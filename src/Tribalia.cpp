@@ -12,6 +12,8 @@
 #include "Log.hpp"
 #include "logic/AttackableObject.hpp"
 #include "logic/ObjectManager.hpp"
+#include "logic/City.hpp"
+#include "logic/Player.hpp"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
@@ -42,6 +44,10 @@ int main(int argc, char const *argv[]) {
     printf("\tHP: %.1f\n", am->GetHP());
     printf("\tBase Attack: %.3f\n", am->GetBaseAttack());
     printf("\tBase Armor: %.3f\n", am->GetBaseArmor());
+
+    City* c = new City{"Test"};
+    c->AddObject(am);
+
 
     objm->UnregisterObject(am);
 
