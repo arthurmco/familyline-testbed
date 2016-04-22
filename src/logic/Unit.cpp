@@ -49,8 +49,8 @@ float Unit::GetSpeed()
 void Unit::SetSpeed(float s)
 {
     this->SetProperty("speed", s);
-
 }
+
 float Unit::GetArmatureMaterial()
 {
     return this->GetProperty<float>("armatureMaterial");

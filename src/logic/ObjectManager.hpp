@@ -19,7 +19,13 @@ namespace Tribalia {
     namespace Logic {
 
         struct ObjectRegisterInfo {
+                /* Object ID */
                 int oid;
+
+                /* Last iteration time (in 'amount of object loops' ) */
+                int lastiter;
+
+                /* Object */
                 GameObject* obj;
         };
 
@@ -44,6 +50,10 @@ namespace Tribalia {
 
             /* Get registered objects */
             int GetCount();
+
+            /* Run the DoAction() method in each registered object
+                TODO: Change this for 'on each visible object' (?)  */
+            bool DoActionAll();
         };
 
     }

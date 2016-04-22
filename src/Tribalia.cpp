@@ -15,6 +15,7 @@
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 
+
 int main(int argc, char const *argv[]) {
     Log::GetLog()->SetFile(stdout);
 

@@ -3,6 +3,31 @@
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 
+
+class ConcreteObject : public AttackableObject
+{
+public:
+    ConcreteObject(int oid, const char* name,
+        float x, float y, float z) :
+    AttackableObject(oid, 2, name,
+        x, y, z, 1000, 1.0f, 1.5f)
+        {
+
+        }
+
+    virtual bool Initialize(){
+        this->_tid = 2;
+        return true;
+    }
+
+    virtual bool DoAction(void)
+    {
+        printf("Iteration \n");
+        return true;
+    }
+};
+
+
 HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
     : Player(name, elo, xp)
     {
@@ -55,8 +80,7 @@ bool HumanPlayer::Play(GameContext* gctx){
         printf("\tPosition (x y z): ");
         scanf("%f %f %f", &ox, &oy, &oz);
 
-        AttackableObject* ao = new AttackableObject(0, 1, oname,
-            ox, oy, oz, 1000, 1.0, 1.0);
+        ConcreteObject* ao = new ConcreteObject(0, oname, ox, oy, oz);
 
         int nid = gctx->om->RegisterObject(ao);
         printf("\t Sucessfully registered %s (%.2f %.2f %.2f) as ID %d\n",

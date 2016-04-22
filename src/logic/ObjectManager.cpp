@@ -33,6 +33,13 @@ int ObjectManager::RegisterObject(GameObject* o, bool overrideID)
     }
 
     o->_oid = ori.oid;
+
+    if (!o->Initialize()){
+        Log::GetLog()->Write("Initialization of object id %d failed",
+            o->_oid);
+        return -1; //throw std::game_exception();
+    }
+
     Log::GetLog()->Write("Registered object %s, type %#x, id %d",
         o->_name.c_str(), o->_tid, o->_oid);
 
@@ -71,8 +78,25 @@ bool ObjectManager::UnregisterObject(GameObject* o)
     /* Not found.  */
     return false;
 }
+
+
 /* Get registered objects */
 int ObjectManager::GetCount()
 {
     return _objects.size();
+}
+
+bool ObjectManager::DoActionAll()
+{
+    bool actions = true;
+    for (auto it = _objects.begin(); it != _objects.end(); ++it){
+        if (it->obj->DoAction()){
+            it->lastiter++;
+        } else {
+            Log::GetLog()->Write("Object %s (id %d, type %d) returned false "
+            "in DoAction()", it->obj->GetName(),
+            it->obj->GetObjectID(), it->obj->GetTypeID());
+
+        }
+    }
 }

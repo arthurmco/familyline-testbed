@@ -24,12 +24,11 @@ namespace Tribalia {
     class GameObject {
         friend class ObjectManager;
 
-    private:
+    protected:
         int _oid;            /* Object ID */
         int _tid;            /* Type ID */
         std::string _name;   /* Object name */
 
-    protected:
         /* Property hashtable */
         std::map<std::string, void*> _properties;
 
@@ -102,7 +101,11 @@ namespace Tribalia {
 
         }
 
+        /* Called on object initialization */
+        virtual bool Initialize() = 0;
 
+        /* Called on each engine loop, when an action is performed */
+        virtual bool DoAction(void) = 0;
 
 
 
