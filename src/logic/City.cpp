@@ -4,8 +4,8 @@ using namespace Tribalia;
 using namespace Tribalia::Logic;
 
 
-    City::City(const char* name)
-        : _name{name}
+    City::City(const char* name, Team* team)
+        : _name{name}, _team(team)
         {
             Log::GetLog()->Write("City %s created", name);
 

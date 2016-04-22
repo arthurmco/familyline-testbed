@@ -45,7 +45,7 @@ int main(int argc, char const *argv[]) {
     printf("\tBase Attack: %.3f\n", am->GetBaseAttack());
     printf("\tBase Armor: %.3f\n", am->GetBaseArmor());
 
-    City* c = new City{"Test"};
+    City* c = new City{"Test", nullptr};
     c->AddObject(am);
 
 

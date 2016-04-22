@@ -29,10 +29,10 @@ namespace Logic {
         int _boys, _girls;
 
         std::string _name;
-        Team* team;
+        Team* _team;
 
     public:
-        City(const char* name);
+        City(const char* name, Team* team);
 
         /* Get an object by its ID */
         AttackableObject* GetObject(int ID);
