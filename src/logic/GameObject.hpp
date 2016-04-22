@@ -55,6 +55,19 @@ namespace Tribalia {
 
         }
 
+        /* Find a property */
+        bool GetProperty(const char* name)
+        {
+            std::string sname{name};
+
+            if (_properties.find(sname) == _properties.end()){
+                return false;
+            }
+
+            return true;
+
+        }
+
         /* Set a property. Returns false if it doesn't exist */
         template<typename T>
         bool SetProperty(const char* name, T value)

@@ -65,6 +65,11 @@ bool HumanPlayer::Play(GameContext* gctx){
         return true;
     }
 
+    if (!strcmp(s, "objcount")){
+        printf("%d\n", gctx->om->GetCount());
+        return true;
+    }
+
     return true;
 
 }

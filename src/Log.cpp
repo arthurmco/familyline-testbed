@@ -31,7 +31,7 @@ void Log::Write(const char* fmt, ...)
     /* Print timestamp */
     time_t now;
     time(&now);
-    fprintf(_logFile, "[%u] ", (int)(now-_time));
+    fprintf(_logFile, "[%8u] ", (int)(now-_time));
 
     /* Print message */
     va_list vl;
