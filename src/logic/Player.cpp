@@ -26,3 +26,7 @@ City* Player::GetCity(const char* name){
     return NULL;
 
 }
+
+
+const char* Player::GetName() { return this->_name.c_str(); }
+int Player::GetXP() { return this->_xp; }

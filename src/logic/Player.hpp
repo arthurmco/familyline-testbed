@@ -33,8 +33,13 @@ namespace Logic {
 
             It allows player to decide its movement
             (input for humans, AI decisions for AI... )
+
+            Returns true to continue its loop, false otherwise.
         ***/
         virtual bool Play(void) = 0;
+
+        const char* GetName();
+        int GetXP();
 
     };
 
