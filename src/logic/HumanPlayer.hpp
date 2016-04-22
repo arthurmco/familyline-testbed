@@ -27,7 +27,7 @@ namespace Logic {
 
             Returns true to continue its loop, false otherwise.
         ***/
-        virtual bool Play(void);
+        virtual bool Play(GameContext*);
     };
 
 }

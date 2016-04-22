@@ -8,6 +8,7 @@
 #include <cstring> //for strcmp
 
 #include "City.hpp"
+#include "GameContext.hpp"
 
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
@@ -36,7 +37,7 @@ namespace Logic {
 
             Returns true to continue its loop, false otherwise.
         ***/
-        virtual bool Play(void) = 0;
+        virtual bool Play(GameContext*) = 0;
 
         const char* GetName();
         int GetXP();

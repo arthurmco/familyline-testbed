@@ -18,11 +18,17 @@ using namespace Tribalia::Logic;
 int main(int argc, char const *argv[]) {
     Log::GetLog()->SetFile(stdout);
 
+    ObjectManager* om = new ObjectManager{};
+
+    GameContext gctx;
+    gctx.om = om;
+
     HumanPlayer hp = HumanPlayer{"Arthur"};
     printf("%-30s \t %4d xp\n\n", hp.GetName(), hp.GetXP());
     bool player = false;
     do {
-        player = hp.Play();
+        player = hp.Play(&gctx);
+        fflush(stdin);
     } while (player);
 
     printf("Exited.\n");

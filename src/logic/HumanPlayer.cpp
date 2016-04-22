@@ -22,10 +22,10 @@ HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
 
 #include <cstdio>
 
-bool HumanPlayer::Play(void){
+bool HumanPlayer::Play(GameContext* gctx){
 
     /* Receive and process human input */
-    printf("> ");
+    printf("\033[1m> \033[0m");
     char s[64];
     fgets(s, 64, stdin);
 
@@ -34,6 +34,35 @@ bool HumanPlayer::Play(void){
 
     if (!strcmp(s, "quit")){
         return false;
+    }
+
+    if (!strcmp(s, "xp")){
+        printf("%d\n", _xp);
+        return true;
+    }
+
+    if (!strcmp(s, "addobject")){
+        printf("Adding object...\n");
+        char oname[128];
+        float ox, oy, oz;
+
+        printf("\tName: ");
+        fgets(oname, 128, stdin);
+
+        //remove '\n'
+        oname[strlen(oname)-1] = 0;
+
+        printf("\tPosition (x y z): ");
+        scanf("%f %f %f", &ox, &oy, &oz);
+
+        AttackableObject* ao = new AttackableObject(0, 1, oname,
+            ox, oy, oz, 1000, 1.0, 1.0);
+
+        int nid = gctx->om->RegisterObject(ao);
+        printf("\t Sucessfully registered %s (%.2f %.2f %.2f) as ID %d\n",
+            ao->GetName(), ao->GetX(), ao->GetY(), ao->GetZ(), nid);
+
+        return true;
     }
 
     return true;
