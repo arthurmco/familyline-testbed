@@ -12,12 +12,15 @@
 #include "Log.hpp"
 #include "logic/HumanPlayer.hpp"
 
+#include "EnviroDefs.h"
+
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 
-
 int main(int argc, char const *argv[]) {
     Log::GetLog()->SetFile(stdout);
+    Log::GetLog()->Write("Tribalia v%s", VERSION);
+    Log::GetLog()->Write("build date %s, commit %s", __DATE__, COMMIT);
 
     ObjectManager* om = new ObjectManager{};
 
@@ -29,6 +32,7 @@ int main(int argc, char const *argv[]) {
     bool player = false;
     do {
         player = hp.Play(&gctx);
+        om->DoActionAll();
         fflush(stdin);
     } while (player);
 

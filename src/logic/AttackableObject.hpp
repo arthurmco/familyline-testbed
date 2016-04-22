@@ -32,7 +32,7 @@ namespace Tribalia {
             float GetBaseArmor();
 
             float SetBaseAttack(float);
-            float SetBaseArmor(float);            
+            float SetBaseArmor(float);
         protected:
             /* Increase HP until maximum */
             float Heal(float);

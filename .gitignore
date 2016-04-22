@@ -1,8 +1,13 @@
-tribalia
+Tribalia
 *.o
+
+#CMakeLists.txt generated files
+EnviroDefs.h
 
 #CMake generated files
 CMakeCache.txt
 CMakeFiles/*
 cmake_install.cmake
 Makefile
+
+
