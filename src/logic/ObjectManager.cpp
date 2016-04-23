@@ -99,4 +99,6 @@ bool ObjectManager::DoActionAll()
 
         }
     }
+
+    return actions;
 }

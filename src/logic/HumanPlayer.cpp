@@ -22,7 +22,7 @@ public:
 
     virtual bool DoAction(void)
     {
-        printf("Iteration \n");
+        printf("Iteration (%d %s) \n", _oid, _name.c_str());
         return true;
     }
 };
@@ -85,8 +85,31 @@ bool HumanPlayer::Play(GameContext* gctx){
         int nid = gctx->om->RegisterObject(ao);
         printf("\t Sucessfully registered %s (%.2f %.2f %.2f) as ID %d\n",
             ao->GetName(), ao->GetX(), ao->GetY(), ao->GetZ(), nid);
-
+        fflush(stdin);
         return true;
+    }
+
+    if (!strcmp(s, "addalot")) {
+        printf("\t How much? :");
+        int count = 0;
+        scanf("%d", &count);
+
+        Log::GetLog()->Write("Adding %d objects", count);
+        srand(count * 2);
+        for (int i = 0; i < count; i++) {
+            char oname[16];
+            sprintf(oname, "Object%d", i);
+
+            float ox = rand()*600.0f;
+            float oy = (rand() * 1000) / 10.0f;
+            float oz = rand() * 1500.0f;
+
+            ConcreteObject* ao = new ConcreteObject(0, oname, ox, oy, oz);
+            gctx->om->RegisterObject(ao);
+        }
+        Log::GetLog()->Write("%d objects added", count);
+
+
     }
 
     if (!strcmp(s, "objcount")){

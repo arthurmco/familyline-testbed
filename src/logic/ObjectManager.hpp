@@ -37,6 +37,7 @@ namespace Tribalia {
             std::vector<int> _freeID;
 
             int AssignID();
+
         public:
             /* Register an object. Return its ID
                 If 'overrideID = true', then the Object Manager will assign a
