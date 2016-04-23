@@ -46,8 +46,15 @@ namespace Tribalia {
             int RegisterObject(GameObject*, bool overrideID = true);
 
             /* Unregister an object. Return true if the object was there, false
-                if it wasn't*/
+                if it wasn't.
+
+                */
             bool UnregisterObject(GameObject*);
+
+            /* Unregister an object. Return true if the object was there, false
+                if it wasn't.
+                */
+            bool UnregisterObject(int id);
 
             /* Get registered objects */
             int GetCount();

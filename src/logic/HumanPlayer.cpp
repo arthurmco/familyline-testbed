@@ -120,3 +120,9 @@ bool HumanPlayer::Play(GameContext* gctx){
     return true;
 
 }
+
+
+HumanPlayer::~HumanPlayer()
+{
+
+}

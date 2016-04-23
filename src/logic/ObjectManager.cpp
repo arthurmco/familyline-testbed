@@ -53,30 +53,40 @@ int ObjectManager::RegisterObject(GameObject* o, bool overrideID)
 /* Unregister an object */
 bool ObjectManager::UnregisterObject(GameObject* o)
 {
+    if ( this->UnregisterObject(o->GetObjectID()) ) {
+        return true;
+    } else {
+        Log::GetLog()->Write("Object %s (type %#x, id %d) not found in "
+            "object manager, so it didn't unregister",
+            o->_name.c_str(), o->_tid, o->_oid);
+        return false;
+
+    }
+}
+
+
+/* Unregister an object. Return true if the object was there, false
+    if it wasn't.
+    */
+bool ObjectManager::UnregisterObject(int id)
+{
     for (auto it = _objects.begin(); it != _objects.end(); ++it){
         /* First search for it */
-        if (it->oid == o->GetObjectID()){
+        if (it->oid == id){
             _objects.erase(it);
             _freeID.push_back(it->oid);
 
             Log::GetLog()->Write("Unregistered object %s, type %#x, id %d",
-                o->_name.c_str(), o->_tid, o->_oid);
-
+                it->obj->_name.c_str(), it->obj->_tid, it->obj->_oid);
 
             return true;
         }
 
     }
 
-
-    Log::GetLog()->Write("Object %s (type %#x, id %d) not found in "
-        "object manager, so it didn't unregister",
-        o->_name.c_str(), o->_tid, o->_oid);
-
-
-
     /* Not found.  */
     return false;
+
 }
 
 

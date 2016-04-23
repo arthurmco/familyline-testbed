@@ -28,6 +28,9 @@ namespace Logic {
             Returns true to continue its loop, false otherwise.
         ***/
         virtual bool Play(GameContext*);
+
+
+        ~HumanPlayer();
     };
 
 }

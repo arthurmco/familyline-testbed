@@ -36,5 +36,5 @@ file(GLOB SRC_BASE "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 #Compilation data
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -g")
 add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC})
