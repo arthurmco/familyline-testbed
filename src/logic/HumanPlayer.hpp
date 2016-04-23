@@ -18,7 +18,6 @@ namespace Logic {
     public:
         HumanPlayer(const char* name, int elo=0, int xp=0);
 
-
         /***
             Virtual function called on each iteration.
 

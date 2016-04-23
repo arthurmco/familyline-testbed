@@ -12,10 +12,13 @@
 #include "Log.hpp"
 #include "logic/HumanPlayer.hpp"
 
+#include "graphical/Renderer.hpp"
+
 #include "EnviroDefs.h"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
+using namespace Tribalia::Graphics;
 
 int main(int argc, char const *argv[]) {
     Log::GetLog()->SetFile(stdout);
@@ -25,18 +28,26 @@ int main(int argc, char const *argv[]) {
     if (COMMIT > 0)
         Log::GetLog()->Write("Built commit %07x", COMMIT);
 
-    ObjectManager* om = new ObjectManager{};
+    ObjectManager* om = nullptr;
+    Renderer* rndr = nullptr;
+
+    try {
+        om = new ObjectManager{};
+        rndr = new Renderer{};
+    } catch (renderer_exception& re) {
+        fprintf(stderr, "Rendering error: %s [%d]",
+            re.what(), re.code);
+        exit(EXIT_FAILURE);
+    }
 
     GameContext gctx;
     gctx.om = om;
 
     HumanPlayer hp = HumanPlayer{"Arthur"};
-    printf("%-30s \t %4d xp\n\n", hp.GetName(), hp.GetXP());
+
     bool player = false;
     do {
-        player = hp.Play(&gctx);
-        om->DoActionAll();
-        fflush(stdin);
+        player = true;
     } while (player);
 
     printf("Exited.\n");

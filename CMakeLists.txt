@@ -28,13 +28,17 @@ execute_process(COMMAND whoami OUTPUT_VARIABLE USERNAME
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 file(APPEND "${GEN_HEADER}" "#define USERNAME \"${USERNAME}\"\n")
 
-
 #File data
 
 file(GLOB_RECURSE SRC_LOGIC "${CMAKE_SOURCE_DIR}/src/logic/*.cpp")
+file(GLOB_RECURSE SRC_GFX "${CMAKE_SOURCE_DIR}/src/graphical/*.cpp")
 file(GLOB SRC_BASE "${CMAKE_SOURCE_DIR}/src/*.cpp")
+
+
+#include_directories(${SDL2_INCLUDE_DIR})
 
 #Compilation data
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -g")
-add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC})
+add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX})
+target_link_libraries(tribalia "SDL2")
