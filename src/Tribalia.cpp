@@ -46,8 +46,17 @@ int main(int argc, char const *argv[]) {
     HumanPlayer hp = HumanPlayer{"Arthur"};
 
     bool player = false;
+    SDL_Event ev;
     do {
         player = true;
+
+        if (SDL_PollEvent(&ev)) {
+            if (ev.type == SDL_WINDOWEVENT &&
+                ev.window.event == SDL_WINDOWEVENT_CLOSE)
+                {
+                    player = false;
+                }
+        }
 
         rndr->Render();
     } while (player);
