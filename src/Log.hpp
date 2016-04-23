@@ -27,6 +27,7 @@ namespace Tribalia {
 
          void SetFile(FILE* f);
          void Write(const char* fmt, ...);
+         void Fatal(const char* fmt, ...);
 
          ~Log();
 

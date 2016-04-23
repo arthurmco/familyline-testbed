@@ -6,6 +6,8 @@
 ***/
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+
 #include "GFXExceptions.hpp"
 
 #include "../Log.hpp"
@@ -20,12 +22,13 @@ namespace Graphics {
     {
     private:
         SDL_Window* _win;
-
+        SDL_GLContext _glctxt;
 
     public:
         Renderer();
         ~Renderer();
 
+        /* Returns true if rendered successfully */
         bool Render();
 
     };

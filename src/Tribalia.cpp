@@ -35,7 +35,7 @@ int main(int argc, char const *argv[]) {
         om = new ObjectManager{};
         rndr = new Renderer{};
     } catch (renderer_exception& re) {
-        fprintf(stderr, "Rendering error: %s [%d]",
+        Log::GetLog()->Fatal("Rendering error: %s [%d]",
             re.what(), re.code);
         exit(EXIT_FAILURE);
     }
@@ -48,6 +48,8 @@ int main(int argc, char const *argv[]) {
     bool player = false;
     do {
         player = true;
+
+        rndr->Render();
     } while (player);
 
     printf("Exited.\n");
