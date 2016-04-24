@@ -20,6 +20,16 @@ namespace Graphics {
         int code;
     };
 
+    class shader_exception : public std::runtime_error
+    {
+    public:
+        explicit shader_exception(std::string msg, int code,
+            const char* file, int type);
+        int code;
+        std::string file;
+        int type;
+    };
+
 
 } /* Graphics */
 } /* Tribalia */

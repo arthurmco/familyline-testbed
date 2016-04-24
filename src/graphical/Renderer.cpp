@@ -76,7 +76,7 @@ Renderer::Renderer()
 /* Returns true if rendered successfully */
 bool Renderer::Render()
 {
-    /*
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glBindVertexArray(vao_tri);
@@ -95,14 +95,7 @@ bool Renderer::Render()
         // Draw the triangle !
     glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
     glDisableVertexAttribArray(0);
-    */
-
-    glBegin(GL_TRIANGLES);
-    glColor3f(1.0f, 0.8f, 0.0f);
-    glVertex2f(-1.0f, -1.0f);
-    glVertex2f(1.0f, -1.0f);
-    glVertex2f(0.0f, 1.0f);
-    glEnd();
+    
 
     SDL_GL_SwapWindow(_win);
     return true;

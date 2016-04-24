@@ -13,6 +13,7 @@
 #include "logic/HumanPlayer.hpp"
 
 #include "graphical/Renderer.hpp"
+#include "graphical/ShaderProgram.hpp"
 
 #include "EnviroDefs.h"
 
@@ -40,6 +41,34 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    Shader *sFrag, *sVert;
+    try {
+        sFrag = new Shader{"shaders/Forward.frag", SHADER_PIXEL};
+        sVert = new Shader{"shaders/Forward.vert", SHADER_VERTEX};
+    } catch (shader_exception& se) {
+        Log::GetLog()->Fatal("Shader error: %s [%d]",
+            se.what(), se.code);
+        Log::GetLog()->Fatal("Shader file: %s, type %d",
+            se.file.c_str(), se.type);
+        exit(EXIT_FAILURE);
+    }
+
+    if (!sFrag->Compile()) {
+        Log::GetLog()->Fatal("Shader %s failed to compile", sFrag->GetPath());
+        exit(EXIT_FAILURE);
+    }
+
+    if (!sVert->Compile()) {
+        Log::GetLog()->Fatal("Shader %s failed to compile", sVert->GetPath());
+        exit(EXIT_FAILURE);
+    }
+
+    ShaderProgram* sProg = new ShaderProgram{sVert, sFrag};
+    if (!sProg->Link()) {
+        Log::GetLog()->Fatal("Shader %d failed to link", sProg->GetID());
+        exit(EXIT_FAILURE);
+    }
+
     GameContext gctx;
     gctx.om = om;
 
@@ -47,6 +76,8 @@ int main(int argc, char const *argv[]) {
 
     bool player = false;
     SDL_Event ev;
+
+    sProg->Use();
     do {
         player = true;
 

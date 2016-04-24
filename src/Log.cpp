@@ -63,3 +63,22 @@ void Log::Fatal(const char* fmt, ...)
     /* Print line terminator */
     fputs("\r\n", _logFile);
 }
+
+void Log::Warning(const char* fmt, ...)
+{
+    /* Print timestamp */
+    time_t now;
+    time(&now);
+    fprintf(_logFile, "[%8u] (WARNING) ", (int)(now-_time));
+
+    /* Print message */
+    va_list vl;
+    va_start(vl, fmt);
+
+    vfprintf(_logFile, fmt, vl);
+
+    va_end(vl);
+
+    /* Print line terminator */
+    fputs("\r\n", _logFile);
+}
