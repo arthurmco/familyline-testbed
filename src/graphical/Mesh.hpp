@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "VertexData.hpp"
 #include "SceneObject.hpp"
 
 #ifndef MESH_HPP
@@ -32,9 +33,9 @@ namespace Graphics {
         /* warning: rotate angle should be in radians */
         void Rotate(glm::vec3 axis, float angle);
 
-
+        VertexData* _vdata;
     public:
-        Mesh();
+        Mesh(VertexData* vd);
 
         void SetPosition(glm::vec3);
         void AddPosition(glm::vec3);
@@ -45,6 +46,7 @@ namespace Graphics {
         void ApplyTransformations();
         glm::mat4 GetModelMatrix() const;
 
+        VertexData* GetVertexData();
     };
 
 

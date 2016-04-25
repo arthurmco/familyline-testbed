@@ -92,7 +92,14 @@ int main(int argc, char const *argv[]) {
     glm::mat4 mvp = mproj * mview * mmodel;
 
     sProg->Use();
-    sProg->SetUniform("color", glm::vec3(0.7, 0.9, 0.0));
+
+    srand(time(NULL));
+    float cx, cy, cz;
+    cx = (rand() % 255) / 255.0f;
+    cy = (rand() % 255) / 255.0f;
+    cz = (rand() % 255) / 255.0f;
+    sProg->SetUniform("color", glm::vec3(cx, cy, cz));
+
     sProg->SetUniform("mvp", mvp);
     do {
         player = true;

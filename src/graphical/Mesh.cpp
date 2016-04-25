@@ -2,7 +2,7 @@
 
 using namespace Tribalia::Graphics;
 
-Mesh::Mesh()
+Mesh::Mesh(VertexData* vd)
     : SceneObject("Mesh", glm::vec3(0,0,0), 0, 0, 0)
 {
     _translMatrix = glm::mat4(1.0);
@@ -10,6 +10,8 @@ Mesh::Mesh()
     _rotMatrix = glm::mat4(1.0);
 
     _modelMatrix = glm::mat4(1.0);
+
+    this->_vdata = vd;
 }
 
 void Mesh::Translate(glm::vec3 pos)
@@ -74,4 +76,9 @@ void Mesh::AddRotation(float x, float y, float z)
     this->Rotate(glm::vec3(0,1,0), _rotations[1]);
     this->Rotate(glm::vec3(0,0,1), _rotations[2]);
     this->ApplyTransformations();
+}
+
+VertexData* Mesh::GetVertexData()
+{
+    return this->_vdata;
 }
