@@ -6,8 +6,12 @@
 
 ***/
 
+#define GLM_FORCE_RADIANS
+
 #include <cstdio>
 #include <cstdlib>
+
+#include <glm/gtc/matrix_transform.hpp> //glm::lookAt()
 
 #include "Log.hpp"
 #include "logic/HumanPlayer.hpp"
@@ -17,17 +21,18 @@
 
 #include "EnviroDefs.h"
 
+
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 using namespace Tribalia::Graphics;
 
 int main(int argc, char const *argv[]) {
     Log::GetLog()->SetFile(stdout);
-    Log::GetLog()->Write("Tribalia v%s", VERSION);
-    Log::GetLog()->Write("built %s by %s ", __DATE__, USERNAME);
+    Log::GetLog()->Write("Tribalia %s", VERSION);
+    Log::GetLog()->Write("built on %s by %s ", __DATE__, USERNAME);
 
     if (COMMIT > 0)
-        Log::GetLog()->Write("Built commit %07x", COMMIT);
+        Log::GetLog()->Write("from commit %07x", COMMIT);
 
     ObjectManager* om = nullptr;
     Renderer* rndr = nullptr;
@@ -77,7 +82,18 @@ int main(int argc, char const *argv[]) {
     bool player = false;
     SDL_Event ev;
 
+    glm::mat4 mvp;
+    glm::mat4 mproj = glm::perspective(glm::radians(45.0f),
+        640.0f/480.0f, 0.1f, 50.0f);
+    glm::mat4 mview = glm::lookAt(glm::vec3(6.4f, 1.3, 2.3),
+                                glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
+    glm::mat4 mmodel = glm::mat4(1.0f);
+    mvp = mproj * mview * mmodel;
+
     sProg->Use();
+    sProg->SetUniform("color", glm::vec3(0.7, 0.9, 0.0));
+    sProg->SetUniform("mvp", mvp);
     do {
         player = true;
 
@@ -90,6 +106,8 @@ int main(int argc, char const *argv[]) {
         }
 
         rndr->Render();
+
+        usleep(1);
     } while (player);
 
     printf("Exited.\n");
