@@ -18,6 +18,7 @@
 
 #include "graphical/Renderer.hpp"
 #include "graphical/ShaderProgram.hpp"
+#include "graphical/Camera.hpp"
 
 #include "EnviroDefs.h"
 
@@ -82,14 +83,13 @@ int main(int argc, char const *argv[]) {
     bool player = false;
     SDL_Event ev;
 
-    glm::mat4 mvp;
-    glm::mat4 mproj = glm::perspective(glm::radians(45.0f),
-        640.0f/480.0f, 0.1f, 50.0f);
-    glm::mat4 mview = glm::lookAt(glm::vec3(6.4f, 1.3, 2.3),
-                                glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    Camera cam = Camera{glm::vec3(6.0f, 1.0f, 2.5f), glm::vec3(0,0,0)};
+
+    glm::mat4 mproj = cam.GetProjectionMatrix();
+    glm::mat4 mview = cam.GetViewMatrix();
 
     glm::mat4 mmodel = glm::mat4(1.0f);
-    mvp = mproj * mview * mmodel;
+    glm::mat4 mvp = mproj * mview * mmodel;
 
     sProg->Use();
     sProg->SetUniform("color", glm::vec3(0.7, 0.9, 0.0));
