@@ -32,6 +32,8 @@ namespace Graphics {
         SceneObject* GetObject(const char* name) const;
         SceneObject* GetObject(float x, float y, float z) const;
 
+        void RemoveObject(SceneObject*);
+
         Camera* GetCamera() const;
         void SetCamera(Camera*);
 

@@ -111,7 +111,7 @@ void Renderer::InitializeShaders()
     if (!sForward->Link()) {
         char shnum[6];
         sprintf(shnum, "%d", sForward->GetID());
-        throw shader_exception("Shader failed to compile", glGetError(),
+        throw shader_exception("Shader failed to link", glGetError(),
             shnum, SHADER_PROGRAM);
     }
 

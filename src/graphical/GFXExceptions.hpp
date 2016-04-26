@@ -30,6 +30,15 @@ namespace Graphics {
         int type;
     };
 
+    class mesh_exception : public std::runtime_error
+    {
+    public:
+        explicit mesh_exception(std::string msg, int code,
+            const char* file);
+        int code;
+        std::string file;
+    };
+
 
 } /* Graphics */
 } /* Tribalia */
