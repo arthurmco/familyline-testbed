@@ -49,8 +49,8 @@ bool ShaderProgram::SetUniform(const char* name, glm::mat4 value)
 {
     GLint unif_id = glGetUniformLocation(this->_id, name);
     glUniformMatrix4fv(unif_id, 1, GL_FALSE, (const GLfloat*)&value[0][0]);
-    Log::GetLog()->Write("Added uniform %s (id %d) to shader %d",
-        name, unif_id, _id);
+    //Log::GetLog()->Write("Setted uniform %s (id %d) on shader %d",
+    //        name, unif_id, _id);
     return (unif_id > 0);
 }
 
@@ -58,8 +58,8 @@ bool ShaderProgram::SetUniform(const char* name, glm::vec3 value)
 {
     GLint unif_id = glGetUniformLocation(this->_id, name);
     glUniform3fv(unif_id, 1, (const GLfloat*) &value[0]);
-    Log::GetLog()->Write("Setted uniform %s (id %d) to (%.3f %.3f %.3f) on shader %d",
-        name, unif_id, value.x, value.y, value.z, _id);
+    //Log::GetLog()->Write("Setted uniform %s (id %d) to (%.3f %.3f %.3f) on shader %d",
+    //    name, unif_id, value.x, value.y, value.z, _id);
     return (unif_id > 0);
 }
 

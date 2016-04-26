@@ -45,12 +45,6 @@ int main(int argc, char const *argv[]) {
         Log::GetLog()->Fatal("Rendering error: %s [%d]",
             re.what(), re.code);
         exit(EXIT_FAILURE);
-    }
-
-    Shader *sFrag, *sVert;
-    try {
-        sFrag = new Shader{"shaders/Forward.frag", SHADER_PIXEL};
-        sVert = new Shader{"shaders/Forward.vert", SHADER_VERTEX};
     } catch (shader_exception& se) {
         Log::GetLog()->Fatal("Shader error: %s [%d]",
             se.what(), se.code);
@@ -59,48 +53,20 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    if (!sFrag->Compile()) {
-        Log::GetLog()->Fatal("Shader %s failed to compile", sFrag->GetPath());
-        exit(EXIT_FAILURE);
-    }
-
-    if (!sVert->Compile()) {
-        Log::GetLog()->Fatal("Shader %s failed to compile", sVert->GetPath());
-        exit(EXIT_FAILURE);
-    }
-
-    ShaderProgram* sProg = new ShaderProgram{sVert, sFrag};
-    if (!sProg->Link()) {
-        Log::GetLog()->Fatal("Shader %d failed to link", sProg->GetID());
-        exit(EXIT_FAILURE);
-    }
 
     GameContext gctx;
     gctx.om = om;
 
     HumanPlayer hp = HumanPlayer{"Arthur"};
+    SceneManager* scenemng = new SceneManager();
 
     bool player = false;
     SDL_Event ev;
 
     Camera cam = Camera{glm::vec3(6.0f, 1.0f, 2.5f), glm::vec3(0,0,0)};
+    scenemng->SetCamera(&cam);
 
-    glm::mat4 mproj = cam.GetProjectionMatrix();
-    glm::mat4 mview = cam.GetViewMatrix();
-
-    glm::mat4 mmodel = glm::mat4(1.0f);
-    glm::mat4 mvp = mproj * mview * mmodel;
-
-    sProg->Use();
-
-    srand(time(NULL));
-    float cx, cy, cz;
-    cx = (rand() % 255) / 255.0f;
-    cy = (rand() % 255) / 255.0f;
-    cz = (rand() % 255) / 255.0f;
-    sProg->SetUniform("color", glm::vec3(cx, cy, cz));
-
-    sProg->SetUniform("mvp", mvp);
+    rndr->SetSceneManager(scenemng);
     do {
         player = true;
 

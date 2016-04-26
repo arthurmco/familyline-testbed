@@ -14,6 +14,8 @@
 #include "GFXExceptions.hpp"
 
 #include "VertexData.hpp"
+#include "ShaderProgram.hpp"
+#include "SceneManager.hpp"
 #include "../Log.hpp"
 
 #ifndef RENDERER_HPP
@@ -33,10 +35,20 @@ namespace Graphics {
         SDL_Window* _win;
         SDL_GLContext _glctxt;
 
+        SceneManager* _scenemng;
         std::vector<VertexRenderInfo> _vertices;
+
+        ShaderProgram* sForward;
+
+        void InitializeLibraries();
+        void InitializeShaders();
     public:
         Renderer();
         ~Renderer();
+
+        SceneManager* GetSceneManager() const;
+        void SetSceneManager(SceneManager*);
+
 
         /* Returns true if rendered successfully */
         bool Render();

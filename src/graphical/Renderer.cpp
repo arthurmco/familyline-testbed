@@ -4,7 +4,45 @@ using namespace Tribalia::Graphics;
 
 GLuint vao_tri, vbo_tri;
 
+
 Renderer::Renderer()
+{
+    InitializeLibraries();
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    /*** TEST: Draw a triangle ***/
+    glGenVertexArrays(1, &vao_tri);
+    glBindVertexArray(vao_tri);
+
+    glGenBuffers(1, &vbo_tri);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_tri);
+
+    static const GLfloat triangle_data[] =
+        {
+            -1.0f, -1.0f, 1.0f,
+            1.0f, -1.0f, 0.0f,
+            0.0f,  1.0f, 0.0f,
+        };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_data), triangle_data,
+        GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+    /*** END TEST ***/
+
+    InitializeShaders();
+    sForward->Use();
+    srand(time(NULL));
+    float cx, cy, cz;
+    cx = (rand() % 255) / 255.0f;
+    cy = (rand() % 255) / 255.0f;
+    cz = (rand() % 255) / 255.0f;
+    sForward->SetUniform("color", glm::vec3(cx, cy, cz));
+
+}
+
+void Renderer::InitializeLibraries()
 {
     int sdl_ret = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
     if (sdl_ret != 0) {
@@ -49,33 +87,46 @@ Renderer::Renderer()
         throw renderer_exception(err, glewStatus);
     }
 
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+}
 
-    /*** TEST: Draw a triangle ***/
-    glGenVertexArrays(1, &vao_tri);
-    glBindVertexArray(vao_tri);
+void Renderer::InitializeShaders()
+{
+    Shader *sFrag, *sVert;
 
-    glGenBuffers(1, &vbo_tri);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_tri);
+    sFrag = new Shader{"shaders/Forward.frag", SHADER_PIXEL};
+    sVert = new Shader{"shaders/Forward.vert", SHADER_VERTEX};
 
-    static const GLfloat triangle_data[] =
-        {
-            -1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, 0.0f,
-            0.0f,  1.0f, 0.0f,
-        };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_data), triangle_data,
-        GL_STATIC_DRAW);
+    if (!sFrag->Compile()) {
+        throw shader_exception("Shader failed to compile", glGetError(),
+            sFrag->GetPath(), sFrag->GetType());
+    }
 
-    glBindVertexArray(0);
-    /*** END TEST ***/
+    if (!sVert->Compile()) {
+        throw shader_exception("Shader failed to compile", glGetError(),
+            sVert->GetPath(), sVert->GetType());
+    }
+
+    sForward = new ShaderProgram{sVert, sFrag};
+    if (!sForward->Link()) {
+        char shnum[6];
+        sprintf(shnum, "%d", sForward->GetID());
+        throw shader_exception("Shader failed to compile", glGetError(),
+            shnum, SHADER_PROGRAM);
+    }
 
 }
 
 /* Returns true if rendered successfully */
 bool Renderer::Render()
 {
+    glm::mat4 mModel, mView, mProj;
+    mView = this->_scenemng->GetCamera()->GetViewMatrix();
+    mProj = this->_scenemng->GetCamera()->GetProjectionMatrix();
+    mModel = glm::mat4(1.0f);
+
+    sForward->SetUniform("mvp", mProj * mView * mModel);
+
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -101,6 +152,15 @@ bool Renderer::Render()
     return true;
 }
 
+SceneManager* Renderer::GetSceneManager() const
+{
+    return this->_scenemng;
+}
+
+void Renderer::SetSceneManager(SceneManager* scenemng)
+{
+    this->_scenemng = scenemng;
+}
 
 Renderer::~Renderer()
 {
