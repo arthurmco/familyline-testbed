@@ -64,7 +64,7 @@ float AttackableObject::Damage(float val)
 {
     float f = this->GetProperty<float>("HP");
 
-    f = std::max(f + val, 0);
+    f =  std::max(f + val, 0.0f);
 
     this->SetProperty("HP", f);
 }
