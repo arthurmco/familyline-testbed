@@ -46,3 +46,25 @@ float AttackableObject::GetBaseAttack(){
 float AttackableObject::GetBaseArmor(){
     return this->GetProperty<float>("baseArmor");
 }
+
+/* Increase HP until maximum */
+float AttackableObject::Heal(float val)
+{
+    float f = this->GetHP();
+    float max = this->GetMaxHP();
+
+    f = std::min(f + val, max);
+
+    this->SetProperty("HP", f);
+
+}
+
+/* Decrease HP until minimum */
+float AttackableObject::Damage(float val)
+{
+    float f = this->GetProperty<float>("HP");
+
+    f = std::max(f + val, 0);
+
+    this->SetProperty("HP", f);
+}

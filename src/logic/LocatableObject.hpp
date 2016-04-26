@@ -7,6 +7,7 @@
 ***/
 
 #include "GameObject.hpp"
+#include "../graphical/Mesh.hpp"
 
 #ifndef LOCATABLEOBJECT_HPP
 #define LOCATABLEOBJECT_HPP
@@ -26,7 +27,9 @@ namespace Tribalia {
             void SetX(float); float GetX();
             void SetY(float); float GetY();
             void SetZ(float); float GetZ();
-            //void SetMesh(Mesh*); Mesh* GetMesh();
+
+            void SetMesh(Tribalia::Graphics::Mesh*);
+            Tribalia::Graphics::Mesh* GetMesh();
 
         };
 
