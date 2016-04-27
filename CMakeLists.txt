@@ -39,7 +39,7 @@ file(GLOB SRC_BASE "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 #Compilation data
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX})
 target_link_libraries(tribalia "SDL2")
 target_link_libraries(tribalia "GL")

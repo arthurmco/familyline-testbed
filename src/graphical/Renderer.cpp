@@ -154,10 +154,14 @@ bool Renderer::Render()
         }
     }
 
+    glEnable(GL_DEPTH_TEST);
+
     glm::mat4 mModel, mView, mProj;
     mView = this->_scenemng->GetCamera()->GetViewMatrix();
     mProj = this->_scenemng->GetCamera()->GetProjectionMatrix();
 
+    sForward->Use();
+    sForward->SetUniform("mView", mView);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -165,6 +169,7 @@ bool Renderer::Render()
     for (auto it = _vertices.begin(); it != _vertices.end(); it++) {
         mModel = *it->worldMat;
         sForward->SetUniform("mvp", mProj * mView * mModel);
+        sForward->SetUniform("mModel", mModel);
 
         glBindVertexArray(it->vao);
 
@@ -191,7 +196,7 @@ bool Renderer::Render()
            (void*)0            // array buffer offset
         );
             // Draw the triangle !
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, it->vd->Positions.size());
+        glDrawArrays(GL_TRIANGLES, 0, it->vd->Positions.size());
         glDisableVertexAttribArray(0);
     }
 
