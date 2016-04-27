@@ -166,13 +166,24 @@ bool Renderer::Render()
         mModel = *it->worldMat;
         sForward->SetUniform("mvp", mProj * mView * mModel);
 
-    //    glBindVertexArray(it->vao);
+        glBindVertexArray(it->vao);
 
         // 1rst attribute buffer : vertices
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, it->vbo_pos);
         glVertexAttribPointer(
-           0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+           0,                  // attribute 0 (positions)
+           3,                  // size
+           GL_FLOAT,           // type
+           GL_FALSE,           // normalized?
+           0,                  // stride
+           (void*)0            // array buffer offset
+        );
+
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, it->vbo_norm);
+        glVertexAttribPointer(
+           1,                  // attribute 1 (normals)
            3,                  // size
            GL_FLOAT,           // type
            GL_FALSE,           // normalized?
@@ -180,7 +191,7 @@ bool Renderer::Render()
            (void*)0            // array buffer offset
         );
             // Draw the triangle !
-        glDrawArrays(GL_TRIANGLES, 0, it->vd->Positions.size());
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, it->vd->Positions.size());
         glDisableVertexAttribArray(0);
     }
 
@@ -213,17 +224,26 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
     vri.worldMat = worldMatrix;
     vri.vd = v;
 
-    //glGenVertexArrays(1, &vri.vao);
-    //glBindVertexArray(vri.vao);
+    glGenVertexArrays(1, &vri.vao);
+    glBindVertexArray(vri.vao);
 
     glGenBuffers(1, &vri.vbo_pos);
     glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_pos);
     glBufferData(GL_ARRAY_BUFFER, v->Positions.size() * sizeof(glm::vec3),
         v->Positions.data(), GL_STATIC_DRAW);
 
+    glGenBuffers(1, &vri.vbo_norm);
+    glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_norm);
+    glBufferData(GL_ARRAY_BUFFER, v->Normals.size() * sizeof(glm::vec3),
+        v->Normals.data(), GL_STATIC_DRAW);
+
+
     glBindVertexArray(0);
 
-    Log::GetLog()->Write("Added vertices with VAO %d (VBO %d)", 0, vri.vbo_pos);
+
+
+    Log::GetLog()->Write("Added vertices with VAO %d (VBO %d)", vri.vao,
+        vri.vbo_pos);
     _vertices.push_back(vri);
     return vri.vao;
 }

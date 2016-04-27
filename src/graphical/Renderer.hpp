@@ -29,7 +29,7 @@ namespace Graphics {
         VertexData* vd;
         glm::mat4* worldMat;
         GLuint vao;
-        GLuint vbo_pos;
+        GLuint vbo_pos, vbo_norm;
     };
 
     class Renderer

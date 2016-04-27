@@ -26,7 +26,6 @@ Mesh* OBJOpener::Open(const char* file)
 
     while (!feof(fOBJ)) {
         char* fline = &line[0];
-
         memset(fline, 0, 256);
         fgets(fline, 256, fOBJ);
 
@@ -78,7 +77,7 @@ Mesh* OBJOpener::Open(const char* file)
                 switch (fline[1]) {
                     /* Texture data (vt) */
                     case 't': {
-                        fline = &fline[1];
+                        fline = &fline[2];
                         glm::vec2 vec = glm::vec2(0.0);
                         sscanf(fline, "%f %f", &vec.x, &vec.y);
                         texcoords.push_back(vec);
@@ -88,7 +87,7 @@ Mesh* OBJOpener::Open(const char* file)
 
                     /* Normal data (vn) */
                     case 'n': {
-                        fline = &fline[1];
+                        fline = &fline[2];
                         glm::vec3 vec = glm::vec3(0.0, 0.0, 1.0);
                         sscanf(fline, "%f %f %f", &vec.x, &vec.y, &vec.z);
                         normals.push_back(vec);
@@ -103,9 +102,23 @@ Mesh* OBJOpener::Open(const char* file)
             int vertIndex[3], normIndex[3], texIndex[3];
 
             // Face data
-            if (sscanf(fline, "%d %d %d",
-                &vertIndex[0], &vertIndex[1], &vertIndex[2]) > 0) {
+            if (sscanf(fline, "%d//%d %d//%d %d//%d",
+            //Normal + position
+                &vertIndex[0], &normIndex[0],
+                &vertIndex[1], &normIndex[1],
+                &vertIndex[2], &normIndex[2]) > 2) {
 
+                indVerts.push_back(vertIndex[0]);
+                indVerts.push_back(vertIndex[1]);
+                indVerts.push_back(vertIndex[2]);
+
+                indNormals.push_back(normIndex[0]);
+                indNormals.push_back(normIndex[1]);
+                indNormals.push_back(normIndex[2]);
+
+            } else if (sscanf(fline, "%d %d %d",
+                &vertIndex[0], &vertIndex[1], &vertIndex[2]) > 0) {
+                //Position
                 indVerts.push_back(vertIndex[0]);
                 indVerts.push_back(vertIndex[1]);
                 indVerts.push_back(vertIndex[2]);
@@ -119,17 +132,36 @@ Mesh* OBJOpener::Open(const char* file)
 
     }
 
+    realVerts.reserve(verts.size() * 3);
     for (int i = 0; i < indVerts.size(); i++) {
-        realVerts.push_back(verts[indVerts[i]]);
+        int index = indVerts[i]-1;
+
+        //Treat negative indices
+        if (index < 0) {
+            index = indVerts.size() - index;
+        }
+        realVerts.push_back(verts[index]);
+    }
+
+    realNormals.reserve(normals.size() * 3);
+    for (int i = 0; i < indNormals.size(); i++) {
+        int index = indNormals[i]-1;
+
+        //Treat negative indices
+        if (index < 0) {
+            index = indNormals.size() - index;
+        }
+        realNormals.push_back(normals[index]);
     }
 
     Log::GetLog()->Write("Opened mesh \"%s\": (OBJ format) %d (%d) vertices, "
-        "%d normals, %d texcoords, file is '%s'",
+        "%d (%d) normals, %d texcoords, file is '%s'",
         mName, verts.size(), realVerts.size(),
-        normals.size(), texcoords.size(), file);
+        normals.size(), realNormals.size(), texcoords.size(), file);
 
     VertexData* vd = new VertexData;
     vd->Positions = realVerts;
+    vd->Normals = realNormals;
 
     Mesh* m = new Mesh(vd);
     m->SetName(mName);
