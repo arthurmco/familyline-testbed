@@ -16,6 +16,7 @@
 #include "VertexData.hpp"
 #include "ShaderProgram.hpp"
 #include "SceneManager.hpp"
+#include "Mesh.hpp"
 #include "../Log.hpp"
 
 #ifndef RENDERER_HPP
@@ -28,6 +29,7 @@ namespace Graphics {
         VertexData* vd;
         glm::mat4* worldMat;
         GLuint vao;
+        GLuint vbo_pos;
     };
 
     class Renderer
@@ -35,6 +37,8 @@ namespace Graphics {
     private:
         SDL_Window* _win;
         SDL_GLContext _glctxt;
+
+
 
         SceneManager* _scenemng;
         std::vector<VertexRenderInfo> _vertices;

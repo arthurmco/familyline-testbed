@@ -12,6 +12,7 @@ Mesh::Mesh(VertexData* vd)
     _modelMatrix = glm::mat4(1.0);
 
     this->_vdata = vd;
+    this->_type = SCENE_MESH;
 }
 
 void Mesh::Translate(glm::vec3 pos)
@@ -81,4 +82,9 @@ void Mesh::AddRotation(float x, float y, float z)
 VertexData* Mesh::GetVertexData()
 {
     return this->_vdata;
+}
+
+glm::mat4* Mesh::GetModelMatrixPointer()
+{
+    return &this->_modelMatrix;
 }

@@ -64,7 +64,7 @@ int main(int argc, char const *argv[]) {
     bool player = false;
     SDL_Event ev;
 
-    Camera cam = Camera{glm::vec3(6.0f, 4.0f, 3.0f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(4.0f, 4.0f, 3.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
 
     rndr->SetSceneManager(scenemng);

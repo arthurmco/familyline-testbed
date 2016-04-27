@@ -22,6 +22,7 @@ namespace Graphics {
 
     class SceneManager {
     private:
+        bool _listModified = true;
         std::vector<SceneObject*> _objects;
         std::list<SceneObject*> _valid_objects;
         Camera* _cam;
@@ -40,11 +41,13 @@ namespace Graphics {
 
         /* Update the valid objects list.
             This list is responsable to show the valid objects, the objects
-            visible to the camera and some beyond */
-        void UpdateValidObjects();
+            visible to the camera and some beyond
+            Return FALSE if we don't have any alteration, TRUE if we have
+        */
+        bool UpdateValidObjects();
 
         /* Retrieve the valid objects list */
-        std::list<SceneObject*>* GetValidObjects() const;
+        std::list<SceneObject*>* GetValidObjects();
     };
 
 }

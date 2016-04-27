@@ -44,10 +44,13 @@ namespace Graphics {
         void AddRotation(float x, float y, float z);
 
         void ApplyTransformations();
+
         glm::mat4 GetModelMatrix() const;
+        glm::mat4* GetModelMatrixPointer();
 
         VertexData* GetVertexData();
     };
+
 
 
 } /* Graphics */

@@ -16,12 +16,18 @@
 namespace Tribalia {
 namespace Graphics {
 
+    enum SceneObjectType {
+        SCENE_GENERIC = 0,
+        SCENE_MESH
+    };
+
     class SceneObject
     {
         friend class SceneManager;
     protected:
         std::string _name;
         int _id = 0;
+        int _type = 0;
 
         glm::vec3 _position;
         float _rotations[3]; /*  Rotation angles in X, Y
@@ -39,6 +45,8 @@ namespace Graphics {
         const char* GetName() const;
 
         int GetID();
+
+        int GetType();
 
         glm::vec3 GetPosition() const;
         void SetPosition(glm::vec3);

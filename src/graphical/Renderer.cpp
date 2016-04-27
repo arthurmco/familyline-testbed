@@ -117,34 +117,72 @@ void Renderer::InitializeShaders()
 
 }
 
+std::vector<int> _last_IDs;
+
 /* Returns true if rendered successfully */
 bool Renderer::Render()
 {
+    /* Check updates from SceneManager*/
+    if (_scenemng->UpdateValidObjects()) {
+        auto objList = _scenemng->GetValidObjects();
+
+        for (auto it = objList->begin(); it != objList->end(); it++) {
+            for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); it2++) {
+                if ((*it)->GetID() == (*it2)) {
+                    break;
+                }
+            }
+
+            /* Object doesn't exist on renderer */
+            Log::GetLog()->Write("Renderer added object '%s' (id %d)",
+                (*it)->GetName(), (*it)->GetID());
+            _last_IDs.push_back((*it)->GetID());
+
+            /* Draw the added object */
+            Mesh* mes = (Mesh*)(*it);
+            if ((*it)->GetType() != SCENE_MESH) {
+                Log::GetLog()->Fatal("Not a mesh, but mesh is the only "
+                "type of scene object we have now! Skipping...");
+                continue;
+            }
+
+            mes->ApplyTransformations();
+
+            this->AddVertexData(mes->GetVertexData(),
+                mes->GetModelMatrixPointer());
+
+        }
+    }
+
     glm::mat4 mModel, mView, mProj;
     mView = this->_scenemng->GetCamera()->GetViewMatrix();
     mProj = this->_scenemng->GetCamera()->GetProjectionMatrix();
-    mModel = glm::mat4(1.0f);
 
-    sForward->SetUniform("mvp", mProj * mView * mModel);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glBindVertexArray(vao_tri);
+    /* Render registered VAOs */
+    for (auto it = _vertices.begin(); it != _vertices.end(); it++) {
+        mModel = *it->worldMat;
+        sForward->SetUniform("mvp", mProj * mView * mModel);
 
-    // 1rst attribute buffer : vertices
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_tri);
-    glVertexAttribPointer(
-       0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-       3,                  // size
-       GL_FLOAT,           // type
-       GL_FALSE,           // normalized?
-       0,                  // stride
-       (void*)0            // array buffer offset
-    );
-        // Draw the triangle !
-    glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-    glDisableVertexAttribArray(0);
+    //    glBindVertexArray(it->vao);
+
+        // 1rst attribute buffer : vertices
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, it->vbo_pos);
+        glVertexAttribPointer(
+           0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+           3,                  // size
+           GL_FLOAT,           // type
+           GL_FALSE,           // normalized?
+           0,                  // stride
+           (void*)0            // array buffer offset
+        );
+            // Draw the triangle !
+        glDrawArrays(GL_TRIANGLES, 0, it->vd->Positions.size());
+        glDisableVertexAttribArray(0);
+    }
 
 
     SDL_GL_SwapWindow(_win);
@@ -175,18 +213,18 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
     vri.worldMat = worldMatrix;
     vri.vd = v;
 
-    GLuint vbo_pos;
+    //glGenVertexArrays(1, &vri.vao);
+    //glBindVertexArray(vri.vao);
 
-    glGenVertexArrays(1, &vri.vao);
-    glBindVertexArray(vri.vao);
-
-    glGenBuffers(1, &vbo_pos);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
-    glBufferData(GL_ARRAY_BUFFER, v->Positions.size(), v->Positions.data(),
-        GL_STATIC_DRAW);
+    glGenBuffers(1, &vri.vbo_pos);
+    glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_pos);
+    glBufferData(GL_ARRAY_BUFFER, v->Positions.size() * sizeof(glm::vec3),
+        v->Positions.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 
+    Log::GetLog()->Write("Added vertices with VAO %d (VBO %d)", 0, vri.vbo_pos);
+    _vertices.push_back(vri);
     return vri.vao;
 }
 

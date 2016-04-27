@@ -6,8 +6,9 @@ int SceneManager::AddObject(SceneObject* obj)
 {
     obj->_id = _objects.size() + 1;
     this->_objects.push_back(obj);
-    Log::GetLog()->Write("Added object %s to the SceneManager",
-        obj->GetName());
+    Log::GetLog()->Write("Added object %s (ID %d) to the SceneManager",
+        obj->_name.c_str(), obj->_id);
+         _listModified = true;
     return 1;
 }
 
@@ -54,6 +55,8 @@ void SceneManager::RemoveObject(SceneObject* sco)
                 Log::GetLog()->Write("Object %s (%.f %.f %.f) removed from the "
                     "scene", sco->GetName(), npos.x, npos.y, npos.z);
                 _objects.erase(it);
+                 _listModified = true;
+                 break;
             }
         }
     }
@@ -66,4 +69,27 @@ Camera* SceneManager::GetCamera() const
 void SceneManager::SetCamera(Camera* c)
 {
     _cam = c;
+}
+
+/* Update the valid objects list.
+    This list is responsable to show the valid objects, the objects
+    visible to the camera and some beyond
+    Return FALSE if we don't have any alteration, TRUE if we have
+*/
+bool SceneManager::UpdateValidObjects()
+{
+    if (!_listModified) return false;
+
+    this->_valid_objects.clear();
+    for (auto it = _objects.begin(); it != _objects.end(); it++) {
+        this->_valid_objects.push_back(*it);
+    }
+     _listModified = false;
+     return true;
+}
+
+/* Retrieve the valid objects list */
+std::list<SceneObject*>* SceneManager::GetValidObjects()
+{
+    return &this->_valid_objects;
 }
