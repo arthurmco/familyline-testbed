@@ -64,13 +64,15 @@ int main(int argc, char const *argv[]) {
     bool player = false;
     SDL_Event ev;
 
-    Camera cam = Camera{glm::vec3(6.0f, 1.0f, 2.5f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(6.0f, 4.0f, 3.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
 
     rndr->SetSceneManager(scenemng);
 
     OBJOpener opener;
-    opener.Open("test1.obj");
+    Mesh* m = opener.Open("test1.obj");
+
+    scenemng->AddObject(m);
 
     do {
         player = true;

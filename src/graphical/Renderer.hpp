@@ -26,7 +26,8 @@ namespace Graphics {
 
     struct VertexRenderInfo {
         VertexData* vd;
-        glm::mat4 worldMat;
+        glm::mat4* worldMat;
+        GLuint vao;
     };
 
     class Renderer
@@ -54,7 +55,7 @@ namespace Graphics {
         bool Render();
 
         /* Add vertex data structure. Returns its VAO ID */
-        GLint AddVertexData(VertexData*, glm::mat4 worldMatrix);
+        GLint AddVertexData(VertexData*, glm::mat4* worldMatrix);
     };
 
 }

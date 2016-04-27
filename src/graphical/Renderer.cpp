@@ -127,7 +127,6 @@ bool Renderer::Render()
 
     sForward->SetUniform("mvp", mProj * mView * mModel);
 
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glBindVertexArray(vao_tri);
@@ -160,6 +159,35 @@ SceneManager* Renderer::GetSceneManager() const
 void Renderer::SetSceneManager(SceneManager* scenemng)
 {
     this->_scenemng = scenemng;
+}
+
+
+/* Add vertex data structure. Returns its VAO ID */
+GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
+{
+    /*  We transmit the worldMatrix as a pointer to allows you to
+        change it without shit like Get... or Set... functions.
+
+        Well, this is a fucking game engine. We need speed
+    */
+
+    VertexRenderInfo vri;
+    vri.worldMat = worldMatrix;
+    vri.vd = v;
+
+    GLuint vbo_pos;
+
+    glGenVertexArrays(1, &vri.vao);
+    glBindVertexArray(vri.vao);
+
+    glGenBuffers(1, &vbo_pos);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+    glBufferData(GL_ARRAY_BUFFER, v->Positions.size(), v->Positions.data(),
+        GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
+    return vri.vao;
 }
 
 Renderer::~Renderer()

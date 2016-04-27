@@ -64,3 +64,9 @@ void SceneObject::AddRotation(float x, float y, float z)
     this->_rotations[1] += y;
     this->_rotations[2] += z;
 }
+
+
+int SceneObject::GetID()
+{
+    return this->_id;
+}

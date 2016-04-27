@@ -29,6 +29,7 @@ namespace Graphics {
     public:
         int AddObject(SceneObject*);
 
+        SceneObject* GetObject(int id) const;
         SceneObject* GetObject(const char* name) const;
         SceneObject* GetObject(float x, float y, float z) const;
 

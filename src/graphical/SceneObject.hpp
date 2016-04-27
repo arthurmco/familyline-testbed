@@ -18,8 +18,10 @@ namespace Graphics {
 
     class SceneObject
     {
+        friend class SceneManager;
     protected:
         std::string _name;
+        int _id = 0;
 
         glm::vec3 _position;
         float _rotations[3]; /*  Rotation angles in X, Y
@@ -35,6 +37,8 @@ namespace Graphics {
 
         void SetName(const char*);
         const char* GetName() const;
+
+        int GetID();
 
         glm::vec3 GetPosition() const;
         void SetPosition(glm::vec3);

@@ -50,8 +50,19 @@ Mesh* OBJOpener::Open(const char* file)
                 cind++;
             }
 
-            fline = &fline[cind];
+            fline = &fline[cind+2];
             strncpy(mName, fline, 255);
+
+            /* Trim the mesh name */
+            for (int i = strlen(mName)-1; i > 0; i--) {
+                if (isspace(mName[i]) || mName[i] == '\n') {
+                    mName[i] = 0;
+                } else {
+                    break;
+                }
+            }
+
+
             break;
         }
         case 'v': {
