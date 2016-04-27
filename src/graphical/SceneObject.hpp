@@ -33,7 +33,8 @@ namespace Graphics {
         void SetBoundingBox(BoundingBox);
         BoundingBox GetBoundingBox() const;
 
-        const char* GetName();
+        void SetName(const char*);
+        const char* GetName() const;
 
         glm::vec3 GetPosition() const;
         void SetPosition(glm::vec3);

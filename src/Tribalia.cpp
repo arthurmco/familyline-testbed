@@ -22,6 +22,7 @@
 
 #include "EnviroDefs.h"
 
+#include "graphical/meshopener/OBJOpener.hpp"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
@@ -67,6 +68,10 @@ int main(int argc, char const *argv[]) {
     scenemng->SetCamera(&cam);
 
     rndr->SetSceneManager(scenemng);
+
+    OBJOpener opener;
+    opener.Open("test1.obj");
+
     do {
         player = true;
 

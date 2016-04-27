@@ -5,6 +5,10 @@
 
 ***/
 
+#include <cstdio>
+#include <cstring>
+#include <cctype>
+
 #include "MeshOpener.hpp"
 
 #ifndef OBJOPENER_HPP

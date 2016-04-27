@@ -16,7 +16,7 @@ namespace Graphics {
 
 struct VertexData
 {
-    std::vector<glm::vec4> Positions;
+    std::vector<glm::vec3> Positions;
     std::vector<glm::vec3> Normals;
     std::vector<glm::vec2> TexCoords;
 };

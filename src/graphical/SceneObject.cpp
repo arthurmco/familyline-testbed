@@ -23,7 +23,12 @@ BoundingBox SceneObject::GetBoundingBox() const
     return this->_box;
 }
 
-const char* SceneObject::GetName()
+void SceneObject::SetName(const char* name)
+{
+    this->_name = std::string{name};
+}
+
+const char* SceneObject::GetName() const
 {
     return this->_name.c_str();
 }
