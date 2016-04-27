@@ -19,6 +19,7 @@ namespace Logic {
     struct Team {
         int id;
         std::string name;
+        char* flag; //pointer to a raw bitmap.
     };
 
     class City {

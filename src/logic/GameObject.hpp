@@ -55,7 +55,7 @@ namespace Tribalia {
         }
 
         /* Find a property */
-        bool GetProperty(const char* name)
+        bool FindProperty(const char* name)
         {
             std::string sname{name};
 

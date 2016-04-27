@@ -62,6 +62,10 @@ namespace Tribalia {
             /* Run the DoAction() method in each registered object
                 TODO: Change this for 'on each visible object' (?)  */
             bool DoActionAll();
+
+            /* Retrieve an object */
+            GameObject* GetObject(int id);
+            GameObject* GetObject(float x, float y, float z, float bias);
         };
 
     }

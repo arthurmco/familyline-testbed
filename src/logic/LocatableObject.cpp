@@ -20,6 +20,7 @@ LocatableObject::LocatableObject(int oid, int tid, const char* name,
         this->AddProperty("yPos", yPos);
         this->AddProperty("zPos", zPos);
 
+        this->AddProperty("mesh", (Tribalia::Graphics::Mesh*)nullptr);
     }
 
 void LocatableObject::SetX(float v) { this->SetProperty("xPos", v);  }
@@ -30,3 +31,12 @@ float LocatableObject::GetY() { return this->GetProperty<float>("yPos"); }
 
 void LocatableObject::SetZ(float v) { this->SetProperty("zPos", v); }
 float LocatableObject::GetZ() { return this->GetProperty<float>("zPos"); }
+
+void LocatableObject::SetMesh(Tribalia::Graphics::Mesh* m)
+{
+    this->SetProperty("mesh", m);
+}
+Tribalia::Graphics::Mesh* LocatableObject::GetMesh()
+{
+    return this->GetProperty<Tribalia::Graphics::Mesh*>("mesh");
+}

@@ -8,6 +8,8 @@
 
 #include "LocatableObject.hpp"
 
+#include <algorithm>
+
 #ifndef ATTACKABLEOBJECT_HPP
 #define ATTACKABLEOBJECT_HPP
 
