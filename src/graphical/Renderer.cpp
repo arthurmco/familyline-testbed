@@ -194,7 +194,7 @@ bool Renderer::Render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     /* Render registered VAOs */
-    for (auto it = _vertices.begin(); it != _vertices.end(); it++) {
+    for (auto it = _vertices.begin(); it != _vertices.end(); ++it) {
         mModel = *it->worldMat;
         sForward->SetUniform("mvp", mProj * mView * mModel);
         sForward->SetUniform("mModel", mModel);

@@ -90,6 +90,7 @@ Mesh* OBJOpener::Open(const char* file)
                         fline = &fline[2];
                         glm::vec3 vec = glm::vec3(0.0, 0.0, 1.0);
                         sscanf(fline, "%f %f %f", &vec.x, &vec.y, &vec.z);
+                        vec = glm::normalize(vec);
                         normals.push_back(vec);
                         continue;
                     }

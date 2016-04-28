@@ -64,22 +64,33 @@ int main(int argc, char const *argv[]) {
     bool player = false;
     SDL_Event ev;
 
-    Camera cam = Camera{glm::vec3(6.0f, 6.0f, 6.0f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(8.0f, 6.0f, 6.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
 
     rndr->SetSceneManager(scenemng);
 
     OBJOpener opener;
     Mesh* m = opener.Open("test.obj");
+    Mesh* m2 = opener.Open("test2.obj");
+    Mesh* m3 = opener.Open("test.obj");
 
-    if (!m) {
+    if (!m || !m2) {
         printf(" Mesh não encontrada");
         return EXIT_FAILURE;
     }
 
     scenemng->AddObject(m);
-    m->AddPosition(glm::vec3(1.0, 0.0, 1.0));
+    scenemng->AddObject(m2);
+    scenemng->AddObject(m3);
+
+    m->AddPosition(glm::vec3(3.0, 1.0, 1.0));
     m->ApplyTransformations();
+
+    m2->AddPosition(glm::vec3(-3.0, 0.0, 0.0));
+    m2->ApplyTransformations();
+    m3->AddRotation(glm::radians(60.0f), 0, 0);
+    m3->AddPosition(glm::vec3(0.0, -1.2, 2.5));
+    m3->ApplyTransformations();
 
     int i = 0;
     do {
@@ -94,12 +105,6 @@ int main(int argc, char const *argv[]) {
         }
 
         rndr->Render();
-        i++;
-
-        printf("(%d)\n", i);
-        if (i == 2000) {
-            scenemng->RemoveObject(m);
-        }
 
         usleep(1);
     } while (player);
