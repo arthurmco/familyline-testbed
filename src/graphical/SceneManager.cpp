@@ -52,8 +52,8 @@ void SceneManager::RemoveObject(SceneObject* sco)
     for (auto it = _objects.begin(); it != _objects.end(); it++) {
         if ((*it)->_position == npos) {
             if (!strcmp((*it)->_name.c_str(), sco->GetName())) {
-                Log::GetLog()->Write("Object %s (%.f %.f %.f) removed from the "
-                    "scene", sco->GetName(), npos.x, npos.y, npos.z);
+                Log::GetLog()->Write("Object %s (at %.2f %.2f %.2f) removed "
+                    "from the scene", sco->GetName(), npos.x, npos.y, npos.z);
                 _objects.erase(it);
                  _listModified = true;
                  break;

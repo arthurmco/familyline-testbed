@@ -117,30 +117,40 @@ void Renderer::InitializeShaders()
 
 }
 
-std::vector<int> _last_IDs;
+struct SceneIDCache {
+    int ID;
+    int lastcheck;
+    GLuint vao;
+};
+
+int lastCheck = 0;
+std::vector<SceneIDCache> _last_IDs;
 
 /* Returns true if rendered successfully */
 bool Renderer::Render()
 {
+
     /* Check updates from SceneManager*/
     if (_scenemng->UpdateValidObjects()) {
+            lastCheck++;
         auto objList = _scenemng->GetValidObjects();
 
-        for (auto it = objList->begin(); it != objList->end(); it++) {
+        /* Check for inserted objects */
+        for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
             for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); it2++) {
-                if ((*it)->GetID() == (*it2)) {
+                if ((*itScene)->GetID() == it2->ID) {
+                    it2->lastcheck = lastCheck;
                     break;
                 }
             }
 
             /* Object doesn't exist on renderer */
             Log::GetLog()->Write("Renderer added object '%s' (id %d)",
-                (*it)->GetName(), (*it)->GetID());
-            _last_IDs.push_back((*it)->GetID());
+                (*itScene)->GetName(), (*itScene)->GetID());
 
             /* Draw the added object */
-            Mesh* mes = (Mesh*)(*it);
-            if ((*it)->GetType() != SCENE_MESH) {
+            Mesh* mes = (Mesh*)(*itScene);
+            if ((*itScene)->GetType() != SCENE_MESH) {
                 Log::GetLog()->Fatal("Not a mesh, but mesh is the only "
                 "type of scene object we have now! Skipping...");
                 continue;
@@ -148,9 +158,27 @@ bool Renderer::Render()
 
             mes->ApplyTransformations();
 
-            this->AddVertexData(mes->GetVertexData(),
+            int vaon = this->AddVertexData(mes->GetVertexData(),
                 mes->GetModelMatrixPointer());
 
+            SceneIDCache sidc;
+            sidc.ID = (*itScene)->GetID();
+            sidc.lastcheck = lastCheck;
+            sidc.vao = vaon;
+            _last_IDs.push_back(sidc);
+        }
+
+        /* Check for deleted objects */
+        for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); ++it2) {
+            if (it2->lastcheck != lastCheck){
+                Log::GetLog()->Write("Removing object ID %d from the cache",
+                    it2->ID);
+                this->RemoveVertexData(it2->vao);
+                _last_IDs.erase(it2);
+
+                if (_last_IDs.empty())
+                    break;
+            }
         }
     }
 
@@ -252,6 +280,19 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
     _vertices.push_back(vri);
     return vri.vao;
 }
+
+void Renderer::RemoveVertexData(GLuint vaoid)
+{
+    VertexRenderInfo vri;
+    for (auto it = _vertices.begin(); it != _vertices.end(); it++){
+        if (it->vao == vaoid) {
+            glDeleteVertexArrays(1, &vaoid);
+            glDeleteBuffers(1, &it->vbo_pos);
+            glDeleteBuffers(1, &it->vbo_norm);
+        }
+    }
+}
+
 
 Renderer::~Renderer()
 {

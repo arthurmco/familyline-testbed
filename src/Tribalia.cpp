@@ -78,7 +78,10 @@ int main(int argc, char const *argv[]) {
     }
 
     scenemng->AddObject(m);
+    m->AddPosition(glm::vec3(1.0, 0.0, 1.0));
+    m->ApplyTransformations();
 
+    int i = 0;
     do {
         player = true;
 
@@ -91,6 +94,12 @@ int main(int argc, char const *argv[]) {
         }
 
         rndr->Render();
+        i++;
+
+        printf("(%d)\n", i);
+        if (i == 2000) {
+            scenemng->RemoveObject(m);
+        }
 
         usleep(1);
     } while (player);

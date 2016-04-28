@@ -60,6 +60,8 @@ namespace Graphics {
 
         /* Add vertex data structure. Returns its VAO ID */
         GLint AddVertexData(VertexData*, glm::mat4* worldMatrix);
+
+        void RemoveVertexData(GLuint vaoid);
     };
 
 }
