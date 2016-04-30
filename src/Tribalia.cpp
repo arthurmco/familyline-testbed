@@ -93,6 +93,7 @@ int main(int argc, char const *argv[]) {
     m3->ApplyTransformations();
 
     int i = 0;
+    unsigned int ticks = SDL_GetTicks();
     do {
         player = true;
 
@@ -106,10 +107,21 @@ int main(int argc, char const *argv[]) {
 
         rndr->Render();
 
-        usleep(1);
+        unsigned int elapsed = SDL_GetTicks();
+        int delta = elapsed - ticks;
+
+        ticks = SDL_GetTicks();
+        printf("\033[1m %4d ms \033[0m\r", delta);
+
+        //Trava em ~60 fps
+        if (delta < 16) {
+            SDL_Delay(16 - delta);
+        }
+
+        //usleep(1);
     } while (player);
 
-    printf("Exited.\n");
+    printf("\nExited.\n");
 
     return 0;
 }
