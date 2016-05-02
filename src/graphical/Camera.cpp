@@ -30,7 +30,7 @@ void Camera::AddLookAt(glm::vec3 pos) { this->_lookAt += pos; _isViewChanged = t
 
 /*  Set position and 'look-at' at the same time,
     giving the impression the camera is 'translating' */
-void Camera::Translate(glm::vec3 pos)
+void Camera::AddMovement(glm::vec3 pos)
 {
     this->AddPosition(pos);
     this->AddLookAt(pos);

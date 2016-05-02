@@ -8,6 +8,8 @@
 
 #define GLM_FORCE_RADIANS
 
+#include "EnviroDefs.h"
+
 #include <cstdio>
 #include <cstdlib>
 
@@ -19,14 +21,14 @@
 #include "graphical/Renderer.hpp"
 #include "graphical/ShaderProgram.hpp"
 #include "graphical/Camera.hpp"
-
-#include "EnviroDefs.h"
-
 #include "graphical/meshopener/OBJOpener.hpp"
+
+#include "input/InputManager.hpp"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 using namespace Tribalia::Graphics;
+using namespace Tribalia::Input;
 
 int main(int argc, char const *argv[]) {
     Log::GetLog()->SetFile(stdout);
@@ -60,9 +62,9 @@ int main(int argc, char const *argv[]) {
 
     HumanPlayer hp = HumanPlayer{"Arthur"};
     SceneManager* scenemng = new SceneManager();
+    InputManager* inputmng = new InputManager();
 
     bool player = false;
-    SDL_Event ev;
 
     Camera cam = Camera{glm::vec3(8.0f, 6.0f, 6.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
@@ -94,16 +96,61 @@ int main(int argc, char const *argv[]) {
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
+    InputEvent ev;
+    bool front = false, back = false;
+    bool left = false, right = false;
     do {
         player = true;
+        inputmng->Run();
 
-        if (SDL_PollEvent(&ev)) {
-            if (ev.type == SDL_WINDOWEVENT &&
-                ev.window.event == SDL_WINDOWEVENT_CLOSE)
-                {
-                    player = false;
+        if (inputmng->GetEvent(&ev)) {
+            if (ev.eventType == EVENT_FINISH) {
+                player = false;
+            }
+
+            if (ev.eventType == EVENT_KEYEVENT) {
+                switch (ev.event.keyev.scancode) {
+                    case SDLK_w:
+                        if (ev.event.keyev.status == KEY_KEYPRESS)
+                            front = true;
+                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                            front = false;
+                    break;
+                    case SDLK_s:
+                        if (ev.event.keyev.status == KEY_KEYPRESS)
+                            back = true;
+                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                            back = false;
+                    break;
+                    case SDLK_a:
+                        if (ev.event.keyev.status == KEY_KEYPRESS)
+                            left = true;
+                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                            left = false;
+                    break;
+                    case SDLK_d:
+                        if (ev.event.keyev.status == KEY_KEYPRESS)
+                            right = true;
+                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                            right = false;
+                    break;
                 }
+
+            }
+
+            inputmng->PopEvent(NULL);
         }
+
+        if (front)
+            cam.AddMovement(glm::vec3(0, 0, -0.009f));
+        else if (back)
+            cam.AddMovement(glm::vec3(0, 0, 0.009f));
+
+        if (left)
+            cam.AddMovement(glm::vec3(-0.009f, 0, 0));
+        else if (right)
+            cam.AddMovement(glm::vec3(0.009f, 0, 0));
+
 
         rndr->Render();
 

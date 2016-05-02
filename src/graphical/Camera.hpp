@@ -44,7 +44,7 @@ namespace Graphics {
 
         /*  Set position and 'look-at' at the same time,
             giving the impression the camera is 'translating' */
-        void Translate(glm::vec3);
+        void AddMovement(glm::vec3);
 
         glm::mat4 GetViewMatrix();
         glm::mat4 GetProjectionMatrix();
