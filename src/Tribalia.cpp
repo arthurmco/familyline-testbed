@@ -66,7 +66,7 @@ int main(int argc, char const *argv[]) {
 
     bool player = false;
 
-    Camera cam = Camera{glm::vec3(8.0f, 6.0f, 6.0f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(2.0f, 8.0f, 8.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
 
     rndr->SetSceneManager(scenemng);
@@ -96,14 +96,16 @@ int main(int argc, char const *argv[]) {
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
+    unsigned int frame = 0;
     InputEvent ev;
     bool front = false, back = false;
     bool left = false, right = false;
+    bool rotate_left = false, rotate_right = false;
     do {
         player = true;
         inputmng->Run();
 
-        if (inputmng->GetEvent(&ev)) {
+        while (inputmng->GetEvent(&ev)) {
             if (ev.eventType == EVENT_FINISH) {
                 player = false;
             }
@@ -134,9 +136,24 @@ int main(int argc, char const *argv[]) {
                         else if (ev.event.keyev.status == KEY_KEYRELEASE)
                             right = false;
                     break;
+                    case SDLK_LEFT:
+                        if (ev.event.keyev.status == KEY_KEYPRESS)
+                            rotate_left = true;
+                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                            rotate_left = false;
+                    break;
+                    case SDLK_RIGHT:
+                        if (ev.event.keyev.status == KEY_KEYPRESS)
+                            rotate_right = true;
+                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                            rotate_right = false;
+                    break;
                 }
 
             }
+
+
+            printf("%d %d \n", ev.mousex, ev.mousey);
 
             inputmng->PopEvent(NULL);
         }
@@ -151,8 +168,14 @@ int main(int argc, char const *argv[]) {
         else if (right)
             cam.AddMovement(glm::vec3(0.009f, 0, 0));
 
+        if (rotate_left)
+            cam.AddRotation(glm::vec3(0, 1, 0), glm::radians(1.0f));
+        else if (rotate_right)
+            cam.AddRotation(glm::vec3(0, 1, 0), glm::radians(-1.0f));
+
 
         rndr->Render();
+        frame++;
 
         unsigned int elapsed = SDL_GetTicks();
         int delta = elapsed - ticks;
@@ -168,7 +191,7 @@ int main(int argc, char const *argv[]) {
         //usleep(1);
     } while (player);
 
-    printf("\nExited.\n");
+    printf("\nExited. (%d frames) \n", frame);
 
     return 0;
 }

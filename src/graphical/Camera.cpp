@@ -14,6 +14,8 @@ Camera::Camera(glm::vec3 pos, glm::vec3 lookAt)
     _isViewChanged = true;
     _isProjectionChanged = true;
 
+    _original_distance = lookAt - pos;
+
     Log::GetLog()->Write("Created camera at (%.2f, %.2f, %.2f) "
         "looking at (%.2f, %.2f, %.2f)",
         pos.x, pos.y, pos.z, lookAt.x, lookAt.y, lookAt.z);
@@ -35,6 +37,28 @@ void Camera::AddMovement(glm::vec3 pos)
     this->AddPosition(pos);
     this->AddLookAt(pos);
 }
+
+
+/*  Add rotation to the camera.
+    You can rotate the camera by changing the look-at value in a
+    'circular way'. I will use the glm rotation functions */
+void Camera::AddRotation(glm::vec3 axis, float angle)
+{
+    glm::vec3 l = this->_lookAt;
+    glm::vec3 pivot = (_lookAt - _pos);
+    glm::mat4 tRotate = glm::rotate(angle, axis);
+    glm::mat4 tPivot = glm::translate(pivot);
+    glm::mat4 tPivotMinus = glm::translate(-pivot);
+    glm::vec4 l4 = tPivotMinus * tRotate * tPivot *
+        glm::vec4(l.x, l.y, l.z, 1.0f);
+
+    l = glm::vec3(l4.x, l4.y, l4.z);
+
+    printf("\n%.2f %.2f %.2f\n", l.x, l.y, l.z);
+    this->_lookAt = l;
+    this->_isViewChanged = true;
+}
+
 
 glm::mat4 Camera::GetViewMatrix()
 {
