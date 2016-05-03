@@ -53,8 +53,6 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
         glm::vec4(l.x, l.y, l.z, 1.0f);
 
     l = glm::vec3(l4.x, l4.y, l4.z);
-
-    printf("\n%.2f %.2f %.2f\n", l.x, l.y, l.z);
     this->_lookAt = l;
     this->_isViewChanged = true;
 }

@@ -22,6 +22,7 @@
 #include "graphical/ShaderProgram.hpp"
 #include "graphical/Camera.hpp"
 #include "graphical/meshopener/OBJOpener.hpp"
+#include "graphical/Terrain.hpp"
 
 #include "input/InputManager.hpp"
 
@@ -75,6 +76,8 @@ int main(int argc, char const *argv[]) {
     Mesh* m = opener.Open("test.obj");
     Mesh* m2 = opener.Open("test2.obj");
     Mesh* m3 = opener.Open("test.obj");
+
+    Terrain* terr = new Terrain{1000, 1000};
 
     if (!m || !m2) {
         printf(" Mesh não encontrada");
@@ -153,7 +156,7 @@ int main(int argc, char const *argv[]) {
             }
 
 
-            printf("%d %d \n", ev.mousex, ev.mousey);
+//            printf("%d %d \n", ev.mousex, ev.mousey);
 
             inputmng->PopEvent(NULL);
         }
@@ -172,7 +175,6 @@ int main(int argc, char const *argv[]) {
             cam.AddRotation(glm::vec3(0, 1, 0), glm::radians(1.0f));
         else if (rotate_right)
             cam.AddRotation(glm::vec3(0, 1, 0), glm::radians(-1.0f));
-
 
         rndr->Render();
         frame++;
