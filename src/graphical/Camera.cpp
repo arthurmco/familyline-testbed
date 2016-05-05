@@ -20,6 +20,7 @@ Camera::Camera(glm::vec3 pos, glm::vec3 lookAt)
         "looking at (%.2f, %.2f, %.2f)",
         pos.x, pos.y, pos.z, lookAt.x, lookAt.y, lookAt.z);
 
+
 }
 
 glm::vec3 Camera::GetPosition() const { return this->_pos; }
@@ -36,6 +37,18 @@ void Camera::AddMovement(glm::vec3 pos)
 {
     this->AddPosition(pos);
     this->AddLookAt(pos);
+    CalculateVectors();
+
+}
+
+void Camera::CalculateVectors()
+{
+
+    glm::vec3 pivot = (_lookAt - _pos);
+    glm::vec3 front = glm::normalize(pivot);
+    _right = glm::normalize(glm::cross(front, glm::vec3(0,1,0)));
+    _up = glm::normalize(glm::cross(_right, front));
+    printf("up: %.2f %.2f %.2f\n", _up.x, _up.y, _up.z);
 }
 
 
@@ -44,9 +57,13 @@ void Camera::AddMovement(glm::vec3 pos)
     'circular way'. I will use the glm rotation functions */
 void Camera::AddRotation(glm::vec3 axis, float angle)
 {
+    CalculateVectors();
+
     glm::vec3 l = this->_lookAt;
     glm::vec3 pivot = (_lookAt - _pos);
-    glm::mat4 tRotate = glm::rotate(angle, axis);
+
+
+    glm::mat4 tRotate = glm::rotate(angle, _up);
     glm::mat4 tPivot = glm::translate(pivot);
     glm::mat4 tPivotMinus = glm::translate(-pivot);
     glm::vec4 l4 = tPivotMinus * tRotate * tPivot *

@@ -34,7 +34,14 @@ namespace Graphics {
         /* Original distance between look-at and positon */
         glm::vec3 _original_distance;
 
+        /* Up and right vectors */
+        glm::vec3 _up;
+        glm::vec3 _right;
+
         glm::mat4 _viewMatrix, _projMatrix;
+
+        void CalculateVectors();
+
     public:
         Camera(glm::vec3 pos, glm::vec3 lookAt);
 

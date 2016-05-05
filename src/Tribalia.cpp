@@ -68,7 +68,7 @@ int main(int argc, char const *argv[]) {
 
     bool player = false;
 
-    Camera cam = Camera{glm::vec3(2.0f, 8.0f, 8.0f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(0.0f, 16.0f, 4.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
 
     rndr->SetSceneManager(scenemng);
