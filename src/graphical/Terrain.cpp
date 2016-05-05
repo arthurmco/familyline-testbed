@@ -43,6 +43,10 @@ Terrain::Terrain(int w, int h)
 
 }
 
+TerrainData* Terrain::GetSection(int index)
+{
+    return _data[index];
+}
 TerrainData* Terrain::GetSection(int x, int y)
 {
     return _data[x + y * _section_width];
@@ -54,5 +58,6 @@ TerrainData** Terrain::GetAllSections()
 
 int Terrain::GetWidth() const { return _width; }
 int Terrain::GetHeight() const { return _height; }
+int Terrain::GetSectionCount() const { return _section_height * _section_width; }
 const char* Terrain::GetName() const { return _name.c_str(); }
 const char* Terrain::GetDescription() const { return _description.c_str(); }

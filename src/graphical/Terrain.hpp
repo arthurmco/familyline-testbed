@@ -39,11 +39,13 @@ namespace Graphics {
     public:
         Terrain(int w, int h);
 
+        TerrainData* GetSection(int index);
         TerrainData* GetSection(int x, int y);
         TerrainData** GetAllSections();
 
         int GetWidth() const;
         int GetHeight() const;
+        int GetSectionCount() const;
 
         const char* GetName() const;
         const char* GetDescription() const;

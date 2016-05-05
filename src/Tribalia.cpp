@@ -23,6 +23,7 @@
 #include "graphical/Camera.hpp"
 #include "graphical/meshopener/OBJOpener.hpp"
 #include "graphical/Terrain.hpp"
+#include "graphical/TerrainRenderer.hpp"
 
 #include "input/InputManager.hpp"
 
@@ -78,6 +79,9 @@ int main(int argc, char const *argv[]) {
     Mesh* m3 = opener.Open("test.obj");
 
     Terrain* terr = new Terrain{1000, 1000};
+    TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
+    terr_rend->SetTerrain(terr);
+    terr_rend->SetCamera(&cam);
 
     if (!m || !m2) {
         printf(" Mesh não encontrada");
@@ -176,6 +180,7 @@ int main(int argc, char const *argv[]) {
         else if (rotate_right)
             cam.AddRotation(glm::vec3(0, 1, 0), glm::radians(-1.0f));
 
+        terr_rend->Update();
         rndr->Render();
         frame++;
 
