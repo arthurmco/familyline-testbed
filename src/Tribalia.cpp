@@ -32,8 +32,13 @@ using namespace Tribalia::Logic;
 using namespace Tribalia::Graphics;
 using namespace Tribalia::Input;
 
+#ifdef _MSC_VER
+    #undef main  //somehow vs does not find main()
+#endif
+
 int main(int argc, char const *argv[]) {
-    Log::GetLog()->SetFile(stdout);
+    FILE* fLog = fopen("/tmp/log.txt", "w");
+    Log::GetLog()->SetFile(fLog);
     Log::GetLog()->Write("Tribalia %s", VERSION);
     Log::GetLog()->Write("built on %s by %s ", __DATE__, USERNAME);
 
