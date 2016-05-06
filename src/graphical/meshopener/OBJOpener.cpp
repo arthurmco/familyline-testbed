@@ -108,8 +108,8 @@ Mesh* OBJOpener::Open(const char* file)
             //Normal + position
                 &vertIndex[0], &normIndex[0],
                 &vertIndex[1], &normIndex[1],
-                &vertIndex[2], &normIndex[2]) > 2) {
 
+                &vertIndex[2], &normIndex[2]) > 2) {
                 indVerts.push_back(vertIndex[0]);
                 indVerts.push_back(vertIndex[1]);
                 indVerts.push_back(vertIndex[2]);
@@ -143,7 +143,7 @@ Mesh* OBJOpener::Open(const char* file)
             index = indVerts.size() - index;
         }
         realVerts.push_back(verts[index]);
-        indMaterials.push_back(0);
+        indMaterials.push_back(1);
     }
 
     realNormals.reserve(normals.size() * 3);
@@ -165,6 +165,7 @@ Mesh* OBJOpener::Open(const char* file)
     VertexData* vd = new VertexData;
     vd->Positions = realVerts;
     vd->Normals = realNormals;
+    vd->MaterialIDs = indMaterials;
 
     Mesh* m = new Mesh(vd);
     m->SetName(mName);

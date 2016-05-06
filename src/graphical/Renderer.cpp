@@ -120,6 +120,7 @@ void Renderer::InitializeShaders()
 void Renderer::SetMaterial(int ID)
 {
     Material* m = MaterialManager::GetInstance()->GetMaterial(ID);
+    printf("Material changed to %s\n", m->GetName());
     if (!m) return;
 
     sForward->SetUniform("diffuse_color", m->GetData()->diffuseColor);

@@ -88,9 +88,9 @@ int main(int argc, char const *argv[]) {
     ObjectRenderer* objrend = new ObjectRenderer(om, scenemng);
 
     MaterialData matdata;
-    matdata.diffuseColor = glm::vec3(1.0, 1.0, 0.0);
+    matdata.diffuseColor = glm::vec3(1.0, 0.0, 0.0);
     matdata.diffuseIntensity = 0.6;
-    matdata.ambientColor = glm::vec3(0.1, 0.1, 0.0);
+    matdata.ambientColor = glm::vec3(0.1, 0.0, 0.0);
     matdata.ambientIntensity = 0.1;
     Material mat = Material(0, "Test", matdata);
     MaterialManager::GetInstance()->AddMaterial(&mat);
