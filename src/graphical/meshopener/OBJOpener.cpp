@@ -21,6 +21,7 @@ Mesh* OBJOpener::Open(const char* file)
     // Full vertices, temporary until we start using indexing
     std::vector<glm::vec3> realVerts, realNormals;
     std::vector<glm::vec2> realTex;
+    std::vector<int> indMaterials;
 
     char mName[255] = "Unnamed";
 
@@ -142,6 +143,7 @@ Mesh* OBJOpener::Open(const char* file)
             index = indVerts.size() - index;
         }
         realVerts.push_back(verts[index]);
+        indMaterials.push_back(0);
     }
 
     realNormals.reserve(normals.size() * 3);

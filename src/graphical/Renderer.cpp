@@ -117,6 +117,17 @@ void Renderer::InitializeShaders()
 
 }
 
+void Renderer::SetMaterial(int ID)
+{
+    Material* m = MaterialManager::GetInstance()->GetMaterial(ID);
+    if (!m) return;
+
+    sForward->SetUniform("diffuse_color", m->GetData()->diffuseColor);
+    //sForward->SetUniform("diffuse_intensity", m->GetData()->diffuseIntensity);
+    sForward->SetUniform("ambient_color", m->GetData()->ambientColor);
+    //sForward->SetUniform("ambient_intensity", m->GetData()->ambientIntensity);
+}
+
 struct SceneIDCache {
     int ID;
     int lastcheck;
@@ -193,11 +204,17 @@ bool Renderer::Render()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    int material = 0;
+
     /* Render registered VAOs */
     for (auto it = _vertices.begin(); it != _vertices.end(); ++it) {
         mModel = *it->worldMat;
         sForward->SetUniform("mvp", mProj * mView * mModel);
         sForward->SetUniform("mModel", mModel);
+
+        if (!it->vd->MaterialIDs.empty())
+            material = it->vd->MaterialIDs[0];
+        SetMaterial(material);
 
         glBindVertexArray(it->vao);
 

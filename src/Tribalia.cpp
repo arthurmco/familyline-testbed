@@ -25,7 +25,7 @@
 #include "graphical/meshopener/OBJOpener.hpp"
 #include "graphical/Terrain.hpp"
 #include "graphical/TerrainRenderer.hpp"
-
+#include "graphical/MaterialManager.hpp"
 
 #include "input/InputManager.hpp"
 
@@ -76,7 +76,9 @@ int main(int argc, char const *argv[]) {
     rndr->SetSceneManager(scenemng);
 
     OBJOpener opener;
-    Mesh* m = opener.Open("test.obj");
+    Mesh* m = opener.Open("test2.obj");
+    m->SetPosition(glm::vec3(4,1,4));
+    scenemng->AddObject(m);
 
     Terrain* terr = new Terrain{1000, 1000};
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
@@ -85,6 +87,13 @@ int main(int argc, char const *argv[]) {
 
     ObjectRenderer* objrend = new ObjectRenderer(om, scenemng);
 
+    MaterialData matdata;
+    matdata.diffuseColor = glm::vec3(1.0, 1.0, 0.0);
+    matdata.diffuseIntensity = 0.6;
+    matdata.ambientColor = glm::vec3(0.1, 0.1, 0.0);
+    matdata.ambientIntensity = 0.1;
+    Material mat = Material(0, "Test", matdata);
+    MaterialManager::GetInstance()->AddMaterial(&mat);
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
@@ -96,7 +105,7 @@ int main(int argc, char const *argv[]) {
     do {
         player = true;
 
-        hp.Play(&gctx);
+        //hp.Play(&gctx);
         inputmng->Run();
 
         while (inputmng->GetEvent(&ev)) {

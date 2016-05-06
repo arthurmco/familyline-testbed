@@ -30,7 +30,6 @@ void ObjectRenderer::Check()
         /* easy way to check if we have a locatable object
             I don't know if is fast */
         LocatableObject* loc = dynamic_cast<LocatableObject*>(it->obj);
-        printf("%#lx %#lx\n", (long int)loc, (long int)it->obj);
         if (loc) {
 
             /* check if mesh is valid */

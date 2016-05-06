@@ -17,6 +17,7 @@ namespace Logic {
 
     struct GameContext {
         ObjectManager* om;
+        double elapsed_seconds;
     };
 
 

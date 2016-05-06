@@ -17,6 +17,7 @@
 #include "ShaderProgram.hpp"
 #include "SceneManager.hpp"
 #include "Mesh.hpp"
+#include "MaterialManager.hpp"
 #include "../Log.hpp"
 
 #ifndef RENDERER_HPP
@@ -47,13 +48,15 @@ namespace Graphics {
 
         void InitializeLibraries();
         void InitializeShaders();
+
+        void SetMaterial(int index);
+
     public:
         Renderer();
         ~Renderer();
 
         SceneManager* GetSceneManager() const;
         void SetSceneManager(SceneManager*);
-
 
         /* Returns true if rendered successfully */
         bool Render();

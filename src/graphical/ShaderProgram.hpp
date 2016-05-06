@@ -30,6 +30,7 @@ namespace Graphics {
             Returns true if it could find the var, false if it couldn't*/
         bool SetUniform(const char* name, glm::mat4 value);
         bool SetUniform(const char* name, glm::vec3 value);
+        bool SetUniform(const char* name, float value);
 
         GLint GetID();
 
