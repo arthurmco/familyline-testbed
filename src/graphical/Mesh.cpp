@@ -49,6 +49,7 @@ glm::mat4 Mesh::GetModelMatrix() const
 
 void Mesh::SetPosition(glm::vec3 pos)
 {
+    this->Translate(-_position);
     SceneObject::SetPosition(pos);
     this->Translate(_position);
     this->ApplyTransformations();

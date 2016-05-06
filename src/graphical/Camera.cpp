@@ -21,6 +21,7 @@ Camera::Camera(glm::vec3 pos, glm::vec3 lookAt)
         pos.x, pos.y, pos.z, lookAt.x, lookAt.y, lookAt.z);
 
 
+    CalculateVectors();
 }
 
 glm::vec3 Camera::GetPosition() const { return this->_pos; }
@@ -37,7 +38,6 @@ void Camera::AddMovement(glm::vec3 pos)
 {
     this->AddPosition(pos);
     this->AddLookAt(pos);
-    CalculateVectors();
 
 }
 
@@ -57,7 +57,6 @@ void Camera::CalculateVectors()
     'circular way'. I will use the glm rotation functions */
 void Camera::AddRotation(glm::vec3 axis, float angle)
 {
-    CalculateVectors();
 
     glm::vec3 l = this->_lookAt;
     glm::vec3 pivot = (_lookAt - _pos);

@@ -17,6 +17,7 @@
 
 #include "Log.hpp"
 #include "logic/HumanPlayer.hpp"
+#include "logic/ObjectRenderer.hpp"
 
 #include "graphical/Renderer.hpp"
 #include "graphical/ShaderProgram.hpp"
@@ -24,6 +25,7 @@
 #include "graphical/meshopener/OBJOpener.hpp"
 #include "graphical/Terrain.hpp"
 #include "graphical/TerrainRenderer.hpp"
+
 
 #include "input/InputManager.hpp"
 
@@ -68,38 +70,21 @@ int main(int argc, char const *argv[]) {
 
     bool player = false;
 
-    Camera cam = Camera{glm::vec3(0.0f, 16.0f, 4.0f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(0.0f, 16.0f, 8.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
 
     rndr->SetSceneManager(scenemng);
 
     OBJOpener opener;
     Mesh* m = opener.Open("test.obj");
-    Mesh* m2 = opener.Open("test2.obj");
-    Mesh* m3 = opener.Open("test.obj");
 
     Terrain* terr = new Terrain{1000, 1000};
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
     terr_rend->SetTerrain(terr);
     terr_rend->SetCamera(&cam);
 
-    if (!m || !m2) {
-        printf(" Mesh não encontrada");
-        return EXIT_FAILURE;
-    }
+    ObjectRenderer* objrend = new ObjectRenderer(om, scenemng);
 
-    scenemng->AddObject(m);
-    scenemng->AddObject(m2);
-    scenemng->AddObject(m3);
-
-    m->AddPosition(glm::vec3(3.0, 1.0, 1.0));
-    m->ApplyTransformations();
-
-    m2->AddPosition(glm::vec3(-3.0, 0.0, 0.0));
-    m2->ApplyTransformations();
-    m3->AddRotation(glm::radians(60.0f), 0, 0);
-    m3->AddPosition(glm::vec3(0.0, -1.2, 2.5));
-    m3->ApplyTransformations();
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
@@ -110,6 +95,8 @@ int main(int argc, char const *argv[]) {
     bool rotate_left = false, rotate_right = false;
     do {
         player = true;
+
+        hp.Play(&gctx);
         inputmng->Run();
 
         while (inputmng->GetEvent(&ev)) {
@@ -171,9 +158,9 @@ int main(int argc, char const *argv[]) {
             cam.AddMovement(glm::vec3(0, 0, 0.009f));
 
         if (left)
-            cam.AddMovement(glm::vec3(-0.009f, 0, 0));
+            cam.AddMovement(glm::vec3(-0.02f, 0, 0));
         else if (right)
-            cam.AddMovement(glm::vec3(0.009f, 0, 0));
+            cam.AddMovement(glm::vec3(0.02f, 0, 0));
 
         if (rotate_left)
             cam.AddRotation(glm::vec3(0, 1, 0), glm::radians(1.0f));
@@ -181,6 +168,10 @@ int main(int argc, char const *argv[]) {
             cam.AddRotation(glm::vec3(0, 1, 0), glm::radians(-1.0f));
 
         terr_rend->Update();
+
+        objrend->Check();
+        objrend->Update();
+
         rndr->Render();
         frame++;
 
@@ -188,6 +179,7 @@ int main(int argc, char const *argv[]) {
         int delta = elapsed - ticks;
 
         ticks = SDL_GetTicks();
+
         printf("\033[1m %4d ms \033[0m\r", delta);
 
         //Trava em ~60 fps

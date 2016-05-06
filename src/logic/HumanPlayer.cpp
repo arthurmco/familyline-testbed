@@ -1,4 +1,5 @@
 #include "HumanPlayer.hpp"
+#include "../graphical/meshopener/OBJOpener.hpp"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
@@ -12,7 +13,8 @@ public:
     AttackableObject(oid, 2, name,
         x, y, z, 1000, 1.0f, 1.5f)
         {
-
+            Tribalia::Graphics::OBJOpener op;
+            this->SetMesh(op.Open("test.obj"));
         }
 
     virtual bool Initialize(){

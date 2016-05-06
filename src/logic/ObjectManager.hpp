@@ -30,6 +30,8 @@ namespace Tribalia {
         };
 
         class ObjectManager {
+            friend class ObjectRenderer;
+
         private:
             std::list<ObjectRegisterInfo> _objects;
 
@@ -66,6 +68,7 @@ namespace Tribalia {
             /* Retrieve an object */
             GameObject* GetObject(int id);
             GameObject* GetObject(float x, float y, float z, float bias);
+
         };
 
     }
