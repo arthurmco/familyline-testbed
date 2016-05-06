@@ -27,8 +27,6 @@
 #include "graphical/TerrainRenderer.hpp"
 #include "graphical/MaterialManager.hpp"
 
-#include "input/InputManager.hpp"
-
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 using namespace Tribalia::Graphics;
@@ -67,11 +65,13 @@ int main(int argc, char const *argv[]) {
     HumanPlayer hp = HumanPlayer{"Arthur"};
     SceneManager* scenemng = new SceneManager();
     InputManager* inputmng = new InputManager();
+    hp.SetInputManager(inputmng);
 
     bool player = false;
 
-    Camera cam = Camera{glm::vec3(0.0f, 16.0f, 8.0f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(0.0f, 16.0f, 16.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
+    hp.SetCamera(&cam);
 
     rndr->SetSceneManager(scenemng);
 
@@ -88,9 +88,9 @@ int main(int argc, char const *argv[]) {
     ObjectRenderer* objrend = new ObjectRenderer(om, scenemng);
 
     MaterialData matdata;
-    matdata.diffuseColor = glm::vec3(1.0, 0.0, 0.0);
+    matdata.diffuseColor = glm::vec3(0.6, 0.1, 0.0);
     matdata.diffuseIntensity = 0.6;
-    matdata.ambientColor = glm::vec3(0.1, 0.0, 0.0);
+    matdata.ambientColor = glm::vec3(0.05, 0.0, 0.0);
     matdata.ambientIntensity = 0.1;
     Material mat = Material(0, "Test", matdata);
     MaterialManager::GetInstance()->AddMaterial(&mat);
@@ -98,83 +98,18 @@ int main(int argc, char const *argv[]) {
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
-    InputEvent ev;
-    bool front = false, back = false;
-    bool left = false, right = false;
-    bool rotate_left = false, rotate_right = false;
+    int delta = 1;
+
+    printf("==== \n Game launched\n");
+    printf(" [C] - Create an object\n");
+    printf("\n");
+
     do {
         player = true;
+        gctx.elapsed_seconds = delta / 1000.0;
 
-        //hp.Play(&gctx);
-        inputmng->Run();
-
-        while (inputmng->GetEvent(&ev)) {
-            if (ev.eventType == EVENT_FINISH) {
-                player = false;
-            }
-
-            if (ev.eventType == EVENT_KEYEVENT) {
-                switch (ev.event.keyev.scancode) {
-                    case SDLK_w:
-                        if (ev.event.keyev.status == KEY_KEYPRESS)
-                            front = true;
-                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
-                            front = false;
-                    break;
-                    case SDLK_s:
-                        if (ev.event.keyev.status == KEY_KEYPRESS)
-                            back = true;
-                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
-                            back = false;
-                    break;
-                    case SDLK_a:
-                        if (ev.event.keyev.status == KEY_KEYPRESS)
-                            left = true;
-                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
-                            left = false;
-                    break;
-                    case SDLK_d:
-                        if (ev.event.keyev.status == KEY_KEYPRESS)
-                            right = true;
-                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
-                            right = false;
-                    break;
-                    case SDLK_LEFT:
-                        if (ev.event.keyev.status == KEY_KEYPRESS)
-                            rotate_left = true;
-                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
-                            rotate_left = false;
-                    break;
-                    case SDLK_RIGHT:
-                        if (ev.event.keyev.status == KEY_KEYPRESS)
-                            rotate_right = true;
-                        else if (ev.event.keyev.status == KEY_KEYRELEASE)
-                            rotate_right = false;
-                    break;
-                }
-
-            }
-
-
-//            printf("%d %d \n", ev.mousex, ev.mousey);
-
-            inputmng->PopEvent(NULL);
-        }
-
-        if (front)
-            cam.AddMovement(glm::vec3(0, 0, -0.009f));
-        else if (back)
-            cam.AddMovement(glm::vec3(0, 0, 0.009f));
-
-        if (left)
-            cam.AddMovement(glm::vec3(-0.02f, 0, 0));
-        else if (right)
-            cam.AddMovement(glm::vec3(0.02f, 0, 0));
-
-        if (rotate_left)
-            cam.AddRotation(glm::vec3(0, 1, 0), glm::radians(1.0f));
-        else if (rotate_right)
-            cam.AddRotation(glm::vec3(0, 1, 0), glm::radians(-1.0f));
+        if (!hp.Play(&gctx))
+            player = false;
 
         terr_rend->Update();
 
@@ -185,11 +120,12 @@ int main(int argc, char const *argv[]) {
         frame++;
 
         unsigned int elapsed = SDL_GetTicks();
-        int delta = elapsed - ticks;
+        delta = elapsed - ticks;
 
         ticks = SDL_GetTicks();
 
         printf("\033[1m %4d ms \033[0m\r", delta);
+
 
         //Trava em ~60 fps
         if (delta < 16) {

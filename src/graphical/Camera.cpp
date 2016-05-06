@@ -46,7 +46,10 @@ void Camera::CalculateVectors()
 
     glm::vec3 pivot = (_lookAt - _pos);
     glm::vec3 front = glm::normalize(pivot);
+    printf("front: %.2f %.2f, %.2f\n", front.x, front.y, front.z);
     _right = glm::normalize(glm::cross(front, glm::vec3(0,1,0)));
+
+    printf("right: %.2f %.2f, %.2f\n", _right.x, _right.y, _right.z);
     _up = glm::normalize(glm::cross(_right, front));
     printf("up: %.2f %.2f %.2f\n", _up.x, _up.y, _up.z);
 }

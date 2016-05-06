@@ -6,6 +6,8 @@
 ***/
 
 #include "Player.hpp"
+#include "../graphical/Camera.hpp"
+#include "../input/InputManager.hpp"
 
 #ifndef HUMAN_PLAYER
 #define HUMAN_PLAYER
@@ -15,6 +17,10 @@ namespace Logic {
 
     class HumanPlayer : public Player
     {
+    private:
+        Tribalia::Graphics::Camera* _cam;
+        Tribalia::Input::InputManager* _imng;
+
     public:
         HumanPlayer(const char* name, int elo=0, int xp=0);
 
@@ -28,6 +34,8 @@ namespace Logic {
         ***/
         virtual bool Play(GameContext*);
 
+        void SetCamera(Tribalia::Graphics::Camera*);
+        void SetInputManager(Tribalia::Input::InputManager*);
 
         ~HumanPlayer();
     };

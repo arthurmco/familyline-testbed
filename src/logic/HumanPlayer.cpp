@@ -3,6 +3,7 @@
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
+using namespace Tribalia::Input;
 
 
 class ConcreteObject : public AttackableObject
@@ -38,6 +39,8 @@ HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
     }
 
 
+void HumanPlayer::SetCamera(Tribalia::Graphics::Camera* c) { _cam = c;}
+void HumanPlayer::SetInputManager(InputManager* mng) {_imng = mng;}
 /***
     Virtual function called on each iteration.
 
@@ -49,75 +52,123 @@ HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
 
 #include <cstdio>
 
+InputEvent ev;
+bool front = false, back = false;
+bool left = false, right = false;
+bool rotate_left = false, rotate_right = false;
+
 bool HumanPlayer::Play(GameContext* gctx){
+    _imng->Run();
 
-    /* Receive and process human input */
-    printf("\033[1m> \033[0m");
-    char s[64];
-    fgets(s, 64, stdin);
-
-    //remove '\n'
-    s[strlen(s)-1] = 0;
-
-    if (!strcmp(s, "quit")){
-        return false;
-    }
-
-    if (!strcmp(s, "xp")){
-        printf("%d\n", _xp);
-        return true;
-    }
-
-    if (!strcmp(s, "addobject")){
-        printf("Adding object...\n");
-        char oname[128];
-        float ox, oy, oz;
-
-        printf("\tName: ");
-        fgets(oname, 128, stdin);
-
-        //remove '\n'
-        oname[strlen(oname)-1] = 0;
-
-        printf("\tPosition (x y z): ");
-        scanf("%f %f %f", &ox, &oy, &oz);
-
-        ConcreteObject* ao = new ConcreteObject(0, oname, ox, oy, oz);
-
-        int nid = gctx->om->RegisterObject(ao);
-        printf("\t Sucessfully registered %s (%.2f %.2f %.2f) as ID %d\n",
-            ao->GetName(), ao->GetX(), ao->GetY(), ao->GetZ(), nid);
-        fflush(stdin);
-        return true;
-    }
-
-    if (!strcmp(s, "addalot")) {
-        printf("\t How much? :");
-        int count = 0;
-        scanf("%d", &count);
-
-        Log::GetLog()->Write("Adding %d objects", count);
-        srand(count * 2);
-        for (int i = 0; i < count; i++) {
-            char oname[16];
-            sprintf(oname, "Object%d", i);
-
-            float ox = rand()*600.0f;
-            float oy = (rand() * 1000) / 10.0f;
-            float oz = rand() * 1500.0f;
-
-            ConcreteObject* ao = new ConcreteObject(0, oname, ox, oy, oz);
-            gctx->om->RegisterObject(ao);
+    while (_imng->GetEvent(&ev)) {
+        if (ev.eventType == EVENT_FINISH) {
+            return false;
         }
-        Log::GetLog()->Write("%d objects added", count);
+
+        if (ev.eventType == EVENT_KEYEVENT) {
+            switch (ev.event.keyev.scancode) {
+                case SDLK_w:
+                    if (ev.event.keyev.status == KEY_KEYPRESS)
+                        front = true;
+                    else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                        front = false;
+                break;
+                case SDLK_s:
+                    if (ev.event.keyev.status == KEY_KEYPRESS)
+                        back = true;
+                    else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                        back = false;
+                break;
+                case SDLK_a:
+                    if (ev.event.keyev.status == KEY_KEYPRESS)
+                        left = true;
+                    else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                        left = false;
+                break;
+                case SDLK_d:
+                    if (ev.event.keyev.status == KEY_KEYPRESS)
+                        right = true;
+                    else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                        right = false;
+                break;
+                case SDLK_LEFT:
+                    if (ev.event.keyev.status == KEY_KEYPRESS)
+                        rotate_left = true;
+                    else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                        rotate_left = false;
+                break;
+                case SDLK_RIGHT:
+                    if (ev.event.keyev.status == KEY_KEYPRESS)
+                        rotate_right = true;
+                    else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                        rotate_right = false;
+                break;
 
 
+                case SDLK_c:
+                {
+                    if (ev.event.keyev.status != KEY_KEYPRESS)
+                        goto key_flush;
+
+                    printf("Create object:\n");
+                    printf("\tName: ");
+                    char n[128];
+                    int i = 0;
+                    float px, py, pz;
+
+                    fflush(stdin);
+                    do {
+                        n[i] = 0;
+                        n[i] = (char) getc(stdin);
+                        if (n[i] == '\n') {
+                            n[i] = 0;
+                            break;
+                        }
+                        i++;
+                    } while (i < 128);
+                    if (i <= 1) goto key_flush;
+
+                    fflush(stdin);
+
+                    printf("\tPosition of %s: ", n);
+                    if (scanf("%f %f %f", &px, &py, &pz) < 3)
+                        goto key_flush;
+
+                    printf("Creating %s at %.3f %.3f %.3f\n", n, px, py, pz);
+
+                    ConcreteObject* c = new ConcreteObject{0, n, px, py, pz};
+                    int id = gctx->om->RegisterObject(c);
+                    printf("%s has id %d now\n", n, id);
+                    fflush(stdin);
+                }
+                break;
+            }
+
+        }
+
+
+//            printf("%d %d \n", ev.mousex, ev.mousey);
+    key_flush:
+        _imng->PopEvent(NULL);
     }
 
-    if (!strcmp(s, "objcount")){
-        printf("%d\n", gctx->om->GetCount());
-        return true;
-    }
+
+    if (front)
+        _cam->AddMovement(glm::vec3(0, 0, -3.2f * gctx->elapsed_seconds));
+    else if (back)
+        _cam->AddMovement(glm::vec3(0, 0, 3.2f * gctx->elapsed_seconds));
+
+    if (left)
+        _cam->AddMovement(glm::vec3(-3.2f * gctx->elapsed_seconds, 0, 0));
+    else if (right)
+        _cam->AddMovement(glm::vec3(3.2f * gctx->elapsed_seconds, 0, 0));
+
+    if (rotate_left)
+        _cam->AddRotation(glm::vec3(0, 1, 0), glm::radians(1.0f));
+    else if (rotate_right)
+        _cam->AddRotation(glm::vec3(0, 1, 0), glm::radians(-1.0f));
+
+
 
     return true;
 

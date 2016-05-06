@@ -19,7 +19,7 @@ void main() {
   //Cosine of angle between normal and light direction
   float cosTheta = clamp(dot(n, l), 0, 1);
   float dist = 5.0f;
-  float lightPower = 50;
+  float lightPower = 30;
 
   vec3 lightColor = vec3(1.0, 1.0, 1.0);
   vec3 finalColor = ambient_color +

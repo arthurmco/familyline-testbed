@@ -61,11 +61,12 @@ void ObjectRenderer::Update()
         (*it)->GetMesh()->SetPosition(glm::vec3(x,y,z));
         (*it)->GetMesh()->ApplyTransformations();
 
+        /*
         printf("\tobject %s id %d is at %.3f %.3f %.3f\n",
             (*it)->GetName(), (*it)->GetObjectID(),
             (*it)->GetMesh()->GetPosition().x,
             (*it)->GetMesh()->GetPosition().y,
             (*it)->GetMesh()->GetPosition().z);
-
+        */
     }
 }
