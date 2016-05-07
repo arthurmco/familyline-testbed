@@ -44,9 +44,21 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -g")
 add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX} ${SRC_INPUT})
 
 if (MSVC)
+  # Set include directories
+  SET(SDL_INCLUDE "." CACHE PATH "SDL2 include directory")
+  SET(GLEW_INCLUDE "." CACHE PATH "GLEW include directory")
+  SET(GLM_INCLUDE "." CACHE PATH "GLM include directory")
+  include_directories(AFTER ${SDL_INCLUDE} ${GLEW_INCLUDE} ${GLM_INCLUDE})
+
+  #Set library directories
+  SET(SDL_LIB "." CACHE PATH "SDL2 library directory")
+  SET(GLEW_LIB "." CACHE PATH "GLEW library directory")
+  link_directories(${SDL_LIB} ${GLEW_LIB})
+
   target_link_libraries(tribalia "SDL2.lib")
   target_link_libraries(tribalia "opengl32.lib")
   target_link_libraries(tribalia "glew32.lib")
+
 else()
   target_link_libraries(tribalia "SDL2")
   target_link_libraries(tribalia "GL")

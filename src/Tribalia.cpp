@@ -8,6 +8,8 @@
 
 #define GLM_FORCE_RADIANS
 
+#define COMMIT
+
 #include "EnviroDefs.h"
 
 #include <cstdio>
@@ -34,10 +36,15 @@ using namespace Tribalia::Input;
 
 #ifdef _MSC_VER
     #undef main  //somehow vs does not find main()
+
+    /* TODO: fixes these variables on win32 builds */
+    #define VERSION "v0.0.1-win32"
+    #define COMMIT 0
+    #define USERNAME "unknown"
 #endif
 
 int main(int argc, char const *argv[]) {
-    FILE* fLog = fopen("/tmp/log.txt", "w");
+    FILE* fLog = fopen("log.txt", "w");
     Log::GetLog()->SetFile(fLog);
     Log::GetLog()->Write("Tribalia %s", VERSION);
     Log::GetLog()->Write("built on %s by %s ", __DATE__, USERNAME);

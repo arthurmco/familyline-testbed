@@ -28,7 +28,7 @@ bool ShaderProgram::Link()
     glGetProgramiv(this->_id, GL_INFO_LOG_LENGTH, &logsize);
 
     if (logsize > 1) {
-        char logdata[logsize];
+        char* logdata = new char[logsize];
 
         glGetProgramInfoLog(this->_id, logsize, NULL, logdata);
         Log::GetLog()->Warning("Shader program %d retrieved a log: \n%s",
