@@ -93,7 +93,8 @@ void InputManager::Run()
             lastx = e.motion.x;
             lasty = e.motion.y;
             lastz = 0;
-            continue;
+            ev.eventType = EVENT_MOUSEMOVE;
+            break;
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
             ev.eventType = EVENT_MOUSEEVENT;

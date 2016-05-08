@@ -7,9 +7,9 @@ Camera::Camera(glm::vec3 pos, glm::vec3 lookAt)
     this->_pos = pos;
     this->_lookAt = lookAt;
 
-    this->_fov = glm::radians(45.0f);
+    this->_fov = glm::radians(60.0f);
     this->_aspectRatio = 4.0f/3.0f;
-    this->_distance = 50.0f;
+    this->_distance = 100.0f;
 
     _isViewChanged = true;
     _isProjectionChanged = true;
@@ -64,7 +64,6 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
     glm::vec3 l = this->_lookAt;
     glm::vec3 pivot = (_lookAt - _pos);
 
-
     glm::mat4 tRotate = glm::rotate(angle, _up);
     glm::mat4 tPivot = glm::translate(pivot);
     glm::mat4 tPivotMinus = glm::translate(-pivot);
@@ -95,4 +94,22 @@ glm::mat4 Camera::GetProjectionMatrix()
     }
 
     return _projMatrix;
+}
+
+
+/*  Get the cursor position and return a ray to the scene in
+    eye space */
+glm::vec3 Camera::Project(int mouse_x, int mouse_y, int screenw, int screenh) const
+{
+    /* Normalize mouse coordinates */
+    float nx = (2.0f * mouse_x) / screenw - 1.0f;
+    float ny = 1.0f - (2.0f * mouse_y) / screenh;
+    float nz = 1.0f;
+    glm::vec3 ray_norm = glm::vec3 (nx, ny, nz);
+
+    /* Transform into homogeneous coordinates and then into eye coordinates */
+    glm::vec4 ray_clip = glm::vec4(ray_norm.x, ray_norm.y, -1.0f, 1.0f);
+    glm::vec4 ray_eye = glm::inverse(_projMatrix) * ray_clip;
+
+    return glm::vec3(ray_eye.x, ray_eye.y, -1.0f);
 }

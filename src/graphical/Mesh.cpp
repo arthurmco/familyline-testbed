@@ -89,3 +89,37 @@ glm::mat4* Mesh::GetModelMatrixPointer()
 {
     return &this->_modelMatrix;
 }
+
+
+void Mesh::GenerateBoundingBox()
+{
+    float minz = 10E6, maxz = 10E-6;
+    float miny = 10E6, maxy = 10E-6;
+    float minx = 10E6, maxx = 10E-6;
+    for (auto it = _vdata->Positions.begin();
+        it != _vdata->Positions.end(); ++it) {
+        minz = std::min(it->z, minz);
+        miny = std::min(it->y, miny);
+        minx = std::min(it->x, minx);
+
+        maxz = std::max(it->z, maxz);
+        maxy = std::max(it->y, maxy);
+        maxx = std::max(it->x, maxx);
+
+
+    }
+
+    printf("m: %s\n", this->_name.c_str());
+    printf(" minx miny minz: %.2f %.2f %.2f\n", minx, miny, minz);
+    printf(" maxx maxy maxz: %.2f %.2f %.2f\n", maxx, maxy, maxz);
+
+    this->_box.points[BOUNDING_BOX_LOWER_LEFT_FRONT]    = glm::vec3(minx, miny, minz);
+    this->_box.points[BOUNDING_BOX_LOWER_LEFT_BACK]     = glm::vec3(minx, miny, maxz);
+    this->_box.points[BOUNDING_BOX_LOWER_RIGHT_BACK]    = glm::vec3(maxx, miny, minz);
+    this->_box.points[BOUNDING_BOX_LOWER_RIGHT_FRONT]   = glm::vec3(maxx, miny, maxz);
+    this->_box.points[BOUNDING_BOX_UPPER_RIGHT_FRONT]   = glm::vec3(minx, maxy, minz);
+    this->_box.points[BOUNDING_BOX_UPPER_RIGHT_BACK]    = glm::vec3(minx, maxy, maxz);
+    this->_box.points[BOUNDING_BOX_UPPER_LEFT_BACK]     = glm::vec3(maxx, maxy, minz);
+    this->_box.points[BOUNDING_BOX_UPPER_LEFT_FRONT]    = glm::vec3(maxx, maxy, maxz);
+
+}

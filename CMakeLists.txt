@@ -51,13 +51,17 @@ if (MSVC)
   include_directories(AFTER ${SDL_INCLUDE} ${GLEW_INCLUDE} ${GLM_INCLUDE})
 
   #Set library directories
-  SET(SDL_LIB "." CACHE PATH "SDL2 library directory")
-  SET(GLEW_LIB "." CACHE PATH "GLEW library directory")
+  SET(SDL_LIB_FOLDER "." CACHE PATH "SDL2 library directory")
+  SET(GLEW_LIB_FOLDER "." CACHE PATH "GLEW library directory")
+
+  find_library(SDL_LIB "SDL2.lib" ${SDL_LIB_FOLDER})
+  find_library(GLEW_LIB "glew32.lib" ${GLEW_LIB_FOLDER})
+
   link_directories(${SDL_LIB} ${GLEW_LIB})
 
-  target_link_libraries(tribalia "SDL2.lib")
+  target_link_libraries(tribalia ${SDL_LIB})
   target_link_libraries(tribalia "opengl32.lib")
-  target_link_libraries(tribalia "glew32.lib")
+  target_link_libraries(tribalia ${GLEW_LIB})
 
 else()
   target_link_libraries(tribalia "SDL2")

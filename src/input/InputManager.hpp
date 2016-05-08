@@ -19,6 +19,7 @@ namespace Input {
 
     enum EventType {
         EVENT_KEYEVENT,     /* Key event */
+        EVENT_MOUSEMOVE,
         EVENT_MOUSEEVENT,   /* Mouse event */
         EVENT_FINISH,       /* Finish request (i.e window closing) */
     };

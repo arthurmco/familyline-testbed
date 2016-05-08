@@ -6,6 +6,8 @@
 ***/
 #define GLM_FORCE_RADIANS
 
+#include <algorithm> //min(), max()
+
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
@@ -50,6 +52,8 @@ namespace Graphics {
         glm::mat4* GetModelMatrixPointer();
 
         VertexData* GetVertexData();
+
+        void GenerateBoundingBox();
     };
 
 

@@ -140,7 +140,6 @@ std::vector<SceneIDCache> _last_IDs;
 /* Returns true if rendered successfully */
 bool Renderer::Render()
 {
-
     /* Check updates from SceneManager*/
     if (_scenemng->UpdateValidObjects()) {
             lastCheck++;

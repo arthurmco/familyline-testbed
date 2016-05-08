@@ -77,7 +77,7 @@ bool Shader::Compile()
     glGetShaderiv(this->_id, GL_INFO_LOG_LENGTH, &logsize);
 
     if (logsize > 1) {
-        char logdata[logsize];
+        char* logdata = new char[logsize];
 
         glGetShaderInfoLog(this->_id, logsize, NULL, logdata);
         Log::GetLog()->Warning("Shader %s retrieved a log: \n%s",
