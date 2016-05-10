@@ -11,13 +11,13 @@ int MaterialManager::AddMaterial(Material* m)
     m->_ID = id;
 
     Log::GetLog()->Write("Added material %s (id %d)\n"
-        "\t\t diffuse %.2f %.2f %.2f intensity %.3f\n"
-        "\t\t ambient %.2f %.2f %.2f intensity %.3f\n",
+        "\t\t diffuse %.2f %.2f %.2f \n"
+        "\t\t ambient %.2f %.2f %.2f \n",
         m->GetName(), m->GetID(),
         m->GetData()->diffuseColor.r, m->GetData()->diffuseColor.g,
-        m->GetData()->diffuseColor.b, m->GetData()->diffuseIntensity,
+        m->GetData()->diffuseColor.b,
         m->GetData()->ambientColor.r, m->GetData()->ambientColor.g,
-        m->GetData()->ambientColor.b, m->GetData()->ambientIntensity);
+        m->GetData()->ambientColor.b);
 ;
     _materials.push_back(*m);
 }

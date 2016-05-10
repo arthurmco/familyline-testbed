@@ -16,13 +16,9 @@ namespace Graphics {
 
     struct MaterialData {
         glm::vec3 diffuseColor;
-        float diffuseIntensity;
-
         glm::vec3 specularColor;
-        float specularIntensity;
-
         glm::vec3 ambientColor;
-        float ambientIntensity;
+
     };
 
     class Material

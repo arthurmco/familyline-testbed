@@ -25,6 +25,7 @@
 #include "graphical/ShaderProgram.hpp"
 #include "graphical/Camera.hpp"
 #include "graphical/meshopener/OBJOpener.hpp"
+#include "graphical/materialopener/MTLOpener.hpp"
 #include "graphical/Terrain.hpp"
 #include "graphical/TerrainRenderer.hpp"
 #include "graphical/MaterialManager.hpp"
@@ -44,7 +45,7 @@ using namespace Tribalia::Input;
 #endif
 
 int main(int argc, char const *argv[]) {
-    FILE* fLog = fopen("log.txt", "w");
+    FILE* fLog = stderr;// fopen("log.txt", "w");
     Log::GetLog()->SetFile(fLog);
     Log::GetLog()->Write("Tribalia %s", VERSION);
     Log::GetLog()->Write("built on %s by %s ", __DATE__, USERNAME);
@@ -103,9 +104,7 @@ int main(int argc, char const *argv[]) {
 
     MaterialData matdata;
     matdata.diffuseColor = glm::vec3(0.6, 0.1, 0.0);
-    matdata.diffuseIntensity = 0.6;
     matdata.ambientColor = glm::vec3(0.05, 0.0, 0.0);
-    matdata.ambientIntensity = 0.1;
     Material mat = Material(0, "Test", matdata);
     MaterialManager::GetInstance()->AddMaterial(&mat);
 
@@ -113,6 +112,9 @@ int main(int argc, char const *argv[]) {
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
     int delta = 1;
+
+    MTLOpener mtlop;
+    mtlop.Open("test.mtl");
 
     printf("==== \n Game launched\n");
     printf(" [C] - Create an object\n");

@@ -43,6 +43,7 @@ void Log::Write(const char* fmt, ...)
 
     /* Print line terminator */
     fputs("\r\n", _logFile);
+    fflush(this->_logFile);
 }
 
 void Log::Fatal(const char* fmt, ...)
@@ -62,6 +63,7 @@ void Log::Fatal(const char* fmt, ...)
 
     /* Print line terminator */
     fputs("\r\n", _logFile);
+    fflush(this->_logFile);
 }
 
 void Log::Warning(const char* fmt, ...)
@@ -81,4 +83,5 @@ void Log::Warning(const char* fmt, ...)
 
     /* Print line terminator */
     fputs("\r\n", _logFile);
+    fflush(this->_logFile);
 }
