@@ -7,7 +7,7 @@ std::vector<Material*> MTLOpener::Open(const char* file)
     FILE* fMat = fopen(file, "r");
 
     if (!fMat) {
-        //throw material_exception("Failure to open material", errno, file);
+        throw material_exception("Failure to open material", errno, file);
     }
 
     std::vector<Material*> mats;
@@ -41,7 +41,7 @@ std::vector<Material*> MTLOpener::Open(const char* file)
                 MaterialData md;
                 md.diffuseColor = diffuse;
                 md.specularColor = specular;
-                md.ambientColor = ambient;
+                md.ambientColor = diffuse * 0.1f;
                 Material* m = new Material{mats.size(), matname, md};
                 mats.push_back(m);
             }
@@ -90,7 +90,7 @@ std::vector<Material*> MTLOpener::Open(const char* file)
     MaterialData md;
     md.diffuseColor = diffuse;
     md.specularColor = specular;
-    md.ambientColor = ambient;
+    md.ambientColor = diffuse * 0.1f;
     Material* m = new Material{mats.size(), matname, md};
     mats.push_back(m);
 

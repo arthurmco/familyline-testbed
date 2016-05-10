@@ -31,6 +31,7 @@ namespace Graphics {
         glm::mat4* worldMat;
         GLuint vao;
         GLuint vbo_pos, vbo_norm;
+        int material_offsets[9];
     };
 
     class Renderer

@@ -23,6 +23,8 @@ Mesh* OBJOpener::Open(const char* file)
     std::vector<glm::vec2> realTex;
     std::vector<int> indMaterials;
 
+    int materialID = 0;
+
     char mName[255] = "Unnamed";
 
     while (!feof(fOBJ)) {
@@ -108,15 +110,13 @@ Mesh* OBJOpener::Open(const char* file)
             //Normal + position
                 &vertIndex[0], &normIndex[0],
                 &vertIndex[1], &normIndex[1],
-
                 &vertIndex[2], &normIndex[2]) > 2) {
-                indVerts.push_back(vertIndex[0]);
-                indVerts.push_back(vertIndex[1]);
-                indVerts.push_back(vertIndex[2]);
 
-                indNormals.push_back(normIndex[0]);
-                indNormals.push_back(normIndex[1]);
-                indNormals.push_back(normIndex[2]);
+                for (int i = 0; i < 3; i++) {
+                    indVerts.push_back(vertIndex[i]);
+                    indNormals.push_back(normIndex[i]);
+                    indMaterials.push_back(materialID);
+                }
 
             } else if (sscanf(fline, "%d %d %d",
                 &vertIndex[0], &vertIndex[1], &vertIndex[2]) > 0) {
@@ -126,9 +126,20 @@ Mesh* OBJOpener::Open(const char* file)
                 indVerts.push_back(vertIndex[2]);
 
             }
-
+            continue;
 
         } // End of face
+        case 'u':
+        {
+            // Use material
+            char matname[256];
+            if (sscanf(fline, "usemtl %s", matname) > 0) {
+                printf("<< %s >>\n", matname);
+                materialID = MaterialManager::GetInstance()->GetMaterial(matname)->GetID();
+                continue;
+            }
+
+        } // End of material
 
         }
 
@@ -143,7 +154,6 @@ Mesh* OBJOpener::Open(const char* file)
             index = indVerts.size() - index;
         }
         realVerts.push_back(verts[index]);
-        indMaterials.push_back(1);
     }
 
     realNormals.reserve(normals.size() * 3);

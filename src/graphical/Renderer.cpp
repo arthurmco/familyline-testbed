@@ -87,6 +87,9 @@ void Renderer::InitializeLibraries()
         throw renderer_exception(err, glewStatus);
     }
 
+    //Enable depth test
+    glEnable(GL_DEPTH_TEST);
+
 }
 
 void Renderer::InitializeShaders()
@@ -120,12 +123,14 @@ void Renderer::InitializeShaders()
 void Renderer::SetMaterial(int ID)
 {
     Material* m = MaterialManager::GetInstance()->GetMaterial(ID);
-    if (!m) return;
+    if (!m) {
+        printf("Cannot found mat id %d\n", ID);
+        return;
+    }
 
     sForward->SetUniform("diffuse_color", m->GetData()->diffuseColor);
-    //sForward->SetUniform("diffuse_intensity", m->GetData()->diffuseIntensity);
     sForward->SetUniform("ambient_color", m->GetData()->ambientColor);
-    //sForward->SetUniform("ambient_intensity", m->GetData()->ambientIntensity);
+
 }
 
 struct SceneIDCache {
@@ -161,7 +166,7 @@ bool Renderer::Render()
             /* Draw the added object */
             Mesh* mes = (Mesh*)(*itScene);
             if ((*itScene)->GetType() != SCENE_MESH) {
-                Log::GetLog()->Fatal("Not a mesh, but mesh is the only "
+                Log::GetLog()->Warning("Not a mesh, but mesh is the only "
                 "type of scene object we have now! Skipping...");
                 continue;
             }
@@ -175,6 +180,7 @@ bool Renderer::Render()
             sidc.ID = (*itScene)->GetID();
             sidc.lastcheck = lastCheck;
             sidc.vao = vaon;
+
             _last_IDs.push_back(sidc);
         }
 
@@ -192,7 +198,6 @@ bool Renderer::Render()
         }
     }
 
-    glEnable(GL_DEPTH_TEST);
 
     glm::mat4 mModel, mView, mProj;
     mView = this->_scenemng->GetCamera()->GetViewMatrix();
@@ -239,8 +244,29 @@ bool Renderer::Render()
            0,                  // stride
            (void*)0            // array buffer offset
         );
-            // Draw the triangle !
-        glDrawArrays(GL_TRIANGLES, 0, it->vd->Positions.size());
+
+        /* Draw the triangles */
+        for (int matidx = 0; matidx < 9; matidx++) {
+            int start = it->material_offsets[matidx];
+            int end = it->material_offsets[matidx+1];
+
+            if (!it->vd->MaterialIDs.empty())
+                material = it->vd->MaterialIDs[start];
+            SetMaterial(material);
+        
+            if (end < 0) {
+                end = it->vd->Positions.size();
+                matidx = 0xff; //force exit
+            }
+
+            glGetError();
+            glDrawArrays(GL_TRIANGLES, start, end-start);
+
+            GLenum err = glGetError();
+            if (err != GL_NO_ERROR) {
+                Log::GetLog()->Fatal("OpenGL error %#x", err);
+            }
+        }
         glDisableVertexAttribArray(0);
     }
 
@@ -293,6 +319,23 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
 
     Log::GetLog()->Write("Added vertices with VAO %d (VBO %d)", vri.vao,
         vri.vbo_pos);
+
+    /* Store material vertex starts */
+    int matidx = 0;
+    int actualidx = -1;
+    int i = 0;
+    for (auto matit = v->MaterialIDs.begin();
+            matit != v->MaterialIDs.end();
+            matit++) {
+        if (*matit != actualidx) {
+            actualidx = *matit;
+            vri.material_offsets[matidx++] = i;
+        }
+        i++;
+    }
+
+    vri.material_offsets[matidx] = -1;
+
     _vertices.push_back(vri);
     return vri.vao;
 }
@@ -305,6 +348,7 @@ void Renderer::RemoveVertexData(GLuint vaoid)
             glDeleteVertexArrays(1, &vaoid);
             glDeleteBuffers(1, &it->vbo_pos);
             glDeleteBuffers(1, &it->vbo_norm);
+            _vertices.erase(it);
         }
     }
 }

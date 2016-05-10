@@ -10,6 +10,7 @@
 #include <cctype>
 
 #include "MeshOpener.hpp"
+#include "../MaterialManager.hpp"
 
 #ifndef OBJOPENER_HPP
 #define OBJOPENER_HPP

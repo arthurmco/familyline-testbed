@@ -24,3 +24,11 @@ mesh_exception::mesh_exception(std::string msg, int code,
             this->code = code;
             this->file = std::string{file};
         }
+
+material_exception::material_exception(std::string msg, int code,
+        const char* file)
+        : std::runtime_error(msg)
+        {
+            this->code = code;
+            this->file = std::string{file};
+        }

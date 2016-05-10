@@ -27,6 +27,9 @@ namespace Graphics {
         /* Add material, return its ID */
         int AddMaterial(Material*);
 
+        /* Add materials*/
+        void AddMaterials(std::vector<Material*>);
+
         Material* GetMaterial(int ID);
         Material* GetMaterial(const char* name);
 

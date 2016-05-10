@@ -82,17 +82,28 @@ int main(int argc, char const *argv[]) {
 
     bool player = false;
 
-    Camera cam = Camera{glm::vec3(4.0f, 32.0f, 4.0f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(4.0f, 16.0f, 4.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
     hp.SetCamera(&cam);
 
     rndr->SetSceneManager(scenemng);
 
+    MTLOpener mtlop;
+    MaterialManager::GetInstance()->AddMaterials(mtlop.Open("casinha.mtl"));
+    MaterialManager::GetInstance()->AddMaterials(mtlop.Open("test2.mtl"));
+
     OBJOpener opener;
     Mesh* m = opener.Open("test2.obj");
     m->SetPosition(glm::vec3(4,1,4));
     m->GenerateBoundingBox();
+
+    Mesh* m2 = opener.Open("casinha.obj");
+    m2->SetPosition(glm::vec3(10, 1, 6));
+    m2->SetRotation(0, glm::radians(-90.0f), 0);
+    m2->GenerateBoundingBox();
+
     scenemng->AddObject(m);
+    scenemng->AddObject(m2);
 
     Terrain* terr = new Terrain{1000, 1000};
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
@@ -113,8 +124,6 @@ int main(int argc, char const *argv[]) {
     unsigned int frame = 0;
     int delta = 1;
 
-    MTLOpener mtlop;
-    mtlop.Open("test.mtl");
 
     printf("==== \n Game launched\n");
     printf(" [C] - Create an object\n");

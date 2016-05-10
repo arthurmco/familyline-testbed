@@ -22,6 +22,14 @@ int MaterialManager::AddMaterial(Material* m)
     _materials.push_back(*m);
 }
 
+/* Add materials*/
+void MaterialManager::AddMaterials(std::vector<Material*> materials)
+{
+    for (int i = 0; i < materials.size(); i++) {
+        this->AddMaterial(materials[i]);
+    }
+}
+
 Material* MaterialManager::GetMaterial(int ID)
 {
     for (auto it = _materials.begin(); it != _materials.end(); ++it) {
