@@ -80,7 +80,6 @@ LocatableObject* ObjectRenderer::CheckRayCollide(glm::vec3 eye_ray,
     glm::vec3 camLook = this->_sm->GetCamera()->GetLookAt();
     glm::vec3 camPos = this->_sm->GetCamera()->GetPosition();
 
-
     /* Check distance */
     float distance = glm::distance(camPos, camLook);
     glm::vec3 bbnormal = glm::vec3(0,1,0);
@@ -91,7 +90,7 @@ LocatableObject* ObjectRenderer::CheckRayCollide(glm::vec3 eye_ray,
         return nullptr; //non-collidable, perpendicular, infinity distance.
     }
 
-    float raydist = -((camPos * bbnormal + distance) / eye_prolong).y;
+    float raydist = ((camPos * bbnormal + distance) / eye_prolong).y;
 
     if (raydist == 0 || raydist == INFINITY)
         return nullptr; //intersection before 0

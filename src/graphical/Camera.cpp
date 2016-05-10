@@ -108,7 +108,7 @@ glm::vec3 Camera::Project(int mouse_x, int mouse_y, int screenw, int screenh) co
     glm::vec3 ray_norm = glm::vec3 (nx, ny, nz);
 
     /* Transform into homogeneous coordinates and then into eye coordinates */
-    glm::vec4 ray_clip = glm::vec4(ray_norm.x, ray_norm.y, -1.0f, 1.0f);
+    glm::vec4 ray_clip = glm::vec4(ray_norm.x, ray_norm.y, 1.0f, 0.0f);
     glm::vec4 ray_eye = glm::inverse(_projMatrix) * ray_clip;
     ray_eye.z = -1.0;   ray_eye.w = 0.0;
     glm::vec4 world_eye = glm::inverse(_viewMatrix) * ray_eye;
