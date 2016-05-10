@@ -104,3 +104,41 @@ LocatableObject* ObjectRenderer::CheckRayCollide(glm::vec3 eye_ray,
 
     return nullptr;
 }
+
+
+/* Check the terrain position that the cursor is projected at, in
+    OpenGL coordinates */
+glm::vec3 ObjectRenderer::CheckTerrainPositions(glm::vec2 positions, int winwidth, int winheight)
+{
+    positions.y = (winheight - positions.y);
+
+    GLfloat depth = 0;
+
+    glm::vec3 pos_near = glm::vec3(positions.x, positions.y, 0.0f);
+    glm::vec3 pos_far = glm::vec3(positions.x, positions.y, 1.0f);
+
+    glm::vec3 unproj_near = glm::unProject(pos_near,
+        this->_sm->GetCamera()->GetViewMatrix(),
+        this->_sm->GetCamera()->GetProjectionMatrix(),
+        glm::vec4(0,0,winwidth,winheight));
+
+    glm::vec3 unproj_far = glm::unProject(pos_far,
+        this->_sm->GetCamera()->GetViewMatrix(),
+        this->_sm->GetCamera()->GetProjectionMatrix(),
+        glm::vec4(0,0,winwidth,winheight));
+
+    // printf("> %.2f %.2f %.2f -> %.2f %.2f %.2f ",
+    //     unproj_near.x, unproj_near.y, unproj_near.z,
+    //     unproj_far.x, unproj_far.y, unproj_far.z);
+
+    glm::vec3 unproj_direction = glm::normalize(unproj_far - unproj_near);
+
+    printf("%.2f %.2f %.2f ", unproj_direction.x, unproj_direction.y, unproj_direction.z);
+
+    glm::vec3 cameraLook = this->_sm->GetCamera()->GetLookAt();
+    float terrain_dist = glm::distance(unproj_near, cameraLook);
+
+    glm::vec3 terrain_pos = unproj_near + (terrain_dist * unproj_direction);
+
+    return terrain_pos;
+}

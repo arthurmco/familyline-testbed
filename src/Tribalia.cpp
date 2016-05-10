@@ -81,7 +81,7 @@ int main(int argc, char const *argv[]) {
 
     bool player = false;
 
-    Camera cam = Camera{glm::vec3(4.0f, 32.0f, 4.0f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(4.0f, 16.0f, 4.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
     hp.SetCamera(&cam);
 
@@ -89,7 +89,7 @@ int main(int argc, char const *argv[]) {
 
     OBJOpener opener;
     Mesh* m = opener.Open("test2.obj");
-    m->SetPosition(glm::vec3(4,1,4));
+    m->SetPosition(glm::vec3(8,1,4));
     m->GenerateBoundingBox();
     scenemng->AddObject(m);
 
