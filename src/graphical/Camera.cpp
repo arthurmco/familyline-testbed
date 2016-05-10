@@ -50,7 +50,7 @@ void Camera::CalculateVectors()
     _right = glm::normalize(glm::cross(front, glm::vec3(0,1,0)));
 
     printf("right: %.2f %.2f, %.2f\n", _right.x, _right.y, _right.z);
-    _up = glm::normalize(glm::cross(_right, front));
+    _up = glm::cross(_right, front);
     printf("up: %.2f %.2f %.2f\n", _up.x, _up.y, _up.z);
 }
 
@@ -98,7 +98,7 @@ glm::mat4 Camera::GetProjectionMatrix()
 
 
 /*  Get the cursor position and return a ray to the scene in
-    eye space */
+    world space */
 glm::vec3 Camera::Project(int mouse_x, int mouse_y, int screenw, int screenh) const
 {
     /* Normalize mouse coordinates */
@@ -110,6 +110,8 @@ glm::vec3 Camera::Project(int mouse_x, int mouse_y, int screenw, int screenh) co
     /* Transform into homogeneous coordinates and then into eye coordinates */
     glm::vec4 ray_clip = glm::vec4(ray_norm.x, ray_norm.y, -1.0f, 1.0f);
     glm::vec4 ray_eye = glm::inverse(_projMatrix) * ray_clip;
+    ray_eye.z = -1.0;   ray_eye.w = 0.0;
+    glm::vec4 world_eye = glm::inverse(_viewMatrix) * ray_eye;
 
-    return glm::vec3(ray_eye.x, ray_eye.y, -1.0f);
+    return glm::normalize(glm::vec3(world_eye.x, world_eye.y, world_eye.z));
 }

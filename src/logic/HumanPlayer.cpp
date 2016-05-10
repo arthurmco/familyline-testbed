@@ -41,6 +41,7 @@ HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
 
 void HumanPlayer::SetCamera(Tribalia::Graphics::Camera* c) { _cam = c;}
 void HumanPlayer::SetInputManager(InputManager* mng) {_imng = mng;}
+
 /***
     Virtual function called on each iteration.
 
@@ -146,8 +147,7 @@ bool HumanPlayer::Play(GameContext* gctx){
 
         } else if (ev.eventType == EVENT_MOUSEMOVE) {
             glm::vec3 ray = _cam->Project(ev.mousex, ev.mousey, 640, 480);
-            printf("\n\rRay: %.2f %.2f %.2f %.2f\n",
-                ray.x, ray.y, ray.z);
+            objr->CheckRayCollide(ray, nullptr);
 
         }
 

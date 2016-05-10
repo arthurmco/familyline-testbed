@@ -7,6 +7,7 @@
 
 #include "Player.hpp"
 #include "../graphical/Camera.hpp"
+#include "ObjectRenderer.hpp"
 #include "../input/InputManager.hpp"
 
 #ifndef HUMAN_PLAYER
@@ -22,6 +23,8 @@ namespace Logic {
         Tribalia::Input::InputManager* _imng;
 
     public:
+        ObjectRenderer* objr;
+
         HumanPlayer(const char* name, int elo=0, int xp=0);
 
         /***

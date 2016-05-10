@@ -99,6 +99,7 @@ int main(int argc, char const *argv[]) {
     terr_rend->SetCamera(&cam);
 
     ObjectRenderer* objrend = new ObjectRenderer(om, scenemng);
+    hp.objr = objrend;
 
     MaterialData matdata;
     matdata.diffuseColor = glm::vec3(0.6, 0.1, 0.0);

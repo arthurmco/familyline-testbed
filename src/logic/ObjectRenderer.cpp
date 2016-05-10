@@ -70,3 +70,38 @@ void ObjectRenderer::Update()
         */
     }
 }
+
+/* Check if the world-space ray collides with any rendered object.
+    Returns the object, or nullptr if any.
+    Also return the collided world-space coords on world_pos vec3. */
+LocatableObject* ObjectRenderer::CheckRayCollide(glm::vec3 eye_ray,
+        glm::vec3* world_pos)
+{
+    glm::vec3 camLook = this->_sm->GetCamera()->GetLookAt();
+    glm::vec3 camPos = this->_sm->GetCamera()->GetPosition();
+
+
+    /* Check distance */
+    float distance = glm::distance(camPos, camLook);
+    glm::vec3 bbnormal = glm::vec3(0,1,0);
+
+    glm::vec3 eye_prolong = (eye_ray * bbnormal);
+
+    if (glm::length(eye_prolong) == 0.0f) {
+        return nullptr; //non-collidable, perpendicular, infinity distance.
+    }
+
+    float raydist = -((camPos * bbnormal + distance) / eye_prolong).y;
+
+    if (raydist == 0 || raydist == INFINITY)
+        return nullptr; //intersection before 0
+
+    glm::vec3 reachpoint = camPos + (eye_ray * raydist);
+
+    printf("dist: %.2f %.2f %.2f \n", reachpoint.x, reachpoint.y, reachpoint.z);
+
+    if (world_pos)
+        *world_pos = reachpoint;
+
+    return nullptr;
+}

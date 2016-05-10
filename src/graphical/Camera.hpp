@@ -67,7 +67,7 @@ namespace Graphics {
         glm::mat4 GetProjectionMatrix();
 
         /*  Get the cursor position and return a ray to the scene in
-            eye space */
+            world space */
         glm::vec3 Project(int mouse_x, int mouse_y, int screenw, int screenh) const;
 
     };
