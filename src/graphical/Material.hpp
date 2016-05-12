@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 #include <string>
 
+#include "Texture.hpp"
+
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
 
@@ -18,6 +20,7 @@ namespace Graphics {
         glm::vec3 diffuseColor;
         glm::vec3 specularColor;
         glm::vec3 ambientColor;
+        Texture* texture = nullptr;
 
     };
 

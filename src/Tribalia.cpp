@@ -91,6 +91,7 @@ int main(int argc, char const *argv[]) {
     MTLOpener mtlop;
     MaterialManager::GetInstance()->AddMaterials(mtlop.Open("casinha.mtl"));
     MaterialManager::GetInstance()->AddMaterials(mtlop.Open("test2.mtl"));
+    MaterialManager::GetInstance()->AddMaterials(mtlop.Open("test.mtl"));
 
     OBJOpener opener;
     Mesh* m = opener.Open("test2.obj");
@@ -113,11 +114,6 @@ int main(int argc, char const *argv[]) {
     ObjectRenderer* objrend = new ObjectRenderer(om, scenemng);
     hp.objr = objrend;
 
-    MaterialData matdata;
-    matdata.diffuseColor = glm::vec3(0.6, 0.1, 0.0);
-    matdata.ambientColor = glm::vec3(0.05, 0.0, 0.0);
-    Material mat = Material(0, "Test", matdata);
-    MaterialManager::GetInstance()->AddMaterial(&mat);
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
