@@ -2,11 +2,13 @@
 
 attribute vec3 position;
 attribute vec3 normal;
+attribute vec2 texcoord;
 
 uniform mat4 mvp;
 uniform mat4 mModel, mView;
 
 varying vec3 norm_out;
+varying vec2 tex_coords;
 
 varying vec3 norm_Camera;
 varying vec3 light_Camera;
@@ -26,4 +28,6 @@ void main() {
 
   norm_Camera = normal_Camera;
   light_Camera = lightDir_Camera;
+
+  tex_coords = texcoord;
 }

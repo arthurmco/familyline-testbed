@@ -31,6 +31,7 @@ namespace Graphics {
         int _ID;
         std::string _name;
         MaterialData _data;
+		Texture* _tex;
 
     public:
         Material(int ID, const char* name, MaterialData data);
@@ -38,6 +39,8 @@ namespace Graphics {
         int GetID() const;
         const char* GetName() const;
         MaterialData* GetData();
+		Texture* GetTexture(); 
+		void SetTexture(Texture*);  
     };
 
 }

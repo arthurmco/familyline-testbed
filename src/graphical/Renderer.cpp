@@ -33,13 +33,14 @@ Renderer::Renderer()
 
     InitializeShaders();
     sForward->Use();
-    srand(time(NULL));
-    float cx, cy, cz;
-    cx = (rand() % 255) / 255.0f;
-    cy = (rand() % 255) / 255.0f;
-    cz = (rand() % 255) / 255.0f;
-    sForward->SetUniform("color", glm::vec3(cx, cy, cz));
 
+	/* 	Create a fake texture, so we can render something
+		if textures aren't available */
+
+	unsigned int* fake_color = new unsigned int;
+	*fake_color = 0xff00ff00;
+	fake_tex = new Texture(1, 1, GL_RGB, fake_color);
+	
 }
 
 void Renderer::InitializeLibraries()
@@ -128,6 +129,17 @@ void Renderer::SetMaterial(int ID)
         return;
     }
 
+	/* Bind a texture */
+	Texture* t = m->GetTexture();
+	if (t) {
+		glBindTexture(GL_TEXTURE_2D, t->GetHandle());	
+		sForward->SetUniform("tex_amount", 1.0f);
+	} else {
+		glBindTexture(GL_TEXTURE_2D, fake_tex->GetHandle());
+		sForward->SetUniform("tex_amount", 0.0f);
+	}
+
+	/* Set materials */
     sForward->SetUniform("diffuse_color", m->GetData()->diffuseColor);
     sForward->SetUniform("ambient_color", m->GetData()->ambientColor);
 
@@ -218,7 +230,7 @@ bool Renderer::Render()
 
         if (!it->vd->MaterialIDs.empty())
             material = it->vd->MaterialIDs[0];
-        SetMaterial(material);
+        
 
         glBindVertexArray(it->vao);
 
@@ -245,6 +257,13 @@ bool Renderer::Render()
            (void*)0            // array buffer offset
         );
 
+		glEnableVertexAttribArray(2);
+		glBindBuffer(GL_ARRAY_BUFFER, it->vbo_tex);
+		glVertexAttribPointer(
+			2,					// attribute 2 (texcoords)
+			2,					// size
+			GL_FLOAT, GL_FALSE, 0, (void*)0);
+	
         /* Draw the triangles */
         for (int matidx = 0; matidx < 9; matidx++) {
             int start = it->material_offsets[matidx];
@@ -253,7 +272,7 @@ bool Renderer::Render()
             if (!it->vd->MaterialIDs.empty())
                 material = it->vd->MaterialIDs[start];
             SetMaterial(material);
-        
+
             if (end < 0) {
                 end = it->vd->Positions.size();
                 matidx = 0xff; //force exit
@@ -267,6 +286,7 @@ bool Renderer::Render()
                 Log::GetLog()->Fatal("OpenGL error %#x", err);
             }
         }
+		glBindTexture(GL_TEXTURE_2D, 0);
         glDisableVertexAttribArray(0);
     }
 
@@ -312,10 +332,12 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
     glBufferData(GL_ARRAY_BUFFER, v->Normals.size() * sizeof(glm::vec3),
         v->Normals.data(), GL_STATIC_DRAW);
 
+	glGenBuffers(1, &vri.vbo_tex);
+	glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_tex);
+	glBufferData(GL_ARRAY_BUFFER, v->TexCoords.size() * sizeof(glm::vec2),
+		v->TexCoords.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
-
-
 
     Log::GetLog()->Write("Added vertices with VAO %d (VBO %d)", vri.vao,
         vri.vbo_pos);

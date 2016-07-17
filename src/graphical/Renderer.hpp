@@ -30,7 +30,7 @@ namespace Graphics {
         VertexData* vd;
         glm::mat4* worldMat;
         GLuint vao;
-        GLuint vbo_pos, vbo_norm;
+        GLuint vbo_pos, vbo_norm, vbo_tex;
         int material_offsets[9];
     };
 
@@ -46,6 +46,7 @@ namespace Graphics {
         std::vector<VertexRenderInfo> _vertices;
 
         ShaderProgram* sForward;
+		Texture* fake_tex;
 
         void InitializeLibraries();
         void InitializeShaders();
