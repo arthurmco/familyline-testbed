@@ -28,6 +28,7 @@
 #include "graphical/materialopener/MTLOpener.hpp"
 #include "graphical/Terrain.hpp"
 #include "graphical/TerrainRenderer.hpp"
+#include "graphical/TextureOpener.hpp"
 #include "graphical/MaterialManager.hpp"
 
 using namespace Tribalia;
@@ -97,6 +98,11 @@ int main(int argc, char const *argv[]) {
     Mesh* m = opener.Open("test2.obj");
     m->SetPosition(glm::vec3(4,1,4));
     m->GenerateBoundingBox();
+
+	Texture* tex = TextureOpener::Open("test.bmp");
+	if (tex) {
+		
+	}
 
     Mesh* m2 = opener.Open("casinha.obj");
     m2->SetPosition(glm::vec3(10, 1, 6));
