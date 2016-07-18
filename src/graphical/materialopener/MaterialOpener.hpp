@@ -10,6 +10,7 @@
 #include "../Material.hpp"
 #include "../GFXExceptions.hpp"
 #include "../../Log.hpp"
+#include "../TextureOpener.hpp"
 
 #ifndef MATERIALOPENER_HPP
 #define MATERIALOPENER_HPP

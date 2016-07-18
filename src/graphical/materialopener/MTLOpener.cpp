@@ -84,6 +84,30 @@ std::vector<Material*> MTLOpener::Open(const char* file)
             continue;
         }
 
+        if (!strncmp(fline, "map_Kd", 6)) {
+            /* Texture */
+            fline += 6;
+            char texpath[256];
+            sscanf(fline, "%s\n", texpath);
+
+            std::string texname{texpath};
+            texname[texname.find_last_of('.')] = 0;
+
+            Log::GetLog()->Write("\t texture: %s (%s)",
+                texname.c_str(), texpath);
+
+            Texture* t = TextureOpener::Open(texpath);
+
+            if (t) {
+                TextureManager::GetInstance()->AddTexture(texname.c_str(), t);
+            } else {
+                Log::GetLog()->Warning("Texture %s failed to load", texpath);
+            }
+
+
+            continue;
+        }
+
     }
 
     /* Add the last material */

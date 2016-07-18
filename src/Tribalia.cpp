@@ -29,6 +29,7 @@
 #include "graphical/Terrain.hpp"
 #include "graphical/TerrainRenderer.hpp"
 #include "graphical/TextureOpener.hpp"
+#include "graphical/TextureManager.hpp"
 #include "graphical/MaterialManager.hpp"
 
 using namespace Tribalia;
@@ -94,7 +95,7 @@ int main(int argc, char const *argv[]) {
     MaterialManager::GetInstance()->AddMaterials(mtlop.Open("test2.mtl"));
     MaterialManager::GetInstance()->AddMaterials(mtlop.Open("test.mtl"));
 	MaterialManager::GetInstance()->AddMaterials(mtlop.Open("testtex.mtl"));
-	
+
     OBJOpener opener;
     Mesh* m = opener.Open("test2.obj");
     m->SetPosition(glm::vec3(4,1,4));
@@ -102,7 +103,9 @@ int main(int argc, char const *argv[]) {
 
 	Texture* tex = TextureOpener::Open("test.bmp");
 	if (tex) {
-		MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);		 }
+		MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);
+        TextureManager::GetInstance()->AddTexture("test", tex);
+    }
 
     Mesh* m2 = opener.Open("casinha.obj");
     m2->SetPosition(glm::vec3(10, 1, 6));

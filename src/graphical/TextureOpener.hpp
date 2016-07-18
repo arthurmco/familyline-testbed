@@ -13,10 +13,14 @@
 #include "Texture.hpp"
 #include "../Log.hpp"
 
+#ifndef TEXTUREOPENER_HPP
+#define TEXTUREOPENER_HPP
+
+
 namespace Tribalia {
 namespace Graphics {
 
-class TextureOpener 
+class TextureOpener
 {
 public:
 	/* 	Opens a image as a texture. Returns a texture
@@ -28,3 +32,5 @@ public:
 
 } /* Graphics */
 } /* Tribalia */
+
+#endif /* end of include guard: TEXTUREOPENER_HPP */
