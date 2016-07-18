@@ -26,7 +26,7 @@ void main() {
   vec3 vcolor = diffuse_color;
 
   vec3 texel = vec3(1,0,0);
-//  texel = texture2D(tex_sam, tex_coords).rgb;
+  texel = texture2D(tex_sam, tex_coords).rgb;
   vcolor = mix(diffuse_color, texel, tex_amount); 
 
   vec3 lightColor = vec3(1.0, 1.0, 1.0);

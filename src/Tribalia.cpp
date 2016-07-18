@@ -93,7 +93,8 @@ int main(int argc, char const *argv[]) {
     MaterialManager::GetInstance()->AddMaterials(mtlop.Open("casinha.mtl"));
     MaterialManager::GetInstance()->AddMaterials(mtlop.Open("test2.mtl"));
     MaterialManager::GetInstance()->AddMaterials(mtlop.Open("test.mtl"));
-
+	MaterialManager::GetInstance()->AddMaterials(mtlop.Open("testtex.mtl"));
+	
     OBJOpener opener;
     Mesh* m = opener.Open("test2.obj");
     m->SetPosition(glm::vec3(4,1,4));
@@ -101,16 +102,20 @@ int main(int argc, char const *argv[]) {
 
 	Texture* tex = TextureOpener::Open("test.bmp");
 	if (tex) {
-		
-	}
+		MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);		 }
 
     Mesh* m2 = opener.Open("casinha.obj");
     m2->SetPosition(glm::vec3(10, 1, 6));
     m2->SetRotation(0, glm::radians(-90.0f), 0);
     m2->GenerateBoundingBox();
 
+	Mesh* m3 = opener.Open("testtex.obj");
+	m3->SetPosition(glm::vec3(20, 1, 10));
+	m3->GenerateBoundingBox();
+
     scenemng->AddObject(m);
     scenemng->AddObject(m2);
+	scenemng->AddObject(m3);
 
     Terrain* terr = new Terrain{1000, 1000};
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};

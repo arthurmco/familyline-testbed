@@ -106,7 +106,19 @@ Mesh* OBJOpener::Open(const char* file)
             int vertIndex[3], normIndex[3], texIndex[3];
 
             // Face data
-            if (sscanf(fline, "%d//%d %d//%d %d//%d",
+			if (sscanf(fline, "%d/%d/%d %d/%d/%d %d/%d/%d",
+				&vertIndex[0], &texIndex[0], &normIndex[0],
+				&vertIndex[1], &texIndex[1], &normIndex[1],
+				&vertIndex[2], &texIndex[2], &normIndex[2]) > 7) {
+				
+				for (int i = 0; i < 3; i++) {
+                    indVerts.push_back(vertIndex[i]);
+                    indNormals.push_back(normIndex[i]);
+					indTex.push_back(texIndex[i]);
+                    indMaterials.push_back(materialID);
+                }
+
+			} else if (sscanf(fline, "%d//%d %d//%d %d//%d",
             //Normal + position
                 &vertIndex[0], &normIndex[0],
                 &vertIndex[1], &normIndex[1],
@@ -167,6 +179,27 @@ Mesh* OBJOpener::Open(const char* file)
         realNormals.push_back(normals[index]);
     }
 
+	realTex.reserve(texcoords.size() * 2);
+	if (indTex.size() > 0) {
+		for (int i = 0; i < indTex.size(); i++) {
+        	int index = indTex[i]-1;
+
+        	//Treat negative indices
+        	if (index < 0) {
+        	    index = indTex.size() - index;
+        	}
+        	
+			realTex.push_back(texcoords[index]);
+    	}
+
+	} else {
+		/* 	If no textures, fill a (1.0, 1.0) texture coordinate, so
+			our shader doesn't break */
+		for (int i = 0; i < indVerts.size(); i++) {
+			realTex.push_back(glm::vec2(1.0, 1.0));
+		}
+	}
+
     Log::GetLog()->Write("Opened mesh \"%s\": (OBJ format) %d (%d) vertices, "
         "%d (%d) normals, %d texcoords, file is '%s'",
         mName, verts.size(), realVerts.size(),
@@ -175,6 +208,7 @@ Mesh* OBJOpener::Open(const char* file)
     VertexData* vd = new VertexData;
     vd->Positions = realVerts;
     vd->Normals = realNormals;
+	vd->TexCoords = realTex;
     vd->MaterialIDs = indMaterials;
 
     Mesh* m = new Mesh(vd);

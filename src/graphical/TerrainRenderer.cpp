@@ -57,6 +57,7 @@ void TerrainRenderer::Update()
                 VertexData* vd = new VertexData();
                 vd->Positions.reserve(SECTION_SIDE*SECTION_SIDE);
                 vd->Normals.reserve(SECTION_SIDE*SECTION_SIDE);
+				vd->TexCoords.reserve(SECTION_SIDE*SECTION_SIDE);
                 vd->MaterialIDs.reserve(SECTION_SIDE*SECTION_SIDE);
 
                 /* Compute maximum points */
@@ -96,6 +97,13 @@ void TerrainRenderer::Update()
                         vd->Normals.push_back(glm::vec3(0,1,0));
                         vd->Normals.push_back(glm::vec3(0,1,0));
                         vd->Normals.push_back(glm::vec3(0,1,0));
+
+						vd->TexCoords.push_back(glm::vec2(1,1));
+						vd->TexCoords.push_back(glm::vec2(1,1));
+						vd->TexCoords.push_back(glm::vec2(1,1));
+						vd->TexCoords.push_back(glm::vec2(1,1));
+						vd->TexCoords.push_back(glm::vec2(1,1));
+						vd->TexCoords.push_back(glm::vec2(1,1));
 
                         vd->MaterialIDs.push_back(matid);
                         vd->MaterialIDs.push_back(matid);
