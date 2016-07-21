@@ -6,7 +6,13 @@
 
 #include "MaterialManager.hpp"
 #include "TextureManager.hpp"
+#include "TextureOpener.hpp"
 #include "Mesh.hpp"
+
+#include "meshopener/OBJOpener.hpp"
+
+#include "materialopener/MTLOpener.hpp"
+
 
 #ifndef ASSETMANAGER_H
 #define ASSETMANAGER_H
@@ -31,7 +37,7 @@ struct Asset {
     int asset_type;
     union {
         Texture* texture;
-        Material* material;
+        std::vector<Material*>* material;
         Mesh* mesh;
     } asset;
 };
@@ -43,9 +49,18 @@ private:
     std::vector<AssetGroup*> _groups;
 
 public:
-    void AddAssetGroup(const char* path, const char* tag);
+    AssetGroup* AddAssetGroup(const char* path, const char* tag);
+
+    /* Query group folder for valid assets */
+    void QueryAssetGroup(AssetGroup* grp);
 
     Asset* GetAsset(const char* relpath);
+    void AddAsset(AssetGroup* grp, Asset* a);
+
+    /*  Read assets from a Tribalia Asset File (*.taif)
+        Returns 'true' if read successfully, 'false' if not
+    */
+    bool ReadFromFile(const char* file);
 };
 
 }

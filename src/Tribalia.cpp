@@ -31,6 +31,7 @@
 #include "graphical/TextureOpener.hpp"
 #include "graphical/TextureManager.hpp"
 #include "graphical/MaterialManager.hpp"
+#include "graphical/AssetManager.hpp"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
@@ -90,11 +91,10 @@ int main(int argc, char const *argv[]) {
 
     rndr->SetSceneManager(scenemng);
 
+    AssetManager am;
+    am.ReadFromFile("test.taif");
+
     MTLOpener mtlop;
-    MaterialManager::GetInstance()->AddMaterials(mtlop.Open("casinha.mtl"));
-    MaterialManager::GetInstance()->AddMaterials(mtlop.Open("test2.mtl"));
-    MaterialManager::GetInstance()->AddMaterials(mtlop.Open("test.mtl"));
-	MaterialManager::GetInstance()->AddMaterials(mtlop.Open("testtex.mtl"));
 
     OBJOpener opener;
     Mesh* m = opener.Open("test2.obj");
