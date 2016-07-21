@@ -94,25 +94,22 @@ int main(int argc, char const *argv[]) {
     AssetManager am;
     am.ReadFromFile("test.taif");
 
-    MTLOpener mtlop;
-
-    OBJOpener opener;
-    Mesh* m = opener.Open("test2.obj");
+    Mesh* m = am.GetAsset("test2.obj")->asset.mesh;
     m->SetPosition(glm::vec3(4,1,4));
     m->GenerateBoundingBox();
 
-	Texture* tex = TextureOpener::Open("test.bmp");
+	Texture* tex = am.GetAsset("test.bmp")->asset.texture;
 	if (tex) {
 		MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);
         TextureManager::GetInstance()->AddTexture("test", tex);
     }
 
-    Mesh* m2 = opener.Open("casinha.obj");
+    Mesh* m2 = am.GetAsset("casinha.obj")->asset.mesh;
     m2->SetPosition(glm::vec3(10, 1, 6));
     m2->SetRotation(0, glm::radians(-90.0f), 0);
     m2->GenerateBoundingBox();
 
-	Mesh* m3 = opener.Open("testtex.obj");
+	Mesh* m3 = am.GetAsset("testtex.obj")->asset.mesh;
 	m3->SetPosition(glm::vec3(20, 1, 10));
 	m3->GenerateBoundingBox();
 

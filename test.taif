@@ -2,5 +2,8 @@
 	file: test.mtl, type: material
 	file: casinha.obj, type: mesh
 	file: casinha.mtl, type: material
+	file: test2.obj, type: mesh
 	file: test2.mtl, type: material
+	file: testtex.obj, type: mesh
 	file: testtex.mtl, type: material
+	file: test.bmp, type: texture
