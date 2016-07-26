@@ -33,6 +33,8 @@
 #include "graphical/MaterialManager.hpp"
 #include "graphical/AssetManager.hpp"
 
+#include "input/Cursor.hpp"
+
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 using namespace Tribalia::Graphics;
@@ -80,8 +82,7 @@ int main(int argc, char const *argv[]) {
 
     HumanPlayer hp = HumanPlayer{"Arthur"};
     SceneManager* scenemng = new SceneManager();
-    InputManager* inputmng = new InputManager();
-    hp.SetInputManager(inputmng);
+    
 
     bool player = false;
 
@@ -127,6 +128,7 @@ int main(int argc, char const *argv[]) {
     ObjectRenderer* objrend = new ObjectRenderer(om, scenemng);
     hp.objr = objrend;
 
+	InputManager::GetInstance()->Initialize();
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
@@ -160,6 +162,9 @@ int main(int argc, char const *argv[]) {
 
         printf("\033[1m %4d ms \033[0m\r", delta);
 
+		int cx, cy;
+		Cursor::GetInstance()->GetPositions(cx, cy);
+		printf("Cursor: (%d, %d)\t", cx, cy);
 
         //Trava em ~60 fps
         if (delta < 16) {

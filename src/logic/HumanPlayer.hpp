@@ -20,8 +20,7 @@ namespace Logic {
     {
     private:
         Tribalia::Graphics::Camera* _cam;
-        Tribalia::Input::InputManager* _imng;
-
+        
     public:
         ObjectRenderer* objr;
 

@@ -40,7 +40,6 @@ HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
 
 
 void HumanPlayer::SetCamera(Tribalia::Graphics::Camera* c) { _cam = c;}
-void HumanPlayer::SetInputManager(InputManager* mng) {_imng = mng;}
 
 /***
     Virtual function called on each iteration.
@@ -57,11 +56,12 @@ InputEvent ev;
 bool front = false, back = false;
 bool left = false, right = false;
 bool rotate_left = false, rotate_right = false;
+InputListener ilt;
 
 bool HumanPlayer::Play(GameContext* gctx){
-    _imng->Run();
+	InputManager::GetInstance()->Run();
 
-    while (_imng->GetEvent(&ev)) {
+    while (InputManager::GetInstance()->GetDefaultListener()->PopEvent(ev)) {
         if (ev.eventType == EVENT_FINISH) {
             return false;
         }
@@ -155,7 +155,7 @@ bool HumanPlayer::Play(GameContext* gctx){
 
 //            printf("%d %d \n", ev.mousex, ev.mousey);
     key_flush:
-        _imng->PopEvent(NULL);
+		__nop();
     }
 
 

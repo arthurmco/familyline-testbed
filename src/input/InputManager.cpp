@@ -2,6 +2,16 @@
 
 using namespace Tribalia::Input;
 
+InputManager* InputManager::im = nullptr;
+
+
+void InputManager::Initialize() {
+	default_listener = new InputListener;
+	this->AddListener(EVENT_ALL_EVENTS, default_listener);
+}
+
+InputListener* InputManager::GetDefaultListener() { return default_listener; }
+
 /* Get the top event (not taking it off the queue).
     Return false if no elements on queue */
 bool InputManager::GetEvent(InputEvent* ev)
@@ -60,6 +70,7 @@ int lastx, lasty, lastz;
 /* Receive events and send them to queues */
 void InputManager::Run()
 {
+    /* Get event data from SDL */
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         InputEvent ev;
@@ -134,5 +145,43 @@ void InputManager::Run()
 
     }
 
+    /* Send events to appropriate listeners */
+	if (_listeners.size() <= 0) return;
 
+    while (!_evt_queue.empty()) {
+        InputEvent ev = _evt_queue.front();
+
+        bool event_received = false;
+        for (auto it = _listeners.begin(); it != _listeners.end(); it++) {
+            if (it->type_mask & ev.eventType) {
+                it->listener->OnListen(ev);
+                event_received = true;
+            }
+        }
+
+        if (event_received) {
+            _evt_queue.pop();
+		} 
+
+    }
+
+}
+
+
+void InputManager::AddListener(int types, InputListener* listener)
+{
+    InputListenerData ild;
+    ild.type_mask = types;
+    ild.listener = listener;
+    Log::GetLog()->Write("Adding listener for event mast %#x", types);
+    _listeners.push_back(ild);
+}
+void InputManager::RemoveListener(InputListener* listener)
+{
+    for (auto it = _listeners.begin(); it != _listeners.end(); it++) {
+        if (it->listener == listener) {
+            _listeners.erase(it);
+            return;
+        }
+    }
 }
