@@ -42,7 +42,7 @@ std::vector<Material*> MTLOpener::Open(const char* file)
                 md.diffuseColor = diffuse;
                 md.specularColor = specular;
                 md.ambientColor = diffuse * 0.1f;
-                Material* m = new Material{mats.size(), matname, md};
+                Material* m = new Material{(int)mats.size(), matname, md};
                 mats.push_back(m);
             }
 
@@ -115,7 +115,7 @@ std::vector<Material*> MTLOpener::Open(const char* file)
     md.diffuseColor = diffuse;
     md.specularColor = specular;
     md.ambientColor = diffuse * 0.1f;
-    Material* m = new Material{mats.size(), matname, md};
+    Material* m = new Material{(int)mats.size(), matname, md};
     mats.push_back(m);
 
     fclose(fMat);

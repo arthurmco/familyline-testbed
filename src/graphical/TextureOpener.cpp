@@ -9,8 +9,7 @@ Texture* TextureOpener::Open(const char* path)
 {
 	/* Initialize devIL if not */
 	if (!isDevilOn) {
-		ilInit();
-		
+		ilInit();	
 	}
 
 	/* 	Initialize a handle for the image and
@@ -28,7 +27,8 @@ Texture* TextureOpener::Open(const char* path)
 		return nullptr;
 	}
 
-	if (ilLoadF(IL_TYPE_UNKNOWN, f) == IL_FALSE) {
+	fclose(f);
+	if (ilLoad(IL_TYPE_UNKNOWN, path) == IL_FALSE) {
 		Log::GetLog()->Warning("TextureOpener: Error while opening %s",
 			path);
 		return nullptr;

@@ -1,5 +1,6 @@
 tribalia
 *.o
+*.obj
 *.swp
 
 #CMakeLists.txt generated files
@@ -11,4 +12,11 @@ CMakeFiles/*
 cmake_install.cmake
 Makefile
 
-
+# Visual Studio data
+*.sln
+*.vcxproj*
+*.VC*
+Debug/*
+Release/*
+tribalia.dir/*
+Win32/*

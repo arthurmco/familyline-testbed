@@ -98,11 +98,13 @@ int main(int argc, char const *argv[]) {
     m->SetPosition(glm::vec3(4,1,4));
     m->GenerateBoundingBox();
 
+	
 	Texture* tex = am.GetAsset("test.bmp")->asset.texture;
 	if (tex) {
 		MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);
         TextureManager::GetInstance()->AddTexture("test", tex);
     }
+	
 
     Mesh* m2 = am.GetAsset("casinha.obj")->asset.mesh;
     m2->SetPosition(glm::vec3(10, 1, 6));

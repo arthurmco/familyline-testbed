@@ -1,7 +1,6 @@
 #include "AssetManager.hpp"
 
 #include <sys/types.h>
-#include <dirent.h>
 
 using namespace Tribalia::Graphics;
 
@@ -21,7 +20,7 @@ AssetGroup* AssetManager::AddAssetGroup(const char* path, const char* tag)
 /* Query group folder for valid assets */
 void AssetManager::QueryAssetGroup(AssetGroup* grp)
 {
-    DIR *d, *dp = NULL, *dn = NULL;
+/*    DIR *d, *dp = NULL, *dn = NULL;
     const char* dpath = grp->folder;
 
     while (d) {
@@ -49,7 +48,7 @@ void AssetManager::QueryAssetGroup(AssetGroup* grp)
 
     }
 
-
+	*/
 }
 
 Asset* AssetManager::GetAsset(const char* relpath)
@@ -74,6 +73,7 @@ void AssetManager::AddAsset(AssetGroup* grp, Asset* a)
         a->relpath, aname[a->asset_type % 3], a->asset_type, grp->folder);
 }
 
+#include <functional>	// std::ptr_fun()
 #include <cstdio>
 /*  Read assets from a Tribalia Asset File (*.taif)
     Returns 'true' if read successfully, 'false' if not

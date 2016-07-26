@@ -56,6 +56,7 @@ float AttackableObject::Heal(float val)
     f = std::min(f + val, max);
 
     this->SetProperty("HP", f);
+	return f;
 
 }
 
@@ -67,4 +68,5 @@ float AttackableObject::Damage(float val)
     f =  std::max(f + val, 0.0f);
 
     this->SetProperty("HP", f);
+	return f;
 }

@@ -15,7 +15,8 @@ int TextureManager::AddTexture(const char* name, Texture* t)
     } else {
         Log::GetLog()->Warning("Texture %s already exists", name);
     }
-
+	
+	return t->GetHandle();
 }
 
 Texture* TextureManager::GetTexture(int ID)

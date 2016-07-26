@@ -40,7 +40,6 @@ file(GLOB SRC_BASE "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 #Compilation data
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -g")
 add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX} ${SRC_INPUT})
 
 if (MSVC)
@@ -60,6 +59,7 @@ if (MSVC)
   find_library(SDL_LIB "SDL2.lib" ${SDL_LIB_FOLDER})
   find_library(GLEW_LIB "glew32.lib" ${GLEW_LIB_FOLDER})
   find_library(DEVIL_LIB "devil.lib" ${DEVIL_LIB_FOLDER})
+  find_library(DEVIL_ILU_LIB "ILU.lib" ${DEVIL_LIB_FOLDER})
 
   link_directories(${SDL_LIB} ${GLEW_LIB})
 
@@ -67,10 +67,13 @@ if (MSVC)
   target_link_libraries(tribalia "opengl32.lib")
   target_link_libraries(tribalia ${GLEW_LIB})
   target_link_libraries(tribalia ${DEVIL_LIB})
-
+  target_link_libraries(tribalia ${DEVIL_ILU_LIB})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /GR /W4")
+  
 else()
   target_link_libraries(tribalia "SDL2")
   target_link_libraries(tribalia "GL")
   target_link_libraries(tribalia "GLEW")
   target_link_libraries(tribalia "IL")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -g")
 endif(MSVC)

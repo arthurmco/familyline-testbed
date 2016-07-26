@@ -20,6 +20,7 @@ int MaterialManager::AddMaterial(Material* m)
         m->GetData()->ambientColor.b);
 ;
     _materials.push_back(*m);
+	return id;
 }
 
 /* Add materials*/
