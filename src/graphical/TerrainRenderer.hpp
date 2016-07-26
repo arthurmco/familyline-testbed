@@ -41,6 +41,12 @@ namespace Graphics {
         void SetCamera(Camera*);
         Camera* GetCamera();
 
+        /* Convert a terrain point from graphical to game space */
+        glm::vec3 GraphicalToGameSpace(glm::vec3 graphical);
+
+		/* Convert a terrain point from game to graphical space*/
+		glm::vec3 GameToGraphicalSpace(glm::vec3 game);
+
         /*  Check the terrains that needs to be rendered and
             send them to the renderer.
             Will also cache terrain textures too */

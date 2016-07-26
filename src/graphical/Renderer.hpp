@@ -67,6 +67,8 @@ namespace Graphics {
         GLint AddVertexData(VertexData*, glm::mat4* worldMatrix);
 
         void RemoveVertexData(GLuint vaoid);
+
+        void GetWindowSize(int& width, int& height);
     };
 
 }

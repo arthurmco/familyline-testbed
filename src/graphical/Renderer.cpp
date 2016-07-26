@@ -40,7 +40,7 @@ Renderer::Renderer()
 	unsigned int* fake_color = new unsigned int;
 	*fake_color = 0xff00ff00;
 	fake_tex = new Texture(1, 1, GL_RGB, fake_color);
-	
+
 }
 
 void Renderer::InitializeLibraries()
@@ -132,7 +132,7 @@ void Renderer::SetMaterial(int ID)
 	/* Bind a texture */
 	Texture* t = m->GetTexture();
 	if (t) {
-		glBindTexture(GL_TEXTURE_2D, t->GetHandle());	
+		glBindTexture(GL_TEXTURE_2D, t->GetHandle());
 		sForward->SetUniform("tex_amount", 1.0f);
 	} else {
 		glBindTexture(GL_TEXTURE_2D, fake_tex->GetHandle());
@@ -197,16 +197,22 @@ bool Renderer::Render()
         }
 
         /* Check for deleted objects */
-        for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); ++it2) {
+		int deleted_num = 0, di = 0;
+	deleted_check:
+        for (auto it2 = _last_IDs.begin()+deleted_num; it2 != _last_IDs.end(); ++it2) {
             if (it2->lastcheck != lastCheck){
                 Log::GetLog()->Write("Removing object ID %d from the cache",
                     it2->ID);
                 this->RemoveVertexData(it2->vao);
+				deleted_num = di;
                 _last_IDs.erase(it2);
 
-                if (_last_IDs.empty())
-                    break;
+				if (_last_IDs.empty())
+					break;
+				else
+					goto deleted_check;
             }
+			di++;
         }
     }
 
@@ -230,7 +236,7 @@ bool Renderer::Render()
 
         if (!it->vd->MaterialIDs.empty())
             material = it->vd->MaterialIDs[0];
-        
+
 
         glBindVertexArray(it->vao);
 
@@ -263,7 +269,7 @@ bool Renderer::Render()
 			2,					// attribute 2 (texcoords)
 			2,					// size
 			GL_FLOAT, GL_FALSE, 0, (void*)0);
-	
+
         /* Draw the triangles */
         for (int matidx = 0; matidx < 9; matidx++) {
             int start = it->material_offsets[matidx];
@@ -371,10 +377,15 @@ void Renderer::RemoveVertexData(GLuint vaoid)
             glDeleteBuffers(1, &it->vbo_pos);
             glDeleteBuffers(1, &it->vbo_norm);
             _vertices.erase(it);
+			break;
         }
     }
 }
 
+void Renderer::GetWindowSize(int& width, int& height)
+{
+    SDL_GetWindowSize(this->_win, &width, &height);
+}
 
 Renderer::~Renderer()
 {

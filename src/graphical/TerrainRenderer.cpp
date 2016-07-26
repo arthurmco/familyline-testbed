@@ -127,3 +127,16 @@ void TerrainRenderer::Update()
         }
     }
 }
+
+/* Convert a terrain point from graphical to game space */
+glm::vec3 TerrainRenderer::GraphicalToGameSpace(glm::vec3 graphical)
+{
+	return glm::vec3(graphical.x / SEC_SIZE, graphical.y, graphical.z / SEC_SIZE);
+}
+
+/* Convert a terrain point from game to graphical space*/
+glm::vec3 TerrainRenderer::GameToGraphicalSpace(glm::vec3 game)
+{
+	return glm::vec3(game.x * SEC_SIZE, game.y, game.z * SEC_SIZE);
+}
+

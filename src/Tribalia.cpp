@@ -33,7 +33,7 @@
 #include "graphical/MaterialManager.hpp"
 #include "graphical/AssetManager.hpp"
 
-#include "input/Cursor.hpp"
+#include "input/InputPicker.hpp"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
@@ -86,7 +86,7 @@ int main(int argc, char const *argv[]) {
 
     bool player = false;
 
-    Camera cam = Camera{glm::vec3(4.0f, 16.0f, 4.0f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(4.2f, 16.0f, 3.8f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
     hp.SetCamera(&cam);
 
@@ -130,6 +130,8 @@ int main(int argc, char const *argv[]) {
 
 	InputManager::GetInstance()->Initialize();
 
+	InputPicker* ip = new InputPicker{ terr_rend, rndr, scenemng, &cam };
+
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
@@ -162,9 +164,10 @@ int main(int argc, char const *argv[]) {
 
         printf("\033[1m %4d ms \033[0m\r", delta);
 
-		int cx, cy;
-		Cursor::GetInstance()->GetPositions(cx, cy);
-		printf("Cursor: (%d, %d)\t", cx, cy);
+		glm::vec3 cur_wor = ip->GetCursorWorldRay();
+		printf("Cursor ray: (%.2f, %.2f %.2f)\t",
+			cur_wor.x, cur_wor.y, cur_wor.z);
+		ip->GetTerrainProjectedPosition();
 
         //Trava em ~60 fps
         if (delta < 16) {
