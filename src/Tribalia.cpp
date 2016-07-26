@@ -25,9 +25,13 @@
 #include "graphical/ShaderProgram.hpp"
 #include "graphical/Camera.hpp"
 #include "graphical/meshopener/OBJOpener.hpp"
+#include "graphical/materialopener/MTLOpener.hpp"
 #include "graphical/Terrain.hpp"
 #include "graphical/TerrainRenderer.hpp"
+#include "graphical/TextureOpener.hpp"
+#include "graphical/TextureManager.hpp"
 #include "graphical/MaterialManager.hpp"
+#include "graphical/AssetManager.hpp"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
@@ -44,7 +48,7 @@ using namespace Tribalia::Input;
 #endif
 
 int main(int argc, char const *argv[]) {
-    FILE* fLog = fopen("log.txt", "w");
+    FILE* fLog = stderr;// fopen("log.txt", "w");
     Log::GetLog()->SetFile(fLog);
     Log::GetLog()->Write("Tribalia %s", VERSION);
     Log::GetLog()->Write("built on %s by %s ", __DATE__, USERNAME);
@@ -87,11 +91,31 @@ int main(int argc, char const *argv[]) {
 
     rndr->SetSceneManager(scenemng);
 
-    OBJOpener opener;
-    Mesh* m = opener.Open("test2.obj");
-    m->SetPosition(glm::vec3(8,1,4));
+    AssetManager am;
+    am.ReadFromFile("test.taif");
+
+    Mesh* m = am.GetAsset("test2.obj")->asset.mesh;
+    m->SetPosition(glm::vec3(4,1,4));
     m->GenerateBoundingBox();
+
+	Texture* tex = am.GetAsset("test.bmp")->asset.texture;
+	if (tex) {
+		MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);
+        TextureManager::GetInstance()->AddTexture("test", tex);
+    }
+
+    Mesh* m2 = am.GetAsset("casinha.obj")->asset.mesh;
+    m2->SetPosition(glm::vec3(10, 1, 6));
+    m2->SetRotation(0, glm::radians(-90.0f), 0);
+    m2->GenerateBoundingBox();
+
+	Mesh* m3 = am.GetAsset("testtex.obj")->asset.mesh;
+	m3->SetPosition(glm::vec3(20, 1, 10));
+	m3->GenerateBoundingBox();
+
     scenemng->AddObject(m);
+    scenemng->AddObject(m2);
+	scenemng->AddObject(m3);
 
     Terrain* terr = new Terrain{1000, 1000};
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
@@ -101,18 +125,12 @@ int main(int argc, char const *argv[]) {
     ObjectRenderer* objrend = new ObjectRenderer(om, scenemng);
     hp.objr = objrend;
 
-    MaterialData matdata;
-    matdata.diffuseColor = glm::vec3(0.6, 0.1, 0.0);
-    matdata.diffuseIntensity = 0.6;
-    matdata.ambientColor = glm::vec3(0.05, 0.0, 0.0);
-    matdata.ambientIntensity = 0.1;
-    Material mat = Material(0, "Test", matdata);
-    MaterialManager::GetInstance()->AddMaterial(&mat);
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
     int delta = 1;
+
 
     printf("==== \n Game launched\n");
     printf(" [C] - Create an object\n");

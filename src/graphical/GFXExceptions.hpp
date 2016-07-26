@@ -39,6 +39,15 @@ namespace Graphics {
         std::string file;
     };
 
+    class material_exception : public std::runtime_error
+    {
+    public:
+        explicit material_exception(std::string msg, int code,
+            const char* file);
+        int code;
+        std::string file;
+    };
+
 
 } /* Graphics */
 } /* Tribalia */

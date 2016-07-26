@@ -33,13 +33,14 @@ Renderer::Renderer()
 
     InitializeShaders();
     sForward->Use();
-    srand(time(NULL));
-    float cx, cy, cz;
-    cx = (rand() % 255) / 255.0f;
-    cy = (rand() % 255) / 255.0f;
-    cz = (rand() % 255) / 255.0f;
-    sForward->SetUniform("color", glm::vec3(cx, cy, cz));
 
+	/* 	Create a fake texture, so we can render something
+		if textures aren't available */
+
+	unsigned int* fake_color = new unsigned int;
+	*fake_color = 0xff00ff00;
+	fake_tex = new Texture(1, 1, GL_RGB, fake_color);
+	
 }
 
 void Renderer::InitializeLibraries()
@@ -87,6 +88,9 @@ void Renderer::InitializeLibraries()
         throw renderer_exception(err, glewStatus);
     }
 
+    //Enable depth test
+    glEnable(GL_DEPTH_TEST);
+
 }
 
 void Renderer::InitializeShaders()
@@ -120,12 +124,25 @@ void Renderer::InitializeShaders()
 void Renderer::SetMaterial(int ID)
 {
     Material* m = MaterialManager::GetInstance()->GetMaterial(ID);
-    if (!m) return;
+    if (!m) {
+        printf("Cannot found mat id %d\n", ID);
+        return;
+    }
 
+	/* Bind a texture */
+	Texture* t = m->GetTexture();
+	if (t) {
+		glBindTexture(GL_TEXTURE_2D, t->GetHandle());	
+		sForward->SetUniform("tex_amount", 1.0f);
+	} else {
+		glBindTexture(GL_TEXTURE_2D, fake_tex->GetHandle());
+		sForward->SetUniform("tex_amount", 0.0f);
+	}
+
+	/* Set materials */
     sForward->SetUniform("diffuse_color", m->GetData()->diffuseColor);
-    //sForward->SetUniform("diffuse_intensity", m->GetData()->diffuseIntensity);
     sForward->SetUniform("ambient_color", m->GetData()->ambientColor);
-    //sForward->SetUniform("ambient_intensity", m->GetData()->ambientIntensity);
+
 }
 
 struct SceneIDCache {
@@ -161,7 +178,7 @@ bool Renderer::Render()
             /* Draw the added object */
             Mesh* mes = (Mesh*)(*itScene);
             if ((*itScene)->GetType() != SCENE_MESH) {
-                Log::GetLog()->Fatal("Not a mesh, but mesh is the only "
+                Log::GetLog()->Warning("Not a mesh, but mesh is the only "
                 "type of scene object we have now! Skipping...");
                 continue;
             }
@@ -175,6 +192,7 @@ bool Renderer::Render()
             sidc.ID = (*itScene)->GetID();
             sidc.lastcheck = lastCheck;
             sidc.vao = vaon;
+
             _last_IDs.push_back(sidc);
         }
 
@@ -192,7 +210,6 @@ bool Renderer::Render()
         }
     }
 
-    glEnable(GL_DEPTH_TEST);
 
     glm::mat4 mModel, mView, mProj;
     mView = this->_scenemng->GetCamera()->GetViewMatrix();
@@ -213,7 +230,7 @@ bool Renderer::Render()
 
         if (!it->vd->MaterialIDs.empty())
             material = it->vd->MaterialIDs[0];
-        SetMaterial(material);
+        
 
         glBindVertexArray(it->vao);
 
@@ -239,8 +256,37 @@ bool Renderer::Render()
            0,                  // stride
            (void*)0            // array buffer offset
         );
-            // Draw the triangle !
-        glDrawArrays(GL_TRIANGLES, 0, it->vd->Positions.size());
+
+		glEnableVertexAttribArray(2);
+		glBindBuffer(GL_ARRAY_BUFFER, it->vbo_tex);
+		glVertexAttribPointer(
+			2,					// attribute 2 (texcoords)
+			2,					// size
+			GL_FLOAT, GL_FALSE, 0, (void*)0);
+	
+        /* Draw the triangles */
+        for (int matidx = 0; matidx < 9; matidx++) {
+            int start = it->material_offsets[matidx];
+            int end = it->material_offsets[matidx+1];
+
+            if (!it->vd->MaterialIDs.empty())
+                material = it->vd->MaterialIDs[start];
+            SetMaterial(material);
+
+            if (end < 0) {
+                end = it->vd->Positions.size();
+                matidx = 0xff; //force exit
+            }
+
+            glGetError();
+            glDrawArrays(GL_TRIANGLES, start, end-start);
+
+            GLenum err = glGetError();
+            if (err != GL_NO_ERROR) {
+                Log::GetLog()->Fatal("OpenGL error %#x", err);
+            }
+        }
+		glBindTexture(GL_TEXTURE_2D, 0);
         glDisableVertexAttribArray(0);
     }
 
@@ -286,13 +332,32 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
     glBufferData(GL_ARRAY_BUFFER, v->Normals.size() * sizeof(glm::vec3),
         v->Normals.data(), GL_STATIC_DRAW);
 
+	glGenBuffers(1, &vri.vbo_tex);
+	glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_tex);
+	glBufferData(GL_ARRAY_BUFFER, v->TexCoords.size() * sizeof(glm::vec2),
+		v->TexCoords.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 
-
-
     Log::GetLog()->Write("Added vertices with VAO %d (VBO %d)", vri.vao,
         vri.vbo_pos);
+
+    /* Store material vertex starts */
+    int matidx = 0;
+    int actualidx = -1;
+    int i = 0;
+    for (auto matit = v->MaterialIDs.begin();
+            matit != v->MaterialIDs.end();
+            matit++) {
+        if (*matit != actualidx) {
+            actualidx = *matit;
+            vri.material_offsets[matidx++] = i;
+        }
+        i++;
+    }
+
+    vri.material_offsets[matidx] = -1;
+
     _vertices.push_back(vri);
     return vri.vao;
 }
@@ -305,6 +370,7 @@ void Renderer::RemoveVertexData(GLuint vaoid)
             glDeleteVertexArrays(1, &vaoid);
             glDeleteBuffers(1, &it->vbo_pos);
             glDeleteBuffers(1, &it->vbo_norm);
+            _vertices.erase(it);
         }
     }
 }

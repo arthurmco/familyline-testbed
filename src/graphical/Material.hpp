@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 #include <string>
 
+#include "Texture.hpp"
+
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
 
@@ -16,13 +18,10 @@ namespace Graphics {
 
     struct MaterialData {
         glm::vec3 diffuseColor;
-        float diffuseIntensity;
-
         glm::vec3 specularColor;
-        float specularIntensity;
-
         glm::vec3 ambientColor;
-        float ambientIntensity;
+        Texture* texture = nullptr;
+
     };
 
     class Material
@@ -32,6 +31,7 @@ namespace Graphics {
         int _ID;
         std::string _name;
         MaterialData _data;
+		Texture* _tex;
 
     public:
         Material(int ID, const char* name, MaterialData data);
@@ -39,6 +39,8 @@ namespace Graphics {
         int GetID() const;
         const char* GetName() const;
         MaterialData* GetData();
+		Texture* GetTexture(); 
+		void SetTexture(Texture*);  
     };
 
 }

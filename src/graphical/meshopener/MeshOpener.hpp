@@ -21,6 +21,7 @@ protected:
     Mesh* _mesh;
 public:
     virtual Mesh* Open(const char* file) = 0;
+    
 };
 
 }

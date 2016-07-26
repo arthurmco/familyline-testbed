@@ -48,23 +48,29 @@ if (MSVC)
   SET(SDL_INCLUDE "." CACHE PATH "SDL2 include directory")
   SET(GLEW_INCLUDE "." CACHE PATH "GLEW include directory")
   SET(GLM_INCLUDE "." CACHE PATH "GLM include directory")
-  include_directories(AFTER ${SDL_INCLUDE} ${GLEW_INCLUDE} ${GLM_INCLUDE})
+  SET(DEVIL_INCLUDE "." CACHE PATH "DevIL include directory")
+  	
+  include_directories(AFTER ${SDL_INCLUDE} ${GLEW_INCLUDE} ${GLM_INCLUDE} ${DEVIL_INCLUDE} )
 
   #Set library directories
   SET(SDL_LIB_FOLDER "." CACHE PATH "SDL2 library directory")
   SET(GLEW_LIB_FOLDER "." CACHE PATH "GLEW library directory")
+  SET(DEVIL_LIB_FOLDER "." CACHE PATH "DevIL library folder")
 
   find_library(SDL_LIB "SDL2.lib" ${SDL_LIB_FOLDER})
   find_library(GLEW_LIB "glew32.lib" ${GLEW_LIB_FOLDER})
+  find_library(DEVIL_LIB "devil.lib" ${DEVIL_LIB_FOLDER})
 
   link_directories(${SDL_LIB} ${GLEW_LIB})
 
   target_link_libraries(tribalia ${SDL_LIB})
   target_link_libraries(tribalia "opengl32.lib")
   target_link_libraries(tribalia ${GLEW_LIB})
+  target_link_libraries(tribalia ${DEVIL_LIB})
 
 else()
   target_link_libraries(tribalia "SDL2")
   target_link_libraries(tribalia "GL")
   target_link_libraries(tribalia "GLEW")
+  target_link_libraries(tribalia "IL")
 endif(MSVC)

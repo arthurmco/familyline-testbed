@@ -7,9 +7,7 @@ TerrainRenderer::TerrainRenderer(Renderer* r)
 {
     MaterialData matdata;
     matdata.diffuseColor = glm::vec3(0.0, 0.5, 0.0);
-    matdata.diffuseIntensity = 0.6;
     matdata.ambientColor = glm::vec3(0.01, 0.01, 0.0);
-    matdata.ambientIntensity = 0.1;
     Material mat = Material(3, "Terrain", matdata);
     MaterialManager::GetInstance()->AddMaterial(&mat);
 }
@@ -59,6 +57,7 @@ void TerrainRenderer::Update()
                 VertexData* vd = new VertexData();
                 vd->Positions.reserve(SECTION_SIDE*SECTION_SIDE);
                 vd->Normals.reserve(SECTION_SIDE*SECTION_SIDE);
+				vd->TexCoords.reserve(SECTION_SIDE*SECTION_SIDE);
                 vd->MaterialIDs.reserve(SECTION_SIDE*SECTION_SIDE);
 
                 /* Compute maximum points */
@@ -98,6 +97,13 @@ void TerrainRenderer::Update()
                         vd->Normals.push_back(glm::vec3(0,1,0));
                         vd->Normals.push_back(glm::vec3(0,1,0));
                         vd->Normals.push_back(glm::vec3(0,1,0));
+
+						vd->TexCoords.push_back(glm::vec2(1,1));
+						vd->TexCoords.push_back(glm::vec2(1,1));
+						vd->TexCoords.push_back(glm::vec2(1,1));
+						vd->TexCoords.push_back(glm::vec2(1,1));
+						vd->TexCoords.push_back(glm::vec2(1,1));
+						vd->TexCoords.push_back(glm::vec2(1,1));
 
                         vd->MaterialIDs.push_back(matid);
                         vd->MaterialIDs.push_back(matid);

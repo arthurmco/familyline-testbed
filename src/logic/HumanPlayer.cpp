@@ -146,9 +146,8 @@ bool HumanPlayer::Play(GameContext* gctx){
             }
 
         } else if (ev.eventType == EVENT_MOUSEMOVE) {
-            glm::vec3 curpos = objr->CheckTerrainPositions(glm::vec2(ev.mousex, ev.mousey), 640, 480);
-            printf("%dx%d = %.3f %.3f %.3f\n", ev.mousex, ev.mousey,
-                curpos.x, curpos.y, curpos.z);
+            glm::vec3 ray = _cam->Project(ev.mousex, ev.mousey, 640, 480);
+            //objr->CheckRayCollide(ray, nullptr);
 
 
         }
