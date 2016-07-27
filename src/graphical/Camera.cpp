@@ -61,7 +61,7 @@ void Camera::CalculateVectors()
 void Camera::AddRotation(glm::vec3 axis, float angle)
 {
 
-    glm::vec3 l = this->_lookAt;
+   /* glm::vec3 l = this->_lookAt;
     glm::vec3 pivot = (_lookAt - _pos);
 
     glm::mat4 tRotate = glm::rotate(angle, _up);
@@ -72,7 +72,7 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
 
     l = glm::vec3(l4.x, l4.y, l4.z);
     this->_lookAt = l;
-    this->_isViewChanged = true;
+    this->_isViewChanged = true;*/
 }
 
 

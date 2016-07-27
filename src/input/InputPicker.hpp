@@ -26,6 +26,9 @@ namespace Input {
 		Tribalia::Graphics::Camera* _cam;
 
     public:
+
+#define MAX_PICK_ITERATIONS 20
+
         InputPicker(Tribalia::Graphics::TerrainRenderer* terrain,
 			Tribalia::Graphics::Renderer* renderer,
 			Tribalia::Graphics::SceneManager* sm,
