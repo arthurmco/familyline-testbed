@@ -32,7 +32,6 @@ void main() {
 
   vec3 acolor = dcolor * 0.1;
 
-  vec3 lightColor = vec3(1.0, 1.0, 1.0);
   vec3 finalColor = acolor;
 
   for (int i = 0; i < lightCount; i++) {
@@ -45,7 +44,7 @@ void main() {
 
     vec3 n = normalize(normal_Camera);
     vec3 l = normalize(lightDir_Camera);
-    float dist = length(lightPos_Camera)/2;
+    float dist = 10.0f;
 
     //Cosine of angle between normal and light direction
     float cosTheta = clamp(dot(n, l), 0, 1);

@@ -121,8 +121,8 @@ int main(int argc, char const *argv[]) {
 	m3->SetPosition(glm::vec3(20, 1, 10));
 	m3->GenerateBoundingBox();
 
-	Light* l = new Light{ "mainLight", glm::vec3(8, 200, 12), 255, 255, 255, 6000 };
-	Light* l2 = new Light{ "mainLight2", glm::vec3(8, 5, 22), 255, 0, 0, 6000 };
+	Light* l = new Light{ "mainLight", glm::vec3(16, 2, 6), 255, 255, 255, 80 };
+	Light* l2 = new Light{ "mainLight2", glm::vec3(32, 2, 3), 255, 0, 0, 90 };
 	
 
     scenemng->AddObject(m);
