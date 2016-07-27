@@ -17,6 +17,7 @@
 #include "ShaderProgram.hpp"
 #include "SceneManager.hpp"
 #include "Mesh.hpp"
+#include "Light.hpp"
 #include "MaterialManager.hpp"
 #include "../Log.hpp"
 

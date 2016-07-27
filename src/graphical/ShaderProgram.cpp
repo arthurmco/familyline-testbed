@@ -74,15 +74,56 @@ bool ShaderProgram::SetUniform(const char* name, float value)
     GLint unif_id = glGetUniformLocation(this->_id, name);
     glUniform1f(unif_id, value);
 
-    if (unif_id < 0) {
-        Log::GetLog()->Write("Uniform %s not found on shader %d",
-                name, _id);
-    }
-
-
     //Log::GetLog()->Write("Setted uniform %s (id %d) to (%.3f %.3f %.3f) on shader %d",
     //    name, unif_id, value.x, value.y, value.z, _id);
     return (unif_id > 0);
+}
+
+bool ShaderProgram::SetUniform(const char* name, int value)
+{
+	GLint unif_id = glGetUniformLocation(this->_id, name);
+	glUniform1i(unif_id, value);
+
+	if (unif_id < 0) {
+		Log::GetLog()->Write("Uniform %s not found on shader %d",
+			name, _id);
+	}
+	
+	//Log::GetLog()->Write("Setted uniform %s (id %d) to (%.3f %.3f %.3f) on shader %d",
+	//    name, unif_id, value.x, value.y, value.z, _id);
+	return (unif_id > 0);
+}
+
+bool ShaderProgram::SetUniformArray(const char* name, int count, float* value)
+{
+	GLint unif_id = glGetUniformLocation(this->_id, name);
+	glUniform1fv(unif_id, count, value);
+
+	if(unif_id < 0) {
+		Log::GetLog()->Write("Uniform %s not found on shader %d",
+			name, _id);
+	}
+
+
+	//Log::GetLog()->Write("Setted uniform %s (id %d) to (%.3f %.3f %.3f) on shader %d",
+	//    name, unif_id, value.x, value.y, value.z, _id);
+	return (unif_id > 0);
+}
+
+bool ShaderProgram::SetUniformArray(const char* name, int count, glm::vec3* value)
+{
+	GLint unif_id = glGetUniformLocation(this->_id, name);
+	glUniform3fv(unif_id, count, (const GLfloat*)&value[0]);
+
+	if(unif_id < 0) {
+		Log::GetLog()->Write("Uniform %s not found on shader %d",
+			name, _id);
+	}
+
+
+	//Log::GetLog()->Write("Setted uniform %s (id %d) to (%.3f %.3f %.3f) on shader %d",
+	//    name, unif_id, value.x, value.y, value.z, _id);
+	return (unif_id > 0);
 }
 
 

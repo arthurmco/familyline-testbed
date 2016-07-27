@@ -50,25 +50,15 @@ glm::vec3 InputPicker::GetTerrainProjectedPosition()
 
 	glm::vec3 cur_world = this->GetCursorWorldRay();
 	
-	printf("\ncamera_pos: %.4f %.4f %.4f, ray_pos: %.4f %.4f %.4f\n",
-		_cam->GetPosition().x, _cam->GetPosition().y, _cam->GetPosition().z,
-		cur_world.x, cur_world.y, cur_world.z);
-
 	float prolong_near = 0.1f, prolong_far = 100.0f;
 	float prolong_now = prolong_near + ((prolong_far - prolong_near ) / 2.0f);
 		
 	glm::vec3 pNear = _cam->GetPosition() + (cur_world * prolong_near);
 	glm::vec3 pFar = _cam->GetPosition() + (cur_world * prolong_far);
 	glm::vec3 pHalf = _cam->GetPosition() + (cur_world * prolong_now);
-
-	printf("pNear: %.4f %.4f %.4f, pFar: %.4f %.4f %.4f\n",
-		pNear.x, pNear.y, pNear.z, pFar.x, pFar.y, pFar.z);
-
-	printf("prolongs: { ");
+	
 	for (int i = 0; i < MAX_PICK_ITERATIONS; i++) {
 		
-		printf("%.2f (%.2f %.2f %.2f), ", prolong_now, pHalf.x, pHalf.y, pHalf.z);
-
 		/*	Here, we'll check if the ray projection is above or below the terrain 
 			
 			If we're above, we'll adjust pNear to that point
@@ -94,8 +84,6 @@ glm::vec3 InputPicker::GetTerrainProjectedPosition()
 
 
 	glm::vec3 collide = _terrain->GraphicalToGameSpace(pHalf);
-	printf(" }\nprol: %.2f, pos: %.3f %.3f %.3f, gamespace: %.3f %.3f %.3f\n\n", 
-		prolong_now, pHalf.x, pHalf.y, pHalf.z, collide.x, collide.y, collide.z);
-
+	
 	return collide;
 }

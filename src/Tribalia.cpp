@@ -24,6 +24,7 @@
 #include "graphical/Renderer.hpp"
 #include "graphical/ShaderProgram.hpp"
 #include "graphical/Camera.hpp"
+#include "graphical/Light.hpp"
 #include "graphical/meshopener/OBJOpener.hpp"
 #include "graphical/materialopener/MTLOpener.hpp"
 #include "graphical/Terrain.hpp"
@@ -73,6 +74,10 @@ int main(int argc, char const *argv[]) {
             se.what(), se.code);
         Log::GetLog()->Fatal("Shader file: %s, type %d",
             se.file.c_str(), se.type);
+
+#ifdef WIN32
+		system("pause");
+#endif
         exit(EXIT_FAILURE);
     }
 
@@ -116,9 +121,15 @@ int main(int argc, char const *argv[]) {
 	m3->SetPosition(glm::vec3(20, 1, 10));
 	m3->GenerateBoundingBox();
 
+	Light* l = new Light{ "mainLight", glm::vec3(8, 200, 12), 255, 255, 255, 6000 };
+	Light* l2 = new Light{ "mainLight2", glm::vec3(8, 5, 22), 255, 0, 0, 6000 };
+	
+
     scenemng->AddObject(m);
     scenemng->AddObject(m2);
 	scenemng->AddObject(m3);
+	scenemng->AddObject(l);
+	scenemng->AddObject(l2);
 
     Terrain* terr = new Terrain{1000, 1000};
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};

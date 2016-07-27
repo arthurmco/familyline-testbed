@@ -154,9 +154,15 @@ struct SceneIDCache {
 int lastCheck = 0;
 std::vector<SceneIDCache> _last_IDs;
 
+int lightCount = 0;
+glm::vec3 lightPositions[4];
+glm::vec3 lightColors[4];
+float lightStrengths[4];
+
 /* Returns true if rendered successfully */
 bool Renderer::Render()
 {
+	
     /* Check updates from SceneManager*/
     if (_scenemng->UpdateValidObjects()) {
             lastCheck++;
@@ -175,14 +181,10 @@ bool Renderer::Render()
             Log::GetLog()->Write("Renderer added object '%s' (id %d)",
                 (*itScene)->GetName(), (*itScene)->GetID());
 
+			if ((*itScene)->GetType() == SCENE_MESH) {
+
             /* Draw the added object */
             Mesh* mes = (Mesh*)(*itScene);
-            if ((*itScene)->GetType() != SCENE_MESH) {
-                Log::GetLog()->Warning("Not a mesh, but mesh is the only "
-                "type of scene object we have now! Skipping...");
-                continue;
-            }
-
             mes->ApplyTransformations();
 
             int vaon = this->AddVertexData(mes->GetVertexData(),
@@ -194,6 +196,29 @@ bool Renderer::Render()
             sidc.vao = vaon;
 
             _last_IDs.push_back(sidc);
+			}
+			else if ((*itScene)->GetType() == SCENE_LIGHT) {
+
+				/*** TODO: Sort lights by strength and send only the most strong ones ***/
+				if (lightCount > 4) {
+					Log::GetLog()->Warning("Maximum number of lights per render exceeded.");
+					continue;
+				}
+
+				Light* light = (Light*)(*itScene);
+				Log::GetLog()->Write("Renderer added light %s", light->GetName());
+				int lR, lG, lB;
+				light->GetColor(lR, lG, lB);
+				lightColors[lightCount] = glm::vec3(lR / 255.0f, lG / 255.0f, lB / 255.0f);
+				lightPositions[lightCount] = light->GetPosition();
+				lightStrengths[lightCount] = light->GetStrength();
+				lightCount++;
+
+
+			} else {
+				Log::GetLog()->Warning("Unsupported scene object! Skipping...");
+				continue;
+			}
         }
 
         /* Check for deleted objects */
@@ -223,6 +248,11 @@ bool Renderer::Render()
 
     sForward->Use();
     sForward->SetUniform("mView", mView);
+
+	sForward->SetUniform("lightCount", lightCount);
+	sForward->SetUniformArray("lightStrenghts", 4, lightStrengths);
+	sForward->SetUniformArray("lightPositions", 4, lightPositions);
+	sForward->SetUniformArray("lightColors", 4, lightColors);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

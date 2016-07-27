@@ -18,7 +18,8 @@ namespace Graphics {
 
     enum SceneObjectType {
         SCENE_GENERIC = 0,
-        SCENE_MESH
+        SCENE_MESH,
+		SCENE_LIGHT,
     };
 
     class SceneObject
