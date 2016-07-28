@@ -14,7 +14,8 @@
 #include "../graphical/Renderer.hpp"
 #include "../graphical/Camera.hpp"
 #include "../graphical/SceneManager.hpp"
-
+#include "../logic/ObjectManager.hpp"
+#include "../logic/LocatableObject.hpp"
 namespace Tribalia {
 namespace Input {
 
@@ -24,6 +25,7 @@ namespace Input {
 		Tribalia::Graphics::Renderer* _renderer;
 		Tribalia::Graphics::SceneManager* _sm;
 		Tribalia::Graphics::Camera* _cam;
+		Tribalia::Logic::ObjectManager* _om;
 
 		bool CheckIfTerrainIntersect(glm::vec3 ray, float start, float end);
 
@@ -34,7 +36,8 @@ namespace Input {
         InputPicker(Tribalia::Graphics::TerrainRenderer* terrain,
 			Tribalia::Graphics::Renderer* renderer,
 			Tribalia::Graphics::SceneManager* sm,
-			Tribalia::Graphics::Camera* cam);
+			Tribalia::Graphics::Camera* cam,
+			Tribalia::Logic::ObjectManager* om);
 
         /* Get cursor ray in screen space */
         glm::vec4 GetCursorScreenRay();
@@ -48,6 +51,10 @@ namespace Input {
 		/*	Get position where the cursor collides with the
 			terrain, in render coordinates */
 		glm::vec3 GetTerrainProjectedPosition();
+
+		/*	Get the object that were intersected by the cursor ray */
+		Tribalia::Logic::LocatableObject* GetIntersectedObject();
+
     };
 
 } /* Input */

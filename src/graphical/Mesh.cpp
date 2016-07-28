@@ -113,6 +113,13 @@ void Mesh::GenerateBoundingBox()
     printf(" minx miny minz: %.2f %.2f %.2f\n", minx, miny, minz);
     printf(" maxx maxy maxz: %.2f %.2f %.2f\n", maxx, maxy, maxz);
 
+    this->_box.minX = minx;
+    this->_box.minY = miny;
+    this->_box.minZ = minz;
+    this->_box.maxX = maxx;
+    this->_box.maxY = maxy;
+    this->_box.maxZ = maxz;
+
     this->_box.points[BOUNDING_BOX_LOWER_LEFT_FRONT]    = glm::vec3(minx, miny, minz);
     this->_box.points[BOUNDING_BOX_LOWER_LEFT_BACK]     = glm::vec3(minx, miny, maxz);
     this->_box.points[BOUNDING_BOX_LOWER_RIGHT_BACK]    = glm::vec3(maxx, miny, minz);

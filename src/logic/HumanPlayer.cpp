@@ -16,6 +16,8 @@ public:
         {
             Tribalia::Graphics::OBJOpener op;
             this->SetMesh(op.Open("test.obj"));
+			this->GetMesh()->GenerateBoundingBox();
+
         }
 
     virtual bool Initialize(){
@@ -138,6 +140,7 @@ bool HumanPlayer::Play(GameContext* gctx){
 //            printf("%d %d \n", ev.mousex, ev.mousey);
     key_flush:
 		__nop();
+
     }
 
 
@@ -157,6 +160,10 @@ bool HumanPlayer::Play(GameContext* gctx){
         _cam->AddRotation(glm::vec3(0, 1, 0), glm::radians(-1.0f));
 
 
+	LocatableObject* l = _ip->GetIntersectedObject();
+	if (l) {
+		printf("intersected with %s\n", l->GetName());
+	}
 
     return true;
 

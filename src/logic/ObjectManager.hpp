@@ -68,7 +68,7 @@ namespace Tribalia {
             /* Retrieve an object */
             GameObject* GetObject(int id);
             GameObject* GetObject(float x, float y, float z, float bias);
-
+			std::list<ObjectRegisterInfo>* GetObjectList();
         };
 
     }

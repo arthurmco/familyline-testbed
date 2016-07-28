@@ -130,7 +130,7 @@ int main(int argc, char const *argv[]) {
 
 	InputManager::GetInstance()->Initialize();
 
-	InputPicker* ip = new InputPicker{ terr_rend, rndr, scenemng, &cam };
+	InputPicker* ip = new InputPicker{ terr_rend, rndr, scenemng, &cam, om};
 	hp.SetPicker(ip);
 
     int i = 0;
