@@ -86,7 +86,7 @@ int main(int argc, char const *argv[]) {
 
     bool player = false;
 
-    Camera cam = Camera{glm::vec3(4.2f, 16.0f, 3.8f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(4.0f, 16.0f, 4.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
     hp.SetCamera(&cam);
 
@@ -131,6 +131,7 @@ int main(int argc, char const *argv[]) {
 	InputManager::GetInstance()->Initialize();
 
 	InputPicker* ip = new InputPicker{ terr_rend, rndr, scenemng, &cam };
+	hp.SetPicker(ip);
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();

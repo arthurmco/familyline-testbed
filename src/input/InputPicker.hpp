@@ -25,6 +25,8 @@ namespace Input {
 		Tribalia::Graphics::SceneManager* _sm;
 		Tribalia::Graphics::Camera* _cam;
 
+		bool CheckIfTerrainIntersect(glm::vec3 ray, float start, float end);
+
     public:
 
 #define MAX_PICK_ITERATIONS 20
