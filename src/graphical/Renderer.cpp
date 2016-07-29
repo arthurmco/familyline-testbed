@@ -162,40 +162,45 @@ float lightStrengths[4];
 /* Returns true if rendered successfully */
 bool Renderer::Render()
 {
-	
+	lastCheck++;
+
     /* Check updates from SceneManager*/
-    if (_scenemng->UpdateValidObjects()) {
-            lastCheck++;
-        auto objList = _scenemng->GetValidObjects();
+	if (_scenemng->UpdateValidObjects()) {
 
-        /* Check for inserted objects */
-        for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
-            for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); it2++) {
-                if ((*itScene)->GetID() == it2->ID) {
-                    it2->lastcheck = lastCheck;
-                    break;
-                }
-            }
+		auto objList = _scenemng->GetValidObjects();
 
-            /* Object doesn't exist on renderer */
-            Log::GetLog()->Write("Renderer added object '%s' (id %d)",
-                (*itScene)->GetName(), (*itScene)->GetID());
+		/* Check for inserted objects */
+		for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
+			bool objExists = false;
+			for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); it2++) {
+				if ((*itScene)->GetID() == it2->ID) {
+					it2->lastcheck = lastCheck;
+					objExists = true;
+					break;
+				}
+			}
+
+			if (objExists) continue;
+
+			/* Object doesn't exist on renderer */
+			Log::GetLog()->Write("Renderer added object '%s' (id %d)",
+				(*itScene)->GetName(), (*itScene)->GetID());
 
 			if ((*itScene)->GetType() == SCENE_MESH) {
 
-            /* Draw the added object */
-            Mesh* mes = (Mesh*)(*itScene);
-            mes->ApplyTransformations();
+				/* Draw the added object */
+				Mesh* mes = (Mesh*)(*itScene);
+				mes->ApplyTransformations();
 
-            int vaon = this->AddVertexData(mes->GetVertexData(),
-                mes->GetModelMatrixPointer());
+				int vaon = this->AddVertexData(mes->GetVertexData(),
+					mes->GetModelMatrixPointer());
 
-            SceneIDCache sidc;
-            sidc.ID = (*itScene)->GetID();
-            sidc.lastcheck = lastCheck;
-            sidc.vao = vaon;
+				SceneIDCache sidc;
+				sidc.ID = (*itScene)->GetID();
+				sidc.lastcheck = lastCheck;
+				sidc.vao = vaon;
 
-            _last_IDs.push_back(sidc);
+				_last_IDs.push_back(sidc);
 			}
 			else if ((*itScene)->GetType() == SCENE_LIGHT) {
 
@@ -215,31 +220,43 @@ bool Renderer::Render()
 				lightCount++;
 
 
-			} else {
+			}
+			else {
 				Log::GetLog()->Warning("Unsupported scene object! Skipping...");
 				continue;
 			}
-        }
+		}
 
-        /* Check for deleted objects */
+
+		/* Check for deleted objects */
 		int deleted_num = 0, di = 0;
 	deleted_check:
-        for (auto it2 = _last_IDs.begin()+deleted_num; it2 != _last_IDs.end(); ++it2) {
-            if (it2->lastcheck != lastCheck){
-                Log::GetLog()->Write("Removing object ID %d from the cache",
-                    it2->ID);
-                this->RemoveVertexData(it2->vao);
+		for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
+			bool isDeleted = true;
+			SceneIDCache* sic;
+			for (auto it2 = _last_IDs.begin() + deleted_num; it2 != _last_IDs.end(); ++it2) {
+				if (it2->ID == (*itScene)->GetID()) {
+					isDeleted = false;
+					sic = &(*it2);
+					break;
+				}
+				di++;
+			}
+
+			if (isDeleted) {
+				Log::GetLog()->Write("Removing object ID %d from the cache",
+					(*itScene)->GetID());
+				this->RemoveVertexData(sic->vao);
 				deleted_num = di;
-                _last_IDs.erase(it2);
+				_last_IDs.erase(_last_IDs.begin()+di);
 
 				if (_last_IDs.empty())
 					break;
-				else
-					goto deleted_check;
-            }
-			di++;
-        }
-    }
+			}
+
+		}
+		
+	}
 
 
     glm::mat4 mModel, mView, mProj;
@@ -248,11 +265,6 @@ bool Renderer::Render()
 
     sForward->Use();
     sForward->SetUniform("mView", mView);
-
-	sForward->SetUniform("lightCount", lightCount);
-	sForward->SetUniformArray("lightStrenghts", 4, lightStrengths);
-	sForward->SetUniformArray("lightPositions", 4, lightPositions);
-	sForward->SetUniformArray("lightColors", 4, lightColors);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

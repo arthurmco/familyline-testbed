@@ -144,7 +144,7 @@ LocatableObject* InputPicker::GetIntersectedObject()
 			float distance = glm::distance(origin, planePos);
 
 			auto t = glm::length((origin * obNormal + distance) / (direction * obNormal));
-			printf("%s: t = %.2f\t", loc->GetName(), t);
+			//printf("%s: t = %.2f\t", loc->GetName(), t);
 			if (t > 0) {
 				/* Intersects! */
 				return loc;

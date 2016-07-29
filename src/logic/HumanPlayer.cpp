@@ -162,7 +162,7 @@ bool HumanPlayer::Play(GameContext* gctx){
 
 	LocatableObject* l = _ip->GetIntersectedObject();
 	if (l) {
-		printf("intersected with %s\n", l->GetName());
+		//printf("intersected with %s\n", l->GetName());
 	}
 
     return true;
