@@ -73,6 +73,7 @@ int main(int argc, char const *argv[]) {
             se.what(), se.code);
         Log::GetLog()->Fatal("Shader file: %s, type %d",
             se.file.c_str(), se.type);
+		system("pause");
         exit(EXIT_FAILURE);
     }
 
@@ -155,7 +156,9 @@ int main(int argc, char const *argv[]) {
         objrend->Check();
         objrend->Update();
 
+		rndr->SetBoundingBox(hp.renderBBs);
         rndr->Render();
+
         frame++;
 
         unsigned int elapsed = SDL_GetTicks();

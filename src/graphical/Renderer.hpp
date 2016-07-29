@@ -40,18 +40,27 @@ namespace Graphics {
         SDL_Window* _win;
         SDL_GLContext _glctxt;
 
-
-
         SceneManager* _scenemng;
         std::vector<VertexRenderInfo> _vertices;
+		std::vector<VertexRenderInfo> _bb_vaos;
 
-        ShaderProgram* sForward;
+		ShaderProgram *sForward, *sLines;
 		Texture* fake_tex;
+
+		/* Custom properties */
+		bool renderBBs = false;
 
         void InitializeLibraries();
         void InitializeShaders();
 
         void SetMaterial(int index);
+
+		void CheckUpdatedObjects();
+
+		/* Render object bounding boxes */
+		void RenderBoundingBoxes();
+		int AddBoundingBox(Mesh*, glm::vec3 color);
+		void RemoveBoundingBox(GLuint);
 
     public:
         Renderer();
@@ -69,6 +78,8 @@ namespace Graphics {
         void RemoveVertexData(GLuint vaoid);
 
         void GetWindowSize(int& width, int& height);
+
+		void SetBoundingBox(bool);
     };
 
 }
