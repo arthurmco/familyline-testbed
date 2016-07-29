@@ -16,6 +16,8 @@ public:
         {
             Tribalia::Graphics::OBJOpener op;
             this->SetMesh(op.Open("test.obj"));
+			this->GetMesh()->GenerateBoundingBox();
+
         }
 
     virtual bool Initialize(){
@@ -40,6 +42,7 @@ HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
 
 
 void HumanPlayer::SetCamera(Tribalia::Graphics::Camera* c) { _cam = c;}
+void HumanPlayer::SetPicker(Tribalia::Input::InputPicker* ip) { _ip = ip; }
 
 /***
     Virtual function called on each iteration.
@@ -60,11 +63,12 @@ InputListener ilt;
 
 bool HumanPlayer::Play(GameContext* gctx){
 	InputManager::GetInstance()->Run();
-
+	srand((uint32_t)gctx);
     while (InputManager::GetInstance()->GetDefaultListener()->PopEvent(ev)) {
         if (ev.eventType == EVENT_FINISH) {
             return false;
         }
+		
 
         if (ev.eventType == EVENT_KEYEVENT) {
             switch (ev.event.keyev.scancode) {
@@ -111,35 +115,15 @@ bool HumanPlayer::Play(GameContext* gctx){
                     if (ev.event.keyev.status != KEY_KEYPRESS)
                         goto key_flush;
 
-                    printf("Create object:\n");
-                    printf("\tName: ");
-                    char n[128];
-                    int i = 0;
-                    float px, py, pz;
+					char cname[32];
+					sprintf(cname, "Object%d", rand());
+					glm::vec3 p = _ip->GetTerrainProjectedPosition();					
 
-                    fflush(stdin);
-                    do {
-                        n[i] = 0;
-                        n[i] = (char) getc(stdin);
-                        if (n[i] == '\n') {
-                            n[i] = 0;
-                            break;
-                        }
-                        i++;
-                    } while (i < 128);
-                    if (i <= 1) goto key_flush;
+                    printf("Creating %s at %.3f %.3f %.3f\n", cname, p.x, 1, p.z);
 
-                    fflush(stdin);
-
-                    printf("\tPosition of %s: ", n);
-                    if (scanf("%f %f %f", &px, &py, &pz) < 3)
-                        goto key_flush;
-
-                    printf("Creating %s at %.3f %.3f %.3f\n", n, px, py, pz);
-
-                    ConcreteObject* c = new ConcreteObject{0, n, px, py, pz};
+                    ConcreteObject* c = new ConcreteObject{0, cname, p.x, 1, p.z};
                     int id = gctx->om->RegisterObject(c);
-                    printf("%s has id %d now\n", n, id);
+                    printf("%s has id %d now\n", cname, id);
                     fflush(stdin);
                 }
                 break;
@@ -156,6 +140,7 @@ bool HumanPlayer::Play(GameContext* gctx){
 //            printf("%d %d \n", ev.mousex, ev.mousey);
     key_flush:
 		__nop();
+
     }
 
 
@@ -175,6 +160,10 @@ bool HumanPlayer::Play(GameContext* gctx){
         _cam->AddRotation(glm::vec3(0, 1, 0), glm::radians(-1.0f));
 
 
+	LocatableObject* l = _ip->GetIntersectedObject();
+	if (l) {
+		printf("intersected with %s\n", l->GetName());
+	}
 
     return true;
 

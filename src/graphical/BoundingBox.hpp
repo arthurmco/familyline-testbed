@@ -44,6 +44,7 @@ namespace Graphics {
     public:
         glm::vec3 points[BOUNDING_BOX_COUNT];
         float rotation;
+        float minX, minY, minZ, maxX, maxY, maxZ;
 
         /* Check if normal collides with bouding box.
             Returns the face index, or -1 if no collision happens*/
