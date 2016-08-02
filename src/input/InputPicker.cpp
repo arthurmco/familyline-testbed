@@ -132,81 +132,64 @@ LocatableObject* InputPicker::GetIntersectedObject()
 
 		if (loc) {
 			BoundingBox bb = loc->GetMesh()->GetBoundingBox();
+			glm::vec4 vmin = glm::vec4(bb.minX, bb.minY, bb.minZ, 1);
+			glm::vec4 vmax = glm::vec4(bb.maxX, bb.maxY, bb.maxZ, 1);
+
+			vmin = loc->GetMesh()->GetModelMatrix() * vmin;
+			vmax = loc->GetMesh()->GetModelMatrix() * vmax;
+
+			glm::min(vmin.y, 0.0f);
+			glm::max(vmax.y, 0.0f);
+
 			glm::vec3 planePosX, planePosY, planePosZ;
 
-			planePosX = (direction.x > 0) ? bb.points[BOUNDING_BOX_FACE_LEFT] : bb.points[BOUNDING_BOX_FACE_RIGHT];
-			planePosY = (direction.y > 0) ? bb.points[BOUNDING_BOX_FACE_BOTTOM] : bb.points[BOUNDING_BOX_FACE_TOP];
-			planePosZ = (direction.z > 0) ? bb.points[BOUNDING_BOX_FACE_FRONT] : bb.points[BOUNDING_BOX_FACE_BACK];
+			float tmin = -100000;
+			float tmax = 100000;
 			
-			glm::vec4 planePosX4 = loc->GetMesh()->GetModelMatrix() * glm::vec4(planePosX.x, planePosX.y, planePosX.z, 1.0);
-			glm::vec4 planePosY4 = loc->GetMesh()->GetModelMatrix() * glm::vec4(planePosY.x, planePosY.y, planePosY.z, 1.0);
-			glm::vec4 planePosZ4 = loc->GetMesh()->GetModelMatrix() * glm::vec4(planePosZ.x, planePosZ.y, planePosZ.z, 1.0);
+			float dxmin, dxMax;
+			printf("\n%s\n", loc->GetName());
+			if (direction.x != 0) {
+				dxmin = (vmin.x - origin.x) / direction.x;
+				dxMax = (vmax.x - origin.x) / direction.x;
 
-			planePosX = glm::vec3(planePosX4.x, planePosX4.y, planePosX4.z);
-			planePosY = glm::vec3(planePosY4.x, planePosY4.y, planePosY4.z);
-			planePosZ = glm::vec3(planePosZ4.x, planePosZ4.y, planePosZ4.z);
+				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+				printf("x: %.4f %.4f \t", dxmin, dxMax);
+				if (tmax < tmin) continue;
+			} 
 
-			glm::vec4 obNormalX4 = loc->GetMesh()->GetModelMatrix() * glm::vec4((direction.x > 0) ? -1 : 1, 0, 0, 0);
-			glm::vec4 obNormalY4 = loc->GetMesh()->GetModelMatrix() * glm::vec4(0, (direction.y > 0) ? -1 : 1, 0, 0);
-			glm::vec4 obNormalZ4 = loc->GetMesh()->GetModelMatrix() * glm::vec4(0, 0, (direction.z > 0) ? -1 : 1, 0);
+			if (direction.y != 0) {
+				dxmin = (vmin.y - origin.y) / direction.y;
+				dxMax = (vmax.y - origin.y) / direction.y;
 
-			glm::vec3 obNormalX = glm::vec3(obNormalX4.x, obNormalX4.y, obNormalX4.z);
-			glm::vec3 obNormalY = glm::vec3(obNormalY4.x, obNormalY4.y, obNormalY4.z);
-			glm::vec3 obNormalZ = glm::vec3(obNormalZ4.x, obNormalZ4.y, obNormalZ4.z);
+				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+				printf("y: %.4f %.4f \t", dxmin, dxMax);
+				if (tmax < tmin) continue;
 
-			/* Test with X axis */
-			float denomx = glm::dot(obNormalX, direction);
-			printf("\n %s", loc->GetName());
-			printf("\ndenomx: %.3f", denomx);
-			if (glm::abs(denomx) < 0.001) {
-				continue;
 			}
 
-			/* The rays aren't perpendicular, i.e, they may collide */
-			float tx = glm::dot(loc->GetMesh()->GetPosition() - origin, obNormalX) / denomx;
-			printf("\t t: %.3f\n", tx);
+			if (direction.z != 0) {
+				dxmin = (vmin.z - origin.z) / direction.z;
+				dxMax = (vmax.z - origin.z) / direction.z;
 
-			if (tx < 0) {
-				/* There's not a collision */
-				continue;
+				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+				printf("z: %.4f %.4f \t", dxmin, dxMax);
+				if (tmax < tmin) continue;
+
 			}
 
-			/* Test with Y axis */
-			float denomy = glm::dot(obNormalY, direction);
-			printf("\ndenomy: %.3f", denomy);
-			if (glm::abs(denomy) < 0.001) {
-				continue;
-			}
+			printf("total: %.4f %.4f\n", tmin, tmax);
 
-			/* The rays aren't perpendicular, i.e, they may collide */
-			float ty = glm::dot(loc->GetMesh()->GetPosition() - origin, obNormalY) / denomy;
-			printf("\t t: %.3f\n", ty);
-
-			if (ty < 0) {
-				/* There's not a collision */
-				continue;
-			}
-
-			/* Test with Z axis */
-			float denomz = glm::dot(obNormalY, direction);
-			printf("\ndenomz: %.3f", denomz);
-			if (glm::abs(denomz) < 0.001) {
-				continue;
-			}
-
-			/* The rays aren't perpendicular, i.e, they may collide */
-			float tz = glm::dot(loc->GetMesh()->GetPosition() - origin, obNormalZ) / denomz;
-			printf("\t t: %.3f\n", ty);
-
-			if (tz < 0) {
-				/* There's not a collision */
+			/* Ray misses */
+			if (tmin < 0) {
 				continue;
 			}
 
 			/* Collided with both 3 axis! */
-			return loc;
-
-			
+			if (tmax >= tmin)
+				return loc;		
 
 			
 		}

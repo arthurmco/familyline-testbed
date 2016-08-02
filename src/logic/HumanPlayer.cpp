@@ -17,7 +17,6 @@ public:
             Tribalia::Graphics::OBJOpener op;
             this->SetMesh(op.Open("test.obj"));
 			this->GetMesh()->GenerateBoundingBox();
-
         }
 
     virtual bool Initialize(){
@@ -119,9 +118,9 @@ bool HumanPlayer::Play(GameContext* gctx){
 					sprintf(cname, "Object%d", rand() % rand());
 					glm::vec3 p = _ip->GetTerrainProjectedPosition();					
 
-                    printf("Creating %s at %.3f %.3f %.3f\n", cname, p.x, 1, p.z);
+                    printf("Creating %s at %.3f %.3f %.3f\n", cname, p.x, 2, p.z);
 
-                    ConcreteObject* c = new ConcreteObject{0, cname, p.x, 1, p.z};
+                    ConcreteObject* c = new ConcreteObject{0, cname, p.x, 2, p.z};
                     int id = gctx->om->RegisterObject(c);
                     printf("%s has id %d now\n", cname, id);
                     fflush(stdin);
