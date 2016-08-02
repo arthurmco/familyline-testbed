@@ -91,7 +91,7 @@ int main(int argc, char const *argv[]) {
 
     bool player = false;
 
-    Camera cam = Camera{glm::vec3(4.2f, 16.0f, 3.8f), glm::vec3(0,0,0)};
+    Camera cam = Camera{glm::vec3(4.0f, 16.0f, 4.0f), glm::vec3(0,0,0)};
     scenemng->SetCamera(&cam);
     hp.SetCamera(&cam);
 
@@ -123,7 +123,7 @@ int main(int argc, char const *argv[]) {
 
 	Light* l = new Light{ "mainLight", glm::vec3(16, 30, 6), 0xff, 0xff, 0xff, 20 };
 	Light* l2 = new Light{ "mainLight2", glm::vec3(8, 5, 6), 0, 0, 255, 40 };
-	Light* l3 = new Light{ "mainLight2", glm::vec3(16, 5, 6), 255, 0, 255, 40 };
+	Light* l3 = new Light{ "mainLight3", glm::vec3(16, 5, 6), 255, 0, 255, 40 };
 	
 
     scenemng->AddObject(m);
@@ -143,7 +143,8 @@ int main(int argc, char const *argv[]) {
 
 	InputManager::GetInstance()->Initialize();
 
-	InputPicker* ip = new InputPicker{ terr_rend, rndr, scenemng, &cam };
+	InputPicker* ip = new InputPicker{ terr_rend, rndr, scenemng, &cam, om};
+	hp.SetPicker(ip);
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
@@ -167,7 +168,9 @@ int main(int argc, char const *argv[]) {
         objrend->Check();
         objrend->Update();
 
+		rndr->SetBoundingBox(hp.renderBBs);
         rndr->Render();
+
         frame++;
 
         unsigned int elapsed = SDL_GetTicks();

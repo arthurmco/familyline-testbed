@@ -8,6 +8,7 @@
 #include "Player.hpp"
 #include "../graphical/Camera.hpp"
 #include "ObjectRenderer.hpp"
+#include "../input/InputPicker.hpp"
 #include "../input/InputManager.hpp"
 
 #ifndef HUMAN_PLAYER
@@ -20,8 +21,11 @@ namespace Logic {
     {
     private:
         Tribalia::Graphics::Camera* _cam;
+		Tribalia::Input::InputPicker* _ip;
         
     public:
+		bool renderBBs = false;
+
         ObjectRenderer* objr;
 
         HumanPlayer(const char* name, int elo=0, int xp=0);
@@ -37,6 +41,7 @@ namespace Logic {
         virtual bool Play(GameContext*);
 
         void SetCamera(Tribalia::Graphics::Camera*);
+		void SetPicker(Tribalia::Input::InputPicker* ip);
         void SetInputManager(Tribalia::Input::InputManager*);
 
         ~HumanPlayer();

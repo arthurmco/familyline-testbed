@@ -58,10 +58,10 @@ void Renderer::InitializeLibraries()
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,   8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,  16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-    _win = SDL_CreateWindow("Tribalia", 0, 0, 640, 480,
+    _win = SDL_CreateWindow("Tribalia", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480,
         SDL_WINDOW_OPENGL);
     if (!_win) {
         char err[1024] = "Window creation error: ";
@@ -96,10 +96,12 @@ void Renderer::InitializeLibraries()
 void Renderer::InitializeShaders()
 {
     Shader *sFrag, *sVert;
+	Shader *fLines, *vLines;
 
     sFrag = new Shader{"shaders/Forward.frag", SHADER_PIXEL};
     sVert = new Shader{"shaders/Forward.vert", SHADER_VERTEX};
-
+	fLines = new Shader{ "shaders/Lines.frag", SHADER_PIXEL };
+	vLines = new Shader{ "shaders/Lines.vert", SHADER_VERTEX };
 
     if (!sFrag->Compile()) {
         throw shader_exception("Shader failed to compile", glGetError(),
@@ -119,6 +121,23 @@ void Renderer::InitializeShaders()
             shnum, SHADER_PROGRAM);
     }
 
+	if (!fLines->Compile()) {
+		throw shader_exception("Shader failed to compile", glGetError(),
+			fLines->GetPath(), fLines->GetType());
+	}
+
+	if (!vLines->Compile()) {
+		throw shader_exception("Shader failed to compile", glGetError(),
+			vLines->GetPath(), vLines->GetType());
+	}
+
+	sLines = new ShaderProgram{ vLines, fLines };
+	if (!sLines->Link()) {
+		char shnum[6];
+		sprintf(shnum, "%d", sLines->GetID());
+		throw shader_exception("Shader failed to link", glGetError(),
+			shnum, SHADER_PROGRAM);
+	}
 }
 
 void Renderer::SetMaterial(int ID)
@@ -154,53 +173,66 @@ struct SceneIDCache {
 int lastCheck = 0;
 std::vector<SceneIDCache> _last_IDs;
 
-int lightCount = 0;
-glm::vec3 lightPositions[4];
-glm::vec3 lightColors[4];
-float lightStrengths[4];
+LightRenderInfo lri;
 
-/* Returns true if rendered successfully */
-bool Renderer::Render()
+void Renderer::CheckUpdatedObjects()
 {
-	
-    /* Check updates from SceneManager*/
-    if (_scenemng->UpdateValidObjects()) {
-            lastCheck++;
-        auto objList = _scenemng->GetValidObjects();
+	lastCheck++;
 
-        /* Check for inserted objects */
-        for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
-            for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); it2++) {
-                if ((*itScene)->GetID() == it2->ID) {
-                    it2->lastcheck = lastCheck;
-                    break;
-                }
-            }
+	/* Check updates from SceneManager*/
+	if (_scenemng->UpdateValidObjects()) {
 
-            /* Object doesn't exist on renderer */
-            Log::GetLog()->Write("Renderer added object '%s' (id %d)",
-                (*itScene)->GetName(), (*itScene)->GetID());
+		auto objList = _scenemng->GetValidObjects();
 
+		/* Check for inserted objects */
+		for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
+			bool objExists = false;
+			/* Check for inserted meshes */
+			switch ((*itScene)->GetType()) {
+			case SCENE_MESH:
+				for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); it2++) {
+					if ((*itScene)->GetID() == it2->ID && (*itScene)->GetType() == SCENE_MESH) {
+						it2->lastcheck = lastCheck;
+						objExists = true;
+						break;
+					}
+				}
+				break;
+			/* Check for inserted lights*/
+			case SCENE_LIGHT:
+				for (int i = 0; i < lri.lightCount; i++) {
+					if (lri.lightIDs[i] == (*itScene)->GetID()) {
+						objExists = true;
+						break;
+					}
+				}
+				break;
+			}
+			
+
+			if (objExists) continue;
+			/* Draw the added object */
 			if ((*itScene)->GetType() == SCENE_MESH) {
 
-            /* Draw the added object */
-            Mesh* mes = (Mesh*)(*itScene);
-            mes->ApplyTransformations();
+				/* Draw the added object */
+				Mesh* mes = (Mesh*)(*itScene);
+				mes->ApplyTransformations();
 
-            int vaon = this->AddVertexData(mes->GetVertexData(),
-                mes->GetModelMatrixPointer());
+				int vaon = this->AddVertexData(mes->GetVertexData(),
+					mes->GetModelMatrixPointer());
 
-            SceneIDCache sidc;
-            sidc.ID = (*itScene)->GetID();
-            sidc.lastcheck = lastCheck;
-            sidc.vao = vaon;
+				SceneIDCache sidc;
+				sidc.ID = (*itScene)->GetID();
+				sidc.lastcheck = lastCheck;
+				sidc.vao = vaon;
+				
 
-            _last_IDs.push_back(sidc);
+				_last_IDs.push_back(sidc);
 			}
 			else if ((*itScene)->GetType() == SCENE_LIGHT) {
 
 				/*** TODO: Sort lights by strength and send only the most strong ones ***/
-				if (lightCount > 4) {
+				if (lri.lightCount > 4) {
 					Log::GetLog()->Warning("Maximum number of lights per render exceeded.");
 					continue;
 				}
@@ -209,50 +241,65 @@ bool Renderer::Render()
 				Log::GetLog()->Write("Renderer added light %s", light->GetName());
 				int lR, lG, lB;
 				light->GetColor(lR, lG, lB);
-				lightColors[lightCount] = glm::vec3(lR / 255.0f, lG / 255.0f, lB / 255.0f);
-				lightPositions[lightCount] = light->GetPosition();
-				lightStrengths[lightCount] = light->GetStrength();
-				lightCount++;
+				lri.lightColors[lri.lightCount] = glm::vec3(lR / 255.0f, lG / 255.0f, lB / 255.0f);
+				lri.lightPositions[lri.lightCount] = light->GetPosition();
+				lri.lightStrengths[lri.lightCount] = light->GetStrength();
+				lri.lightIDs[lri.lightCount] = light->GetID();
+				lri.lightCount++;
 
-
-			} else {
+			}
+			else {
 				Log::GetLog()->Warning("Unsupported scene object! Skipping...");
 				continue;
 			}
-        }
+		}
 
-        /* Check for deleted objects */
+		/* Check for deleted objects */
 		int deleted_num = 0, di = 0;
 	deleted_check:
-        for (auto it2 = _last_IDs.begin()+deleted_num; it2 != _last_IDs.end(); ++it2) {
-            if (it2->lastcheck != lastCheck){
-                Log::GetLog()->Write("Removing object ID %d from the cache",
-                    it2->ID);
-                this->RemoveVertexData(it2->vao);
+		for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
+			bool isDeleted = true;
+			SceneIDCache* sic = nullptr;
+			for (auto it2 = _last_IDs.begin() + deleted_num; it2 != _last_IDs.end(); ++it2) {
+				if (it2->ID == (*itScene)->GetID()) {
+					isDeleted = false;
+					sic = &(*it2);
+					break;
+				}
+				di++;
+			}
+
+			if (isDeleted && sic) {
+				Log::GetLog()->Write("Removing object ID %d from the cache",
+					(*itScene)->GetID());
+				this->RemoveVertexData(sic->vao);
 				deleted_num = di;
-                _last_IDs.erase(it2);
+				_last_IDs.erase(_last_IDs.begin() + di);
 
 				if (_last_IDs.empty())
 					break;
-				else
-					goto deleted_check;
-            }
-			di++;
-        }
-    }
+			}
+
+		}
+
+	}
+}
 
 
+bool Renderer::Render() 
+{
+	this->CheckUpdatedObjects();
     glm::mat4 mModel, mView, mProj;
     mView = this->_scenemng->GetCamera()->GetViewMatrix();
     mProj = this->_scenemng->GetCamera()->GetProjectionMatrix();
 
     sForward->Use();
     sForward->SetUniform("mView", mView);
-
-	sForward->SetUniform("lightCount", lightCount);
-	sForward->SetUniformArray("lightStrenghts", 4, lightStrengths);
-	sForward->SetUniformArray("lightPositions", 4, lightPositions);
-	sForward->SetUniformArray("lightColors", 4, lightColors);
+	
+	sForward->SetUniform("lightCount", lri.lightCount);
+	sForward->SetUniformArray("lightStrenghts", 4, lri.lightStrengths);
+	sForward->SetUniformArray("lightPositions", 4, lri.lightPositions);
+	sForward->SetUniformArray("lightColors", 4, lri.lightColors);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -326,6 +373,9 @@ bool Renderer::Render()
         glDisableVertexAttribArray(0);
     }
 
+	if (renderBBs) {
+		this->RenderBoundingBoxes();
+	}
 
     SDL_GL_SwapWindow(_win);
     return true;
@@ -405,17 +455,136 @@ void Renderer::RemoveVertexData(GLuint vaoid)
         if (it->vao == vaoid) {
             glDeleteVertexArrays(1, &vaoid);
             glDeleteBuffers(1, &it->vbo_pos);
-            glDeleteBuffers(1, &it->vbo_norm);
+			glDeleteBuffers(1, &it->vbo_norm);
+			glDeleteBuffers(1, &it->vbo_tex);
             _vertices.erase(it);
 			break;
         }
     }
 }
 
+/* Render object bounding boxes */
+void Renderer::RenderBoundingBoxes()
+{
+	sLines->Use();
+	for (auto it = _bb_vaos.begin(); it != _bb_vaos.end(); it++) {
+		sLines->SetUniform("mvp", 
+			_scenemng->GetCamera()->GetProjectionMatrix() *_scenemng->GetCamera()->GetViewMatrix() * *it->worldMat);
+		
+		glBindVertexArray(it->vao);
+
+		// 1rst attribute buffer : vertices
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, it->vbo_pos);
+		glVertexAttribPointer(
+			0,                  // attribute 0 (positions)
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, it->vbo_norm);	// use normal space for colors
+		glVertexAttribPointer(
+			1,                  // attribute 1 (colors)
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+
+		glGetError();
+		glDrawArrays(GL_LINE_STRIP, 0, it->vd->Positions.size());
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+			Log::GetLog()->Fatal("OpenGL error %#x", err);
+		}
+	}
+}
+
+int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
+{
+	VertexRenderInfo vri;
+
+	/* Generate bb points */
+
+	m->GenerateBoundingBox();
+	BoundingBox bb = m->GetBoundingBox();
+	vri.vd = new VertexData{};
+	vri.vd->Positions.push_back(glm::vec3(bb.minX, bb.minY, bb.minZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.minX, bb.maxY, bb.minZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.maxX, bb.maxY, bb.minZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.minX, bb.minY, bb.minZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.maxX, bb.minY, bb.minZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.maxX, bb.maxY, bb.minZ));
+
+	vri.vd->Positions.push_back(glm::vec3(bb.minX, bb.maxY, bb.minZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.minX, bb.maxY, bb.maxZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.minX, bb.maxY, bb.minZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.maxX, bb.maxY, bb.minZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
+
+	vri.vd->Positions.push_back(glm::vec3(bb.minX, bb.minY, bb.maxZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.minX, bb.maxY, bb.maxZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.minX, bb.minY, bb.maxZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.maxX, bb.minY, bb.maxZ));
+	vri.vd->Positions.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
+
+	for (int i = 0; i < vri.vd->Positions.size(); i++) {
+		// Use normals for color, so we can use the same struct.
+		vri.vd->Normals.push_back(color);
+	}
+
+	vri.worldMat = m->GetModelMatrixPointer();
+
+	glGenVertexArrays(1, &vri.vao);
+	glBindVertexArray(vri.vao);
+
+	glGenBuffers(1, &vri.vbo_pos);
+	glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_pos);
+	glBufferData(GL_ARRAY_BUFFER, vri.vd->Positions.size() * sizeof(glm::vec3),
+		vri.vd->Positions.data(), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &vri.vbo_norm);
+	glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_norm);
+	glBufferData(GL_ARRAY_BUFFER, vri.vd->Normals.size() * sizeof(glm::vec3),
+		vri.vd->Normals.data(), GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+
+	Log::GetLog()->Write("Added bounding box with VAO %d (VBO %d)", vri.vao,
+		vri.vbo_pos);
+	
+	_bb_vaos.push_back(vri);
+	return vri.vao;
+}
+
+void Renderer::RemoveBoundingBox(GLuint vao)
+{
+	VertexRenderInfo vri;
+	for (auto it = _bb_vaos.begin(); it != _bb_vaos.end(); it++) {
+		if (it->vao == vao) {
+			glDeleteVertexArrays(1, &vao);
+			glDeleteBuffers(1, &it->vbo_pos);
+			glDeleteBuffers(1, &it->vbo_norm);
+			_bb_vaos.erase(it);
+			break;
+		}
+	}
+}
+
 void Renderer::GetWindowSize(int& width, int& height)
 {
     SDL_GetWindowSize(this->_win, &width, &height);
 }
+
+void Renderer::SetBoundingBox(bool b) { renderBBs = b; }
 
 Renderer::~Renderer()
 {

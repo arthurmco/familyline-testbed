@@ -96,6 +96,11 @@ int ObjectManager::GetCount()
     return _objects.size();
 }
 
+std::list<ObjectRegisterInfo>* ObjectManager::GetObjectList()
+{
+	return &_objects;
+}
+
 bool ObjectManager::DoActionAll()
 {
     bool actions = true;
