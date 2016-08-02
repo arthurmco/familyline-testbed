@@ -24,6 +24,8 @@ namespace Logic {
 		Tribalia::Input::InputPicker* _ip;
         
     public:
+		bool renderBBs = false;
+
         ObjectRenderer* objr;
 
         HumanPlayer(const char* name, int elo=0, int xp=0);

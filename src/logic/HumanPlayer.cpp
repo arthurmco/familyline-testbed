@@ -17,7 +17,6 @@ public:
             Tribalia::Graphics::OBJOpener op;
             this->SetMesh(op.Open("test.obj"));
 			this->GetMesh()->GenerateBoundingBox();
-
         }
 
     virtual bool Initialize(){
@@ -37,7 +36,7 @@ HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
     : Player(name, elo, xp)
     {
         /* Initialize input subsystems */
-
+		srand((uint32_t)name*elo);
     }
 
 
@@ -62,8 +61,8 @@ bool rotate_left = false, rotate_right = false;
 InputListener ilt;
 
 bool HumanPlayer::Play(GameContext* gctx){
+	
 	InputManager::GetInstance()->Run();
-	srand((uint32_t)gctx);
     while (InputManager::GetInstance()->GetDefaultListener()->PopEvent(ev)) {
         if (ev.eventType == EVENT_FINISH) {
             return false;
@@ -116,17 +115,26 @@ bool HumanPlayer::Play(GameContext* gctx){
                         goto key_flush;
 
 					char cname[32];
-					sprintf(cname, "Object%d", rand());
+					sprintf(cname, "Object%d", rand() % rand());
 					glm::vec3 p = _ip->GetTerrainProjectedPosition();					
 
-                    printf("Creating %s at %.3f %.3f %.3f\n", cname, p.x, 1, p.z);
+                    printf("Creating %s at %.3f %.3f %.3f\n", cname, p.x, 2, p.z);
 
-                    ConcreteObject* c = new ConcreteObject{0, cname, p.x, 1, p.z};
+                    ConcreteObject* c = new ConcreteObject{0, cname, p.x, 2, p.z};
                     int id = gctx->om->RegisterObject(c);
                     printf("%s has id %d now\n", cname, id);
                     fflush(stdin);
                 }
                 break;
+
+				case SDLK_b :
+				{
+					if (ev.event.keyev.status != KEY_KEYPRESS)
+						goto key_flush;
+
+					this->renderBBs = !this->renderBBs;
+				}
+				break;
             }
 
         } else if (ev.eventType == EVENT_MOUSEMOVE) {

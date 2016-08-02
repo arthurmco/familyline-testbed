@@ -161,7 +161,9 @@ int main(int argc, char const *argv[]) {
         objrend->Check();
         objrend->Update();
 
+		rndr->SetBoundingBox(hp.renderBBs);
         rndr->Render();
+
         frame++;
 
         unsigned int elapsed = SDL_GetTicks();

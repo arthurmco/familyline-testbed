@@ -132,23 +132,66 @@ LocatableObject* InputPicker::GetIntersectedObject()
 
 		if (loc) {
 			BoundingBox bb = loc->GetMesh()->GetBoundingBox();
-			glm::vec3 planePos;
-			planePos = glm::vec3(0, 0, 0);
-			planePos.x = (direction.x > 0) ? bb.minX : bb.maxX;
-			planePos.y = (direction.y > 0) ? bb.minY : bb.maxY;
-			planePos.z = (direction.z > 0) ? bb.minZ : bb.maxZ;
-			glm::vec4 planePos4 = loc->GetMesh()->GetModelMatrix() * glm::vec4(planePos, 1.0f);
-			planePos = glm::vec3(planePos4.x, planePos4.y, planePos4.z);
-			
-			glm::vec3 obNormal = glm::normalize(origin - planePos);
-			float distance = glm::distance(origin, planePos);
+			glm::vec4 vmin = glm::vec4(bb.minX, bb.minY, bb.minZ, 1);
+			glm::vec4 vmax = glm::vec4(bb.maxX, bb.maxY, bb.maxZ, 1);
 
-			auto t = glm::length((origin * obNormal + distance) / (direction * obNormal));
-			//printf("%s: t = %.2f\t", loc->GetName(), t);
-			if (t > 0) {
-				/* Intersects! */
-				return loc;
+			vmin = loc->GetMesh()->GetModelMatrix() * vmin;
+			vmax = loc->GetMesh()->GetModelMatrix() * vmax;
+
+			glm::min(vmin.y, 0.0f);
+			glm::max(vmax.y, 0.0f);
+
+			glm::vec3 planePosX, planePosY, planePosZ;
+
+			float tmin = -100000;
+			float tmax = 100000;
+			
+			float dxmin, dxMax;
+			printf("\n%s\n", loc->GetName());
+			if (direction.x != 0) {
+				dxmin = (vmin.x - origin.x) / direction.x;
+				dxMax = (vmax.x - origin.x) / direction.x;
+
+				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+				printf("x: %.4f %.4f \t", dxmin, dxMax);
+				if (tmax < tmin) continue;
+			} 
+
+			if (direction.y != 0) {
+				dxmin = (vmin.y - origin.y) / direction.y;
+				dxMax = (vmax.y - origin.y) / direction.y;
+
+				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+				printf("y: %.4f %.4f \t", dxmin, dxMax);
+				if (tmax < tmin) continue;
+
 			}
+
+			if (direction.z != 0) {
+				dxmin = (vmin.z - origin.z) / direction.z;
+				dxMax = (vmax.z - origin.z) / direction.z;
+
+				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+				printf("z: %.4f %.4f \t", dxmin, dxMax);
+				if (tmax < tmin) continue;
+
+			}
+
+			printf("total: %.4f %.4f\n", tmin, tmax);
+
+			/* Ray misses */
+			if (tmin < 0) {
+				continue;
+			}
+
+			/* Collided with both 3 axis! */
+			if (tmax >= tmin)
+				return loc;		
+
+			
 		}
 	}
 
