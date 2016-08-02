@@ -177,7 +177,7 @@ void Renderer::CheckUpdatedObjects()
 {
 	lastCheck++;
 
-    /* Check updates from SceneManager*/
+	/* Check updates from SceneManager*/
 	if (_scenemng->UpdateValidObjects()) {
 
 		auto objList = _scenemng->GetValidObjects();
@@ -239,17 +239,21 @@ void Renderer::CheckUpdatedObjects()
 					(*itScene)->GetID());
 				this->RemoveVertexData(sic->vao);
 				deleted_num = di;
-				_last_IDs.erase(_last_IDs.begin()+di);
+				_last_IDs.erase(_last_IDs.begin() + di);
 
 				if (_last_IDs.empty())
 					break;
 			}
 
 		}
-		
+
 	}
+}
 
 
+bool Renderer::Render() 
+{
+	this->CheckUpdatedObjects();
     glm::mat4 mModel, mView, mProj;
     mView = this->_scenemng->GetCamera()->GetViewMatrix();
     mProj = this->_scenemng->GetCamera()->GetProjectionMatrix();
