@@ -33,6 +33,7 @@
 #include "graphical/TextureManager.hpp"
 #include "graphical/MaterialManager.hpp"
 #include "graphical/AssetManager.hpp"
+#include "graphical/Window.hpp"
 
 #include "input/InputPicker.hpp"
 
@@ -60,11 +61,12 @@ int main(int argc, char const *argv[]) {
         Log::GetLog()->Write("from commit %07x", COMMIT);
 
     ObjectManager* om = nullptr;
-    Renderer* rndr = nullptr;
+	Window* win = nullptr;
+    //Renderer* rndr = nullptr;
 
     try {
         om = new ObjectManager{};
-        rndr = new Renderer{};
+		win = new Window{ 640, 480 };
     } catch (renderer_exception& re) {
         Log::GetLog()->Fatal("Rendering error: %s [%d]",
             re.what(), re.code);
@@ -95,7 +97,7 @@ int main(int argc, char const *argv[]) {
     scenemng->SetCamera(&cam);
     hp.SetCamera(&cam);
 
-    rndr->SetSceneManager(scenemng);
+    //rndr->SetSceneManager(scenemng);
 
     AssetManager am;
     am.ReadFromFile("test.taif");
@@ -134,17 +136,17 @@ int main(int argc, char const *argv[]) {
 	scenemng->AddObject(l3);
 
     Terrain* terr = new Terrain{1000, 1000};
-    TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
-    terr_rend->SetTerrain(terr);
-    terr_rend->SetCamera(&cam);
+//    TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
+//    terr_rend->SetTerrain(terr);
+//    terr_rend->SetCamera(&cam);
 
     ObjectRenderer* objrend = new ObjectRenderer(om, scenemng);
     hp.objr = objrend;
 
-	InputManager::GetInstance()->Initialize();
+	//InputManager::GetInstance()->Initialize();
 
-	InputPicker* ip = new InputPicker{ terr_rend, rndr, scenemng, &cam, om};
-	hp.SetPicker(ip);
+	//InputPicker* ip = new InputPicker{ terr_rend, rndr, scenemng, &cam, om};
+	//hp.SetPicker(ip);
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
@@ -155,21 +157,23 @@ int main(int argc, char const *argv[]) {
     printf("==== \n Game launched\n");
     printf(" [C] - Create an object\n");
     printf("\n");
+	win->Show();
 
     do {
         player = true;
         gctx.elapsed_seconds = delta / 1000.0;
 
-        if (!hp.Play(&gctx))
-            player = false;
+//        if (!hp.Play(&gctx))
+//            player = false;
 
-        terr_rend->Update();
+//        terr_rend->Update();
 
         objrend->Check();
         objrend->Update();
 
-		rndr->SetBoundingBox(hp.renderBBs);
-        rndr->Render();
+		//rndr->SetBoundingBox(hp.renderBBs);
+        //rndr->Render();
+		win->Update();
 
         frame++;
 
@@ -178,12 +182,12 @@ int main(int argc, char const *argv[]) {
 
         ticks = SDL_GetTicks();
 
-        printf("\033[1m %4d ms \033[0m\r", delta);
+	    printf("\033[1m %4d ms \033[0m\r", delta);
 
-		glm::vec3 cur_wor = ip->GetCursorWorldRay();
-		printf("Cursor ray: (%.2f, %.2f %.2f)\t",
-			cur_wor.x, cur_wor.y, cur_wor.z);
-		ip->GetTerrainProjectedPosition();
+		//glm::vec3 cur_wor = ip->GetCursorWorldRay();
+		//printf("Cursor ray: (%.2f, %.2f %.2f)\t",
+		//	cur_wor.x, cur_wor.y, cur_wor.z);
+		//ip->GetTerrainProjectedPosition();
 
         //Trava em ~60 fps
         if (delta < 16) {

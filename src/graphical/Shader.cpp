@@ -82,6 +82,7 @@ bool Shader::Compile()
         glGetShaderInfoLog(this->_id, logsize, NULL, logdata);
         Log::GetLog()->Warning("Shader %s retrieved a log: \n%s",
             this->_path.c_str(), logdata);
+		throw shader_exception(logdata, 0, this->_path.c_str(), this->_type);
 
 		delete logdata;
     }

@@ -33,6 +33,8 @@ bool ShaderProgram::Link()
         glGetProgramInfoLog(this->_id, logsize, NULL, logdata);
         Log::GetLog()->Warning("Shader program %d retrieved a log: \n%s",
             this->_id, logdata);
+		throw shader_exception(logdata, 0, "", SHADER_PROGRAM);
+
     }
 
     return (res == GL_TRUE);

@@ -13,6 +13,14 @@
 namespace Tribalia {
 namespace Graphics {
 
+    class window_exception : public std::runtime_error
+    {
+    public:
+        explicit window_exception(std::string msg, int code);
+
+        int code;
+    };
+
     class renderer_exception : public std::runtime_error
     {
     public:

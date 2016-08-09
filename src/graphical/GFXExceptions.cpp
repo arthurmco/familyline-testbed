@@ -8,6 +8,12 @@ renderer_exception::renderer_exception(std::string msg, int code)
         this->code = code;
     }
 
+window_exception::window_exception(std::string msg, int code)
+    : std::runtime_error(msg)
+{
+    this->code = code;
+}
+
 shader_exception::shader_exception(std::string msg, int code,
         const char* file, int type)
         : std::runtime_error(msg)
