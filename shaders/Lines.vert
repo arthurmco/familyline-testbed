@@ -1,11 +1,11 @@
-#version 120
+#version 150
 
-attribute vec3 position;
-attribute vec3 color;
+in vec3 position;
+in vec3 color;
 
 uniform mat4 mvp;
 
-varying vec3 outColor;
+out vec3 outColor;
 
 void main() {
     vec4 pos4 = vec4(position,1);

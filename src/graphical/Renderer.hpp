@@ -43,6 +43,7 @@ namespace Graphics {
 		int lightIDs[4];
 	};
 
+
     class Renderer
     {
     private:

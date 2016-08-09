@@ -1,21 +1,21 @@
-#version 120
+#version 150
 
-attribute vec3 position;
-attribute vec3 normal;
-attribute vec2 texcoord;
+in vec3 position;
+in vec3 normal;
+in vec2 texcoord;
 
 uniform mat4 mvp;
 uniform mat4 mModel, mView;
 
-varying vec3 norm_out;
-varying vec2 tex_coords;
+out vec3 norm_out;
+out vec2 tex_coords;
 
-varying vec3 norm_Camera;
+out vec3 norm_Camera;
 
 uniform int lightCount;
 uniform vec3 lightPositions[4];
 
-varying vec3 lightDirections[4];
+out vec3 lightDirections[4];
 
 void main() {
   gl_Position = mvp * vec4(position, 1.0);

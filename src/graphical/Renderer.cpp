@@ -2,7 +2,7 @@
 
 using namespace Tribalia::Graphics;
 
-GLuint vao_tri, vbo_tri;
+GLuint vao_tri = 0, vbo_tri = 0;
 
 
 Renderer::Renderer()
@@ -59,7 +59,7 @@ void Renderer::InitializeLibraries()
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,  16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
     _win = SDL_CreateWindow("Tribalia", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480,
         SDL_WINDOW_OPENGL);
@@ -79,6 +79,7 @@ void Renderer::InitializeLibraries()
         throw renderer_exception(err, -11);
     }
 
+	glewExperimental = GL_TRUE;
     GLenum glewStatus = glewInit();
 
     if (glewStatus != GLEW_OK) {
@@ -319,8 +320,8 @@ bool Renderer::Render()
 
         // 1rst attribute buffer : vertices
         glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, it->vbo_pos);
-        glVertexAttribPointer(
+		glBindBuffer(GL_ARRAY_BUFFER, it->vbo_pos);
+		glVertexAttribPointer(
            0,                  // attribute 0 (positions)
            3,                  // size
            GL_FLOAT,           // type
@@ -330,7 +331,7 @@ bool Renderer::Render()
         );
 
         glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, it->vbo_norm);
+		glBindBuffer(GL_ARRAY_BUFFER, it->vbo_norm);
         glVertexAttribPointer(
            1,                  // attribute 1 (normals)
            3,                  // size
@@ -412,17 +413,23 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
     glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_pos);
     glBufferData(GL_ARRAY_BUFFER, v->Positions.size() * sizeof(glm::vec3),
         v->Positions.data(), GL_STATIC_DRAW);
-
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+	
     glGenBuffers(1, &vri.vbo_norm);
     glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_norm);
     glBufferData(GL_ARRAY_BUFFER, v->Normals.size() * sizeof(glm::vec3),
         v->Normals.data(), GL_STATIC_DRAW);
-
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
+		
 	glGenBuffers(1, &vri.vbo_tex);
 	glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_tex);
 	glBufferData(GL_ARRAY_BUFFER, v->TexCoords.size() * sizeof(glm::vec2),
 		v->TexCoords.data(), GL_STATIC_DRAW);
-
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(2);
+	
     glBindVertexArray(0);
 
     Log::GetLog()->Write("Added vertices with VAO %d (VBO %d)", vri.vao,

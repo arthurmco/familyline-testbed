@@ -1,9 +1,9 @@
-#version 120
+#version 150
 
 uniform vec3 color;
 
-varying vec3 norm_Camera;
-varying vec2 tex_coords;
+in vec3 norm_Camera;
+in vec2 tex_coords;
 
 uniform vec3 diffuse_color;
 uniform float diffuse_intensity;
@@ -16,7 +16,7 @@ uniform int lightCount;
 uniform float lightStrenghts[4];
 uniform vec3 lightColors[4];
 
-varying vec3 lightDirections[4];
+in vec3 lightDirections[4];
 
 uniform sampler2D tex_sam;
 
@@ -24,7 +24,7 @@ void main() {
   vec3 vcolor = diffuse_color;
 
   vec3 texel = vec3(1,0,0);
-  texel = texture2D(tex_sam, tex_coords).rgb;
+  texel = texture(tex_sam, tex_coords).rgb;
   vcolor = mix(diffuse_color, texel, tex_amount);
 
   vec4 lightSum = vec4(0);
