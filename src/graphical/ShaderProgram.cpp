@@ -45,9 +45,23 @@ void ShaderProgram::Use()
 }
 
 
+/* Tries to get the uniform location.
+First, it query the cache, then it asks for OpenGL*/
+GLint ShaderProgram::GetUniformLocation(const char* name)
+{
+	std::string sname{ name };
+	if (uniform_cache.find(sname) == uniform_cache.end()) {
+		// Not found. Adds to the cache
+		uniform_cache[sname] = glGetUniformLocation(this->_id, name);
+	}
+
+	return uniform_cache[sname];
+}
+
+
 bool ShaderProgram::SetUniform(const char* name, glm::mat4 value)
 {
-    GLint unif_id = glGetUniformLocation(this->_id, name);
+    GLint unif_id = GetUniformLocation(name);
 
     if (unif_id < 0) {
         Log::GetLog()->Write("Uniform %s not found on shader %d",
@@ -62,7 +76,7 @@ bool ShaderProgram::SetUniform(const char* name, glm::mat4 value)
 
 bool ShaderProgram::SetUniform(const char* name, glm::vec3 value)
 {
-    GLint unif_id = glGetUniformLocation(this->_id, name);
+    GLint unif_id = GetUniformLocation(name);
     glUniform3fv(unif_id, 1, (const GLfloat*) &value[0]);
     //Log::GetLog()->Write("Setted uniform %s (id %d) to (%.3f %.3f %.3f) on shader %d",
     //    name, unif_id, value.x, value.y, value.z, _id);
@@ -71,7 +85,7 @@ bool ShaderProgram::SetUniform(const char* name, glm::vec3 value)
 
 bool ShaderProgram::SetUniform(const char* name, float value)
 {
-    GLint unif_id = glGetUniformLocation(this->_id, name);
+    GLint unif_id = GetUniformLocation(name);
     glUniform1f(unif_id, value);
 
     //Log::GetLog()->Write("Setted uniform %s (id %d) to (%.3f %.3f %.3f) on shader %d",
@@ -81,7 +95,7 @@ bool ShaderProgram::SetUniform(const char* name, float value)
 
 bool ShaderProgram::SetUniform(const char* name, int value)
 {
-	GLint unif_id = glGetUniformLocation(this->_id, name);
+	GLint unif_id = GetUniformLocation(name);
 	glUniform1i(unif_id, value);
 
 	if (unif_id < 0) {
@@ -96,7 +110,7 @@ bool ShaderProgram::SetUniform(const char* name, int value)
 
 bool ShaderProgram::SetUniformArray(const char* name, int count, float* value)
 {
-	GLint unif_id = glGetUniformLocation(this->_id, name);
+	GLint unif_id = GetUniformLocation(name);
 	glUniform1fv(unif_id, count, value);
 
 	if(unif_id < 0) {
@@ -112,7 +126,7 @@ bool ShaderProgram::SetUniformArray(const char* name, int count, float* value)
 
 bool ShaderProgram::SetUniformArray(const char* name, int count, glm::vec3* value)
 {
-	GLint unif_id = glGetUniformLocation(this->_id, name);
+	GLint unif_id = GetUniformLocation(name);
 	glUniform3fv(unif_id, count, (const GLfloat*)&value[0]);
 
 	if(unif_id < 0) {

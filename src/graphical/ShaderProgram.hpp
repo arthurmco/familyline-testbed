@@ -8,6 +8,8 @@
 #include "Shader.hpp"
 #include <glm/glm.hpp>
 
+#include <map>
+
 #ifndef SHADERPROGRAM_HPP
 #define SHADERPROGRAM_HPP
 
@@ -21,6 +23,12 @@ namespace Graphics {
         Shader* _pixel;
 
         GLint _id;
+
+		std::map<std::string, GLint> uniform_cache;
+
+		/* Tries to get the uniform location.
+			First, it query the cache, then it asks for OpenGL*/
+		GLint GetUniformLocation(const char* name);
     public:
         ShaderProgram(Shader* vert, Shader* pixel);
         bool Link();
