@@ -10,6 +10,7 @@
 
 #include "ShaderProgram.hpp"
 #include "GFXExceptions.hpp"
+#include "Framebuffer.hpp"
 
 #ifndef WINDOW_HPP
 #define WINDOW_HPP
@@ -25,6 +26,8 @@ namespace Graphics {
 
 		ShaderProgram* winShader = nullptr;
 
+		Framebuffer* _f3D = nullptr;
+
         GLuint base_vao, base_vbo, base_index_vbo;
     public:
         Window(int w, int h);
@@ -34,6 +37,10 @@ namespace Graphics {
 
         /* Updates the window content to the video card */
         void Update();
+
+		void Set3DFramebuffer(Framebuffer* f);
+
+		void GetSize(int& w, int& h);
     };
 
 

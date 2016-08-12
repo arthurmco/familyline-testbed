@@ -35,7 +35,6 @@ file(GLOB_RECURSE SRC_GFX "${CMAKE_SOURCE_DIR}/src/graphical/*.cpp")
 file(GLOB_RECURSE SRC_INPUT "${CMAKE_SOURCE_DIR}/src/input/*.cpp")
 file(GLOB SRC_BASE "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
-
 #include_directories(${SDL2_INCLUDE_DIR})
 
 #Compilation data
@@ -48,7 +47,7 @@ if (MSVC)
   SET(GLEW_INCLUDE "." CACHE PATH "GLEW include directory")
   SET(GLM_INCLUDE "." CACHE PATH "GLM include directory")
   SET(DEVIL_INCLUDE "." CACHE PATH "DevIL include directory")
-  	
+
   include_directories(AFTER ${SDL_INCLUDE} ${GLEW_INCLUDE} ${GLM_INCLUDE} ${DEVIL_INCLUDE} )
 
   #Set library directories
@@ -69,7 +68,7 @@ if (MSVC)
   target_link_libraries(tribalia ${DEVIL_LIB})
   target_link_libraries(tribalia ${DEVIL_ILU_LIB})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /GR /W4")
-  
+
 else()
   target_link_libraries(tribalia "SDL2")
   target_link_libraries(tribalia "GL")

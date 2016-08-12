@@ -41,6 +41,7 @@ Window::Window(int w, int h)
 static const GLfloat base_win_square_points[] =
 { -1.0, 1.0, 1.0,        1.0, 1.0, 1.0,
 1.0, -1.0, 1.0,        -1.0, -1.0, 1.0 };
+
 static const GLuint base_win_square_elements[] =
 { 0, 3, 2, 0, 1, 2 };
 
@@ -69,47 +70,62 @@ void Window::Show()
         throw renderer_exception(err, glewStatus);
     }
 
-    //Enable depth test
-    glEnable(GL_DEPTH_TEST);
 
-    /* Create the basic VAO for the window */
- 
-    glGenBuffers(1, &base_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, base_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(base_win_square_points),
-        base_win_square_points, GL_STATIC_DRAW);
-
-    glGenBuffers(1, &base_index_vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, base_index_vbo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(base_win_square_elements),
-        base_win_square_elements, GL_STATIC_DRAW);
-
-
+	/* Compile the shader */
 	if (!winShader) {
 		Shader *sv = new Shader{ "shaders/Window.vert", SHADER_VERTEX };
 		Shader *sf = new Shader{ "shaders/Window.frag", SHADER_PIXEL };
 
 		sv->Compile();
 		sf->Compile();
-
+	
 		winShader = new ShaderProgram{ sv, sf };
 		winShader->Link();
+		
 	}
 
+
+    /* Create the basic VAO for the window */
+ 
+	glGenVertexArrays(1, &base_vao);
+	glBindVertexArray(base_vao);
+
+    glGenBuffers(1, &base_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, base_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(base_win_square_points),
+        base_win_square_points, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &base_index_vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, base_index_vbo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(base_win_square_elements),
+		base_win_square_elements, GL_STATIC_DRAW);
+    
+	glBindVertexArray(0);
+
     SDL_ShowWindow(_win);
+
 }
 
 /* Updates the window content to the video card */
 void Window::Update()
 {
+	glDisable(GL_DEPTH_TEST);
 	winShader->Use();
+	glClear(GL_COLOR_BUFFER_BIT);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, base_index_vbo);
+	winShader->SetUniform("texRender", 0);
+	//winShader->SetUniform("texGUI", 1);
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, _f3D->GetTextureHandle());
+	
+	glBindVertexArray(base_vao);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, base_vbo);
 	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		0,                  // attribute 0. 
 		3,                  // size
 		GL_FLOAT,           // type
 		GL_FALSE,           // normalized?
@@ -118,8 +134,29 @@ void Window::Update()
 	);
 	// Draw the triangle !
 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, base_index_vbo);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	
-	glDisableVertexAttribArray(0);
 
+	SDL_GL_SwapWindow(_win);
+
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR) {
+		printf("GL error %#x\n", err);
+	}
+
+
+	glDisableVertexAttribArray(0);
+	glBindVertexArray(0);
+	glEnable(GL_DEPTH_TEST);
+}
+
+void Window::GetSize(int& w, int& h)
+{
+	w = _width;
+	h = _height;
+}
+
+void Window::Set3DFramebuffer(Framebuffer* f)
+{
+	_f3D = f;
 }

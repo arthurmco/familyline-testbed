@@ -47,9 +47,6 @@ namespace Graphics {
     class Renderer
     {
     private:
-        SDL_Window* _win;
-        SDL_GLContext _glctxt;
-
         SceneManager* _scenemng;
         std::vector<VertexRenderInfo> _vertices;
 		std::vector<VertexRenderInfo> _bb_vaos;
@@ -86,8 +83,6 @@ namespace Graphics {
         GLint AddVertexData(VertexData*, glm::mat4* worldMatrix);
 
         void RemoveVertexData(GLuint vaoid);
-
-        void GetWindowSize(int& width, int& height);
 
 		void SetBoundingBox(bool);
     };

@@ -11,7 +11,7 @@
 
 #include "Cursor.hpp"
 #include "../graphical/TerrainRenderer.hpp"
-#include "../graphical/Renderer.hpp"
+#include "../graphical/Window.hpp"
 #include "../graphical/Camera.hpp"
 #include "../graphical/SceneManager.hpp"
 #include "../logic/ObjectManager.hpp"
@@ -22,7 +22,7 @@ namespace Input {
     class InputPicker {
     private:
         Tribalia::Graphics::TerrainRenderer* _terrain;
-		Tribalia::Graphics::Renderer* _renderer;
+		Tribalia::Graphics::Window* _win;
 		Tribalia::Graphics::SceneManager* _sm;
 		Tribalia::Graphics::Camera* _cam;
 		Tribalia::Logic::ObjectManager* _om;
@@ -34,7 +34,7 @@ namespace Input {
 #define MAX_PICK_ITERATIONS 20
 
         InputPicker(Tribalia::Graphics::TerrainRenderer* terrain,
-			Tribalia::Graphics::Renderer* renderer,
+			Tribalia::Graphics::Window* win,
 			Tribalia::Graphics::SceneManager* sm,
 			Tribalia::Graphics::Camera* cam,
 			Tribalia::Logic::ObjectManager* om);

@@ -4,11 +4,11 @@ using namespace Tribalia::Input;
 using namespace Tribalia::Graphics;
 using namespace Tribalia::Logic;
 
-InputPicker::InputPicker(TerrainRenderer* terrain, Renderer* renderer, SceneManager* sm, Camera* cam,
+InputPicker::InputPicker(TerrainRenderer* terrain, Window* win, SceneManager* sm, Camera* cam,
 	ObjectManager* om)
 {
     this->_terrain = terrain;
-    this->_renderer = renderer;
+    this->_win = win;
     this->_sm = sm;
 	this->_cam = cam;
 	this->_om = om;
@@ -18,7 +18,7 @@ InputPicker::InputPicker(TerrainRenderer* terrain, Renderer* renderer, SceneMana
 glm::vec4 InputPicker::GetCursorScreenRay()
 {
     int w = 0, h = 0, x = 0, y = 0;
-    _renderer->GetWindowSize(w, h);
+    _win->GetSize(w, h);
     Cursor::GetInstance()->GetPositions(x, y);
 
     // Create ray data.
@@ -44,7 +44,7 @@ glm::vec3 InputPicker::GetCursorWorldRay()
 	return glm::normalize(cur_world3);
 	*/
 	int x, y, w, h;
-	_renderer->GetWindowSize(w, h);
+	_win->GetSize(w, h);
 	Cursor::GetInstance()->GetPositions(x, y);
 
 

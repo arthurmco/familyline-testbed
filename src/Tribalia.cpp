@@ -34,6 +34,7 @@
 #include "graphical/MaterialManager.hpp"
 #include "graphical/AssetManager.hpp"
 #include "graphical/Window.hpp"
+#include "graphical/Framebuffer.hpp"
 
 #include "input/InputPicker.hpp"
 
@@ -62,11 +63,15 @@ int main(int argc, char const *argv[]) {
 
     ObjectManager* om = nullptr;
 	Window* win = nullptr;
-    //Renderer* rndr = nullptr;
+    Renderer* rndr = nullptr;
 
     try {
         om = new ObjectManager{};
 		win = new Window{ 640, 480 };
+		Framebuffer::SetDefaultSize(640, 480);
+		win->Show();
+
+		rndr = new Renderer{};
     } catch (renderer_exception& re) {
         Log::GetLog()->Fatal("Rendering error: %s [%d]",
             re.what(), re.code);
@@ -97,7 +102,7 @@ int main(int argc, char const *argv[]) {
     scenemng->SetCamera(&cam);
     hp.SetCamera(&cam);
 
-    //rndr->SetSceneManager(scenemng);
+    rndr->SetSceneManager(scenemng);
 
     AssetManager am;
     am.ReadFromFile("test.taif");
@@ -136,43 +141,46 @@ int main(int argc, char const *argv[]) {
 	scenemng->AddObject(l3);
 
     Terrain* terr = new Terrain{1000, 1000};
-//    TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
-//    terr_rend->SetTerrain(terr);
-//    terr_rend->SetCamera(&cam);
+    TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
+    terr_rend->SetTerrain(terr);
+    terr_rend->SetCamera(&cam);
 
     ObjectRenderer* objrend = new ObjectRenderer(om, scenemng);
     hp.objr = objrend;
 
-	//InputManager::GetInstance()->Initialize();
+	InputManager::GetInstance()->Initialize();
 
-	//InputPicker* ip = new InputPicker{ terr_rend, rndr, scenemng, &cam, om};
-	//hp.SetPicker(ip);
+	InputPicker* ip = new InputPicker{ terr_rend, win, scenemng, &cam, om};
+	hp.SetPicker(ip);
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
     int delta = 1;
 
+	Framebuffer fbRender{ 640, 480, GL_UNSIGNED_BYTE };
+	win->Set3DFramebuffer(&fbRender);
 
     printf("==== \n Game launched\n");
     printf(" [C] - Create an object\n");
     printf("\n");
-	win->Show();
 
     do {
         player = true;
         gctx.elapsed_seconds = delta / 1000.0;
 
-//        if (!hp.Play(&gctx))
-//            player = false;
+        if (!hp.Play(&gctx))
+            player = false;
 
-//        terr_rend->Update();
+		terr_rend->Update();
 
         objrend->Check();
         objrend->Update();
 
-		//rndr->SetBoundingBox(hp.renderBBs);
-        //rndr->Render();
+		fbRender.SetActive();
+		rndr->SetBoundingBox(hp.renderBBs);
+        rndr->Render();
+		fbRender.UnsetActive();
 		win->Update();
 
         frame++;

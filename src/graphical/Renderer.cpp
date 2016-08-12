@@ -7,29 +7,11 @@ GLuint vao_tri = 0, vbo_tri = 0;
 
 Renderer::Renderer()
 {
-    InitializeLibraries();
+    //InitializeLibraries();
+    //Enable depth test
+    glEnable(GL_DEPTH_TEST);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-    /*** TEST: Draw a triangle ***/
-    glGenVertexArrays(1, &vao_tri);
-    glBindVertexArray(vao_tri);
-
-    glGenBuffers(1, &vbo_tri);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_tri);
-
-    static const GLfloat triangle_data[] =
-        {
-            -1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, 0.0f,
-            0.0f,  1.0f, 0.0f,
-        };
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_data), triangle_data,
-        GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
-    /*** END TEST ***/
 
     InitializeShaders();
     sForward->Use();
@@ -45,52 +27,6 @@ Renderer::Renderer()
 
 void Renderer::InitializeLibraries()
 {
-    int sdl_ret = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
-    if (sdl_ret != 0) {
-        /* Video hasn't been initialized correctly */
-        char err[1024] = "SDL wasn't initialized correctly: ";
-        strcat(err, SDL_GetError());
-        throw renderer_exception(err, sdl_ret);
-    }
-
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE,    8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,  8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,   8);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,  16);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-
-    _win = SDL_CreateWindow("Tribalia", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480,
-        SDL_WINDOW_OPENGL);
-    if (!_win) {
-        char err[1024] = "Window creation error: ";
-        strcat(err, SDL_GetError());
-        SDL_Quit();
-        throw renderer_exception(err, -10);
-    }
-
-    _glctxt = SDL_GL_CreateContext(_win);
-
-    if (_glctxt == NULL) {
-        char err[1024] = "OpenGL context creation error: ";
-        strcat(err, SDL_GetError());
-        SDL_Quit();
-        throw renderer_exception(err, -11);
-    }
-
-	glewExperimental = GL_TRUE;
-    GLenum glewStatus = glewInit();
-
-    if (glewStatus != GLEW_OK) {
-        char err[1024] = "GLEW initialization error: ";
-        strcat(err, (char*)glewGetErrorString(glewStatus));
-        SDL_Quit();
-        throw renderer_exception(err, glewStatus);
-    }
-
-    //Enable depth test
-    glEnable(GL_DEPTH_TEST);
 
 }
 
@@ -209,7 +145,7 @@ void Renderer::CheckUpdatedObjects()
 				}
 				break;
 			}
-			
+
 
 			if (objExists) continue;
 			/* Draw the added object */
@@ -226,7 +162,7 @@ void Renderer::CheckUpdatedObjects()
 				sidc.ID = (*itScene)->GetID();
 				sidc.lastcheck = lastCheck;
 				sidc.vao = vaon;
-				
+
 
 				_last_IDs.push_back(sidc);
 			}
@@ -287,7 +223,7 @@ void Renderer::CheckUpdatedObjects()
 }
 
 
-bool Renderer::Render() 
+bool Renderer::Render()
 {
 	this->CheckUpdatedObjects();
     glm::mat4 mModel, mView, mProj;
@@ -296,7 +232,7 @@ bool Renderer::Render()
 
     sForward->Use();
     sForward->SetUniform("mView", mView);
-	
+
 	sForward->SetUniform("lightCount", lri.lightCount);
 	sForward->SetUniformArray("lightStrenghts", 4, lri.lightStrengths);
 	sForward->SetUniformArray("lightPositions", 4, lri.lightPositions);
@@ -378,7 +314,6 @@ bool Renderer::Render()
 		this->RenderBoundingBoxes();
 	}
 
-    SDL_GL_SwapWindow(_win);
     return true;
 }
 
@@ -415,21 +350,21 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
         v->Positions.data(), GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
-	
+
     glGenBuffers(1, &vri.vbo_norm);
     glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_norm);
     glBufferData(GL_ARRAY_BUFFER, v->Normals.size() * sizeof(glm::vec3),
         v->Normals.data(), GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(1);
-		
+
 	glGenBuffers(1, &vri.vbo_tex);
 	glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_tex);
 	glBufferData(GL_ARRAY_BUFFER, v->TexCoords.size() * sizeof(glm::vec2),
 		v->TexCoords.data(), GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(2);
-	
+
     glBindVertexArray(0);
 
     Log::GetLog()->Write("Added vertices with VAO %d (VBO %d)", vri.vao,
@@ -475,9 +410,9 @@ void Renderer::RenderBoundingBoxes()
 {
 	sLines->Use();
 	for (auto it = _bb_vaos.begin(); it != _bb_vaos.end(); it++) {
-		sLines->SetUniform("mvp", 
+		sLines->SetUniform("mvp",
 			_scenemng->GetCamera()->GetProjectionMatrix() *_scenemng->GetCamera()->GetViewMatrix() * *it->worldMat);
-		
+
 		glBindVertexArray(it->vao);
 
 		// 1rst attribute buffer : vertices
@@ -567,7 +502,7 @@ int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
 
 	Log::GetLog()->Write("Added bounding box with VAO %d (VBO %d)", vri.vao,
 		vri.vbo_pos);
-	
+
 	_bb_vaos.push_back(vri);
 	return vri.vao;
 }
@@ -584,11 +519,6 @@ void Renderer::RemoveBoundingBox(GLuint vao)
 			break;
 		}
 	}
-}
-
-void Renderer::GetWindowSize(int& width, int& height)
-{
-    SDL_GetWindowSize(this->_win, &width, &height);
 }
 
 void Renderer::SetBoundingBox(bool b) { renderBBs = b; }
