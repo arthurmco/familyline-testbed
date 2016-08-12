@@ -16,8 +16,8 @@ Framebuffer::Framebuffer(int w, int h, GLenum format)
 	glBindTexture(GL_TEXTURE_2D, tex_handle);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, GL_RGBA, format, 0);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glGenRenderbuffers(1, &renderbuffer_handle);
 	glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_handle);

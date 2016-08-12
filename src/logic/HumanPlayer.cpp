@@ -36,7 +36,7 @@ HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
     : Player(name, elo, xp)
     {
         /* Initialize input subsystems */
-		srand((uint32_t)name*elo);
+		srand((size_t)name*elo);
     }
 
 
@@ -118,9 +118,9 @@ bool HumanPlayer::Play(GameContext* gctx){
 					sprintf(cname, "Object%d", rand() % rand());
 					glm::vec3 p = _ip->GetTerrainProjectedPosition();					
 
-                    printf("Creating %s at %.3f %.3f %.3f\n", cname, p.x, 2, p.z);
+                    printf("Creating %s at %.3f %.3f %.3f\n", cname, p.x, 2.0f, p.z);
 
-                    ConcreteObject* c = new ConcreteObject{0, cname, p.x, 2, p.z};
+                    ConcreteObject* c = new ConcreteObject{0, cname, p.x, 2.0f, p.z};
                     int id = gctx->om->RegisterObject(c);
                     printf("%s has id %d now\n", cname, id);
                     fflush(stdin);

@@ -156,9 +156,10 @@ int main(int argc, char const *argv[]) {
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
+
     int delta = 1;
 
-	Framebuffer fbRender{ 640, 480, GL_UNSIGNED_BYTE };
+	Framebuffer fbRender{ 320, 240, GL_UNSIGNED_BYTE };
 	win->Set3DFramebuffer(&fbRender);
 
     printf("==== \n Game launched\n");
