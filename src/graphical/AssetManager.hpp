@@ -48,6 +48,8 @@ private:
     std::vector<Asset*> _assets;
     std::vector<AssetGroup*> _groups;
 
+	bool LoadAsset(Asset* a);
+
 public:
     AssetGroup* AddAssetGroup(const char* path, const char* tag);
 

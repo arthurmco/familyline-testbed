@@ -159,7 +159,7 @@ int main(int argc, char const *argv[]) {
 
     int delta = 1;
 
-	Framebuffer fbRender{ 320, 240, GL_UNSIGNED_BYTE };
+	Framebuffer fbRender{ 640, 480, GL_UNSIGNED_BYTE };
 	win->Set3DFramebuffer(&fbRender);
 
     printf("==== \n Game launched\n");
