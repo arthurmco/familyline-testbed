@@ -128,18 +128,13 @@ int main(int argc, char const *argv[]) {
 	m3->SetPosition(glm::vec3(20, 1, 10));
 	m3->GenerateBoundingBox();
 
-	Light* l = new Light{ "mainLight", glm::vec3(16, 30, 6), 0xff, 0xff, 0xff, 20 };
-	Light* l2 = new Light{ "mainLight2", glm::vec3(8, 5, 6), 0, 0, 255, 40 };
-	Light* l3 = new Light{ "mainLight3", glm::vec3(16, 5, 6), 255, 0, 255, 40 };
-	
+	Light* l = new Light{ "mainLight", glm::vec3(16, 30, 16), 0xff, 0xff, 0xff, 10 };
 
     scenemng->AddObject(m);
     scenemng->AddObject(m2);
 	scenemng->AddObject(m3);
 	scenemng->AddObject(l);
-	scenemng->AddObject(l2);
-	scenemng->AddObject(l3);
-
+	
     Terrain* terr = new Terrain{1000, 1000};
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
     terr_rend->SetTerrain(terr);

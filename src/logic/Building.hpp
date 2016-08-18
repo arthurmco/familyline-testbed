@@ -7,6 +7,7 @@
 ***/
 
 #include "AttackableObject.hpp"
+#include "Unit.hpp"
 
 #ifndef BUILDING_H
 #define BUILDING_H
@@ -16,6 +17,17 @@ namespace Logic {
 
     class Building : public AttackableObject
     {
+	private:
+		inline void InitGarrisoning(int capacity = 0);
+
+	protected:
+		/*	The maximum amount of people that can be garrisoned inside the 
+			building */
+		int _maximumCapacityUnits;
+
+		Unit** _garrisonedUnits;
+		int _garrisonedCount;
+
     public:
         Building(int oid, int tid, const char* name);
         Building(int oid, int tid, const char* name,
@@ -26,11 +38,18 @@ namespace Logic {
         Building(int oid, int tid, const char* name,
             float x, float y, float z, int maxHP,
             float baseAtk, float baseArmor,
-            float buildMaterial, float BuildingStrength);
+            float buildMaterial, float BuildingStrength,
+			int garrisonCapacity);
 
         float GetBuildMaterial(); void SetBuildMaterial(float);
         float GetBuildingStrength(); void SetBuildingStrength(float);
 
+		int GetMaximumGarrisonCapacity();
+		int GetGarrisonedUnitCound();
+
+		/* Get/set where your units will be created or degarrisoned, in game units */
+		void GetUnitBirthPoint(float& x, float& y);
+		void SetUnitBirthPoint(float x, float y);
     };
 
 }

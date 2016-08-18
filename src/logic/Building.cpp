@@ -16,6 +16,7 @@ Building::Building(int oid, int tid, const char* name,
     {
         this->AddProperty("buildMaterial", 0.0f);
         this->AddProperty("buildingStrength", 1.0f);
+		InitGarrisoning();
     }
 
 Building::Building(int oid, int tid, const char* name,
@@ -25,15 +26,17 @@ Building::Building(int oid, int tid, const char* name,
     {
         this->AddProperty("buildMaterial", 0.0f);
         this->AddProperty("buildingStrength", 1.0f);
+		InitGarrisoning();
     }
 Building::Building(int oid, int tid, const char* name,
     float x, float y, float z, int maxHP,
     float baseAtk, float baseArmor,
-    float buildMaterial, float buildingStrength)
+    float buildMaterial, float buildingStrength, int garrisonCapacity)
     : AttackableObject(oid, tid, name, x, y, z, maxHP, baseAtk, baseArmor)
     {
         this->AddProperty("buildMaterial", buildMaterial);
         this->AddProperty("buildingStrength", buildingStrength);
+		InitGarrisoning(garrisonCapacity);
     }
 
 float Building::GetBuildMaterial()
@@ -56,4 +59,22 @@ float Building::GetBuildingStrength()
 void Building::SetBuildingStrength(float bs)
 {
     this->SetProperty("buildingStrength", bs);
+}
+
+inline void Building::InitGarrisoning(int capacity)
+{
+	this->_maximumCapacityUnits = capacity;
+	this->_garrisonedCount = 0;
+	if (capacity > 0) {
+		this->_garrisonedUnits = new Unit*[capacity];		
+	}
+}
+
+int Building::GetMaximumGarrisonCapacity()
+{
+	return _maximumCapacityUnits;
+}
+int Building::GetGarrisonedUnitCound()
+{
+	return _garrisonedCount;
 }

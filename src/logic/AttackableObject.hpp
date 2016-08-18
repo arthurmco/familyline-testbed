@@ -26,15 +26,20 @@ namespace Tribalia {
             AttackableObject(int oid, int tid, const char* name,
                 float x, float y, float z, int maxHP,
                 float baseAtk, float baseArmor);
-
-
-            int GetMaxHP();
-            float GetHP();
-            float GetBaseAttack();
-            float GetBaseArmor();
+			
+            int GetMaxHP(void);
+            float GetHP(void);
+            float GetBaseAttack(void);
+            float GetBaseArmor(void);
 
             float SetBaseAttack(float);
             float SetBaseArmor(float);
+
+            float GetUnitBonus(void);
+            float GetBasicBuildingBonus(void);
+            float GetMediumBuildingBonus(void);
+            float GetAdvancedBuildingBonus(void);
+
         protected:
             /* Increase HP until maximum */
             float Heal(float);
