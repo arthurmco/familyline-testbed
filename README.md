@@ -15,4 +15,4 @@ If you are building under Windows, download the packages in their respective sit
 
 If you are building on Linux, type the following command:
 
-`# apt-get install libglm-dev libglew libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev`
+`# apt-get install libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev`

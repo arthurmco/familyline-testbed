@@ -147,7 +147,7 @@ bool HumanPlayer::Play(GameContext* gctx){
 
 //            printf("%d %d \n", ev.mousex, ev.mousey);
     key_flush:
-		__nop();
+		while(0);
 
     }
 
