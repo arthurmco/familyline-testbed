@@ -46,6 +46,7 @@ int Framebuffer::defWidth, Framebuffer::defHeight;
     bring back the default one */
 void Framebuffer::UnsetActive()
 {
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_handle);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, defWidth, defHeight);
 

@@ -22,6 +22,7 @@
 #include "logic/ObjectRenderer.hpp"
 
 #include "graphical/Renderer.hpp"
+#include "graphical/GUIRenderer.hpp"
 #include "graphical/ShaderProgram.hpp"
 #include "graphical/Camera.hpp"
 #include "graphical/Light.hpp"
@@ -155,7 +156,12 @@ int main(int argc, char const *argv[]) {
     int delta = 1;
 
 	Framebuffer fbRender{ 640, 480, GL_UNSIGNED_BYTE };
+	Framebuffer fbGUI{ 640, 480, GL_UNSIGNED_BYTE };
 	win->Set3DFramebuffer(&fbRender);
+	win->SetGUIFramebuffer(&fbGUI);
+
+	GUIRenderer gr{ win };
+	gr.SetFramebuffer(&fbGUI);
 
     printf("==== \n Game launched\n");
     printf(" [C] - Create an object\n");
@@ -172,6 +178,8 @@ int main(int argc, char const *argv[]) {
 
         objrend->Check();
         objrend->Update();
+
+		gr.Render();
 
 		fbRender.SetActive();
 		rndr->SetBoundingBox(hp.renderBBs);

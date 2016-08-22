@@ -27,6 +27,7 @@ namespace Graphics {
 		ShaderProgram* winShader = nullptr;
 
 		Framebuffer* _f3D = nullptr;
+		Framebuffer* _fGUI = nullptr;
 
         GLuint base_vao, base_vbo, base_index_vbo;
     public:
@@ -39,6 +40,7 @@ namespace Graphics {
         void Update();
 
 		void Set3DFramebuffer(Framebuffer* f);
+		void SetGUIFramebuffer(Framebuffer* f);
 
 		void GetSize(int& w, int& h);
     };

@@ -116,11 +116,13 @@ void Window::Update()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	winShader->SetUniform("texRender", 0);
-	//winShader->SetUniform("texGUI", 1);
+	winShader->SetUniform("texGUI", 1);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, _f3D->GetTextureHandle());
-	
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, _fGUI->GetTextureHandle());
+
 	glBindVertexArray(base_vao);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, base_vbo);
@@ -159,4 +161,9 @@ void Window::GetSize(int& w, int& h)
 void Window::Set3DFramebuffer(Framebuffer* f)
 {
 	_f3D = f;
+}
+
+void Window::SetGUIFramebuffer(Framebuffer* f)
+{
+	_fGUI = f;
 }

@@ -47,18 +47,21 @@ if (MSVC)
   SET(GLEW_INCLUDE "." CACHE PATH "GLEW include directory")
   SET(GLM_INCLUDE "." CACHE PATH "GLM include directory")
   SET(DEVIL_INCLUDE "." CACHE PATH "DevIL include directory")
+  SET(CAIRO_INCLUDE "." CACHE PATH "Cairo include directory")
 
-  include_directories(AFTER ${SDL_INCLUDE} ${GLEW_INCLUDE} ${GLM_INCLUDE} ${DEVIL_INCLUDE} )
+  include_directories(AFTER ${SDL_INCLUDE} ${GLEW_INCLUDE} ${GLM_INCLUDE} ${DEVIL_INCLUDE} ${CAIRO_INCLUDE})
 
   #Set library directories
   SET(SDL_LIB_FOLDER "." CACHE PATH "SDL2 library directory")
   SET(GLEW_LIB_FOLDER "." CACHE PATH "GLEW library directory")
   SET(DEVIL_LIB_FOLDER "." CACHE PATH "DevIL library folder")
+  SET(CAIRO_LIB_FOLDER "." CACHE PATH "Cairo library folder")
 
   find_library(SDL_LIB "SDL2.lib" ${SDL_LIB_FOLDER})
   find_library(GLEW_LIB "glew32.lib" ${GLEW_LIB_FOLDER})
   find_library(DEVIL_LIB "devil.lib" ${DEVIL_LIB_FOLDER})
   find_library(DEVIL_ILU_LIB "ILU.lib" ${DEVIL_LIB_FOLDER})
+  find_library(CAIRO_LIB "cairo.lib" ${CAIRO_LIB_FOLDER})
 
   link_directories(${SDL_LIB} ${GLEW_LIB})
 
@@ -67,6 +70,7 @@ if (MSVC)
   target_link_libraries(tribalia ${GLEW_LIB})
   target_link_libraries(tribalia ${DEVIL_LIB})
   target_link_libraries(tribalia ${DEVIL_ILU_LIB})
+  target_link_libraries(tribalia ${CAIRO_LIB})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /GR /W4")
 
 else()

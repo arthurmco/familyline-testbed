@@ -4,7 +4,9 @@
 */
 
 #include <cairo/cairo.h>
-#include <GLEW/gl.h>
+#include <GL/glew.h>
+
+#include "Window.hpp"
 
 #ifndef GUIRENDERER_HPP
 #define GUIRENDERER_HPP
@@ -18,16 +20,21 @@ namespace Graphics {
 class GUIRenderer {
 private:
    cairo_t* cr;
-   cairo_context_t* cr_ctxt;
+   cairo_surface_t* cr_surface;
  
+   Window* _w;
+
+   Framebuffer* _f;
 public:
-    GUIRenderer();
+    GUIRenderer(Window* w);
+
+	void SetFramebuffer(Framebuffer* f);
 
     /* Write a message in the screen */
-    DebugWrite(const char* fmt, ...);   
+    void DebugWrite(const char* fmt, ...);   
 
     /* Render the GUI view */
-    Render();
+    bool Render();
 
 
 };
