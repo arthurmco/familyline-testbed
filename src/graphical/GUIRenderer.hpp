@@ -6,6 +6,8 @@
 #include <cairo/cairo.h>
 #include <GL/glew.h>
 
+#include <cstdarg>
+
 #include "Window.hpp"
 
 #ifndef GUIRENDERER_HPP
@@ -31,7 +33,7 @@ public:
 	void SetFramebuffer(Framebuffer* f);
 
     /* Write a message in the screen */
-    void DebugWrite(const char* fmt, ...);   
+    void DebugWrite(int x, int y, const char* fmt, ...);   
 
     /* Render the GUI view */
     bool Render();

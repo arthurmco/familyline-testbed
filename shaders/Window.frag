@@ -8,7 +8,7 @@ in vec2 uv;
 void main() {
 
     vec4 crender = texture(texRender, uv);
-    vec4 cgui = texture(texGUI, uv);
+    vec4 cgui = texture(texGUI, vec2(uv.x, 1.0-uv.y));
 
     gl_FragColor = vec4(mix(crender, cgui, cgui.a).rgb, 1.0);
 }

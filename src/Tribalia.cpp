@@ -163,11 +163,12 @@ int main(int argc, char const *argv[]) {
 	GUIRenderer gr{ win };
 	gr.SetFramebuffer(&fbGUI);
 
-    printf("==== \n Game launched\n");
-    printf(" [C] - Create an object\n");
-    printf("\n");
-
+	double pms = 0.0;
+	int pframe = 0;
     do {
+
+		gr.DebugWrite(10, 15, "Tribalia v0.0.1 Build 1, commit %07x", COMMIT);
+		gr.DebugWrite(10, 35, "Press C to create an object at mouse cursor.");
         player = true;
         gctx.elapsed_seconds = delta / 1000.0;
 
@@ -193,8 +194,13 @@ int main(int argc, char const *argv[]) {
         delta = elapsed - ticks;
 
         ticks = SDL_GetTicks();
+	
+		if (frame % 30 == 0) {
+			pms = delta * 1.0;
+		}
 
-	    printf("\033[1m %4d ms \033[0m\r", delta);
+		gr.DebugWrite(0, 420, "%.1f ms, %.2f fps", pms, 1000 / pms);
+		
 
 		//glm::vec3 cur_wor = ip->GetCursorWorldRay();
 		//printf("Cursor ray: (%.2f, %.2f %.2f)\t",
