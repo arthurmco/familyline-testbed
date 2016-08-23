@@ -25,7 +25,7 @@ shader_exception::shader_exception(std::string msg, int code,
 
 mesh_exception::mesh_exception(std::string msg, int code,
         const char* file)
-        : std::runtime_error(msg + "'" + file + "'")
+        : std::runtime_error(msg)
         {
             this->code = code;
             this->file = std::string{file};

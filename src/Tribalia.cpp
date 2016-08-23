@@ -18,7 +18,7 @@
 #include <glm/gtc/matrix_transform.hpp> //glm::lookAt()
 
 #include "Log.hpp"
-#include "logic/HumanPlayer.hpp"
+#include "HumanPlayer.hpp"
 #include "logic/ObjectRenderer.hpp"
 
 #include "graphical/Renderer.hpp"
@@ -63,19 +63,63 @@ int main(int argc, char const *argv[]) {
         Log::GetLog()->Write("from commit %07x", COMMIT);
 
     ObjectManager* om = nullptr;
-	Window* win = nullptr;
+	  Window* win = nullptr;
     Renderer* rndr = nullptr;
+    HumanPlayer* hp;
+    SceneManager* scenemng;
 
+    bool player = false;
+
+    Camera* cam;
+
+    AssetManager am;
+    Mesh* m;
+
+    GameContext gctx;
     try {
-        om = new ObjectManager{};
-		win = new Window{ 640, 480 };
-		Framebuffer::SetDefaultSize(640, 480);
-		win->Show();
+      om = new ObjectManager{};
+		  win = new Window{ 640, 480 };
 
-		rndr = new Renderer{};
+		  Framebuffer::SetDefaultSize(640, 480);
+		  win->Show();
+
+      rndr = new Renderer{};
+
+
+      gctx.om = om;
+
+      hp = new HumanPlayer{"Arthur"};
+      scenemng = new SceneManager();
+
+      cam = new Camera{glm::vec3(4.0f, 16.0f, 4.0f), glm::vec3(0,0,0)};
+      scenemng->SetCamera(cam);
+      hp->SetCamera(cam);
+
+      rndr->SetSceneManager(scenemng);
+
+
+      am.ReadFromFile("test.taif");
+
+      m = am.GetAsset("test2.obj")->asset.mesh;
+      m->SetPosition(glm::vec3(4,1,4));
+      m->GenerateBoundingBox();
+
+
     } catch (renderer_exception& re) {
         Log::GetLog()->Fatal("Rendering error: %s [%d]",
             re.what(), re.code);
+        exit(EXIT_FAILURE);
+    }  catch (mesh_exception& se) {
+        Log::GetLog()->Fatal("Mesh error: %s",
+            se.what());
+        Log::GetLog()->Fatal("Mesh file: %s",
+            se.file.c_str());
+        exit(EXIT_FAILURE);
+    }  catch (material_exception& se) {
+        Log::GetLog()->Fatal("Material error: %s ",
+            se.what());
+        Log::GetLog()->Fatal("Material file: %s",
+            se.file.c_str());
         exit(EXIT_FAILURE);
     } catch (shader_exception& se) {
         Log::GetLog()->Fatal("Shader error: %s [%d]",
@@ -89,36 +133,12 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-
-    GameContext gctx;
-    gctx.om = om;
-
-    HumanPlayer hp = HumanPlayer{"Arthur"};
-    SceneManager* scenemng = new SceneManager();
-    
-
-    bool player = false;
-
-    Camera cam = Camera{glm::vec3(4.0f, 16.0f, 4.0f), glm::vec3(0,0,0)};
-    scenemng->SetCamera(&cam);
-    hp.SetCamera(&cam);
-
-    rndr->SetSceneManager(scenemng);
-
-    AssetManager am;
-    am.ReadFromFile("test.taif");
-
-    Mesh* m = am.GetAsset("test2.obj")->asset.mesh;
-    m->SetPosition(glm::vec3(4,1,4));
-    m->GenerateBoundingBox();
-
-	
 	Texture* tex = am.GetAsset("test.bmp")->asset.texture;
 	if (tex) {
 		MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);
         TextureManager::GetInstance()->AddTexture("test", tex);
     }
-	
+
 
     Mesh* m2 = am.GetAsset("casinha.obj")->asset.mesh;
     m2->SetPosition(glm::vec3(10, 1, 6));
@@ -135,19 +155,19 @@ int main(int argc, char const *argv[]) {
     scenemng->AddObject(m2);
 	scenemng->AddObject(m3);
 	scenemng->AddObject(l);
-	
+
     Terrain* terr = new Terrain{1000, 1000};
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
     terr_rend->SetTerrain(terr);
-    terr_rend->SetCamera(&cam);
+    terr_rend->SetCamera(cam);
 
     ObjectRenderer* objrend = new ObjectRenderer(om, scenemng);
-    hp.objr = objrend;
+    hp->objr = objrend;
 
-	InputManager::GetInstance()->Initialize();
+    InputManager::GetInstance()->Initialize();
 
-	InputPicker* ip = new InputPicker{ terr_rend, win, scenemng, &cam, om};
-	hp.SetPicker(ip);
+	  InputPicker* ip = new InputPicker{ terr_rend, win, scenemng, cam, om};
+	  hp->SetPicker(ip);
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
@@ -172,7 +192,7 @@ int main(int argc, char const *argv[]) {
         player = true;
         gctx.elapsed_seconds = delta / 1000.0;
 
-        if (!hp.Play(&gctx))
+        if (!hp->Play(&gctx))
             player = false;
 
 		terr_rend->Update();
@@ -183,7 +203,7 @@ int main(int argc, char const *argv[]) {
 		gr.Render();
 
 		fbRender.SetActive();
-		rndr->SetBoundingBox(hp.renderBBs);
+		rndr->SetBoundingBox(hp->renderBBs);
         rndr->Render();
 		fbRender.UnsetActive();
 		win->Update();
@@ -194,13 +214,13 @@ int main(int argc, char const *argv[]) {
         delta = elapsed - ticks;
 
         ticks = SDL_GetTicks();
-	
+
 		if (frame % 30 == 0) {
 			pms = delta * 1.0;
 		}
 
 		gr.DebugWrite(0, 420, "%.1f ms, %.2f fps", pms, 1000 / pms);
-		
+
 
 		//glm::vec3 cur_wor = ip->GetCursorWorldRay();
 		//printf("Cursor ray: (%.2f, %.2f %.2f)\t",

@@ -1,7 +1,10 @@
 #include "AssetManager.hpp"
 
 #include <sys/types.h>
-
+#ifndef _MSC_VER
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 using namespace Tribalia::Graphics;
 
 
@@ -76,6 +79,28 @@ void AssetManager::AddAsset(AssetGroup* grp, Asset* a)
     Log::GetLog()->Write("Added asset %s type %s (%d) to group %s",
         a->relpath, aname[a->asset_type % 3], a->asset_type, grp->folder);
 }
+
+
+bool CheckIfExists(const char* path) {
+#ifndef _MSC_VER
+    struct stat statbuf;
+    if (stat(path, &statbuf) < 0) {
+      switch (errno) {
+        case EBADF:
+        case ENOENT:  return false;
+      }
+    }
+
+    return (statbuf.st_size > 0);
+#else
+    #warning Tribalia is unable to find a stat() version!
+    #warning Using less destructive return
+    return true;
+#endif
+
+}
+
+
 
 #include <functional>	// std::ptr_fun()
 #include <cstdio>
@@ -156,6 +181,20 @@ bool AssetManager::ReadFromFile(const char* file)
 			asset->asset_type = ASSET_MATERIAL;
 		}
 
+    if (!CheckIfExists(file.c_str())) {
+        /* throw the correct exception */
+        switch (asset->asset_type) {
+          case ASSET_MESH:
+            throw mesh_exception("File not found", -1, file.c_str()); break;
+          case ASSET_MATERIAL:
+            throw material_exception("Material not found", -1, file.c_str()); break;
+          case ASSET_TEXTURE:
+            throw material_exception("Texture not found", -1, file.c_str()); break;
+
+        }
+        return false;
+    }
+
 		this->AddAsset(grp, asset);
 
 
@@ -232,7 +271,7 @@ bool AssetManager::LoadAsset(Asset* at)
 		if (ext == "obj") {
 			OBJOpener o;
 			at->asset.mesh = o.Open(at->relpath);
-	
+
 			if (at->asset.mesh) {
 				return true;
 			}
@@ -242,4 +281,3 @@ bool AssetManager::LoadAsset(Asset* at)
 
 	return false;
 }
-

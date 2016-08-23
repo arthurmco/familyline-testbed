@@ -1,10 +1,9 @@
 #include "HumanPlayer.hpp"
-#include "../graphical/meshopener/OBJOpener.hpp"
+#include "graphical/meshopener/OBJOpener.hpp"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 using namespace Tribalia::Input;
-
 
 class ConcreteObject : public AttackableObject
 {
@@ -61,13 +60,13 @@ bool rotate_left = false, rotate_right = false;
 InputListener ilt;
 
 bool HumanPlayer::Play(GameContext* gctx){
-	
+
 	InputManager::GetInstance()->Run();
     while (InputManager::GetInstance()->GetDefaultListener()->PopEvent(ev)) {
         if (ev.eventType == EVENT_FINISH) {
             return false;
         }
-		
+
 
         if (ev.eventType == EVENT_KEYEVENT) {
             switch (ev.event.keyev.scancode) {
@@ -116,7 +115,7 @@ bool HumanPlayer::Play(GameContext* gctx){
 
 					char cname[32];
 					sprintf(cname, "Object%d", rand() % rand());
-					glm::vec3 p = _ip->GetTerrainProjectedPosition();					
+					glm::vec3 p = _ip->GetTerrainProjectedPosition();
 
                     printf("Creating %s at %.3f %.3f %.3f\n", cname, p.x, 2.0f, p.z);
 

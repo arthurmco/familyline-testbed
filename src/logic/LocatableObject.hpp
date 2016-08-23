@@ -28,6 +28,9 @@ namespace Tribalia {
             void SetY(float); float GetY();
             void SetZ(float); float GetZ();
 
+            /* Get the rotation, in radians */
+            float GetRotation(void);
+
             void SetMesh(Tribalia::Graphics::Mesh*);
             Tribalia::Graphics::Mesh* GetMesh();
 

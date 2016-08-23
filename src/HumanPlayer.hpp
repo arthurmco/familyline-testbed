@@ -5,28 +5,25 @@
 
 ***/
 
-#include "Player.hpp"
-#include "../graphical/Camera.hpp"
-#include "ObjectRenderer.hpp"
-#include "../input/InputPicker.hpp"
-#include "../input/InputManager.hpp"
+#include "logic/Player.hpp"
+#include "graphical/Camera.hpp"
+#include "logic/ObjectRenderer.hpp"
+#include "input/InputPicker.hpp"
+#include "input/InputManager.hpp"
 
 #ifndef HUMAN_PLAYER
 #define HUMAN_PLAYER
 
-namespace Tribalia {
-namespace Logic {
-
-    class HumanPlayer : public Player
+    class HumanPlayer : public Tribalia::Logic::Player
     {
     private:
         Tribalia::Graphics::Camera* _cam;
 		Tribalia::Input::InputPicker* _ip;
-        
+
     public:
 		bool renderBBs = false;
 
-        ObjectRenderer* objr;
+        Tribalia::Logic::ObjectRenderer* objr;
 
         HumanPlayer(const char* name, int elo=0, int xp=0);
 
@@ -38,7 +35,7 @@ namespace Logic {
 
             Returns true to continue its loop, false otherwise.
         ***/
-        virtual bool Play(GameContext*);
+        virtual bool Play(Tribalia::Logic::GameContext*);
 
         void SetCamera(Tribalia::Graphics::Camera*);
 		void SetPicker(Tribalia::Input::InputPicker* ip);
@@ -46,10 +43,5 @@ namespace Logic {
 
         ~HumanPlayer();
     };
-
-}
-}
-
-
 
 #endif /* end of include guard: HUMAN_PLAYER */
