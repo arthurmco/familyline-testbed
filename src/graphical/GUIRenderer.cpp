@@ -3,17 +3,17 @@
 using namespace Tribalia::Graphics;
 
 int ww, wh;
-GUIRenderer::GUIRenderer(Window* w) 
+GUIRenderer::GUIRenderer(Window* w)
 {
 	/* Create the cairo context */
 	w->GetSize(ww, wh);
 	cr_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, ww, wh);
 	cr = cairo_create(cr_surface);
-	
+
 	/* Create the framebuffer */
 	cairo_rectangle(cr, 20, 20, 200, 100);
 	cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.5);
-	
+
 	cairo_fill(cr);
 
 	_w = w;
@@ -38,15 +38,21 @@ void GUIRenderer::DebugWrite(int x, int y, const char* fmt, ...)
 	delete ch;
 }
 
-void GUIRenderer::SetFramebuffer(Framebuffer* f) { 
-	_f = f; 
+void GUIRenderer::SetFramebuffer(Framebuffer* f) {
+	_f = f;
 	Log::GetLog()->Write("[GUIRenderer] Framebuffer now it's the texture #%d", f->GetTextureHandle());
+
 }
 
-
+bool fb_setup = false;
 bool GUIRenderer::Render()
 {
 	glBindTexture(GL_TEXTURE_2D, _f->GetTextureHandle());
+	if (!fb_setup) {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		fb_setup = true;
+	}
 
 	cairo_surface_flush(cr_surface);
 	unsigned char* c = cairo_image_surface_get_data(cr_surface);

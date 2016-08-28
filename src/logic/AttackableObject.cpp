@@ -109,3 +109,32 @@ float AttackableObject::GetMediumBuildingBonus(void) {
 float AttackableObject::GetAdvancedBuildingBonus(void) {
 	return this->GetProperty<float>("bonusAdvancedBuildingAtk");
 }
+
+/*  Get all actions. Return the action count.
+    'names' is an array of C strings */
+int AttackableObject::GetActionNames(const char**& names)
+{
+    int count = 0;
+    for (auto it = _actions.begin(); it != _actions.end(); it++) {
+        if (names) {
+            if (names[count]) {
+                names[count] = it->name;
+            }
+        }
+        count++;
+    }
+
+    return count;
+}
+
+/*  Get the data for each action */
+UserAction* AttackableObject::GetAction(const char* name)
+{
+    for (auto it = _actions.begin(); it != _actions.end(); it++) {
+        if (!strcmp(it->name, name)) {
+            return (UserAction*)&it;
+        }
+    }
+
+    return nullptr;
+}

@@ -7,7 +7,9 @@
 ***/
 
 #include "LocatableObject.hpp"
+#include "Action.hpp"
 
+#include <cstring>
 #include <algorithm>
 
 #ifndef ATTACKABLEOBJECT_HPP
@@ -26,7 +28,7 @@ namespace Tribalia {
             AttackableObject(int oid, int tid, const char* name,
                 float x, float y, float z, int maxHP,
                 float baseAtk, float baseArmor);
-			
+
             int GetMaxHP(void);
             float GetHP(void);
             float GetBaseAttack(void);
@@ -40,7 +42,18 @@ namespace Tribalia {
             float GetMediumBuildingBonus(void);
             float GetAdvancedBuildingBonus(void);
 
+            /*  Get all actions. Return the action count.
+                'names' is an array of C strings */
+            int GetActionNames(const char**& names);
+
+            /*  Get the data for each action */
+            UserAction* GetAction(const char* name);
+
         protected:
+            /* The actions that this entity can perform */
+            std::vector<UserAction> _actions;
+
+
             /* Increase HP until maximum */
             float Heal(float);
 

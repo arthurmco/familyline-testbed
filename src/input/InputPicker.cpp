@@ -66,21 +66,17 @@ bool InputPicker::CheckIfTerrainIntersect(glm::vec3 ray, float start, float end)
 	return false;
 }
 
-
-/*	Get position where the cursor collides with the
-terrain, in render coordinates */
-glm::vec3 InputPicker::GetTerrainProjectedPosition()
+void InputPicker::UpdateTerrainProjectedPosition()
 {
-	
 	glm::vec3 cur_world = this->GetCursorWorldRay();
-	
+
 	/*printf("\ncamera_pos: %.4f %.4f %.4f, ray_pos: %.4f %.4f %.4f\n",
 		_cam->GetPosition().x, _cam->GetPosition().y, _cam->GetPosition().z,
 		cur_world.x, cur_world.y, cur_world.z);
 */
 	float prolong_near = 0.1f, prolong_far = 128.0f;
 	float prolong_now = prolong_near + ((prolong_far - prolong_near ) / 2.0f);
-		
+
 	glm::vec3 pHalf;
 	glm::vec3 pNear = _cam->GetPosition() + (cur_world * prolong_near);
 	glm::vec3 pFar = _cam->GetPosition() + (cur_world * prolong_far);
@@ -90,21 +86,21 @@ glm::vec3 InputPicker::GetTerrainProjectedPosition()
 	for (int i = 0; i < MAX_PICK_ITERATIONS; i++) {
 
 
-		/*	Here, we'll check if the ray projection is above or below the terrain 
-			
+		/*	Here, we'll check if the ray projection is above or below the terrain
+
 			If we're above, we'll adjust pNear to that point
 			If we're below, we'll adjust pFar to that point
 
 			To check that, we simply check if pFar is under and
-			pNear and pHalf are above 
+			pNear and pHalf are above
 		*/
 
 
 		if (this->CheckIfTerrainIntersect(cur_world, prolong_near, prolong_now))
 			prolong_far = prolong_now;
-		else 
+		else
 			prolong_near = prolong_now;
-			
+
 
 		prolong_now = prolong_near + ((prolong_far - prolong_near) / 2.0f);
 		pHalf = _cam->GetPosition() + (cur_world * prolong_now);
@@ -113,15 +109,13 @@ glm::vec3 InputPicker::GetTerrainProjectedPosition()
 	}
 
 	glm::vec3 collide = _terrain->GraphicalToGameSpace(pHalf);
-	//printf(" }\nprol: %.2f, pos: %.3f %.3f %.3f, gamespace: %.3f %.3f %.3f\n\n", 
+	//printf(" }\nprol: %.2f, pos: %.3f %.3f %.3f, gamespace: %.3f %.3f %.3f\n\n",
 	//	1.0f, pHalf.x, pHalf.y, pHalf.z, collide.x, collide.y, collide.z);
-	
-	return collide;
+
+	_intersectedPosition =  collide;
 }
 
-
-/*	Get the object that were intersected by the cursor ray */
-LocatableObject* InputPicker::GetIntersectedObject()
+void InputPicker::UpdateIntersectedObject()
 {
 	glm::vec3 direction = this->GetCursorWorldRay();
 
@@ -145,18 +139,18 @@ LocatableObject* InputPicker::GetIntersectedObject()
 
 			float tmin = -100000;
 			float tmax = 100000;
-			
+
 			float dxmin, dxMax;
-//			printf("\n%s\n", loc->GetName());
+			//printf("\n%s\n", loc->GetName());
 			if (direction.x != 0) {
 				dxmin = (vmin.x - origin.x) / direction.x;
 				dxMax = (vmax.x - origin.x) / direction.x;
 
 				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
 				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
-	//			printf("x: %.4f %.4f \t", dxmin, dxMax);
+				//printf("x: %.4f %.4f \t", dxmin, dxMax);
 				if (tmax < tmin) continue;
-			} 
+			}
 
 			if (direction.y != 0) {
 				dxmin = (vmin.y - origin.y) / direction.y;
@@ -164,7 +158,7 @@ LocatableObject* InputPicker::GetIntersectedObject()
 
 				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
 				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
-		//		printf("y: %.4f %.4f \t", dxmin, dxMax);
+				//printf("y: %.4f %.4f \t", dxmin, dxMax);
 				if (tmax < tmin) continue;
 
 			}
@@ -175,7 +169,7 @@ LocatableObject* InputPicker::GetIntersectedObject()
 
 				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
 				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
-			//	printf("z: %.4f %.4f \t", dxmin, dxMax);
+				//printf("z: %.4f %.4f \t", dxmin, dxMax);
 				if (tmax < tmin) continue;
 
 			}
@@ -188,13 +182,28 @@ LocatableObject* InputPicker::GetIntersectedObject()
 			}
 
 			/* Collided with both 3 axis! */
-			if (tmax >= tmin)
-				return loc;		
+			if (tmax >= tmin) {
+				_locatableObject = loc;
+				return;
+			}
 
-			
 		}
 	}
 
-	return nullptr;
+	_locatableObject = nullptr;
 }
 
+
+/*	Get position where the cursor collides with the
+terrain, in render coordinates */
+glm::vec3 InputPicker::GetTerrainProjectedPosition()
+{
+		return _intersectedPosition;
+}
+
+
+/*	Get the object that were intersected by the cursor ray */
+LocatableObject* InputPicker::GetIntersectedObject()
+{
+		return _locatableObject;
+}
