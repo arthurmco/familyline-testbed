@@ -33,7 +33,6 @@ namespace Tribalia {
 
             void SetMesh(Tribalia::Graphics::Mesh*);
             Tribalia::Graphics::Mesh* GetMesh();
-
         };
 
     }

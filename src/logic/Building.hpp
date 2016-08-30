@@ -28,6 +28,11 @@ namespace Logic {
 		Unit** _garrisonedUnits;
 		int _garrisonedCount;
 
+        /*  Train an unit. 
+            It will appear instantly, so it's your responsability
+            to define a delay */
+        void Train(Unit* unit);
+
     public:
         Building(int oid, int tid, const char* name);
         Building(int oid, int tid, const char* name,
