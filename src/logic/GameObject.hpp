@@ -111,6 +111,15 @@ namespace Tribalia {
 
     };
 
+    /* Helper macros to ease property handling */
+    #define DEF_PROPERTY(name, defaultval) \
+        this->AddProperty(name, defaultval)
+
+    #define GET_PROPERTY(type, name) \
+        this->GetProperty<type>(name)
+
+    #define SET_PROPERTY(name, val) \
+        this->SetProperty(name, val)
     }
 }
 

@@ -41,7 +41,13 @@ namespace Tribalia {
             float GetBasicBuildingBonus(void);
             float GetMediumBuildingBonus(void);
             float GetAdvancedBuildingBonus(void);
+    
+            /* Retrieve this unit experience
+               The experience is tightly associated with the soldier
+               strength progression and hit chance */
+            int GetExperience();
 
+           
             /*  Get all actions. Return the action count.
                 'names' is an array of C strings */
             int GetActionNames(const char**& names);
@@ -49,10 +55,14 @@ namespace Tribalia {
             /*  Get the data for each action */
             UserAction* GetAction(const char* name);
 
+            /* Hit another entity 
+               Returns the amount of damage 
+            */
+            float Hit(AttackableObject* other);
+
         protected:
             /* The actions that this entity can perform */
             std::vector<UserAction> _actions;
-
 
             /* Increase HP until maximum */
             float Heal(float);
