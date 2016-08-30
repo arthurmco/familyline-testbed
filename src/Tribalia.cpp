@@ -104,7 +104,6 @@ int main(int argc, char const *argv[]) {
       m->SetPosition(glm::vec3(4,1,4));
       m->GenerateBoundingBox();
 
-
     } catch (renderer_exception& re) {
         Log::GetLog()->Fatal("Rendering error: %s [%d]",
             re.what(), re.code);
@@ -185,41 +184,42 @@ int main(int argc, char const *argv[]) {
 
 	double pms = 0.0;
 	int pframe = 0;
+
     do {
 
-    ip->UpdateIntersectedObject();
-    ip->UpdateTerrainProjectedPosition();
+        ip->UpdateIntersectedObject();
+        ip->UpdateTerrainProjectedPosition();
 
 		gr.DebugWrite(10, 15, "Tribalia v0.0.1 Build 1, commit %07x", COMMIT);
 		gr.DebugWrite(10, 35, "Press C to create an object at mouse cursor.");
-    player = true;
-    gctx.elapsed_seconds = delta / 1000.0;
+        player = true;
+        gctx.elapsed_seconds = delta / 1000.0;
 
-    if (!hp->Play(&gctx))
-        player = false;
+        if (!hp->Play(&gctx))
+            player = false;
 
 		terr_rend->Update();
 
-    objrend->Check();
-    objrend->Update();
+        objrend->Check();
+        objrend->Update();
 
-    auto locc = ip->GetIntersectedObject();
-    if (locc) {
-        gr.DebugWrite(10, 100, "Hovering object '%s'", locc->GetName());
-    }
+        auto locc = ip->GetIntersectedObject();
+        if (locc) {
+            gr.DebugWrite(10, 100, "Hovering object '%s'", locc->GetName());
+        }
 
-    glm::vec3 p = ip->GetTerrainProjectedPosition();
-    gr.DebugWrite(10, 120, "Terrain pos: %.3f,%.3f,%.3f", p.x, p.y, p.z);
-    gr.DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
-      "Enabled" : "Disabled");
+        glm::vec3 p = ip->GetTerrainProjectedPosition();
+        gr.DebugWrite(10, 120, "Terrain pos: %.3f,%.3f,%.3f", p.x, p.y, p.z);
+        gr.DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
+          "Enabled" : "Disabled");
 
-		gr.Render();
+    	gr.Render();
 
-		fbRender.SetActive();
-		rndr->SetBoundingBox(hp->renderBBs);
+    	fbRender.SetActive();
+    	rndr->SetBoundingBox(hp->renderBBs);
         rndr->Render();
-		fbRender.UnsetActive();
-		win->Update();
+    	fbRender.UnsetActive();
+    	win->Update();
 
         frame++;
 
@@ -228,24 +228,25 @@ int main(int argc, char const *argv[]) {
 
         ticks = SDL_GetTicks();
 
-		if (frame % 30 == 0) {
-			pms = delta * 1.0;
-		}
+    	if (frame % 30 == 0) {
+	    	pms = delta * 1.0;
+    	}
 
-		gr.DebugWrite(0, 420, "%.1f ms, %.2f fps", pms, 1000 / pms);
+	    gr.DebugWrite(0, 420, "%.1f ms, %.2f fps", pms, 1000 / pms);
 
 
-		//glm::vec3 cur_wor = ip->GetCursorWorldRay();
-		//printf("Cursor ray: (%.2f, %.2f %.2f)\t",
-		//	cur_wor.x, cur_wor.y, cur_wor.z);
-		//ip->GetTerrainProjectedPosition();
+	//glm::vec3 cur_wor = ip->GetCursorWorldRay();
+	//printf("Cursor ray: (%.2f, %.2f %.2f)\t",
+	//	cur_wor.x, cur_wor.y, cur_wor.z);
+	//ip->GetTerrainProjectedPosition();
 
-        //Trava em ~60 fps
+    //Trava em ~60 fps
         if (delta < 16) {
-            SDL_Delay(16 - delta);
+              SDL_Delay(16 - delta);
         }
 
         //usleep(1);
+    
     } while (player);
 
     printf("\nExited. (%d frames) \n", frame);

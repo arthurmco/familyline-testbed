@@ -163,7 +163,7 @@ void Renderer::CheckUpdatedObjects()
 				sidc.lastcheck = lastCheck;
 				sidc.vao = vaon;
 
-
+                this->AddBoundingBox(mes, glm::vec3(1,0,0));
 				_last_IDs.push_back(sidc);
 			}
 			else if ((*itScene)->GetType() == SCENE_LIGHT) {
