@@ -48,7 +48,7 @@ using namespace Tribalia::Input;
     #undef main  //somehow vs does not find main()
 
     /* TODO: fixes these variables on win32 builds */
-    #define VERSION "v0.0.1-win32"
+    #define VERSION VERSION"-win32"
     #define COMMIT 0
     #define USERNAME "unknown"
 #endif
@@ -207,9 +207,16 @@ int main(int argc, char const *argv[]) {
         if (locc) {
             gr.DebugWrite(10, 100, "Hovering object '%s'", locc->GetName());
         }
+    
+        LocatableObject* selected = hp->GetSelectedObject();
+        if (selected) {
+            gr.DebugWrite(10, 120, "Selected object: '%s'", 
+                selected->GetName());
+        }
+            
 
         glm::vec3 p = ip->GetTerrainProjectedPosition();
-        gr.DebugWrite(10, 120, "Terrain pos: %.3f,%.3f,%.3f", p.x, p.y, p.z);
+        gr.DebugWrite(10, 140, "Terrain pos: %.3f,%.3f,%.3f", p.x, p.y, p.z);
         gr.DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
           "Enabled" : "Disabled");
 

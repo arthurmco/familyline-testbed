@@ -20,6 +20,8 @@
         Tribalia::Graphics::Camera* _cam;
 		Tribalia::Input::InputPicker* _ip;
 
+        Tribalia::Logic::LocatableObject* _selected_obj = nullptr;
+
     public:
 		bool renderBBs = false;
 
@@ -41,6 +43,7 @@
 		void SetPicker(Tribalia::Input::InputPicker* ip);
         void SetInputManager(Tribalia::Input::InputManager*);
 
+        Tribalia::Logic::LocatableObject* GetSelectedObject();
         ~HumanPlayer();
     };
 

@@ -132,6 +132,8 @@ void InputManager::Run()
 
             if (e.button.clicks % 2 == 0)
                 ev.event.keyev.status = KEY_KEYREPEAT;
+
+            break;
         default:
             continue;
     }

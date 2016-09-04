@@ -57,6 +57,7 @@ InputEvent ev;
 bool front = false, back = false;
 bool left = false, right = false;
 bool rotate_left = false, rotate_right = false;
+bool mouse_click = false;
 InputListener ilt;
 
 bool HumanPlayer::Play(GameContext* gctx){
@@ -141,7 +142,17 @@ bool HumanPlayer::Play(GameContext* gctx){
             //objr->CheckRayCollide(ray, nullptr);
 
 
+        } else if (ev.eventType == EVENT_MOUSEEVENT ) {
+            
+            if (ev.event.mouseev.button == MOUSE_LEFT) {
+                if (ev.event.mouseev.status == KEY_KEYPRESS) 
+                    mouse_click = true;
+                else
+                    mouse_click = false;
+            }
+                    
         }
+
 
 
 //            printf("%d %d \n", ev.mousex, ev.mousey);
@@ -169,13 +180,23 @@ bool HumanPlayer::Play(GameContext* gctx){
 
 	LocatableObject* l = _ip->GetIntersectedObject();
 	if (l) {
+        if (mouse_click) {
+            _selected_obj = l;
+        }
 		//printf("intersected with %s\n", l->GetName());
-	}
+	} else {
+        if (mouse_click)   _selected_obj = nullptr;
+    }
 
     return true;
 
 }
 
+
+LocatableObject* HumanPlayer::GetSelectedObject() 
+{
+    return _selected_obj;
+}
 
 HumanPlayer::~HumanPlayer()
 {
