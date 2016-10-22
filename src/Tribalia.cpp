@@ -37,11 +37,14 @@
 #include "graphical/Window.hpp"
 #include "graphical/Framebuffer.hpp"
 
+#include "graphical/gui/Panel.hpp"
+
 #include "input/InputPicker.hpp"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 using namespace Tribalia::Graphics;
+using namespace Tribalia::Graphics::GUI;
 using namespace Tribalia::Input;
 
 #ifdef _MSC_VER
@@ -182,6 +185,8 @@ int main(int argc, char const *argv[]) {
 	GUIRenderer gr{ win };
 	gr.SetFramebuffer(&fbGUI);
 
+    gr.AddPanel(new Panel{0, 0, 320, 240});
+
 	double pms = 0.0;
 	int pframe = 0;
 
@@ -207,13 +212,13 @@ int main(int argc, char const *argv[]) {
         if (locc) {
             gr.DebugWrite(10, 100, "Hovering object '%s'", locc->GetName());
         }
-    
+
         LocatableObject* selected = hp->GetSelectedObject();
         if (selected) {
-            gr.DebugWrite(10, 120, "Selected object: '%s'", 
+            gr.DebugWrite(10, 120, "Selected object: '%s'",
                 selected->GetName());
         }
-            
+
 
         glm::vec3 p = ip->GetTerrainProjectedPosition();
         gr.DebugWrite(10, 140, "Terrain pos: %.3f,%.3f,%.3f", p.x, p.y, p.z);
@@ -253,7 +258,7 @@ int main(int argc, char const *argv[]) {
         }
 
         //usleep(1);
-    
+
     } while (player);
 
     printf("\nExited. (%d frames) \n", frame);

@@ -32,6 +32,7 @@ file(APPEND "${GEN_HEADER}" "#define USERNAME \"${USERNAME}\"\n")
 
 file(GLOB_RECURSE SRC_LOGIC "${CMAKE_SOURCE_DIR}/src/logic/*.cpp")
 file(GLOB_RECURSE SRC_GFX "${CMAKE_SOURCE_DIR}/src/graphical/*.cpp")
+file(GLOB_RECURSE SRC_GUI "${CMAKE_SOURCE_DIR}/src/graphical/gui/*.cpp")
 file(GLOB_RECURSE SRC_INPUT "${CMAKE_SOURCE_DIR}/src/input/*.cpp")
 file(GLOB SRC_BASE "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
@@ -39,7 +40,7 @@ file(GLOB SRC_BASE "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 #Compilation data
 
-add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX} ${SRC_INPUT})
+add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT})
 
 if (MSVC)
   # Set include directories

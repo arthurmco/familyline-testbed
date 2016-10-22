@@ -7,8 +7,10 @@
 #include <GL/glew.h>
 
 #include <cstdarg>
+#include <vector>
 
 #include "Window.hpp"
+#include "gui/IPanel.hpp"
 
 #ifndef GUIRENDERER_HPP
 #define GUIRENDERER_HPP
@@ -19,12 +21,13 @@ namespace Graphics {
 /*  This class will get the cairo context and
     transform it into a texture, */
 
-class GUIRenderer {
+class GUIRenderer : public GUI::IPanel {
 private:
    cairo_t* cr;
    cairo_surface_t* cr_surface;
- 
+
    Window* _w;
+   std::vector<GUI::IPanel*> _panels;
 
    Framebuffer* _f;
 public:
@@ -33,11 +36,24 @@ public:
 	void SetFramebuffer(Framebuffer* f);
 
     /* Write a message in the screen */
-    void DebugWrite(int x, int y, const char* fmt, ...);   
+    void DebugWrite(int x, int y, const char* fmt, ...);
 
     /* Render the GUI view */
     bool Render();
 
+    /* Redraw the child controls */
+    virtual void Redraw() override;
+
+    /* Add a panel using the panel position or a new position */
+    virtual int AddPanel(GUI::IPanel* p) override;
+    virtual int AddPanel(GUI::IPanel* p, int x, int y) override;
+
+    /* Remove the panel */
+    virtual void RemovePanel(GUI::IPanel* p) override;
+
+    virtual void SetBounds(int x, int y, int w, int h) override;
+    virtual void SetPosition(int x, int y) override;
+    virtual void GetBounds(int& x, int& y, int& w, int& h) override;
 
 };
 
