@@ -14,7 +14,7 @@ namespace GUI {
 /*
     A panel is the most basic window structore for Tribalia's GUI
 */
-class IControlUpdater {
+class IControl {
 private:
 
 

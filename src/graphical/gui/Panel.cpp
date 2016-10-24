@@ -3,11 +3,15 @@
 using namespace Tribalia::Graphics::GUI;
 
 Panel::Panel() : _xPos(0), _yPos(0), _width(0), _height(0)
-{}
+{
+    _bgColor = 0x778899cc;
+}
 
 Panel::Panel(int x, int y, int w, int h)
     : _xPos(x), _yPos(y), _width(w), _height(h)
-{}
+{
+     _bgColor = 0x778899cc;
+}
 
 void Panel::SetBounds(int x, int y, int w, int h)
 {

@@ -11,6 +11,7 @@
 
 #include "Window.hpp"
 #include "gui/IPanel.hpp"
+#include "gui/IContainer.hpp"
 
 #ifndef GUIRENDERER_HPP
 #define GUIRENDERER_HPP
@@ -21,7 +22,7 @@ namespace Graphics {
 /*  This class will get the cairo context and
     transform it into a texture, */
 
-class GUIRenderer : public GUI::IPanel {
+class GUIRenderer : public GUI::IContainer {
 private:
    cairo_t* cr;
    cairo_surface_t* cr_surface;

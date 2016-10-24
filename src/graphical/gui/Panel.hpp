@@ -6,7 +6,7 @@
 #include <cairo/cairo.h>
 #include <vector>
 
-#include "IPanel.hpp"
+#include "IContainer.hpp"
 
 #ifndef _GUI_PANEL
 #define _GUI_PANEL
@@ -18,7 +18,7 @@ namespace GUI {
 /*
     A panel is the most basic window structore for Tribalia's GUI
 */
-class Panel : public IPanel {
+class Panel : public IContainer {
 private:
     int _xPos, _yPos;
     int _width, _height;
