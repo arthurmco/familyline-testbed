@@ -141,6 +141,9 @@ int main(int argc, char const *argv[]) {
         TextureManager::GetInstance()->AddTexture("test", tex);
     }
 
+    MD2Opener op;
+    Mesh* m5 = op.Open("/home/arthurmco/Documentos/softwares/modelpack6/trailer.md2");
+
 
     Mesh* m2 = am.GetAsset("casinha.obj")->asset.mesh;
     m2->SetPosition(glm::vec3(10, 1, 6));

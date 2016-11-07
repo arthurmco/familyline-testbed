@@ -267,15 +267,23 @@ bool AssetManager::LoadAsset(Asset* at)
 
 		std::string ext{ at->relpath };
 		ext = ext.substr(ext.find_last_of('.') + 1);
+        MeshOpener* o;
 
 		if (ext == "obj") {
-			OBJOpener o;
-			at->asset.mesh = o.Open(at->relpath);
+            o = new OBJOpener{};
+        } else if (ext == "md2") {
+            o = new MD2Opener{};
+        } else {
+            Log::GetLog()->Write("%s uses an unsupported extension",
+                at->relpath);
+            break;
+        }
 
-			if (at->asset.mesh) {
-				return true;
-			}
+		at->asset.mesh = o->Open(at->relpath);
+		if (at->asset.mesh) {
+			return true;
 		}
+
 	} break;
 	}
 

@@ -78,17 +78,20 @@ bool GUIRenderer::Render()
 void GUIRenderer::Redraw()
 {
     for (GUI::IPanel* p : _panels) {
-        p->Redraw();
-
 		int x,y,w,h;
 		uint8_t r,g,b,a;
 
 		p->GetBounds(x,y,w,h);
 		p->GetBackColor(r,g,b,a);
-		cairo_set_line_width (cr, 1);
 		cairo_set_source_rgba (cr, r/255.0, g/255.0, b/255.0, a/255.0);
 		cairo_rectangle (cr, x, y, w, h);
 		cairo_fill (cr);
+		cairo_rectangle (cr, x, y, w, h);
+		cairo_set_line_width (cr, 2);
+		cairo_set_source_rgba (cr, r/512.0, g/512.0, b/512.0, 1.0);
+		cairo_stroke(cr);
+
+		p->Redraw();
     }
 }
 

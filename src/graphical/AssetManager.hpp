@@ -10,6 +10,7 @@
 #include "Mesh.hpp"
 
 #include "meshopener/OBJOpener.hpp"
+#include "meshopener/MD2Opener.hpp"
 
 #include "materialopener/MTLOpener.hpp"
 
