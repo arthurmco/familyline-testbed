@@ -35,12 +35,13 @@ namespace Graphics {
 
     public:
         Material(int ID, const char* name, MaterialData data);
+        Material(const char* name, MaterialData data);
 
         int GetID() const;
         const char* GetName() const;
         MaterialData* GetData();
-		Texture* GetTexture(); 
-		void SetTexture(Texture*);  
+		Texture* GetTexture();
+		void SetTexture(Texture*);
     };
 
 }

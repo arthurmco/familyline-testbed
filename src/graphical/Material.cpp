@@ -2,10 +2,20 @@
 
 using namespace Tribalia::Graphics;
 
+int lastID = 0;
 Material::Material(int ID, const char* name, MaterialData data)
     :_ID(ID), _name{name}, _data(data)
 {
+    if (ID > lastID) lastID = ID+1;
+
 	_tex = nullptr;
+}
+
+Material::Material(const char* name, MaterialData data)
+    : _name{name}, _data(data)
+{
+	_tex = nullptr;
+    _ID = lastID++;
 }
 
 int Material::GetID() const { return _ID; }
