@@ -57,30 +57,23 @@ std::vector<Material*> MTLOpener::Open(const char* file)
                     break;
             }
 
-            Log::GetLog()->Write("New material recognized: %s", matname);
             continue;
         }
 
         if (!strncmp(fline, "Ka", 2)) {
             fline += 2;
             sscanf(fline, "%f %f %f", &ambient.x, &ambient.y, &ambient.z);
-            Log::GetLog()->Write("\t ambient: %.2f %.2f %.2f",
-                ambient.x, ambient.y, ambient.z);
             continue;
         }
         if (!strncmp(fline, "Kd", 2)) {
             fline += 2;
             sscanf(fline, "%f %f %f", &diffuse.x, &diffuse.y, &diffuse.z);
-            Log::GetLog()->Write("\t diffuse: %.2f %.2f %.2f",
-                diffuse.x, diffuse.y, diffuse.z);
             continue;
 
         }
         if (!strncmp(fline, "Ks", 2)) {
             fline += 2;
             sscanf(fline, "%f %f %f", &specular.x, &specular.y, &specular.z);
-            Log::GetLog()->Write("\t specular: %.2f %.2f %.2f",
-                specular.x, specular.y, specular.z);
             continue;
         }
 
@@ -92,9 +85,6 @@ std::vector<Material*> MTLOpener::Open(const char* file)
 
             std::string texname{texpath};
             texname[texname.find_last_of('.')] = 0;
-
-            Log::GetLog()->Write("\t texture: %s (%s)",
-                texname.c_str(), texpath);
 
             Texture* t = TextureOpener::Open(texpath);
 

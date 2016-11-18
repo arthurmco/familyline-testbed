@@ -108,11 +108,11 @@ void Mesh::GenerateBoundingBox()
 
 
     }
-
+/*
     printf("m: %s\n", this->_name.c_str());
     printf(" minx miny minz: %.2f %.2f %.2f\n", minx, miny, minz);
     printf(" maxx maxy maxz: %.2f %.2f %.2f\n", maxx, maxy, maxz);
-
+*/
     this->_box.minX = minx;
     this->_box.minY = miny;
     this->_box.minZ = minz;

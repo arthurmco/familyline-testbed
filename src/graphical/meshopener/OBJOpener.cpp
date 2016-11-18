@@ -110,7 +110,7 @@ Mesh* OBJOpener::Open(const char* file)
 				&vertIndex[0], &texIndex[0], &normIndex[0],
 				&vertIndex[1], &texIndex[1], &normIndex[1],
 				&vertIndex[2], &texIndex[2], &normIndex[2]) > 7) {
-				
+
 				for (int i = 0; i < 3; i++) {
                     indVerts.push_back(vertIndex[i]);
                     indNormals.push_back(normIndex[i]);
@@ -146,7 +146,6 @@ Mesh* OBJOpener::Open(const char* file)
             // Use material
             char matname[256];
             if (sscanf(fline, "usemtl %s", matname) > 0) {
-                printf("<< %s >>\n", matname);
 				Material* m = MaterialManager::GetInstance()->GetMaterial(matname);
 				materialID = m->GetID();
                 continue;
@@ -189,7 +188,7 @@ Mesh* OBJOpener::Open(const char* file)
         	if (index < 0) {
         	    index = indTex.size() - index;
         	}
-        	
+
 			realTex.push_back(texcoords[index]);
     	}
 

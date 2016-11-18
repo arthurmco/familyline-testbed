@@ -10,9 +10,9 @@ int MaterialManager::AddMaterial(Material* m)
     int id = _materials.size();
     m->_ID = id;
 
-    Log::GetLog()->Write("Added material %s (id %d)\n"
-        "\t\t diffuse %.2f %.2f %.2f \n"
-        "\t\t ambient %.2f %.2f %.2f \n",
+    Log::GetLog()->Write("Added material %s (id %d) ["
+        " diffuse (%.2f %.2f %.2f) "
+        " ambient (%.2f %.2f %.2f) ]",
         m->GetName(), m->GetID(),
         m->GetData()->diffuseColor.r, m->GetData()->diffuseColor.g,
         m->GetData()->diffuseColor.b,
