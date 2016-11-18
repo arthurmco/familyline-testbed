@@ -161,7 +161,7 @@ int main(int argc, char const *argv[]) {
 	scenemng->AddObject(m3);
 	scenemng->AddObject(l);
 
-    Terrain* terr = new Terrain{1000, 1000};
+    Terrain* terr = new Terrain{1000, 1000};;
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
     terr_rend->SetTerrain(terr);
     terr_rend->SetCamera(cam);

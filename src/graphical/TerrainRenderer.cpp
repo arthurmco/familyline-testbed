@@ -78,24 +78,28 @@ void TerrainRenderer::Update()
                     for (int ex = 0; ex < exMax; ex++) {
                         h = _tdata[i].data->data[ey*SECTION_SIDE + ex].elevation;
 
-                        hx = _tdata[i].data->data[ey*SECTION_SIDE + (ex+1)].elevation;
+                        if (ex+1 < exMax)
+                            hx = _tdata[i].data->data[ey*SECTION_SIDE + (ex+1)].elevation;
 
-                        hy = _tdata[i].data->data[(ey+1)*SECTION_SIDE + (ex)].elevation;
-                        
-                        hxy = _tdata[i].data->data[(ey+1)*SECTION_SIDE + (ex+1)].elevation;
+                        if (ey+1 < eyMax)
+                            hy = _tdata[i].data->data[(ey+1)*SECTION_SIDE + (ex)].elevation;
+
+                        if (ex+1 < exMax && ey+1 < eyMax)
+                            hxy = _tdata[i].data->data[(ey+1)*SECTION_SIDE + (ex+1)].elevation;
 
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px, h, offsetY+py));
+                            offsetX+px, h * SEC_HEIGHT, offsetY+py));
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px, hy, offsetY+py+SEC_SIZE));
+                            offsetX+px, hy * SEC_HEIGHT, offsetY+py+SEC_SIZE));
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px+SEC_SIZE, hx, offsetY+py+SEC_SIZE));
+                            offsetX+px+SEC_SIZE, hxy * SEC_HEIGHT, offsetY+py+SEC_SIZE));
+
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px, h, offsetY+py));
+                            offsetX+px, h * SEC_HEIGHT, offsetY+py));
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px+SEC_SIZE, hx, offsetY+py));
+                            offsetX+px+SEC_SIZE, hxy * SEC_HEIGHT, offsetY+py+SEC_SIZE));
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px+SEC_SIZE, hy, offsetY+py+SEC_SIZE));
+                            offsetX+px+SEC_SIZE, hx * SEC_HEIGHT, offsetY+py));
 
                         vd->Normals.push_back(glm::vec3(0,1,0));
                         vd->Normals.push_back(glm::vec3(0,1,0));

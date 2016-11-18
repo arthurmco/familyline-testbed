@@ -521,12 +521,12 @@ void Renderer::RemoveBoundingBox(GLuint vao)
 	}
 }
 
-void Renderer::SetBoundingBox(bool b) { 
+void Renderer::SetBoundingBox(bool b) {
 
-    renderBBs = b; 
+    renderBBs = b;
     if (b != renderBBs) {
         glLineWidth(4.0f);
-    }    
+    }
 
 
 }
