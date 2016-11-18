@@ -24,13 +24,13 @@ Terrain::Terrain(int w, int h)
         float size = _section_width * _section_height * sizeof(TerrainData);
         char* unit;
         int index = 0;
-        const char* unit_index[] = {"bytes", "kB", "MB", "GB", "TB", "PB", "EB"};
+        const char* unit_index[] = {"bytes", "kB", "MB", "GB", "TB", "PB"};
 
         while (size >= 1024) {
             unit = const_cast<char*>(unit_index[++index]);
             size /= 1024.0;
 
-            if (index >= 7)
+            if (index >= 6)
                 break;
         }
 

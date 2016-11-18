@@ -66,7 +66,7 @@ int main(int argc, char const *argv[]) {
         Log::GetLog()->Write("from commit %07x", COMMIT);
 
     ObjectManager* om = nullptr;
-	  Window* win = nullptr;
+    Window* win = nullptr;
     Renderer* rndr = nullptr;
     HumanPlayer* hp;
     SceneManager* scenemng;

@@ -13,7 +13,11 @@
 #include "Renderer.hpp"
 #include "VertexData.hpp"
 
+/* Size of each slot, in OpenGL units */
 #define SEC_SIZE 0.50
+
+/* What each unit of height means in OpenGL units */
+#define SEC_HEIGHT 0.005
 
 namespace Tribalia {
 namespace Graphics {

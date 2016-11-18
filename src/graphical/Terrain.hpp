@@ -23,7 +23,10 @@ namespace Graphics {
 
     #define SECTION_SIDE 256
     struct TerrainData {
-        int data[SECTION_SIDE*SECTION_SIDE];
+        struct TerrainSlot {
+            int16_t elevation;
+            uint16_t terrain_type;
+        } data[SECTION_SIDE*SECTION_SIDE];
     };
 
     class Terrain {

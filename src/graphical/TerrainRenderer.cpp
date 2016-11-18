@@ -6,9 +6,9 @@ TerrainRenderer::TerrainRenderer(Renderer* r)
     : _rend(r)
 {
     MaterialData matdata;
-    matdata.diffuseColor = glm::vec3(0.0, 0.5, 0.0);
+    matdata.diffuseColor = glm::vec3(0.1, 0.5, 0.0);
     matdata.ambientColor = glm::vec3(0.01, 0.01, 0.0);
-    Material mat = Material(3, "Terrain", matdata);
+    Material mat = Material("Terrain", matdata);
     MaterialManager::GetInstance()->AddMaterial(&mat);
 }
 
@@ -47,6 +47,9 @@ void TerrainRenderer::Update()
     for (int y = 0; y < h; y++) {
         offsetY = (SECTION_SIDE * y * SEC_SIZE);
         offsetX = 0;
+
+        int h, hx, hy, hxy;
+
         for (int x = 0; x < w; x++) {
 
             int i = x+y*w;
@@ -70,26 +73,29 @@ void TerrainRenderer::Update()
                     eyMax = _t->GetHeight() - (y*SECTION_SIDE);
                 }
 
-                //FILE* f = fopen("coords.txt", "a");
-                //fprintf(f, "%d %d --\n", y, x);
                 float px = 0, py = 0;
                 for (int ey = 0; ey < eyMax; ey++) {
                     for (int ex = 0; ex < exMax; ex++) {
-                        //fprintf(f, "\t%.4f %.4f %.4f\n",
-                        //   offsetX+px, 0.0, offsetY+py);
+                        h = _tdata[i].data->data[ey*SECTION_SIDE + ex].elevation;
+
+                        hx = _tdata[i].data->data[ey*SECTION_SIDE + (ex+1)].elevation;
+
+                        hy = _tdata[i].data->data[(ey+1)*SECTION_SIDE + (ex)].elevation;
+                        
+                        hxy = _tdata[i].data->data[(ey+1)*SECTION_SIDE + (ex+1)].elevation;
 
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px, 0.0, offsetY+py));
+                            offsetX+px, h, offsetY+py));
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px, 0.0, offsetY+py+SEC_SIZE));
+                            offsetX+px, hy, offsetY+py+SEC_SIZE));
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px+SEC_SIZE, 0.0, offsetY+py+SEC_SIZE));
+                            offsetX+px+SEC_SIZE, hx, offsetY+py+SEC_SIZE));
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px, 0.0, offsetY+py));
+                            offsetX+px, h, offsetY+py));
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px+SEC_SIZE, 0.0, offsetY+py));
+                            offsetX+px+SEC_SIZE, hx, offsetY+py));
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px+SEC_SIZE, 0.0, offsetY+py+SEC_SIZE));
+                            offsetX+px+SEC_SIZE, hy, offsetY+py+SEC_SIZE));
 
                         vd->Normals.push_back(glm::vec3(0,1,0));
                         vd->Normals.push_back(glm::vec3(0,1,0));
@@ -139,4 +145,3 @@ glm::vec3 TerrainRenderer::GameToGraphicalSpace(glm::vec3 game)
 {
 	return glm::vec3(game.x * SEC_SIZE, game.y, game.z * SEC_SIZE);
 }
-
