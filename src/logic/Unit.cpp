@@ -70,3 +70,15 @@ void Unit::SetPiercingAttack(float patk)
 {
     this->SetProperty("piercingAttack", patk);
 }
+
+/* Move, one tick at a time, towards a specified unit vector */
+void Unit::Move(glm::vec3 vec_dest)
+{
+    glm::vec3 pos = glm::vec3(this->GetX(), this->GetY(), this->GetZ());
+    glm::vec3 dest = glm::normalize(vec_dest);
+    pos += dest;
+
+    this->SetX(pos.x);
+    this->SetY(pos.y);
+    this->SetZ(pos.z);
+}

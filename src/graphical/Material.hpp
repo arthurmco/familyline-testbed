@@ -22,6 +22,17 @@ namespace Graphics {
         glm::vec3 ambientColor;
         Texture* texture = nullptr;
 
+        MaterialData(glm::vec3 dif, glm::vec3 spec, glm::vec3 amb) {
+            diffuseColor = dif;
+            specularColor = spec;
+            ambientColor = amb;
+        }
+
+        MaterialData() {
+            diffuseColor = glm::vec3(0);
+            specularColor = glm::vec3(0);
+            ambientColor = glm::vec3(0);
+        }
     };
 
     class Material
