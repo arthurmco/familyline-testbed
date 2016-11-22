@@ -21,3 +21,12 @@ Debug/*
 Release/*
 tribalia.dir/*
 Win32/*
+
+# Data files
+*.bmp
+*.png
+*.gif
+*.jpeg
+
+# Documents
+*.odt
