@@ -1,0 +1,47 @@
+#!/bin/bash
+
+#  Get the binary ready to distribution (Linux)
+#  Generates a tarball containing the software and copies get_dependencies and install, to
+# respectively get the needed dependencies and install the software.
+#
+# Copyright (C) 2016 Arthur M
+
+# Do a full rebuild
+
+if [ ! -d ".git" ]; then
+    cd ..
+fi
+
+make clean
+cmake .
+make
+echo " ok"
+
+FOLDER_SRC="$(pwd)"
+FOLDER_DST="/tmp/tri$RANDOM"
+
+mkdir $FOLDER_DST
+
+echo -n "Preparing the package... "
+# Copies only the final binary, shaders and media
+cp tribalia $FOLDER_DST
+cp -r shaders $FOLDER_DST
+
+shopt -s nullglob
+cp -f *.{bmp,gif,png,jpg} $FOLDER_DST
+cp -f *.taif $FOLDER_DST
+cp -f *.md{2,3,4,5} $FOLDER_DST
+cp -f *.{obj,mtl} $FOLDER_DST
+shopt -u nullglob
+
+echo " ok!"
+
+echo -n "Compressing... "
+cd $FOLDER_DST
+rm -f *.tar.gz
+tar -zcf tribalia.tar.gz *
+cp tribalia.tar.gz $FOLDER_SRC
+echo " ok!"
+
+rm -rf $FOLDER_DST
+cd $FOLDER_SRC
