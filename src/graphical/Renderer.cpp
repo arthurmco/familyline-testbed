@@ -112,7 +112,7 @@ std::vector<SceneIDCache> _last_IDs;
 
 LightRenderInfo lri;
 
-void Renderer::CheckUpdatedObjects()
+void Renderer::UpdateObjects()
 {
 	lastCheck++;
 
@@ -225,7 +225,7 @@ void Renderer::CheckUpdatedObjects()
 
 bool Renderer::Render()
 {
-	this->CheckUpdatedObjects();
+	
     glm::mat4 mModel, mView, mProj;
     mView = this->_scenemng->GetCamera()->GetViewMatrix();
     mProj = this->_scenemng->GetCamera()->GetProjectionMatrix();

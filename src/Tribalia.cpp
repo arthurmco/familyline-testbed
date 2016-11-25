@@ -217,7 +217,7 @@ int main(int argc, char const *argv[]) {
 
 		terr_rend->Update();
 
-        objrend->Check();
+        bool objupdate = objrend->Check();
         objrend->Update();
 
         auto locc = ip->GetIntersectedObject();
@@ -241,6 +241,7 @@ int main(int argc, char const *argv[]) {
 
     	fbRender.SetActive();
     	rndr->SetBoundingBox(hp->renderBBs);
+		if (objupdate) rndr->UpdateObjects();
         rndr->Render();
     	fbRender.UnsetActive();
     	win->Update();

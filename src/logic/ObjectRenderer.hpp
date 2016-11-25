@@ -31,8 +31,10 @@ namespace Logic {
     public:
         ObjectRenderer(ObjectManager*, Tribalia::Graphics::SceneManager*);
 
-        /* Check for new objects, add them to the list */
-        void Check();
+        /*	Check for new objects, add them to the list 
+			Return true if we have new objects, false if we haven't
+		*/
+        bool Check();
 
         /* Update object meshes */
         void Update();

@@ -9,8 +9,9 @@ ObjectRenderer::ObjectRenderer(ObjectManager* om, Tribalia::Graphics::SceneManag
 
 }
 
-/* Check for new objects, add them to the list */
-void ObjectRenderer::Check()
+/*	Check for new objects, add them to the list
+	Return true if we have new objects, false if we haven't */
+bool ObjectRenderer::Check()
 {
     int object_found = 0;
     for (auto it = _om->_objects.begin(); it != _om->_objects.end(); ++it) {
@@ -46,6 +47,8 @@ void ObjectRenderer::Check()
         Log::GetLog()->Write("Object renderer updated. %d objects found",
             object_found);
     }
+
+	return (object_found == 0);
 
 }
 

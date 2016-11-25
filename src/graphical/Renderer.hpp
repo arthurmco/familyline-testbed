@@ -62,8 +62,6 @@ namespace Graphics {
 
         void SetMaterial(int index);
 
-		void CheckUpdatedObjects();
-
 		/* Render object bounding boxes */
 		void RenderBoundingBoxes();
 		int AddBoundingBox(Mesh*, glm::vec3 color);
@@ -77,6 +75,7 @@ namespace Graphics {
         void SetSceneManager(SceneManager*);
 
         /* Returns true if rendered successfully */
+		void UpdateObjects();
         bool Render();
 
         /* Add vertex data structure. Returns its VAO ID */
