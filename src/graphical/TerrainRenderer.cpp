@@ -48,7 +48,7 @@ void TerrainRenderer::Update()
         offsetY = (SECTION_SIDE * y * SEC_SIZE);
         offsetX = 0;
 
-        int h, hx, hy, hxy;
+        int hh, hx, hy, hxy;
 
         for (int x = 0; x < w; x++) {
 
@@ -76,7 +76,7 @@ void TerrainRenderer::Update()
                 float px = 0, py = 0;
                 for (int ey = 0; ey < eyMax; ey++) {
                     for (int ex = 0; ex < exMax; ex++) {
-                        h = _tdata[i].data->data[ey*SECTION_SIDE + ex].elevation;
+                        hh = _tdata[i].data->data[ey*SECTION_SIDE + ex].elevation;
 
                         if (ex+1 < exMax)
                             hx = _tdata[i].data->data[ey*SECTION_SIDE + (ex+1)].elevation;
@@ -88,14 +88,14 @@ void TerrainRenderer::Update()
                             hxy = _tdata[i].data->data[(ey+1)*SECTION_SIDE + (ex+1)].elevation;
 
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px, h * SEC_HEIGHT, offsetY+py));
+                            offsetX+px, hh * SEC_HEIGHT, offsetY+py));
                         vd->Positions.push_back(glm::vec3(
                             offsetX+px, hy * SEC_HEIGHT, offsetY+py+SEC_SIZE));
                         vd->Positions.push_back(glm::vec3(
                             offsetX+px+SEC_SIZE, hxy * SEC_HEIGHT, offsetY+py+SEC_SIZE));
 
                         vd->Positions.push_back(glm::vec3(
-                            offsetX+px, h * SEC_HEIGHT, offsetY+py));
+                            offsetX+px, hh * SEC_HEIGHT, offsetY+py));
                         vd->Positions.push_back(glm::vec3(
                             offsetX+px+SEC_SIZE, hxy * SEC_HEIGHT, offsetY+py+SEC_SIZE));
                         vd->Positions.push_back(glm::vec3(

@@ -54,7 +54,7 @@ struct md2_frame {
     float scaleX, scaleY, scaleZ;
     float transX, transY, transZ;
     char name[16];
-} __attribute__((packed));
+}; //__attribute__((packed));
 
 /*  MD2 normal table, from the Quake 2 anorms.h file.
     If you want to skip, go to line 230

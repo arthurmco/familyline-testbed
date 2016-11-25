@@ -107,6 +107,7 @@ void GUIRenderer::Redraw()
  {
 	 p->SetPosition(x, y);
 	 AddPanel(p);
+	 return 1;
  }
 
 /* Remove the panel */

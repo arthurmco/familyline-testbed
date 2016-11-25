@@ -51,7 +51,7 @@ using namespace Tribalia::Input;
     #undef main  //somehow vs does not find main()
 
     /* TODO: fixes these variables on win32 builds */
-    #define VERSION VERSION"-win32"
+     //#define VERSION VERSION"-win32"
     #define COMMIT 0
     #define USERNAME "unknown"
 #endif

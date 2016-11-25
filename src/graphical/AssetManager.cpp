@@ -93,8 +93,8 @@ bool CheckIfExists(const char* path) {
 
     return (statbuf.st_size > 0);
 #else
-    #warning Tribalia is unable to find a stat() version!
-    #warning Using less destructive return
+    #pragma message("Tribalia is unable to find a stat() version!")
+    #pragma message(" Using less destructive return value")
     return true;
 #endif
 
