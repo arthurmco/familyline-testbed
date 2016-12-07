@@ -23,8 +23,8 @@ tribalia.dir/*
 Win32/*
 
 # Data files
-*.bmp
-*.png
+#*.bmp
+#*.png
 *.gif
 *.jpeg
 
