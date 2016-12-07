@@ -23,9 +23,9 @@ isyum=$(whereis yum | tail -c +5)
 if [ -n "${isapt}" ]; then
     apt install libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev libcairo2 libcairo2-dev
 elif [ -n "${isdnf}" ]; then
-    dnf install libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev libcairo2 libcairo2-dev
+    dnf install libglm-devel libglew1.10 libglew-devel libsdl2-2.0.0 libsdl2-devel libdevil1c2 libdevil-devel libcairo2 libcairo2-devel
 elif [ -n "${isyum}" ]; then
-    yum install libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev libcairo2 libcairo2-dev
+    yum install libglm-devel libglew1.10 libglew-devel libsdl2-2.0.0 libsdl2-devel libdevil1c2 libdevil-devel libcairo2 libcairo2-devel
 else
     echo "Please install the following packages equivalent in your distribution: "
     echo "libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev libcairo2 libcairo2-dev"
