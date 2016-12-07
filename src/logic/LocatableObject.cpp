@@ -18,7 +18,7 @@ LocatableObject::LocatableObject(int oid, int tid, const char* name,
         DEF_PROPERTY("yPos", yPos);
         DEF_PROPERTY("zPos", zPos);
         DEF_PROPERTY("rotation",-1);
-        
+
         DEF_PROPERTY("mesh", (Tribalia::Graphics::Mesh*)nullptr);
     }
 
@@ -32,6 +32,18 @@ void LocatableObject::SetZ(float v) { SET_PROPERTY("zPos", v); }
 float LocatableObject::GetZ() { return GET_PROPERTY(float, "zPos"); }
 
 float LocatableObject::GetRotation() { return GET_PROPERTY(float, "rotation"); }
+
+/* Get radius from mesh data. */
+float LocatableObject::GetRadius()
+{
+    Tribalia::Graphics::Mesh* m = GET_PROPERTY(Tribalia::Graphics::Mesh*, "mesh");
+    if (m) {
+        /*  Multiply by 4, the default number for gl to game coord conversion.
+            Divide by 2, the diameter to radius converter */
+        return (m->GetBoundingBox().maxX - m->GetBoundingBox().minX) * (4/2);
+    }
+    return 0.0f;
+}
 
 void LocatableObject::SetMesh(Tribalia::Graphics::Mesh* m)
 {
