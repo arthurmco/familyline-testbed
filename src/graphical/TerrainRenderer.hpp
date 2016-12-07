@@ -8,7 +8,7 @@
 #ifndef TERRAINRENDERER_HPP
 #define TERRAINRENDERER_HPP
 
-#include "Terrain.hpp"
+#include "../logic/Terrain.hpp"
 #include "Camera.hpp"
 #include "Renderer.hpp"
 #include "VertexData.hpp"
@@ -24,14 +24,14 @@ namespace Graphics {
 
 
     struct TerrainDataInfo {
-        TerrainData* data;
+        Tribalia::Logic::TerrainData* data;
         GLint vao;
     };
 
     class TerrainRenderer {
     private:
         TerrainDataInfo* _tdata = nullptr;
-        Terrain* _t;
+        Tribalia::Logic::Terrain* _t;
         Camera* _cam  = nullptr;
         Renderer* _rend;
         glm::mat4 _wmatrix = glm::mat4(1.0f);
@@ -39,8 +39,8 @@ namespace Graphics {
     public:
         TerrainRenderer(Renderer*);
 
-        void SetTerrain(Terrain*);
-        Terrain* GetTerrain();
+        void SetTerrain(Tribalia::Logic::Terrain*);
+        Tribalia::Logic::Terrain* GetTerrain();
 
         void SetCamera(Camera*);
         Camera* GetCamera();

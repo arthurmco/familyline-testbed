@@ -1,6 +1,7 @@
 #include "TerrainRenderer.hpp"
 
 using namespace Tribalia::Graphics;
+using namespace Tribalia::Logic;
 
 TerrainRenderer::TerrainRenderer(Renderer* r)
     : _rend(r)

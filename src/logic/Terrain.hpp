@@ -14,7 +14,7 @@
 #define TERRAIN_HPP
 
 namespace Tribalia {
-namespace Graphics {
+namespace Logic {
 
     /*  A terrain is divided into sections.
         The sections are stored contiguously in the terrain file (and memory)

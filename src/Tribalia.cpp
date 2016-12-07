@@ -28,7 +28,6 @@
 #include "graphical/Light.hpp"
 #include "graphical/meshopener/OBJOpener.hpp"
 #include "graphical/materialopener/MTLOpener.hpp"
-#include "graphical/Terrain.hpp"
 #include "graphical/TerrainRenderer.hpp"
 #include "graphical/TextureOpener.hpp"
 #include "graphical/TextureManager.hpp"
