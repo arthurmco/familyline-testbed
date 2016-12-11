@@ -46,9 +46,10 @@ bool ObjectRenderer::Check()
     if (object_found > 0) {
         Log::GetLog()->Write("Object renderer updated. %d objects found",
             object_found);
+        return true;
     }
 
-	return (object_found == 0);
+	return false;
 
 }
 

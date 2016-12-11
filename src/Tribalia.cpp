@@ -20,6 +20,7 @@
 #include "Log.hpp"
 #include "HumanPlayer.hpp"
 #include "logic/ObjectRenderer.hpp"
+#include "logic/PathFinder.hpp"
 
 #include "graphical/Renderer.hpp"
 #include "graphical/GUIRenderer.hpp"
@@ -149,6 +150,7 @@ int main(int argc, char const *argv[]) {
     Mesh* m5 = op.Open("cabana.md2");
     m5->SetName("cabana");
     m5->SetPosition(glm::vec3(5, 1, 10));
+    m5->SetRotation(glm::radians(-90.0f), 0, 0);
     m5->GenerateBoundingBox();
     m5->GetVertexData()->MaterialIDs.push_back(MaterialManager::GetInstance()->GetMaterial("test")->GetID());
 
@@ -182,6 +184,9 @@ int main(int argc, char const *argv[]) {
 	  InputPicker* ip = new InputPicker{ terr_rend, win, scenemng, cam, om};
 	  hp->SetPicker(ip);
 
+    PathFinder* pathf = new PathFinder(terr, om);
+    pathf->UpdateSlotList(0, 0, terr->GetWidth(), terr->GetHeight());
+
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
@@ -201,6 +206,7 @@ int main(int argc, char const *argv[]) {
 	double pms = 0.0;
 	int pframe = 0;
 
+
     do {
 
         ip->UpdateIntersectedObject();
@@ -217,7 +223,10 @@ int main(int argc, char const *argv[]) {
 		terr_rend->Update();
 
         bool objupdate = objrend->Check();
-        objrend->Update();
+        if (objupdate) {
+            objrend->Update();
+            pathf->UpdateSlotList(0, 0, terr->GetWidth(), terr->GetHeight());
+        }
 
         auto locc = ip->GetIntersectedObject();
         if (locc) {
