@@ -186,6 +186,7 @@ int main(int argc, char const *argv[]) {
 
     PathFinder* pathf = new PathFinder(terr, om);
     pathf->UpdateSlotList(0, 0, terr->GetWidth(), terr->GetHeight());
+    hp->SetPathfinder(pathf);
 
     int i = 0;
     unsigned int ticks = SDL_GetTicks();
@@ -223,7 +224,7 @@ int main(int argc, char const *argv[]) {
 		terr_rend->Update();
 
         bool objupdate = objrend->Check();
-        if (objupdate) {
+        if (objupdate || hp->HasUpdated()) {
             objrend->Update();
             pathf->UpdateSlotList(0, 0, terr->GetWidth(), terr->GetHeight());
         }

@@ -58,6 +58,10 @@ namespace Input {
 			terrain, in render coordinates */
 		glm::vec3 GetTerrainProjectedPosition();
 
+        /*	Get position where the cursor collides with the
+        terrain, in game coordinates */
+        glm::vec2 GetGameProjectedPosition();
+
 		/*	Get the object that were intersected by the cursor ray */
 		Tribalia::Logic::LocatableObject* GetIntersectedObject();
 

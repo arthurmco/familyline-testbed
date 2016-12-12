@@ -201,6 +201,15 @@ glm::vec3 InputPicker::GetTerrainProjectedPosition()
 		return _intersectedPosition;
 }
 
+/*	Get position where the cursor collides with the
+terrain, in game coordinates */
+glm::vec2 InputPicker::GetGameProjectedPosition()
+{
+	glm::vec3 intGame = GetTerrainProjectedPosition();
+	return glm::vec2(intGame.x, intGame.z);
+}
+
+
 
 /*	Get the object that were intersected by the cursor ray */
 LocatableObject* InputPicker::GetIntersectedObject()

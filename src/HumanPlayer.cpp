@@ -41,6 +41,7 @@ HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
 
 void HumanPlayer::SetCamera(Tribalia::Graphics::Camera* c) { _cam = c;}
 void HumanPlayer::SetPicker(Tribalia::Input::InputPicker* ip) { _ip = ip; }
+void HumanPlayer::SetPathfinder(Tribalia::Logic::PathFinder* p) { _pf = p; }
 
 /***
     Virtual function called on each iteration.
@@ -143,14 +144,29 @@ bool HumanPlayer::Play(GameContext* gctx){
 
 
         } else if (ev.eventType == EVENT_MOUSEEVENT ) {
-            
+
             if (ev.event.mouseev.button == MOUSE_LEFT) {
-                if (ev.event.mouseev.status == KEY_KEYPRESS) 
+                if (ev.event.mouseev.status == KEY_KEYPRESS)
                     mouse_click = true;
                 else
                     mouse_click = false;
             }
-                    
+
+            if (ev.event.mouseev.button == MOUSE_RIGHT && _selected_obj) {
+                if (ev.event.mouseev.status == KEY_KEYPRESS) {
+                    /* Move the object to some position */
+                    glm::vec2 to = _ip->GetGameProjectedPosition();
+
+                    glm::vec2 lp = _pf->CreatePath(_selected_obj, to).back();
+                    printf("Moved to %.2fx%.2f", lp.x, lp.y);
+                    _selected_obj->SetX(lp.x);
+                    _selected_obj->SetZ(lp.y);
+                    _updated = true;
+
+
+                }
+            }
+
         }
 
 
@@ -193,9 +209,17 @@ bool HumanPlayer::Play(GameContext* gctx){
 }
 
 
-LocatableObject* HumanPlayer::GetSelectedObject() 
+
+LocatableObject* HumanPlayer::GetSelectedObject()
 {
     return _selected_obj;
+}
+
+bool HumanPlayer::HasUpdated()
+{
+    bool u = _updated;
+    _updated = false;
+    return u;
 }
 
 HumanPlayer::~HumanPlayer()

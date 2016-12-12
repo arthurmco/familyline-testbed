@@ -28,7 +28,7 @@ struct PathFinderSlot {
     double terrain_land_points;
 
      /* Difficulty for water units.
-        Normal is 0.0. Land is 1.0. Water/land mixture is between these values */
+        Normal is 1.0. Land is 0.0. Water/land mixture is between these values */
     double terrain_water_points;
 
     /* True if there's something in your way */
@@ -57,6 +57,42 @@ struct PathMap {
     }
 };
 
+/* Type for an item used for pathfinding coefficient calculations */
+struct PathItem {
+    glm::vec2 point;
+    PathFinderSlot* slot;
+    double f,g,h;
+    struct PathItem *prev, *next;
+
+    PathItem(glm::vec2 p, PathFinderSlot* s) {
+        point = p;
+    }
+
+    void calculateAStar(glm::vec2 from, glm::vec2 to) {
+        g = glm::distance(from, point);
+        h = glm::distance(point, to);
+
+        f = g + h;
+    }
+
+    /* Calculate multiplication numbers */
+    void calculateMult(bool isWaterUnit) {
+        float mult;
+
+
+        if (slot->isObstructed) {
+            mult = 9E+10;
+        } else {
+            /* TODO: Think of a better calculation */
+            if (isWaterUnit)
+                mult = slot->elevation_points / slot->terrain_water_points;
+            else
+                mult = slot->elevation_points * (slot->terrain_land_points);
+        }
+
+        f *= mult;
+    }
+};
 
 class PathFinder {
 private:
@@ -74,6 +110,11 @@ private:
         Both 'to' and 'from' are removed from the final list
     */
     std::vector<glm::vec2> PathFind(glm::vec2 from, glm::vec2 to, bool isWaterUnit);
+
+    /* Add neighbors to open list */
+    void AddNeighborsToOpenList(std::list<PathItem*>* open_list,
+        std::list<PathItem*>* closed_list, glm::vec2 point,
+        glm::vec2 from, glm::vec2 to);
 
 public:
     PathFinder(Terrain* t, ObjectManager* om);

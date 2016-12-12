@@ -6,6 +6,7 @@
 ***/
 
 #include "logic/Player.hpp"
+#include "logic/PathFinder.hpp"
 #include "graphical/Camera.hpp"
 #include "logic/ObjectRenderer.hpp"
 #include "input/InputPicker.hpp"
@@ -21,6 +22,9 @@
 		Tribalia::Input::InputPicker* _ip;
 
         Tribalia::Logic::LocatableObject* _selected_obj = nullptr;
+        Tribalia::Logic::PathFinder* _pf = nullptr;
+
+        bool _updated = false;
 
     public:
 		bool renderBBs = false;
@@ -28,6 +32,7 @@
         Tribalia::Logic::ObjectRenderer* objr;
 
         HumanPlayer(const char* name, int elo=0, int xp=0);
+
 
         /***
             Virtual function called on each iteration.
@@ -42,6 +47,9 @@
         void SetCamera(Tribalia::Graphics::Camera*);
 		void SetPicker(Tribalia::Input::InputPicker* ip);
         void SetInputManager(Tribalia::Input::InputManager*);
+        void SetPathfinder(Tribalia::Logic::PathFinder*);
+
+        bool HasUpdated();
 
         Tribalia::Logic::LocatableObject* GetSelectedObject();
         ~HumanPlayer();
