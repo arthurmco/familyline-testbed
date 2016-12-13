@@ -144,6 +144,9 @@ void InputManager::Run()
 
         _evt_queue.push(ev);
 
+		if (_evt_queue.size() > MAX_INPUT_QUEUE) {
+			_evt_queue.pop();
+		}
 
     }
 
@@ -163,7 +166,7 @@ void InputManager::Run()
 
         if (event_received) {
             _evt_queue.pop();
-		} 
+		}
 
     }
 

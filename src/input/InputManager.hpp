@@ -21,6 +21,9 @@
 namespace Tribalia {
 namespace Input {
 
+    /*  Maximum events for each iteration. */
+    #define MAX_INPUT_QUEUE 60
+
     struct InputListenerData {
         int type_mask;  /* Mask of events you want to receive info */
         InputListener* listener;
