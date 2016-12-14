@@ -63,6 +63,7 @@ InputListener ilt;
 
 bool HumanPlayer::Play(GameContext* gctx){
 
+    _updated = false;
 	InputManager::GetInstance()->Run();
     while (InputManager::GetInstance()->GetDefaultListener()->PopEvent(ev)) {
         if (ev.eventType == EVENT_FINISH) {
@@ -215,11 +216,9 @@ LocatableObject* HumanPlayer::GetSelectedObject()
     return _selected_obj;
 }
 
-bool HumanPlayer::HasUpdated()
+bool HumanPlayer::HasUpdatedObject()
 {
-    bool u = _updated;
-    _updated = false;
-    return u;
+    return _updated;
 }
 
 HumanPlayer::~HumanPlayer()

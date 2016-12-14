@@ -65,8 +65,8 @@ void PathFinder::UpdateSlotList(int x, int y, int w, int h)
         if (lz < y || lz > (y+h)) continue;
 
         float radius = lobj->GetRadius();
-        printf("\tFound object within updt square: %s (%d,%d)\n",
-            lobj->GetName(), lx, lz);
+    /*    printf("\tFound object within updt square: %s (%d,%d)\n",
+            lobj->GetName(), lx, lz); */
 
         /* For now, let just assume radius=box side/2 */
         for (int ry = -radius; ry < radius; ry++) {
@@ -110,8 +110,8 @@ void PathFinder::AddNeighborsToOpenList(std::list<PathItem*>* open_list,
 
             pi->calculateAStar(from, to);
             //pi->calculateMult(false);
-            printf("%f,%f : f=%.3f, g=%.3f, h=%.3f\n",
-                pi->point.x, pi->point.y, pi->f, pi->g, pi->h);
+        /*    printf("%f,%f : f=%.3f, g=%.3f, h=%.3f\n",
+                pi->point.x, pi->point.y, pi->f, pi->g, pi->h); */
             open_list->push_back(pi);
 
         }
@@ -161,7 +161,7 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
                 }
 
                 if (pi->f < lower->f) {
-                    printf("(pi)%.3f menor que (lower)%.3f", pi->f, lower->f);
+                    //printf("(pi)%.3f menor que (lower)%.3f", pi->f, lower->f);
                     lower = pi;
                 }
             }
@@ -171,8 +171,8 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
             PathItem* plast = closed_list.back();
             lower->prev = plast;
             plast->next = lower;
-            printf("\nlower: (%.2f,%.2f), plast: (%.2f,%.2f) |",
-                lower->point.x, lower->point.y, plast->point.x, plast->point.y);
+            /*printf("\nlower: (%.2f,%.2f), plast: (%.2f,%.2f) |",
+                lower->point.x, lower->point.y, plast->point.x, plast->point.y); */
             closed_list.push_back(lower);
             pos = lower->point;
 

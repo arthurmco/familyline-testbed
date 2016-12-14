@@ -224,7 +224,7 @@ int main(int argc, char const *argv[]) {
 		terr_rend->Update();
 
         bool objupdate = objrend->Check();
-        if (objupdate || hp->HasUpdated()) {
+        if (objupdate || hp->HasUpdatedObject()) {
             objrend->Update();
             pathf->UpdateSlotList(0, 0, terr->GetWidth(), terr->GetHeight());
         }

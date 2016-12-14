@@ -39,6 +39,11 @@ namespace Logic {
         ***/
         virtual bool Play(GameContext*) = 0;
 
+        /* True if this player has updated an object in the last Play() call */
+        virtual bool HasUpdatedObject() = 0;
+
+
+
         const char* GetName();
         int GetXP();
 

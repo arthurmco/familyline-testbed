@@ -49,7 +49,7 @@
         void SetInputManager(Tribalia::Input::InputManager*);
         void SetPathfinder(Tribalia::Logic::PathFinder*);
 
-        bool HasUpdated();
+        virtual bool HasUpdatedObject();
 
         Tribalia::Logic::LocatableObject* GetSelectedObject();
         ~HumanPlayer();
