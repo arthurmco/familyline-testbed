@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <glm/glm.hpp>
+#include "AnimationData.hpp"
+
 
 #ifndef VERTEXDATA_HPP
 #define VERTEXDATA_HPP
@@ -20,6 +22,7 @@ struct VertexData
     std::vector<glm::vec3> Normals;
     std::vector<glm::vec2> TexCoords;
     std::vector<int> MaterialIDs;
+    AnimationData* animationData = nullptr;
 };
 
 }

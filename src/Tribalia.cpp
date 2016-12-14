@@ -36,6 +36,7 @@
 #include "graphical/AssetManager.hpp"
 #include "graphical/Window.hpp"
 #include "graphical/Framebuffer.hpp"
+#include "graphical/AnimationManager.hpp"
 
 #include "graphical/gui/Panel.hpp"
 
@@ -242,6 +243,9 @@ int main(int argc, char const *argv[]) {
 
 
         glm::vec3 p = ip->GetTerrainProjectedPosition();
+
+        AnimationManager::GetInstance()->Iterate();
+
         gr.DebugWrite(10, 140, "Terrain pos: %.3f,%.3f,%.3f", p.x, p.y, p.z);
         gr.DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
           "Enabled" : "Disabled");

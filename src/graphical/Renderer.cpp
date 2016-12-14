@@ -225,7 +225,7 @@ void Renderer::UpdateObjects()
 
 bool Renderer::Render()
 {
-	
+
     glm::mat4 mModel, mView, mProj;
     mView = this->_scenemng->GetCamera()->GetViewMatrix();
     mProj = this->_scenemng->GetCamera()->GetProjectionMatrix();
@@ -347,7 +347,8 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
     glGenBuffers(1, &vri.vbo_pos);
     glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_pos);
     glBufferData(GL_ARRAY_BUFFER, v->Positions.size() * sizeof(glm::vec3),
-        v->Positions.data(), GL_STATIC_DRAW);
+        v->animationData ? v->animationData->GetVertexRawData() : v->Positions.data(),
+        v->animationData ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
