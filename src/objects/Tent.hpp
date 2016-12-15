@@ -13,11 +13,17 @@
 namespace Tribalia {
 
 /*  A tent is a basic people storage building */
-class Tent : Logic::Building {
+class Tent : public Logic::Building {
 private:
     static const int TID = 002;
 public:
     Tent(int oid, float x, float y, float z);
+
+    /* Called on object initialization */
+    virtual bool Initialize();
+
+    /* Called on each engine loop, when an action is performed */
+    virtual bool DoAction(void);
 };
 
 }

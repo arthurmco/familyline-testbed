@@ -1,35 +1,10 @@
 #include "HumanPlayer.hpp"
 #include "graphical/meshopener/OBJOpener.hpp"
 
+
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 using namespace Tribalia::Input;
-
-class ConcreteObject : public AttackableObject
-{
-public:
-    ConcreteObject(int oid, const char* name,
-        float x, float y, float z) :
-    AttackableObject(oid, 2, name,
-        x, y, z, 1000, 1.0f, 1.5f)
-        {
-            Tribalia::Graphics::OBJOpener op;
-            this->SetMesh(op.Open("test.obj"));
-			this->GetMesh()->GenerateBoundingBox();
-        }
-
-    virtual bool Initialize(){
-        this->_tid = 2;
-        return true;
-    }
-
-    virtual bool DoAction(void)
-    {
-        printf("Iteration (%d %s) \n", _oid, _name.c_str());
-        return true;
-    }
-};
-
 
 HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
     : Player(name, elo, xp)
@@ -116,15 +91,14 @@ bool HumanPlayer::Play(GameContext* gctx){
                     if (ev.event.keyev.status != KEY_KEYPRESS)
                         goto key_flush;
 
-					char cname[32];
-					sprintf(cname, "Object%d", rand() % rand());
 					glm::vec3 p = _ip->GetTerrainProjectedPosition();
 
-                    printf("Creating %s at %.3f %.3f %.3f\n", cname, p.x, 2.0f, p.z);
+                    Tent* c = new Tent{0, p.x, 2.0f, p.z};
+                    printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, 1.0f, p.z);
 
-                    ConcreteObject* c = new ConcreteObject{0, cname, p.x, 2.0f, p.z};
+
                     int id = gctx->om->RegisterObject(c);
-                    printf("%s has id %d now\n", cname, id);
+                    printf("%s has id %d now\n", c->GetName(), id);
                     fflush(stdin);
                 }
                 break;

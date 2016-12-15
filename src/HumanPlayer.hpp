@@ -12,6 +12,8 @@
 #include "input/InputPicker.hpp"
 #include "input/InputManager.hpp"
 
+#include "objects/Tent.hpp"
+
 #ifndef HUMAN_PLAYER
 #define HUMAN_PLAYER
 
