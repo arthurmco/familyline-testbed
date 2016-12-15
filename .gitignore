@@ -1,6 +1,5 @@
 tribalia
 *.o
-*.obj
 *.swp
 *.pch
 
