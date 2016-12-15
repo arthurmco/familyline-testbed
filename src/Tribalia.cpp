@@ -76,7 +76,7 @@ int main(int argc, char const *argv[]) {
 
     Camera* cam;
 
-    AssetManager am;
+    AssetManager* am = AssetManager::GetInstance();
     Mesh* m;
 
     GameContext gctx;
@@ -95,16 +95,16 @@ int main(int argc, char const *argv[]) {
       hp = new HumanPlayer{"Arthur"};
       scenemng = new SceneManager();
 
-      cam = new Camera{glm::vec3(4.0f, 16.0f, 4.0f), glm::vec3(0,0,0)};
+      cam = new Camera{glm::vec3(6.0f, 24.0f, 6.0f), glm::vec3(0,0,0)};
       scenemng->SetCamera(cam);
       hp->SetCamera(cam);
 
       rndr->SetSceneManager(scenemng);
 
 
-      am.ReadFromFile("test.taif");
+      am->ReadFromFile("test.taif");
 
-      m = am.GetAsset("test2.obj")->asset.mesh;
+      m = am->GetAsset("test2.obj")->asset.mesh;
       m->SetPosition(glm::vec3(4,1,4));
       m->GenerateBoundingBox();
 
@@ -136,7 +136,7 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-	Texture* tex = am.GetAsset("test.bmp")->asset.texture;
+	Texture* tex = am->GetAsset("test.bmp")->asset.texture;
 	if (tex) {
 		MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);
         TextureManager::GetInstance()->AddTexture("test", tex);
@@ -155,12 +155,12 @@ int main(int argc, char const *argv[]) {
     m5->GenerateBoundingBox();
     m5->GetVertexData()->MaterialIDs.push_back(MaterialManager::GetInstance()->GetMaterial("test")->GetID());
 
-    Mesh* m2 = am.GetAsset("casinha.obj")->asset.mesh;
+    Mesh* m2 = am->GetAsset("models/Tent.obj")->asset.mesh;
     m2->SetPosition(glm::vec3(10, 1, 6));
     m2->SetRotation(0, glm::radians(-90.0f), 0);
     m2->GenerateBoundingBox();
 
-	Mesh* m3 = am.GetAsset("testtex.obj")->asset.mesh;
+	Mesh* m3 = am->GetAsset("testtex.obj")->asset.mesh;
 	m3->SetPosition(glm::vec3(20, 1, 10));
 	m3->GenerateBoundingBox();
 
