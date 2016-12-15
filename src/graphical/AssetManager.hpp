@@ -64,6 +64,12 @@ public:
         Returns 'true' if read successfully, 'false' if not
     */
     bool ReadFromFile(const char* file);
+
+    static AssetManager* GetInstance() {
+        static AssetManager* am = nullptr;
+        if (!am)    am = new AssetManager;
+        return am;
+    }
 };
 
 }
