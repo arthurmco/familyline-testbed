@@ -21,17 +21,22 @@ FOLDER_SRC="$(pwd)"
 FOLDER_DST="/tmp/tri$RANDOM"
 
 mkdir $FOLDER_DST
+mkdir $FOLDER_DST/materials
+mkdir $FOLDER_DST/models
+mkdir $FOLDER_DST/shaders
 
 echo -n "Preparing the package... "
 # Copies only the final binary, shaders and media
 cp tribalia $FOLDER_DST
-cp -r shaders $FOLDER_DST
+cp shaders/* $FOLDER_DST/shaders
+cp materials/* $FOLDER_DST/materials
+cp models/* $FOLDER_DST/models
+cp README.md $FOLDER_DST
+cp scripts/install $FOLDER_DST
 
 shopt -s nullglob
 cp -f *.{bmp,gif,png,jpg} $FOLDER_DST
 cp -f *.taif $FOLDER_DST
-cp -f *.md{2,3,4,5} $FOLDER_DST
-cp -f *.{obj,mtl} $FOLDER_DST
 shopt -u nullglob
 
 echo " ok!"

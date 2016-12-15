@@ -35,3 +35,7 @@ fi
 echo -e "\033[1;32mok! \033[0m"
 echo -ne "\033[1m -> TODO: copy the directories and folders to the right places \033[0m"
 
+echo "..."
+echo -n "You can run Tribalia now by typing ./tribalia in your shell, or double-clicking its file name in the "
+echo "file browser."
+
