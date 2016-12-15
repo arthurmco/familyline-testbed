@@ -2,32 +2,6 @@
 
 using namespace Tribalia::Graphics;
 
-/* MD2 header */
-struct md2_header_t
-{
-  int ident;                  /* magic number: "IDP2" */
-  int version;                /* version: must be 8 */
-
-  int skinwidth;              /* texture width */
-  int skinheight;             /* texture height */
-
-  int framesize;              /* size in bytes of a frame */
-
-  int num_skins;              /* number of skins */
-  int num_vertices;           /* number of vertices per frame */
-  int num_st;                 /* number of texture coordinates */
-  int num_tris;               /* number of triangles */
-  int num_glcmds;             /* number of opengl commands */
-  int num_frames;             /* number of frames */
-
-  int offset_skins;           /* offset skin data */
-  int offset_st;              /* offset texture coordinate data */
-  int offset_tris;            /* offset triangle data */
-  int offset_frames;          /* offset frame data */
-  int offset_glcmds;          /* offset OpenGL command data */
-  int offset_end;             /* offset end of file */
-};
-
 /*  MD2 vertex
     Each vertex is stored in a one-byte form, together with a multiplication
     factor in the frame information */
@@ -66,7 +40,6 @@ Mesh* MD2Opener::Open(const char* file)
         throw mesh_exception("Failure to open mesh", errno, file);
     }
 
-    struct md2_header_t hdr;
     fread(&hdr, sizeof(md2_header_t), 1, fMD2);
 
     if (hdr.ident != 0x32504449) {
@@ -126,6 +99,9 @@ Mesh* MD2Opener::Open(const char* file)
             anorms[vertsMD2[i].normal][1], anorms[vertsMD2[i].normal][2]);
     }
 
+    /* Save the end of first frame position */
+    int frame2coords = (int)ftell(fMD2);
+
     delete vertsMD2;
 
     /* Read texcoords */
@@ -164,7 +140,7 @@ Mesh* MD2Opener::Open(const char* file)
             aVerts[trisMD2[i].vertex[1]].x, aVerts[trisMD2[i].vertex[1]].y, aVerts[trisMD2[i].vertex[1]].z,
             aVerts[trisMD2[i].vertex[2]].x, aVerts[trisMD2[i].vertex[2]].y, aVerts[trisMD2[i].vertex[2]].z);
             */
-
+;
         textures->push_back(aTex[trisMD2[i].st[0]]);
         textures->push_back(aTex[trisMD2[i].st[1]]);
         textures->push_back(aTex[trisMD2[i].st[2]]);
@@ -182,6 +158,62 @@ Mesh* MD2Opener::Open(const char* file)
     vd->TexCoords = *textures;
     vd->Normals = *normals;
 
+    if (hdr.num_frames > 1) {
+
+        /* Read the remaining of frame information */
+        printf("Reading frame data - %d frames detected\n", hdr.num_frames);
+        AnimationData* ad = new AnimationData(hdr.num_frames, 0, &vd->Positions);
+        ad->InsertFrame(0, vd->Positions.data());
+
+        // Go to the second frame
+        fseek(fMD2, frame2coords, SEEK_SET);
+
+        glm::vec3* vlist = new glm::vec3[vd->Positions.size()];
+        glm::vec3* avlist = new glm::vec3[hdr.num_vertices];
+
+        for (size_t f = 1; f < hdr.num_frames; f++) {
+
+            struct md2_frame fframe;
+            fread(&fframe, sizeof(struct md2_frame), 1, fMD2);
+            printf("\tframe #%d: scalefactor: (%.3f,%.3f,%.3f), transfactor: (%.3f,%.3f,%.3f) \n",
+                f, fframe.scaleX, fframe.scaleY, fframe.scaleZ, fframe.transX,
+                fframe.transY, fframe.transZ);
+
+            scaleMult = glm::vec3(fframe.scaleX, fframe.scaleY, fframe.scaleZ);
+            transMult = glm::vec3(fframe.transX, fframe.transY, fframe.transZ);
+
+            struct md2_vertex* fverts = new md2_vertex[hdr.num_vertices];
+            fread(fverts, sizeof(struct md2_vertex), hdr.num_vertices, fMD2);
+
+            // Mount the triangles. Get all vertices, scale and transform them
+            for (size_t i = 0; i < hdr.num_vertices; i++) {
+                glm::vec3 v =  glm::vec3(fverts[i].v[0], fverts[i].v[1], fverts[i].v[2]);
+                v = (v * scaleMult) + transMult;
+                avlist[i] = v;
+            }
+
+            // Assemble
+            for (   size_t i = 0, v = 0;
+                    i < hdr.num_tris, v < vd->Positions.size();
+                    i++, v+=3) {
+                /*printf("tri %d: (%d %d %d)\n", i,
+                    trisMD2[i].vfvertsertex[0], trisMD2[i].vertex[1], trisMD2[i].vertex[2]); */
+                vlist[v] = (avlist[trisMD2[i].vertex[0]]);
+                vlist[v+1] = (avlist[trisMD2[i].vertex[1]]);
+                vlist[v+2] = (avlist[trisMD2[i].vertex[2]]);
+
+            }
+
+            ad->InsertFrame(f, vlist);
+
+        }
+
+        /* The list get copied, so we can delete it */
+        delete vlist;
+        delete avlist;
+        vd->animationData = ad;
+
+    }
     Mesh* m = new Mesh{vd};
     return m;
 }
