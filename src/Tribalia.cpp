@@ -104,7 +104,7 @@ int main(int argc, char const *argv[]) {
 
       am->ReadFromFile("test.taif");
 
-      m = am->GetAsset("test2.obj")->asset.mesh;
+      m = am->GetAsset("models/test2.obj")->asset.mesh;
       m->SetPosition(glm::vec3(4,1,4));
       m->GenerateBoundingBox();
 
@@ -148,7 +148,7 @@ int main(int argc, char const *argv[]) {
     MaterialManager::GetInstance()->AddMaterial(matest);
 
     MD2Opener op;
-    Mesh* m5 = op.Open("cabana.md2");
+    Mesh* m5 = op.Open("models/cabana.md2");
     m5->SetName("cabana");
     m5->SetPosition(glm::vec3(5, 1, 10));
     m5->SetRotation(glm::radians(-90.0f), 0, 0);
@@ -160,7 +160,7 @@ int main(int argc, char const *argv[]) {
     m2->SetRotation(0, glm::radians(-90.0f), 0);
     m2->GenerateBoundingBox();
 
-	Mesh* m3 = am->GetAsset("testtex.obj")->asset.mesh;
+	Mesh* m3 = am->GetAsset("models/testtex.obj")->asset.mesh;
 	m3->SetPosition(glm::vec3(20, 1, 10));
 	m3->GenerateBoundingBox();
 

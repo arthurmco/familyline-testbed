@@ -1,9 +1,9 @@
-	file: test.obj, type: mesh
-	file: test.mtl, type: material
+	file: models/test.obj, type: mesh
+	file: materials/test.mtl, type: material
 	file: models/Tent.obj, type: mesh
-	file: casinha.mtl, type: material
-	file: test2.obj, type: mesh
-	file: test2.mtl, type: material
-	file: testtex.obj, type: mesh
-	file: testtex.mtl, type: material
+	file: materials/casinha.mtl, type: material
+	file: models/test2.obj, type: mesh
+	file: materials/test2.mtl, type: material
+	file: models/testtex.obj, type: mesh
+	file: materials/testtex.mtl, type: material
 	file: test.bmp, type: texture
