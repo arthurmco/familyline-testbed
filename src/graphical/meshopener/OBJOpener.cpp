@@ -147,7 +147,9 @@ Mesh* OBJOpener::Open(const char* file)
             char matname[256];
             if (sscanf(fline, "usemtl %s", matname) > 0) {
 				Material* m = MaterialManager::GetInstance()->GetMaterial(matname);
-				materialID = m->GetID();
+                if (m) {
+				    materialID = m->GetID();
+                }
                 continue;
             }
 
