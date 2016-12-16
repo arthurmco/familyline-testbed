@@ -13,6 +13,8 @@ if [ ! "$EUID" = 0 ]; then
     exit 2
 fi
 
+set -e  # Stops on first error.
+
 echo -ne "\033[1m -> Downloading dependencies \033[0m"
 
 
@@ -23,9 +25,9 @@ isyum=$(whereis yum | tail -c +5)
 if [ -n "${isapt}" ]; then
     apt install libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev libcairo2 libcairo2-dev
 elif [ -n "${isdnf}" ]; then
-    dnf install libglm-devel libglew1.10 libglew-devel libsdl2-2.0.0 libsdl2-devel libdevil1c2 libdevil-devel libcairo2 libcairo2-devel
+    dnf install glm-devel glew glew-devel SDL2 SDL2-devel DevIL DevIL-devel cairo cairo-devel
 elif [ -n "${isyum}" ]; then
-    yum install libglm-devel libglew1.10 libglew-devel libsdl2-2.0.0 libsdl2-devel libdevil1c2 libdevil-devel libcairo2 libcairo2-devel
+    yum install glm-devel glew glew-devel SDL2 SDL2-devel DevIL DevIL-devel cairo cairo-devel
 else
     echo "Please install the following packages equivalent in your distribution: "
     echo "libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev libcairo2 libcairo2-dev"
