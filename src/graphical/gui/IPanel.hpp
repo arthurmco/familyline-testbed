@@ -24,7 +24,7 @@ namespace GUI {
 */
 class IPanel : public IControl {
 protected:
-    int _bgColor;  /* control background color, in RGBA format */
+    int _bgColor, _fgColor = 0xffffffff;  /* control back n fore color, in RGBA format */
     int _xPos, _yPos;
     int _width, _height;
 
@@ -42,6 +42,13 @@ public:
     int GetBackColor(uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a);
     void SetBackColor(int rgba);
     void SetBackColor(uint32_t r, uint32_t g, uint32_t b, uint32_t a);
+
+    int GetForeColor();
+    int GetForeColor(uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a);
+    void SetForeColor(int rgba);
+    void SetForeColor(uint32_t r, uint32_t g, uint32_t b, uint32_t a);
+    
+
 };
 
 }

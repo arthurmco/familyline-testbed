@@ -206,6 +206,7 @@ int main(int argc, char const *argv[]) {
 
     gr.AddPanel(new Panel{0, 0, 320, 240});
     Label lbl = Label(120, 120, 100, 30, "This is a true label");
+    lbl.SetForeColor(255, 128, 0, 255);
     gr.AddPanel(&lbl);
 
 	double pms = 0.0;
