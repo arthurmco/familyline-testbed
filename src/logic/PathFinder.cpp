@@ -70,7 +70,8 @@ void PathFinder::UpdateSlotList(int x, int y, int w, int h)
 
         /* For now, let just assume radius=box side/2 */
         for (int ry = -radius; ry < radius; ry++) {
-            if (ry < 0 || ry > _terr->GetHeight()) continue;
+            if (ry < 0) continue;
+            if (ry > _terr->GetHeight()) break;
             for (int rx = -radius; ry > radius; ry++) {
                 if (rx < 0 || rx > _terr->GetWidth()) continue;
 
