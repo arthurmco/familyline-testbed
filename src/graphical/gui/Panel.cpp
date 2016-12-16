@@ -2,43 +2,21 @@
 
 using namespace Tribalia::Graphics::GUI;
 
-Panel::Panel() : _xPos(0), _yPos(0), _width(0), _height(0)
+Panel::Panel()
 {
     _bgColor = 0x778899cc;
 }
 
 Panel::Panel(int x, int y, int w, int h)
-    : _xPos(x), _yPos(y), _width(w), _height(h)
 {
+    SetBounds(x,y,w,h);
      _bgColor = 0x778899cc;
 }
 
-void Panel::SetBounds(int x, int y, int w, int h)
-{
-    _xPos = x;
-    _yPos = y;
-    _width = w;
-    _height = h;
-}
-
-void Panel::SetPosition(int x, int y)
-{
-    _xPos = x;
-    _yPos = y;
-}
-
-void Panel::GetBounds(int& x, int& y, int& w, int& h)
-{
-    x = _xPos;
-    y = _yPos;
-    w = _width;
-    h = _height;
-}
-
-void Panel::Redraw()
+void Panel::Redraw(cairo_t* ctxt)
 {
     for (Panel* p : _panels) {
-        p->Redraw();
+        p->Redraw(ctxt);
 
     }
 }

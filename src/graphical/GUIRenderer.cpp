@@ -47,7 +47,7 @@ void GUIRenderer::SetFramebuffer(Framebuffer* f) {
 bool fb_setup = false;
 bool GUIRenderer::Render()
 {
-	this->Redraw();
+	this->Redraw(nullptr);
 
 	glBindTexture(GL_TEXTURE_2D, _f->GetTextureHandle());
 	if (!fb_setup) {
@@ -75,7 +75,7 @@ bool GUIRenderer::Render()
 }
 
 /* Redraw the child controls */
-void GUIRenderer::Redraw()
+void GUIRenderer::Redraw(cairo_t* ctxt)
 {
     for (GUI::IPanel* p : _panels) {
 		int x,y,w,h;
@@ -91,7 +91,9 @@ void GUIRenderer::Redraw()
 		cairo_set_source_rgba (cr, r/512.0, g/512.0, b/512.0, 1.0);
 		cairo_stroke(cr);
 
-		p->Redraw();
+		/* 	We use our own drawing context, since the render loop will pass 
+			a NULL for us */
+		p->Redraw(cr);
     }
 }
 
@@ -118,7 +120,3 @@ void GUIRenderer::Redraw()
 
  void GUIRenderer::SetBounds(int x, int y, int w, int h) {}
  void GUIRenderer::SetPosition(int x, int y) {}
- void GUIRenderer::GetBounds(int& x, int& y, int& w, int& h)
- {
-	x = 0;	y = 0;	w = ww;	h = wh;
- }

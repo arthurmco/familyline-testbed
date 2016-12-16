@@ -17,7 +17,7 @@ namespace GUI {
 class IControl {
 public:
     /* Redraws itself */
-    virtual void Redraw() = 0;
+    virtual void Redraw(cairo_t* ctxt) = 0;
 
     
 };

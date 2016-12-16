@@ -2,6 +2,16 @@
 
 using namespace Tribalia::Graphics::GUI;
 
+IPanel::IPanel(){}
+
+IPanel::IPanel(int x, int y, int w, int h)
+{
+    _xPos = x;
+    _yPos = y;
+    _width = w;
+    _height = h;
+}
+
 /* Non-virtual functions...
     fuck off */
 
@@ -21,4 +31,27 @@ void IPanel::SetBackColor(int rgba)
 void IPanel::SetBackColor(uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 {
     _bgColor = a | (b << 8) | (g << 16) | (r << 24);
+}
+
+void IPanel::SetBounds(int x, int y, int w, int h) 
+{
+    _xPos = x;
+    _yPos = y;
+    _width = w;
+    _height = h;
+}
+
+void IPanel::SetPosition(int x, int y)
+{
+    _xPos = x;
+    _yPos = y;
+}
+
+void IPanel::GetBounds(int& x, int& y, int& w, int& h)
+{
+    x = _xPos;
+    y = _yPos;
+    w = _width;
+    h = _height;
+    
 }

@@ -25,11 +25,16 @@ namespace GUI {
 class IPanel : public IControl {
 protected:
     int _bgColor;  /* control background color, in RGBA format */
+    int _xPos, _yPos;
+    int _width, _height;
 
 public:
-    virtual void SetBounds(int x, int y, int w, int h) = 0;
-    virtual void SetPosition(int x, int y) = 0;
-    virtual void GetBounds(int& x, int& y, int& w, int& h) = 0;
+    IPanel();
+    IPanel(int x, int y, int w, int h);
+
+    void SetBounds(int x, int y, int w, int h);
+    void SetPosition(int x, int y);
+    void GetBounds(int& x, int& y, int& w, int& h);
 
     /*  Non-virtual functions in an interface?
         C++ allows this. I won't implement this on every control I make. */

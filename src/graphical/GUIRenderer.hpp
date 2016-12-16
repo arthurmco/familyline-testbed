@@ -43,7 +43,7 @@ public:
     bool Render();
 
     /* Redraw the child controls */
-    virtual void Redraw() override;
+    virtual void Redraw(cairo_t* ctxt) override;
 
     /* Add a panel using the panel position or a new position */
     virtual int AddPanel(GUI::IPanel* p) override;
@@ -52,9 +52,10 @@ public:
     /* Remove the panel */
     virtual void RemovePanel(GUI::IPanel* p) override;
 
-    virtual void SetBounds(int x, int y, int w, int h) override;
-    virtual void SetPosition(int x, int y) override;
-    virtual void GetBounds(int& x, int& y, int& w, int& h) override;
+    void SetBounds(int x, int y, int w, int h);
+    void SetPosition(int x, int y);
+
+    
 
 };
 
