@@ -6,4 +6,4 @@
 	file: materials/test2.mtl, type: material
 	file: models/testtex.obj, type: mesh
 	file: materials/testtex.mtl, type: material
-	file: test.bmp, type: texture
+	file: textures/test.bmp, type: texture

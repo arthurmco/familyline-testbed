@@ -137,7 +137,7 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-	Texture* tex = am->GetAsset("test.bmp")->asset.texture;
+	Texture* tex = am->GetAsset("textures/test.bmp")->asset.texture;
 	if (tex) {
 		MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);
         TextureManager::GetInstance()->AddTexture("test", tex);
