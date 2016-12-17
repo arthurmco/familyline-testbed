@@ -66,7 +66,7 @@ bool ObjectRenderer::Check()
             Log::GetLog()->Write("Removed object with id %d", id->ID);
             _sm->RemoveObject(id->m);
             _IDs.erase(id);
-            break;
+            return true;
         }
     }
 

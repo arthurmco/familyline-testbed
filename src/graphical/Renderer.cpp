@@ -189,30 +189,28 @@ void Renderer::UpdateObjects()
 				continue;
 			}
 		}
-	}
-
-	objList = _scenemng->GetValidObjects();
+	
 
 		/* Check for deleted objects */
-	deleted_check:
-	for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); ++it2) {
-		bool isDeleted = true;
-		printf("%d ", it2->ID);
-		for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
+		deleted_check:
+		for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); ++it2) {
+			bool isDeleted = true;
+			for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
 
-			if (it2->ID == (*itScene)->GetID()) {
-				isDeleted = false;
-				printf("<%d> |", (*itScene)->GetID());
+				if (it2->ID == (*itScene)->GetID()) {
+					isDeleted = false;
+					break;
+				}
+			}
+
+			if (isDeleted) {
+				Log::GetLog()->Write("Removing object ID %d from the cache",
+					it2->ID);
+				this->RemoveVertexData(it2->vao);
+				_last_IDs.erase(it2);
 				break;
 			}
-		}
 
-		if (isDeleted) {
-			Log::GetLog()->Write("Removing object ID %d from the cache",
-				it2->ID);
-			this->RemoveVertexData(it2->vao);
-			_last_IDs.erase(it2);
-			break;
 		}
 
 	}

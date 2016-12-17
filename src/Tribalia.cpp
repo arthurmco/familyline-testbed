@@ -204,7 +204,10 @@ int main(int argc, char const *argv[]) {
 	GUIRenderer gr{ win };
 	gr.SetFramebuffer(&fbGUI);
 
-    gr.AddPanel(new Panel{0, 0, 320, 240});
+    Panel p = Panel{0, 0, 320, 240};
+    p.SetBackColor(255, 0, 0, 25);
+    gr.AddPanel(&p);
+    
     Label lbl = Label(120, 460, "This is a true label");
     lbl.SetForeColor(255, 128, 0, 255);
 
@@ -224,7 +227,7 @@ int main(int argc, char const *argv[]) {
         ip->UpdateIntersectedObject();
         ip->UpdateTerrainProjectedPosition();
 
-		gr.DebugWrite(10, 35, "Press C to create an object at mouse cursor.");
+		gr.DebugWrite(10, 40, "Press C to create an object at mouse cursor, and R to remove it.");
         player = true;
         gctx.elapsed_seconds = delta / 1000.0;
 
