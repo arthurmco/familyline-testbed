@@ -205,7 +205,7 @@ int main(int argc, char const *argv[]) {
 	gr.SetFramebuffer(&fbGUI);
 
     gr.AddPanel(new Panel{0, 0, 320, 240});
-    Label lbl = Label(120, 460, 100, 30, "This is a true label");
+    Label lbl = Label(120, 460, "This is a true label");
     lbl.SetForeColor(255, 128, 0, 255);
     gr.AddPanel(&lbl);
 
@@ -218,7 +218,7 @@ int main(int argc, char const *argv[]) {
         ip->UpdateIntersectedObject();
         ip->UpdateTerrainProjectedPosition();
 
-		gr.DebugWrite(10, 15, "Tribalia v0.0.1 Build 1, commit %07x", COMMIT);
+		gr.DebugWrite(10, 15, "Tribalia " VERSION " commit %07x", COMMIT);
 		gr.DebugWrite(10, 35, "Press C to create an object at mouse cursor.");
         player = true;
         gctx.elapsed_seconds = delta / 1000.0;

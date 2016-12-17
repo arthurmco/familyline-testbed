@@ -2,7 +2,7 @@
 
 using namespace Tribalia::Graphics::GUI;
 
-IPanel::IPanel(){}
+IPanel::IPanel(){_bgColor = 0xffffff00;}
 
 IPanel::IPanel(int x, int y, int w, int h)
 {
@@ -10,6 +10,7 @@ IPanel::IPanel(int x, int y, int w, int h)
     _yPos = y;
     _width = w;
     _height = h;
+    _bgColor = 0xffffff00;
 }
 
 /* Non-virtual functions...

@@ -8,13 +8,16 @@ Label::Label(int x, int y, const char* text)
     _xPos = x;
     _yPos = y;
     _width = _text.size() * 9;
-    _height = 10;
+    _height = 16.0f;
+    _bgColor = 0xffffff00;
+    
 }
 
 Label::Label(int x, int y, int w, int h, const char* text)
     : IPanel(x,y,w,h)
 {
     _text = std::string{text};
+    _bgColor = 0xffffff00;   
 }
 
 const char* Label::GetText() const
