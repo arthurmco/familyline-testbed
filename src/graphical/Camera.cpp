@@ -29,8 +29,21 @@ void Camera::SetPosition(glm::vec3 pos) { this->_pos = pos; _isViewChanged = tru
 void Camera::AddPosition(glm::vec3 pos) { this->_pos += pos; _isViewChanged = true;}
 
 glm::vec3 Camera::GetLookAt() const { return this->_lookAt; }
-void Camera::SetLookAt(glm::vec3 pos) { this->_lookAt = pos; _isViewChanged = true;}
-void Camera::AddLookAt(glm::vec3 pos) { this->_lookAt += pos; _isViewChanged = true;}
+void Camera::SetLookAt(glm::vec3 pos) { 
+    /* Reset all rotations here */
+    this->_lookAt = pos; 
+    this->_lookAtOriginal = pos;
+     _isViewChanged = true;
+     _rotation = 0;    
+}
+
+void Camera::AddLookAt(glm::vec3 pos) { 
+    this->_lookAt += pos; 
+    this->_lookAtOriginal += pos;
+    _isViewChanged = true;
+}
+
+float Camera::GetRotation() const { return _rotation; }
 
 /*  Set position and 'look-at' at the same time,
     giving the impression the camera is 'translating' */
@@ -50,9 +63,11 @@ void Camera::CalculateVectors()
     _right = glm::normalize(glm::cross(front, glm::vec3(0,1,0)));
 
     printf("right: %.2f %.2f, %.2f\n", _right.x, _right.y, _right.z);
-    _up = glm::cross(_right, front);
+    _up = glm::vec3(0,1,0);// glm::cross(_right, front);
     printf("up: %.2f %.2f %.2f\n", _up.x, _up.y, _up.z);
 }
+
+
 
 
 /*  Add rotation to the camera.
@@ -62,16 +77,23 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
 {
 
     glm::vec3 l = this->_lookAt;
-    glm::vec3 pivot = (_lookAt - _pos);
+    
+    _rotation += angle;
+    constexpr float max_angle = glm::radians(360.0f);
+    if (_rotation >= max_angle)
+        _rotation -= max_angle;
 
-    glm::mat4 tRotate = glm::rotate(angle, _up);
-    glm::mat4 tPivot = glm::translate(pivot);
-    glm::mat4 tPivotMinus = glm::translate(-pivot);
-    glm::vec4 l4 = tPivotMinus * tRotate * tPivot *
-        glm::vec4(l.x, l.y, l.z, 1.0f);
+    float dist = glm::distance(_pos, _lookAtOriginal);
+    float vx = sin(_rotation)*dist;
+    float vz = cos(_rotation)*dist;
 
-    l = glm::vec3(l4.x, l4.y, l4.z);
-    this->_lookAt = l;
+    printf("p: %f %f, l: %f %f \n\t", _pos.x, _pos.z, _lookAt.x, _lookAt.z);
+    printf("r: %f, (vx: %f vz: %f) -> %f %f %f\n\n", _rotation, vx, vz, _lookAt.x, _lookAt.y, _lookAt.z);
+    _lookAt = glm::vec3(_lookAtOriginal.x-vx, _lookAtOriginal.y, _lookAtOriginal.z+vz);
+
+
+
+
     this->_isViewChanged = true;
 }
 
@@ -79,6 +101,7 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
 glm::mat4 Camera::GetViewMatrix()
 {
     if (_isViewChanged) {
+      
         this->_viewMatrix = glm::lookAt(_pos, _lookAt, glm::vec3(0,1,0));
         _isViewChanged = false;
     }

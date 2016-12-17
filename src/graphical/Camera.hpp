@@ -11,6 +11,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <cmath>
 #include "../Log.hpp"
 
 #ifndef CAMERA_HPP
@@ -24,6 +25,8 @@ namespace Graphics {
     private:
         glm::vec3 _pos;
         glm::vec3 _lookAt;
+        glm::vec3 _lookAtOriginal;
+        
         float _fov;
         float _aspectRatio;
         float _distance;
@@ -37,6 +40,9 @@ namespace Graphics {
         /* Up and right vectors */
         glm::vec3 _up;
         glm::vec3 _right;
+
+        /* Camera rotation, in radians */
+        float _rotation = 0;
 
         glm::mat4 _viewMatrix, _projMatrix;
 
@@ -57,6 +63,7 @@ namespace Graphics {
             giving the impression the camera is 'translating' */
         void AddMovement(glm::vec3);
 
+        float GetRotation() const;
 
         /*  Add rotation to the camera.
             You can rotate the camera by changing the look-at value in a
