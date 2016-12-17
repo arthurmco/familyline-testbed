@@ -19,6 +19,12 @@
 namespace Tribalia {
 namespace Logic {
 
+    struct ObjectRenderData {
+        int ID;
+        Tribalia::Graphics::Mesh* m;
+        bool ok;
+    };
+
     class ObjectRenderer
     {
     private:
@@ -26,20 +32,20 @@ namespace Logic {
         Tribalia::Graphics::SceneManager* _sm;
 
         std::list<LocatableObject*> _objects;
-        std::vector<int> _IDs;
+        std::vector<ObjectRenderData> _IDs;
 
     public:
         ObjectRenderer(ObjectManager*, Tribalia::Graphics::SceneManager*);
 
-        /*	Check for new objects, add them to the list 
-			Return true if we have new objects, false if we haven't
+        /*	Check for new and deleted objects, add them to the list 
+			Return true if we have object changes, false if we haven't
 		*/
         bool Check();
 
         /* Update object meshes */
         void Update();
 
-        /* Check if the world-space ray collides with any rendered object.
+        /* Check if the worldobjects-space ray collides with any rendered object.
             Returns the object, or nullptr if any.
             Also return the collided world-space coords on world_pos vec3. */
         LocatableObject* CheckRayCollide(glm::vec3 eye_ray, glm::vec3* world_pos);

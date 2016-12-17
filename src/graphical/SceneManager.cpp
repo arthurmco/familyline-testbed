@@ -4,7 +4,7 @@ using namespace Tribalia::Graphics;
 
 int SceneManager::AddObject(SceneObject* obj)
 {
-    obj->_id = _objects.size() + 1;
+    obj->_id = _objects.size() + 1 + (uintptr_t)obj;
     this->_objects.push_back(obj);
     Log::GetLog()->Write("Added object %s (ID %d) to the SceneManager",
         obj->_name.c_str(), obj->_id);
@@ -50,15 +50,15 @@ void SceneManager::RemoveObject(SceneObject* sco)
 {
     glm::vec3 npos = sco->GetPosition();
     for (auto it = _objects.begin(); it != _objects.end(); it++) {
-        if ((*it)->_position == npos) {
-            if (!strcmp((*it)->_name.c_str(), sco->GetName())) {
-                Log::GetLog()->Write("Object %s (at %.2f %.2f %.2f) removed "
-                    "from the scene", sco->GetName(), npos.x, npos.y, npos.z);
-                _objects.erase(it);
-                 _listModified = true;
-                 break;
-            }
+     
+        if ((*it)->GetID() == sco->GetID()) {
+            Log::GetLog()->Write("Object %s (at %.2f %.2f %.2f) removed "
+                "from the scene", sco->GetName(), npos.x, npos.y, npos.z);
+            _objects.erase(it);
+             _listModified = true;
+             break;
         }
+     
     }
 }
 
@@ -84,7 +84,8 @@ bool SceneManager::UpdateValidObjects()
     for (auto it = _objects.begin(); it != _objects.end(); it++) {
         this->_valid_objects.push_back(*it);
     }
-     _listModified = false;
+    
+    _listModified = false;
      return true;
 }
 

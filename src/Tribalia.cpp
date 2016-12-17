@@ -207,7 +207,13 @@ int main(int argc, char const *argv[]) {
     gr.AddPanel(new Panel{0, 0, 320, 240});
     Label lbl = Label(120, 460, "This is a true label");
     lbl.SetForeColor(255, 128, 0, 255);
+
+    Label lblVersion = Label(10, 10, "");
+    lblVersion.SetText("Tribalia " VERSION " commit %07x", COMMIT);
+    lblVersion.SetForeColor(255, 255, 255, 255);
+
     gr.AddPanel(&lbl);
+    gr.AddPanel(&lblVersion);
 
 	double pms = 0.0;
 	int pframe = 0;
@@ -218,7 +224,6 @@ int main(int argc, char const *argv[]) {
         ip->UpdateIntersectedObject();
         ip->UpdateTerrainProjectedPosition();
 
-		gr.DebugWrite(10, 15, "Tribalia " VERSION " commit %07x", COMMIT);
 		gr.DebugWrite(10, 35, "Press C to create an object at mouse cursor.");
         player = true;
         gctx.elapsed_seconds = delta / 1000.0;

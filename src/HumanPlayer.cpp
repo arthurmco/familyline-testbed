@@ -103,6 +103,19 @@ bool HumanPlayer::Play(GameContext* gctx){
                 }
                 break;
 
+                case SDLK_r:
+                {
+                    if (ev.event.keyev.status != KEY_KEYPRESS)
+                        goto key_flush;
+
+					LocatableObject* l = _ip->GetIntersectedObject();
+                    if (l) {
+                        printf("Deleting object %s", l->GetName());
+                        gctx->om->UnregisterObject(l);
+                    }
+                }
+                break;
+
 				case SDLK_b :
 				{
 					if (ev.event.keyev.status != KEY_KEYPRESS)

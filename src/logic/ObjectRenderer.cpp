@@ -13,15 +13,21 @@ ObjectRenderer::ObjectRenderer(ObjectManager* om, Tribalia::Graphics::SceneManag
 	Return true if we have new objects, false if we haven't */
 bool ObjectRenderer::Check()
 {
+    for (auto id_it = _IDs.begin(); id_it != _IDs.end(); ++id_it) {
+        id_it->ok = false;        
+    }
+
     int object_found = 0;
     for (auto it = _om->_objects.begin(); it != _om->_objects.end(); ++it) {
 
         bool exists = false;
         /* Check if ID already exists.
             If yes, then the object is already added */
-        for (auto id_it = _IDs.begin(); id_it != _IDs.end(); ++id_it) {
-            if (*id_it == it->oid) {
+        for (auto& id_it : _IDs) {
+            if (id_it.ID == it->oid) {
                 exists = true;
+                id_it.ok = true;
+
                 break;
             }
         }
@@ -39,7 +45,11 @@ bool ObjectRenderer::Check()
             object_found++;
             _objects.emplace_back(loc);
             _sm->AddObject(loc->GetMesh());
-            _IDs.push_back(it->oid);
+            ObjectRenderData ord;
+            ord.ID = it->oid;
+            ord.m = loc->GetMesh();
+            ord.ok = true;
+            _IDs.push_back(ord);
         }
     }
 
@@ -48,6 +58,19 @@ bool ObjectRenderer::Check()
             object_found);
         return true;
     }
+
+    for (auto id = _IDs.begin(); id != _IDs.end(); ++id) {
+        if (!id->ok) {
+            /*  ID is not ok, meaning that it wasn't been updated, meaning
+                that it doesn't exist. Remove it from the scene */
+            Log::GetLog()->Write("Removed object with id %d", id->ID);
+            _sm->RemoveObject(id->m);
+            _IDs.erase(id);
+            break;
+        }
+    }
+
+    /* Check for the inverse */
 
 	return false;
 

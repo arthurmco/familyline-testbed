@@ -25,10 +25,17 @@ const char* Label::GetText() const
     return _text.c_str();
 }
 
-void Label::SetText(char* txt)
+void Label::SetText(char* txt, ...)
 {
-    _text = std::string{txt};
+    va_list vl;
+    va_start(vl, txt);
+    char* s = new char[512+strlen(txt)];
+    vsprintf(s, txt, vl);
+    va_end(vl);
+
+    _text = std::string{s};
 }
+
 
 void Label::Redraw(cairo_t* ctxt)
 {

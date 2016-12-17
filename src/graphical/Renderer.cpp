@@ -115,11 +115,10 @@ LightRenderInfo lri;
 void Renderer::UpdateObjects()
 {
 	lastCheck++;
+	auto objList = _scenemng->GetValidObjects();
 
 	/* Check updates from SceneManager*/
 	if (_scenemng->UpdateValidObjects()) {
-
-		auto objList = _scenemng->GetValidObjects();
 
 		/* Check for inserted objects */
 		for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
@@ -190,36 +189,34 @@ void Renderer::UpdateObjects()
 				continue;
 			}
 		}
+	}
+
+	objList = _scenemng->GetValidObjects();
 
 		/* Check for deleted objects */
-		int deleted_num = 0, di = 0;
 	deleted_check:
+	for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); ++it2) {
+		bool isDeleted = true;
+		printf("%d ", it2->ID);
 		for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
-			bool isDeleted = true;
-			SceneIDCache* sic = nullptr;
-			for (auto it2 = _last_IDs.begin() + deleted_num; it2 != _last_IDs.end(); ++it2) {
-				if (it2->ID == (*itScene)->GetID()) {
-					isDeleted = false;
-					sic = &(*it2);
-					break;
-				}
-				di++;
+
+			if (it2->ID == (*itScene)->GetID()) {
+				isDeleted = false;
+				printf("<%d> |", (*itScene)->GetID());
+				break;
 			}
+		}
 
-			if (isDeleted && sic) {
-				Log::GetLog()->Write("Removing object ID %d from the cache",
-					(*itScene)->GetID());
-				this->RemoveVertexData(sic->vao);
-				deleted_num = di;
-				_last_IDs.erase(_last_IDs.begin() + di);
-
-				if (_last_IDs.empty())
-					break;
-			}
-
+		if (isDeleted) {
+			Log::GetLog()->Write("Removing object ID %d from the cache",
+				it2->ID);
+			this->RemoveVertexData(it2->vao);
+			_last_IDs.erase(it2);
+			break;
 		}
 
 	}
+	
 }
 
 

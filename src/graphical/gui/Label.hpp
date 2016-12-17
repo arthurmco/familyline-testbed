@@ -5,6 +5,8 @@
 
 #include "IPanel.hpp"
 #include <string>
+#include <cstdarg>
+#include <cstring>
 
 #ifndef LABEL_HPP
 #define LABEL_HPP
@@ -22,7 +24,7 @@ public:
     Label(int x, int y, int w, int h, const char* text);
 
     const char* GetText() const;
-    void SetText(char* txt);
+    void SetText(char* txt, ...);
 
     virtual void Redraw(cairo_t* ctxt);
 
