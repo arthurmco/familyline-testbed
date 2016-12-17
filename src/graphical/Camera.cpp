@@ -5,7 +5,9 @@ using namespace Tribalia::Graphics;
 Camera::Camera(glm::vec3 pos, glm::vec3 lookAt)
 {
     this->_pos = pos;
+    this->_posOriginal = pos;
     this->_lookAt = lookAt;
+    this->_lookAtOriginal = lookAt;
 
     this->_fov = glm::radians(60.0f);
     this->_aspectRatio = 4.0f/3.0f;
@@ -25,8 +27,18 @@ Camera::Camera(glm::vec3 pos, glm::vec3 lookAt)
 }
 
 glm::vec3 Camera::GetPosition() const { return this->_pos; }
-void Camera::SetPosition(glm::vec3 pos) { this->_pos = pos; _isViewChanged = true;}
-void Camera::AddPosition(glm::vec3 pos) { this->_pos += pos; _isViewChanged = true;}
+void Camera::SetPosition(glm::vec3 pos) { 
+    this->_pos = pos;
+    this->_posOriginal = pos;
+    _rotation = 0;
+     _isViewChanged = true;
+}
+
+void Camera::AddPosition(glm::vec3 pos) { 
+    this->_pos += pos;
+    this->_posOriginal += pos;
+     _isViewChanged = true;
+}
 
 glm::vec3 Camera::GetLookAt() const { return this->_lookAt; }
 void Camera::SetLookAt(glm::vec3 pos) { 
@@ -68,8 +80,6 @@ void Camera::CalculateVectors()
 }
 
 
-
-
 /*  Add rotation to the camera.
     You can rotate the camera by changing the look-at value in a
     'circular way'. I will use the glm rotation functions */
@@ -80,18 +90,14 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
     
     _rotation += angle;
     constexpr float max_angle = glm::radians(360.0f);
-    if (_rotation >= max_angle)
-        _rotation -= max_angle;
 
     float dist = glm::length(glm::vec3(_pos.x - _lookAtOriginal.x, 
-        _pos.y, _pos.z - _lookAtOriginal.z));
+         _lookAtOriginal.y, _pos.z - _lookAtOriginal.z)); 
     float vx = sin(_rotation)*dist;
     float vz = cos(_rotation)*dist;
 
-    printf("p: %f %f, l: %f %f \n\t", _pos.x, _pos.z, _lookAt.x, _lookAt.z);
-    printf("r: %f, (vx: %f vz: %f) -> %f %f %f\n\n", _rotation, vx, vz, _lookAt.x, _lookAt.y, _lookAt.z);
-    _lookAt = glm::vec3(_lookAtOriginal.x-vx, _lookAtOriginal.y, _lookAtOriginal.z+vz);
-
+    printf("dist: %.2f, vx: %.2f, vz: %.2f \n", dist, vx, vz);
+    _lookAt = glm::vec3(_pos.x-vx, _lookAtOriginal.y, _pos.z-vz);
 
 
 
@@ -102,8 +108,8 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
 glm::mat4 Camera::GetViewMatrix()
 {
     if (_isViewChanged) {
-      
         this->_viewMatrix = glm::lookAt(_pos, _lookAt, glm::vec3(0,1,0));
+
         _isViewChanged = false;
     }
 

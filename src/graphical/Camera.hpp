@@ -24,6 +24,7 @@ namespace Graphics {
     {
     private:
         glm::vec3 _pos;
+        glm::vec3 _posOriginal;
         glm::vec3 _lookAt;
         glm::vec3 _lookAtOriginal;
 
@@ -42,7 +43,7 @@ namespace Graphics {
         glm::vec3 _right;
 
         /* Camera default rotation, in radians */
-        float _rotation = 0;
+        float _rotation = M_PI/4;
 
         glm::mat4 _viewMatrix, _projMatrix;
 
