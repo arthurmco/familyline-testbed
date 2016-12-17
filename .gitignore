@@ -21,6 +21,7 @@ Debug/*
 Release/*
 tribalia.dir/*
 Win32/*
+.vscode/*
 
 # Data files
 #*.bmp

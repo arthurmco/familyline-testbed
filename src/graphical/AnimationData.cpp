@@ -64,6 +64,7 @@ void AnimationData::InsertFrame(int num, glm::vec3* vertices)
 
 }
 
+
 /* Bakes the vertex data for the actual frame */
 void AnimationData::BakeVertexData(glm::vec3* vlist)
 {

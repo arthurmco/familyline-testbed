@@ -23,6 +23,7 @@ struct VertexData
     std::vector<glm::vec2> TexCoords;
     std::vector<int> MaterialIDs;
     AnimationData* animationData = nullptr;
+    int vbo_pos;
 };
 
 }

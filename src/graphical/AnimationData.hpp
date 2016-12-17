@@ -33,7 +33,6 @@ private:
 
     std::vector<glm::vec3>* _vlist;
 
-
     /*  A map that binds a frame number to a list of deltas;
         When the frame is modified, it's obligatory to have the last vertex here,
         so we know when to stop.*/

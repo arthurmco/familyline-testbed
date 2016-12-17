@@ -18,5 +18,6 @@ void AnimationManager::Iterate()
 {
     for (auto& a : _animations) {
         a->NextFrame();
+        
     }
 }

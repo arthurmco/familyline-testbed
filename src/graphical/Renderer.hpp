@@ -80,8 +80,8 @@ namespace Graphics {
 
         /* Add vertex data structure. Returns its VAO ID */
         GLint AddVertexData(VertexData*, glm::mat4* worldMatrix);
-
         void RemoveVertexData(GLuint vaoid);
+        void UpdateVertexData(int vbo, glm::vec3* data, size_t count);
 
 		void SetBoundingBox(bool);
     };
