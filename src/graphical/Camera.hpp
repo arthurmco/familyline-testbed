@@ -26,7 +26,7 @@ namespace Graphics {
         glm::vec3 _pos;
         glm::vec3 _lookAt;
         glm::vec3 _lookAtOriginal;
-        
+
         float _fov;
         float _aspectRatio;
         float _distance;
@@ -41,7 +41,7 @@ namespace Graphics {
         glm::vec3 _up;
         glm::vec3 _right;
 
-        /* Camera rotation, in radians */
+        /* Camera default rotation, in radians */
         float _rotation = 0;
 
         glm::mat4 _viewMatrix, _projMatrix;
