@@ -26,7 +26,7 @@ void AnimationData::InsertFrame(int num, glm::vec3* vertices)
 
     /* Check if we had any difference from the base frame */
     for (int v = 0; v < _vlist->size(); v++) {
-        if (vertices[v] == _vlist->at(v)) {
+        if (vertices[v] != _vlist->at(v)) {
             hasDelta = true;
 
             AnimationFrame af;
