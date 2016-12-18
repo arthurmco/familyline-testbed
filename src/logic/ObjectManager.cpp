@@ -73,11 +73,13 @@ bool ObjectManager::UnregisterObject(int id)
     for (auto it = _objects.begin(); it != _objects.end(); ++it){
         /* First search for it */
         if (it->oid == id){
-            _objects.erase(it);
-            _freeID.push_back(it->oid);
+			_freeID.push_back(it->oid);
+			Log::GetLog()->Write("Unregistered object %s, type %#x, id %d",
+				it->obj->_name.c_str(), it->obj->_tid, it->obj->_oid);
 
-            Log::GetLog()->Write("Unregistered object %s, type %#x, id %d",
-                it->obj->_name.c_str(), it->obj->_tid, it->obj->_oid);
+            _objects.erase(it);
+            
+            
 
             return true;
         }
