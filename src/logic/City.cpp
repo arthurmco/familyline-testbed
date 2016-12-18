@@ -28,7 +28,9 @@ using namespace Tribalia::Logic;
     /* Add object into city. Return ID */
     int City::AddObject(AttackableObject* a){
         _objects.push_back(a);
-        a->AddProperty<City*>("city", this);
+        a->SetProperty("city", this);
+        Log::GetLog()->Write("[City] Added %s (%d) to city %s", a->GetName(), a->GetObjectID(),
+            _name.c_str());
         return a->GetObjectID();
     }
 

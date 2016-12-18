@@ -1,6 +1,7 @@
 
 #include "AttackableObject.hpp"
 
+
 using namespace Tribalia::Logic;
 
 AttackableObject::AttackableObject(int oid, int tid, const char* name)
@@ -15,8 +16,9 @@ AttackableObject::AttackableObject(int oid, int tid, const char* name)
     DEF_PROPERTY("bonusMediumBuildingAtk", 1.0e-2f);
     DEF_PROPERTY("bonusAdvancedBuildingAtk", 1.0e-3f);
     DEF_PROPERTY("experience", 0);
-
+    DEF_PROPERTY("city", nullptr);
 }
+
 AttackableObject::AttackableObject(int oid, int tid, const char* name,
         float x, float y, float z)
         : LocatableObject(oid, tid, name, x, y, z)
@@ -30,6 +32,7 @@ AttackableObject::AttackableObject(int oid, int tid, const char* name,
     DEF_PROPERTY("bonusMediumBuildingAtk", 1.0e-2f);
     DEF_PROPERTY("bonusAdvancedBuildingAtk", 1.0e-3f);
     DEF_PROPERTY("experience", 0);
+    DEF_PROPERTY("city", nullptr);
 
 }
 AttackableObject::AttackableObject(int oid, int tid, const char* name,
@@ -46,7 +49,9 @@ AttackableObject::AttackableObject(int oid, int tid, const char* name,
     DEF_PROPERTY("bonusMediumBuildingAtk", 1.0e-2f);
     DEF_PROPERTY("bonusAdvancedBuildingAtk", 1.0e-3f);
     DEF_PROPERTY("experience", 0);
+    DEF_PROPERTY("city", nullptr);
 }
+
 
 int AttackableObject::GetMaxHP(void){
     return GET_PROPERTY(int,"maxHP");

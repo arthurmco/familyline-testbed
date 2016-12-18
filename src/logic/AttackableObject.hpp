@@ -60,6 +60,7 @@ namespace Tribalia {
             */
             float Hit(AttackableObject* other);
 
+
         protected:
             /* The actions that this entity can perform */
             std::vector<UserAction> _actions;

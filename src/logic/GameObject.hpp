@@ -32,6 +32,7 @@ namespace Tribalia {
         /* Property hashtable */
         std::map<std::string, void*> _properties;
 
+
     public:
         GameObject(int oid, int tid, const char* name);
 
@@ -106,8 +107,6 @@ namespace Tribalia {
 
         /* Called on each engine loop, when an action is performed */
         virtual bool DoAction(void) = 0;
-
-
 
     };
 

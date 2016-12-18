@@ -11,6 +11,10 @@ HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
     {
         /* Initialize input subsystems */
 		srand((size_t)name*elo);
+
+         /* Create a city for it */
+         City* c = new City{name, nullptr};
+         AddCity(c);
     }
 
 
@@ -94,6 +98,7 @@ bool HumanPlayer::Play(GameContext* gctx){
 					glm::vec3 p = _ip->GetTerrainProjectedPosition();
 
                     Tent* c = new Tent{0, p.x, 2.0f, p.z};
+                    this->GetCity()->AddObject(c);
                     printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, 1.0f, p.z);
 
 
@@ -110,6 +115,7 @@ bool HumanPlayer::Play(GameContext* gctx){
 					glm::vec3 p = _ip->GetTerrainProjectedPosition();
 
                     WatchTower* c = new WatchTower{0, p.x, 2.0f, p.z};
+                    this->GetCity()->AddObject(c);
                     printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, 1.0f, p.z);
 
 
@@ -181,16 +187,18 @@ bool HumanPlayer::Play(GameContext* gctx){
 
     }
 
+    float unit = 3.2f * gctx->elapsed_seconds;
+
 
     if (front)
-        _cam->AddMovement(glm::vec3(0, 0, -3.2f * gctx->elapsed_seconds));
+        _cam->AddMovement(glm::vec3(0, 0, -unit));
     else if (back)
-        _cam->AddMovement(glm::vec3(0, 0, 3.2f * gctx->elapsed_seconds));
+        _cam->AddMovement(glm::vec3(0, 0, unit));
 
     if (left)
-        _cam->AddMovement(glm::vec3(-3.2f * gctx->elapsed_seconds, 0, 0));
+        _cam->AddMovement(glm::vec3(-unit, 0, 0));
     else if (right)
-        _cam->AddMovement(glm::vec3(3.2f * gctx->elapsed_seconds, 0, 0));
+        _cam->AddMovement(glm::vec3(unit, 0, 0));
 
     if (rotate_left)
         _cam->AddRotation(glm::vec3(0, 1, 0), glm::radians(1.0f));

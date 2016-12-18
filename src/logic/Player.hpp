@@ -26,6 +26,7 @@ namespace Logic {
     public:
         Player(const char* name, int elo=0, int xp=0);
 
+        City* GetCity();
         City* GetCity(const char* name);
 
         void AddCity(City*);

@@ -15,6 +15,11 @@ void Player::AddCity(City* c)
     _cities.push_back(c);
 }
 
+City* Player::GetCity()
+{
+    return _cities.at(0);
+}
+
 City* Player::GetCity(const char* name){
 
     for (auto it = _cities.begin(); it != _cities.end(); ++it){
