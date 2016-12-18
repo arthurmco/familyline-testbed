@@ -27,6 +27,9 @@ Win32/*
 #*.png
 *.gif
 *.jpeg
+*.blend
+*.blend1
+*.blend2
 
 # Documents
 *.odt

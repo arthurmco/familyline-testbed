@@ -102,6 +102,22 @@ bool HumanPlayer::Play(GameContext* gctx){
                     fflush(stdin);
                 }
                 break;
+                case SDLK_e:
+                {
+                    if (ev.event.keyev.status != KEY_KEYPRESS)
+                        goto key_flush;
+
+					glm::vec3 p = _ip->GetTerrainProjectedPosition();
+
+                    WatchTower* c = new WatchTower{0, p.x, 2.0f, p.z};
+                    printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, 1.0f, p.z);
+
+
+                    int id = gctx->om->RegisterObject(c);
+                    printf("%s has id %d now\n", c->GetName(), id);
+                    fflush(stdin);
+                }
+                break;
 
                 case SDLK_r:
                 {

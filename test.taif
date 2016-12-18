@@ -7,3 +7,5 @@
 	file: models/testtex.obj, type: mesh
 	file: materials/testtex.mtl, type: material
 	file: textures/test.bmp, type: texture
+	file: models/WatchTower.obj, type: mesh
+	file: materials/WatchTower.mtl, type: material

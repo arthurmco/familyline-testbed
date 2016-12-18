@@ -13,6 +13,7 @@
 #include "input/InputManager.hpp"
 
 #include "objects/Tent.hpp"
+#include "objects/WatchTower.hpp"
 
 #ifndef HUMAN_PLAYER
 #define HUMAN_PLAYER
