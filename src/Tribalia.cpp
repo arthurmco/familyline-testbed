@@ -255,6 +255,7 @@ int main(int argc, char const *argv[]) {
     	fbRender.SetActive();
     	rndr->SetBoundingBox(hp->renderBBs);
 		if (objupdate) rndr->UpdateObjects();
+        rndr->UpdateFrames();
         rndr->Render();
     	fbRender.UnsetActive();
     	win->Update();

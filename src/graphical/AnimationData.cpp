@@ -91,6 +91,13 @@ void AnimationData::BakeVertexData(glm::vec3* vlist)
     }
 }
 
+
+/* Gets the actual frame */
+int AnimationData::GetActualFrame() {
+    return _frameActual;
+}
+
+
 /* Get vertex raw data for the actual frame */
 glm::vec3* AnimationData::GetVertexRawData()
 {

@@ -324,6 +324,18 @@ bool Renderer::Render()
     return true;
 }
 
+void Renderer::UpdateFrames()
+{
+	for (auto v : _vertices) {
+		if (v.vd->animationData) {
+			/* Has animation things */
+			UpdateVertexData(v.vbo_pos, v.vd->animationData->GetVertexRawData(),
+				v.vd->Positions.size());
+			printf("Updated mesh %d to frame %d", v.vao, v.vd->animationData->GetActualFrame());
+		}
+	}
+}
+
 SceneManager* Renderer::GetSceneManager() const
 {
     return this->_scenemng;

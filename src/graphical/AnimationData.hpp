@@ -47,6 +47,9 @@ public:
     /* Inserts a frame to the animation */
     void InsertFrame(int num, glm::vec3* vertices);
 
+    /* Gets the actual frame */
+    int GetActualFrame();
+
     /* Bakes the vertex data for the actual frame */
     void BakeVertexData(glm::vec3* vlist);
 
