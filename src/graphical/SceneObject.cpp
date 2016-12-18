@@ -2,12 +2,12 @@
 
 using namespace Tribalia::Graphics;
 
+
 SceneObject::SceneObject(const char* name, glm::vec3 pos,
         float rotX, float rotY, float rotZ)
         {
             this->_name = std::string{name};
             this->_position = pos;
-
 
             this->_rotations[0] = rotX;
             this->_rotations[1] = rotY;

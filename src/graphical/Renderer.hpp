@@ -33,6 +33,7 @@ namespace Graphics {
         GLuint vao;
         GLuint vbo_pos, vbo_norm, vbo_tex;
         int material_offsets[9];
+        GLuint vao_bbox = 0;
     };
 
 	struct LightRenderInfo {

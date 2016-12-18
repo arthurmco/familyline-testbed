@@ -391,6 +391,10 @@ void Renderer::RemoveVertexData(GLuint vaoid)
     VertexRenderInfo vri;
     for (auto it = _vertices.begin(); it != _vertices.end(); it++){
         if (it->vao == vaoid) {
+			if (it->vao_bbox) {
+				RemoveBoundingBox(it->vao_bbox);
+			}
+
             glDeleteVertexArrays(1, &vaoid);
             glDeleteBuffers(1, &it->vbo_pos);
 			glDeleteBuffers(1, &it->vbo_norm);
@@ -447,6 +451,15 @@ void Renderer::RenderBoundingBoxes()
 int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
 {
 	VertexRenderInfo vri;
+	VertexRenderInfo* vri_mesh = nullptr;
+
+	/* Find the original mesh in our list */
+	for (auto& vv : _vertices) {
+		if (vv.vd->meshptr == (uintptr_t)m) {
+			vri_mesh = &vv;
+			break;
+		}
+	}
 
 	/* Generate bb points */
 
@@ -496,8 +509,13 @@ int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
 
 	glBindVertexArray(0);
 
-	Log::GetLog()->Write("Added bounding box with VAO %d (VBO %d)", vri.vao,
-		vri.vbo_pos);
+	Log::GetLog()->Write("Added bounding box of mesh vao %d with VAO %d (VBO %d)", 
+		vri_mesh ? vri_mesh->vao : -1, vri.vao, vri.vbo_pos);
+
+	if (vri_mesh) {
+		vri_mesh->vao_bbox = vri.vao;
+		printf("|||%d|||", vri_mesh->vao_bbox);
+	}
 
 	_bb_vaos.push_back(vri);
 	return vri.vao;
