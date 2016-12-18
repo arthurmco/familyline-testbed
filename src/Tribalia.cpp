@@ -155,7 +155,7 @@ int main(int argc, char const *argv[]) {
     m5->SetRotation(glm::radians(-90.0f), 0, 0);
     m5->GenerateBoundingBox();
     m5->GetVertexData()->MaterialIDs.push_back(MaterialManager::GetInstance()->GetMaterial("test")->GetID());
-
+	
     Mesh* m2 = am->GetAsset("models/Tent.obj")->asset.mesh;
     m2->SetPosition(glm::vec3(10, 1, 6));
     m2->SetRotation(0, glm::radians(-90.0f), 0);
