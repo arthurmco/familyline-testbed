@@ -1,0 +1,91 @@
+# These are the guidelines for the new Tribalia Asset Format
+# Comments needs to be started with a '#' character
+
+# Includes needs to be started with @include, ex:
+@include oldassets.taif
+
+# The format is like this
+
+asset1 {
+    type: mesh
+    path: file1.obj #Path is relative to the file.
+    texture: file1_tex
+}
+
+# Files can be referenced before they appear, so, in the first pass, we can
+# only store the names, build a dependency graph, and load all of them, in the
+# correct order.
+
+file1_tex {
+    type: texture
+    path_diffuse: file1d.png
+    path_normal: file1n.png
+    path_specular: file1s.png
+}
+
+# We can support materials too, declared here or in a file
+
+material1 {
+    type: material
+    path: mat1.mtl
+}
+
+material2 {
+    type: material
+    diffuse_color: 0.2 0.0 0.0
+    ambient_color: 0.02 0.0 0.0
+    specular_color: 0.8 0.2 0.2
+    texture: file1.tex
+}
+
+# Other mesh details can be supported
+
+mesh2 {
+    type: mesh
+    material: material2
+    rotationFactor: 0.0 -90.0 0.0   # Rotation angles, in radians, to be rotated before added
+    scaleFactor: 0.1 0.1 0.1        # Scale factor, to be sized (Tribalia scale is rather small compared to
+                                    # other models around
+}
+
+# Audio is supported too, but I want to further improve the options
+# before declare support
+
+audio1 {
+    type: audio
+    file: audio1.mp3
+    volumeFactor: 0.85
+    usableArea: 0m11s 0m14s
+}
+
+# Text might be supported
+
+# You can make fake folders of assets, too
+
+fakefolder {
+    mesh3 {
+        type: mesh  # Will be viewed as fakefolder/mesh3
+        file: mesh3.md2
+        # Animation definitions for meshes
+        animationDef: walk, 0-25
+        animationDef: run, 26-50
+        
+        material: material1
+    }
+
+    mesh4 {
+        type: mesh
+        file: mesh3.md4
+        # Bone definitions are supported too
+        boneDef['rightLeg'] = m_rightLeg # Define the internal bone engine from the external
+        boneDef['leftLeg] = m_leftLef
+        
+    }
+
+    # TODO: Implement a way to do particle emission
+
+}
+
+
+
+
