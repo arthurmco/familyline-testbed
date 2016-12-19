@@ -38,3 +38,9 @@ material_exception::material_exception(std::string msg, int code,
             this->code = code;
             this->file = std::string{file};
         }
+
+asset_exception::asset_exception(void* assetptr, const char* msg)
+        : std::runtime_error(msg)
+        {
+            this->assetptr = assetptr;
+        }

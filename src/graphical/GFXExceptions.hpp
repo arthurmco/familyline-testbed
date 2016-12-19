@@ -56,6 +56,13 @@ namespace Graphics {
         std::string file;
     };
 
+    class asset_exception : public std::runtime_error
+    {
+    public:
+        explicit asset_exception(void* assetptr, const char* msg);
+        void* assetptr;
+    };
+
 
 } /* Graphics */
 } /* Tribalia */
