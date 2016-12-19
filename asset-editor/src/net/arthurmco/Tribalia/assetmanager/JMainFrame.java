@@ -5,7 +5,10 @@
  */
 package net.arthurmco.Tribalia.assetmanager;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +65,7 @@ public class JMainFrame extends javax.swing.JFrame
         jScrollPane2 = new javax.swing.JScrollPane();
         lstAssets = new javax.swing.JList<>();
         jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Tribalia Asset Editor");
@@ -141,6 +145,14 @@ public class JMainFrame extends javax.swing.JFrame
             }
         });
 
+        jButton2.setText("Open Asset File");
+        jButton2.setToolTipText("");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -157,6 +169,8 @@ public class JMainFrame extends javax.swing.JFrame
                     .addComponent(pnlAssetInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButton2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton1)))
                 .addGap(18, 18, 18))
         );
@@ -171,7 +185,9 @@ public class JMainFrame extends javax.swing.JFrame
             .addGroup(layout.createSequentialGroup()
                 .addComponent(pnlAssetInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
                 .addContainerGap())
         );
 
@@ -247,6 +263,8 @@ public class JMainFrame extends javax.swing.JFrame
             JFileChooser fs = new JFileChooser();
             if (fs.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 fileOut = fs.getSelectedFile().getPath();
+            } else {
+                return;
             }
         }
         
@@ -295,6 +313,102 @@ public class JMainFrame extends javax.swing.JFrame
         
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+         
+        JFileChooser fs = new JFileChooser();
+        if (fs.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            fileOut = fs.getSelectedFile().getPath();
+        }
+        
+        boolean isInBlock = false;
+        String type="", name="", path="";
+        
+        try {
+            BufferedReader bread = new BufferedReader(new FileReader(fileOut));
+
+            String line;
+            while ((line = bread.readLine()) != null) {
+                line = line.trim();
+                
+                if (line.startsWith("#")) {
+                    /* Comment. Continue */
+                    continue;
+                }
+                
+                /* Purge comments away */
+                int cmtIndex = line.indexOf("#");
+                if (cmtIndex > 0 && line.charAt(cmtIndex-1) != '\\') {
+                    line = line.replace(line.substring(cmtIndex), "");
+                }
+                
+                if (line.endsWith("{")) {
+                    /* Begin of a block */
+                    name = line.substring(0, line.lastIndexOf('{')).trim();
+                    isInBlock = true;
+                    continue;
+                }
+                
+                if (isInBlock) {
+                    if (line.startsWith("type:")) {
+                        type = line.substring("type:".length()).trim();
+                        continue;
+                    }
+                    
+                    if (line.startsWith("path")) {
+                        path = line.substring("path:".length()).trim();
+                        continue;
+                    }
+                    
+                    if (line.startsWith("}")) {
+                        Asset asset;
+                        System.out.println("Discovered asset: name='"+name+"'" +
+                                ", type='"+type+"'");
+                        
+                        File parentFolder = fs.getSelectedFile().getParentFile();
+                        File b = new File(parentFolder, path);
+                        String abspath = parentFolder.getAbsolutePath() + "/" + path;
+                        
+                        try {
+                            abspath = b.getCanonicalPath(); // may throw IOException
+                        } catch (IOException rex) {
+                            System.out.println(">>> File " + path + " does not exist");
+                        }
+                        
+                        switch (type) {
+                        case Asset.TYPE_TEXTURE:
+                            Texture t = new Texture(name, abspath);
+                            asset = t;
+                            break;
+                            
+                        case Asset.TYPE_MESH:
+                            Mesh m = new Mesh(name, abspath);
+                            asset = m;
+                            break;
+                            
+                        default:
+                            System.out.println("Invalid mesh!!!");
+                            continue;
+
+                        }
+
+                        name="";
+                        path="";
+                        type="";
+                        lmodel.addElement(asset);
+                    }
+                    
+                }
+                
+            }
+
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "I/O error:\n" + ex.getLocalizedMessage(), 
+                    "I/O Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        
+    }//GEN-LAST:event_jButton2ActionPerformed
+
     public void run() {
         pnlAssetInfo.setVisible(false);
       
@@ -336,6 +450,7 @@ public class JMainFrame extends javax.swing.JFrame
     private javax.swing.JButton btnApplyAsset;
     private javax.swing.JButton btnRemove;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane2;

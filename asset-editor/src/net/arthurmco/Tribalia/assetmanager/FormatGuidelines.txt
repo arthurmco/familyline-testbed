@@ -7,7 +7,7 @@
 # The format is like this
 
 asset1 {
-    type: mesh
+    type: mesh  # Type NEEDS to be the first
     path: file1.obj #Path is relative to the file.
     texture: file1_tex
 }
