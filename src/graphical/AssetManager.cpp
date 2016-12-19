@@ -54,10 +54,10 @@ void AssetManager::QueryAssetGroup(AssetGroup* grp)
 	*/
 }
 
-Asset* AssetManager::GetAsset(const char* relpath)
+Asset* AssetManager::GetAsset(const char* path)
 {
     for (auto it = _assets.begin(); it != _assets.end(); it++) {
-        if (!strcmp(relpath, (*it)->relpath)) {
+        if (!strcmp(path, (*it)->path)) {
 			Asset* at = (*it);
 			if (!at->asset.mesh) {
 				this->LoadAsset(at);
@@ -77,7 +77,7 @@ void AssetManager::AddAsset(AssetGroup* grp, Asset* a)
     static const char* aname[] =
         {"mesh", "material", "texture"};
     Log::GetLog()->Write("Added asset %s type %s (%d) to group %s",
-        a->relpath, aname[a->asset_type % 3], a->asset_type, grp->folder);
+        a->path, aname[a->asset_type % 3], a->asset_type, grp->folder);
 }
 
 
@@ -100,6 +100,34 @@ bool CheckIfExists(const char* path) {
 
 }
 
+Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
+{
+	std::string extension = afi->path.substr(afi->path.find_last_of('.')+1);
+	Asset* a = new Asset();
+	strcpy(a->path, afi->path.c_str());
+		
+	if (afi->type == "mesh") {
+		a->asset_type = ASSET_MESH;
+	} else if (afi->type == "texture") {
+		a->asset_type = ASSET_TEXTURE;
+	} else if (afi->type == "material") { 
+		a->asset_type = ASSET_MATERIAL;
+	}
+
+	/** Treat dependencies */
+	for (auto& dep : afi->depends) {
+		if (!dep->isProcessed) {
+			AddAsset(grp, RetrieveAsset(grp, dep));
+		}
+		
+	}
+	
+	afi->isProcessed = true;
+	if (!LoadAsset(a)) {
+		throw asset_exception(afi, "Error loading asset");
+	}
+	return a;
+}
 
 
 #include <functional>	// std::ptr_fun()
@@ -109,122 +137,17 @@ bool CheckIfExists(const char* path) {
 */
 bool AssetManager::ReadFromFile(const char* file)
 {
-	FILE* f = fopen(file, "r");
-	if (!f) return false;
-
-	/*  Get file path. This will be the base for the relative paths
-		later */
-	std::string start_path{ file };
-	start_path = start_path.substr(0, start_path.find_last_of('/'));
-
 	AssetGroup* grp = this->AddAssetGroup(file, "fromfile");
-	while (!feof(f)) {
-		char line[512];
-		fgets(line, 512, f);
+	
+	AssetFile* af = new AssetFile(file);
+	af->BuildFileItemTree();
 
-		/* Take off the newline */
-		size_t l = strlen(line);
-		if (l > 0)
-			if (line[l - 1] == '\n')
-				line[l - 1] = 0;
-
-		l--;
-		if (l > 0)
-			if (line[l - 1] == '\r')
-				line[l - 1] = 0;
-
-		std::string sline{ line };
-
-		/* Take off comments */
-		if (sline.find_first_of('#') != std::string::npos) {
-			continue;
+	for (auto& afi : *af->GetFileItemTree()) {
+		if (!afi->isProcessed) {
+			AddAsset(grp, RetrieveAsset(grp, afi));
 		}
-
-		std::string file, type;
-		size_t ipos, tpos;
-
-		ipos = sline.find("file");
-		if (ipos == std::string::npos) {
-			continue;
-		}
-
-		file = sline.substr(ipos + 5,
-			sline.find_first_of(',', ipos + 5) - (ipos + 5));
-
-		tpos = sline.find("type", ipos + 5);
-		if (tpos == std::string::npos) {
-			continue;
-		}
-
-		type = sline.substr(tpos + 5);
-
-		/* trim type and file */
-		file.erase(file.begin(), std::find_if(file.begin(), file.end(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))));
-		type.erase(type.begin(), std::find_if(type.begin(), type.end(),
-			std::not1(std::ptr_fun<int, int>(std::isspace))));
-
-		Log::GetLog()->Write("Found asset '%s', type '%s'", file.c_str(), type.c_str());
-
-		Asset* asset = new Asset();
-		strcpy(asset->relpath, file.c_str());
-
-		if (type == "mesh") {
-			asset->asset_type = ASSET_MESH;
-
-		}
-		else if (type == "texture") {
-			asset->asset_type = ASSET_TEXTURE;
-
-		}
-		else if (type == "material") {
-			asset->asset_type = ASSET_MATERIAL;
-		}
-
-    if (!CheckIfExists(file.c_str())) {
-        /* throw the correct exception */
-        switch (asset->asset_type) {
-          case ASSET_MESH:
-            throw mesh_exception("File not found", -1, file.c_str()); break;
-          case ASSET_MATERIAL:
-            throw material_exception("Material not found", -1, file.c_str()); break;
-          case ASSET_TEXTURE:
-            throw material_exception("Texture not found", -1, file.c_str()); break;
-
-        }
-        return false;
-    }
-
-		this->AddAsset(grp, asset);
-
-
 	}
 
-	/* Now load the data */
-	for (auto it = _assets.begin(); it != _assets.end(); it++) {
-		Asset* at = (*it);
-
-
-		/* Load the materials */
-		std::string ext{ at->relpath };
-		ext = ext.substr(ext.find_last_of('.') + 1);
-
-		if (ext == "mtl") {
-			MTLOpener o;
-			std::vector<Material*>* m = new std::vector<Material*>;
-			*m = o.Open(at->relpath);
-
-			if (m) {
-				at->asset.material = m;
-				MaterialManager::GetInstance()->AddMaterials(*m);
-			}
-
-		}
-
-
-	}
-
-	fclose(f);
 	return true;
 }
 
@@ -236,24 +159,26 @@ bool AssetManager::LoadAsset(Asset* at)
 	switch (at->asset_type) {
 	case ASSET_TEXTURE: {
 		TextureOpener o;
-		at->asset.texture = o.Open(at->relpath);
+		at->asset.texture = o.Open(at->path);
 
 		if (at->asset.texture) {
-			std::string fname{ at->relpath };
-			std::string tname = fname.substr(fname.find_last_of('/') + 1);
+			std::string fname{ at->path };
+			int i = fname.find_last_of('/');
+			if (i == std::string::npos)	i = -1;
+			std::string tname = fname.substr(i + 1);
 			TextureManager::GetInstance()->AddTexture(tname.c_str(), at->asset.texture);
 			return true;
 		}
 
 	} break;
 	case ASSET_MATERIAL: {
-		std::string ext{ at->relpath };
+		std::string ext{ at->path };
 		ext = ext.substr(ext.find_last_of('.') + 1);
 
 		if (ext == "mtl") {
 			MTLOpener o;
 			std::vector<Material*>* m = new std::vector<Material*>;
-			*m = o.Open(at->relpath);
+			*m = o.Open(at->path);
 
 			if (m) {
 				at->asset.material = m;
@@ -265,7 +190,7 @@ bool AssetManager::LoadAsset(Asset* at)
 	} break;
 	case ASSET_MESH: {
 
-		std::string ext{ at->relpath };
+		std::string ext{ at->path };
 		ext = ext.substr(ext.find_last_of('.') + 1);
         MeshOpener* o;
 
@@ -275,11 +200,11 @@ bool AssetManager::LoadAsset(Asset* at)
             o = new MD2Opener{};
         } else {
             Log::GetLog()->Write("%s uses an unsupported extension",
-                at->relpath);
+                at->path);
             break;
         }
 
-		at->asset.mesh = o->Open(at->relpath);
+		at->asset.mesh = o->Open(at->path);
 		if (at->asset.mesh) {
 			return true;
 		}

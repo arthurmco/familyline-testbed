@@ -107,7 +107,9 @@ int main(int argc, char const *argv[]) {
       rndr->SetSceneManager(scenemng);
 
 
-      am->ReadFromFile("test.taif");
+      if (!am->ReadFromFile("assets.taif")) {
+          throw asset_exception(nullptr, "Invalid asset file!");
+      }
 
       m = am->GetAsset("models/test2.obj")->asset.mesh;
       m->SetPosition(glm::vec3(4,1,4));
@@ -134,10 +136,13 @@ int main(int argc, char const *argv[]) {
             se.what(), se.code);
         Log::GetLog()->Fatal("Shader file: %s, type %d",
             se.file.c_str(), se.type);
-
-#ifdef WIN32
-		system("pause");
-#endif
+        exit(EXIT_FAILURE);
+    } catch (asset_exception& ae) {
+        Log::GetLog()->Fatal("Asset file error: %s", ae.what());
+        if (ae.assetptr) {
+            AssetFileItem* a = (AssetFileItem*)ae.assetptr;
+            Log::GetLog()->Fatal("Asset %s, file: %s", a->name.c_str(), a->path.c_str());
+        }
         exit(EXIT_FAILURE);
     }
 

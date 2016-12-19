@@ -44,11 +44,27 @@ AssetFile::AssetFile(const char* path)
     _path = std::string(path);
 }
 
+/*  Represents a material item that wasn't found, but specified to be
+    loaded late */
+struct DeferredLink {
+    AssetFileItem* afi;
+    std::string asset;
+};
+
 /* Build the file item dependency tree */
 void AssetFile::BuildFileItemTree()
 {
     bool isInAsset = false;
+
+    // General options
     std::string name, path, type;
+
+    // Mesh-specific
+    std::string material_asset, texture_asset;
+
+    std::vector<DeferredLink> deferred_material_assets;
+    std::vector<DeferredLink> deferred_texture_assets;
+
     rewind(_fAsset);
     while (!feof(_fAsset)) {
         // Get char and take out \n and \r
@@ -95,6 +111,21 @@ void AssetFile::BuildFileItemTree()
                 continue;
             }
 
+            if (type == "mesh") {
+                i = l.find("material_asset:"); 
+                if (i != std::string::npos) {
+                    material_asset = Trim(l.substr(i+15));
+                    continue;
+                }
+
+                i = l.find("texture_asset:"); 
+                if (i != std::string::npos) {
+                    texture_asset = Trim(l.substr(i+14));
+                    continue;
+                }
+                
+            }
+
             i = l.find("}");
             if (i != std::string::npos) {
                 AssetFileItem* afi = new AssetFileItem;
@@ -103,9 +134,80 @@ void AssetFile::BuildFileItemTree()
                 afi->type = type;
                 printf("\t new asset found: %s, %s, %s\n", name.c_str(), type.c_str(), path.c_str());
 
+                /* Check if our material asset has been loaded */
+                if (type == "mesh") {
+                    bool mfound = false;
+                    if (material_asset != "") {
+                        for (auto& afs : _file_items) {
+                            if (afs->name == material_asset) {
+                                mfound = true;
+                                afi->depends.push_back(afs);
+                                break;
+                            }
+                        }
+
+                        if (!mfound) {
+                            DeferredLink dl;
+                            dl.afi = afi;
+                            dl.asset = material_asset;
+                            printf("%s material not found, deferred load\n", material_asset.c_str());
+                            deferred_material_assets.push_back(dl);
+                        }
+                        
+                    }
+
+                    mfound = false;
+                    if (texture_asset != "") {
+                        for (auto& afs : _file_items) {
+                            if (afs->name == texture_asset) {
+                                mfound = true;
+                                afi->depends.push_back(afs);
+                                break;
+                            }
+                        }
+
+                        if (!mfound) {
+                            DeferredLink dl;
+                            dl.afi = afi;
+                            dl.asset = texture_asset;
+                            printf("%s texture not found, deferred load\n", texture_asset.c_str());
+                            deferred_texture_assets.push_back(dl);
+                        }
+                        
+                    }
+                } else if (type == "material") {
+                    /* Check if our deferred material is here */
+                    for (auto it = deferred_material_assets.begin();
+                         it != deferred_material_assets.end();
+                         it++) {
+                        if (it->asset == name) {
+                            it->afi->depends.push_back(afi);
+                            printf("%s material loaded now\n", name.c_str());
+                            deferred_material_assets.erase(it);
+                            break;
+                        }
+                    }
+                    
+                } else if (type == "texture") {
+                    /* Check if our texture material is here */
+                    for (auto it = deferred_texture_assets.begin();
+                         it != deferred_texture_assets.end();
+                         it++) {
+                        if (it->asset == name) {
+                            it->afi->depends.push_back(afi);
+                            printf("%s texture loaded now\n", name.c_str());
+                            deferred_texture_assets.erase(it);
+                            break;
+                        }
+                    }
+                    
+                }
+
+
                 name = "";
                 path = "";
                 type = "";
+                material_asset = "";
 
                 isInAsset = false;
                 _file_items.push_back(afi);

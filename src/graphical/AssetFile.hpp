@@ -28,6 +28,9 @@ struct AssetFileItem {
 
     /* The childs of this item */
     std::vector<AssetFileItem*> childs;
+
+    /* Is the asset fully added? */
+    bool isProcessed = false;
 };
 
 class AssetFile {

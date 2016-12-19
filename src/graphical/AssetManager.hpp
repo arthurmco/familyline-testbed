@@ -8,6 +8,7 @@
 #include "TextureManager.hpp"
 #include "TextureOpener.hpp"
 #include "Mesh.hpp"
+#include "AssetFile.hpp"
 
 #include "meshopener/OBJOpener.hpp"
 #include "meshopener/MD2Opener.hpp"
@@ -34,7 +35,7 @@ enum AssetType {
 
 struct Asset {
     AssetGroup* group;
-    char relpath[128];  // Relative path of the asset file
+    char path[256];  // Relative path of the asset file
     int asset_type;
     union {
         Texture* texture;
@@ -50,6 +51,7 @@ private:
     std::vector<AssetGroup*> _groups;
 
 	bool LoadAsset(Asset* a);
+    Asset* RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi);
 
 public:
     AssetGroup* AddAssetGroup(const char* path, const char* tag);
@@ -57,7 +59,7 @@ public:
     /* Query group folder for valid assets */
     void QueryAssetGroup(AssetGroup* grp);
 
-    Asset* GetAsset(const char* relpath);
+    Asset* GetAsset(const char* path);
     void AddAsset(AssetGroup* grp, Asset* a);
 
     /*  Read assets from a Tribalia Asset File (*.taif)
