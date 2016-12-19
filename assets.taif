@@ -1,0 +1,66 @@
+# This is an asset file for Tribalia
+
+# The style of the file is pratically autodescritive.
+# Please don't use the Asset Editor for now, because it don't preserve
+# comments.
+
+test.obj {
+    type: mesh
+    path: models/test.obj
+    material_asset: test.mtl
+    texture_asset: test.bmp
+}
+
+test.mtl {
+    type: material
+    path: materials/test.mtl
+}
+
+Tent.obj {
+    type: mesh
+    path: models/Tent.obj
+}
+
+casinha.mtl {
+    type: material
+    path: materials/casinha.mtl
+}
+
+Test2.obj {
+    type: mesh
+    path: models/test2.obj
+    material_asset: Test2.mtl
+}
+
+Test2.mtl {
+    type: material
+    path: materials/test2.mtl
+}
+
+testtex.obj {
+    type: mesh
+    path: models/testtex.obj
+    material_asset: testtex.mtl
+}
+
+testtex.mtl {
+    type: material
+    path: materials/testtex.mtl
+}
+
+test.bmp {
+    type: texture
+    path: textures/test.bmp
+}
+
+WatchTower.obj {
+    type: mesh
+    path: models/WatchTower.obj
+    material_asset: WatchTower.mtl
+}
+
+WatchTower.mtl {
+    type: material
+    path: materials/WatchTower.mtl
+}
+
