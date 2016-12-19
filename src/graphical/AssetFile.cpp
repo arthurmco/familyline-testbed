@@ -20,6 +20,18 @@ static std::string Trim(std::string str)
 
 }
 
+#define SEPARATOR '/'
+#if defined(_WIN32)
+    #define SEPARATOR '\\'
+#endif
+
+std::string AssetFile::GetAbsolutePath(std::string rel)
+{   
+    std::string dir = _path.substr(0, _path.find_last_of(SEPARATOR)+1);
+    dir.append(rel);
+    return dir;    
+}
+
 AssetFile::AssetFile(const char* path)
 {
     _fAsset = fopen(path, "r");
@@ -27,8 +39,9 @@ AssetFile::AssetFile(const char* path)
         char* msg = new char[strlen(path)+48];
         sprintf(msg, "Failure to open %s: %d", path, errno);
         throw new asset_exception(this, msg);
-
     }
+
+    _path = std::string(path);
 }
 
 /* Build the file item dependency tree */
@@ -78,7 +91,7 @@ void AssetFile::BuildFileItemTree()
 
             i = l.find("path:");
             if (i != std::string::npos) {
-                path = Trim(l.substr(i+5));
+                path = GetAbsolutePath(Trim(l.substr(i+5)).c_str());
                 continue;
             }
 
@@ -88,14 +101,14 @@ void AssetFile::BuildFileItemTree()
                 afi->name = name;
                 afi->path = path;
                 afi->type = type;
+                printf("\t new asset found: %s, %s, %s\n", name.c_str(), type.c_str(), path.c_str());
 
                 name = "";
                 path = "";
                 type = "";
 
+                isInAsset = false;
                 _file_items.push_back(afi);
-
-
             }
         }
 

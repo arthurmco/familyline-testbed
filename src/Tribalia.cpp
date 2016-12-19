@@ -26,6 +26,7 @@
 #include "graphical/GUIRenderer.hpp"
 #include "graphical/ShaderProgram.hpp"
 #include "graphical/Camera.hpp"
+#include "graphical/AssetFile.hpp"
 #include "graphical/Light.hpp"
 #include "graphical/meshopener/OBJOpener.hpp"
 #include "graphical/materialopener/MTLOpener.hpp"
@@ -72,6 +73,9 @@ int main(int argc, char const *argv[]) {
     Renderer* rndr = nullptr;
     HumanPlayer* hp;
     SceneManager* scenemng;
+
+    AssetFile* afi = new AssetFile("/home/arthurmco/teste.taif");
+    afi->BuildFileItemTree();
 
     bool player = false;
 

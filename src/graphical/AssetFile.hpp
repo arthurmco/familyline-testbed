@@ -36,7 +36,7 @@ private:
     std::string _path;
     std::vector<AssetFileItem*> _file_items;
 
-    const char* GetAbsolutePath(const char* rel);
+    std::string GetAbsolutePath(std::string rel);
     
 
 public:
