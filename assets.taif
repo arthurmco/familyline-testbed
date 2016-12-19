@@ -50,7 +50,7 @@ testtex.mtl {
 
 test.bmp {
     type: texture
-    path: textures/test.bmp
+    path: textures/test.png
 }
 
 WatchTower.obj {
@@ -64,3 +64,7 @@ WatchTower.mtl {
     path: materials/WatchTower.mtl
 }
 
+cabana.md2 {
+    type: mesh
+    path: models/cabana.md2
+}

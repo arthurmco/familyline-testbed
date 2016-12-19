@@ -7,7 +7,7 @@ using namespace Tribalia::Logic;
     strength, 2 units of garrison capacity */
 Tent::Tent(int oid, float x, float y, float z)
     : Building(oid, TID, "Tent", x, y, z, 250, 0, 1.0, 1.0, 0.95, 2) {
-        DEF_MESH("models/Tent.obj");
+        DEF_MESH("Tent.obj");
 
     }
 

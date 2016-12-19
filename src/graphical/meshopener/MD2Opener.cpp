@@ -61,6 +61,7 @@ struct md2_frame {
 Mesh* MD2Opener::Open(const char* file)
 {
     FILE* fMD2 = fopen(file, "rb");
+    rewind(fMD2);
 
     if (!fMD2) {
         throw mesh_exception("Failure to open mesh", errno, file);
@@ -183,5 +184,6 @@ Mesh* MD2Opener::Open(const char* file)
     vd->Normals = *normals;
 
     Mesh* m = new Mesh{vd};
+    fclose(fMD2);
     return m;
 }

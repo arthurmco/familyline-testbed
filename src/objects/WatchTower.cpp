@@ -7,7 +7,7 @@ using namespace Tribalia::Logic;
     strength, 5 units of garrison capacity */
 WatchTower::WatchTower(int oid, float x, float y, float z)
     : Building(oid, TID, "WatchTower", x, y, z, 1000, 1.2, 1.5, 1.8, 1.12, 5) {
-        DEF_MESH("models/WatchTower.obj");
+        DEF_MESH("WatchTower.obj");
 
     }
 

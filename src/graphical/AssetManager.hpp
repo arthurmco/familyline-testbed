@@ -35,6 +35,7 @@ enum AssetType {
 
 struct Asset {
     AssetGroup* group;
+    char name[64];
     char path[256];  // Relative path of the asset file
     int asset_type;
     union {

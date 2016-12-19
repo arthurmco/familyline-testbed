@@ -54,12 +54,14 @@ void AssetManager::QueryAssetGroup(AssetGroup* grp)
 	*/
 }
 
-Asset* AssetManager::GetAsset(const char* path)
+Asset* AssetManager::GetAsset(const char* name)
 {
-    for (auto it = _assets.begin(); it != _assets.end(); it++) {
-        if (!strcmp(path, (*it)->path)) {
-			Asset* at = (*it);
+    for (auto it : _assets) {
+        if (!strcmp(name, it->name)) {
+			Asset* at = (Asset*)it;
 			if (!at->asset.mesh) {
+				printf("Not loaded.");
+				fflush(stdout);
 				this->LoadAsset(at);
 			}
 			return at;
@@ -76,8 +78,8 @@ void AssetManager::AddAsset(AssetGroup* grp, Asset* a)
 
     static const char* aname[] =
         {"mesh", "material", "texture"};
-    Log::GetLog()->Write("Added asset %s type %s (%d) to group %s",
-        a->path, aname[a->asset_type % 3], a->asset_type, grp->folder);
+    Log::GetLog()->Write("Added asset %s path %s type %s (%d) to group %s",
+        a->name, a->path, aname[a->asset_type % 3], a->asset_type, grp->folder);
 }
 
 
@@ -105,6 +107,7 @@ Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
 	std::string extension = afi->path.substr(afi->path.find_last_of('.')+1);
 	Asset* a = new Asset();
 	strcpy(a->path, afi->path.c_str());
+	strcpy(a->name, afi->name.c_str());
 		
 	if (afi->type == "mesh") {
 		a->asset_type = ASSET_MESH;
@@ -214,3 +217,4 @@ bool AssetManager::LoadAsset(Asset* at)
 
 	return false;
 }
+

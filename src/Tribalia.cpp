@@ -74,9 +74,6 @@ int main(int argc, char const *argv[]) {
     HumanPlayer* hp;
     SceneManager* scenemng;
 
-    AssetFile* afi = new AssetFile("/home/arthurmco/teste.taif");
-    afi->BuildFileItemTree();
-
     bool player = false;
 
     Camera* cam;
@@ -111,7 +108,7 @@ int main(int argc, char const *argv[]) {
           throw asset_exception(nullptr, "Invalid asset file!");
       }
 
-      m = am->GetAsset("models/test2.obj")->asset.mesh;
+      m = am->GetAsset("Test2.obj")->asset.mesh;
       m->SetPosition(glm::vec3(4,1,4));
       m->GenerateBoundingBox();
 
@@ -146,7 +143,7 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-	Texture* tex = am->GetAsset("textures/test.bmp")->asset.texture;
+	Texture* tex = am->GetAsset("test.bmp")->asset.texture;
 	if (tex) {
 		MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);
         TextureManager::GetInstance()->AddTexture("test", tex);
@@ -158,19 +155,19 @@ int main(int argc, char const *argv[]) {
     MaterialManager::GetInstance()->AddMaterial(matest);
 
     MD2Opener op;
-    Mesh* m5 = op.Open("models/cabana.md2");
+    Mesh* m5 = am->GetAsset("cabana.md2")->asset.mesh;
     m5->SetName("cabana");
     m5->SetPosition(glm::vec3(5, 1, 10));
     m5->SetRotation(glm::radians(-90.0f), 0, 0);
     m5->GenerateBoundingBox();
     m5->GetVertexData()->MaterialIDs.push_back(MaterialManager::GetInstance()->GetMaterial("test")->GetID());
 	
-    Mesh* m2 = am->GetAsset("models/Tent.obj")->asset.mesh;
+    Mesh* m2 = am->GetAsset("Tent.obj")->asset.mesh;
     m2->SetPosition(glm::vec3(10, 1, 6));
     m2->SetRotation(0, glm::radians(-90.0f), 0);
     m2->GenerateBoundingBox();
 
-	Mesh* m3 = am->GetAsset("models/testtex.obj")->asset.mesh;
+	Mesh* m3 = am->GetAsset("testtex.obj")->asset.mesh;
 	m3->SetPosition(glm::vec3(20, 1, 10));
 	m3->GenerateBoundingBox();
 

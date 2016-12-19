@@ -28,9 +28,32 @@ Texture* TextureOpener::Open(const char* path)
 	}
 
 	fclose(f);
-	if (ilLoad(IL_TYPE_UNKNOWN, path) == IL_FALSE) {
-		Log::GetLog()->Warning("TextureOpener: Error while opening %s",
-			path);
+	if (ilLoadImage(path) == IL_FALSE) {
+		int e = ilGetError();
+		char* estr;
+
+		switch (e) {
+			case IL_COULD_NOT_OPEN_FILE:
+				estr = "Could not open file";
+				break;
+
+			case IL_INVALID_EXTENSION:
+			case IL_INVALID_FILE_HEADER:
+				estr = "Invalid file format.";
+				break;
+
+			case IL_INVALID_PARAM:
+				estr = "Unrecognized file.";
+				break;			
+			
+			default: 
+				estr = new char[128];
+				sprintf(estr, "Unknown error %#x", e);
+				break;
+		}
+
+		Log::GetLog()->Warning("TextureOpener: Error '%s' while opening %s",
+			estr, path);
 		return nullptr;
 	}
 
