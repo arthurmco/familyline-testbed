@@ -96,7 +96,6 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
     float vx = sin(_rotation)*dist;
     float vz = cos(_rotation)*dist;
 
-    printf("dist: %.2f, vx: %.2f, vz: %.2f \n", dist, vx, vz);
     _lookAt = glm::vec3(_pos.x-vx, _lookAtOriginal.y, _pos.z-vz);
 
 

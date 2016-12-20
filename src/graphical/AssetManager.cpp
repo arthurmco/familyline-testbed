@@ -126,8 +126,10 @@ Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
 	}
 	
 	afi->isProcessed = true;
-	if (!LoadAsset(a)) {
-		throw asset_exception(afi, "Error loading asset");
+	if (a->asset_type != ASSET_MESH) {
+		if (!LoadAsset(a)) {
+			throw asset_exception(afi, "Error loading asset");
+		}
 	}
 	return a;
 }

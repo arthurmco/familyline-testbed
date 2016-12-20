@@ -150,7 +150,7 @@ int main(int argc, char const *argv[]) {
     }
 
     Material* matest = new Material{"test", MaterialData(
-        glm::vec3(1.0, 0.6, 0.7), glm::vec3(1.0, 0.9, 0.95), glm::vec3(0.1, 0.05, 0.06)
+        glm::vec3(0.0, 0.6, 0.7), glm::vec3(1.0, 0.9, 0.95), glm::vec3(0.1, 0.05, 0.06)
     )};
     MaterialManager::GetInstance()->AddMaterial(matest);
 

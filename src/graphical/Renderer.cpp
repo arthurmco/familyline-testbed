@@ -514,7 +514,6 @@ int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
 
 	if (vri_mesh) {
 		vri_mesh->vao_bbox = vri.vao;
-		printf("|||%d|||", vri_mesh->vao_bbox);
 	}
 
 	_bb_vaos.push_back(vri);
