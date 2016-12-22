@@ -48,8 +48,8 @@ void Timer::RunTimers(double msdelta)
             tevs.second.was_run = false;
         }
 
-        printf("global: %.3f ms, local (%.2f) : %.3f ms\n", 
-            ms_sum, tevs.first, tevs.second.ms_sum);
+        // printf("global: %.3f ms, local (%.2f) : %.3f ms\n", 
+        //     ms_sum, tevs.first, tevs.second.ms_sum);
         tevs.second.ms_sum += msdelta;
 
         /*  Run the timer event that it needs to be runned.
@@ -58,8 +58,8 @@ void Timer::RunTimers(double msdelta)
         */
         if (tevs.second.ms_sum >= tevs.first) {
             for (auto& funcs : tevs.second.funcs) {
-                printf("\t calling function %#p (args %#x %.3f %#x)\n", funcs.func, 
-                    funcs.opt_inst, tevs.second.ms_sum, funcs.opt_arg);
+                // printf("\t calling function %#p (args %#x %.3f %#x)\n", funcs.func, 
+                //     funcs.opt_inst, tevs.second.ms_sum, funcs.opt_arg);
                 funcs.func(funcs.opt_inst, tevs.second.ms_sum, funcs.opt_arg);
             }
             tevs.second.ms_sum = 0;

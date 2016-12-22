@@ -58,13 +58,6 @@ using namespace Tribalia::Input;
     #define USERNAME "unknown"
 #endif
 
-static void test_timer(void* opt_inst, double frame_delta, void* opt_arg) {
-    (void) opt_inst;
-    (void) opt_arg;
-
-    printf("Timer test (delta: %.3f)", frame_delta);
-}
-
 int main(int argc, char const *argv[]) {
     FILE* fLog = stderr;// fopen("log.txt", "w");
     Log::GetLog()->SetFile(fLog);
@@ -215,9 +208,6 @@ int main(int argc, char const *argv[]) {
 
 	double pms = 0.0;
 	int pframe = 0;
-
-    Timer::getInstance()->AddFunctionCall(100, &test_timer, nullptr, nullptr );
-
 
     do {
 
