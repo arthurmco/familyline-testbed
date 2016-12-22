@@ -18,6 +18,7 @@
 #include <glm/gtc/matrix_transform.hpp> //glm::lookAt()
 
 #include "Log.hpp"
+#include "Timer.hpp"
 #include "HumanPlayer.hpp"
 #include "logic/ObjectRenderer.hpp"
 #include "logic/PathFinder.hpp"
@@ -227,7 +228,6 @@ int main(int argc, char const *argv[]) {
 	double pms = 0.0;
 	int pframe = 0;
 
-
     do {
 
         ip->UpdateIntersectedObject();
@@ -279,6 +279,7 @@ int main(int argc, char const *argv[]) {
     	fbRender.SetActive();
     	rndr->SetBoundingBox(hp->renderBBs);
 		if (objupdate) rndr->UpdateObjects();
+        rndr->UpdateFrames();
         rndr->Render();
     	fbRender.UnsetActive();
     	win->Update();
@@ -289,6 +290,7 @@ int main(int argc, char const *argv[]) {
         delta = elapsed - ticks;
 
         ticks = SDL_GetTicks();
+        Timer::getInstance()->RunTimers(delta);
 
     	if (frame % 30 == 0) {
 	    	pms = delta * 1.0;

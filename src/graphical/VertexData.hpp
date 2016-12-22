@@ -24,6 +24,7 @@ struct VertexData
     std::vector<int> MaterialIDs;
     AnimationData* animationData = nullptr;
     uintptr_t meshptr;
+    int vbo_pos;
 };
 
 }

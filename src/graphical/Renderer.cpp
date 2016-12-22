@@ -243,6 +243,13 @@ bool Renderer::Render()
         sForward->SetUniform("mvp", mProj * mView * mModel);
         sForward->SetUniform("mModel", mModel);
 
+
+		if (it->vd->animationData) {
+			this->UpdateVertexData(it->vd->vbo_pos, it->vd->animationData->GetVertexRawData(),
+				it->vd->Positions.size());
+		}
+		
+
         if (!it->vd->MaterialIDs.empty())
             material = it->vd->MaterialIDs[0];
 
@@ -312,6 +319,18 @@ bool Renderer::Render()
     return true;
 }
 
+void Renderer::UpdateFrames()
+{
+	for (auto v : _vertices) {
+		if (v.vd->animationData) {
+			/* Has animation things */
+			UpdateVertexData(v.vbo_pos, v.vd->animationData->GetVertexRawData(),
+				v.vd->Positions.size());
+			//printf("Updated mesh %d to frame %d", v.vao, v.vd->animationData->GetActualFrame());
+		}
+	}
+}
+
 SceneManager* Renderer::GetSceneManager() const
 {
     return this->_scenemng;
@@ -363,8 +382,8 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
 
     glBindVertexArray(0);
 
-    Log::GetLog()->Write("Added vertices with VAO %d (VBO %d)", vri.vao,
-        vri.vbo_pos);
+    /* Log::GetLog()->Write("Added vertices with VAO %d (VBO %d)", vri.vao,
+        vri.vbo_pos); */
 
     /* Store material vertex starts */
     int matidx = 0;
@@ -381,9 +400,16 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
     }
 
     vri.material_offsets[matidx] = -1;
+	v->vbo_pos = vri.vbo_pos;
 
     _vertices.push_back(vri);
     return vri.vao;
+}
+
+void Renderer::UpdateVertexData(int vbo, glm::vec3* data, size_t count)
+{
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, count * sizeof(glm::vec3), (void*)data);
 }
 
 void Renderer::RemoveVertexData(GLuint vaoid)

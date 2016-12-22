@@ -26,7 +26,7 @@ void AnimationData::InsertFrame(int num, glm::vec3* vertices)
 
     /* Check if we had any difference from the base frame */
     for (int v = 0; v < _vlist->size(); v++) {
-        if (vertices[v] == _vlist->at(v)) {
+        if (vertices[v] != _vlist->at(v)) {
             hasDelta = true;
 
             AnimationFrame af;
@@ -58,9 +58,12 @@ void AnimationData::InsertFrame(int num, glm::vec3* vertices)
     /* If we had any difference, then add the vertex data */
     if (hasDelta) {
         _frames.emplace(num, vecaf);
+    } else {
+        Log::GetLog()->Write("Frame %d ignored, same data than base frame", num);
     }
 
 }
+
 
 /* Bakes the vertex data for the actual frame */
 void AnimationData::BakeVertexData(glm::vec3* vlist)
@@ -88,19 +91,28 @@ void AnimationData::BakeVertexData(glm::vec3* vlist)
     }
 }
 
+
+/* Gets the actual frame */
+int AnimationData::GetActualFrame() {
+    return _frameActual;
+}
+
+
 /* Get vertex raw data for the actual frame */
 glm::vec3* AnimationData::GetVertexRawData()
 {
     static int f;
     static glm::vec3* verts = nullptr;
 
-    if (!verts) {
-        f = _frameActual;
-        BakeVertexData(verts);
+    if (f != _frameActual) {
+        if (verts) {
+            delete[] verts;
+            verts = nullptr;
+        }
     }
 
-    if (f != _frameActual) {
-        delete[] verts;
+    if (!verts) {
+        verts = new glm::vec3[_vlist->size()];
         f = _frameActual;
         BakeVertexData(verts);
     }

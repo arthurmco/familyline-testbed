@@ -32,6 +32,12 @@ Win32/*
 *.blend1
 *.blend2
 
+#GNU global tags
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+
 # Documents
 *.odt
 
