@@ -2,6 +2,18 @@
 
 using namespace Tribalia::Graphics;
 
+
+/* Init the scene manager with terrain coordinates, in OpenGL units */
+SceneManager::SceneManager(int terrW, int terrH)
+{
+    _terrainWidth = terrW;
+    _terrainHeight = terrH;
+
+    _quadrants = new SceneQuadrant[ 
+        (int)ceil(terrH/SCENE_QUADRANT_SIZE) * (int)ceil(terrW/SCENE_QUADRANT_SIZE) ];
+    
+}
+
 int SceneManager::AddObject(SceneObject* obj)
 {
     obj->_id = _objects.size() + 1 + (uintptr_t)obj;
@@ -69,6 +81,13 @@ Camera* SceneManager::GetCamera() const
 void SceneManager::SetCamera(Camera* c)
 {
     _cam = c;
+}
+
+void SceneManager::GetCameraQuadrant(int& x, int& y)
+{
+    glm::vec3 pos = _cam->GetPosition();
+    x = floor(pos.x / SCENE_QUADRANT_SIZE);
+    y = floor(pos.z / SCENE_QUADRANT_SIZE);
 }
 
 /* Update the valid objects list.

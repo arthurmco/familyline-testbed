@@ -31,7 +31,7 @@ namespace Tribalia {
 
         /* Property hashtable */
         std::map<std::string, void*> _properties;
-
+        int _xPos, _yPos, _zPos;
 
     public:
         GameObject(int oid, int tid, const char* name);

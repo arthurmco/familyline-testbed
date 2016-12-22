@@ -71,6 +71,7 @@ int main(int argc, char const *argv[]) {
     Renderer* rndr = nullptr;
     HumanPlayer* hp;
     SceneManager* scenemng;
+     Terrain* terr;
 
     bool player = false;
 
@@ -81,34 +82,35 @@ int main(int argc, char const *argv[]) {
 
     GameContext gctx;
     try {
-      om = new ObjectManager{};
-		  win = new Window{ 640, 480 };
+        om = new ObjectManager{};
+            win = new Window{ 640, 480 };
 
-		  Framebuffer::SetDefaultSize(640, 480);
-		  win->Show();
+            Framebuffer::SetDefaultSize(640, 480);
+            win->Show();
 
-      rndr = new Renderer{};
-
-
-      gctx.om = om;
-
-      hp = new HumanPlayer{"Arthur"};
-      scenemng = new SceneManager();
-
-      cam = new Camera{glm::vec3(6.0f, 24.0f, 6.0f), glm::vec3(0,0,0)};
-      scenemng->SetCamera(cam);
-      hp->SetCamera(cam);
-
-      rndr->SetSceneManager(scenemng);
+        rndr = new Renderer{};
 
 
-      if (!am->ReadFromFile("assets.taif")) {
-          throw asset_exception(nullptr, "Invalid asset file!");
-      }
+        gctx.om = om;
 
-      m = am->GetAsset("Test2.obj")->asset.mesh;
-      m->SetPosition(glm::vec3(4,1,4));
-      m->GenerateBoundingBox();
+        hp = new HumanPlayer{"Arthur"};
+        terr = new Terrain{1000, 1000};
+        scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
+
+        cam = new Camera{glm::vec3(6.0f, 24.0f, 6.0f), glm::vec3(0,0,0)};
+        scenemng->SetCamera(cam);
+        hp->SetCamera(cam);
+
+        rndr->SetSceneManager(scenemng);
+
+
+        if (!am->ReadFromFile("assets.taif")) {
+            throw asset_exception(nullptr, "Invalid asset file!");
+        }
+
+        m = am->GetAsset("Test2.obj")->asset.mesh;
+        m->SetPosition(glm::vec3(4,1,4));
+        m->GenerateBoundingBox();
 
     } catch (renderer_exception& re) {
         Log::GetLog()->Fatal("Rendering error: %s [%d]",
@@ -177,7 +179,7 @@ int main(int argc, char const *argv[]) {
     scenemng->AddObject(m5);
 	scenemng->AddObject(l);
 
-    Terrain* terr = new Terrain{1000, 1000};;
+   
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
     terr_rend->SetTerrain(terr);
     terr_rend->SetCamera(cam);
@@ -249,6 +251,12 @@ int main(int argc, char const *argv[]) {
         auto locc = ip->GetIntersectedObject();
         if (locc) {
             gr.DebugWrite(10, 100, "Hovering object '%s'", locc->GetName());
+        }
+
+        {
+            int qx, qy;
+            scenemng->GetCameraQuadrant(qx, qy);
+            gr.DebugWrite(10, 160, "Camera quadrant: %d x %d", qx, qy);
         }
 
         LocatableObject* selected = hp->GetSelectedObject();

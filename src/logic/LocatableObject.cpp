@@ -5,31 +5,31 @@ using namespace Tribalia::Logic;
 LocatableObject::LocatableObject(int oid, int tid, const char* name) :
     GameObject(oid, tid, name)
     {
-        DEF_PROPERTY("xPos",-1);
-        DEF_PROPERTY("yPos",-1);
-        DEF_PROPERTY("zPos",-1);
+       _xPos = -1;
+       _yPos = -1;
+       _zPos = -1;
         DEF_PROPERTY("rotation",-1);
     }
 LocatableObject::LocatableObject(int oid, int tid, const char* name,
     float xPos, float yPos, float zPos) :
         GameObject(oid, tid, name)
     {
-        DEF_PROPERTY("xPos", xPos);
-        DEF_PROPERTY("yPos", yPos);
-        DEF_PROPERTY("zPos", zPos);
+        _xPos = xPos;
+        _yPos = yPos;
+        _zPos = zPos;
         DEF_PROPERTY("rotation",-1);
 
         DEF_PROPERTY("mesh", (Tribalia::Graphics::Mesh*)nullptr);
     }
 
-void LocatableObject::SetX(float v) { SET_PROPERTY("xPos", v);  }
-float LocatableObject::GetX() { return GET_PROPERTY(float, "xPos"); }
+void LocatableObject::SetX(float v) { _xPos = v;  }
+float LocatableObject::GetX() { return _xPos; }
 
-void LocatableObject::SetY(float v) { SET_PROPERTY("yPos", v); }
-float LocatableObject::GetY() { return GET_PROPERTY(float, "yPos"); }
+void LocatableObject::SetY(float v) { _yPos = v; }
+float LocatableObject::GetY() { return _yPos; }
 
-void LocatableObject::SetZ(float v) { SET_PROPERTY("zPos", v); }
-float LocatableObject::GetZ() { return GET_PROPERTY(float, "zPos"); }
+void LocatableObject::SetZ(float v) { _zPos = v; }
+float LocatableObject::GetZ() { return _zPos; }
 
 float LocatableObject::GetRotation() { return GET_PROPERTY(float, "rotation"); }
 

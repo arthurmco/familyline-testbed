@@ -20,14 +20,33 @@
 namespace Tribalia {
 namespace Graphics {
 
+    /* Scene quadrant size, in OpenGL coordinates */
+    #define SCENE_QUADRANT_SIZE 64
+
+    /* A scene quadrant. Might help divide the scene in pieces, so rendering is faster */
+    struct SceneQuadrant {
+        int x, y;
+        std::list<SceneObject*> _quadrant_objects;
+    };
+
     class SceneManager {
     private:
         bool _listModified = true;
         std::vector<SceneObject*> _objects;
         std::list<SceneObject*> _valid_objects;
+
+        SceneQuadrant* _quadrants;
+
         Camera* _cam;
 
+        int _terrainWidth, _terrainHeight;
+
     public:
+        SceneManager(){}
+
+        /* Init the scene manager with terrain coordinates, in OpenGL units */
+        SceneManager(int terrW, int terrH);
+
         int AddObject(SceneObject*);
 
         SceneObject* GetObject(int id) const;
@@ -38,6 +57,9 @@ namespace Graphics {
 
         Camera* GetCamera() const;
         void SetCamera(Camera*);
+
+        /* Output the camera quadrant int x and y */
+        void GetCameraQuadrant(int& x, int& y);
 
         /* Update the valid objects list.
             This list is responsable to show the valid objects, the objects
