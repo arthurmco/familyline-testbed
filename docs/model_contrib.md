@@ -31,4 +31,6 @@ the Z direction (the blue arrow) points to the back of your model.
 * You need to specify the texture in the code. Tribalia doesn't support texture loading from MD2 and MD2 format
 doesn't specify material names. But the UV coordinates are read correcly.
 
+* MD2 animations are supported on graphical branch, but without respecting framerate (it will run at game framerate)
+
 * The defaults are OK.
