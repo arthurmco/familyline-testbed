@@ -198,14 +198,14 @@ void InputPicker::UpdateIntersectedObject()
 terrain, in render coordinates */
 glm::vec3 InputPicker::GetTerrainProjectedPosition()
 {
-		return _intersectedPosition;
+		return _terrain->GameToGraphicalSpace(_intersectedPosition);
 }
 
 /*	Get position where the cursor collides with the
 terrain, in game coordinates */
 glm::vec2 InputPicker::GetGameProjectedPosition()
 {
-	glm::vec3 intGame = GetTerrainProjectedPosition();
+	glm::vec3 intGame = _intersectedPosition;
 	return glm::vec2(intGame.x, intGame.z);
 }
 

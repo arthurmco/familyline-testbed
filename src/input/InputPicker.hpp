@@ -18,9 +18,10 @@
 #include "../logic/LocatableObject.hpp"
 namespace Tribalia {
 namespace Input {
+#define MAX_PICK_ITERATIONS 12
 
-    class InputPicker {
-    private:
+class InputPicker {
+private:
     Tribalia::Graphics::TerrainRenderer* _terrain;
 		Tribalia::Graphics::Window* _win;
 		Tribalia::Graphics::SceneManager* _sm;
@@ -32,9 +33,7 @@ namespace Input {
 
 		bool CheckIfTerrainIntersect(glm::vec3 ray, float start, float end);
 
-    public:
-
-#define MAX_PICK_ITERATIONS 20
+public:
 
     InputPicker(Tribalia::Graphics::TerrainRenderer* terrain,
 		Tribalia::Graphics::Window* win,
@@ -58,9 +57,9 @@ namespace Input {
 			terrain, in render coordinates */
 		glm::vec3 GetTerrainProjectedPosition();
 
-        /*	Get position where the cursor collides with the
-        terrain, in game coordinates */
-        glm::vec2 GetGameProjectedPosition();
+    /*	Get position where the cursor collides with the
+    terrain, in game coordinates */
+    glm::vec2 GetGameProjectedPosition();
 
 		/*	Get the object that were intersected by the cursor ray */
 		Tribalia::Logic::LocatableObject* GetIntersectedObject();
