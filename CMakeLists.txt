@@ -18,10 +18,13 @@ file(APPEND "${GEN_HEADER}" " Do not directly edit it! */\n\n")
 file(APPEND "${GEN_HEADER}" "#define VERSION \"v0.0.3\" \n")
 
 # Retrieve commit number (useful when getting logs from git clones)
-execute_process(COMMAND sh "${CMAKE_SOURCE_DIR}/scripts/get_commit.sh"
-  OUTPUT_VARIABLE COMMIT_NUM)
-
-file(APPEND "${GEN_HEADER}" "#define COMMIT 0x${COMMIT_NUM} \n")
+execute_process(
+  COMMAND git log -1 --format=%h
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE COMMIT_HASH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+file(APPEND "${GEN_HEADER}" "#define COMMIT \"${COMMIT_HASH}\" \n")
 
 # Retrieve the user who compiled
 execute_process(COMMAND whoami OUTPUT_VARIABLE USERNAME

@@ -55,8 +55,6 @@ using namespace Tribalia::Input;
 
     /* TODO: fixes these variables on win32 builds */
      //#define VERSION VERSION"-win32"
-    #define COMMIT 0
-    #define USERNAME "unknown"
 #endif
 
 int main(int argc, char const *argv[]) {
@@ -218,7 +216,7 @@ int main(int argc, char const *argv[]) {
     lbl.SetForeColor(255, 128, 0, 255);
 
     Label lblVersion = Label(10, 10, "");
-    lblVersion.SetText("Tribalia " VERSION " commit %07x", COMMIT);
+    lblVersion.SetText("Tribalia " VERSION " commit " COMMIT);
     lblVersion.SetForeColor(255, 255, 255, 255);
 
     gr.AddPanel(&lbl);
