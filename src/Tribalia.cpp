@@ -18,6 +18,7 @@
 #include <glm/gtc/matrix_transform.hpp> //glm::lookAt()
 
 #include "Log.hpp"
+#include "Timer.hpp"
 #include "HumanPlayer.hpp"
 #include "logic/ObjectRenderer.hpp"
 #include "logic/PathFinder.hpp"
@@ -56,6 +57,13 @@ using namespace Tribalia::Input;
     #define COMMIT 0
     #define USERNAME "unknown"
 #endif
+
+static void test_timer(void* opt_inst, double frame_delta, void* opt_arg) {
+    (void) opt_inst;
+    (void) opt_arg;
+
+    printf("Timer test (delta: %.3f)", frame_delta);
+}
 
 int main(int argc, char const *argv[]) {
     FILE* fLog = stderr;// fopen("log.txt", "w");
@@ -208,6 +216,8 @@ int main(int argc, char const *argv[]) {
 	double pms = 0.0;
 	int pframe = 0;
 
+    Timer::getInstance()->AddFunctionCall(100, &test_timer, nullptr, nullptr );
+
 
     do {
 
@@ -266,6 +276,7 @@ int main(int argc, char const *argv[]) {
         delta = elapsed - ticks;
 
         ticks = SDL_GetTicks();
+        Timer::getInstance()->RunTimers(delta);
 
     	if (frame % 30 == 0) {
 	    	pms = delta * 1.0;

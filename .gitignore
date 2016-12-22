@@ -29,5 +29,11 @@ Win32/*
 *.gif
 *.jpeg
 
+#GNU global tags
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+
 # Documents
 *.odt
