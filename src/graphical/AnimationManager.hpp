@@ -6,6 +6,8 @@
 
 #include "AnimationData.hpp"
 #include "../Log.hpp"
+#include "../Timer.hpp"
+
 
 #ifndef ANIMATIONMANAGER_HPP
 #define ANIMATIONMANAGER_HPP
