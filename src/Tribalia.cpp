@@ -77,6 +77,7 @@ int main(int argc, char const *argv[]) {
     bool player = false;
 
     Camera* cam;
+    
 
     AssetManager* am = AssetManager::GetInstance();
     Mesh* m;

@@ -3,6 +3,7 @@ tribalia
 *.o
 *.swp
 *.pch
+.*.*
 
 #CMakeLists.txt generated files
 EnviroDefs.h
