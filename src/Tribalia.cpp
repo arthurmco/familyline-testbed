@@ -8,8 +8,6 @@
 
 #define GLM_FORCE_RADIANS
 
-#define COMMIT
-
 #include "EnviroDefs.h"
 
 #include <cstdio>
@@ -78,6 +76,14 @@ static void show_version()
 	printf("\n");
 }
 
+void show_help()
+{
+	printf("Tribalia help:\n");
+	printf("--version:\tPrint version and, if compiled inside a Git repo, commit info\n");
+	printf("--help:\t\tPrint this help information\n");
+	printf("--size <W>x<H>: Changes the game resolution to <W>x<H> pixels\n");
+}
+
 int main(int argc, char const *argv[]) 
 {
 	int winW = 640, winH = 480;
@@ -101,14 +107,19 @@ int main(int argc, char const *argv[])
 		printf("pre-load: chosen %d x %d for screen size\n", winW, winH);
 	}
 
+	if (get_arg_index("--help", argc, argv) >= 0) {
+		show_help();
+		return EXIT_SUCCESS;
+	}
+
 	
     FILE* fLog = stderr;// fopen("log.txt", "w");
     Log::GetLog()->SetFile(fLog);
-    Log::GetLog()->Write("Tribalia %s", VERSION);
-    Log::GetLog()->Write("built on %s by %s ", __DATE__, USERNAME);
-
-    if (COMMIT > 0)
-        Log::GetLog()->Write("from commit %07x", COMMIT);
+    Log::GetLog()->Write("Tribalia " VERSION);
+    Log::GetLog()->Write("built on " __DATE__ " by " USERNAME);
+#if defined(COMMIT)
+	Log::GetLog()->Write("git commit is " COMMIT);
+#endif
 
     ObjectManager* om = nullptr;
     Window* win = nullptr;
@@ -269,7 +280,6 @@ int main(int argc, char const *argv[])
     gr.AddPanel(&lblVersion);
 
 	double pms = 0.0;
-	int pframe = 0;
 
     do {
 
