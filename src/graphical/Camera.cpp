@@ -2,7 +2,7 @@
 
 using namespace Tribalia::Graphics;
 
-Camera::Camera(glm::vec3 pos, glm::vec3 lookAt)
+Camera::Camera(glm::vec3 pos, float aspectRatio, glm::vec3 lookAt)
 {
     this->_pos = pos;
     this->_posOriginal = pos;
@@ -10,7 +10,7 @@ Camera::Camera(glm::vec3 pos, glm::vec3 lookAt)
     this->_lookAtOriginal = lookAt;
 
     this->_fov = glm::radians(60.0f);
-    this->_aspectRatio = 4.0f/3.0f;
+    this->_aspectRatio = aspectRatio;
     this->_distance = 100.0f;
 
     _isViewChanged = true;

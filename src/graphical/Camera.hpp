@@ -54,7 +54,7 @@ namespace Graphics {
         void CalculateVectors();
 
     public:
-        Camera(glm::vec3 pos, glm::vec3 lookAt);
+        Camera(glm::vec3 pos, float aspectRatio, glm::vec3 lookAt);
 
         glm::vec3 GetPosition() const;
         void SetPosition(glm::vec3);

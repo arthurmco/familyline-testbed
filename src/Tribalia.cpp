@@ -16,6 +16,7 @@
 #include <cstdlib>
 
 #include <glm/gtc/matrix_transform.hpp> //glm::lookAt()
+#include <cstring>
 
 #include "Log.hpp"
 #include "Timer.hpp"
@@ -58,7 +59,49 @@ using namespace Tribalia::Input;
      //#define VERSION VERSION"-win32"
 #endif
 
-int main(int argc, char const *argv[]) {
+static int get_arg_index(const char* name, int argc, char const* argv[]) 
+{
+	for (int i = 0; i < argc; i++) {
+		if (!strcmp(argv[i], name)) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+static void show_version() 
+{
+	printf("Tribalia " VERSION "\n");
+	printf("Compiled in " __DATE__ "\n");
+	printf("Commit hash " COMMIT "\n");
+	printf("\n");
+}
+
+int main(int argc, char const *argv[]) 
+{
+	int winW = 640, winH = 480;
+	if (get_arg_index("--version",argc,argv) >= 0) {
+		show_version();
+		return EXIT_SUCCESS;
+	}
+
+	int i =  get_arg_index("--size", argc, argv);
+	if (i >= 0) {
+		if (i >= argc) {
+			printf("size not defined. Expected <W>x<H> for size! Aborting...");
+			return EXIT_FAILURE;
+		}
+
+		if (sscanf(argv[i+1], "%dx%d", &winW, &winH) <= 1) {
+			printf("size format is wrong. Expected <W>x<H> for size! Aborting...");
+			return EXIT_FAILURE;
+		}
+
+		printf("pre-load: chosen %d x %d for screen size\n", winW, winH);
+	}
+
+	
     FILE* fLog = stderr;// fopen("log.txt", "w");
     Log::GetLog()->SetFile(fLog);
     Log::GetLog()->Write("Tribalia %s", VERSION);
@@ -85,10 +128,10 @@ int main(int argc, char const *argv[]) {
     GameContext gctx;
     try {
         om = new ObjectManager{};
-            win = new Window{ 640, 480 };
+        win = new Window{ winW, winH };
 
-            Framebuffer::SetDefaultSize(640, 480);
-            win->Show();
+        Framebuffer::SetDefaultSize(winW, winH);
+        win->Show();
 
         rndr = new Renderer{};
 
@@ -99,7 +142,7 @@ int main(int argc, char const *argv[]) {
         terr = new Terrain{1000, 1000};
         scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
 
-        cam = new Camera{glm::vec3(6.0f, 24.0f, 6.0f), glm::vec3(0,0,0)};
+        cam = new Camera{glm::vec3(6.0f, 24.0f, 6.0f), (float)winW/(float)winH, glm::vec3(0,0,0)};
         scenemng->SetCamera(cam);
         hp->SetCamera(cam);
 
@@ -198,14 +241,13 @@ int main(int argc, char const *argv[]) {
     pathf->UpdateSlotList(0, 0, terr->GetWidth(), terr->GetHeight());
     hp->SetPathfinder(pathf);
 
-    int i = 0;
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
 
     int delta = 1;
 
-	Framebuffer fbRender{ 640, 480, GL_UNSIGNED_BYTE };
-	Framebuffer fbGUI{ 640, 480, GL_UNSIGNED_BYTE };
+	Framebuffer fbRender{ winW, winH, GL_UNSIGNED_BYTE };
+	Framebuffer fbGUI{ winW, winH, GL_UNSIGNED_BYTE };
 	win->Set3DFramebuffer(&fbRender);
 	win->SetGUIFramebuffer(&fbGUI);
 
@@ -277,15 +319,15 @@ int main(int argc, char const *argv[]) {
         gr.DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
           "Enabled" : "Disabled");
 
-    	gr.Render();
+		gr.Render();
 
-    	fbRender.SetActive();
-    	rndr->SetBoundingBox(hp->renderBBs);
+		fbRender.SetActive();
+		rndr->SetBoundingBox(hp->renderBBs);
 		if (objupdate) rndr->UpdateObjects();
         rndr->UpdateFrames();
         rndr->Render();
-    	fbRender.UnsetActive();
-    	win->Update();
+		fbRender.UnsetActive();
+		win->Update();
 
         frame++;
 
@@ -295,11 +337,11 @@ int main(int argc, char const *argv[]) {
         ticks = SDL_GetTicks();
         Timer::getInstance()->RunTimers(delta);
 
-    	if (frame % 30 == 0) {
-	    	pms = delta * 1.0;
-    	}
+		if (frame % 30 == 0) {
+			pms = delta * 1.0;
+		}
 
-	    gr.DebugWrite(0, 420, "%.1f ms, %.2f fps", pms, 1000 / pms);
+		gr.DebugWrite(0, 420, "%.1f ms, %.2f fps", pms, 1000 / pms);
 
 
 	//glm::vec3 cur_wor = ip->GetCursorWorldRay();

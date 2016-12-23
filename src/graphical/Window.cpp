@@ -27,7 +27,7 @@ Window::Window(int w, int h)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
     _win = SDL_CreateWindow("Tribalia",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480,
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h,
         SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
 
     if (!_win) {
