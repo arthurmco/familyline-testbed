@@ -157,7 +157,7 @@ int main(int argc, char const *argv[])
         terr = new Terrain{1000, 1000};
         scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
 
-        cam = new Camera{glm::vec3(6.0f, 24.0f, 6.0f), (float)winW/(float)winH, glm::vec3(0,0,0)};
+		cam = new Camera{glm::vec3(6.0f, 36.0f, 6.0f), (float)winW/(float)winH, glm::vec3(0,0,0)};
         scenemng->SetCamera(cam);
         hp->SetCamera(cam);
 
