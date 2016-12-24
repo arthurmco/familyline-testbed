@@ -28,8 +28,7 @@ The header (.hpp) needs to be like this:
 
 namespace Tribalia {
 
-/*  A tent is a basic people storage building */
-class "<OBJECT_CLASS_NAME>" : public Logic::Building {
+class <OBJECT_CLASS_NAME> : public Logic::Building {
 private:
     static const int TID = <THE_OBJECT_TYPE_ID>
 public:

@@ -18,7 +18,7 @@
 #include "../logic/LocatableObject.hpp"
 namespace Tribalia {
 namespace Input {
-#define MAX_PICK_ITERATIONS 12
+#define MAX_PICK_ITERATIONS 16
 
 class InputPicker {
 private:

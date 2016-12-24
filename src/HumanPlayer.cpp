@@ -154,9 +154,6 @@ bool HumanPlayer::Play(GameContext* gctx){
             }
 
         } else if (ev.eventType == EVENT_MOUSEMOVE) {
-            glm::vec3 ray = _cam->Project(ev.mousex, ev.mousey, 640, 480);
-            //objr->CheckRayCollide(ray, nullptr);
-
 
         } else if (ev.eventType == EVENT_MOUSEEVENT ) {
 

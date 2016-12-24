@@ -78,8 +78,6 @@ void InputPicker::UpdateTerrainProjectedPosition()
 	float prolong_now = prolong_near + ((prolong_far - prolong_near ) / 2.0f);
 
 	glm::vec3 pHalf;
-	glm::vec3 pNear = _cam->GetPosition() + (cur_world * prolong_near);
-	glm::vec3 pFar = _cam->GetPosition() + (cur_world * prolong_far);
 
 	/*printf("near: %.3f %.3f %.3f, far: %.3f %.3f %.3f, prolongs: { ",
 		pNear.x, pNear.y, pNear.z, pFar.x, pFar.y, pFar.z);*/
