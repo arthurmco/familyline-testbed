@@ -21,6 +21,17 @@ namespace Tribalia {
         extensibility.
      */
 
+	/* Macro to easily add a 'cloning with personalized position' method.
+	 * Note that, for obligation, you'll have to have a constructor for your 
+	 * object that is of form (oid, x, y, z)
+	 */
+	#define ADD_CLONE_MACRO(classname, objname) \
+		virtual GameObject* Clone(float x, float y, float z, char* n = nullptr) { \
+			auto o = new classname{0, x, y, z}; 	\
+			if(n) o->SetName(n); 					\
+			return o;								\
+		}
+
     class GameObject {
         friend class ObjectManager;
 
@@ -40,6 +51,8 @@ namespace Tribalia {
         int GetTypeID();
         const char* GetName();
         void SetName(char*);
+
+		virtual GameObject* Clone(float x, float y, float z, char* n = nullptr) = 0;
 
         /* Get a property value */
         template<typename T>

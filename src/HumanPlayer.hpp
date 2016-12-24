@@ -7,14 +7,12 @@
 
 #include "logic/Player.hpp"
 #include "logic/PathFinder.hpp"
+#include "logic/ObjectFactory.hpp"
 #include "graphical/Camera.hpp"
 #include "graphical/TerrainRenderer.hpp"
 #include "logic/ObjectRenderer.hpp"
 #include "input/InputPicker.hpp"
 #include "input/InputManager.hpp"
-
-#include "objects/Tent.hpp"
-#include "objects/WatchTower.hpp"
 
 #ifndef HUMAN_PLAYER
 #define HUMAN_PLAYER

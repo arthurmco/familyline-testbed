@@ -21,6 +21,7 @@
 #include "HumanPlayer.hpp"
 #include "logic/ObjectRenderer.hpp"
 #include "logic/PathFinder.hpp"
+#include "logic/ObjectFactory.hpp"
 
 #include "graphical/Renderer.hpp"
 #include "graphical/GUIRenderer.hpp"
@@ -43,6 +44,9 @@
 #include "graphical/gui/Label.hpp"
 
 #include "input/InputPicker.hpp"
+
+#include "objects/WatchTower.hpp"
+#include "objects/Tent.hpp"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
@@ -76,7 +80,7 @@ static void show_version()
 	printf("\n");
 }
 
-void show_help()
+static void show_help()
 {
 	printf("Tribalia help:\n");
 	printf("--version:\tPrint version and, if compiled inside a Git repo, commit info\n");
@@ -234,7 +238,6 @@ int main(int argc, char const *argv[])
 	scenemng->AddObject(m3);
     scenemng->AddObject(m5);
 	scenemng->AddObject(l);
-
    
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
     terr_rend->SetTerrain(terr);
@@ -281,6 +284,9 @@ int main(int argc, char const *argv[])
 
 	double pms = 0.0;
 
+	/* Adds the objects to the factory */
+	ObjectFactory::GetInstance()->AddObject(new WatchTower);
+	ObjectFactory::GetInstance()->AddObject(new Tent);
     do {
 
         ip->UpdateIntersectedObject();
