@@ -1,4 +1,5 @@
 tribalia
+tribalia-server
 
 *.o
 *.swp
