@@ -153,8 +153,6 @@ bool HumanPlayer::Play(GameContext* gctx){
 				break;
             }
 
-        } else if (ev.eventType == EVENT_MOUSEMOVE) {
-
         } else if (ev.eventType == EVENT_MOUSEEVENT ) {
 
             if (ev.event.mouseev.button == MOUSE_LEFT) {
