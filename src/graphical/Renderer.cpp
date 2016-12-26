@@ -401,7 +401,7 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
 
     vri.material_offsets[matidx] = -1;
 	v->vbo_pos = vri.vbo_pos;
-
+	
     _vertices.push_back(vri);
     return vri.vao;
 }

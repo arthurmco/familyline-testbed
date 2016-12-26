@@ -90,6 +90,12 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
     
     _rotation += angle;
     constexpr float max_angle = glm::radians(360.0f);
+	if (_rotation >= max_angle) {
+		_rotation -= max_angle;
+	}
+	if (_rotation <= -max_angle) {
+		_rotation += max_angle;
+	}
 
     float dist = glm::length(glm::vec3(_pos.x - _lookAtOriginal.x, 
          _lookAtOriginal.y, _pos.z - _lookAtOriginal.z)); 

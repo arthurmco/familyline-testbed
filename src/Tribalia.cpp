@@ -332,6 +332,8 @@ int main(int argc, char const *argv[])
 
         gr.DebugWrite(10, 140, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f)",
              p.x, p.y, p.z, q.x, q.y);
+		gr.DebugWrite(10, 180, "Camera rotation: %.1fº", 
+						cam->GetRotation() * 180 / M_PI);
         gr.DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
           "Enabled" : "Disabled");
 
@@ -357,7 +359,7 @@ int main(int argc, char const *argv[])
 			pms = delta * 1.0;
 		}
 
-		gr.DebugWrite(0, 420, "%.1f ms, %.2f fps", pms, 1000 / pms);
+		gr.DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
 
 	//glm::vec3 cur_wor = ip->GetCursorWorldRay();

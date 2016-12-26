@@ -187,18 +187,23 @@ bool HumanPlayer::Play(GameContext* gctx){
 
     }
 
-    float unit = 3.2f * gctx->elapsed_seconds;
-
+    float unit = 5.0f * gctx->elapsed_seconds;
+	float rot_sin = glm::sin(_cam->GetRotation());
+	float rot_cos = glm::cos(_cam->GetRotation());
 
     if (front)
-        _cam->AddMovement(glm::vec3(0, 0, -unit));
+        _cam->AddMovement(glm::vec3
+						(-(unit*rot_sin), 0, -(unit*rot_cos)));
     else if (back)
-        _cam->AddMovement(glm::vec3(0, 0, unit));
+        _cam->AddMovement(glm::vec3(
+						unit*rot_sin, 0, unit*rot_cos));
 
     if (left)
-        _cam->AddMovement(glm::vec3(-unit, 0, 0));
+        _cam->AddMovement(glm::vec3(
+						-(unit*rot_cos), 0, (unit*rot_sin)));
     else if (right)
-        _cam->AddMovement(glm::vec3(unit, 0, 0));
+        _cam->AddMovement(glm::vec3(
+						unit*rot_cos, 0, -(unit*rot_sin)));
 
     if (rotate_left)
         _cam->AddRotation(glm::vec3(0, 1, 0), glm::radians(1.0f));
