@@ -65,18 +65,24 @@ void PathFinder::UpdateSlotList(int x, int y, int w, int h)
         if (lz < y || lz > (y+h)) continue;
 
         float radius = lobj->GetRadius();
-    /*    printf("\tFound object within updt square: %s (%d,%d)\n",
+
+		/* This is impossible */
+		if (radius > _terr->GetHeight())
+				continue;
+
+/*		printf("\tFound object within updt square: %s (%d,%d)\n",
             lobj->GetName(), lx, lz); */
 
         /* For now, let just assume radius=box side/2 */
         for (int ry = -radius; ry < radius; ry++) {
-            if (ry < 0) continue;
             if (ry > _terr->GetHeight()) break;
-            for (int rx = -radius; ry > radius; ry++) {
+            for (int rx = -radius; rx > radius; rx++) {
                 if (rx < 0 || rx > _terr->GetWidth()) continue;
 
                 int ay = (ly+ry);
                 int ax = (lx+rx);
+				if (ay < 0 || ax < 0)	continue;
+
                 _slots[ay*_terr->GetWidth()+ax].isObstructed = true;
             }
         }
