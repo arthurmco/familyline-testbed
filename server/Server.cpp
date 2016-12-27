@@ -9,11 +9,7 @@
 #include <errno.h>
 #include <cstdio>
 #include <cstring>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
+#include "Client.hpp"
 
 #define PORT 3456
 
@@ -61,6 +57,14 @@ int main(int argc, char const* argv[])
 		inet_ntop(AF_INET, (void*)&(cliaddr.sin_addr), ipstr, INET_ADDRSTRLEN);
 
 		printf("Socket accepted (fd %d), address %s\n", clisockfd, ipstr);
+
+		write(clisockfd, "[!T IDENTIFY", 12);
+		char resp[255];
+		memset(resp, 0, 255);
+
+
+
+
 		close(clisockfd);
 	}	
 
