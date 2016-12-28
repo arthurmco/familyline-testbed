@@ -7,7 +7,7 @@ TerrainRenderer::TerrainRenderer(Renderer* r)
     : _rend(r)
 {
     MaterialData matdata;
-    matdata.diffuseColor = glm::vec3(0.1, 0.5, 0.0);
+    matdata.diffuseColor = glm::vec3(0.4, 0.6, 0.0);
     matdata.ambientColor = glm::vec3(0.01, 0.01, 0.0);
     Material mat = Material("Terrain", matdata);
     MaterialManager::GetInstance()->AddMaterial(&mat);

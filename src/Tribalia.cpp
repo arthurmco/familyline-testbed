@@ -22,6 +22,7 @@
 #include "logic/ObjectRenderer.hpp"
 #include "logic/PathFinder.hpp"
 #include "logic/ObjectFactory.hpp"
+#include "logic/ObjectPathManager.hpp"
 
 #include "graphical/Renderer.hpp"
 #include "graphical/GUIRenderer.hpp"
@@ -306,6 +307,7 @@ int main(int argc, char const *argv[])
             objrend->Update();
             pathf->UpdateSlotList(0, 0, terr->GetWidth(), terr->GetHeight());
         }
+		objrend->Update();
 
         auto locc = ip->GetIntersectedObject();
         if (locc) {
@@ -329,6 +331,7 @@ int main(int argc, char const *argv[])
         glm::vec2 q = ip->GetGameProjectedPosition();
 
         AnimationManager::GetInstance()->Iterate();
+		ObjectPathManager::getInstance()->UpdatePaths();
 
         gr.DebugWrite(10, 140, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f)",
              p.x, p.y, p.z, q.x, q.y);

@@ -11,6 +11,7 @@
 #include "graphical/Camera.hpp"
 #include "graphical/TerrainRenderer.hpp"
 #include "logic/ObjectRenderer.hpp"
+#include "logic/ObjectPathManager.hpp"
 #include "input/InputPicker.hpp"
 #include "input/InputManager.hpp"
 

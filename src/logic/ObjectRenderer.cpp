@@ -82,7 +82,7 @@ void ObjectRenderer::Update()
     for (auto it = _objects.begin(); it != _objects.end(); it++) {
         double x, y, z;
         x = (*it)->GetX();
-        y = (*it)->GetY(); //change this
+        y = (*it)->GetY(); 
         z = (*it)->GetZ();
 
         (*it)->GetMesh()->SetPosition(Graphics::TerrainRenderer::GameToGraphicalSpace(glm::vec3(x,y,z)));

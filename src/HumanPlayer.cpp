@@ -167,10 +167,15 @@ bool HumanPlayer::Play(GameContext* gctx){
                     /* Move the object to some position */
                     glm::vec2 to = _ip->GetGameProjectedPosition();
 
-                    glm::vec2 lp = _pf->CreatePath(_selected_obj, to).back();
+					auto path = _pf->CreatePath(_selected_obj, to);
+                    glm::vec2 lp = path.back();
                     printf("Moved to %.2fx%.2f", lp.x, lp.y);
-                    _selected_obj->SetX(lp.x);
-                    _selected_obj->SetZ(lp.y);
+					
+					ObjectPathManager::getInstance()->AddPath(
+									_selected_obj, &path);
+						
+					//_selected_obj->SetX(lp.x);
+                    //_selected_obj->SetZ(lp.y);
                     _updated = true;
 
 
