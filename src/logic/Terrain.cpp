@@ -52,6 +52,19 @@ Terrain::Terrain(int w, int h)
 
 }
 
+int Terrain::GetHeightFromPoint(unsigned x, unsigned y)
+{
+    unsigned sectionX = ceil(float(x) / (SECTION_SIDE * 1.0));
+    unsigned sectionY = ceil(float(y) / (SECTION_SIDE * 1.0));
+	unsigned index = sectionY * _section_height + sectionX;
+
+	unsigned siX = x % SECTION_SIDE;
+	unsigned siY = y % SECTION_SIDE;
+
+	return _data[index]->data[siY*SECTION_SIDE+siX].elevation;
+}
+
+
 TerrainData* Terrain::GetSection(int index)
 {
     return _data[index];

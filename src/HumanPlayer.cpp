@@ -100,7 +100,7 @@ bool HumanPlayer::Play(GameContext* gctx){
 
                     AttackableObject* c = (AttackableObject*) 
 							ObjectFactory::GetInstance()->GetObject(2)->Clone(
-											p.x, 0, p.z);
+											p.x, p.y, p.z);
                     this->GetCity()->AddObject(c);
                     printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, 1.0f, p.z);
 
@@ -119,7 +119,7 @@ bool HumanPlayer::Play(GameContext* gctx){
 
 					AttackableObject* c = (AttackableObject*)
 							ObjectFactory::GetInstance()->GetObject(3)->Clone(
-									p.x, 0.0f, p.z);
+									p.x, p.y, p.z);
                     this->GetCity()->AddObject(c);
                     printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, 1.0f, p.z);
 

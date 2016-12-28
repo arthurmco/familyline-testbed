@@ -107,6 +107,10 @@ void InputPicker::UpdateTerrainProjectedPosition()
 	}
 
 	glm::vec3 collide = _terrain->GraphicalToGameSpace(pHalf);
+
+	if (collide.x > 0 && collide.z > 0)
+		collide.y = _terrain->GetTerrain()->GetHeightFromPoint(
+					collide.x, collide.z);
 	//printf(" }\nprol: %.2f, pos: %.3f %.3f %.3f, gamespace: %.3f %.3f %.3f\n\n",
 	//	1.0f, pHalf.x, pHalf.y, pHalf.z, collide.x, collide.y, collide.z);
 
