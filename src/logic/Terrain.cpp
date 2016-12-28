@@ -16,7 +16,16 @@ Terrain::Terrain(int w, int h)
     /* Create the sections */
     for (int y = 0; y < _section_height; y++) {
         for (int x = 0; x < _section_width; x++) {
-            _data[x + y * _section_width] = new TerrainData();
+			unsigned index = x + y * _section_width;
+			_data[index] = new TerrainData();
+
+			for (int iy = 0; iy < SECTION_SIDE; iy++) {
+				for (int ix = 0; ix < SECTION_SIDE; ix++) {
+					int16_t v = (int16_t)(sqrt(ix*iy));
+					_data[index]->data[iy*SECTION_SIDE+ix].elevation = v;
+//					printf(">> x:%d y%d sqrt %d\n", ix, iy, v);
+				}
+			}
         }
     }
 

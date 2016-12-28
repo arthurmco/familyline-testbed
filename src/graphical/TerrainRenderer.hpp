@@ -17,7 +17,7 @@
 #define SEC_SIZE 0.50
 
 /* What each unit of height means in OpenGL units */
-#define SEC_HEIGHT 0.005
+#define SEC_HEIGHT 0.01
 
 namespace Tribalia {
 namespace Graphics {
