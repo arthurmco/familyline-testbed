@@ -1,5 +1,5 @@
 #include "PathFinder.hpp"
-
+#include <iterator> //std::advance()
 using namespace Tribalia::Logic;
 
 PathFinder::PathFinder(Terrain* t, ObjectManager* om)
@@ -49,6 +49,7 @@ void PathFinder::UpdateSlotList(int x, int y, int w, int h)
             _slots[ry*_terr->GetWidth()+rx].isObstructed = false;
         }
     }
+	return;
 
     for (auto& obj : *_om->GetObjectList()) {
         LocatableObject* lobj = dynamic_cast<LocatableObject*>(obj.obj);
@@ -105,13 +106,13 @@ void PathFinder::AddNeighborsToOpenList(std::list<PathItem*>* open_list,
 
             bool isInClosed = false;
             /* Check if the point isn't on the closed list */
-            for (auto& pc : *closed_list) {
-                if (pc->point == p) {
+            for (auto it = closed_list->begin(); it != closed_list->end(); it++) {
+                if ((*it)->point == p) {
                     isInClosed = true;
                     break;
                 }
             }
-            if (isInClosed) continue;
+           	if (isInClosed) continue;
 
             PathItem* pi = new PathItem(p, GET_POS_SLOT(p, _terr->GetWidth()));
 
@@ -148,11 +149,9 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
 
             /* Fixes some precision shit */
             if (glm::abs(pos.x - to.x) < 1 && glm::abs(pos.y - to.y) < 1) {
-                closed_list.push_back(new PathItem(to, GET_POS_SLOT(to, _terr->GetWidth())));
+                closed_list.push_back( new PathItem{to, GET_POS_SLOT(to, _terr->GetWidth())});
                 break;
             }
-
-            int i = (pos.y * _terr->GetWidth() + pos.x);
 
             /* Get all neighbors to the open list */
             //open_list.clear();
@@ -184,6 +183,34 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
             pos = lower->point;
 
         }
+
+		/* 	Check the vector pathway for non-repeating paths 
+		 	Yes, reversed. It's more easy to do it		 
+  		*/
+		{
+			std::vector<glm::vec2> p2;
+			std::vector<int> to_delete;
+			int i = 0;
+			for (auto it = closed_list.rbegin(); it != closed_list.rend(); it++) {
+				bool del = false;
+				for (auto& v : p2) {
+					if (v == (*it)->point) {
+						to_delete.push_back(i);
+						del = true;
+						break;
+					}	
+
+				}
+				if (del) continue;
+				p2.push_back((*it)->point);
+			}
+
+			for (auto dit : to_delete) {
+				auto it = closed_list.end();
+				std::advance(it, -dit-1);
+				closed_list.erase(it);
+			}
+		}
 
         /* Create the vector pathway */
         auto vecp = std::vector<glm::vec2>();

@@ -66,6 +66,7 @@ struct PathItem {
 
     PathItem(glm::vec2 p, PathFinderSlot* s) {
         point = p;
+		slot = s;
     }
 
     void calculateAStar(glm::vec2 from, glm::vec2 to) {

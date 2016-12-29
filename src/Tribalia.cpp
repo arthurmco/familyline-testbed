@@ -58,8 +58,6 @@ using namespace Tribalia::Input;
 #ifdef _MSC_VER
     #undef main  //somehow vs does not find main()
 
-    /* TODO: fixes these variables on win32 builds */
-     //#define VERSION VERSION"-win32"
 #endif
 
 static int get_arg_index(const char* name, int argc, char const* argv[]) 
@@ -358,7 +356,7 @@ int main(int argc, char const *argv[])
         ticks = SDL_GetTicks();
         Timer::getInstance()->RunTimers(delta);
 
-		if (frame % 30 == 0) {
+		if (frame % 15 == 0) {
 			pms = delta * 1.0;
 		}
 
@@ -371,8 +369,8 @@ int main(int argc, char const *argv[])
 	//ip->GetTerrainProjectedPosition();
 
     //Trava em ~60 fps
-        if (delta < 16) {
-              SDL_Delay(16 - delta);
+        if (delta < 1000/60.0) {
+              SDL_Delay(1000/60.0 - delta);
         }
 
         //usleep(1);
