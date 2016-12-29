@@ -22,6 +22,8 @@ will be discouraged in the future.
 
 * OBJ animations are not supported and never will be.
 
+* 1 mesh per file. There's support for more in the parser, but not in the mesh opener nor in the asset
+
 * The other defaults are OK.
 
 ## MD2
