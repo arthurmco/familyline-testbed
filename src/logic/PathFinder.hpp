@@ -93,6 +93,10 @@ struct PathItem {
 
         f *= mult;
     }
+
+	bool operator==(const PathItem& p) const {
+		return (point == p.point);
+	}
 };
 
 class PathFinder {

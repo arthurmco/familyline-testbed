@@ -76,13 +76,15 @@ void PathFinder::UpdateSlotList(int x, int y, int w, int h)
 
         /* For now, let just assume radius=box side/2 */
         for (int ry = -radius; ry < radius; ry++) {
+			int ay = (ly+ry);
+			if (ay < 0)	continue; 
+
             if (ry > _terr->GetHeight()) break;
             for (int rx = -radius; rx > radius; rx++) {
                 if (rx < 0 || rx > _terr->GetWidth()) continue;
 
-                int ay = (ly+ry);
                 int ax = (lx+rx);
-				if (ay < 0 || ax < 0)	continue;
+				if (ax < 0)	continue;
 
                 _slots[ay*_terr->GetWidth()+ax].isObstructed = true;
             }
@@ -102,17 +104,17 @@ void PathFinder::AddNeighborsToOpenList(std::list<PathItem*>* open_list,
         for (int x = -1; x <= 1; x++) {
             if (y == 0 && x == 0) continue; /* Only the neighbors */
 
-            glm::vec2 p = glm::vec2(point.x - x, point.y - y);
+			/* Checks for the closed list */	
+            glm::vec2 p = glm::vec2(point.x + x, point.y + y);
+			bool isclosed = false;
+			for (auto& i : *closed_list) {
+				if (i->point.x == p.x && i->point.y == p.y) {
+					isclosed = true;
+					break;
+				}
+			}
 
-            bool isInClosed = false;
-            /* Check if the point isn't on the closed list */
-            for (auto it = closed_list->begin(); it != closed_list->end(); it++) {
-                if ((*it)->point == p) {
-                    isInClosed = true;
-                    break;
-                }
-            }
-           	if (isInClosed) continue;
+			if (isclosed)	continue;
 
             PathItem* pi = new PathItem(p, GET_POS_SLOT(p, _terr->GetWidth()));
 
@@ -120,14 +122,13 @@ void PathFinder::AddNeighborsToOpenList(std::list<PathItem*>* open_list,
             //pi->calculateMult(false);
         /*    printf("%f,%f : f=%.3f, g=%.3f, h=%.3f\n",
                 pi->point.x, pi->point.y, pi->f, pi->g, pi->h); */
-            open_list->push_back(pi);
+			
+	        open_list->push_back(pi);
 
         }
     }
 
-    open_list->unique([](PathItem* p1, PathItem* p2)
-        { return (p1->point == p2->point); });
-
+	
 }
 
 
@@ -145,79 +146,84 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
         closed_list.push_back(pi);
 
         while (pos != to) {
-            open_list.clear();
 
             /* Fixes some precision shit */
             if (glm::abs(pos.x - to.x) < 1 && glm::abs(pos.y - to.y) < 1) {
-                closed_list.push_back( new PathItem{to, GET_POS_SLOT(to, _terr->GetWidth())});
+				PathItem* l = new PathItem{to, GET_POS_SLOT(to, _terr->GetWidth())};
+				PathItem* pl = (PathItem*)closed_list.back();
+				l->prev = pl;
+				pl->next = l;
+				l->next = nullptr;
+				closed_list.push_back(l);
                 break;
             }
 
             /* Get all neighbors to the open list */
-            //open_list.clear();
+            open_list.clear();
             this->AddNeighborsToOpenList(&open_list, &closed_list, pos, from, to);
 
             /* Check who had the lower score */
             PathItem* lower = nullptr;
+			PathItem* replace = nullptr;
 
-            for (auto pi : open_list) {
+            for (auto& pi : open_list) {
                 if (!lower) {
                     lower = pi;
                     continue;
                 }
 
+				/* If we're repeating some point, then make it the point we are now */
+				if ((pi->point.x >= (pos.x-1) && pi->point.x <= (pos.x+1) &&
+					pi->point.y > (pos.y-1) && pi->point.y <= (pos.y+1))) {
+					pi->calculateAStar(from, to);
+					replace = pi;
+				}
+
                 if (pi->f < lower->f) {
-                    //printf("(pi)%.3f menor que (lower)%.3f", pi->f, lower->f);
+                    //printf("\n(pi)%.3f < (lower)%.3f (%.2f, %.2f)", pi->f, lower->f,
+					//				pi->point.x, pi->point.y);
                     lower = pi;
                 }
             }
+
+			if (replace) {
+				replace->next = lower;
+				lower->prev = replace;
+			}
 
             /*  Add the lower to the closed item, and bind it to the last item
                 on there */
             PathItem* plast = closed_list.back();
             lower->prev = plast;
             plast->next = lower;
-            /*printf("\nlower: (%.2f,%.2f), plast: (%.2f,%.2f) |",
-                lower->point.x, lower->point.y, plast->point.x, plast->point.y); */
-            closed_list.push_back(lower);
+  //          printf("\nlower: (%.2f,%.2f), plast: (%.2f,%.2f)|\n",
+  //              lower->point.x, lower->point.y, plast->point.x, plast->point.y); 
+
+			/* Removes it from open list and adds it into closed */
+			for (auto it = open_list.begin(); it != open_list.end(); it++) {
+				if ((*it)->point == lower->point) {
+//					printf("(%u) - moved out %.f %.f", open_list.size(), lower->point.x, lower->point.y);
+					open_list.erase(it);
+					break;
+				}
+			}	
+
+			closed_list.push_back(lower);
             pos = lower->point;
 
         }
 
-		/* 	Check the vector pathway for non-repeating paths 
-		 	Yes, reversed. It's more easy to do it		 
-  		*/
-		{
-			std::vector<glm::vec2> p2;
-			std::vector<int> to_delete;
-			int i = 0;
-			for (auto it = closed_list.rbegin(); it != closed_list.rend(); it++) {
-				bool del = false;
-				for (auto& v : p2) {
-					if (v == (*it)->point) {
-						to_delete.push_back(i);
-						del = true;
-						break;
-					}	
-
-				}
-				if (del) continue;
-				p2.push_back((*it)->point);
-			}
-
-			for (auto dit : to_delete) {
-				auto it = closed_list.end();
-				std::advance(it, -dit-1);
-				closed_list.erase(it);
-			}
-		}
-
         /* Create the vector pathway */
         auto vecp = std::vector<glm::vec2>();
+		vecp.reserve(closed_list.size()+1);
+		auto item = closed_list.front();
 
-        for (auto& li : closed_list) {
-            vecp.push_back(li->point);
+        while (item->next) {
+			printf("%p (%.2f %.2f) -> %p (%.2f %.2f)\n", item, item->point.x, item->point.y, item->next, item->next->point.x, item->next->point.y);
+            vecp.push_back(item->point);
+			item = item->next;
         }
+
 
         return vecp;
     }
