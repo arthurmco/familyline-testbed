@@ -114,7 +114,15 @@ void PathFinder::AddNeighborsToOpenList(std::list<PathItem*>* open_list,
 				}
 			}
 
-			if (isclosed)	continue;
+			bool isopen = false;
+			for (auto& i : *open_list) {
+				if (i->point == p) {
+					isopen = true;
+					break;
+				}
+			}
+
+			if (isclosed || isopen)	continue;
 
             PathItem* pi = new PathItem(p, GET_POS_SLOT(p, _terr->GetWidth()));
 
@@ -144,6 +152,7 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
         pi->calculateAStar(from, to);
         //pi->calculateMult(false);
         closed_list.push_back(pi);
+		double pos_f = pi->f;
 
         while (pos != to) {
 
@@ -179,14 +188,17 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
 					replace = pi;
 				}
 
-                if (pi->f < lower->f) {
-                    //printf("\n(pi)%.3f < (lower)%.3f (%.2f, %.2f)", pi->f, lower->f,
-					//				pi->point.x, pi->point.y);
+                if (pi->h < lower->h) {
+                    printf("\n(pi)%.3f < (lower)%.3f (%.2f, %.2f)", pi->f, lower->f,
+									pi->point.x, pi->point.y);
                     lower = pi;
+					if (pos_f > lower->f) {
+						continue;
+					}
                 }
             }
 
-			if (replace) {
+			if (replace == lower) {
 				replace->next = lower;
 				lower->prev = replace;
 			}
@@ -210,7 +222,7 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
 
 			closed_list.push_back(lower);
             pos = lower->point;
-
+			pos_f = lower->f;
         }
 
         /* Create the vector pathway */
