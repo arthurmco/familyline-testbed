@@ -23,6 +23,7 @@
 #include "logic/PathFinder.hpp"
 #include "logic/ObjectFactory.hpp"
 #include "logic/ObjectPathManager.hpp"
+#include "logic/TerrainFile.hpp"
 
 #include "graphical/Renderer.hpp"
 #include "graphical/GUIRenderer.hpp"
@@ -60,7 +61,7 @@ using namespace Tribalia::Input;
 
 #endif
 
-static int get_arg_index(const char* name, int argc, char const* argv[]) 
+static int get_arg_index(const char* name, int argc, char const* argv[])
 {
 	for (int i = 0; i < argc; i++) {
 		if (!strcmp(argv[i], name)) {
@@ -71,7 +72,7 @@ static int get_arg_index(const char* name, int argc, char const* argv[])
 	return -1;
 }
 
-static void show_version() 
+static void show_version()
 {
 	printf("Tribalia " VERSION "\n");
 	printf("Compiled in " __DATE__ "\n");
@@ -87,7 +88,7 @@ static void show_help()
 	printf("--size <W>x<H>: Changes the game resolution to <W>x<H> pixels\n");
 }
 
-int main(int argc, char const *argv[]) 
+int main(int argc, char const *argv[])
 {
 	int winW = 640, winH = 480;
 	if (get_arg_index("--version",argc,argv) >= 0) {
@@ -115,7 +116,7 @@ int main(int argc, char const *argv[])
 		return EXIT_SUCCESS;
 	}
 
-	
+
     FILE* fLog = stderr;// fopen("log.txt", "w");
     Log::GetLog()->SetFile(fLog);
     Log::GetLog()->Write("Tribalia " VERSION);
@@ -134,10 +135,11 @@ int main(int argc, char const *argv[])
     bool player = false;
 
     Camera* cam;
-    
+
 
     AssetManager* am = AssetManager::GetInstance();
     Mesh* m;
+	TerrainFile* terrFile;
 
     GameContext gctx;
     try {
@@ -153,6 +155,8 @@ int main(int argc, char const *argv[])
         gctx.om = om;
 
         hp = new HumanPlayer{"Arthur"};
+		terrFile = new TerrainFile("terrain_test.trtb");
+		terrFile->GetTerrain();
         terr = new Terrain{1000, 1000};
         scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
 
@@ -200,7 +204,12 @@ int main(int argc, char const *argv[])
             Log::GetLog()->Fatal("Asset %s, file: %s", a->name.c_str(), a->path.c_str());
         }
         exit(EXIT_FAILURE);
-    }
+    } catch (terrain_file_exception& te) {
+		Log::GetLog()->Fatal("Terrain file error: %s on file %s", te.what(), te.file.c_str());
+		if (te.code != 0) {
+			Log::GetLog()->Fatal("Error code: %d (%s)", te.code, strerror(te.code));
+		}
+	}
 
 	Texture* tex = am->GetAsset("test.bmp")->asset.texture;
 	if (tex) {
@@ -220,7 +229,7 @@ int main(int argc, char const *argv[])
     m5->SetRotation(glm::radians(-90.0f), 0, 0);
     m5->GenerateBoundingBox();
     m5->GetVertexData()->MaterialIDs.push_back(MaterialManager::GetInstance()->GetMaterial("test")->GetID());
-	
+
     Mesh* m2 = am->GetAsset("Tent.obj")->asset.mesh;
     m2->SetPosition(glm::vec3(10, 1, 6));
     m2->SetRotation(0, glm::radians(-90.0f), 0);
@@ -237,7 +246,7 @@ int main(int argc, char const *argv[])
 	scenemng->AddObject(m3);
     scenemng->AddObject(m5);
 	scenemng->AddObject(l);
-   
+
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
     terr_rend->SetTerrain(terr);
     terr_rend->SetCamera(cam);
@@ -270,7 +279,7 @@ int main(int argc, char const *argv[])
     Panel p = Panel{0, 0, 320, 240};
     p.SetBackColor(255, 0, 0, 25);
     gr.AddPanel(&p);
-    
+
     Label lbl = Label(120, 460, "This is a true label");
     lbl.SetForeColor(255, 128, 0, 255);
 
@@ -333,7 +342,7 @@ int main(int argc, char const *argv[])
 
         gr.DebugWrite(10, 140, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f)",
              p.x, p.y, p.z, q.x, q.y);
-		gr.DebugWrite(10, 180, "Camera rotation: %.1fº", 
+		gr.DebugWrite(10, 180, "Camera rotation: %.1fº",
 						cam->GetRotation() * 180 / M_PI);
         gr.DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
           "Enabled" : "Disabled");
