@@ -209,6 +209,7 @@ int main(int argc, char const *argv[])
 		if (te.code != 0) {
 			Log::GetLog()->Fatal("Error code: %d (%s)", te.code, strerror(te.code));
 		}
+		exit(EXIT_FAILURE);
 	}
 
 	Texture* tex = am->GetAsset("test.bmp")->asset.texture;
