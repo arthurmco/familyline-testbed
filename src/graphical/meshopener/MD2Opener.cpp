@@ -176,10 +176,10 @@ Mesh* MD2Opener::Open(const char* file)
 
             struct md2_frame fframe;
             fread(&fframe, sizeof(struct md2_frame), 1, fMD2);
-            printf("\tframe #%d: scalefactor: (%.3f,%.3f,%.3f), transfactor: (%.3f,%.3f,%.3f) \n",
+ /*           printf("\tframe #%d: scalefactor: (%.3f,%.3f,%.3f), transfactor: (%.3f,%.3f,%.3f) \n",
                 f, fframe.scaleX, fframe.scaleY, fframe.scaleZ, fframe.transX,
                 fframe.transY, fframe.transZ);
-
+*/
             scaleMult = glm::vec3(fframe.scaleX, fframe.scaleY, fframe.scaleZ);
             transMult = glm::vec3(fframe.transX, fframe.transY, fframe.transZ);
 

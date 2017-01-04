@@ -26,12 +26,18 @@ void Log::SetFile(FILE* f)
 
     this->_logFile = f;
 }
+
+#define BOLD "\033[1m"
+#define RED "\033[31m"
+#define YELLOW "\033[33m"
+#define NORMAL "\033[0m"
+
 void Log::Write(const char* fmt, ...)
 {
     /* Print timestamp */
     time_t now;
     time(&now);
-    fprintf(_logFile, "[%8u] ", (int)(now-_time));
+    fprintf(_logFile, "[%8u] " BOLD, (int)(now-_time));
 
     /* Print message */
     va_list vl;
@@ -42,7 +48,7 @@ void Log::Write(const char* fmt, ...)
     va_end(vl);
 
     /* Print line terminator */
-    fputs("\r\n", _logFile);
+    fputs(NORMAL "\r\n", _logFile);
     fflush(this->_logFile);
 }
 
@@ -51,7 +57,8 @@ void Log::Fatal(const char* fmt, ...)
     /* Print timestamp */
     time_t now;
     time(&now);
-    fprintf(_logFile, "[%8u] (FATAL) ", (int)(now-_time));
+    fprintf(_logFile, "[%8u] " RED " (FATAL) " 
+					NORMAL "" BOLD "" RED, (int)(now-_time));
 
     /* Print message */
     va_list vl;
@@ -62,7 +69,7 @@ void Log::Fatal(const char* fmt, ...)
     va_end(vl);
 
     /* Print line terminator */
-    fputs("\r\n", _logFile);
+    fputs(NORMAL "\r\n", _logFile);
     fflush(this->_logFile);
 }
 
@@ -71,7 +78,8 @@ void Log::Warning(const char* fmt, ...)
     /* Print timestamp */
     time_t now;
     time(&now);
-    fprintf(_logFile, "[%8u] (WARNING) ", (int)(now-_time));
+    fprintf(_logFile, "[%8u] " YELLOW " (WARNING) " 
+					NORMAL "" BOLD "" YELLOW, (int)(now-_time));
 
     /* Print message */
     va_list vl;
@@ -82,6 +90,6 @@ void Log::Warning(const char* fmt, ...)
     va_end(vl);
 
     /* Print line terminator */
-    fputs("\r\n", _logFile);
+    fputs(NORMAL "\r\n", _logFile);
     fflush(this->_logFile);
 }

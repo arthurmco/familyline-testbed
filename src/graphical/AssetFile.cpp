@@ -1,4 +1,5 @@
 #include "AssetFile.hpp"
+#include "../Log.hpp"
 
 using namespace Tribalia::Graphics;
 
@@ -132,8 +133,7 @@ void AssetFile::BuildFileItemTree()
                 afi->name = name;
                 afi->path = path;
                 afi->type = type;
-                printf("\t new asset found: %s, %s, %s\n", name.c_str(), type.c_str(), path.c_str());
-
+/*                printf("\t new asset found: %s, %s, %s\n", name.c_str(), type.c_str(), path.c_str());*/
                 /* Check if our material asset has been loaded */
                 if (type == "mesh") {
                     bool mfound = false;
@@ -150,7 +150,7 @@ void AssetFile::BuildFileItemTree()
                             DeferredLink dl;
                             dl.afi = afi;
                             dl.asset = material_asset;
-                            printf("%s material not found, deferred load\n", material_asset.c_str());
+							Log::GetLog()->Warning("%s material not found, deferred load", material_asset.c_str());
                             deferred_material_assets.push_back(dl);
                         }
                         
@@ -170,7 +170,8 @@ void AssetFile::BuildFileItemTree()
                             DeferredLink dl;
                             dl.afi = afi;
                             dl.asset = texture_asset;
-                            printf("%s texture not found, deferred load\n", texture_asset.c_str());
+							Log::GetLog()->Warning("%s texture not found, deferred load", texture_asset.c_str());
+
                             deferred_texture_assets.push_back(dl);
                         }
                         
