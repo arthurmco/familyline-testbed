@@ -7,6 +7,7 @@
 
 #include <string>
 #include <cmath>
+#include <cstdlib> //memcpy()
 
 #include "../Log.hpp"
 
@@ -57,6 +58,12 @@ namespace Logic {
 
         const char* GetName() const;
         const char* GetDescription() const;
+
+		void SetName(const char*);
+		void SetDescription(const char*);
+
+		/* Get raw terrain data and split it into sections */
+		void SetData(TerrainSlot* slot);
 
     };
 

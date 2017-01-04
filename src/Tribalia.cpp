@@ -156,8 +156,7 @@ int main(int argc, char const *argv[])
 
         hp = new HumanPlayer{"Arthur"};
 		terrFile = new TerrainFile("terrain_test.trtb");
-		terrFile->GetTerrain();
-        terr = new Terrain{1000, 1000};
+		terr = terrFile->GetTerrain();
         scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
 
 		cam = new Camera{glm::vec3(6.0f, 36.0f, 6.0f), (float)winW/(float)winH, glm::vec3(0,0,0)};
@@ -372,18 +371,10 @@ int main(int argc, char const *argv[])
 
 		gr.DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
-
-	//glm::vec3 cur_wor = ip->GetCursorWorldRay();
-	//printf("Cursor ray: (%.2f, %.2f %.2f)\t",
-	//	cur_wor.x, cur_wor.y, cur_wor.z);
-	//ip->GetTerrainProjectedPosition();
-
-    //Trava em ~60 fps
+    //Locked in ~60 fps
         if (delta < 1000/60.0) {
               SDL_Delay(1000/60.0 - delta);
         }
-
-        //usleep(1);
 
     } while (player);
 

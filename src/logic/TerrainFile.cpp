@@ -73,7 +73,12 @@ Terrain* TerrainFile::GetTerrain(int index)
 						fPath, 0);
 	}
 
-	return nullptr;	
+	Terrain* t = new Terrain{(int)tdh.width, (int)tdh.height};
+	t->SetName("Test");
+	t->SetDescription("A test terrain");
+	t->SetData(slots);
+
+	return t;	
 }
 
 TerrainFile::~TerrainFile()

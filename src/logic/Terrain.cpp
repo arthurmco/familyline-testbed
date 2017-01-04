@@ -54,8 +54,8 @@ Terrain::Terrain(int w, int h)
 
 int Terrain::GetHeightFromPoint(unsigned x, unsigned y)
 {
-    unsigned sectionX = ceil(float(x) / (SECTION_SIDE * 1.0));
-    unsigned sectionY = ceil(float(y) / (SECTION_SIDE * 1.0));
+    unsigned sectionX = floor(float(x) / (SECTION_SIDE * 1.0));
+    unsigned sectionY = floor(float(y) / (SECTION_SIDE * 1.0));
 	unsigned index = sectionY * _section_height + sectionX;
 
 	unsigned siX = x % SECTION_SIDE;
@@ -83,3 +83,28 @@ int Terrain::GetHeight() const { return _height; }
 int Terrain::GetSectionCount() const { return _section_height * _section_width; }
 const char* Terrain::GetName() const { return _name.c_str(); }
 const char* Terrain::GetDescription() const { return _description.c_str(); }
+void Terrain::SetName(const char* n) { _name = std::string{n}; }
+void Terrain::SetDescription(const char* d) { _description = std::string{d}; }
+
+
+/* Get raw terrain data and split it into sections */
+void Terrain::SetData(TerrainSlot* slot) {
+	if (!slot) {
+		Log::GetLog()->Warning("Terrain: data is a null pointer");
+	}
+
+	for (int sy = 0; sy < _section_height; sy++) {
+		for (int sx = 0; sx < _section_width; sx++) {
+			int index = sy*_section_width+sx;
+			for (unsigned y = 0; y < SECTION_SIDE; y++) {
+				for (unsigned x = 0; x < SECTION_SIDE; x++) {
+					_data[index]->data[y*SECTION_SIDE+x] = 
+							slot[( sy * SECTION_SIDE + y) * _width + (sx * SECTION_SIDE + x)];
+				}
+			}
+		}
+	}	
+
+}
+
+
