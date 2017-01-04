@@ -43,10 +43,5 @@ GTAGS
 # Documents
 *.odt
 
-# Netbeans data
-asset-editor/nbproject/private/
-asset-editor/build/
-asset-editor/nbbuild/
-asset-editor/dist/
-asset-editor/nbdist/
-asset-editor/.nb-gradle/
+# Code::Blocks
+*.cbp
