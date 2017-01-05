@@ -35,7 +35,7 @@ void GUIRenderer::DebugWrite(int x, int y, const char* fmt, ...)
 	cairo_move_to(cr, x*1.0, y*1.0);
 	cairo_show_text(cr, ch);
 	surfaceChanged = true;
-	delete ch;
+	delete[] ch;
 }
 
 void GUIRenderer::SetFramebuffer(Framebuffer* f) {

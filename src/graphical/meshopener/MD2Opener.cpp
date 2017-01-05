@@ -103,7 +103,7 @@ Mesh* MD2Opener::Open(const char* file)
     /* Save the end of first frame position */
     int frame2coords = (int)ftell(fMD2);
 
-    delete vertsMD2;
+    delete[] vertsMD2;
 
     /* Read texcoords */
     fseek(fMD2, hdr.offset_st, SEEK_SET);

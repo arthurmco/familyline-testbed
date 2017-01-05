@@ -62,7 +62,7 @@ Shader::Shader(const char* path, int type)
     this->_path = std::string{path};
     this->_type = type;
 
-    delete filedata;
+    delete[] filedata;
 }
 
 bool Shader::Compile()
