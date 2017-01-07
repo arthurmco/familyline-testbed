@@ -1,4 +1,5 @@
 #include "Mesh.hpp"
+#include "Material.hpp"
 
 using namespace Tribalia::Graphics;
 
@@ -130,4 +131,16 @@ void Mesh::GenerateBoundingBox()
     this->_box.points[BOUNDING_BOX_UPPER_LEFT_BACK]     = glm::vec3(maxx, maxy, minz);
     this->_box.points[BOUNDING_BOX_UPPER_LEFT_FRONT]    = glm::vec3(maxx, maxy, maxz);
 
+}
+
+
+/* Sets material for whole mesh */
+void Mesh::SetMaterial(void* m)
+{
+    Material* mt = (Material*)m;
+    for (auto&& mat_index : this->_vdata->MaterialIDs) {
+	mat_index = mt->GetID();
+    }
+
+    
 }

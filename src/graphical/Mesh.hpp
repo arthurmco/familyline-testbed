@@ -54,6 +54,9 @@ namespace Graphics {
         VertexData* GetVertexData();
 
         void GenerateBoundingBox();
+
+	/* Sets material for whole mesh */
+	void SetMaterial(void* m);
     };
 
 
