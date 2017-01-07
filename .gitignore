@@ -5,6 +5,7 @@ tribalia-server
 *.swp
 *.pch
 .*.*
+*~
 
 #CMakeLists.txt generated files
 EnviroDefs.h
