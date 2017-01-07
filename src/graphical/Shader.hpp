@@ -7,7 +7,10 @@
 
 #include <string>
 #include <cstring> //strcat
+
+#ifndef __gl_h__
 #include <GL/glew.h>
+#endif
 
 #include <cstdio>
 

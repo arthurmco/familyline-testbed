@@ -5,6 +5,7 @@
 
 ***/
 
+#include <GL/glew.h>
 #include "logic/Player.hpp"
 #include "logic/PathFinder.hpp"
 #include "logic/ObjectFactory.hpp"

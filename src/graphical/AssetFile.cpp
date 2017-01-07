@@ -150,7 +150,7 @@ void AssetFile::BuildFileItemTree()
                             DeferredLink dl;
                             dl.afi = afi;
                             dl.asset = material_asset;
-							Log::GetLog()->Warning("%s material not found, deferred load", material_asset.c_str());
+			    Log::GetLog()->Warning("%s material not found, deferred load", material_asset.c_str());
                             deferred_material_assets.push_back(dl);
                         }
                         
@@ -162,7 +162,7 @@ void AssetFile::BuildFileItemTree()
                             if (afs->name == texture_asset) {
                                 mfound = true;
                                 afi->depends.push_back(afs);
-                                break;
+			        break;
                             }
                         }
 
@@ -170,7 +170,7 @@ void AssetFile::BuildFileItemTree()
                             DeferredLink dl;
                             dl.afi = afi;
                             dl.asset = texture_asset;
-							Log::GetLog()->Warning("%s texture not found, deferred load", texture_asset.c_str());
+			    Log::GetLog()->Warning("%s texture not found, deferred load", texture_asset.c_str());
 
                             deferred_texture_assets.push_back(dl);
                         }
@@ -209,6 +209,7 @@ void AssetFile::BuildFileItemTree()
                 path = "";
                 type = "";
                 material_asset = "";
+		texture_asset = "";
 
                 isInAsset = false;
                 _file_items.push_back(afi);

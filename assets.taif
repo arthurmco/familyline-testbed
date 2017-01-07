@@ -67,4 +67,5 @@ WatchTower.mtl {
 cabana.md2 {
     type: mesh
     path: models/cabana.md2
+	texture_asset: test.bmp
 }

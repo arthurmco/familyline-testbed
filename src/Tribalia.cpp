@@ -13,12 +13,8 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include <glm/gtc/matrix_transform.hpp> //glm::lookAt()
 #include <cstring>
 
-#include "Log.hpp"
-#include "Timer.hpp"
-#include "HumanPlayer.hpp"
 #include "logic/ObjectRenderer.hpp"
 #include "logic/PathFinder.hpp"
 #include "logic/ObjectFactory.hpp"
@@ -47,8 +43,13 @@
 
 #include "input/InputPicker.hpp"
 
+#include "Log.hpp"
+#include "Timer.hpp"
+#include "HumanPlayer.hpp"
 #include "objects/WatchTower.hpp"
 #include "objects/Tent.hpp"
+
+#include <glm/gtc/matrix_transform.hpp> //glm::lookAt()
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;

@@ -5,13 +5,13 @@
 
 ***/
 
+#include "../logic/Terrain.hpp"
+#include "Renderer.hpp"
+#include "Camera.hpp"
+#include "VertexData.hpp"
+
 #ifndef TERRAINRENDERER_HPP
 #define TERRAINRENDERER_HPP
-
-#include "../logic/Terrain.hpp"
-#include "Camera.hpp"
-#include "Renderer.hpp"
-#include "VertexData.hpp"
 
 /* Size of each slot, in OpenGL units */
 #define SEC_SIZE 0.50
