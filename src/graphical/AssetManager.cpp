@@ -164,6 +164,7 @@ Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
 	    char* mname = new char[256];
 	    sprintf(mname, "%s#texture", a->name);
 	    MaterialData md;
+	    md.diffuseColor = glm::vec3(1,1,0);
 	    
 	    Material* mt = new Material{mname, md};
 	    mt->SetTexture(child_t);

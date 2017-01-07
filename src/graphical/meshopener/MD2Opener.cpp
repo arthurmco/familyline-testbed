@@ -64,7 +64,7 @@ Mesh* MD2Opener::Open(const char* file)
     auto verts = new std::vector<glm::vec3>{};
     auto normals = new std::vector<glm::vec3>{};    //each tris has 1 normal
     auto textures = new std::vector<glm::vec2>{};
-
+    auto matids = new std::vector<int>{};
 
     /*  Read the frame information. The vertices are stored right after.
         Until we support animation, only one frame will be read
@@ -86,7 +86,8 @@ Mesh* MD2Opener::Open(const char* file)
     auto vertsMD2 = new md2_vertex[hdr.num_vertices];
     auto trisMD2 = new md2_triangle[hdr.num_tris];
     auto texcoordsMD2 = new md2_texcoords[hdr.num_st];
-
+    
+    
     fread(vertsMD2, sizeof(md2_vertex), hdr.num_vertices, fMD2);
 
     auto aVerts = new glm::vec3[hdr.num_vertices];
@@ -145,6 +146,10 @@ Mesh* MD2Opener::Open(const char* file)
         textures->push_back(aTex[trisMD2[i].st[0]]);
         textures->push_back(aTex[trisMD2[i].st[1]]);
         textures->push_back(aTex[trisMD2[i].st[2]]);
+
+	matids->push_back(0);
+	matids->push_back(0);
+	matids->push_back(0);
     }
 
     int i = 0;
@@ -158,6 +163,7 @@ Mesh* MD2Opener::Open(const char* file)
     vd->Positions = *verts;
     vd->TexCoords = *textures;
     vd->Normals = *normals;
+    vd->MaterialIDs = *matids;
 
     if (hdr.num_frames > 1) {
 

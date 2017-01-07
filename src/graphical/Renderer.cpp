@@ -20,7 +20,7 @@ Renderer::Renderer()
 		if textures aren't available */
 
 	unsigned int* fake_color = new unsigned int;
-	*fake_color = 0xff00ff00;
+	*fake_color = 0xffffff00;
 	fake_tex = new Texture(1, 1, GL_RGB, fake_color);
 
 }
