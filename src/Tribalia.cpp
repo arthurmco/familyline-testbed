@@ -130,7 +130,7 @@ int main(int argc, char const *argv[])
     Renderer* rndr = nullptr;
     HumanPlayer* hp;
     SceneManager* scenemng;
-     Terrain* terr;
+    Terrain* terr;
 
     bool player = false;
 
@@ -139,7 +139,7 @@ int main(int argc, char const *argv[])
 
     AssetManager* am = AssetManager::GetInstance();
     Mesh* m;
-	TerrainFile* terrFile;
+    TerrainFile* terrFile;
 
     GameContext gctx;
     try {
@@ -243,9 +243,9 @@ int main(int argc, char const *argv[])
 
     scenemng->AddObject(m);
     scenemng->AddObject(m2);
-	scenemng->AddObject(m3);
+    scenemng->AddObject(m3);
     scenemng->AddObject(m5);
-	scenemng->AddObject(l);
+    scenemng->AddObject(l);
 
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};
     terr_rend->SetTerrain(terr);
@@ -256,8 +256,8 @@ int main(int argc, char const *argv[])
 
     InputManager::GetInstance()->Initialize();
 
-	  InputPicker* ip = new InputPicker{ terr_rend, win, scenemng, cam, om};
-	  hp->SetPicker(ip);
+    InputPicker* ip = new InputPicker{ terr_rend, win, scenemng, cam, om};
+    hp->SetPicker(ip);
 
     PathFinder* pathf = new PathFinder(terr, om);
     pathf->UpdateSlotList(0, 0, terr->GetWidth(), terr->GetHeight());

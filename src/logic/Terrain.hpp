@@ -22,10 +22,10 @@ namespace Logic {
         They make terrain loading and rendering much more easier
         (because only one portion needs to be loaded/rendered at a time) */
 
-	struct TerrainSlot {
-		int16_t elevation;
-        uint16_t terrain_type;
-	};
+     struct TerrainSlot {
+	  int16_t elevation;
+	  uint16_t terrain_type;
+     };
 
     #define SECTION_SIDE 256
     struct TerrainData {
