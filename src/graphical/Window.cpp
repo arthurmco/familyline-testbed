@@ -141,7 +141,7 @@ void Window::Update()
 	// Draw the triangle !
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, base_index_vbo);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	SDL_GL_SwapWindow(_win);
 
@@ -153,6 +153,7 @@ void Window::Update()
 
 	glDisableVertexAttribArray(0);
 	glBindVertexArray(0);
+	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_DEPTH_TEST);
 }
 
