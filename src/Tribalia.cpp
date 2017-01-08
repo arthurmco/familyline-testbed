@@ -234,13 +234,21 @@ int main(int argc, char const *argv[])
     Mesh* m2 = am->GetAsset("Tent.obj")->asset.mesh;
     m2->SetPosition(glm::vec3(10, 1, 6));
     m2->SetRotation(0, glm::radians(-90.0f), 0);
+
+    Material* mtt = new Material{"tent",
+				 MaterialData(glm::vec3(0.5,0.8,0.7), glm::vec3(1), glm::vec3(0.1))};
+    mtt->SetTexture(TextureManager::GetInstance()->GetTexture(5));
+    MaterialManager::GetInstance()->AddMaterial(mtt);
+
+    
+    m2->SetMaterial(mtt);
     m2->GenerateBoundingBox();
 
-	Mesh* m3 = am->GetAsset("testtex.obj")->asset.mesh;
-	m3->SetPosition(glm::vec3(20, 1, 10));
-	m3->GenerateBoundingBox();
-
-	Light* l = new Light{ "mainLight", glm::vec3(16, 30, 16), 0xff, 0xff, 0xff, 10 };
+    Mesh* m3 = am->GetAsset("testtex.obj")->asset.mesh;
+    m3->SetPosition(glm::vec3(20, 1, 10));
+    m3->GenerateBoundingBox();
+    
+    Light* l = new Light{ "mainLight", glm::vec3(16, 30, 16), 0xff, 0xff, 0xff, 10 };
 
     scenemng->AddObject(m);
     scenemng->AddObject(m2);
@@ -269,13 +277,13 @@ int main(int argc, char const *argv[])
 
     int delta = 1;
 
-	Framebuffer fbRender{ winW, winH, GL_UNSIGNED_BYTE };
-	Framebuffer fbGUI{ winW, winH, GL_UNSIGNED_BYTE };
-	win->Set3DFramebuffer(&fbRender);
-	win->SetGUIFramebuffer(&fbGUI);
-
-	GUIRenderer gr{ win };
-	gr.SetFramebuffer(&fbGUI);
+    Framebuffer fbRender{ winW, winH, GL_UNSIGNED_BYTE };
+    Framebuffer fbGUI{ winW, winH, GL_UNSIGNED_BYTE };
+    win->Set3DFramebuffer(&fbRender);
+    win->SetGUIFramebuffer(&fbGUI);
+    
+    GUIRenderer gr{ win };
+    gr.SetFramebuffer(&fbGUI);
 
     Panel p = Panel{0, 0, 320, 240};
     p.SetBackColor(255, 0, 0, 25);

@@ -160,14 +160,13 @@ Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
 	    /* If no material but textured, then we create a ghost material for it
 	       Note that materials defined in the model takes precedence */
 
-	    printf("______AAAA\n");
 	    char* mname = new char[256];
 	    sprintf(mname, "%s#texture", a->name);
 	    MaterialData md;
 	    md.diffuseColor = glm::vec3(1,1,0);
 	    
 	    Material* mt = new Material{mname, md};
-	    mt->SetTexture(child_t);
+	    mt->SetTexture(TextureManager::GetInstance()->GetTexture(child_t->GetHandle()));
 	    MaterialManager::GetInstance()->AddMaterial(mt);
 
 	}

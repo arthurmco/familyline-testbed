@@ -19,6 +19,7 @@ test.mtl {
 Tent.obj {
     type: mesh
     path: models/Tent.obj
+	texture_asset: test.bmp
 }
 
 casinha.mtl {
@@ -64,8 +65,13 @@ WatchTower.mtl {
     path: materials/WatchTower.mtl
 }
 
+cabana.png {
+	type: texture
+	path: textures/cabana.png
+}
+
 cabana.md2 {
     type: mesh
     path: models/cabana.md2
-	texture_asset: test.bmp
+	texture_asset: cabana.png
 }

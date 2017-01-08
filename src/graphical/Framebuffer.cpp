@@ -9,29 +9,33 @@ Framebuffer::Framebuffer(int w, int h, GLenum format)
     _width = w;
     _height = h;
 
-	glGenFramebuffers(1, &fb_handle);
-	glBindFramebuffer(GL_FRAMEBUFFER, fb_handle);
+    glGenFramebuffers(1, &fb_handle);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb_handle);
 
-	glGenTextures(1, &tex_handle);
-	glBindTexture(GL_TEXTURE_2D, tex_handle);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, GL_RGBA, format, 0);
+    glGenTextures(1, &tex_handle);
+    glBindTexture(GL_TEXTURE_2D, tex_handle);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, GL_RGBA, format, 0);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	glGenRenderbuffers(1, &renderbuffer_handle);
-	glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_handle);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
+    glGenRenderbuffers(1, &renderbuffer_handle);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_handle);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
 
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer_handle);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex_handle, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer_handle);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex_handle, 0);
 
-	GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, draw_buffers);
+    GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, draw_buffers);
 
-	GLenum fb_error = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (fb_error != GL_FRAMEBUFFER_COMPLETE)
-		throw new renderer_exception{ "The framebuffer is not complete", (int)fb_error };
+    GLenum fb_error = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (fb_error != GL_FRAMEBUFFER_COMPLETE)
+	throw new renderer_exception{ "The framebuffer is not complete", (int)fb_error };
+
+    Log::GetLog()->Write("[Framebuffer] Created framebuffer id %#x texid %#x "
+			 "with %d x %d", fb_handle, tex_handle, w, h);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 /* Set this framebuffer to be the active one */

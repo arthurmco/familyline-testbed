@@ -1,12 +1,13 @@
 /***
     Framebuffer wrapping class
 
-    Copyright (C) 2016 Arthur M
+    Copyright (C) 2016,2017 Arthur M
 ***/
 
 #include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 
+#include "../Log.hpp"
 #include "GFXExceptions.hpp"
 
 #ifndef FRAMEBUFFER_HPP
@@ -38,10 +39,10 @@ namespace Graphics {
         /*  Get the texture handle for this framebuffer
             Useful when you want to use its content as a texture */
         GLint GetTextureHandle();
-
-		static void SetDefaultSize(int w, int h) {
-			defWidth = w; defHeight = h;
-		}
+	
+	static void SetDefaultSize(int w, int h) {
+	    defWidth = w; defHeight = h;
+	}
     };
 
 

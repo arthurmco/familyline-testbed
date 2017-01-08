@@ -61,11 +61,7 @@ Texture* TextureOpener::Open(const char* path)
 	int height = ilGetInteger(IL_IMAGE_HEIGHT);
 	GLenum format;
 
-	switch (ilGetInteger(IL_IMAGE_FORMAT)) {
-		case IL_RGB: format = GL_RGB; break;
-		case IL_BGR: format = GL_BGR; break;
-		default: format = GL_RGB; break;
-	}
+	format = ilGetInteger(IL_IMAGE_FORMAT);
 
 	unsigned char* data = ilGetData();
 	Texture* tex = new Texture(width, height, format, data);

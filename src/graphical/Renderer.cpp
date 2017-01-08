@@ -10,6 +10,7 @@ Renderer::Renderer()
     //InitializeLibraries();
     //Enable depth test
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -19,9 +20,9 @@ Renderer::Renderer()
 	/* 	Create a fake texture, so we can render something
 		if textures aren't available */
 
-	unsigned int* fake_color = new unsigned int;
-	*fake_color = 0xffffff00;
-	fake_tex = new Texture(1, 1, GL_RGB, fake_color);
+    unsigned int* fake_color = new unsigned int;
+    *fake_color = 0xffff00ff;
+    fake_tex = new Texture(1, 1, GL_RGBA, fake_color);
 
 }
 
@@ -33,13 +34,13 @@ void Renderer::InitializeLibraries()
 void Renderer::InitializeShaders()
 {
     Shader *sFrag, *sVert;
-	Shader *fLines, *vLines;
+    Shader *fLines, *vLines;
 
     sFrag = new Shader{"shaders/Forward.frag", SHADER_PIXEL};
     sVert = new Shader{"shaders/Forward.vert", SHADER_VERTEX};
-	fLines = new Shader{ "shaders/Lines.frag", SHADER_PIXEL };
-	vLines = new Shader{ "shaders/Lines.vert", SHADER_VERTEX };
-
+    fLines = new Shader{ "shaders/Lines.frag", SHADER_PIXEL };
+    vLines = new Shader{ "shaders/Lines.vert", SHADER_VERTEX };
+	
     if (!sFrag->Compile()) {
         throw shader_exception("Shader failed to compile", glGetError(),
             sFrag->GetPath(), sFrag->GetType());
@@ -77,6 +78,8 @@ void Renderer::InitializeShaders()
 	}
 }
 
+#include "TextureManager.hpp"
+
 void Renderer::SetMaterial(int ID)
 {
     Material* m = MaterialManager::GetInstance()->GetMaterial(ID);
@@ -85,15 +88,21 @@ void Renderer::SetMaterial(int ID)
         return;
     }
 
-	/* Bind a texture */
-	Texture* t = m->GetTexture();
-	if (t) {
-		glBindTexture(GL_TEXTURE_2D, t->GetHandle());
-		sForward->SetUniform("tex_amount", 1.0f);
-	} else {
-		glBindTexture(GL_TEXTURE_2D, fake_tex->GetHandle());
-		sForward->SetUniform("tex_amount", 0.0f);
-	}
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    /* Bind a texture */
+    Texture* t = m->GetTexture();
+
+    if (t)
+	t = TextureManager::GetInstance()->GetTexture(t->GetHandle());
+    
+    if (t) {
+	glBindTexture(GL_TEXTURE_2D, t->GetHandle());
+	sForward->SetUniform("tex_amount", 1.0f);
+    } else {
+	glBindTexture(GL_TEXTURE_2D, fake_tex->GetHandle());
+	sForward->SetUniform("tex_amount", 0.0f);
+    }
 
 	/* Set materials */
     sForward->SetUniform("diffuse_color", m->GetData()->diffuseColor);
@@ -192,7 +201,6 @@ void Renderer::UpdateObjects()
 	
 
 		/* Check for deleted objects */
-		deleted_check:
 		for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); ++it2) {
 			bool isDeleted = true;
 			for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
@@ -228,10 +236,10 @@ bool Renderer::Render()
     sForward->Use();
     sForward->SetUniform("mView", mView);
 
-	sForward->SetUniform("lightCount", lri.lightCount);
-	sForward->SetUniformArray("lightStrenghts", 4, lri.lightStrengths);
-	sForward->SetUniformArray("lightPositions", 4, lri.lightPositions);
-	sForward->SetUniformArray("lightColors", 4, lri.lightColors);
+    sForward->SetUniform("lightCount", lri.lightCount);
+    sForward->SetUniformArray("lightStrenghts", 4, lri.lightStrengths);
+    sForward->SetUniformArray("lightPositions", 4, lri.lightPositions);
+    sForward->SetUniformArray("lightColors", 4, lri.lightColors);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -244,10 +252,10 @@ bool Renderer::Render()
         sForward->SetUniform("mModel", mModel);
 
 
-		if (it->vd->animationData) {
-			this->UpdateVertexData(it->vd->vbo_pos, it->vd->animationData->GetVertexRawData(),
-				it->vd->Positions.size());
-		}
+	if (it->vd->animationData) {
+	    this->UpdateVertexData(it->vd->vbo_pos, it->vd->animationData->GetVertexRawData(),
+				   it->vd->Positions.size());
+	}
 		
 
         if (!it->vd->MaterialIDs.empty())
@@ -269,8 +277,8 @@ bool Renderer::Render()
         );
 
         glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, it->vbo_norm);
-        glVertexAttribPointer(
+	glBindBuffer(GL_ARRAY_BUFFER, it->vbo_norm);
+	glVertexAttribPointer(
            1,                  // attribute 1 (normals)
            3,                  // size
            GL_FLOAT,           // type
@@ -279,12 +287,12 @@ bool Renderer::Render()
            (void*)0            // array buffer offset
         );
 
-		glEnableVertexAttribArray(2);
-		glBindBuffer(GL_ARRAY_BUFFER, it->vbo_tex);
-		glVertexAttribPointer(
-			2,					// attribute 2 (texcoords)
-			2,					// size
-			GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, it->vbo_tex);
+	glVertexAttribPointer(
+	    2,					// attribute 2 (texcoords)
+	    2,					// size
+	    GL_FLOAT, GL_FALSE, 0, (void*)0);
 
         /* Draw the triangles */
         for (int matidx = 0; matidx < 9; matidx++) {
@@ -294,7 +302,7 @@ bool Renderer::Render()
             if (!it->vd->MaterialIDs.empty())
                 material = it->vd->MaterialIDs[start];
             SetMaterial(material);
-
+	    
             if (end < 0) {
                 end = it->vd->Positions.size();
                 matidx = 0xff; //force exit
@@ -308,7 +316,7 @@ bool Renderer::Render()
                 Log::GetLog()->Fatal("OpenGL error %#x", err);
             }
         }
-		glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
         glDisableVertexAttribArray(0);
     }
 
@@ -361,24 +369,24 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
     glGenBuffers(1, &vri.vbo_pos);
     glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_pos);
     glBufferData(GL_ARRAY_BUFFER, v->Positions.size() * sizeof(glm::vec3),
-        v->animationData ? v->animationData->GetVertexRawData() : v->Positions.data(),
-        v->animationData ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
+		 v->animationData ? v->animationData->GetVertexRawData() : v->Positions.data(),
+		 v->animationData ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
 
     glGenBuffers(1, &vri.vbo_norm);
     glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_norm);
     glBufferData(GL_ARRAY_BUFFER, v->Normals.size() * sizeof(glm::vec3),
-        v->Normals.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(1);
-
-	glGenBuffers(1, &vri.vbo_tex);
-	glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_tex);
-	glBufferData(GL_ARRAY_BUFFER, v->TexCoords.size() * sizeof(glm::vec2),
-		v->TexCoords.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(2);
+		 v->Normals.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
+    
+    glGenBuffers(1, &vri.vbo_tex);
+    glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_tex);
+    glBufferData(GL_ARRAY_BUFFER, v->TexCoords.size() * sizeof(glm::vec2),
+		 v->TexCoords.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);
 
@@ -390,8 +398,8 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
     int actualidx = -1;
     int i = 0;
     for (auto matit = v->MaterialIDs.begin();
-            matit != v->MaterialIDs.end();
-            matit++) {
+	 matit != v->MaterialIDs.end();
+	 matit++) {
         if (*matit != actualidx) {
             actualidx = *matit;
             vri.material_offsets[matidx++] = i;
@@ -400,7 +408,7 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
     }
 
     vri.material_offsets[matidx] = -1;
-	v->vbo_pos = vri.vbo_pos;
+    v->vbo_pos = vri.vbo_pos;
 	
     _vertices.push_back(vri);
     return vri.vao;

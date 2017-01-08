@@ -14,7 +14,7 @@ Material::Material(int ID, const char* name, MaterialData data)
 Material::Material(const char* name, MaterialData data)
     : _name{name}, _data(data)
 {
-	_tex = nullptr;
+    _tex = nullptr;
     _ID = lastID++;
 }
 
