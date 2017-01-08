@@ -8,6 +8,7 @@
 
 #define GLM_FORCE_RADIANS
 
+
 #include "EnviroDefs.h"
 
 #include <cstdio>
@@ -137,7 +138,6 @@ int main(int argc, char const *argv[])
 
     Camera* cam;
 
-
     AssetManager* am = AssetManager::GetInstance();
     Mesh* m;
     TerrainFile* terrFile;
@@ -152,15 +152,16 @@ int main(int argc, char const *argv[])
 
         rndr = new Renderer{};
 
-
         gctx.om = om;
 
         hp = new HumanPlayer{"Arthur"};
-		terrFile = new TerrainFile("terrain_test.trtb");
-		terr = terrFile->GetTerrain();
-        scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
 
-		cam = new Camera{glm::vec3(6.0f, 36.0f, 6.0f), (float)winW/(float)winH, glm::vec3(0,0,0)};
+	terrFile = new TerrainFile("terrain_test.trtb");
+	terr = terrFile->GetTerrain();
+
+	scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
+
+	cam = new Camera{glm::vec3(6.0f, 36.0f, 6.0f), (float)winW/(float)winH, glm::vec3(0,0,0)};
         scenemng->SetCamera(cam);
         hp->SetCamera(cam);
 
@@ -205,21 +206,21 @@ int main(int argc, char const *argv[])
         }
         exit(EXIT_FAILURE);
     } catch (terrain_file_exception& te) {
-		Log::GetLog()->Fatal("Terrain file error: %s on file %s", te.what(), te.file.c_str());
-		if (te.code != 0) {
-			Log::GetLog()->Fatal("Error code: %d (%s)", te.code, strerror(te.code));
-		}
-		exit(EXIT_FAILURE);
+	Log::GetLog()->Fatal("Terrain file error: %s on file %s", te.what(), te.file.c_str());
+	if (te.code != 0) {
+	    Log::GetLog()->Fatal("Error code: %d (%s)", te.code, strerror(te.code));
 	}
-
-	Texture* tex = am->GetAsset("test.bmp")->asset.texture;
-	if (tex) {
-		MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);
+	exit(EXIT_FAILURE);
+    }
+    
+    Texture* tex = am->GetAsset("test.bmp")->asset.texture;
+    if (tex) {
+	MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);
         TextureManager::GetInstance()->AddTexture("test", tex);
     }
 
     Material* matest = new Material{"test", MaterialData(
-        glm::vec3(0.0, 0.6, 0.7), glm::vec3(1.0, 0.9, 0.95), glm::vec3(0.1, 0.05, 0.06)
+	    glm::vec3(0.0, 0.6, 0.7), glm::vec3(1.0, 0.9, 0.95), glm::vec3(0.1, 0.05, 0.06)
     )};
     MaterialManager::GetInstance()->AddMaterial(matest);
 
@@ -237,7 +238,7 @@ int main(int argc, char const *argv[])
 
     Material* mtt = new Material{"tent",
 				 MaterialData(glm::vec3(0.5,0.8,0.7), glm::vec3(1), glm::vec3(0.1))};
-    mtt->SetTexture(TextureManager::GetInstance()->GetTexture(5));
+    mtt->SetTexture(tex);
     MaterialManager::GetInstance()->AddMaterial(mtt);
 
     
@@ -299,17 +300,18 @@ int main(int argc, char const *argv[])
     gr.AddPanel(&lbl);
     gr.AddPanel(&lblVersion);
 
-	double pms = 0.0;
-
-	/* Adds the objects to the factory */
-	ObjectFactory::GetInstance()->AddObject(new WatchTower);
-	ObjectFactory::GetInstance()->AddObject(new Tent);
+    double pms = 0.0;
+    
+    /* Adds the objects to the factory */
+    ObjectFactory::GetInstance()->AddObject(new WatchTower);
+    ObjectFactory::GetInstance()->AddObject(new Tent);
+    
     do {
 
         ip->UpdateIntersectedObject();
         ip->UpdateTerrainProjectedPosition();
 
-		gr.DebugWrite(10, 40, "Press C to create an object at mouse cursor, and R to remove it.");
+	gr.DebugWrite(10, 40, "Press C to create an object at mouse cursor, and R to remove it.");
         player = true;
         gctx.elapsed_seconds = delta / 1000.0;
 
@@ -347,24 +349,24 @@ int main(int argc, char const *argv[])
         glm::vec2 q = ip->GetGameProjectedPosition();
 
         AnimationManager::GetInstance()->Iterate();
-		ObjectPathManager::getInstance()->UpdatePaths();
+	ObjectPathManager::getInstance()->UpdatePaths();
 
         gr.DebugWrite(10, 140, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f)",
-             p.x, p.y, p.z, q.x, q.y);
-		gr.DebugWrite(10, 180, "Camera rotation: %.1fº",
-						cam->GetRotation() * 180 / M_PI);
+		      p.x, p.y, p.z, q.x, q.y);
+	gr.DebugWrite(10, 180, "Camera rotation: %.1fº",
+		      cam->GetRotation() * 180 / M_PI);
         gr.DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
           "Enabled" : "Disabled");
 
-		gr.Render();
+	gr.Render();
 
-		fbRender.SetActive();
-		rndr->SetBoundingBox(hp->renderBBs);
-		if (objupdate) rndr->UpdateObjects();
+	fbRender.SetActive();
+	rndr->SetBoundingBox(hp->renderBBs);
+	if (objupdate) rndr->UpdateObjects();
         rndr->UpdateFrames();
         rndr->Render();
-		fbRender.UnsetActive();
-		win->Update();
+	fbRender.UnsetActive();
+	win->Update();
 
         frame++;
 
@@ -374,15 +376,15 @@ int main(int argc, char const *argv[])
         ticks = SDL_GetTicks();
         Timer::getInstance()->RunTimers(delta);
 
-		if (frame % 15 == 0) {
-			pms = delta * 1.0;
-		}
+	if (frame % 15 == 0) {
+	    pms = delta * 1.0;
+	}
 
-		gr.DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
+	gr.DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
-    //Locked in ~60 fps
+	//Locked in ~60 fps
         if (delta < 1000/60.0) {
-              SDL_Delay(1000/60.0 - delta);
+	    SDL_Delay(1000/60.0 - delta);
         }
 
     } while (player);

@@ -14,6 +14,13 @@ Framebuffer::Framebuffer(int w, int h, GLenum format)
 
     glGenTextures(1, &tex_handle);
     glBindTexture(GL_TEXTURE_2D, tex_handle);
+
+    GLenum glerr = GL_NO_ERROR;
+    if ((glerr = glGetError()) != GL_NO_ERROR) {
+	Log::GetLog()->Warning("[Framebuffer] GL error %#x while binding texture handle %d",
+			       glerr, tex_handle);
+    }
+    
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, GL_RGBA, format, 0);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

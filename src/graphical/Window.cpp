@@ -25,7 +25,6 @@ Window::Window(int w, int h)
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
     
     _win = SDL_CreateWindow("Tribalia",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h,
@@ -59,11 +58,17 @@ void Window::Show()
         throw renderer_exception(err, 0);
     }
 
-	glClearColor(0, 0, 0, 1);
-
-	glewExperimental = GL_TRUE;
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    
+    glewExperimental = GL_TRUE;
     GLenum glewStatus = glewInit();
 
+    /* glewInit() can emit GL_INVALID_ENUM, but this doesn't seem to affect
+       the operation of the library
+       (check https://www.khronos.org/opengl/wiki/OpenGL_Loading_Library) */
+    
+    glGetError();
+    
     if (glewStatus != GLEW_OK) {
         char err[1024] = "GLEW initialization error: ";
         strcat(err, (char*)glewGetErrorString(glewStatus));
@@ -71,40 +76,38 @@ void Window::Show()
         throw renderer_exception(err, glewStatus);
     }
 
-
-	/* Compile the shader */
-	if (!winShader) {
-		Shader *sv = new Shader{ "shaders/Window.vert", SHADER_VERTEX };
-		Shader *sf = new Shader{ "shaders/Window.frag", SHADER_PIXEL };
-
-		sv->Compile();
-		sf->Compile();
+    /* Compile the shader */
+    if (!winShader) {
+	Shader *sv = new Shader{ "shaders/Window.vert", SHADER_VERTEX };
+	Shader *sf = new Shader{ "shaders/Window.frag", SHADER_PIXEL };
 	
-		winShader = new ShaderProgram{ sv, sf };
-		winShader->Link();
-		
-	}
-
+	sv->Compile();
+	sf->Compile();
+	
+	winShader = new ShaderProgram{ sv, sf };
+	winShader->Link();
+	
+    }
 
     /* Create the basic VAO for the window */
- 
-	glGenVertexArrays(1, &base_vao);
-	glBindVertexArray(base_vao);
-
+    
+    glGenVertexArrays(1, &base_vao);
+    glBindVertexArray(base_vao);
+    
     glGenBuffers(1, &base_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, base_vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(base_win_square_points),
-        base_win_square_points, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glGenBuffers(1, &base_index_vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, base_index_vbo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(base_win_square_elements),
-		base_win_square_elements, GL_STATIC_DRAW);
+		 base_win_square_points, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
     
-	glBindVertexArray(0);
-
+    glGenBuffers(1, &base_index_vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, base_index_vbo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(base_win_square_elements),
+		 base_win_square_elements, GL_STATIC_DRAW);
+    
+    glBindVertexArray(0);
+    
     SDL_ShowWindow(_win);
 
 }

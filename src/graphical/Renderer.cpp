@@ -17,11 +17,12 @@ Renderer::Renderer()
     InitializeShaders();
     sForward->Use();
 
-	/* 	Create a fake texture, so we can render something
-		if textures aren't available */
+    /* 	Create a fake texture, so we can render something
+	if textures aren't available */
 
     unsigned int* fake_color = new unsigned int;
-    *fake_color = 0xffff00ff;
+    
+    fake_color[0] = 0xffff00ff;    
     fake_tex = new Texture(1, 1, GL_RGBA, fake_color);
 
 }
@@ -104,7 +105,7 @@ void Renderer::SetMaterial(int ID)
 	sForward->SetUniform("tex_amount", 0.0f);
     }
 
-	/* Set materials */
+    /* Set materials */
     sForward->SetUniform("diffuse_color", m->GetData()->diffuseColor);
     sForward->SetUniform("ambient_color", m->GetData()->ambientColor);
 
