@@ -100,6 +100,8 @@ void AssetFile::BuildFileItemTree()
         if (isInAsset) {
             size_t i;
 
+	    printf("[%s]\n", name.c_str());
+
             i = l.find("type:");
             if (i != std::string::npos) {
                 type = Trim(l.substr(i+5));
@@ -186,21 +188,31 @@ void AssetFile::BuildFileItemTree()
                             printf("%s material loaded now\n", name.c_str());
                             deferred_material_assets.erase(it);
                             break;
-                        }
+			}
                     }
                     
                 } else if (type == "texture") {
                     /* Check if our texture material is here */
-                    for (auto it = deferred_texture_assets.begin();
-                         it != deferred_texture_assets.end();
-                         it++) {
-                        if (it->asset == name) {
-                            it->afi->depends.push_back(afi);
-                            printf("%s texture loaded now\n", name.c_str());
-                            deferred_texture_assets.erase(it);
-                            break;
-                        }
-                    }
+		    bool breaks = true;
+
+		    while (true) {
+			breaks = true;
+			for (auto it = deferred_texture_assets.begin();
+			     it != deferred_texture_assets.end();
+			     it++) {
+			    if (it->asset == name) {
+				it->afi->depends.push_back(afi);
+				printf("%s texture loaded now\n", name.c_str());
+				deferred_texture_assets.erase(it);
+				breaks = false;
+				break;
+			    }
+			}
+			
+			if (breaks) {
+			    break;
+			}
+		    }
                     
                 }
 
@@ -208,6 +220,7 @@ void AssetFile::BuildFileItemTree()
                 name = "";
                 path = "";
                 type = "";
+                        
                 material_asset = "";
 		texture_asset = "";
 
@@ -217,7 +230,21 @@ void AssetFile::BuildFileItemTree()
         }
 
 
+    }
 
+
+    printf("Unrecognized textures: %d\n", deferred_texture_assets.size());
+    for (auto& unrecog : deferred_texture_assets) {
+	printf("Texture name: '%s', referenced in '%s'", unrecog.asset.c_str(),
+	       unrecog.afi->name.c_str());
+    }
+
+    for (auto& it : _file_items) {
+	printf("%s\n", it->name.c_str());
+
+	for (auto& dep_it : it->depends) {
+	    printf(" |-> %s\n", dep_it->name.c_str());
+	}
     }
 }
 

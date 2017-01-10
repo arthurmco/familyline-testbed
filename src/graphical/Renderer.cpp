@@ -94,9 +94,6 @@ void Renderer::SetMaterial(int ID)
     /* Bind a texture */
     Texture* t = m->GetTexture();
 
-    if (t)
-	t = TextureManager::GetInstance()->GetTexture(t->GetHandle());
-    
     if (t) {
 	glBindTexture(GL_TEXTURE_2D, t->GetHandle());
 	sForward->SetUniform("tex_amount", 1.0f);

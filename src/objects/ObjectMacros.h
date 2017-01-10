@@ -12,7 +12,7 @@
 #define OBJECTMACROS_H
 
 #define DEF_MESH(dasset) SetMesh(new Tribalia::Graphics::Mesh{\
-        Tribalia::Graphics::AssetManager::GetInstance()->GetAsset(dasset)->asset.mesh->GetVertexData()})
+	    *Tribalia::Graphics::AssetManager::GetInstance()->GetAsset(dasset)->asset.mesh})
 
 /*  Build a game object, generically.
     So, your object always needs to have a constructor like (oid, x, y ,z) */

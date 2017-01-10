@@ -138,9 +138,12 @@ void Mesh::GenerateBoundingBox()
 void Mesh::SetMaterial(void* m)
 {
     Material* mt = (Material*)m;
-    for (auto&& mat_index : this->_vdata->MaterialIDs) {
-	mat_index = mt->GetID();
+    _vdata->MaterialIDs.clear();
+
+    for (size_t i = 0; i < _vdata->Positions.size(); i++) {
+	_vdata->MaterialIDs.push_back(mt->GetID());
     }
 
+    
     
 }

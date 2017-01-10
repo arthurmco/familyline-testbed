@@ -232,17 +232,17 @@ int main(int argc, char const *argv[])
     m5->GenerateBoundingBox();
     m5->GetVertexData()->MaterialIDs.push_back(MaterialManager::GetInstance()->GetMaterial("test")->GetID());
 
-    Mesh* m2 = am->GetAsset("Tent.obj")->asset.mesh;
+    Mesh* m2 = new Mesh(*am->GetAsset("Tent.obj")->asset.mesh);
     m2->SetPosition(glm::vec3(10, 1, 6));
     m2->SetRotation(0, glm::radians(-90.0f), 0);
 
-    Material* mtt = new Material{"tent",
+/*    Material* mtt = new Material{"tent",
 				 MaterialData(glm::vec3(0.5,0.8,0.7), glm::vec3(1), glm::vec3(0.1))};
     mtt->SetTexture(tex);
     MaterialManager::GetInstance()->AddMaterial(mtt);
-
     
-    m2->SetMaterial(mtt);
+    
+    m2->SetMaterial(mtt); */
     m2->GenerateBoundingBox();
 
     Mesh* m3 = am->GetAsset("testtex.obj")->asset.mesh;
