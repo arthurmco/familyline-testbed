@@ -108,12 +108,25 @@ void InputPicker::UpdateTerrainProjectedPosition()
 
 	glm::vec3 collide = _terrain->GraphicalToGameSpace(pHalf);
 
+	/* Clamp collide to the terrain area */
+	if (collide.x >= _terrain->GetTerrain()->GetWidth())
+	    collide.x = _terrain->GetTerrain()->GetWidth()-1;
+	
+	if (collide.z >= _terrain->GetTerrain()->GetHeight())
+	    collide.z = _terrain->GetTerrain()->GetHeight()-1;
+
+	if (collide.x < 0)
+	    collide.x = 0;
+
+	if (collide.z < 0)
+	    collide.z = 0;
+	
 	if (collide.x > 0 && collide.z > 0)
 		collide.y = _terrain->GetTerrain()->GetHeightFromPoint(
 					collide.x, collide.z);
 	//printf(" }\nprol: %.2f, pos: %.3f %.3f %.3f, gamespace: %.3f %.3f %.3f\n\n",
 	//	1.0f, pHalf.x, pHalf.y, pHalf.z, collide.x, collide.y, collide.z);
-
+	
 	_intersectedPosition =  collide;
 }
 
@@ -200,15 +213,15 @@ void InputPicker::UpdateIntersectedObject()
 terrain, in render coordinates */
 glm::vec3 InputPicker::GetTerrainProjectedPosition()
 {
-		return _terrain->GameToGraphicalSpace(_intersectedPosition);
+    return _terrain->GameToGraphicalSpace(_intersectedPosition);
 }
 
 /*	Get position where the cursor collides with the
 terrain, in game coordinates */
 glm::vec2 InputPicker::GetGameProjectedPosition()
 {
-	glm::vec3 intGame = _intersectedPosition;
-	return glm::vec2(intGame.x, intGame.z);
+    glm::vec3 intGame = _intersectedPosition;
+    return glm::vec2(intGame.x, intGame.z);
 }
 
 
@@ -216,5 +229,5 @@ glm::vec2 InputPicker::GetGameProjectedPosition()
 /*	Get the object that were intersected by the cursor ray */
 LocatableObject* InputPicker::GetIntersectedObject()
 {
-		return _locatableObject;
+    return _locatableObject;
 }
