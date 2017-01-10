@@ -112,6 +112,7 @@ struct SceneIDCache {
     int ID;
     int lastcheck;
     GLuint vao;
+    GLuint bbvao;
 };
 
 int lastCheck = 0;
@@ -168,8 +169,7 @@ void Renderer::UpdateObjects()
 				sidc.ID = (*itScene)->GetID();
 				sidc.lastcheck = lastCheck;
 				sidc.vao = vaon;
-
-                this->AddBoundingBox(mes, glm::vec3(1,0,0));
+				sidc.bbvao = this->AddBoundingBox(mes, glm::vec3(1,0,0));
 				_last_IDs.push_back(sidc);
 			}
 			else if ((*itScene)->GetType() == SCENE_LIGHT) {
@@ -198,6 +198,7 @@ void Renderer::UpdateObjects()
 		}
 	
 
+	deleted_check:
 		/* Check for deleted objects */
 		for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); ++it2) {
 			bool isDeleted = true;
@@ -213,6 +214,7 @@ void Renderer::UpdateObjects()
 				Log::GetLog()->Write("Removing object ID %d from the cache",
 					it2->ID);
 				this->RemoveVertexData(it2->vao);
+				this->RemoveBoundingBox(it2->bbvao);
 				_last_IDs.erase(it2);
 				break;
 			}
