@@ -88,40 +88,47 @@ void TerrainRenderer::Update()
                         if (ex+1 < exMax && ey+1 < eyMax)
                             hxy = _tdata[i].data->data[(ey+1)*SECTION_SIDE + (ex+1)].elevation;
 
-                        vd->Positions.push_back(glm::vec3(
-                            offsetX+px, hh * SEC_HEIGHT, offsetY+py));
-                        vd->Positions.push_back(glm::vec3(
-                            offsetX+px, hy * SEC_HEIGHT, offsetY+py+SEC_SIZE));
-                        vd->Positions.push_back(glm::vec3(
-                            offsetX+px+SEC_SIZE, hxy * SEC_HEIGHT, offsetY+py+SEC_SIZE));
+			// Add the vertices
+			glm::vec3 t1, t1x, t1y;
+			t1 = glm::vec3(offsetX+px, hh * SEC_HEIGHT, offsetY+py);
+			t1x = glm::vec3(offsetX+px, hy * SEC_HEIGHT, offsetY+py+SEC_SIZE);
+			t1y = glm::vec3(offsetX+px+SEC_SIZE, hxy * SEC_HEIGHT, offsetY+py+SEC_SIZE);
+			
+                        vd->Positions.push_back(t1);
+                        vd->Positions.push_back(t1x);
+                        vd->Positions.push_back(t1y);
 
-                        vd->Positions.push_back(glm::vec3(
-                            offsetX+px, hh * SEC_HEIGHT, offsetY+py));
-                        vd->Positions.push_back(glm::vec3(
-                            offsetX+px+SEC_SIZE, hxy * SEC_HEIGHT, offsetY+py+SEC_SIZE));
-                        vd->Positions.push_back(glm::vec3(
-                            offsetX+px+SEC_SIZE, hx * SEC_HEIGHT, offsetY+py));
+			glm::vec3 t2x, t2y;
+			t2y = glm::vec3(offsetX+px+SEC_SIZE, hxy * SEC_HEIGHT, offsetY+py+SEC_SIZE);
+			t2x = glm::vec3(offsetX+px+SEC_SIZE, hx * SEC_HEIGHT, offsetY+py);
+			   
+                        vd->Positions.push_back(t1);
+                        vd->Positions.push_back(t2y);
+                        vd->Positions.push_back(t2x);
 
-                        vd->Normals.push_back(glm::vec3(0,1,0));
-                        vd->Normals.push_back(glm::vec3(0,1,0));
-                        vd->Normals.push_back(glm::vec3(0,1,0));
-                        vd->Normals.push_back(glm::vec3(0,1,0));
-                        vd->Normals.push_back(glm::vec3(0,1,0));
-                        vd->Normals.push_back(glm::vec3(0,1,0));
+			// Make the normals
+			glm::vec3 t1a = glm::normalize(t1x - t1);
+			glm::vec3 t1b = glm::normalize(t1y - t1);
 
-						vd->TexCoords.push_back(glm::vec2(1,1));
-						vd->TexCoords.push_back(glm::vec2(1,1));
-						vd->TexCoords.push_back(glm::vec2(1,1));
-						vd->TexCoords.push_back(glm::vec2(1,1));
-						vd->TexCoords.push_back(glm::vec2(1,1));
-						vd->TexCoords.push_back(glm::vec2(1,1));
+			glm::vec3 t2a = glm::normalize(t2y - t1);
+			glm::vec3 t2b = glm::normalize(t2x - t1);
 
-                        vd->MaterialIDs.push_back(matid);
-                        vd->MaterialIDs.push_back(matid);
-                        vd->MaterialIDs.push_back(matid);
-                        vd->MaterialIDs.push_back(matid);
-                        vd->MaterialIDs.push_back(matid);
-                        vd->MaterialIDs.push_back(matid);
+			glm::vec3 tr1 = glm::max(glm::vec3(0,0,0), glm::cross(t1a, t1b));
+			glm::vec3 tr2 = glm::max(glm::vec3(0,0,0), glm::cross(t2a, t2b));
+			
+                        vd->Normals.push_back(tr1);
+                        vd->Normals.push_back(tr1);
+                        vd->Normals.push_back(tr2);
+                        vd->Normals.push_back(tr1);
+                        vd->Normals.push_back(tr2);
+                        vd->Normals.push_back(tr2);
+
+			
+			for (size_t i = 0; i < 6; i++) {
+			    vd->TexCoords.push_back(glm::vec2(1,1));
+			    vd->MaterialIDs.push_back(matid);
+			}
+
                         px += SEC_SIZE;
                     }
                     py += SEC_SIZE;
