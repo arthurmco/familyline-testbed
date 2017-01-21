@@ -239,26 +239,29 @@ void AssetFile::BuildFileItemTree()
 
     }
 
-
-    Log::GetLog()->Warning("Unrecognized textures: %d\n", deferred_texture_assets.size());
-    for (auto& unrecog : deferred_texture_assets) {
-	Log::GetLog()->Warning("Texture name: '%s', referenced in '%s'", unrecog.asset.c_str(),
-	       unrecog.afi->name.c_str());
-    }
-
-    Log::GetLog()->Warning("Unrecognized materials: %d\n", deferred_texture_assets.size());
-    for (auto& unrecog : deferred_material_assets) {
-	Log::GetLog()->Warning("Texture name: '%s', referenced in '%s'", unrecog.asset.c_str(),
-	       unrecog.afi->name.c_str());
-    }
-
-    for (auto& it : _file_items) {
-	printf("%s\n", it->name.c_str());
-
-	for (auto& dep_it : it->depends) {
-	    printf(" |-> %s\n", dep_it->name.c_str());
+    if (deferred_texture_assets.size() > 0) {
+	Log::GetLog()->Warning("Unrecognized textures: %d", deferred_texture_assets.size());
+	for (auto& unrecog : deferred_texture_assets) {
+	    Log::GetLog()->Warning("Texture name: '%s', referenced in '%s'", unrecog.asset.c_str(),
+				   unrecog.afi->name.c_str());
 	}
     }
+
+    if (deferred_material_assets.size() > 0) {
+	Log::GetLog()->Warning("Unrecognized materials: %d", deferred_material_assets.size());
+	for (auto& unrecog : deferred_material_assets) {
+	    Log::GetLog()->Warning("Texture name: '%s', referenced in '%s'", unrecog.asset.c_str(),
+				   unrecog.afi->name.c_str());
+	}
+    }
+
+    // for (auto& it : _file_items) {
+    // 	printf("%s\n", it->name.c_str());
+
+    // 	for (auto& dep_it : it->depends) {
+    // 	    printf(" |-> %s\n", dep_it->name.c_str());
+    // 	}
+    // }
 }
 
 AssetFile::~AssetFile()
