@@ -34,11 +34,19 @@ Terrain* TerrainRenderer::GetTerrain() { return _t; }
 void TerrainRenderer::SetCamera(Camera* c) { _cam = c; }
 Camera* TerrainRenderer::GetCamera() { return _cam; }
 
+bool needs_update = true;
+
 /*  Check the terrains that needs to be rendered and
     send them to the renderer.
     Will also cache terrain textures too */
 void TerrainRenderer::Update()
 {
+    if (!needs_update) {
+	return;
+    }
+
+    needs_update = false;
+    
     int matid = MaterialManager::GetInstance()->GetMaterial("Terrain")->GetID();
 
     int w = ceil(_t->GetWidth() / (SECTION_SIDE*1.0));
@@ -122,7 +130,6 @@ void TerrainRenderer::Update()
                         vd->Normals.push_back(tr1);
                         vd->Normals.push_back(tr2);
                         vd->Normals.push_back(tr2);
-
 			
 			for (size_t i = 0; i < 6; i++) {
 			    vd->TexCoords.push_back(glm::vec2(1,1));
