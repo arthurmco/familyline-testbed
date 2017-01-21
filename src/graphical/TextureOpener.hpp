@@ -8,6 +8,7 @@
 #include <IL/il.h>
 
 #include <errno.h>
+#include <cmath>
 #include <cstdio>
 
 #include "Texture.hpp"
@@ -22,10 +23,13 @@ namespace Graphics {
 
 class TextureOpener
 {
+private:
+    static Texture* TextureOpenBMP(FILE*, const char*);
+    
 public:
-	/* 	Opens a image as a texture. Returns a texture
-		object, or nullptr if texture wasn't found */
-	static Texture* Open(const char* path);
+    /* 	Opens a image as a texture. Returns a texture
+	object, or nullptr if texture wasn't found */
+    static Texture* Open(const char* path);
 
 
 };

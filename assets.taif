@@ -51,7 +51,7 @@ testtex.mtl {
 
 test.bmp {
     type: texture
-    path: textures/test.png
+    path: textures/test.bmp
 }
 
 WatchTower.obj {

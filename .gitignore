@@ -43,8 +43,5 @@ GRTAGS
 GSYMS
 GTAGS
 
-# Documents
-*.odt
-
 # Code::Blocks
 *.cbp
