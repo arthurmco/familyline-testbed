@@ -97,18 +97,7 @@ Texture* TextureOpener::TextureOpenBMP(FILE* f, const char* path) {
 
 Texture* TextureOpener::Open(const char* path)
 {
-	/* Initialize devIL if not */
-	if (!isDevilOn) {
-		ilInit();	
-	}
-
-	/* 	Initialize a handle for the image and
-		open it */
-	ILuint handle = 0;
-	ilGenImages(1, &handle);
-	ilBindImage(handle);	
-
-	Log::GetLog()->Write("TextureOpener: Opening %s", path);
+    	Log::GetLog()->Write("TextureOpener: Opening %s", path);
 	FILE* f = fopen(path, "rb");
 	
 	if (!f) {
@@ -124,6 +113,18 @@ Texture* TextureOpener::Open(const char* path)
 	}
 
 	fclose(f);
+	
+	/* Initialize devIL if not */
+	if (!isDevilOn) {
+		ilInit();	
+	}
+
+	/* 	Initialize a handle for the image and
+		open it */
+	ILuint handle = 0;
+	ilGenImages(1, &handle);
+	ilBindImage(handle);	
+
 	if (ilLoad(IL_TYPE_UNKNOWN, path) == IL_FALSE) {
 		int e = ilGetError();
 		const char* estr;
