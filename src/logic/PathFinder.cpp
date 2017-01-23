@@ -79,14 +79,15 @@ void PathFinder::UpdateSlotList(int x, int y, int w, int h)
         for (int ry = -radius; ry < radius; ry++) {
 	    int ay = (lz+ry);
 	    if (ay < 0)	continue; 
-	    
             if (ry > _terr->GetHeight()) break;
-            for (int rx = -radius; rx > radius; rx++) {
+	    
+            for (int rx = -radius; rx < radius; rx++) {
                 if (rx < 0 || rx > _terr->GetWidth()) continue;
 		
                 int ax = (lx+rx);
 		if (ax < 0)	continue;
-		
+
+		printf("[[%d %d]]\n", ay, ax);
                 _slots[ay*_terr->GetWidth()+ax].isObstructed = true;
             }
         }
