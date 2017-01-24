@@ -27,5 +27,6 @@ build:
 test:
   stage: test
   script:
+    - apt update
     - bash ./scripts/install
     - ./tribalia --version
