@@ -12,7 +12,6 @@ LocatableObject::LocatableObject(int oid, int tid, const char* name,
     GameObject(oid, tid, name, xPos, yPos, zPos)
     {
         DEF_PROPERTY("rotation",-1);
-
         DEF_PROPERTY("mesh", (Tribalia::Graphics::Mesh*)nullptr);
     }
 
