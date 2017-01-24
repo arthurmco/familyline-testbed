@@ -6,7 +6,6 @@ tribalia-server
 *.pch
 *.dir-locals.el
 
-*~
 
 compile*.json
 

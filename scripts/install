@@ -23,7 +23,7 @@ isdnf=$(whereis dnf | tail -c +5)
 isyum=$(whereis yum | tail -c +5)
 
 if [ -n "${isapt}" ]; then
-    apt install libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev libcairo2 libcairo2-dev
+    apt install -y libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev libcairo2 libcairo2-dev
 elif [ -n "${isdnf}" ]; then
     dnf install glm-devel glew glew-devel SDL2 SDL2-devel DevIL DevIL-devel cairo cairo-devel
 elif [ -n "${isyum}" ]; then
