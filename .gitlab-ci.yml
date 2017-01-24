@@ -26,5 +26,5 @@ build:
 
 test:
   stage: test
-     script:
-      - ./tribalia --version
+  script:
+    - ./tribalia --version
