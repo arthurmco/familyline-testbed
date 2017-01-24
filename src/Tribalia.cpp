@@ -144,6 +144,7 @@ int main(int argc, char const *argv[])
 
     GameContext gctx;
     try {
+	/* Initialise things */
         om = new ObjectManager{};
         win = new Window{ winW, winH };
 
@@ -167,14 +168,13 @@ int main(int argc, char const *argv[])
 
         rndr->SetSceneManager(scenemng);
 
-
         if (!am->ReadFromFile("assets.taif")) {
             throw asset_exception(nullptr, "Invalid asset file!");
         }
 
-        m = am->GetAsset("Test2.obj")->asset.mesh;
-        m->SetPosition(glm::vec3(4,1,4));
-        m->GenerateBoundingBox();
+    } catch (window_exception& we) {
+	Log::GetLog()->Fatal("Window creation error: %s (%d)", we.what(), we.code);
+	exit(EXIT_FAILURE);
 
     } catch (renderer_exception& re) {
         Log::GetLog()->Fatal("Rendering error: %s [%d]",
@@ -212,49 +212,8 @@ int main(int argc, char const *argv[])
 	}
 	exit(EXIT_FAILURE);
     }
-    
-    Texture* tex = am->GetAsset("test.bmp")->asset.texture;
-    if (tex) {
-	MaterialManager::GetInstance()->GetMaterial("Casa2")->SetTexture(tex);
-        TextureManager::GetInstance()->AddTexture("test", tex);
-    }
-
-    Material* matest = new Material{"test", MaterialData(
-	    glm::vec3(0.0, 0.6, 0.7), glm::vec3(1.0, 0.9, 0.95), glm::vec3(0.1, 0.05, 0.06)
-    )};
-    MaterialManager::GetInstance()->AddMaterial(matest);
-
-    MD2Opener op;
-    Mesh* m5 = am->GetAsset("cabana.md2")->asset.mesh;
-    m5->SetName("cabana");
-    m5->SetPosition(glm::vec3(5, 1, 10));
-    m5->SetRotation(glm::radians(-90.0f), 0, 0);
-    m5->GenerateBoundingBox();
-    m5->GetVertexData()->MaterialIDs.push_back(MaterialManager::GetInstance()->GetMaterial("test")->GetID());
-
-    Mesh* m2 = new Mesh(*am->GetAsset("Tent.obj")->asset.mesh);
-    m2->SetPosition(glm::vec3(10, 1, 6));
-    m2->SetRotation(0, glm::radians(-90.0f), 0);
-
-/*    Material* mtt = new Material{"tent",
-				 MaterialData(glm::vec3(0.5,0.8,0.7), glm::vec3(1), glm::vec3(0.1))};
-    mtt->SetTexture(tex);
-    MaterialManager::GetInstance()->AddMaterial(mtt);
-    
-    
-    m2->SetMaterial(mtt); */
-    m2->GenerateBoundingBox();
-
-    Mesh* m3 = am->GetAsset("testtex.obj")->asset.mesh;
-    m3->SetPosition(glm::vec3(20, 1, 10));
-    m3->GenerateBoundingBox();
-    
+   
     Light* l = new Light{ "mainLight", glm::vec3(16, 30, 16), 0xff, 0xff, 0xff, 10 };
-
-    scenemng->AddObject(m);
-    scenemng->AddObject(m2);
-    scenemng->AddObject(m3);
-    scenemng->AddObject(m5);
     scenemng->AddObject(l);
 
     TerrainRenderer* terr_rend = new TerrainRenderer{rndr};

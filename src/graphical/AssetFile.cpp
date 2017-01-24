@@ -255,13 +255,13 @@ void AssetFile::BuildFileItemTree()
 	}
     }
 
-    // for (auto& it : _file_items) {
-    // 	printf("%s\n", it->name.c_str());
+    for (auto& it : _file_items) {
+    	printf("%s\n", it->name.c_str());
 
-    // 	for (auto& dep_it : it->depends) {
-    // 	    printf(" |-> %s\n", dep_it->name.c_str());
-    // 	}
-    // }
+    	for (auto& dep_it : it->depends) {
+    	    printf(" |-> %s\n", dep_it->name.c_str());
+    	}
+    }
 }
 
 AssetFile::~AssetFile()

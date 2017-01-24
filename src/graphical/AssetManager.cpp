@@ -67,12 +67,10 @@ Asset* AssetManager::GetAsset(const char* name)
 		/* Check if we have a texture binded to this mesh in the file */
 		Material* m;
 		char* mname = new char[256];
-		sprintf(mname, "%s#texture", it->name);
+		sprintf(mname, " ******  %s#texture", it->name);
 		m = MaterialManager::GetInstance()->GetMaterial(mname);
-		printf("%s %#p |", mname, m);
 		if (m != nullptr) {
 		    if (at->asset_type == ASSET_MESH) {
-			printf("MALAKOI %s", mname);
 			m->GetData()->diffuseColor.r = 0.0;
 			at->asset.mesh->SetMaterial(m);
 		    }
@@ -125,7 +123,6 @@ Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
 	Asset* a = new Asset();
 	strcpy(a->path, afi->path.c_str());
 	strcpy(a->name, afi->name.c_str());
-	printf("%s >>", a->name);
 	
 	if (afi->type == "mesh") {
 	    a->asset_type = ASSET_MESH;
@@ -142,33 +139,34 @@ Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
 	for (auto& dep : afi->depends) {
 
 	    Asset* ac = nullptr;
+	    
 	    if (!dep->isProcessed) {
-		Asset* ac = RetrieveAsset(grp, dep);
+		ac = RetrieveAsset(grp, dep);
 		AddAsset(grp, ac);
 	    } else {
 		ac = this->GetAsset(dep->name.c_str());
 	    }
 
-	    printf("( sub %s)", dep->name.c_str());
+	    
 	    fflush(stdout);
 	    if (!ac) continue;
 	    /* This is a workaround for supporting textured but material-less files. */
 	    switch (ac->asset_type) {
-	    case ASSET_MATERIAL: if (ac->asset.material) child_mat = ac->asset.material; break;
-	    case ASSET_TEXTURE:  if (ac->asset.texture)  child_t = ac->asset.texture;    break;	    
+	    case ASSET_MATERIAL:
+		if (ac->asset.material) child_mat = ac->asset.material; break;
+	    case ASSET_TEXTURE:
+		if (ac->asset.texture)  child_t = ac->asset.texture;    break;	    
 	    }
 	
 	
 	}
-
-	printf("%s %#p >>", a->name, child_t);
+	
 	if (child_t) {
 	    /* If no material but textured, then we create a ghost material for it
 	       Note that materials defined in the model takes precedence */
 
 	    char* mname = new char[256];
 	    sprintf(mname, "%s#texture", a->name);
-	    printf("%s||", mname);
 	    MaterialData md;
 	    md.diffuseColor = glm::vec3(1,1,0);
 	    
@@ -185,7 +183,7 @@ Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
 		}
 
 	}
-	
+
 	return a;
 }
 
@@ -223,7 +221,7 @@ bool AssetManager::LoadAsset(Asset* at)
 	
 	if (at->asset.texture) {
 	    std::string fname{ at->path };
-	    int i = fname.find_last_of('/');
+	    size_t i = fname.find_last_of('/');
 
 	    if (i == std::string::npos)	i = -1;
 
