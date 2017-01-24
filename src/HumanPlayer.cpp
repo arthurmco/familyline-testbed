@@ -216,13 +216,13 @@ bool HumanPlayer::Play(GameContext* gctx){
         _cam->AddRotation(glm::vec3(0, 1, 0), glm::radians(-1.0f));
 
 
-	LocatableObject* l = _ip->GetIntersectedObject();
-	if (l) {
+    LocatableObject* l = _ip->GetIntersectedObject();
+    if (l) {
         if (mouse_click) {
             _selected_obj = l;
         }
-		//printf("intersected with %s\n", l->GetName());
-	} else {
+	//printf("intersected with %s\n", l->GetName());
+    } else {
         if (mouse_click)   _selected_obj = nullptr;
     }
 

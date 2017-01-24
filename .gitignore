@@ -4,8 +4,8 @@ tribalia-server
 *.o
 *.swp
 *.pch
-.*.*
-*~
+*.dir-locals.el
+
 
 compile*.json
 

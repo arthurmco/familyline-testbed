@@ -82,10 +82,19 @@ if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /GR /W4")
 
 else()
+	
+  # Some compiler-dependant options
+  option(IS_DEBUG "Set if you want to output debugging symbols" OFF)
+  
   target_link_libraries(tribalia "SDL2")
   target_link_libraries(tribalia "GL")
   target_link_libraries(tribalia "GLEW")
   target_link_libraries(tribalia "IL")
   target_link_libraries(tribalia "cairo")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -O2 -g")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -O2")
+
+  if (IS_DEBUG)
+		  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+  endif(IS_DEBUG)
+
 endif(MSVC)

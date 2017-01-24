@@ -24,10 +24,6 @@ namespace Tribalia {
             LocatableObject(int oid, int tid, const char* name,
                 float xPos, float yPos, float zPos);
 
-            void SetX(float); float GetX();
-            void SetY(float); float GetY();
-            void SetZ(float); float GetZ();
-
             /* Get radius */
             float GetRadius();
 

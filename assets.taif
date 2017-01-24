@@ -4,49 +4,10 @@
 # Please don't use the Asset Editor for now, because it don't preserve
 # comments.
 
-test.obj {
-    type: mesh
-    path: models/test.obj
-    material_asset: test.mtl
-    texture_asset: test.bmp
-}
-
-test.mtl {
-    type: material
-    path: materials/test.mtl
-}
-
 Tent.obj {
     type: mesh
     path: models/Tent.obj
 	texture_asset: test.bmp
-}
-
-casinha.mtl {
-    type: material
-    path: materials/casinha.mtl
-}
-
-Test2.obj {
-    type: mesh
-    path: models/test2.obj
-    material_asset: Test2.mtl
-}
-
-Test2.mtl {
-    type: material
-    path: materials/test2.mtl
-}
-
-testtex.obj {
-    type: mesh
-    path: models/testtex.obj
-    material_asset: testtex.mtl
-}
-
-testtex.mtl {
-    type: material
-    path: materials/testtex.mtl
 }
 
 test.bmp {
@@ -65,13 +26,3 @@ WatchTower.mtl {
     path: materials/WatchTower.mtl
 }
 
-cabana.png {
-	type: texture
-	path: textures/cabana.png
-}
-
-cabana.md2 {
-    type: mesh
-    path: models/cabana.md2
-	texture_asset: cabana.png
-}

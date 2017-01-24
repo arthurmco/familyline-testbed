@@ -1,0 +1,32 @@
+# Tribalia gitlab-ci file
+#
+# Copyright (C) 2017 Arthur M
+
+# see https://hub.docker.com/_/gcc/
+image: gcc
+
+build:
+  stage: build
+  before_script: 
+    - apt update && apt -y install make cmake gcc g++
+    - bash ./scripts/install --devel
+  script: 
+    - cmake .
+    - make -j4
+  artifacts:
+    paths:
+    - ./tribalia # The executable
+
+# No caching. A full build is better to catch bugs
+
+
+# A basic test.
+# Run Tribalia with non-graphical parameters
+# The docker container might not support opengl > 3.2
+
+test:
+  stage: test
+  script:
+    - apt update
+    - bash ./scripts/install
+    - ./tribalia --version
