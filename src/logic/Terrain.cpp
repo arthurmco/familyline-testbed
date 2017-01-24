@@ -97,12 +97,24 @@ void Terrain::SetData(TerrainSlot* slot) {
 		for (int sx = 0; sx < _section_width; sx++) {
 			int index = sy*_section_width+sx;
 			for (unsigned y = 0; y < SECTION_SIDE; y++) {
+				if ((sy * SECTION_SIDE + y) > _height) {
+					/* No more terrain after this */
+					break;
+				}
+
 				for (unsigned x = 0; x < SECTION_SIDE; x++) {
-					_data[index]->data[y*SECTION_SIDE+x] = 
-							slot[( sy * SECTION_SIDE + y) * _width + (sx * SECTION_SIDE + x)];
+					if ((sx * SECTION_SIDE + x) > _width) {
+						/* There's no more terrain after this */
+						break;
+					}
+
+					size_t slotindex = (sy * SECTION_SIDE + y) * _width + (sx * SECTION_SIDE + x);
+					_data[index]->data[y*SECTION_SIDE+x] = slot[slotindex];
 				}
 			}
+
 		}
+		
 	}	
 
 }

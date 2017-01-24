@@ -53,11 +53,12 @@ void ObjectPathManager::UpdatePaths()
 		}
 
 		printf("-> pp of %s is (%.1f, %.1f)\n",
-						it->lc->GetName(), it->path_point.x, it->path_point.y);
+				it->lc->GetName(), it->path_point.x, it->path_point.y);
 		it->lc->SetX(it->path_point.x);
 		it->lc->SetZ(it->path_point.y);
-		it->path_point = (*it->path)[++it->path_ptr];
-		
+
+		if (it->path_ptr < it->path->size()-1)
+			it->path_point = (*it->path)[++(it->path_ptr)];
 	}
 
 	/* Delete the reserved iterators */
