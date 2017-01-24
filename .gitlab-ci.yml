@@ -12,13 +12,13 @@ build:
   # install the necessary build tools when needed
   before_script: 
     - apt update && apt -y install make cmake gcc g++
-	- bash ./scripts/install --devel
+    - bash ./scripts/install --devel
   script: 
     - cmake .
-	- make -j4
+    - make -j4
   artifacts:
     paths:
-      - tribalia
+    - tribalia
   # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
   # cache:
   #   paths:
