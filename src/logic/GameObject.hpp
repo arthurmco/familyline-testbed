@@ -40,13 +40,24 @@ namespace Tribalia {
         int _tid;            /* Type ID */
         std::string _name;   /* Object name */
 
+	/* Position and size information
+	   Might not seem, but every object needs this */
+        int _xPos, _yPos, _zPos;
+	float _radius = -1.0f;
+
+	
         /* Property hashtable */
         std::map<std::string, void*> _properties;
-        int _xPos, _yPos, _zPos;
-
+	
     public:
         GameObject(int oid, int tid, const char* name);
+	GameObject(int oid, int tid, const char* name, float x, float y, float z);
 
+	void SetX(float); float GetX();
+	void SetY(float); float GetY();
+	void SetZ(float); float GetZ();
+
+	
         int GetObjectID();
         int GetTypeID();
         const char* GetName();
