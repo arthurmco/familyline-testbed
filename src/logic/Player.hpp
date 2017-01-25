@@ -40,6 +40,12 @@ namespace Logic {
         ***/
         virtual bool Play(GameContext*) = 0;
 
+	/***
+	    Process player input.
+	    Returns true if some input was received, false if not 
+	***/
+	virtual bool ProcessInput() = 0;
+	
         /* True if this player has updated an object in the last Play() call */
         virtual bool HasUpdatedObject() = 0;
 

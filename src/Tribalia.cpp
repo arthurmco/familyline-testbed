@@ -90,27 +90,38 @@ static void show_help()
 	printf("--size <W>x<H>: Changes the game resolution to <W>x<H> pixels\n");
 }
 
+static int winW = 640, winH = 480;
+
+static int check_size(int i, int argc, char const* argv[])
+{
+    if (i >= argc) {
+	printf("size not defined. Expected <W>x<H> for size! Aborting");
+	return -1;
+    }
+    
+    if (sscanf(argv[i+1], "%dx%d", &winW, &winH) <= 1) {
+	printf("size format is wrong. Expected <W>x<H> for size! Aborting...");
+	return -1;
+    }
+    
+    printf("pre-load: chosen %d x %d for screen size\n", winW, winH);
+    return 0;
+    
+}
+
 int main(int argc, char const *argv[])
 {
 	int winW = 640, winH = 480;
 	if (get_arg_index("--version",argc,argv) >= 0) {
-		show_version();
-		return EXIT_SUCCESS;
+	    show_version();
+	    return EXIT_SUCCESS;
 	}
 
 	int i =  get_arg_index("--size", argc, argv);
 	if (i >= 0) {
-		if (i >= argc) {
-			printf("size not defined. Expected <W>x<H> for size! Aborting...");
-			return EXIT_FAILURE;
-		}
-
-		if (sscanf(argv[i+1], "%dx%d", &winW, &winH) <= 1) {
-			printf("size format is wrong. Expected <W>x<H> for size! Aborting...");
-			return EXIT_FAILURE;
-		}
-
-		printf("pre-load: chosen %d x %d for screen size\n", winW, winH);
+	    if( check_size(i, argc, argv) < 0) {
+		return EXIT_FAILURE;
+	    }
 	}
 
 	if (get_arg_index("--help", argc, argv) >= 0) {
@@ -124,22 +135,21 @@ int main(int argc, char const *argv[])
     Log::GetLog()->Write("Tribalia " VERSION);
     Log::GetLog()->Write("built on " __DATE__ " by " USERNAME);
 #if defined(COMMIT)
-	Log::GetLog()->Write("git commit is " COMMIT);
+    Log::GetLog()->Write("git commit is " COMMIT);
 #endif
 
     ObjectManager* om = nullptr;
     Window* win = nullptr;
     Renderer* rndr = nullptr;
-    HumanPlayer* hp;
-    SceneManager* scenemng;
-    Terrain* terr;
+    HumanPlayer* hp = nullptr;
+    SceneManager* scenemng = nullptr;
+    Terrain* terr = nullptr;
 
     bool player = false;
 
     Camera* cam;
 
     AssetManager* am = AssetManager::GetInstance();
-    Mesh* m;
     TerrainFile* terrFile;
 
     GameContext gctx;
@@ -175,28 +185,21 @@ int main(int argc, char const *argv[])
     } catch (window_exception& we) {
 	Log::GetLog()->Fatal("Window creation error: %s (%d)", we.what(), we.code);
 	exit(EXIT_FAILURE);
-
     } catch (renderer_exception& re) {
         Log::GetLog()->Fatal("Rendering error: %s [%d]",
             re.what(), re.code);
         exit(EXIT_FAILURE);
     }  catch (mesh_exception& se) {
-        Log::GetLog()->Fatal("Mesh error: %s",
-            se.what());
-        Log::GetLog()->Fatal("Mesh file: %s",
-            se.file.c_str());
+        Log::GetLog()->Fatal("Mesh error: %s", se.what());
+        Log::GetLog()->Fatal("Mesh file: %s", se.file.c_str());
         exit(EXIT_FAILURE);
     }  catch (material_exception& se) {
-        Log::GetLog()->Fatal("Material error: %s ",
-            se.what());
-        Log::GetLog()->Fatal("Material file: %s",
-            se.file.c_str());
+        Log::GetLog()->Fatal("Material error: %s ", se.what());
+        Log::GetLog()->Fatal("Material file: %s", se.file.c_str());
         exit(EXIT_FAILURE);
     } catch (shader_exception& se) {
-        Log::GetLog()->Fatal("Shader error: %s [%d]",
-            se.what(), se.code);
-        Log::GetLog()->Fatal("Shader file: %s, type %d",
-            se.file.c_str(), se.type);
+        Log::GetLog()->Fatal("Shader error: %s [%d]", se.what(), se.code);
+        Log::GetLog()->Fatal("Shader file: %s, type %d", se.file.c_str(), se.type);
         exit(EXIT_FAILURE);
     } catch (asset_exception& ae) {
         Log::GetLog()->Fatal("Asset file error: %s", ae.what());
@@ -264,6 +267,8 @@ int main(int argc, char const *argv[])
     /* Adds the objects to the factory */
     ObjectFactory::GetInstance()->AddObject(new WatchTower);
     ObjectFactory::GetInstance()->AddObject(new Tent);
+
+    hp->Play(&gctx);
     
     do {
 
@@ -274,10 +279,11 @@ int main(int argc, char const *argv[])
         player = true;
         gctx.elapsed_seconds = delta / 1000.0;
 
+	hp->ProcessInput();
         if (!hp->Play(&gctx))
             player = false;
-
-		terr_rend->Update();
+	
+	terr_rend->Update();
 
         bool objupdate = objrend->Check();
         if (objupdate || hp->HasUpdatedObject()) {
