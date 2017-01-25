@@ -2,6 +2,15 @@
 
 using namespace Tribalia::Graphics;
 
+#define FGETS_OR_THROW(s, size, stream) \
+    if (!fgets(s, size, stream)) {				      \
+	if (!feof(stream)) {					      \
+	    throw mesh_exception("Unexpected EOF while reading mesh", \
+				 EIO, file);			      \
+	}							      \
+    }
+
+
 Mesh* OBJOpener::Open(const char* file)
 {
     FILE* fOBJ = fopen(file, "r");
@@ -30,7 +39,7 @@ Mesh* OBJOpener::Open(const char* file)
     while (!feof(fOBJ)) {
         char* fline = &line[0];
         memset(fline, 0, 256);
-        fgets(fline, 256, fOBJ);
+        FGETS_OR_THROW(fline, 256, fOBJ);
 
         int cind = 0;
         while (isspace(fline[cind])) {
@@ -160,7 +169,7 @@ Mesh* OBJOpener::Open(const char* file)
     }
 
     realVerts.reserve(verts.size() * 3);
-    for (int i = 0; i < indVerts.size(); i++) {
+    for (size_t i = 0; i < indVerts.size(); i++) {
         int index = indVerts[i]-1;
 
         //Treat negative indices
@@ -171,7 +180,7 @@ Mesh* OBJOpener::Open(const char* file)
     }
 
     realNormals.reserve(normals.size() * 3);
-    for (int i = 0; i < indNormals.size(); i++) {
+    for (size_t i = 0; i < indNormals.size(); i++) {
         int index = indNormals[i]-1;
 
         //Treat negative indices
@@ -183,7 +192,7 @@ Mesh* OBJOpener::Open(const char* file)
 
 	realTex.reserve(texcoords.size() * 2);
 	if (indTex.size() > 0) {
-		for (int i = 0; i < indTex.size(); i++) {
+		for (size_t i = 0; i < indTex.size(); i++) {
         	int index = indTex[i]-1;
 
         	//Treat negative indices
@@ -197,7 +206,7 @@ Mesh* OBJOpener::Open(const char* file)
 	} else {
 		/* 	If no textures, fill a (1.0, 1.0) texture coordinate, so
 			our shader doesn't break */
-		for (int i = 0; i < indVerts.size(); i++) {
+		for (size_t i = 0; i < indVerts.size(); i++) {
 			realTex.push_back(glm::vec2(1.0, 1.0));
 		}
 	}

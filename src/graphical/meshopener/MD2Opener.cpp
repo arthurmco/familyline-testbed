@@ -30,6 +30,12 @@ struct md2_frame {
     char name[16];
 }; //__attribute__((packed));
 
+#define FREAD_OR_THROW(ptr, size, nmemb, f) \
+    if (fread(ptr, size, nmemb, f) < (size_t)nmemb) {			\
+	throw mesh_exception("Unexpected EOF while reading mesh", errno, file); \
+    }
+
+
 #include "anorms.h"
 
 Mesh* MD2Opener::Open(const char* file)
@@ -41,7 +47,7 @@ Mesh* MD2Opener::Open(const char* file)
         throw mesh_exception("Failure to open mesh", errno, file);
     }
 
-    fread(&hdr, sizeof(md2_header_t), 1, fMD2);
+    FREAD_OR_THROW(&hdr, sizeof(md2_header_t), 1, fMD2);
 
     if (hdr.ident != 0x32504449) {
         throw mesh_exception("Invalid MD2 mesh header", errno, file);
@@ -71,7 +77,7 @@ Mesh* MD2Opener::Open(const char* file)
      */
     struct md2_frame frame;
     fseek(fMD2, hdr.offset_frames, SEEK_SET);
-    fread(&frame, sizeof(struct md2_frame), 1, fMD2);
+    FREAD_OR_THROW(&frame, sizeof(struct md2_frame), 1, fMD2);
 
     auto scaleMult = glm::vec3(frame.scaleX, frame.scaleY, frame.scaleZ);
     auto transMult = glm::vec3(frame.transX, frame.transY, frame.transZ);
@@ -88,13 +94,13 @@ Mesh* MD2Opener::Open(const char* file)
     auto texcoordsMD2 = new md2_texcoords[hdr.num_st];
     
     
-    fread(vertsMD2, sizeof(md2_vertex), hdr.num_vertices, fMD2);
+    FREAD_OR_THROW(vertsMD2, sizeof(md2_vertex), hdr.num_vertices, fMD2);
 
     auto aVerts = new glm::vec3[hdr.num_vertices];
     auto aNorms = new glm::vec3[hdr.num_vertices];
     auto aTex = new glm::vec2[hdr.num_st];
 
-    for (size_t i = 0; i < hdr.num_vertices; i++) {
+    for (size_t i = 0; i < (size_t)hdr.num_vertices; i++) {
         glm::vec3 vert = glm::vec3(vertsMD2[i].v[0], vertsMD2[i].v[1], vertsMD2[i].v[2]);
         aVerts[i] = (vert * scaleMult) + transMult;
         aNorms[i] = glm::vec3(anorms[vertsMD2[i].normal][0],
@@ -108,9 +114,9 @@ Mesh* MD2Opener::Open(const char* file)
 
     /* Read texcoords */
     fseek(fMD2, hdr.offset_st, SEEK_SET);
-    fread(texcoordsMD2, sizeof(md2_texcoords), hdr.num_st, fMD2);
+    FREAD_OR_THROW(texcoordsMD2, sizeof(md2_texcoords), hdr.num_st, fMD2);
 
-    for (size_t i = 0; i < hdr.num_st; i++) {
+    for (size_t i = 0; i < (size_t)hdr.num_st; i++) {
         float texS,texT;
         texS = texcoordsMD2[i].s / (float)hdr.skinwidth;
         texT = texcoordsMD2[i].t / (float)hdr.skinheight;
@@ -118,14 +124,14 @@ Mesh* MD2Opener::Open(const char* file)
         aTex[i] = glm::vec2(texS, texT);
     }
 
-    delete texcoordsMD2;
+    delete[] texcoordsMD2;
 
 
     /* Read triangle data */
     fseek(fMD2, hdr.offset_tris, SEEK_SET);
-    fread(trisMD2, sizeof(md2_triangle), hdr.num_tris, fMD2);
+    FREAD_OR_THROW(trisMD2, sizeof(md2_triangle), hdr.num_tris, fMD2);
 
-    for (size_t i = 0; i < hdr.num_tris; i++) {
+    for (size_t i = 0; i < (size_t)hdr.num_tris; i++) {
         /*printf("tri %d: (%d %d %d)\n", i,
             trisMD2[i].vertex[0], trisMD2[i].vertex[1], trisMD2[i].vertex[2]); */
         verts->push_back(aVerts[trisMD2[i].vertex[0]]);
@@ -178,10 +184,10 @@ Mesh* MD2Opener::Open(const char* file)
         glm::vec3* vlist = new glm::vec3[vd->Positions.size()];
         glm::vec3* avlist = new glm::vec3[hdr.num_vertices];
 
-        for (size_t f = 1; f < hdr.num_frames; f++) {
+        for (size_t f = 1; f < (size_t)hdr.num_frames; f++) {
 
             struct md2_frame fframe;
-            fread(&fframe, sizeof(struct md2_frame), 1, fMD2);
+            FREAD_OR_THROW(&fframe, sizeof(struct md2_frame), 1, fMD2);
  /*           printf("\tframe #%d: scalefactor: (%.3f,%.3f,%.3f), transfactor: (%.3f,%.3f,%.3f) \n",
                 f, fframe.scaleX, fframe.scaleY, fframe.scaleZ, fframe.transX,
                 fframe.transY, fframe.transZ);
@@ -190,10 +196,10 @@ Mesh* MD2Opener::Open(const char* file)
             transMult = glm::vec3(fframe.transX, fframe.transY, fframe.transZ);
 
             struct md2_vertex* fverts = new md2_vertex[hdr.num_vertices];
-            fread(fverts, sizeof(struct md2_vertex), hdr.num_vertices, fMD2);
+            FREAD_OR_THROW(fverts, sizeof(struct md2_vertex), hdr.num_vertices, fMD2);
 
             // Mount the triangles. Get all vertices, scale and transform them
-            for (size_t i = 0; i < hdr.num_vertices; i++) {
+            for (size_t i = 0; i < (size_t)hdr.num_vertices; i++) {
                 glm::vec3 v =  glm::vec3(fverts[i].v[0], fverts[i].v[1], fverts[i].v[2]);
                 v = (v * scaleMult) + transMult;
                 avlist[i] = v;
@@ -201,7 +207,7 @@ Mesh* MD2Opener::Open(const char* file)
 
             // Assemble
             for (   size_t i = 0, v = 0;
-                    i < hdr.num_tris, v < vd->Positions.size();
+                    (i < (size_t)hdr.num_tris), (v < vd->Positions.size());
                     i++, v+=3) {
                 /*printf("tri %d: (%d %d %d)\n", i,
                     trisMD2[i].vfvertsertex[0], trisMD2[i].vertex[1], trisMD2[i].vertex[2]); */
@@ -216,8 +222,8 @@ Mesh* MD2Opener::Open(const char* file)
         }
 
         /* The list get copied, so we can delete it */
-        delete vlist;
-        delete avlist;
+        delete[] vlist;
+        delete[] avlist;
         vd->animationData = ad;
 
     }

@@ -255,8 +255,7 @@ int main(int argc, char const *argv[])
     Label lbl = Label(120, 460, "This is a true label");
     lbl.SetForeColor(255, 128, 0, 255);
 
-    Label lblVersion = Label(10, 10, "");
-    lblVersion.SetText("Tribalia " VERSION " commit " COMMIT);
+    Label lblVersion = Label(10, 10, "Tribalia " VERSION " commit " COMMIT);
     lblVersion.SetForeColor(255, 255, 255, 255);
 
     gr.AddPanel(&lbl);
@@ -268,8 +267,6 @@ int main(int argc, char const *argv[])
     ObjectFactory::GetInstance()->AddObject(new WatchTower);
     ObjectFactory::GetInstance()->AddObject(new Tent);
 
-    hp->Play(&gctx);
-    
     do {
 
         ip->UpdateIntersectedObject();

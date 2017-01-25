@@ -128,99 +128,99 @@ void Renderer::UpdateObjects()
 	/* Check updates from SceneManager*/
 	if (_scenemng->UpdateValidObjects()) {
 
-		/* Check for inserted objects */
-		for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
-			bool objExists = false;
+	    /* Check for inserted objects */
+	    for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
+		bool objExists = false;
 			/* Check for inserted meshes */
-			switch ((*itScene)->GetType()) {
-			case SCENE_MESH:
-				for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); it2++) {
-					if ((*itScene)->GetID() == it2->ID && (*itScene)->GetType() == SCENE_MESH) {
-						it2->lastcheck = lastCheck;
-						objExists = true;
-						break;
-					}
-				}
-				break;
-			/* Check for inserted lights*/
-			case SCENE_LIGHT:
-				for (int i = 0; i < lri.lightCount; i++) {
-					if (lri.lightIDs[i] == (*itScene)->GetID()) {
-						objExists = true;
-						break;
-					}
-				}
-				break;
+		switch ((*itScene)->GetType()) {
+		case SCENE_MESH:
+		    for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); it2++) {
+			if ((*itScene)->GetID() == it2->ID && (*itScene)->GetType() == SCENE_MESH) {
+			    it2->lastcheck = lastCheck;
+			    objExists = true;
+			    break;
 			}
-
-
-			if (objExists) continue;
-			/* Draw the added object */
-			if ((*itScene)->GetType() == SCENE_MESH) {
-
-				/* Draw the added object */
-				Mesh* mes = (Mesh*)(*itScene);
-				mes->ApplyTransformations();
-
-				int vaon = this->AddVertexData(mes->GetVertexData(),
-					mes->GetModelMatrixPointer());
-
-				SceneIDCache sidc;
-				sidc.ID = (*itScene)->GetID();
-				sidc.lastcheck = lastCheck;
-				sidc.vao = vaon;
-				sidc.bbvao = this->AddBoundingBox(mes, glm::vec3(1,0,0));
-				_last_IDs.push_back(sidc);
+		    }
+		    break;
+		    /* Check for inserted lights*/
+		case SCENE_LIGHT:
+		    for (int i = 0; i < lri.lightCount; i++) {
+			if (lri.lightIDs[i] == (*itScene)->GetID()) {
+			    objExists = true;
+			    break;
 			}
-			else if ((*itScene)->GetType() == SCENE_LIGHT) {
-
-				/*** TODO: Sort lights by strength and send only the most strong ones ***/
-				if (lri.lightCount > 4) {
-					Log::GetLog()->Warning("Maximum number of lights per render exceeded.");
-					continue;
-				}
-
-				Light* light = (Light*)(*itScene);
-				Log::GetLog()->Write("Renderer added light %s", light->GetName());
-				int lR, lG, lB;
-				light->GetColor(lR, lG, lB);
-				lri.lightColors[lri.lightCount] = glm::vec3(lR / 255.0f, lG / 255.0f, lB / 255.0f);
-				lri.lightPositions[lri.lightCount] = light->GetPosition();
-				lri.lightStrengths[lri.lightCount] = light->GetStrength();
-				lri.lightIDs[lri.lightCount] = light->GetID();
-				lri.lightCount++;
-
-			}
-			else {
-				Log::GetLog()->Warning("Unsupported scene object! Skipping...");
-				continue;
-			}
+		    }
+		    break;
 		}
-	
-
-	deleted_check:
-		/* Check for deleted objects */
-		for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); ++it2) {
+		
+		
+		if (objExists) continue;
+		/* Draw the added object */
+		if ((*itScene)->GetType() == SCENE_MESH) {
+		    
+		    /* Draw the added object */
+		    Mesh* mes = (Mesh*)(*itScene);
+		    mes->ApplyTransformations();
+		    
+		    int vaon = this->AddVertexData(mes->GetVertexData(),
+						   mes->GetModelMatrixPointer());
+		    
+		    SceneIDCache sidc;
+		    sidc.ID = (*itScene)->GetID();
+		    sidc.lastcheck = lastCheck;
+		    sidc.vao = vaon;
+		    sidc.bbvao = this->AddBoundingBox(mes, glm::vec3(1,0,0));
+		    _last_IDs.push_back(sidc);
+		}
+		else if ((*itScene)->GetType() == SCENE_LIGHT) {
+		    
+		    /*** TODO: Sort lights by strength and send only the most strong ones ***/
+		    if (lri.lightCount > 4) {
+			Log::GetLog()->Warning("Maximum number of lights per render exceeded.");
+			continue;
+		    }
+		    
+		    Light* light = (Light*)(*itScene);
+		    Log::GetLog()->Write("Renderer added light %s", light->GetName());
+		    int lR, lG, lB;
+		    light->GetColor(lR, lG, lB);
+		    lri.lightColors[lri.lightCount] = glm::vec3(lR / 255.0f, lG / 255.0f, lB / 255.0f);
+		    lri.lightPositions[lri.lightCount] = light->GetPosition();
+		    lri.lightStrengths[lri.lightCount] = light->GetStrength();
+		    lri.lightIDs[lri.lightCount] = light->GetID();
+		    lri.lightCount++;
+		    
+		}
+		else {
+		    Log::GetLog()->Warning("Unsupported scene object! Skipping...");
+		    continue;
+		}
+	    }
+	    
+	    
+	    
+	    /* Check for deleted objects */
+	    for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); ++it2) {
 			bool isDeleted = true;
 			for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
-
-				if (it2->ID == (*itScene)->GetID()) {
-					isDeleted = false;
-					break;
-				}
-			}
-
-			if (isDeleted) {
-				Log::GetLog()->Write("Removing object ID %d from the cache",
-					it2->ID);
-				this->RemoveVertexData(it2->vao);
-				this->RemoveBoundingBox(it2->bbvao);
-				_last_IDs.erase(it2);
+			    
+			    if (it2->ID == (*itScene)->GetID()) {
+				isDeleted = false;
 				break;
+			    }
+			}
+			
+			if (isDeleted) {
+			    Log::GetLog()->Write("Removing object ID %d from the cache",
+						 it2->ID);
+			    this->RemoveVertexData(it2->vao);
+			    this->RemoveBoundingBox(it2->bbvao);
+			    _last_IDs.erase(it2);
+			    break;
 			}
 
-		}
-
+	    }
+	    
 	}
 	
 }
@@ -521,7 +521,7 @@ int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
 	vri.vd->Positions.push_back(glm::vec3(bb.maxX, bb.minY, bb.maxZ));
 	vri.vd->Positions.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
 
-	for (int i = 0; i < vri.vd->Positions.size(); i++) {
+	for (size_t i = 0; i < vri.vd->Positions.size(); i++) {
 		// Use normals for color, so we can use the same struct.
 		vri.vd->Normals.push_back(color);
 	}
