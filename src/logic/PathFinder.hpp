@@ -65,7 +65,8 @@ struct PathItem {
     /* Calculate multiplication numbers */
     void calculateMult(bool isWaterUnit);
 
-    bool operator==(const PathItem& p) const;
+    bool operator== (const PathItem& p) const;
+    bool operator== (const glm::vec2& v) const;
 };
 
 class PathFinder {
@@ -86,9 +87,8 @@ private:
     std::vector<glm::vec2> PathFind(glm::vec2 from, glm::vec2 to, bool isWaterUnit);
 
     /* Add neighbors to open list */
-    void AddNeighborsToOpenList(std::list<PathItem*>* open_list,
-        std::list<PathItem*>* closed_list, glm::vec2 point,
-        glm::vec2 from, glm::vec2 to);
+    void AddNeighborsToOpenList(std::list<PathItem>* open_list,
+				std::list<PathItem>* closed_list, glm::vec2 point, glm::vec2 from, glm::vec2 to);
 
 public:
     PathFinder(Terrain* t, ObjectManager* om);

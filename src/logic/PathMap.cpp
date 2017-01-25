@@ -51,3 +51,8 @@ bool PathItem::operator==(const PathItem& p) const
 {
     return (point == p.point);
 }
+
+bool PathItem::operator==(const glm::vec2& v) const
+{
+    return (point == v);
+}
