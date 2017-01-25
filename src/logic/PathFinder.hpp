@@ -45,16 +45,10 @@ struct PathMap {
     } *map;
 
     /* Create the pathmap */
-    PathMap(int w, int h){
-        map = new PathMapElement[w*h];
-        width = w;
-        height = h;
-    }
+    PathMap(int w, int h);
 
     /* Delete the pathmap*/
-    ~PathMap() {
-        delete map;
-    }
+    ~PathMap();
 };
 
 /* Type for an item used for pathfinding coefficient calculations */
@@ -64,39 +58,14 @@ struct PathItem {
     double f,g,h;
     struct PathItem *prev, *next;
 
-    PathItem(glm::vec2 p, PathFinderSlot* s) {
-        point = p;
-	slot = s;
-    }
+    PathItem(glm::vec2 p, PathFinderSlot* s);
 
-    void calculateAStar(glm::vec2 from, glm::vec2 to) {
-        g = glm::distance(from, point);
-        h = glm::distance(point, to);
-
-        f = g + h;
-    }
+    void calculateAStar(glm::vec2 from, glm::vec2 to);
 
     /* Calculate multiplication numbers */
-    void calculateMult(bool isWaterUnit) {
-        float mult;
+    void calculateMult(bool isWaterUnit);
 
-
-        if (slot->isObstructed) {
-            mult = 9E+10;
-        } else {
-            /* TODO: Think of a better calculation */
-            if (isWaterUnit)
-                mult = slot->elevation_points / slot->terrain_water_points;
-            else
-                mult = slot->elevation_points * (slot->terrain_land_points);
-        }
-
-        f *= mult;
-    }
-
-    bool operator==(const PathItem& p) const {
-	return (point == p.point);
-    }
+    bool operator==(const PathItem& p) const;
 };
 
 class PathFinder {
