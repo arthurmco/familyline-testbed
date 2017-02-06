@@ -44,7 +44,7 @@ void PathItem::calculateMult(bool isWaterUnit)
 	    mult = slot->elevation_points * (slot->terrain_land_points);
     }
     
-    f *= mult;
+    //f *= mult;
 }
 
 bool PathItem::operator==(const PathItem& p) const
