@@ -31,7 +31,7 @@ void PathItem::calculateAStar(glm::vec2 from, glm::vec2 to)
     /* Calculate multiplication numbers */
 void PathItem::calculateMult(bool isWaterUnit)
 {
-    float mult;
+    float mult = 1.0f;
     
     
     if (slot->isObstructed) {
@@ -44,7 +44,7 @@ void PathItem::calculateMult(bool isWaterUnit)
 	    mult = slot->elevation_points * (slot->terrain_land_points);
     }
     
-    //f *= mult;
+    f *= mult;
 }
 
 bool PathItem::operator==(const PathItem& p) const

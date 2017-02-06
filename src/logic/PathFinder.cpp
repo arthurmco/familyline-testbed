@@ -191,14 +191,19 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
 	    }
 	}
 
-
 	/* Remove the lowest from the open list and put it into closed list */
 	lower = *lower_it;
 	open_list.erase(lower_it);
 	lower->prev = nullptr;
 
-	/* Check if we have had this node before */
-	for (auto it = closed_list.begin(); it != closed_list.end(); it++) {
+
+	size_t i = 0;
+	/* Check if we have had crossed this node before.
+	   This helps avoiding zig-zag and 'walking in circle' pathing bugs 
+	*/
+	for (auto it = closed_list.begin(); it != closed_list.end(); ++it) {
+        
+	
 	    if ((*it) == lower) {
 		// Immediate node
 		lower = (*it);
@@ -206,7 +211,7 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
 		break;
 	    }
 
-	    if (std::next(it) != closed_list.end()) { 
+	    if (i+3 < closed_list.size()) {
 
 		bool has_found = false;
 		
@@ -220,6 +225,13 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
 			glm::vec2 pos(lower->point.x+x, lower->point.y+y);
 			if (*(*it) == pos) {
 			    printf("\n\n!!!!\n\n");
+
+			    /* Recalculate start position.
+			       Might help with infinite loops and walking in circle bugs even more, because
+			       the A* values would change. */
+			    from = pos;
+
+			    
 			    (*it)->next = lower;
 			    lower->prev = (*it);
 			    closed_list.erase(++it, --closed_list.end());
@@ -236,7 +248,10 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
 
 	    }
 
+	    i++;
+
 	}
+
 
 	if (!lower->prev) {
 	    lower->prev = now;
@@ -246,7 +261,6 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
 	now = lower;
 	closed_list.push_back(now);
     }
-
     
     /* Retrieve points and return */
     std::vector<glm::vec2> points;
