@@ -25,6 +25,7 @@ Makefile
 Debug/*
 Release/*
 tribalia.dir/*
+tribalia-server.dir/*
 Win32/*
 .vscode/*
 
