@@ -35,7 +35,9 @@ namespace Logic {
         float GetPiercingAttack(); void SetPiercingAttack(float);
 
         /* Move, one tick at a time, towards a specified unit vector */
-        void Move(glm::vec3 vec_dest);
+	void Move(glm::vec3 vec_dest);
+
+	virtual ~Unit(){}
 
     };
 

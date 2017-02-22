@@ -17,16 +17,15 @@ namespace Logic {
 
     class Building : public AttackableObject
     {
-	private:
-		inline void InitGarrisoning(int capacity = 0);
+    private:
+	inline void InitGarrisoning(int capacity = 0);
 
-	protected:
-		/*	The maximum amount of people that can be garrisoned inside the 
-			building */
-		int _maximumCapacityUnits;
-
-		Unit** _garrisonedUnits;
-		int _garrisonedCount;
+    protected:
+	/*	The maximum amount of people that can be garrisoned inside the 
+		building */
+	int _maximumCapacityUnits;
+	Unit** _garrisonedUnits;
+	int _garrisonedCount;
 
         /*  Train an unit. 
             It will appear instantly, so it's your responsability
@@ -49,12 +48,15 @@ namespace Logic {
         float GetBuildMaterial(); void SetBuildMaterial(float);
         float GetBuildingStrength(); void SetBuildingStrength(float);
 
-		int GetMaximumGarrisonCapacity();
-		int GetGarrisonedUnitCound();
+	int GetMaximumGarrisonCapacity();
+	int GetGarrisonedUnitCound();
 
-		/* Get/set where your units will be created or degarrisoned, in game units */
-		void GetUnitBirthPoint(float& x, float& y);
-		void SetUnitBirthPoint(float x, float y);
+	/* Get/set where your units will be created or degarrisoned, in game units */
+	void GetUnitBirthPoint(float& x, float& y);
+	void SetUnitBirthPoint(float x, float y);
+
+	virtual ~Building(){}
+	
     };
 
 }
