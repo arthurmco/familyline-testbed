@@ -69,7 +69,19 @@ struct PathItem {
     bool operator== (const glm::vec2& v) const;
 };
 
+enum PathFlags {
+    /* A loop was made while pathfinding */
+    PATHF_LOOP = 0x1,
+
+    /* A dead end was found while pathfinding */
+    PATHF_DEADEND = 0x2,
+};
+    
 class PathFinder {
+    /* The maximum amount of time a pathfinding can enter in loop before
+       we give up */
+    #define LOOP_POINTS_MAX 16
+    
 private:
     Terrain* _terr;
     ObjectManager* _om;
@@ -83,8 +95,11 @@ private:
         game coordinates
         Get an array of points, who is the path for you get to 'to' from 'from'.
         Both 'to' and 'from' are removed from the final list
+
+	If something occurs here, it will inform on the retflags variable
     */
-    std::vector<glm::vec2> PathFind(glm::vec2 from, glm::vec2 to, bool isWaterUnit);
+    std::vector<glm::vec2> PathFind(glm::vec2 from, glm::vec2 to, bool isWaterUnit,
+	int& retflags);
 
     /* Add neighbors to open list */
     void AddNeighborsToOpenList(std::list<PathItem*>* open_list,

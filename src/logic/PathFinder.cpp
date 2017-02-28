@@ -34,7 +34,30 @@ std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* from, glm::vec2 t
     Log::GetLog()->Write("[PathFinder] Finding path for %s (%.1fx%.1f) to "
         "(%.1fx%.1f)", from->GetName(), vFrom.x, vFrom.y, to.x, to.y);
 
-    return PathFind(vFrom, to, isWater);
+    std::vector<glm::vec2> v;
+    bool vend = true;
+    int flags;
+
+    int limit = 0;
+    do {
+	vend = true;
+	auto vi = this->PathFind(vFrom, to, isWater, flags);
+	v.insert(v.end(), vi.begin(), vi.end());
+	
+	if (flags & PATHF_LOOP)
+	    vend = false; //Path in loop, need to recalculate again
+
+	/* The first item here will always be the previous 'vFrom' so we don't get without
+	   items never. */
+	vFrom = *(--(vi.end()));
+	limit++;
+
+	if (limit > LOOP_POINTS_MAX)
+	    break; // prevents infinite loops
+	
+    } while (!vend);
+    
+    return v;
 }
 
 /*  Update the pathfinder slot list, for an determined region
@@ -69,7 +92,7 @@ void PathFinder::UpdateSlotList(int x, int y, int w, int h)
         int radius = (int)lobj->GetRadius();
 
 	/* This is impossible */
-	if (radius > _terr->GetHeight())
+	if (radius > h)
 	    continue;
 
 	printf("\tFound object within updt square: %s (%d,%d) r:%d\n",
@@ -143,16 +166,23 @@ void PathFinder::AddNeighborsToOpenList(std::list<PathItem*>* open_list,
 
 
 std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
-    glm::vec2 to, bool isWaterUnit)
+	   glm::vec2 to, bool isWaterUnit, int& retflags)
 {
+    this->UpdateSlotList(0, 0, 256, 256);
+    
     std::list<PathItem*> open_list;
     std::list<PathItem*> closed_list;
 
+    retflags = 0;
+    
     PathItem* now = new PathItem(from, GET_POS_SLOT(from, _terr->GetWidth()));
     now->calculateAStar(from, to);
     now->calculateMult(false);
     closed_list.push_back(now);
-    
+
+    int loop_points = 0;
+    bool loop_ovflw = false;
+	
     while (now->point != to) {
 
 	open_list.clear();
@@ -196,7 +226,6 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
 	open_list.erase(lower_it);
 	lower->prev = nullptr;
 
-
 	size_t i = 0;
 	/* Check if we have had crossed this node before.
 	   This helps avoiding zig-zag and 'walking in circle' pathing bugs 
@@ -230,7 +259,27 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
 			       Might help with infinite loops and walking in circle bugs even more, because
 			       the A* values would change. */
 			    from = pos;
+			    loop_points++;
+			    printf("-- %d", loop_points);
 
+			    if (loop_points > LOOP_POINTS_MAX) {
+				/* We looped to much.
+				   Time to give up.
+
+				   TODO: Maybe add some sort of flag to the path, to
+				   indicate it broke and we should restart it again */
+				printf("Too many breaks\n ");
+				to = now->point;
+				closed_list.push_back(now);
+				has_found = true;
+				loop_ovflw = true;
+				retflags |= PATHF_LOOP;
+				break;
+			    }
+
+			    if (loop_ovflw)
+				break;
+			    
 			    
 			    (*it)->next = lower;
 			    lower->prev = (*it);
@@ -239,18 +288,31 @@ std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
 			    break;
 			}
 		    
-		    
+			if (loop_ovflw)
+			    break;
 		    
 		    }
+
+		    if (loop_ovflw)
+			break;
 		}
 
+		if (loop_ovflw)
+		    break;
+		
 		if (has_found) break;
 
 	    }
 
+	    if (loop_ovflw)
+		break;
+
 	    i++;
 
 	}
+
+	if (loop_ovflw)
+	    break;
 
 
 	if (!lower->prev) {
