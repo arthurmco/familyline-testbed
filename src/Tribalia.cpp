@@ -21,6 +21,7 @@
 #include "logic/ObjectFactory.hpp"
 #include "logic/ObjectPathManager.hpp"
 #include "logic/TerrainFile.hpp"
+#include "logic/Team.hpp"
 
 #include "graphical/Renderer.hpp"
 #include "graphical/GUIRenderer.hpp"
@@ -90,27 +91,38 @@ static void show_help()
 	printf("--size <W>x<H>: Changes the game resolution to <W>x<H> pixels\n");
 }
 
+static int winW = 640, winH = 480;
+
+static int check_size(int i, int argc, char const* argv[])
+{
+    if (i >= argc) {
+	printf("size not defined. Expected <W>x<H> for size! Aborting");
+	return -1;
+    }
+    
+    if (sscanf(argv[i+1], "%dx%d", &winW, &winH) <= 1) {
+	printf("size format is wrong. Expected <W>x<H> for size! Aborting...");
+	return -1;
+    }
+    
+    printf("pre-load: chosen %d x %d for screen size\n", winW, winH);
+    return 0;
+    
+}
+
 int main(int argc, char const *argv[])
 {
 	int winW = 640, winH = 480;
 	if (get_arg_index("--version",argc,argv) >= 0) {
-		show_version();
-		return EXIT_SUCCESS;
+	    show_version();
+	    return EXIT_SUCCESS;
 	}
 
 	int i =  get_arg_index("--size", argc, argv);
 	if (i >= 0) {
-		if (i >= argc) {
-			printf("size not defined. Expected <W>x<H> for size! Aborting...");
-			return EXIT_FAILURE;
-		}
-
-		if (sscanf(argv[i+1], "%dx%d", &winW, &winH) <= 1) {
-			printf("size format is wrong. Expected <W>x<H> for size! Aborting...");
-			return EXIT_FAILURE;
-		}
-
-		printf("pre-load: chosen %d x %d for screen size\n", winW, winH);
+	    if( check_size(i, argc, argv) < 0) {
+		return EXIT_FAILURE;
+	    }
 	}
 
 	if (get_arg_index("--help", argc, argv) >= 0) {
@@ -124,22 +136,23 @@ int main(int argc, char const *argv[])
     Log::GetLog()->Write("Tribalia " VERSION);
     Log::GetLog()->Write("built on " __DATE__ " by " USERNAME);
 #if defined(COMMIT)
-	Log::GetLog()->Write("git commit is " COMMIT);
+    Log::GetLog()->Write("git commit is " COMMIT);
 #endif
 
     ObjectManager* om = nullptr;
+    HumanPlayer* hp = nullptr;
+    Terrain* terr = nullptr;
+    TeamCoordinator* tc = nullptr;
+    
     Window* win = nullptr;
     Renderer* rndr = nullptr;
-    HumanPlayer* hp;
-    SceneManager* scenemng;
-    Terrain* terr;
+    SceneManager* scenemng = nullptr;
 
     bool player = false;
 
     Camera* cam;
 
     AssetManager* am = AssetManager::GetInstance();
-    Mesh* m;
     TerrainFile* terrFile;
 
     GameContext gctx;
@@ -160,6 +173,11 @@ int main(int argc, char const *argv[])
 	terrFile = new TerrainFile("terrain_test.trtb");
 	terr = terrFile->GetTerrain();
 
+	tc = new TeamCoordinator();
+	auto tteam = tc->CreateTeam("test");
+	printf("%s -- %#x\n", tteam->name.c_str(), tteam->id);
+        
+
 	scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
 
 	cam = new Camera{glm::vec3(6.0f, 36.0f, 6.0f), (float)winW/(float)winH, glm::vec3(0,0,0)};
@@ -175,28 +193,21 @@ int main(int argc, char const *argv[])
     } catch (window_exception& we) {
 	Log::GetLog()->Fatal("Window creation error: %s (%d)", we.what(), we.code);
 	exit(EXIT_FAILURE);
-
     } catch (renderer_exception& re) {
         Log::GetLog()->Fatal("Rendering error: %s [%d]",
             re.what(), re.code);
         exit(EXIT_FAILURE);
     }  catch (mesh_exception& se) {
-        Log::GetLog()->Fatal("Mesh error: %s",
-            se.what());
-        Log::GetLog()->Fatal("Mesh file: %s",
-            se.file.c_str());
+        Log::GetLog()->Fatal("Mesh error: %s", se.what());
+        Log::GetLog()->Fatal("Mesh file: %s", se.file.c_str());
         exit(EXIT_FAILURE);
     }  catch (material_exception& se) {
-        Log::GetLog()->Fatal("Material error: %s ",
-            se.what());
-        Log::GetLog()->Fatal("Material file: %s",
-            se.file.c_str());
+        Log::GetLog()->Fatal("Material error: %s ", se.what());
+        Log::GetLog()->Fatal("Material file: %s", se.file.c_str());
         exit(EXIT_FAILURE);
     } catch (shader_exception& se) {
-        Log::GetLog()->Fatal("Shader error: %s [%d]",
-            se.what(), se.code);
-        Log::GetLog()->Fatal("Shader file: %s, type %d",
-            se.file.c_str(), se.type);
+        Log::GetLog()->Fatal("Shader error: %s [%d]", se.what(), se.code);
+        Log::GetLog()->Fatal("Shader file: %s, type %d", se.file.c_str(), se.type);
         exit(EXIT_FAILURE);
     } catch (asset_exception& ae) {
         Log::GetLog()->Fatal("Asset file error: %s", ae.what());
@@ -252,8 +263,7 @@ int main(int argc, char const *argv[])
     Label lbl = Label(120, 460, "This is a true label");
     lbl.SetForeColor(255, 128, 0, 255);
 
-    Label lblVersion = Label(10, 10, "");
-    lblVersion.SetText("Tribalia " VERSION " commit " COMMIT);
+    Label lblVersion = Label(10, 10, "Tribalia " VERSION " commit " COMMIT);
     lblVersion.SetForeColor(255, 255, 255, 255);
 
     gr.AddPanel(&lbl);
@@ -264,7 +274,7 @@ int main(int argc, char const *argv[])
     /* Adds the objects to the factory */
     ObjectFactory::GetInstance()->AddObject(new WatchTower);
     ObjectFactory::GetInstance()->AddObject(new Tent);
-    
+
     do {
 
         ip->UpdateIntersectedObject();
@@ -274,10 +284,11 @@ int main(int argc, char const *argv[])
         player = true;
         gctx.elapsed_seconds = delta / 1000.0;
 
+	hp->ProcessInput();
         if (!hp->Play(&gctx))
             player = false;
-
-		terr_rend->Update();
+	
+	terr_rend->Update();
 
         bool objupdate = objrend->Check();
         if (objupdate || hp->HasUpdatedObject()) {

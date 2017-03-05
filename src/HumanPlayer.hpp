@@ -48,6 +48,14 @@
         ***/
         virtual bool Play(Tribalia::Logic::GameContext*);
 
+	
+	/***
+	    Process player input.
+	    Returns true if some input was received, false if not 
+	***/
+	virtual bool ProcessInput();
+	
+	
         void SetCamera(Tribalia::Graphics::Camera*);
 		void SetPicker(Tribalia::Input::InputPicker* ip);
         void SetInputManager(Tribalia::Input::InputManager*);

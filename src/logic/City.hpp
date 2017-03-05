@@ -20,6 +20,7 @@ namespace Logic {
         int id;
         std::string name;
         char* flag; //pointer to a raw bitmap.
+	void* tinfo; //pointer to a TeamCities structure
     };
 
     class City {
