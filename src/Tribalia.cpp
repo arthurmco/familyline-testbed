@@ -21,6 +21,7 @@
 #include "logic/ObjectFactory.hpp"
 #include "logic/ObjectPathManager.hpp"
 #include "logic/TerrainFile.hpp"
+#include "logic/Team.hpp"
 
 #include "graphical/Renderer.hpp"
 #include "graphical/GUIRenderer.hpp"
@@ -139,11 +140,13 @@ int main(int argc, char const *argv[])
 #endif
 
     ObjectManager* om = nullptr;
+    HumanPlayer* hp = nullptr;
+    Terrain* terr = nullptr;
+    TeamCoordinator* tc = nullptr;
+    
     Window* win = nullptr;
     Renderer* rndr = nullptr;
-    HumanPlayer* hp = nullptr;
     SceneManager* scenemng = nullptr;
-    Terrain* terr = nullptr;
 
     bool player = false;
 
@@ -169,6 +172,11 @@ int main(int argc, char const *argv[])
 
 	terrFile = new TerrainFile("terrain_test.trtb");
 	terr = terrFile->GetTerrain();
+
+	tc = new TeamCoordinator();
+	auto tteam = tc->CreateTeam("test");
+	printf("%s -- %#x\n", tteam->name.c_str(), tteam->id);
+        
 
 	scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
 
