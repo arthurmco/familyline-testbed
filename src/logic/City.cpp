@@ -56,3 +56,4 @@ using namespace Tribalia::Logic;
 
 
     const char* City::GetName() { return _name.c_str(); }
+
