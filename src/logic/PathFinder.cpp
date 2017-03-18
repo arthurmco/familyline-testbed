@@ -1,335 +1,191 @@
 #include "PathFinder.hpp"
-#include <iterator> //std::advance()
+#include <cstring> //memset()
+
 using namespace Tribalia::Logic;
 
-PathFinder::PathFinder(Terrain* t, ObjectManager* om)
+PathFinder::PathFinder(ObjectManager* om)
+    : _om(om)
+{ }
+
+void PathFinder::InitPathmap(int w, int h)
 {
-    _terr = t;
-    _om = om;
-
-    _slots = new PathFinderSlot[t->GetHeight()*t->GetWidth()];
-
-    /* Load terrain data here */
-    for (int y = 0; y < t->GetHeight(); y++) {
-        for (int x = 0; x < t->GetWidth(); x++) {
-            int i = (y*t->GetWidth())+x;
-
-            _slots[i].elevation_points = 1.0;   /* No elevation yet */
-            _slots[i].terrain_land_points = 1.0;    /* No diff terrain types yet */
-            _slots[i].terrain_water_points = 0.0;
-            _slots[i].isObstructed = false;
-
-        }
-    }
-
-    Log::GetLog()->Write("PathFinder: initialized terrain %dx%d, %.3f kB approx.",
-        t->GetWidth(), t->GetHeight(), (t->GetWidth()*t->GetHeight()*sizeof(PathFinderSlot)));
+    _mapWidth = w;
+    _mapHeight = h;
+    _pathing_slots = new unsigned char[w*h];
 }
-
-std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* from, glm::vec2 to)
+void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 {
-    glm::vec2 vFrom = glm::vec2(from->GetX(), from->GetZ());
-    bool isWater = false;   // Water units unsupported for now.
+    auto objList = _om->GetObjectList();
 
-    Log::GetLog()->Write("[PathFinder] Finding path for %s (%.1fx%.1f) to "
-        "(%.1fx%.1f)", from->GetName(), vFrom.x, vFrom.y, to.x, to.y);
-
-    std::vector<glm::vec2> v;
-    bool vend = true;
-    int flags;
-
-    int limit = 0;
-    do {
-	vend = true;
-	auto vi = this->PathFind(vFrom, to, isWater, flags);
-	v.insert(v.end(), vi.begin(), vi.end());
-	
-	if (flags & PATHF_LOOP)
-	    vend = false; //Path in loop, need to recalculate again
-
-	/* The first item here will always be the previous 'vFrom' so we don't get without
-	   items never. */
-	vFrom = *(--(vi.end()));
-	limit++;
-
-	if (limit > LOOP_POINTS_MAX)
-	    break; // prevents infinite loops
-	
-    } while (!vend);
+    memset((void*)_pathing_slots, 0, w*h*sizeof(unsigned char));
     
-    return v;
+    for (auto& obj : *objList) {
+	LocatableObject* l = dynamic_cast<LocatableObject*>(obj.obj);
+	if (!l) {
+	    continue; // Not locatable
+	}
+
+	int ox = l->GetX(), oy = l->GetY(), oz = l->GetZ();
+	float r = l->GetRadius();
+
+	for (int y = oz-r; y < oz+r; y++) {	    
+	    for (int x = ox-r; x < ox+r; x++) {
+		_pathing_slots[y*_mapWidth+x] = 0xff;
+	    }
+	}	
+    }
+    
 }
 
-/*  Update the pathfinder slot list, for an determined region
-    Note that this will only update the buildings, because terrain is
-    immutable in this engine.
+
+static inline double CalculateF(PathNode* n) {
+    return (n->g + n->h) * n->weight;
+}
+
+/* Create neighbors and check if they exist in both open and closed list
+   If they don't exist in both lists, add it in open
+   If they exist in the open, update its values
+   If they exist in the closed, don't add it 
+*/   
+void PathFinder::CreateNeighbors(PathNode* n, std::list<PathNode*>& lopen,
+			    std::list<PathNode*>& lclosed, glm::vec2 from,
+			    glm::vec2 to)
+{
+    for (double y = -1; y <= 1; y++) {
+	for (double x = -1; x <= 1; x++) {
+	    if (x == 0 && y == 0) continue;
+	    
+	    glm::vec2 neighbor = glm::vec2(n->pos.x + x, n->pos.y + y);
+
+	    bool isInClosed = false;
+	    for (auto& closednode : lclosed) {
+		if (closednode->pos == neighbor) {
+		    isInClosed = true;
+		    break;
+		}		
+	    }
+	    if (isInClosed) continue;
+
+	    bool isInOpen = false;
+	    for (auto& opennode : lopen) {
+		if (opennode->pos == neighbor) {
+		    isInOpen = true;
+		    CalculateF(opennode);
+		    break;
+		}
+	    }
+	    if (isInOpen) continue;
+
+	    PathNode* n = this->CreateNode(neighbor, from, to);
+	    lopen.push_back(n);
+	    
+	}
+    }
+    
+}
+
+PathNode* PathFinder::CreateNode(glm::vec2 pos, glm::vec2 from, glm::vec2 to)
+{
+    PathNode* n = new PathNode;
+    n->pos = pos;
+    n->weight = 1.0;
+    n->next = nullptr;
+    n->prev = nullptr;
+
+    // use euclidian distance as g
+    n->g = glm::sqrt(glm::pow(pos.x - from.x, 2) + glm::pow(pos.y - from.y, 2));
+
+    // use Manhattan distance as h
+    n->h = glm::abs(to.x - pos.x) + glm::abs(to.y - pos.y);
+    
+    n->f = CalculateF(n);
+    return n;
+}
+
+
+
+
+
+/* Create a path from 'from' to 'to'. 
+   Returns true if a path was viable, in this case there are its nodes in 'nodelist'
+   Returns false if a path wasn't viable, returns the nodelist until the most approximated location 
+
+   The path is based on A* algorithm. It should follow it, but probably doesn't
 */
-void PathFinder::UpdateSlotList(int x, int y, int w, int h)
+bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& nodelist)
 {
-    /* Clean every obstruction thing about other slots */
-    for (int ry = y; ry < y+h; ry++) {
-        for (int rx = x; rx < x+w; rx++) {
-            _slots[ry*_terr->GetWidth()+rx].isObstructed = false;
-	   
-        }
-    }
-    
+    PathNode* node;
+    node = CreateNode(from, from, to);
 
-    for (auto& obj : *_om->GetObjectList()) {
-        LocatableObject* lobj = dynamic_cast<LocatableObject*>(obj.obj);
+    std::list<PathNode*> lopen, lclosed;
+    lclosed.push_back(node);
 
-        /* Not locatable */
-        if (!lobj) continue;
-
-        int lx = lobj->GetX();
-        //int ly = lobj->GetY();
-        int lz = lobj->GetZ();
-
-        /* Take off everything that isn't on the square */
-        if (lx < x || lx > (x+w)) continue;
-        if (lz < y || lz > (y+h)) continue;
-
-        int radius = (int)lobj->GetRadius();
-
-	/* This is impossible */
-	if (radius > h)
-	    continue;
-
-	printf("\tFound object within updt square: %s (%d,%d) r:%d\n",
-	       lobj->GetName(), lx, lz, radius);
-
-        /* For now, let just assume radius=box side/2 */
-        for (int ry = -radius; ry < radius; ry++) {
-	    int ay = (lz+ry);
-	    if (ay < 0)	continue; 
-            if (ry > _terr->GetHeight()) break;
-	    
-            for (int rx = -radius; rx < radius; rx++) {
-                if (rx < 0 || rx > _terr->GetWidth()) continue;
-		
-                int ax = (lx+rx);
-		if (ax < 0)	continue;
-
-		printf("[[%d %d]]\n", ay, ax);
-                _slots[ay*_terr->GetWidth()+ax].isObstructed = true;
-            }
-        }
-
-    }
-}
-
-
-#define GET_POS_SLOT(pos, w) (&_slots[(int)(floor(pos.y) * w + floor(pos.x))])
-
-/* Add neighbors to open list.
-
-   Add only those who are not in the list */
-void PathFinder::AddNeighborsToOpenList(std::list<PathItem*>* open_list,
-					std::list<PathItem*>* closed_list,
-					glm::vec2 point, glm::vec2 from,
-					glm::vec2 to)
-{
-    for (auto x = -1; x <= 1; x++) {
-	for (auto y = -1; y <= 1; y++) {
-
-	    glm::vec2 p(point.x+x, point.y+y);
-	    
-	    /* Do not add yourself into the list */
-	    if (x == 0 && y == 0)
-		continue;
-
-	    bool has_item = false;
-
-	    /* Check if this item is on closed list */
-	    for (auto& it : *closed_list) {
-		if ((*it) == p) {
-		    /* If we find, same thing: recalculate item and break */
-		    it->calculateAStar(from, to);
-		    it->calculateMult(false);
-		    has_item = true;
-		    break;
-		}
+    while (node->pos != to) {
+	printf("%.2f %.2f\n", node->pos.x, node->pos.y);
+	
+	/* Open the neighbors */	
+	this->CreateNeighbors(node, lopen, lclosed, from, to);
+	
+	PathNode* lowernode = nullptr;
+	double lowerf = 9E10;
+	/* Check the path with the best 'f' */
+	for (auto& opennode : lopen) {
+	    if (opennode->f < lowerf) {
+		printf("\t next: %.2f %.2f (f: %.4f)\n", opennode->pos.x, opennode->pos.y, lowerf);
+		lowerf = opennode->f;
+		lowernode = opennode;
 	    }
-
-	    if (has_item) continue;
-	    
-	    /* Add the item */
-	    PathItem* pit = new PathItem(p, GET_POS_SLOT(p, _terr->GetWidth()));
-	    pit->calculateAStar(from, to);
-	    pit->calculateMult(false);
-	    open_list->push_back(pit);
-	    
 	}
-    }
-    
-}
 
+	/* Define nodes' relation */
+	lowernode->prev = node;
+	node->next = lowernode;
+	lclosed.push_back(lowernode);
+	lopen.remove_if(
+	    [&lowernode](PathNode*& n){return (n->pos == lowernode->pos); });
 
-std::vector<glm::vec2> PathFinder::PathFind(glm::vec2 from,
-	   glm::vec2 to, bool isWaterUnit, int& retflags)
-{
-    this->UpdateSlotList(0, 0, 256, 256);
-    
-    std::list<PathItem*> open_list;
-    std::list<PathItem*> closed_list;
-
-    retflags = 0;
-    
-    PathItem* now = new PathItem(from, GET_POS_SLOT(from, _terr->GetWidth()));
-    now->calculateAStar(from, to);
-    now->calculateMult(false);
-    closed_list.push_back(now);
-
-    int loop_points = 0;
-    bool loop_ovflw = false;
+	node = lowernode;
 	
-    while (now->point != to) {
+	//TODO: remove lowernode from openlist
 
-	open_list.clear();
-	
-	/* Check if distance is lower than one point.
-	   If is, then just add the "final point" there */
-	if (glm::abs(now->point.x - to.x) < 1.0 &&
-	    glm::abs(now->point.y - to.y) < 1.0) {
-	    PathItem* it = new PathItem(to, GET_POS_SLOT(to, _terr->GetWidth()));
-	    it->calculateAStar(from, to);
-	    it->calculateMult(false);
-	    closed_list.push_back(it);
-	    printf("over!\n");
+	/* Check if we approximately reached the final point
+	   If yes, just add the 'final touch' */
+	if (glm::abs(node->pos.x - to.x) < 1.0 &&
+	    glm::abs(node->pos.y - to.y) < 1.0) {
+	    PathNode* final = CreateNode(to, from, to);
+	    final->prev = lowernode;
+	    lowernode->next = final;
+	    lclosed.push_back(lowernode);
 	    break;
 	}
+    }
 
-	
-	/* Add neighbors to open list */
-	this->AddNeighborsToOpenList(&open_list, &closed_list, now->point, from, to);
-	printf("-> %zu : %zu\n", open_list.size(), closed_list.size());
+    printf("-- ok, realigning\n");
 
-	/* Check who has the lowest f score */
-	
-	double lower_f = 9e12; // the diagonal?
-
-	auto lower_it = open_list.begin();
-	PathItem* lower = nullptr;
-
-	for (auto it = open_list.begin(); it != open_list.end(); ++it) {
-	    (*it)->calculateAStar(from, to);
-	    (*it)->calculateMult(false);
-	    
-	    if ((*it)->f < lower_f) {
-		lower_f = (*it)->f;
-		lower_it = it;
-	    }
-	}
-
-	/* Remove the lowest from the open list and put it into closed list */
-	lower = *lower_it;
-	open_list.erase(lower_it);
-	lower->prev = nullptr;
-
-	size_t i = 0;
-	/* Check if we have had crossed this node before.
-	   This helps avoiding zig-zag and 'walking in circle' pathing bugs 
-	*/
-	for (auto it = closed_list.begin(); it != closed_list.end(); ++it) {
-        
-	
-	    if ((*it) == lower) {
-		// Immediate node
-		lower = (*it);
-		closed_list.erase(it, closed_list.end());
-		break;
-	    }
-
-	    if (i+3 < closed_list.size()) {
-
-		bool has_found = false;
-		
-		/* Check neighbors too, but only if this node isn't the last */
-		for (int x = -1; x <= 1; x++) {
-		    if (has_found) break;
-		    
-		    for (int y = -1; y <= 1; y++) {
-			if (x == 0 && y == 0) continue;
-
-			glm::vec2 pos(lower->point.x+x, lower->point.y+y);
-			if (*(*it) == pos) {
-			    printf("\n\n!!!!\n\n");
-
-			    /* Recalculate start position.
-			       Might help with infinite loops and walking in circle bugs even more, because
-			       the A* values would change. */
-			    from = pos;
-			    loop_points++;
-			    printf("-- %d", loop_points);
-
-			    if (loop_points > LOOP_POINTS_MAX) {
-				/* We looped to much.
-				   Time to give up.
-
-				   TODO: Maybe add some sort of flag to the path, to
-				   indicate it broke and we should restart it again */
-				printf("Too many breaks\n ");
-				to = now->point;
-				closed_list.push_back(now);
-				has_found = true;
-				loop_ovflw = true;
-				retflags |= PATHF_LOOP;
-				break;
-			    }
-
-			    if (loop_ovflw)
-				break;
-			    
-			    
-			    (*it)->next = lower;
-			    lower->prev = (*it);
-			    closed_list.erase(++it, --closed_list.end());
-			    has_found = true;
-			    break;
-			}
-		    
-			if (loop_ovflw)
-			    break;
-		    
-		    }
-
-		    if (loop_ovflw)
-			break;
-		}
-
-		if (loop_ovflw)
-		    break;
-		
-		if (has_found) break;
-
-	    }
-
-	    if (loop_ovflw)
-		break;
-
-	    i++;
-
-	}
-
-	if (loop_ovflw)
-	    break;
-
-
-	if (!lower->prev) {
-	    lower->prev = now;
-	    now->next = lower;
-	}
-	
-	now = lower;
-	closed_list.push_back(now);
+    /* Find the correct path */
+    for (PathNode* n = lclosed.back(); n; n = n->prev) {
+	printf("%p %p\n ", n, n->prev);
+	nodelist.push_back(n);
     }
     
-    /* Retrieve points and return */
-    std::vector<glm::vec2> points;
+    return true;   
+}
 
-    for (auto& p : closed_list) {
-	points.push_back(p->point);
+std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* o, glm::vec2 destination)
+{
+    std::vector<glm::vec2> vec;
+    std::list<PathNode*> nodelist;
+
+    glm::vec2 from(o->GetX(), o->GetZ());
+    printf("from: %.2f %.2f, to %.2f %.2f\n\n",
+	   from.x, from.y, destination.x, destination.y);
+    
+    MakePath(from, destination, nodelist);
+
+    /* Reverse the map */
+    for (auto node = nodelist.rbegin(); node != nodelist.rend(); node++) {
+	vec.push_back((*node)->pos);
     }
 
-    return points;
+    return vec;
 }
