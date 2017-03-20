@@ -5,7 +5,10 @@ tribalia-server
 *.swp
 *.pch
 *.dir-locals.el
-
+*.dll
+*.exe
+distribute/
+!setup.nsi
 
 compile*.json
 

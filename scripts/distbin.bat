@@ -21,15 +21,13 @@ copy models Debug\models
 copy models Release\models
 copy textures Release\textures
 copy docs Release\docs
+copy terrain_test.trtb Release\terrain_test.trtb
 
 copy assets.taif Debug
 copy assets.taif Release
 
-copy *.bmp Debug
-copy *.bmp Release
-copy *.png Debug
-copy *.png Release
-
 copy *.md Release
+
+robocopy /s Release/ distribute/ * /S
 
 echo Data files copied
