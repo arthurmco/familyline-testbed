@@ -54,6 +54,8 @@ namespace Logic {
 
 	void InitPathmap(int w, int h);
 	void UpdatePathmap(int w, int h, int x = 0, int y = 0);
+	void ClearPathmap(int w, int h, int x, int y);
+
 	
 	std::vector<glm::vec2> CreatePath(LocatableObject* o, glm::vec2 destination);
     };    

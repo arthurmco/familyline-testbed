@@ -38,6 +38,15 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 }
 
 
+static double CalculateGH(PathNode* n, glm::vec2 from, glm::vec2 to, glm::vec2 pos) {
+    // use euclidian distance as g
+    n->g = glm::sqrt(glm::pow(pos.x - from.x, 2) + glm::pow(pos.y - from.y, 2));
+
+    // use Manhattan distance as h
+    n->h = glm::abs(to.x - pos.x) + glm::abs(to.y - pos.y);
+ 
+}
+
 static inline double CalculateF(PathNode* n) {
     return (n->g + n->h) * n->weight;
 }
@@ -57,6 +66,16 @@ void PathFinder::CreateNeighbors(PathNode* n, std::list<PathNode*>& lopen,
 	    
 	    glm::vec2 neighbor = glm::vec2(n->pos.x + x, n->pos.y + y);
 
+	    // do not add negative slots
+	    if (neighbor.x < 0 || neighbor.y < 0) {
+		continue;
+	    }
+
+	    // do not add obstacles
+	    int pindex = ((int)neighbor.y * _mapWidth + (int)neighbor.x);
+	    if (_pathing_slots[(unsigned)pindex] == 0xff)
+		continue;
+	    
 	    bool isInClosed = false;
 	    for (auto& closednode : lclosed) {
 		if (closednode->pos == neighbor) {
@@ -70,13 +89,24 @@ void PathFinder::CreateNeighbors(PathNode* n, std::list<PathNode*>& lopen,
 	    for (auto& opennode : lopen) {
 		if (opennode->pos == neighbor) {
 		    isInOpen = true;
-		    CalculateF(opennode);
+		    double oldg = opennode->g;		    
+		    CalculateGH(opennode, from, to, neighbor);
+
+		    printf(" rec %.3f -> %.3f\n", oldg, opennode->g);
+		    if (oldg < opennode->g) {
+			opennode->g = oldg;
+		    } else {
+			CalculateF(opennode);
+		    } 
+		    
 		    break;
 		}
 	    }
 	    if (isInOpen) continue;
 
 	    PathNode* n = this->CreateNode(neighbor, from, to);
+	    if (!n) continue;
+	    
 	    lopen.push_back(n);
 	    
 	}
@@ -88,15 +118,19 @@ PathNode* PathFinder::CreateNode(glm::vec2 pos, glm::vec2 from, glm::vec2 to)
 {
     PathNode* n = new PathNode;
     n->pos = pos;
-    n->weight = 1.0;
     n->next = nullptr;
     n->prev = nullptr;
 
-    // use euclidian distance as g
-    n->g = glm::sqrt(glm::pow(pos.x - from.x, 2) + glm::pow(pos.y - from.y, 2));
+    CalculateGH(n, from, to, pos);
+    printf("\t\tg: %.3f | h: %.3f\n", n->g, n->h);
 
-    // use Manhattan distance as h
-    n->h = glm::abs(to.x - pos.x) + glm::abs(to.y - pos.y);
+    int pindex = (unsigned)pos.y * _mapWidth + (unsigned)pos.x;
+    if (pindex < 0 || pos.y < 0 || pos.x < 0) {
+	return nullptr;
+    }
+    
+    n->weight = 1.0; /*(_pathing_slots[(unsigned)pindex] == 0xff)
+		      ? 1.0E9 : 1; */
     
     n->f = CalculateF(n);
     return n;
@@ -120,6 +154,8 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
     std::list<PathNode*> lopen, lclosed;
     lclosed.push_back(node);
 
+    int ct = 0;
+    
     while (node->pos != to) {
 	printf("%.2f %.2f\n", node->pos.x, node->pos.y);
 	
@@ -145,9 +181,7 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
 	    [&lowernode](PathNode*& n){return (n->pos == lowernode->pos); });
 
 	node = lowernode;
-	
-	//TODO: remove lowernode from openlist
-
+        
 	/* Check if we approximately reached the final point
 	   If yes, just add the 'final touch' */
 	if (glm::abs(node->pos.x - to.x) < 1.0 &&
@@ -158,6 +192,7 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
 	    lclosed.push_back(lowernode);
 	    break;
 	}
+
     }
 
     printf("-- ok, realigning\n");
@@ -171,12 +206,24 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
     return true;   
 }
 
+void PathFinder::ClearPathmap(int w, int h, int x, int y) {
+    for (int oy = y; oy < y+h; oy++) {
+	for (int ox = x; ox < x+w; ox++) {
+	    _pathing_slots[oy*_mapWidth+ox] = 0;
+	}
+    }
+}
+
 std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* o, glm::vec2 destination)
 {
     std::vector<glm::vec2> vec;
     std::list<PathNode*> nodelist;
-
     glm::vec2 from(o->GetX(), o->GetZ());
+    double r = o->GetRadius();
+    
+    /* Unmap our object */
+    this->ClearPathmap(r*2, r*2, from.x-r, from.y-r);
+    
     printf("from: %.2f %.2f, to %.2f %.2f\n\n",
 	   from.x, from.y, destination.x, destination.y);
     
