@@ -80,6 +80,8 @@ void PathFinder::CreateNeighbors(PathNode* n, std::list<PathNode*>& lopen,
 	    for (auto& closednode : lclosed) {
 		if (closednode->pos == neighbor) {
 		    isInClosed = true;
+		    n->prev = closednode;
+		    closednode->next = n;
 		    break;
 		}		
 	    }
@@ -156,7 +158,7 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
 
     int ct = 0;
     
-    while (node->pos != to) {
+    while (node->pos != to) {	
 	printf("%.2f %.2f\n", node->pos.x, node->pos.y);
 	
 	/* Open the neighbors */	
