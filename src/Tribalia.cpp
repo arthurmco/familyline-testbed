@@ -239,8 +239,9 @@ int main(int argc, char const *argv[])
     InputPicker* ip = new InputPicker{ terr_rend, win, scenemng, cam, om};
     hp->SetPicker(ip);
 
-    PathFinder* pathf = new PathFinder(terr, om);
-    pathf->UpdateSlotList(0, 0, terr->GetWidth(), terr->GetHeight());
+    PathFinder* pathf = new PathFinder(om);
+    pathf->InitPathmap(terr->GetWidth(), terr->GetHeight());
+    pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
     hp->SetPathfinder(pathf);
 
     unsigned int ticks = SDL_GetTicks();
@@ -293,7 +294,7 @@ int main(int argc, char const *argv[])
         bool objupdate = objrend->Check();
         if (objupdate || hp->HasUpdatedObject()) {
             objrend->Update();
-            pathf->UpdateSlotList(0, 0, terr->GetWidth(), terr->GetHeight());
+            pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
         }
 		objrend->Update();
 

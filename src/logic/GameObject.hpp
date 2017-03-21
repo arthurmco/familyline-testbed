@@ -63,7 +63,7 @@ namespace Tribalia {
         const char* GetName();
         void SetName(char*);
 
-		virtual GameObject* Clone(float x, float y, float z, char* n = nullptr) = 0;
+	virtual GameObject* Clone(float x, float y, float z, char* n = nullptr) = 0;
 
         /* Get a property value */
         template<typename T>

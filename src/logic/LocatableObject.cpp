@@ -24,6 +24,7 @@ float LocatableObject::GetRadius()
     if (m) {
 
 	if (_radius < 0.0f) {
+	    m->GenerateBoundingBox();
 	
 	    /*  Multiply by 4, the default number for gl to game coord 
 		conversion.
