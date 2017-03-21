@@ -15,10 +15,9 @@ void PathFinder::InitPathmap(int w, int h)
 }
 void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 {
-    auto objList = _om->GetObjectList();
-
-    memset((void*)_pathing_slots, 0, w*h*sizeof(unsigned char));
+    this->ClearPathmap(w, h, x, y);
     
+    auto objList = _om->GetObjectList();    
     for (auto& obj : *objList) {
 	LocatableObject* l = dynamic_cast<LocatableObject*>(obj.obj);
 	if (!l) {
@@ -157,6 +156,7 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
     lclosed.push_back(node);
 
     int ct = 0;
+    bool ret = true;
     
     while (node->pos != to) {	
 	printf("%.2f %.2f\n", node->pos.x, node->pos.y);
@@ -173,6 +173,11 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
 		lowerf = opennode->f;
 		lowernode = opennode;
 	    }
+	}
+
+	if (!lowernode) {
+	    ret = false;
+	    break;
 	}
 
 	/* Define nodes' relation */
@@ -195,6 +200,8 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
 	    break;
 	}
 
+	lopen.clear();
+
     }
 
     printf("-- ok, realigning\n");
@@ -205,7 +212,7 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
 	nodelist.push_back(n);
     }
     
-    return true;   
+    return ret;   
 }
 
 void PathFinder::ClearPathmap(int w, int h, int x, int y) {
