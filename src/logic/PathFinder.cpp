@@ -37,13 +37,14 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 }
 
 
-static double CalculateGH(PathNode* n, glm::vec2 from, glm::vec2 to, glm::vec2 pos) {
+static void CalculateGH(PathNode* n, glm::vec2 from, glm::vec2 to, glm::vec2 pos) {
     // use euclidian distance as g
-    n->g = glm::sqrt(glm::pow(pos.x - from.x, 2) + glm::pow(pos.y - from.y, 2));
+    n->g = glm::sqrt(glm::pow(pos.x - from.x, 2.0) + glm::pow(pos.y - from.y, 2.0));
 
     // use Manhattan distance as h
     n->h = glm::abs(to.x - pos.x) + glm::abs(to.y - pos.y);
- 
+
+
 }
 
 static inline double CalculateF(PathNode* n) {
