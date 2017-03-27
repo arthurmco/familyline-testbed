@@ -24,7 +24,8 @@ UninstPage instfiles
 
 ; Default install
 Section ""
-	SetOutPath "$INSTDIR"
+	SetOutPath "$TEMP\tribalia"
+	File "depend\vc_redist.x86.exe"
 
 	; Check if we need to install Visual C++ Redistributable
 	${If} ${RunningX64}
@@ -37,7 +38,7 @@ Section ""
 
 	; Install
 	DetailPrint "Installing prerequisite: Visual C++ 2015 Redistributable" ; because MS don't bundle it with windows
-	ExecWait 'depend/vc_redist.x86.exe' $0
+	ExecWait '$TEMP\tribalia\vc_redist.x86.exe' $0
 
 	${If} $0 != 0 
 		DetailPrint "Prerequisite install canceled"
@@ -45,7 +46,7 @@ Section ""
 	${EndIf}
 
 	vcrinstalled:
-
+	SetOutPath "$INSTDIR"
 	File "tribalia.exe"
 	File "zlib1.dll"
 	File "SDL2.dll"
