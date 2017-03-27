@@ -15,7 +15,7 @@ file(WRITE "${GEN_HEADER}" "/* Auto-generated header by CMakeLists.txt \n")
 file(APPEND "${GEN_HEADER}" " Do not directly edit it! */\n\n")
 
 # Write version
-file(APPEND "${GEN_HEADER}" "#define VERSION \"v0.0.4\" \n")
+file(APPEND "${GEN_HEADER}" "#define VERSION \"v0.0.5\" \n")
 
 # Retrieve commit number (useful when getting logs from git clones)
 execute_process(
