@@ -31,6 +31,28 @@ Unit::Unit(int oid, int tid, const char* name,
     }
 
 Unit::Unit(int oid, int tid, const char* name,
+	   float x, float y, float z, int maxHP, float HP,
+    float baseAtk, float baseArmor,
+    float speed, float armatureMaterial,
+    float piercingAttack)
+    : AttackableObject(oid, tid, name, x, y, z, maxHP, HP, baseAtk, baseArmor)
+    {
+        this->AddProperty("speed", speed);
+        this->AddProperty("armatureMaterial", armatureMaterial);
+        this->AddProperty("piercingAttack", piercingAttack);
+    }
+
+Unit::Unit(int oid, int tid, const char* name,
+	   float x, float y, float z, int maxHP, float HP,
+    float baseAtk, float baseArmor)
+    : AttackableObject(oid, tid, name, x, y, z, maxHP, HP, baseAtk, baseArmor)
+    {
+        this->AddProperty("speed", 1.0f);
+        this->AddProperty("armatureMaterial", 0.0f);
+        this->AddProperty("piercingAttack", 0.01f);
+    }
+
+Unit::Unit(int oid, int tid, const char* name,
     float x, float y, float z, int maxHP,
     float baseAtk, float baseArmor,
     float speed, float armatureMaterial,
@@ -41,6 +63,7 @@ Unit::Unit(int oid, int tid, const char* name,
         this->AddProperty("armatureMaterial", armatureMaterial);
         this->AddProperty("piercingAttack", piercingAttack);
     }
+
 
 float Unit::GetSpeed()
 {

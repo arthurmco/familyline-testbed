@@ -2,7 +2,7 @@
 /***
     Attackable object class
 
-    Copyright 2016 Arthur M.
+    Copyright 2016, 2017 Arthur M.
 
 ***/
 
@@ -10,6 +10,7 @@
 #include "Action.hpp"
 
 #include <cstring>
+#include <cstdlib> //srand(), rand()
 #include <algorithm>
 
 #ifndef ATTACKABLEOBJECT_HPP
@@ -17,6 +18,14 @@
 
 namespace Tribalia {
     namespace Logic {
+
+	/* The status of attacked or attackable objects */
+	enum AttackableStatus {
+	    AST_CREATING,
+	    AST_ALIVE,
+	    AST_DEAD,
+	    AST_INVULNERABLE,
+	};
 
         /* This class represents an object that can attack... and be attacked */
 
@@ -27,6 +36,9 @@ namespace Tribalia {
                 float x, float y, float z);
             AttackableObject(int oid, int tid, const char* name,
                 float x, float y, float z, int maxHP,
+                float baseAtk, float baseArmor);
+            AttackableObject(int oid, int tid, const char* name,
+		float x, float y, float z, int maxHP, float HP,
                 float baseAtk, float baseArmor);
 
             int GetMaxHP(void);
@@ -41,29 +53,26 @@ namespace Tribalia {
             float GetBasicBuildingBonus(void);
             float GetMediumBuildingBonus(void);
             float GetAdvancedBuildingBonus(void);
-    
+	    
+	    AttackableStatus GetStatus(void);
+
+	    /* Set the object status. 
+	     * Note that you can't set an object to dead */
+	    void SetStatus(AttackableStatus);
+	    
             /* Retrieve this unit experience
                The experience is tightly associated with the soldier
                strength progression and hit chance */
             int GetExperience();
 
            
-            /*  Get all actions. Return the action count.
-                'names' is an array of C strings */
-            int GetActionNames(const char**& names);
-
-            /*  Get the data for each action */
-            UserAction* GetAction(const char* name);
-
             /* Hit another entity 
-               Returns the amount of damage 
+               Returns the amount of damage dealt
             */
             float Hit(AttackableObject* other);
 
 
         protected:
-            /* The actions that this entity can perform */
-            std::vector<UserAction> _actions;
 
             /* Increase HP until maximum */
             float Heal(float);
