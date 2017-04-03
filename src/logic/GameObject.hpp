@@ -2,7 +2,7 @@
 /***
     Game object class implementation
 
-    Copyright 2016 Arthur M.
+    Copyright 2016, 2017 Arthur M.
 
 ***/
 
@@ -125,6 +125,9 @@ namespace Tribalia {
             return false;
 
         }
+
+	/* Returns true if a property exists */
+	bool HasProperty(const char* name);
 
         /* Called on object initialization */
         virtual bool Initialize() = 0;

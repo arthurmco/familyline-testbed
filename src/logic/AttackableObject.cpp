@@ -17,8 +17,9 @@ AttackableObject::AttackableObject(int oid, int tid, const char* name)
     DEF_PROPERTY("bonusAdvancedBuildingAtk", 1.0e-3f);
     DEF_PROPERTY("experience", 0);
     DEF_PROPERTY("city", nullptr);
-    DEF_PROPERTY("attack_status", AST_ALIVE);
-
+    DEF_PROPERTY("attackStatus", AST_ALIVE);
+    DEF_PROPERTY("attackRange", 1.0);
+	
     /* This isn't reccomended, but we don't need a nice method
      * just to calculate the attack chance */
     srand((unsigned int)((uintptr_t)this & 0xffffffff));
@@ -38,7 +39,8 @@ AttackableObject::AttackableObject(int oid, int tid, const char* name,
     DEF_PROPERTY("bonusAdvancedBuildingAtk", 1.0e-3f);
     DEF_PROPERTY("experience", 0);
     DEF_PROPERTY("city", nullptr);
-    DEF_PROPERTY("attack_status", AST_ALIVE);
+    DEF_PROPERTY("attackStatus", AST_ALIVE);
+    DEF_PROPERTY("attackRange", 1.0);
 
 }
 AttackableObject::AttackableObject(int oid, int tid, const char* name,
@@ -56,7 +58,9 @@ AttackableObject::AttackableObject(int oid, int tid, const char* name,
     DEF_PROPERTY("bonusAdvancedBuildingAtk", 1.0e-3f);
     DEF_PROPERTY("experience", 0);
     DEF_PROPERTY("city", nullptr);
-    DEF_PROPERTY("attack_status", AST_ALIVE);
+    DEF_PROPERTY("attackStatus", AST_ALIVE);
+    DEF_PROPERTY("attackRange", 1.0);
+
 }
 
 AttackableObject::AttackableObject(int oid, int tid, const char* name,
@@ -74,7 +78,9 @@ AttackableObject::AttackableObject(int oid, int tid, const char* name,
     DEF_PROPERTY("bonusAdvancedBuildingAtk", 1.0e-3f);
     DEF_PROPERTY("experience", 0);
     DEF_PROPERTY("city", nullptr);
-    DEF_PROPERTY("attack_status", AST_ALIVE);
+    DEF_PROPERTY("attackStatus", AST_ALIVE);
+    DEF_PROPERTY("attackRange", 1.0);
+
 }
 
 int AttackableObject::GetMaxHP(void){
@@ -125,7 +131,7 @@ float AttackableObject::Damage(float val)
     f =  std::max(f + val, 0.0f);
 
     if (f <= 0.0) {
-	SET_PROPERTY("attack_status", AST_DEAD);
+	SET_PROPERTY("attackStatus", AST_DEAD);
     }
 
     
@@ -154,14 +160,14 @@ int AttackableObject::GetExperience()
 	    
 AttackableStatus AttackableObject::GetStatus(void)
 {
-    return GET_PROPERTY(AttackableStatus, "attack_status");
+    return GET_PROPERTY(AttackableStatus, "attackStatus");
 }
 
 /* Set the object status. 
  * Note that you can't set an object to dead */
 void AttackableObject::SetStatus(AttackableStatus a){
     if (a != AST_DEAD)
-	SET_PROPERTY("attack_status", a);
+	SET_PROPERTY("attackStatus", a);
 }
 	    
 float AttackableObject::Hit(AttackableObject* other) 
@@ -189,3 +195,17 @@ float AttackableObject::Hit(AttackableObject* other)
 
     return (float)atk_real;
 }
+
+/* Check if the other object is within attack range */
+bool AttackableObject::CheckAttackRange(AttackableObject* other)
+{
+    double atkRange = GET_PROPERTY(double, "attackRange");
+    double atkRadius = atkRange + this->GetRadius();
+
+    glm::vec2 vRelPos = glm::vec2(other->_xPos - this->_xPos,
+				  other->_zPos - this->_zPos);
+
+    return (glm::length(vRelPos) <= atkRadius);
+}
+
+

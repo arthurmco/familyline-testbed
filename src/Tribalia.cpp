@@ -311,8 +311,16 @@ int main(int argc, char const *argv[])
 
         LocatableObject* selected = hp->GetSelectedObject();
         if (selected) {
-            gr.DebugWrite(10, 120, "Selected object: '%s'",
-                selected->GetName());
+	    if (selected->HasProperty("maxHP")) {
+		AttackableObject* a = (AttackableObject*)selected;
+		gr.DebugWrite(10, 120, "Selected object: '%s' (%4d/%4d)",
+			      a->GetName(), (int)a->GetHP(), a->GetMaxHP());
+	
+	    } else {
+		gr.DebugWrite(10, 120, "Selected object: '%s'",
+			      selected->GetName());
+	      
+	    }	    
         }
 
 

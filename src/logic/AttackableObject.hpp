@@ -71,6 +71,9 @@ namespace Tribalia {
             */
             float Hit(AttackableObject* other);
 
+	    /* Check if the other object is within attack range */
+	    bool CheckAttackRange(AttackableObject* other);
+
 
         protected:
 

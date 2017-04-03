@@ -40,3 +40,11 @@ float GameObject::GetY() { return _yPos; }
 
 void GameObject::SetZ(float v) { _zPos = v; }
 float GameObject::GetZ() { return _zPos; }
+
+/* Returns true if a property exists */
+bool GameObject::HasProperty(const char* name)
+{
+    std::string sname{name};
+
+    return (_properties.find(sname) != _properties.end());
+}

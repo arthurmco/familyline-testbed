@@ -157,7 +157,7 @@ void TerrainRenderer::Update()
 glm::vec3 TerrainRenderer::GraphicalToGameSpace(glm::vec3 graphical)
 {
 	return glm::vec3(graphical.x / SEC_SIZE, 
-				graphical.y / SEC_HEIGHT, graphical.z / SEC_SIZE);
+			 graphical.y / SEC_HEIGHT, graphical.z / SEC_SIZE);
 
 }
 
@@ -165,5 +165,5 @@ glm::vec3 TerrainRenderer::GraphicalToGameSpace(glm::vec3 graphical)
 glm::vec3 TerrainRenderer::GameToGraphicalSpace(glm::vec3 game)
 {
 	return glm::vec3(game.x * SEC_SIZE, 
-					game.y * SEC_HEIGHT, game.z * SEC_SIZE);
+			 game.y * SEC_HEIGHT, game.z * SEC_SIZE);
 }
