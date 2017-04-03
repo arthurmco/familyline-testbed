@@ -29,6 +29,14 @@ namespace Logic {
             float baseAtk, float baseArmor,
             float speed, float armatureMaterial,
             float piercingAttack);
+        Unit(int oid, int tid, const char* name,
+            float x, float y, float z, int maxHP,
+	     float HP, float baseAtk, float baseArmor);
+        Unit(int oid, int tid, const char* name,
+            float x, float y, float z, int maxHP,
+	     float HP, float baseAtk, float baseArmor,
+            float speed, float armatureMaterial,
+            float piercingAttack);
 
         float GetSpeed(); void SetSpeed(float);
         float GetArmatureMaterial(); void SetArmatureMaterial(float);

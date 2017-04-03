@@ -40,7 +40,7 @@ namespace Logic {
             float x, float y, float z, int maxHP,
             float baseAtk, float baseArmor);
         Building(int oid, int tid, const char* name,
-            float x, float y, float z, int maxHP,
+		 float x, :float y, float z, int maxHP,
             float baseAtk, float baseArmor,
             float buildMaterial, float BuildingStrength,
 			int garrisonCapacity);
