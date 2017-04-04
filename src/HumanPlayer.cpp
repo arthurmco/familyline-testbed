@@ -46,6 +46,8 @@ bool attack_set = false, attack_ready = false;
 bool build_tent = false, build_tower = false;
 bool remove_object = false;
 
+AttackableObject *attacker, *attackee;
+
 InputListener ilt;
 
 bool HumanPlayer::ProcessInput()
@@ -140,9 +142,10 @@ bool HumanPlayer::ProcessInput()
             }
 	    
         } else if (ev.eventType == EVENT_MOUSEEVENT ) {
+	    if (attack_set && attack_ready) { attack_set = false; }
 	    
             if (ev.event.mouseev.button == MOUSE_LEFT) {
-		attack_set = attack_ready = false;
+	        attack_set = false;
                 if (ev.event.mouseev.status == KEY_KEYPRESS)
                     mouse_click = true;
                 else
@@ -170,7 +173,7 @@ bool HumanPlayer::ProcessInput()
 			_updated = true;
 		    } else {
 			attack_ready = true;
-			attack_set = false;
+			attack_set = true;
 		    }
 		    
 
@@ -263,20 +266,26 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
 
     if (attack_ready) {
-	AttackableObject* ao = dynamic_cast<AttackableObject*>(_ip->GetIntersectedObject());
+	if (attack_set)
+	    attackee = dynamic_cast<AttackableObject*>(_ip->GetIntersectedObject());
 
-	if (ao) {
-	    AttackableObject* sel = dynamic_cast<AttackableObject*>(_selected_obj);
-	    if (sel && sel->CheckAttackRange(ao)) {
-		float f = sel->Hit(ao, gctx->elapsed_seconds);
-		printf("%s dealt %.3f damage on %s\n", sel->GetName(), f,
-		       ao->GetName());
+	if (attackee) {
+
+	    if (attack_set)
+		attacker = dynamic_cast<AttackableObject*>(_selected_obj);
+	    
+	    if (attacker && attacker->CheckAttackRange(attackee)) {
+		float f = attacker->Hit(attackee, gctx->elapsed_seconds);
+		printf("%s dealt %.3f damage on %s\n", attacker->GetName(), f,
+		       attackee->GetName());
 		       
 	    } else {
 		attack_ready = false;
+		attacker = attackee = nullptr;
 	    }
 	} else {
 	    attack_ready = false;
+	    attacker = attackee = nullptr;
 	}
     }
 
