@@ -57,7 +57,7 @@ void TerrainRenderer::Update()
         offsetY = (SECTION_SIDE * y * SEC_SIZE);
         offsetX = 0;
 
-        int hh, hx, hy, hxy;
+        int hh = 0, hx = 0, hy = 0, hxy = 0;
 
         for (int x = 0; x < w; x++) {
 

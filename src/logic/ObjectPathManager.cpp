@@ -19,7 +19,7 @@ bool ObjectPathManager::AddPath(LocatableObject* o,
 
 	printf("--- added path");
 	_pathrefs.emplace_back(maxpathID++, o, 
-					new std::vector<glm::vec2>(*path));	
+			       new std::vector<glm::vec2>(*path));	
 	return true;
 }
 
@@ -52,10 +52,14 @@ void ObjectPathManager::UpdatePaths()
 			compl_its.push_back(it);
 		}
 
+		auto px = it->path_point.x;
+		auto pz = it->path_point.y;
+
 		printf("-> pp of %s is (%.1f, %.1f)\n",
-				it->lc->GetName(), it->path_point.x, it->path_point.y);
-		it->lc->SetX(it->path_point.x);
-		it->lc->SetZ(it->path_point.y);
+		       it->lc->GetName(), px, pz);
+		it->lc->SetX(px);
+		it->lc->SetY(_terr->GetHeightFromPoint(px, pz));
+		it->lc->SetZ(pz);
 
 		if (it->path_ptr < it->path->size()-1)
 			it->path_point = (*it->path)[++(it->path_ptr)];
@@ -67,4 +71,5 @@ void ObjectPathManager::UpdatePaths()
 	}
 }
 
+void ObjectPathManager::SetTerrain(Terrain* t) { _terr = t; }
 

@@ -276,6 +276,8 @@ int main(int argc, char const *argv[])
     ObjectFactory::GetInstance()->AddObject(new WatchTower);
     ObjectFactory::GetInstance()->AddObject(new Tent);
 
+    ObjectPathManager::getInstance()->SetTerrain(terr);
+
     do {
 
         ip->UpdateIntersectedObject();

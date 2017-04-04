@@ -53,17 +53,17 @@ namespace Logic {
         int GetHeight() const;
         int GetSectionCount() const;
 
-		/* Gets the height from a point, in game space */
-		int GetHeightFromPoint(unsigned x, unsigned y);
+	/* Gets the height from a point, in game space */
+	int GetHeightFromPoint(unsigned x, unsigned y);
 
         const char* GetName() const;
         const char* GetDescription() const;
 
-		void SetName(const char*);
-		void SetDescription(const char*);
+	void SetName(const char*);
+	void SetDescription(const char*);
 
-		/* Get raw terrain data and split it into sections */
-		void SetData(TerrainSlot* slot);
+	/* Get raw terrain data and split it into sections */
+	void SetData(TerrainSlot* slot);
 
     };
 

@@ -8,6 +8,7 @@
 
 #include <glm/glm.hpp>
 #include "LocatableObject.hpp"
+#include "Terrain.hpp"
 
 #ifndef OBJECTPATHMANAGER_HPP
 #define OBJECTPATHMANAGER_HPP
@@ -21,10 +22,10 @@ struct ObjectPathRef {
 	LocatableObject* lc;
 	std::vector<glm::vec2>* path;
 	glm::vec2 path_point;
-	int path_ptr = 0;
+	unsigned int path_ptr = 0;
 
 	ObjectPathRef(int pathid, LocatableObject* lc, 
-					std::vector<glm::vec2>* path)
+		      std::vector<glm::vec2>* path)
 	{
 		this->pathid = pathid;
 		this->lc = lc;
@@ -36,30 +37,35 @@ struct ObjectPathRef {
 
 class ObjectPathManager {
 private:	
-	std::vector<ObjectPathRef> _pathrefs;
-
+    std::vector<ObjectPathRef> _pathrefs;
+    Terrain* _terr = nullptr;
+    
 public:
-	/* 	Adds a path from object 'o' to the path manager 
-	 	Returns true if added successfully, or false if there's already a path there
-		for the same object
-	 */
-	bool AddPath(LocatableObject* o, std::vector<glm::vec2>* path);
+    /* 	Adds a path from object 'o' to the path manager 
+	Returns true if added successfully, or false if there's already a path there
+	for the same object
+    */
+    bool AddPath(LocatableObject* o, std::vector<glm::vec2>* path);
 
-	/* 	Removes a path from object 'oid'. 
-	 	Returns true if path removed, or false if path didn't exist there */
-	bool RemovePath(long oid);
+    /* 	Removes a path from object 'oid'. 
+	Returns true if path removed, or false if path didn't exist there */
+    bool RemovePath(long oid);
 
-	/* Update the paths
-	 * Also, removes the completed paths
-	 * */
-	void UpdatePaths();
+    /* Update the paths
+     * Also, removes the completed paths
+     * */
+    void UpdatePaths();
 
-	static ObjectPathManager* getInstance()	{
-		static ObjectPathManager* i = nullptr;
-		if (!i) 	i = new ObjectPathManager;
+    void SetTerrain(Terrain*);
+    
+    
 
-		return i;
-	}
+    static ObjectPathManager* getInstance()	{
+	static ObjectPathManager* i = nullptr;
+	if (!i) 	i = new ObjectPathManager;
+
+	return i;
+    }
 
 };
 
