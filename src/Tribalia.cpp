@@ -298,10 +298,16 @@ int main(int argc, char const *argv[])
         }
 		objrend->Update();
 
+        LocatableObject* selected = hp->GetSelectedObject();
         auto locc = ip->GetIntersectedObject();
         if (locc) {
             gr.DebugWrite(10, 100, "Hovering object '%s'", locc->GetName());
-        }
+
+	    if (selected && locc->HasProperty("maxHP")) {
+		AttackableObject* a = (AttackableObject*)locc;
+		gr.DebugWrite(350, 100, a->CheckAttackRange((AttackableObject*)selected) ? "In range" : "Not in range");
+	    }
+	}
 
         {
             int qx, qy;
@@ -309,7 +315,6 @@ int main(int argc, char const *argv[])
             gr.DebugWrite(10, 160, "Camera quadrant: %d x %d", qx, qy);
         }
 
-        LocatableObject* selected = hp->GetSelectedObject();
         if (selected) {
 	    if (selected->HasProperty("maxHP")) {
 		AttackableObject* a = (AttackableObject*)selected;

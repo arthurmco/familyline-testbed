@@ -128,7 +128,7 @@ float AttackableObject::Damage(float val)
 {
     float f = GET_PROPERTY(float, "HP");
 
-    f =  std::max(f + val, 0.0f);
+    f =  std::max(f - val, 0.0f);
 
     if (f <= 0.0) {
 	SET_PROPERTY("attackStatus", AST_DEAD);
@@ -179,7 +179,7 @@ float AttackableObject::Hit(AttackableObject* other)
 	return 0.0f;
     }
     
-    attack_seed = (rand() % 90) + 10;
+    attack_seed = (rand() % 85) + 15;
     double atk_percent = attack_seed * 0.01;
     double atk_true = (GetBaseAttack());  //do not use bonuses yet
     int exp = this->GetExperience();
@@ -199,13 +199,15 @@ float AttackableObject::Hit(AttackableObject* other)
 /* Check if the other object is within attack range */
 bool AttackableObject::CheckAttackRange(AttackableObject* other)
 {
+    /* Basic circle-circle collision detection */
+    
     double atkRange = GET_PROPERTY(double, "attackRange");
     double atkRadius = atkRange + this->GetRadius();
 
     glm::vec2 vRelPos = glm::vec2(other->_xPos - this->_xPos,
 				  other->_zPos - this->_zPos);
 
-    return (glm::length(vRelPos) <= atkRadius);
+    return (glm::length(vRelPos) <= (atkRadius + other->GetRadius()));
 }
 
 

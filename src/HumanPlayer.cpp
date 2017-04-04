@@ -41,6 +41,8 @@ bool rotate_left = false, rotate_right = false;
 bool mouse_click = false;
 bool exit_game = false;
 
+bool attack_set = false, attack_ready = false;
+
 bool build_tent = false, build_tower = false;
 bool remove_object = false;
 
@@ -131,11 +133,16 @@ bool HumanPlayer::ProcessInput()
 		this->renderBBs = !this->renderBBs;
 	    }
 	    break;
+
+	    case SDLK_k:
+		attack_set = true;
+		break;
             }
 	    
         } else if (ev.eventType == EVENT_MOUSEEVENT ) {
 	    
             if (ev.event.mouseev.button == MOUSE_LEFT) {
+		attack_set = false;
                 if (ev.event.mouseev.status == KEY_KEYPRESS)
                     mouse_click = true;
                 else
@@ -144,19 +151,26 @@ bool HumanPlayer::ProcessInput()
 	    
             if (ev.event.mouseev.button == MOUSE_RIGHT && _selected_obj) {
                 if (ev.event.mouseev.status == KEY_KEYPRESS) {
-                    /* Move the object to some position */
-                    glm::vec2 to = _ip->GetGameProjectedPosition();
+
+		    if (!attack_set) {
 		    
-		    auto path = _pf->CreatePath(_selected_obj, to);
-                    glm::vec2 lp = path.back();
-                    printf("Moved to %.2fx%.2f", lp.x, lp.y);
+			/* Move the object to some position */
+			glm::vec2 to = _ip->GetGameProjectedPosition();
+		    
+			auto path = _pf->CreatePath(_selected_obj, to);
+			glm::vec2 lp = path.back();
+			printf("Moved to %.2fx%.2f", lp.x, lp.y);
 					
-		    ObjectPathManager::getInstance()->AddPath(
-			_selected_obj, &path);
+			ObjectPathManager::getInstance()->AddPath(
+			    _selected_obj, &path);
 		    
-		    //_selected_obj->SetX(lp.x);
-                    //_selected_obj->SetZ(lp.y);
-                    _updated = true;
+			//_selected_obj->SetX(lp.x);
+			//_selected_obj->SetZ(lp.y);
+			_updated = true;
+		    } else {
+			attack_ready = true;
+			attack_set = false;
+		    }
 		    
 
                 }
@@ -247,6 +261,23 @@ bool HumanPlayer::Play(GameContext* gctx)
 	remove_object = false;
     }
 
+    if (attack_ready) {
+	AttackableObject* ao = dynamic_cast<AttackableObject*>(_ip->GetIntersectedObject());
+
+	if (ao) {
+	    AttackableObject* sel = dynamic_cast<AttackableObject*>(_selected_obj);
+	    if (sel && sel->CheckAttackRange(ao)) {
+		float f = sel->Hit(ao);
+		printf("%s dealt %.3f damage on %s\n", sel->GetName(), f,
+		       ao->GetName());
+		       
+	    }
+	} 
+
+	attack_ready = false;
+	
+    }
+    
     return true;
 
 }
