@@ -142,7 +142,7 @@ bool HumanPlayer::ProcessInput()
         } else if (ev.eventType == EVENT_MOUSEEVENT ) {
 	    
             if (ev.event.mouseev.button == MOUSE_LEFT) {
-		attack_set = false;
+		attack_set = attack_ready = false;
                 if (ev.event.mouseev.status == KEY_KEYPRESS)
                     mouse_click = true;
                 else
@@ -153,6 +153,7 @@ bool HumanPlayer::ProcessInput()
                 if (ev.event.mouseev.status == KEY_KEYPRESS) {
 
 		    if (!attack_set) {
+			attack_ready = false;
 		    
 			/* Move the object to some position */
 			glm::vec2 to = _ip->GetGameProjectedPosition();
@@ -267,16 +268,19 @@ bool HumanPlayer::Play(GameContext* gctx)
 	if (ao) {
 	    AttackableObject* sel = dynamic_cast<AttackableObject*>(_selected_obj);
 	    if (sel && sel->CheckAttackRange(ao)) {
-		float f = sel->Hit(ao);
+		float f = sel->Hit(ao, gctx->elapsed_seconds);
 		printf("%s dealt %.3f damage on %s\n", sel->GetName(), f,
 		       ao->GetName());
 		       
+	    } else {
+		attack_ready = false;
 	    }
-	} 
-
-	attack_ready = false;
-	
+	} else {
+	    attack_ready = false;
+	}
     }
+
+    
     
     return true;
 

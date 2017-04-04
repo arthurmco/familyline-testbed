@@ -68,8 +68,9 @@ namespace Tribalia {
            
             /* Hit another entity 
                Returns the amount of damage dealt
+	       tick is the tick time, in seconds
             */
-            float Hit(AttackableObject* other);
+            float Hit(AttackableObject* other, double tick);
 
 	    /* Check if the other object is within attack range */
 	    bool CheckAttackRange(AttackableObject* other);

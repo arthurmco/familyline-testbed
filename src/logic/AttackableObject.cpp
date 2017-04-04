@@ -170,7 +170,7 @@ void AttackableObject::SetStatus(AttackableStatus a){
 	SET_PROPERTY("attackStatus", a);
 }
 	    
-float AttackableObject::Hit(AttackableObject* other) 
+float AttackableObject::Hit(AttackableObject* other, double tick) 
 {
     /* Check if this object is invulnerable.
        We can't damage nor be damaged by invulnerable attackers */
@@ -185,6 +185,7 @@ float AttackableObject::Hit(AttackableObject* other)
     int exp = this->GetExperience();
     
     double atk_real = atk_true * atk_percent * (1+(exp*0.001));
+    atk_real *= (tick * 10);
     other->Damage(atk_real);
 
     /* Check if the other is dead.
