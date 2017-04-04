@@ -24,7 +24,7 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 	    continue; // Not locatable
 	}
 
-	int ox = l->GetX(), oy = l->GetY(), oz = l->GetZ();
+	int ox = l->GetX(), oz = l->GetZ();
 	float r = l->GetRadius();
 
 	for (int y = oz-r; y < oz+r; y++) {	    
@@ -156,7 +156,6 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
     std::list<PathNode*> lopen, lclosed;
     lclosed.push_back(node);
 
-    int ct = 0;
     bool ret = true;
     
     while (node->pos != to) {	
@@ -228,6 +227,27 @@ std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* o, glm::vec2 dest
 {
     std::vector<glm::vec2> vec;
     std::list<PathNode*> nodelist;
+
+
+    /* Check if some object obstructs the destination */
+    double driftx = 0.0, driftz = 0.0;
+    while (LocatableObject* oobj = dynamic_cast<LocatableObject*>(
+	    _om->GetObject(o->GetX()+driftx, 0, o->GetZ()+driftz, o->GetRadius()))) {
+	if (destination.x+driftx <= 0)
+	    driftx += oobj->GetRadius();
+	else
+	    driftx -= oobj->GetRadius();
+
+	if (destination.y+driftz <= 0)
+	    driftz += oobj->GetRadius();
+	else
+	    driftz -= oobj->GetRadius();
+		
+    }
+    
+    destination.x += driftx;
+    destination.y += driftz;
+    
     glm::vec2 from(o->GetX(), o->GetZ());
     double r = o->GetRadius();
     
