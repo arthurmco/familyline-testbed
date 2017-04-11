@@ -94,7 +94,7 @@ void PathFinder::CreateNeighbors(PathNode* n, std::list<PathNode*>& lopen,
 		    double oldg = opennode->g;		    
 		    CalculateGH(opennode, from, to, neighbor);
 
-		    printf(" rec %.3f -> %.3f\n", oldg, opennode->g);
+		    // printf(" rec %.3f -> %.3f\n", oldg, opennode->g);
 		    if (oldg < opennode->g) {
 			opennode->g = oldg;
 		    } else {
@@ -133,7 +133,7 @@ PathNode* PathFinder::CreateNode(glm::vec2 pos, glm::vec2 from, glm::vec2 to)
     n->prev = nullptr;
 
     CalculateGH(n, from, to, pos);
-    printf("\t\tg: %.3f | h: %.3f\n", n->g, n->h);
+    // printf("\t\tg: %.3f | h: %.3f\n", n->g, n->h);
 
     int pindex = (unsigned)pos.y * _mapWidth + (unsigned)pos.x;
     if (pindex < 0 || pos.y < 0 || pos.x < 0) {
@@ -168,7 +168,7 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
     bool ret = true;
     
     while (node->pos != to) {	
-	printf("%.2f %.2f\n", node->pos.x, node->pos.y);
+	// printf("%.2f %.2f\n", node->pos.x, node->pos.y);
 	
 	/* Open the neighbors */	
 	this->CreateNeighbors(node, lopen, lclosed, from, to);
@@ -178,7 +178,7 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
 	/* Check the path with the best 'f' */
 	for (auto& opennode : lopen) {
 	    if (opennode->f < lowerf) {
-		printf("\t next: %.2f %.2f (f: %.4f)\n", opennode->pos.x, opennode->pos.y, lowerf);
+		// printf("\t next: %.2f %.2f (f: %.4f)\n", opennode->pos.x, opennode->pos.y, lowerf);
 		lowerf = opennode->f;
 		lowernode = opennode;
 	    }
