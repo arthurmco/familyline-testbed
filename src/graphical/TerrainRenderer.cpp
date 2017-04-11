@@ -3,14 +3,21 @@
 using namespace Tribalia::Graphics;
 using namespace Tribalia::Logic;
 
+static Material m = Material("terrain", MaterialData(0.8f, 0.95f, 0.2f));
+
+/* Return a valid material, or the above material 'm' */
+#define MATERIAL_GET(id) \
+    ((_texturemap[id].m != nullptr) ? _texturemap[id].m->GetID() : m.GetID())
+     
+    
+    
 TerrainRenderer::TerrainRenderer(Renderer* r)
     : _rend(r)
 {
     MaterialData matdata;
     matdata.diffuseColor = glm::vec3(0.4, 0.6, 0.0);
     matdata.ambientColor = glm::vec3(0.01, 0.01, 0.0);
-    Material mat = Material("Terrain", matdata);
-    MaterialManager::GetInstance()->AddMaterial(&mat);
+    MaterialManager::GetInstance()->AddMaterial(&m);
 }
 
 void TerrainRenderer::SetTerrain(Terrain* t)
@@ -22,13 +29,15 @@ void TerrainRenderer::SetTerrain(Terrain* t)
     _tdata = new TerrainDataInfo[t->GetSectionCount()];
 
     Log::GetLog()->Write("Added terrain with %d sections",
-        t->GetSectionCount());
-        for (int i = 0; i < t->GetSectionCount(); i++) {
-            _tdata[i].data = nullptr;
-            _tdata[i].vao = -1;
-        }
+	 t->GetSectionCount());
+
+    for (int i = 0; i < t->GetSectionCount(); i++) {
+	_tdata[i].data = nullptr;
+	_tdata[i].vao = -1;
+    }
 
 }
+
 Terrain* TerrainRenderer::GetTerrain() { return _t; }
 
 void TerrainRenderer::SetCamera(Camera* c) { _cam = c; }
@@ -46,8 +55,7 @@ void TerrainRenderer::Update()
     }
 
     needs_update = false;
-    
-    int matid = MaterialManager::GetInstance()->GetMaterial("Terrain")->GetID();
+
 
     int w = ceil(_t->GetWidth() / (SECTION_SIDE*1.0));
     int h = ceil(_t->GetHeight() / (SECTION_SIDE*1.0));
@@ -82,11 +90,13 @@ void TerrainRenderer::Update()
                     eyMax = _t->GetHeight() - (y*SECTION_SIDE);
                 }
 
+		int mid = 0, midx = 0, midy = 0, midxy = 0;
+		
                 float px = 0, py = 0;
                 for (int ey = 0; ey < eyMax; ey++) {
                     for (int ex = 0; ex < exMax; ex++) {
                         hh = _tdata[i].data->data[ey*SECTION_SIDE + ex].elevation;
-
+				
                         if (ex+1 < exMax)
                             hx = _tdata[i].data->data[ey*SECTION_SIDE + (ex+1)].elevation;
 
@@ -96,6 +106,16 @@ void TerrainRenderer::Update()
                         if (ex+1 < exMax && ey+1 < eyMax)
                             hxy = _tdata[i].data->data[(ey+1)*SECTION_SIDE + (ex+1)].elevation;
 
+			mid = _tdata[i].data->data[ey*SECTION_SIDE + ex].terrain_type;
+                        if (ex+1 < exMax)
+			    midx = _tdata[i].data->data[ey*SECTION_SIDE + (ex+1)].terrain_type;
+			if (ey+1 < eyMax)
+			    midy = _tdata[i].data->data[(ey+1)*SECTION_SIDE + (ex)].terrain_type;
+			
+                        if (ex+1 < exMax && ey+1 < eyMax)
+			    midxy = _tdata[i].data->data[(ey+1)*SECTION_SIDE + (ex+1)].terrain_type;
+
+			
 			// Add the vertices
 			glm::vec3 t1, t1x, t1y;
 			t1 = glm::vec3(offsetX+px, hh * SEC_HEIGHT, offsetY+py);
@@ -105,6 +125,14 @@ void TerrainRenderer::Update()
                         vd->Positions.push_back(t1);
                         vd->Positions.push_back(t1x);
                         vd->Positions.push_back(t1y);
+			
+			vd->TexCoords.push_back(glm::vec2(0,0));
+			vd->TexCoords.push_back(glm::vec2(0,1));
+			vd->TexCoords.push_back(glm::vec2(1,0));
+
+			vd->MaterialIDs.push_back(MATERIAL_GET(mid));
+			vd->MaterialIDs.push_back(MATERIAL_GET(midx));
+			vd->MaterialIDs.push_back(MATERIAL_GET(midy));
 
 			glm::vec3 t2x, t2y;
 			t2y = glm::vec3(offsetX+px+SEC_SIZE, hxy * SEC_HEIGHT, offsetY+py+SEC_SIZE);
@@ -114,6 +142,10 @@ void TerrainRenderer::Update()
                         vd->Positions.push_back(t2y);
                         vd->Positions.push_back(t2x);
 
+			vd->TexCoords.push_back(glm::vec2(0,0));
+			vd->TexCoords.push_back(glm::vec2(1,1));
+			vd->TexCoords.push_back(glm::vec2(1,0));
+			
 			// Make the normals
 			glm::vec3 t1a = glm::normalize(t1x - t1);
 			glm::vec3 t1b = glm::normalize(t1y - t1);
@@ -132,8 +164,7 @@ void TerrainRenderer::Update()
                         vd->Normals.push_back(tr2);
 			
 			for (size_t i = 0; i < 6; i++) {
-			    vd->TexCoords.push_back(glm::vec2(1,1));
-			    vd->MaterialIDs.push_back(matid);
+			    vd->MaterialIDs.push_back(m.GetID());
 			}
 
                         px += SEC_SIZE;
@@ -141,7 +172,6 @@ void TerrainRenderer::Update()
                     py += SEC_SIZE;
                     px = 0;
                 }
-                //fclose(f);
 
                 _tdata[i].vao = _rend->AddVertexData(vd, &_wmatrix);
                 Log::GetLog()->Write("Generated terrain data for section %d, "
@@ -156,14 +186,23 @@ void TerrainRenderer::Update()
 /* Convert a terrain point from graphical to game space */
 glm::vec3 TerrainRenderer::GraphicalToGameSpace(glm::vec3 graphical)
 {
-	return glm::vec3(graphical.x / SEC_SIZE, 
-			 graphical.y / SEC_HEIGHT, graphical.z / SEC_SIZE);
+    return glm::vec3(graphical.x / SEC_SIZE, 
+		     graphical.y / SEC_HEIGHT, graphical.z / SEC_SIZE);
 
 }
+
+
 
 /* Convert a terrain point from game to graphical space*/
 glm::vec3 TerrainRenderer::GameToGraphicalSpace(glm::vec3 game)
 {
-	return glm::vec3(game.x * SEC_SIZE, 
-			 game.y * SEC_HEIGHT, game.z * SEC_SIZE);
+    return glm::vec3(game.x * SEC_SIZE, 
+		     game.y * SEC_HEIGHT, game.z * SEC_SIZE);
 }
+
+
+void TerrainRenderer::AddMaterial(unsigned int id, Material* mat)
+{
+    _texturemap[id] = TerrainMaterial(mat);
+}
+

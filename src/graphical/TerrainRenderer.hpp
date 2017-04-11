@@ -5,6 +5,8 @@
 
 ***/
 
+#include <map>
+
 #include "../logic/Terrain.hpp"
 #include "Renderer.hpp"
 #include "Camera.hpp"
@@ -28,6 +30,16 @@ namespace Graphics {
         GLint vao;
     };
 
+    struct TerrainMaterial {
+	Material* m;
+	Shader* pshader;
+	Shader* vshader;
+
+	TerrainMaterial();
+	TerrainMaterial(Material* m);
+	TerrainMaterial(Material* m, Shader* ps, Shader* vs);
+    };    
+
     class TerrainRenderer {
     private:
         TerrainDataInfo* _tdata = nullptr;
@@ -36,6 +48,9 @@ namespace Graphics {
         Renderer* _rend;
         glm::mat4 _wmatrix = glm::mat4(1.0f);
 
+	// Maps texture IDs into real textures
+	std::map<unsigned int, TerrainMaterial> _texturemap;
+	
     public:
         TerrainRenderer(Renderer*);
 
@@ -45,11 +60,13 @@ namespace Graphics {
         void SetCamera(Camera*);
         Camera* GetCamera();
 
+	void AddMaterial(unsigned int id, Material* m);
+
         /* Convert a terrain point from graphical to game space */
         static glm::vec3 GraphicalToGameSpace(glm::vec3 graphical);
 
-		/* Convert a terrain point from game to graphical space*/
-		static glm::vec3 GameToGraphicalSpace(glm::vec3 game);
+	/* Convert a terrain point from game to graphical space*/
+	static glm::vec3 GameToGraphicalSpace(glm::vec3 game);
 
         /*  Check the terrains that needs to be rendered and
             send them to the renderer.

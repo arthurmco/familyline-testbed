@@ -28,6 +28,12 @@ namespace Graphics {
             ambientColor = amb;
         }
 
+	MaterialData(float dif, float spec, float amb) {
+            diffuseColor = glm::vec3(dif);
+            specularColor = glm::vec3(spec);
+            ambientColor = glm::vec3(amb);
+        }
+
         MaterialData() {
             diffuseColor = glm::vec3(0);
             specularColor = glm::vec3(0);
