@@ -1,4 +1,5 @@
 #include "TerrainRenderer.hpp"
+#include "TextureOpener.hpp"
 
 using namespace Tribalia::Graphics;
 using namespace Tribalia::Logic;
@@ -20,9 +21,12 @@ TerrainRenderer::TerrainRenderer(Renderer* r)
     MaterialManager::GetInstance()->AddMaterial(&m);
 
     Material* t0 = new Material("grass",
-	MaterialData(glm::vec3(0.0, 0.8, 0.0),
+	MaterialData(glm::vec3(0.3, 0.3, 0.3),
 		     glm::vec3(0.4, 1.0, 0.4),
-		     glm::vec3(0.2)));
+		     glm::vec3(0.02)));
+    t0->SetTexture(TextureOpener::Open("textures/terrain/grass.png"));
+    MaterialManager::GetInstance()->AddMaterial(t0);
+    
     this->AddMaterial(0, t0);
 						       
 }
