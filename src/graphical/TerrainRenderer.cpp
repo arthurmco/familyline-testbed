@@ -18,6 +18,13 @@ TerrainRenderer::TerrainRenderer(Renderer* r)
     matdata.diffuseColor = glm::vec3(0.4, 0.6, 0.0);
     matdata.ambientColor = glm::vec3(0.01, 0.01, 0.0);
     MaterialManager::GetInstance()->AddMaterial(&m);
+
+    Material* t0 = new Material("grass",
+	MaterialData(glm::vec3(0.0, 0.8, 0.0),
+		     glm::vec3(0.4, 1.0, 0.4),
+		     glm::vec3(0.2)));
+    this->AddMaterial(0, t0);
+						       
 }
 
 void TerrainRenderer::SetTerrain(Terrain* t)
@@ -145,6 +152,11 @@ void TerrainRenderer::Update()
 			vd->TexCoords.push_back(glm::vec2(0,0));
 			vd->TexCoords.push_back(glm::vec2(1,1));
 			vd->TexCoords.push_back(glm::vec2(1,0));
+
+			vd->MaterialIDs.push_back(MATERIAL_GET(mid));
+			vd->MaterialIDs.push_back(MATERIAL_GET(midxy));
+			vd->MaterialIDs.push_back(MATERIAL_GET(midx));
+
 			
 			// Make the normals
 			glm::vec3 t1a = glm::normalize(t1x - t1);
@@ -162,11 +174,7 @@ void TerrainRenderer::Update()
                         vd->Normals.push_back(tr1);
                         vd->Normals.push_back(tr2);
                         vd->Normals.push_back(tr2);
-			
-			for (size_t i = 0; i < 6; i++) {
-			    vd->MaterialIDs.push_back(m.GetID());
-			}
-
+		        
                         px += SEC_SIZE;
                     }
                     py += SEC_SIZE;
