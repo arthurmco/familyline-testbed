@@ -112,7 +112,7 @@ static int check_size(int i, int argc, char const* argv[])
 
 int main(int argc, char const *argv[])
 {
-	int winW = 640, winH = 480;
+    //int winW = 640, winH = 480;
 	if (get_arg_index("--version",argc,argv) >= 0) {
 	    show_version();
 	    return EXIT_SUCCESS;
