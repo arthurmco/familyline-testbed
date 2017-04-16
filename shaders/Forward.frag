@@ -17,6 +17,7 @@ uniform float lightStrenghts[4];
 uniform vec3 lightColors[4];
 
 in vec3 lightDirections[4];
+out vec4 ocolor;
 
 uniform sampler2D tex_sam;
 
@@ -43,5 +44,5 @@ void main() {
 
   vec3 finalColor = ambient_color + (vcolor * lightSum.a) + (lightSum.xyz * lightSum.a);
 
-  gl_FragColor = vec4(finalColor, 1.0);
+  ocolor = vec4(finalColor, 1.0);
 }
