@@ -34,6 +34,8 @@ void Log::SetFile(FILE* f)
 
 void Log::Write(const char* fmt, ...)
 {
+    if (!this->_logFile) return;
+    
     /* Print timestamp */
     time_t now;
     time(&now);
@@ -54,6 +56,8 @@ void Log::Write(const char* fmt, ...)
 
 void Log::Fatal(const char* fmt, ...)
 {
+    if (!this->_logFile) return;
+    
     /* Print timestamp */
     time_t now;
     time(&now);
@@ -75,6 +79,8 @@ void Log::Fatal(const char* fmt, ...)
 
 void Log::Warning(const char* fmt, ...)
 {
+    if (!this->_logFile) return;
+	
     /* Print timestamp */
     time_t now;
     time(&now);

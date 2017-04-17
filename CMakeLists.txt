@@ -49,6 +49,9 @@ file(GLOB_RECURSE SRC_SERVER "${CMAKE_SOURCE_DIR}/server/*.cpp")
 add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT} ${SRC_OBJECTS})
 add_executable(tribalia-server ${SRC_SERVER})
 
+# Add test suites
+include("test/unit-tests.cmake")
+
 if (MSVC)
   # Set include directories
   SET(SDL_INCLUDE "." CACHE PATH "SDL2 include directory")
@@ -79,6 +82,16 @@ if (MSVC)
   target_link_libraries(tribalia ${DEVIL_LIB})
   target_link_libraries(tribalia ${DEVIL_ILU_LIB})
   target_link_libraries(tribalia ${CAIRO_LIB})
+
+  if (DO_TESTS)
+  	target_link_libraries(tribalia-tests ${SDL_LIB})
+  	target_link_libraries(tribalia-tests "opengl32.lib")
+  	target_link_libraries(tribalia-tests ${GLEW_LIB})
+  	target_link_libraries(tribalia-tests ${DEVIL_LIB})
+  	target_link_libraries(tribalia-tests ${DEVIL_ILU_LIB})
+  	target_link_libraries(tribalia-tests ${CAIRO_LIB})
+  endif(DO_TESTS)
+
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /GR /W4")
 
 else()
@@ -91,6 +104,17 @@ else()
   target_link_libraries(tribalia "GLEW")
   target_link_libraries(tribalia "IL")
   target_link_libraries(tribalia "cairo")
+
+  if(DO_TESTS)
+  	target_link_libraries(tribalia-tests "SDL2")
+  	target_link_libraries(tribalia-tests "GL")
+  	target_link_libraries(tribalia-tests "GLEW")
+  	target_link_libraries(tribalia-tests "IL")
+  	target_link_libraries(tribalia-tests "cairo")
+  endif(DO_TESTS)
+
+
+
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -O2")
 
   if (IS_DEBUG)

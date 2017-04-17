@@ -1,5 +1,6 @@
 tribalia
 tribalia-server
+tribalia-tests
 
 *.o
 *.swp
@@ -45,7 +46,12 @@ Win32/*
 GPATH
 GRTAGS
 GSYMS
-GTAGS
+TAGS
+
+# Google test and CTest folders
+googletest*/*
+Testing/*
+CTest*.cmake
 
 # Code::Blocks
 *.cbp

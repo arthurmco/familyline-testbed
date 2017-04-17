@@ -134,11 +134,10 @@ GameObject* ObjectManager::GetObject(int id)
 GameObject* ObjectManager::GetObject(float x, float y, float z, float bias)
 {
     for (auto it = _objects.begin(); it != _objects.end(); ++it) {
-        if (!it->obj->FindProperty("xPos")) continue;
 
-        float xPos = it->obj->GetProperty<float>("xPos");
-        float yPos = it->obj->GetProperty<float>("yPos");
-        float zPos = it->obj->GetProperty<float>("zPos");
+        float xPos = it->obj->GetX();
+        float yPos = it->obj->GetY();
+        float zPos = it->obj->GetZ();
 
         if (xPos >= (x - bias) && xPos <= (x + bias)) {
             if (yPos >= (y - bias) && yPos <= (y + bias)) {

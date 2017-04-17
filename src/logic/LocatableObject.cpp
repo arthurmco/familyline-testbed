@@ -36,7 +36,7 @@ float LocatableObject::GetRadius()
 	return _radius;
 	
     }
-    return 0.0f;
+    return (_radius < 0.0f) ? 0.0f : _radius;
 }
 
 void LocatableObject::SetMesh(Tribalia::Graphics::Mesh* m)

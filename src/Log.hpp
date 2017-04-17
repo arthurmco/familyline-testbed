@@ -17,7 +17,7 @@ namespace Tribalia {
     class Log {
     private:
 
-        FILE* _logFile = NULL;
+        FILE* _logFile = nullptr;
         time_t _time;
         static Log* l;
 
