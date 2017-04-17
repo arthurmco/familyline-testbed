@@ -86,7 +86,7 @@ static void show_version()
 static void show_help()
 {
 	printf("Tribalia help:\n");
-	printf("--version:\tPrint version and, if compiled inside a Git repo, commit info\n");
+	printf("--version:\tPrint version and, if compiled inside a Git repo, commit hash\n");
 	printf("--help:\t\tPrint this help information\n");
 	printf("--size <W>x<H>: Changes the game resolution to <W>x<H> pixels\n");
 }
@@ -298,7 +298,7 @@ int main(int argc, char const *argv[])
             objrend->Update();
             pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
         }
-		objrend->Update();
+	objrend->Update();
 
         LocatableObject* selected = hp->GetSelectedObject();
         auto locc = ip->GetIntersectedObject();
