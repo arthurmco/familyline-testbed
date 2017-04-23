@@ -21,6 +21,10 @@ TEST_F(ObjectTest, CheckObjectCreation){
     _om->RegisterObject(t);
     EXPECT_NE(-1, t->GetObjectID()) << "ID not allocated correctly";
 
+#ifdef _WIN32
+#undef GetObject
+#endif
+
     int id = t->GetObjectID();
     GameObject* tr = _om->GetObject(id);
     EXPECT_EQ(t, tr) << "Could not get object by ID";
@@ -34,6 +38,10 @@ TEST_F(ObjectTest, CheckObjectCreation){
     _om->UnregisterObject(tr);
     tr = _om->GetObject(id);
     EXPECT_EQ(nullptr, tr) << "Could not delete the object";
+
+#ifdef _WIN32
+#define GetObject GetObjectA
+#endif
 
     delete t;
 }
