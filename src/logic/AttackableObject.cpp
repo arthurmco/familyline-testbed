@@ -143,13 +143,13 @@ float AttackableObject::GetUnitBonus(void) {
     return GET_PROPERTY(float,"bonusUnitAtk");
 }
 float AttackableObject::GetBasicBuildingBonus(void) {
-	return GET_PROPERTY(float,"bonusBasicBuildingAtk");
+    return GET_PROPERTY(float,"bonusBasicBuildingAtk");
 }
 float AttackableObject::GetMediumBuildingBonus(void) {
-	return GET_PROPERTY(float,"bonusMediumBuildingAtk");
+    return GET_PROPERTY(float,"bonusMediumBuildingAtk");
 }
 float AttackableObject::GetAdvancedBuildingBonus(void) {
-	return GET_PROPERTY(float,"bonusAdvancedBuildingAtk");
+    return GET_PROPERTY(float,"bonusAdvancedBuildingAtk");
 }
 
 int AttackableObject::GetExperience()
@@ -173,9 +173,11 @@ void AttackableObject::SetStatus(AttackableStatus a){
 float AttackableObject::Hit(AttackableObject* other, double tick) 
 {
     /* Check if this object is invulnerable.
-       We can't damage nor be damaged by invulnerable attackers */
+       We can't damage nor be damaged by invulnerable or dead attackers */
     if (this->GetStatus() == AST_INVULNERABLE ||
-	other->GetStatus() == AST_INVULNERABLE) {
+	other->GetStatus() == AST_INVULNERABLE ||
+	other->GetStatus() == AST_DEAD ||
+	this->GetStatus() == AST_DEAD) {
 	return 0.0f;
     }
     
