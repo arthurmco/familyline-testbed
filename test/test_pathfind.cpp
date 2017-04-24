@@ -8,6 +8,10 @@ void PathfinderTest::SetUp()
     _pf = new PathFinder{_om};
 
     _pf->InitPathmap(256, 256);
+
+    o = new TestObject(1, 10, 1, 10);
+    _om->RegisterObject(o);
+
 }
 
 void PathfinderTest::TearDown()
@@ -24,10 +28,7 @@ void PrintTo(const vec2& vec, ::std::ostream *os) {
 
 
 TEST_F(PathfinderTest, TestStraightPathfind){
-    TestObject* o = new TestObject(1, 10, 1, 10);
-    _om->RegisterObject(o);
-    ASSERT_EQ(1, _om->GetCount()) << "Object manager with wrong count";
-
+    
     auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
     
     /* Check if we didn't got off the path too far */
@@ -47,15 +48,10 @@ TEST_F(PathfinderTest, TestStraightPathfind){
 }
 
 TEST_F(PathfinderTest, TestObstaclePathfind){
-    TestObject* o = new TestObject(1, 10, 1, 10);
     TestObject* c = new TestObject(1, 21, 1, 21);
-    
-    _om->RegisterObject(o);
     _om->RegisterObject(c);
 
     _pf->UpdatePathmap(256, 256);
-    
-    ASSERT_EQ(2, _om->GetCount()) << "Object manager with wrong count";
 
     auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
     

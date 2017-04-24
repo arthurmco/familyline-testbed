@@ -13,6 +13,7 @@ class PathfinderTest : public ::testing::Test {
 protected:
     Tribalia::Logic::ObjectManager* _om;
     Tribalia::Logic::PathFinder* _pf;
+    TestObject* o;
     
 public:
     void SetUp();
