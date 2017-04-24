@@ -217,7 +217,7 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
 
     /* Find the correct path */
     for (PathNode* n = lclosed.back(); n; n = n->prev) {
-	printf("%p %p\n ", n, n->prev);
+	printf("%p (%f %f) -> %p\n ", n, n->pos.x, n->pos.y, n->prev);
 	nodelist.push_back(n);
     }
     
@@ -239,21 +239,7 @@ std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* o, glm::vec2 dest
 
 
     /* Check if some object obstructs the destination */
-    double driftx = 0.0, driftz = 0.0;
-    while (LocatableObject* oobj = dynamic_cast<LocatableObject*>(
-	    _om->GetObject(o->GetX()+driftx, 0, o->GetZ()+driftz, o->GetRadius()))) {
-	if (destination.x+driftx <= 0)
-	    driftx += oobj->GetRadius();
-	else
-	    driftx -= oobj->GetRadius();
-
-	if (destination.y+driftz <= 0)
-	    driftz += oobj->GetRadius();
-	else
-	    driftz -= oobj->GetRadius();
-		
-    }
-    
+    double driftx = 0.0, driftz = 0.0;   
     destination.x += driftx;
     destination.y += driftz;
     
