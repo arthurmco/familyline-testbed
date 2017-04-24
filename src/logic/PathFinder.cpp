@@ -98,9 +98,9 @@ void PathFinder::CreateNeighbors(PathNode* n, std::list<PathNode*>& lopen,
 		    if (oldg < opennode->g) {
 			opennode->g = oldg;
 		    } else {
-			if (glm::abs(x) == glm::abs(y)) {
+			/*if (glm::abs(x) == glm::abs(y)) {
 			    opennode->weight = 1.41;
-			}
+			}*/
 			opennode->f = CalculateF(opennode);
 		    } 
 		    
