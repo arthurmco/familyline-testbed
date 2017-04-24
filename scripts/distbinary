@@ -26,6 +26,7 @@ mkdir -p $FOLDER_DST/$DIRNAME/materials
 mkdir -p $FOLDER_DST/$DIRNAME/models
 mkdir -p $FOLDER_DST/$DIRNAME/shaders
 mkdir -p $FOLDER_DST/$DIRNAME/textures
+mkdir -p $FOLDER_DST/$DIRNAME/textures/terrain
 
 echo -n "Preparing the package... "
 # Copies only the final binary, shaders and media
@@ -34,6 +35,7 @@ cp shaders/* $FOLDER_DST/$DIRNAME/shaders
 cp materials/* $FOLDER_DST/$DIRNAME/materials
 cp models/* $FOLDER_DST/$DIRNAME/models
 cp textures/* $FOLDER_DST/$DIRNAME/textures
+cp textures/terrain/* $FOLDER_DST/$DIRNAME/textures/terrain
 cp README.md $FOLDER_DST/$DIRNAME
 cp scripts/install $FOLDER_DST/$DIRNAME
 

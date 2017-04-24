@@ -10,6 +10,7 @@ mkdir Debug\models
 mkdir Release\models
 mkdir Debug\textures
 mkdir Release\textures
+mkdir Release\textures\terrain
 mkdir Debug\docs
 mkdir Release\docs
 
@@ -20,6 +21,7 @@ copy materials Release\materials
 copy models Debug\models
 copy models Release\models
 copy textures Release\textures
+copy textures\terrain Release\textures\terrain
 copy docs Release\docs
 copy terrain_test.trtb Release\terrain_test.trtb
 
@@ -31,3 +33,4 @@ copy *.md Release
 robocopy /s Release/ distribute/ * /S
 
 echo Data files copied
+

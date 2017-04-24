@@ -7,7 +7,7 @@
 !include x64.nsh
 
 Name "Tribalia"
-OutFile "install.exe"
+OutFile "TribaliaInstall.exe"
 InstallDir "$PROGRAMFILES\Tribalia"
 
 
@@ -76,6 +76,9 @@ Section ""
 	File "textures\*.bmp"
 	File "textures\*.png"
 
+	SetOutPath "$INSTDIR\textures\terrain"
+	File "textures\terrain\*.*"
+
 	SetOutPath "$INSTDIR"
 	WriteUninstaller "uninstall.exe"
 SectionEnd
@@ -113,6 +116,7 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\materials"
 	RMDir /r "$INSTDIR\models"
 	RMDir /r "$INSTDIR\shaders"
+	RMDIR /r "$INSTDIR\textures\terrain"
 	RMDIR /r "$INSTDIR\textures"
 	
 	RMDir "$INSTDIR"
