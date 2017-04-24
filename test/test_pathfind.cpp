@@ -16,6 +16,13 @@ void PathfinderTest::TearDown()
     delete _om;
 }
 
+namespace glm { 
+void PrintTo(const vec2& vec, ::std::ostream *os) {
+    *os << "(" << vec.x << ", " << vec.y << ")";
+}
+}
+
+
 TEST_F(PathfinderTest, TestStraightPathfind){
     TestObject* o = new TestObject(1, 10, 1, 10);
     _om->RegisterObject(o);
@@ -33,6 +40,9 @@ TEST_F(PathfinderTest, TestStraightPathfind){
 
 	i++;
     }
+
+    auto vlast = vlist.back();
+    EXPECT_EQ(glm::vec2(32, 32), vlast);
    
 }
 
@@ -61,6 +71,7 @@ TEST_F(PathfinderTest, TestObstaclePathfind){
 	
 	i++;
     }
-   
 
+    auto vlast = vlist.back();
+    EXPECT_EQ(glm::vec2(32, 32), vlast);
 }
