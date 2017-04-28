@@ -46,6 +46,22 @@ TEST_F(ObjectTest, CheckObjectCreation){
     delete t;
 }
 
+TEST_F(ObjectTest, CheckObjectProperties) {
+    TestObject* o = new TestObject(-1, 1, 1, 1);
+    const char* prop = "DandoBouraBandjido";
+    
+    ASSERT_EQ(false, o->HasProperty(prop));
+    ASSERT_EQ(false, o->SetProperty<int>(prop, 0x101));
+
+    o->AddProperty(prop, 0x101);
+    ASSERT_EQ(true, o->HasProperty(prop));
+    ASSERT_EQ(0x101, o->GetProperty<int>(prop));
+        
+    ASSERT_EQ(true, o->SetProperty(prop, 0x202));
+    ASSERT_EQ(0x202, o->GetProperty<int>(prop));
+    
+}
+
 TEST_F(ObjectTest, CheckObjectAttack){
     TestObject* atk = new TestObject(-1, 20, 1, 20);
     TestObject* def = new TestObject(-1, 20, 1, 10);
