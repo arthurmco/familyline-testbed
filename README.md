@@ -3,6 +3,7 @@
 Tribalia is a real-time strategic game focused on Ancient Era, from since the
 neolythic period (~ 10.000 AD) to the death of Christ (~ 30 BD).
 
+<img src="icons/tribalia-logo.png" height="256px" width="256px" />
 
 ## Needed Software
 
