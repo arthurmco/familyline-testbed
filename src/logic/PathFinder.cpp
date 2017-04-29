@@ -94,7 +94,7 @@ void PathFinder::CreateNeighbors(PathNode* n, std::list<PathNode*>& lopen,
 		    double oldg = opennode->g;		    
 		    CalculateGH(opennode, from, to, neighbor);
 
-		    // printf(" rec %.3f -> %.3f\n", oldg, opennode->g);
+		    //printf(" rec %.3f -> %.3f\n", oldg, opennode->g);
 		    if (oldg < opennode->g) {
 			opennode->g = oldg;
 		    } else {
@@ -238,20 +238,32 @@ std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* o, glm::vec2 dest
     std::list<PathNode*> nodelist;
 
     double r = o->GetRadius();
+
+
+    bool only_y_up = false;
+    bool only_x_up = false;
     
     /* Check if some object obstructs the destination */
     while (_pathing_slots[int(destination.y)*_mapWidth+int(destination.x)] != 0) {
-	if (destination.x > o->GetX()) {
+	if (destination.x > o->GetX() && destination.x > 0 && !only_x_up) {
 	    destination.x -= r;
 	} else {
 	    destination.x += r;
 	}
 
-	if (destination.y > o->GetZ()) {
+	if (destination.x >= 0.0 && destination.x < 1.0)
+	    only_x_up = true;
+
+	if (destination.y > o->GetY() && destination.y > 0 && !only_y_up) {
 	    destination.y -= r;
 	} else {
 	    destination.y += r;
 	}
+
+	if (destination.y >= 0.0 && destination.y < 1.0)
+	    only_y_up = true;	    
+	
+//	printf("%.f %.f\n", destination.x, destination.y);
     }
     
     glm::vec2 from(o->GetX(), o->GetZ());
