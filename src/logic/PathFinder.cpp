@@ -237,14 +237,24 @@ std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* o, glm::vec2 dest
     std::vector<glm::vec2> vec;
     std::list<PathNode*> nodelist;
 
-
+    double r = o->GetRadius();
+    
     /* Check if some object obstructs the destination */
-    double driftx = 0.0, driftz = 0.0;   
-    destination.x += driftx;
-    destination.y += driftz;
+    while (_pathing_slots[int(destination.y)*_mapWidth+int(destination.x)] != 0) {
+	if (destination.x > o->GetX()) {
+	    destination.x -= r;
+	} else {
+	    destination.x += r;
+	}
+
+	if (destination.y > o->GetZ()) {
+	    destination.y -= r;
+	} else {
+	    destination.y += r;
+	}
+    }
     
     glm::vec2 from(o->GetX(), o->GetZ());
-    double r = o->GetRadius();
     
     /* Unmap our object */
     this->ClearPathmap(r*2, r*2, from.x-r, from.y-r);

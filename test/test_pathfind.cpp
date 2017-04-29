@@ -126,9 +126,9 @@ TEST_F(PathfinderTest, TestIfPathfindingPutObjectInOtherObjectPosition){
     EXPECT_NE(glm::vec2(32, 32), vlast) << "Shouldn't go to obstacle";
     EXPECT_NE(glm::vec2(10, 10), vlast) << "Shouldn't go back to start";
 
-    EXPECT_GE(28, vlast.x);
-    EXPECT_LE(36, vlast.x);
-    EXPECT_GE(28, vlast.y);
-    EXPECT_LE(36, vlast.y);
+    EXPECT_LE(28, vlast.x);
+    EXPECT_GE(36, vlast.x);
+    EXPECT_LE(28, vlast.y);
+    EXPECT_GE(36, vlast.y);
      
 }
