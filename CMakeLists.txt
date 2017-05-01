@@ -9,21 +9,17 @@ cmake_minimum_required(VERSION 2.8)
 project(Tribalia)
 
 SET(GEN_HEADER "${CMAKE_SOURCE_DIR}/src/EnviroDefs.h")
+configure_file("${CMAKE_SOURCE_DIR}/src/EnviroDefs.h.in" "${CMAKE_SOURCE_DIR}/src/EnviroDefs.h" @ONLY)
 
-# Create a include for generated content
-file(WRITE "${GEN_HEADER}" "/* Auto-generated header by CMakeLists.txt \n")
-file(APPEND "${GEN_HEADER}" " Do not directly edit it! */\n\n")
+SET(T_VERSION "0.1.0")
 
-# Write version
-file(APPEND "${GEN_HEADER}" "#define VERSION \"v0.0.6\" \n")
+file(APPEND "${GEN_HEADER}" "#define VERSION \"${T_VERSION}\" \n")
 
 # Retrieve commit number (useful when getting logs from git clones)
 execute_process(
   COMMAND git log -1 --format=%h
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE COMMIT_HASH
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+  OUTPUT_VARIABLE COMMIT_HASH OUTPUT_STRIP_TRAILING_WHITESPACE )
 file(APPEND "${GEN_HEADER}" "#define COMMIT \"${COMMIT_HASH}\" \n")
 
 # Retrieve the user who compiled
