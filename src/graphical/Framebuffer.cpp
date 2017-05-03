@@ -46,18 +46,29 @@ Framebuffer::Framebuffer(int w, int h, GLenum format)
 }
 
 /* Set this framebuffer to be the active one */
-void Framebuffer::SetActive()
+void Framebuffer::SetAsRead()
+{
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_handle);
+	glViewport(0, 0, _width, _height);
+}
+
+void Framebuffer::SetAsBoth()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fb_handle);
+	glViewport(0, 0, _width, _height);
+}
+
+void Framebuffer::SetAsWrite()
+{
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb_handle);
 	glViewport(0, 0, _width, _height);
 }
 
 int Framebuffer::defWidth, Framebuffer::defHeight;
 /*  Remove this framebuffer from the active state and
     bring back the default one */
-void Framebuffer::UnsetActive()
+void Framebuffer::Unset()
 {
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_handle);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, defWidth, defHeight);
 

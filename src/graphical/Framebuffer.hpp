@@ -29,13 +29,18 @@ namespace Graphics {
     public:
         Framebuffer(int w, int h, GLenum format);
 
-        /* Set this framebuffer to be the active one */
-        void SetActive();
+        /* Set this framebuffer to be the read framebuffer */
+        void SetAsRead();
 
-        /*  Remove this framebuffer from the active state and
-            bring back the default one */
-        void UnsetActive();
+	/* Set the framebuffer to be the write framebuffer */
+	void SetAsWrite();
 
+	/* Set the framebuffer as both read and write */
+	void SetAsBoth();
+
+	/* Set the framebuffer as nothing */
+	void Unset();
+	
         /*  Get the texture handle for this framebuffer
             Useful when you want to use its content as a texture */
         GLint GetTextureHandle();

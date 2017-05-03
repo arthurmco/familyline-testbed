@@ -337,6 +337,14 @@ int main(int argc, char const *argv[])
         AnimationManager::GetInstance()->Iterate();
 	ObjectPathManager::getInstance()->UpdatePaths();
 
+	fbRender.SetAsBoth();
+	rndr->SetBoundingBox(hp->renderBBs);
+	if (objupdate) rndr->UpdateObjects();
+        rndr->UpdateFrames();
+        rndr->Render();
+	fbRender.SetAsWrite();
+	fbGUI.SetAsRead();
+	
         gr.DebugWrite(10, 140, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f)",
 		      p.x, p.y, p.z, q.x, q.y);
 	gr.DebugWrite(10, 180, "Camera rotation: %.1fº",
@@ -346,12 +354,8 @@ int main(int argc, char const *argv[])
 
 	gr.Render();
 
-	fbRender.SetActive();
-	rndr->SetBoundingBox(hp->renderBBs);
-	if (objupdate) rndr->UpdateObjects();
-        rndr->UpdateFrames();
-        rndr->Render();
-	fbRender.UnsetActive();
+	fbRender.Unset();
+	fbGUI.Unset();
 	win->Update();
 
         frame++;
