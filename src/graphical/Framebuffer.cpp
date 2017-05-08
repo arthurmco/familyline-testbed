@@ -38,45 +38,49 @@ Framebuffer::Framebuffer(int w, int h, GLenum format)
 
     GLenum fb_error = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (fb_error != GL_FRAMEBUFFER_COMPLETE)
-	throw new renderer_exception{ "The framebuffer is not complete", (int)fb_error };
+	throw new renderer_exception{ "The framebuffer is not complete",
+		(int)fb_error };
 
     Log::GetLog()->Write("[Framebuffer] Created framebuffer id %#x texid %#x "
 			 "with %d x %d", fb_handle, tex_handle, w, h);
+
     glBindTexture(GL_TEXTURE_2D, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 /* Set this framebuffer to be the active one */
 void Framebuffer::SetAsRead()
 {
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_handle);
-	glViewport(0, 0, _width, _height);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_handle);
+    glViewport(0, 0, _width, _height);
 }
 
 void Framebuffer::SetAsBoth()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, fb_handle);
-	glViewport(0, 0, _width, _height);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb_handle);
+    glViewport(0, 0, _width, _height);
 }
 
 void Framebuffer::SetAsWrite()
 {
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb_handle);
-	glViewport(0, 0, _width, _height);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb_handle);
+    glViewport(0, 0, _width, _height);
 }
 
 int Framebuffer::defWidth, Framebuffer::defHeight;
+
 /*  Remove this framebuffer from the active state and
     bring back the default one */
 void Framebuffer::Unset()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, defWidth, defHeight);
-
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, defWidth, defHeight);
 }
+
 
 /*  Get the texture handle for this framebuffer
     Useful when you want to use its content as a texture */
 GLint Framebuffer::GetTextureHandle()
 {
-	return tex_handle;
+    return tex_handle;
 }

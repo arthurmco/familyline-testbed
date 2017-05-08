@@ -329,14 +329,14 @@ bool Renderer::Render()
 
 void Renderer::UpdateFrames()
 {
-	for (auto v : _vertices) {
-		if (v.vd->animationData) {
-			/* Has animation things */
-			UpdateVertexData(v.vbo_pos, v.vd->animationData->GetVertexRawData(),
-				v.vd->Positions.size());
-			//printf("Updated mesh %d to frame %d", v.vao, v.vd->animationData->GetActualFrame());
-		}
+    for (auto v : _vertices) {
+	if (v.vd->animationData) {
+	    /* Has animation things */
+	    UpdateVertexData(v.vbo_pos, v.vd->animationData->GetVertexRawData(),
+			     v.vd->Positions.size());
+	    //printf("Updated mesh %d to frame %d", v.vao, v.vd->animationData->GetActualFrame());
 	}
+    }
 }
 
 SceneManager* Renderer::GetSceneManager() const
@@ -556,16 +556,16 @@ int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
 
 void Renderer::RemoveBoundingBox(GLuint vao)
 {
-	VertexRenderInfo vri;
-	for (auto it = _bb_vaos.begin(); it != _bb_vaos.end(); it++) {
-		if (it->vao == vao) {
-			glDeleteVertexArrays(1, &vao);
-			glDeleteBuffers(1, &it->vbo_pos);
-			glDeleteBuffers(1, &it->vbo_norm);
-			_bb_vaos.erase(it);
-			break;
-		}
+    VertexRenderInfo vri;
+    for (auto it = _bb_vaos.begin(); it != _bb_vaos.end(); it++) {
+	if (it->vao == vao) {
+	    glDeleteVertexArrays(1, &vao);
+	    glDeleteBuffers(1, &it->vbo_pos);
+	    glDeleteBuffers(1, &it->vbo_norm);
+	    _bb_vaos.erase(it);
+	    break;
 	}
+    }
 }
 
 void Renderer::SetBoundingBox(bool b) {

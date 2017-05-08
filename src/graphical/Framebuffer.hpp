@@ -24,7 +24,7 @@ namespace Graphics {
 
         int _width, _height;
 
-		static int defWidth, defHeight;
+	static int defWidth, defHeight;
 
     public:
         Framebuffer(int w, int h, GLenum format);

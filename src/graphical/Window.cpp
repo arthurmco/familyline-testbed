@@ -115,46 +115,49 @@ void Window::Show()
 /* Updates the window content to the video card */
 void Window::Update()
 {
-	glDisable(GL_DEPTH_TEST);
-	winShader->Use();
-	glClear(GL_COLOR_BUFFER_BIT);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, _width, _height);
 
-	winShader->SetUniform("texRender", 0);
-	winShader->SetUniform("texGUI", 1);
+    glDisable(GL_DEPTH_TEST);
+    winShader->Use();
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _f3D->GetTextureHandle());
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, _fGUI->GetTextureHandle());
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _f3D->GetTextureHandle());
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, _fGUI->GetTextureHandle());
+    winShader->SetUniform("texRender", 0);
+    winShader->SetUniform("texGUI", 1);
+    
+    glBindVertexArray(base_vao);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, base_vbo);
+    glVertexAttribPointer(
+	0,                  // attribute 0. 
+	3,                  // size
+	GL_FLOAT,           // type
+	GL_FALSE,           // normalized?
+	0,                  // stride
+	(void*)0            // array buffer offset
+    );
+    // Draw the triangle !
 
-	glBindVertexArray(base_vao);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, base_vbo);
-	glVertexAttribPointer(
-		0,                  // attribute 0. 
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);
-	// Draw the triangle !
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, base_index_vbo);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    
+    SDL_GL_SwapWindow(_win);
+    
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+	printf("GL error %#x\n", err);
+    }
+    
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, base_index_vbo);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-	SDL_GL_SwapWindow(_win);
-
-	GLenum err = glGetError();
-	if (err != GL_NO_ERROR) {
-		printf("GL error %#x\n", err);
-	}
-
-
-	glDisableVertexAttribArray(0);
-	glBindVertexArray(0);
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_DEPTH_TEST);
+    glDisableVertexAttribArray(0);
+    glBindVertexArray(0);
+    glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Window::GetSize(int& w, int& h)
