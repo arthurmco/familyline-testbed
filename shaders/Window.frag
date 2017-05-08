@@ -11,6 +11,5 @@ void main() {
     vec4 crender = texture2D(texRender, uv);
     vec4 cgui = texture2D(texGUI, vec2(uv.x, 1.0-uv.y));
 
-//    color = vec4(crender.r, cgui.b, cgui.a, 1);
     color = vec4(mix(crender, cgui, cgui.a));
 }

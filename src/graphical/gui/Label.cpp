@@ -46,8 +46,12 @@ void Label::Redraw(cairo_t* ctxt)
 
     /* Redraw the text */
     cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
-	cairo_select_font_face(ctxt, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size(ctxt, 14.0);
-    cairo_move_to(ctxt, _xPos*1.0, (_yPos*1.0)+14.0);
+    cairo_select_font_face(ctxt, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+
+    /* Draw the text relative to container.
+       The position only interests for our parent know where to render us 
+    */
+    cairo_set_font_size(ctxt, 14.0);
+    cairo_move_to(ctxt, 0, 14);
     cairo_show_text(ctxt, _text.c_str());
 }

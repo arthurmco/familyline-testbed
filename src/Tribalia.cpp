@@ -259,7 +259,7 @@ int main(int argc, char const *argv[])
 
     Panel p = Panel{0, 0, 320, 240};
     p.SetBackColor(255, 0, 0, 25);
-    gr.AddPanel(&p);
+    // gr.AddPanel(&p);
 
     Label lbl = Label(120, 460, "This is a true label");
     lbl.SetForeColor(255, 128, 0, 255);

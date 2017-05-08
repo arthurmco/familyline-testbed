@@ -1,4 +1,5 @@
 #include "GUIRenderer.hpp"
+#include <typeinfo>
 
 using namespace Tribalia::Graphics;
 
@@ -17,7 +18,7 @@ static const float debug_msg_panel_pos[][3] =
    texture coordinates
 */
 static const float panel_texture_coord[][2] =
-{ {-1, -1}, {1, -1}, {1, 1}, {-1, -1}, {-1, 1}, {1, 1}};
+{ {0, 1}, {1, 1}, {1, 0}, {0, 1}, {0, 0}, {1, 0}};
 
 
 GUIRenderer::GUIRenderer(Window* w)
@@ -103,8 +104,9 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
     sGUI->SetUniform("texPanel", 0);
 
     for (auto& p : _panels) {
-	//p.panel->Redraw(p.ctxt);
+	p.panel->Redraw(p.ctxt);
 	cairo_surface_flush(p.csurf);
+	unsigned char* c = cairo_image_surface_get_data(p.csurf);
 	
 	glBindVertexArray(p.vao);
 
@@ -115,11 +117,10 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, p.vbo_tex);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
+	
 	glBindTexture(GL_TEXTURE_2D, p.tex_id);
-/*	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, p.pw, p.ph, 0, GL_BGRA,
-		     GL_UNSIGNED_INT_8_8_8_8_REV,
-		     (void*)cairo_image_surface_get_data(p.csurf)); */
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, p.pw, p.ph, 0, GL_BGRA,
+		     GL_UNSIGNED_BYTE, c);
 	
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -128,8 +129,13 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	    Log::GetLog()->Fatal("OpenGL error %#x", err);
 	}
 
+	cairo_save(p.ctxt);
+	cairo_set_source_rgba(p.ctxt, 0.0, 0.0, 0.0, 0.0);
+	cairo_set_operator(p.ctxt, CAIRO_OPERATOR_SOURCE);
+	cairo_paint(p.ctxt);
+	cairo_restore(p.ctxt);
+	
     }
-
     glBindVertexArray(0);
     glDisableVertexAttribArray(0);
 }
@@ -146,7 +152,8 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	 float relx = float(px)/win_w, rely = float(py)/win_h;
 	 float relw = float(pw)/win_w, relh = float(ph)/win_h;
 	 
-	 printf(" panel relpos %.2f %.2f %.2f %.2f\n", relx, rely, relw, relh);
+	 printf(" panel pos %d %d %d %d relpos %.2f %.2f %.2f %.2f\n",
+		px, py, pw, ph, relx, rely, relw, relh);
 
 	 /* Create the panel vertices */
 	 float win_vectors[][3] =
@@ -183,21 +190,18 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	 pro.ctxt = cairo_create(pro.csurf);
 
 	 /* Clean the surface with transparent color */
-	 cairo_set_source_rgba(pro.ctxt, 0, 0, 0, 0);
-	 cairo_rectangle(pro.ctxt, 0, 0, 1.0, 1.0);
-	 cairo_fill(pro.ctxt);
-	 cairo_surface_flush(pro.csurf);   
+	 cairo_set_source_rgb(pro.ctxt, 0, 0, 0);
+	 cairo_paint_with_alpha(pro.ctxt, 0.5);
+	 cairo_surface_flush(pro.csurf);
 
 	 
 	 /* Generate textures */
 	 glGenTextures(1, &(pro.tex_id));
 	 glBindTexture(GL_TEXTURE_2D, pro.tex_id);
 
-	 unsigned int* c = new unsigned int[pw*ph];
-	 for (int i = 0; i < pw*ph; i++)
-	     c[i] = 0xffffffff;
 	 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pw, ph, 0, GL_BGRA,
-		      GL_UNSIGNED_INT_8_8_8_8_REV, c);
+		      GL_UNSIGNED_BYTE,
+		      (void*)cairo_image_surface_get_data(pro.csurf));
 
        	
 	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

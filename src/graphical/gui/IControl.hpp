@@ -19,7 +19,7 @@ public:
     /* Redraws itself */
     virtual void Redraw(cairo_t* ctxt) = 0;
 
-    
+    virtual ~IControl(){}
 };
 
 }
