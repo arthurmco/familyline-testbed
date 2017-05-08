@@ -19,23 +19,41 @@
 namespace Tribalia {
 namespace Graphics {
 
+/* Stores everything needed to render a panel, including panel data itself */
+struct PanelRenderObject {
+    // Vertex pointers
+    GLuint vao, vbo_vert, vbo_tex;
+
+    // The panel
+    GUI::IPanel* panel;
+
+    // The texture ID and panel pixel sizes (for easy lookup)
+    GLuint tex_id;
+    int pw, ph;
+
+    /* Each panel has its own cairo context and surface */
+    cairo_surface_t* csurf;
+    cairo_t* ctxt;
+    
+};
+    
 /*  This class will get the cairo context and
     transform it into a texture, */
 
 class GUIRenderer : public GUI::IContainer {
 private:
-   cairo_t* cr;
-   cairo_surface_t* cr_surface;
 
    Window* _w;
-   std::vector<GUI::IPanel*> _panels;
+   std::vector<PanelRenderObject> _panels;
 
    Framebuffer* _f;
+
+   ShaderProgram* sGUI;
 public:
     GUIRenderer(Window* w);
 
-	void SetFramebuffer(Framebuffer* f);
-
+    void SetFramebuffer(Framebuffer* f);
+    
     /* Write a message in the screen */
     void DebugWrite(int x, int y, const char* fmt, ...);
 
