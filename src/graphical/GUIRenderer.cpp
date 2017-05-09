@@ -1,5 +1,5 @@
 #include "GUIRenderer.hpp"
-#include <typeinfo>
+#include "gui/Panel.hpp"
 
 using namespace Tribalia::Graphics;
 
@@ -47,10 +47,14 @@ GUIRenderer::GUIRenderer(Window* w)
             shnum, SHADER_PROGRAM);
     }
 
-
-
     /* Create a panel for debug messages */
-	
+    this->AddPanel(new GUI::Panel(0, 0, win_w, win_h));
+
+    debug_ctxt = _panels.back().ctxt;
+    Log::GetLog()->Write("[GUIRenderer] Debug Cairo context is %p (texture %u)",
+			 debug_ctxt, _panels.back().tex_id);
+    _panels.back().is_debug = 1;
+
     _w = w;
 }
 
@@ -58,25 +62,19 @@ bool surfaceChanged = false;
 
 void GUIRenderer::DebugWrite(int x, int y, const char* fmt, ...)
 {
-    return;
-    
     char* ch = new char[512];
     va_list vl;
     va_start(vl, fmt);
     vsprintf(ch, fmt, vl);
     va_end(vl);
    
-   
-    printf("dw (%d %d): %s\n", x, y, ch);
-    delete[] ch;
-/*
-	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
-	cairo_select_font_face(cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size(cr, 14.0);
-	cairo_move_to(cr, x*1.0, y*1.0);
-	cairo_show_text(cr, ch);
-	surfaceChanged = true;
-	delete[] ch; */
+    cairo_set_source_rgba(debug_ctxt, 1.0, 1.0, 1.0, 1.0);
+    cairo_select_font_face(debug_ctxt, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(debug_ctxt, 14.0);
+    cairo_move_to(debug_ctxt, double(x), double(y));
+    cairo_show_text(debug_ctxt, ch);
+
+    delete[] ch; 
 }
 
 void GUIRenderer::SetFramebuffer(Framebuffer* f) {
@@ -89,10 +87,14 @@ bool fb_setup = false;
 bool GUIRenderer::Render()
 {
     glClearColor(0.0, 0.0, 0.0, 0.0);
+    glDisable(GL_DEPTH_TEST);
     sGUI->Use();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     this->Redraw(nullptr);
+
     glClearColor(0.0, 0.0, 0.0, 1.0);
+    glEnable(GL_DEPTH_TEST);
     
     return true;
 }
@@ -104,7 +106,9 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
     sGUI->SetUniform("texPanel", 0);
 
     for (auto& p : _panels) {
-	p.panel->Redraw(p.ctxt);
+	if (!p.is_debug)
+	    p.panel->Redraw(p.ctxt);
+	
 	cairo_surface_flush(p.csurf);
 	unsigned char* c = cairo_image_surface_get_data(p.csurf);
 	
@@ -133,7 +137,7 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	cairo_set_source_rgba(p.ctxt, 0.0, 0.0, 0.0, 0.0);
 	cairo_set_operator(p.ctxt, CAIRO_OPERATOR_SOURCE);
 	cairo_paint(p.ctxt);
-	cairo_restore(p.ctxt);
+	cairo_restore(p.ctxt); 
 	
     }
     glBindVertexArray(0);
@@ -141,95 +145,95 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 }
 
 /* Add a panel using the panel position or a new position */
- int GUIRenderer::AddPanel(GUI::IPanel* p)
- {
-	 Log::GetLog()->Write("GUIRenderer: Added panel (%#p)", p);
+int GUIRenderer::AddPanel(GUI::IPanel* p)
+{
+    Log::GetLog()->Write("GUIRenderer: Added panel (%#p)", p);
 
-	 /* Create panel vertices */
-	 int px, py, pw, ph;
-	 p->GetBounds(px, py, pw, ph);
+    /* Create panel vertices */
+    int px, py, pw, ph;
+    p->GetBounds(px, py, pw, ph);
 
-	 float relx = float(px)/win_w, rely = float(py)/win_h;
-	 float relw = float(pw)/win_w, relh = float(ph)/win_h;
+    float relx = float(px)/win_w, rely = float(py)/win_h;
+    float relw = float(pw)/win_w, relh = float(ph)/win_h;
 	 
-	 printf(" panel pos %d %d %d %d relpos %.2f %.2f %.2f %.2f\n",
-		px, py, pw, ph, relx, rely, relw, relh);
+    printf(" panel pos %d %d %d %d relpos %.2f %.2f %.2f %.2f\n",
+	   px, py, pw, ph, relx, rely, relw, relh);
 
-	 /* Create the panel vertices */
-	 float win_vectors[][3] =
-	 {
-	     {relx, (rely+relh), 0.9f}, {relx+relw, (rely+relh), 0.9f},
-	     {relx+relw, (rely), 0.9f},
-	     {relx, (rely+relh), 0.9f}, {relx, rely, 0.9f},
-	     {relx+relw, rely, 0.9f}
-	 };
+    /* Create the panel vertices */
+    float win_vectors[][3] =
+	{
+	    {relx, (rely+relh), 0.9f}, {relx+relw, (rely+relh), 0.9f},
+	    {relx+relw, (rely), 0.9f},
+	    {relx, (rely+relh), 0.9f}, {relx, rely, 0.9f},
+	    {relx+relw, rely, 0.9f}
+	};
 	 
-	 PanelRenderObject pro;
+    PanelRenderObject pro;
 
-	 glGenVertexArrays(1, &(pro.vao));
-	 glBindVertexArray(pro.vao);
+    glGenVertexArrays(1, &(pro.vao));
+    glBindVertexArray(pro.vao);
 
-	 /* Create vertex information */
-	 glGenBuffers(1, &(pro.vbo_vert));
-	 glBindBuffer(GL_ARRAY_BUFFER, pro.vbo_vert);
-	 glBufferData(GL_ARRAY_BUFFER, sizeof(win_vectors), win_vectors, GL_STATIC_DRAW);
-	 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	 glEnableVertexAttribArray(0);
+    /* Create vertex information */
+    glGenBuffers(1, &(pro.vbo_vert));
+    glBindBuffer(GL_ARRAY_BUFFER, pro.vbo_vert);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(win_vectors), win_vectors, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
 
-	 glGenBuffers(1, &(pro.vbo_tex));
-	 glBindBuffer(GL_ARRAY_BUFFER, pro.vbo_tex);
-	 glBufferData(GL_ARRAY_BUFFER, sizeof(panel_texture_coord),
-		      panel_texture_coord, GL_STATIC_DRAW);
-	 glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	 glEnableVertexAttribArray(1);
+    glGenBuffers(1, &(pro.vbo_tex));
+    glBindBuffer(GL_ARRAY_BUFFER, pro.vbo_tex);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(panel_texture_coord),
+		 panel_texture_coord, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
 
-	 glBindVertexArray(0);
+    glBindVertexArray(0);
 
-	 /* Create cairo context and surface for each panel */
-	 pro.csurf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pw, ph);
-	 pro.ctxt = cairo_create(pro.csurf);
+    /* Create cairo context and surface for each panel */
+    pro.csurf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pw, ph);
+    pro.ctxt = cairo_create(pro.csurf);
 
-	 /* Clean the surface with transparent color */
-	 cairo_set_source_rgb(pro.ctxt, 0, 0, 0);
-	 cairo_paint_with_alpha(pro.ctxt, 0.5);
-	 cairo_surface_flush(pro.csurf);
+    /* Clean the surface with transparent color */
+    cairo_set_source_rgb(pro.ctxt, 0, 0, 0);
+    cairo_paint_with_alpha(pro.ctxt, 0.5);
+    cairo_surface_flush(pro.csurf);
 
 	 
-	 /* Generate textures */
-	 glGenTextures(1, &(pro.tex_id));
-	 glBindTexture(GL_TEXTURE_2D, pro.tex_id);
+    /* Generate textures */
+    glGenTextures(1, &(pro.tex_id));
+    glBindTexture(GL_TEXTURE_2D, pro.tex_id);
 
-	 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pw, ph, 0, GL_BGRA,
-		      GL_UNSIGNED_BYTE,
-		      (void*)cairo_image_surface_get_data(pro.csurf));
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, pw, ph, 0, GL_BGRA,
+		 GL_UNSIGNED_BYTE,
+		 (void*)cairo_image_surface_get_data(pro.csurf));
 
        	
-	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-	 glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-	 pro.pw = pw;
-	 pro.ph = ph;
+    pro.pw = pw;
+    pro.ph = ph;
 	 
-	 /* Upload panel */
-	 pro.panel = p;
-	 _panels.push_back(pro);
+    /* Upload panel */
+    pro.panel = p;
+    _panels.push_back(pro);
 	 
-	 return 1;
- }
+    return 1;
+}
 
- int GUIRenderer::AddPanel(GUI::IPanel* p, int x, int y)
- {
-	 p->SetPosition(x, y);
-	 return AddPanel(p);
- }
+int GUIRenderer::AddPanel(GUI::IPanel* p, int x, int y)
+{
+    p->SetPosition(x, y);
+    return AddPanel(p);
+}
 
 /* Remove the panel */
- void GUIRenderer::RemovePanel(GUI::IPanel* p)
- {
+void GUIRenderer::RemovePanel(GUI::IPanel* p)
+{
 
- }
+}
 
  void GUIRenderer::SetBounds(int x, int y, int w, int h) {}
  void GUIRenderer::SetPosition(int x, int y) {}

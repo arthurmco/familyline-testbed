@@ -34,6 +34,9 @@ struct PanelRenderObject {
     /* Each panel has its own cairo context and surface */
     cairo_surface_t* csurf;
     cairo_t* ctxt;
+
+    /* is debug?  */
+    unsigned int is_debug = 0;
     
 };
     
@@ -42,13 +45,16 @@ struct PanelRenderObject {
 
 class GUIRenderer : public GUI::IContainer {
 private:
+    
+    Window* _w;
+    std::vector<PanelRenderObject> _panels;
 
-   Window* _w;
-   std::vector<PanelRenderObject> _panels;
+    /* Cairo context for debug messages */
+    cairo_t* debug_ctxt;
+    
+    Framebuffer* _f;
 
-   Framebuffer* _f;
-
-   ShaderProgram* sGUI;
+    ShaderProgram* sGUI;
 public:
     GUIRenderer(Window* w);
 
