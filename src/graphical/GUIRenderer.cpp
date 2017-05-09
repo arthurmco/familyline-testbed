@@ -90,7 +90,7 @@ bool GUIRenderer::Render()
 {
     glClearColor(0.0, 0.0, 0.0, 0.0);
     sGUI->Use();
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     this->Redraw(nullptr);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     
@@ -158,10 +158,10 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	 /* Create the panel vertices */
 	 float win_vectors[][3] =
 	 {
-	     {relx, 1.0f-(rely+relh), 0.9f}, {relx+relw, 1.0f-(rely+relh), 0.9f},
-	     {relx+relw, 1.0f-(rely), 0.9f},
-	     {relx, 1.0f-(rely+relh), 0.9f}, {relx, 1.0f-rely, 0.9f},
-	     {relx+relw, 1.0f-rely, 0.9f}
+	     {relx, (rely+relh), 0.9f}, {relx+relw, (rely+relh), 0.9f},
+	     {relx+relw, (rely), 0.9f},
+	     {relx, (rely+relh), 0.9f}, {relx, rely, 0.9f},
+	     {relx+relw, rely, 0.9f}
 	 };
 	 
 	 PanelRenderObject pro;

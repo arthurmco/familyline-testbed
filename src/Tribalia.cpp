@@ -277,7 +277,7 @@ int main(int argc, char const *argv[])
     ObjectFactory::GetInstance()->AddObject(new Tent);
 
     ObjectPathManager::getInstance()->SetTerrain(terr);
-
+    
     do {
 
         ip->UpdateIntersectedObject();
@@ -338,15 +338,11 @@ int main(int argc, char const *argv[])
 	ObjectPathManager::getInstance()->UpdatePaths();
 
 	fbRender.SetAsBoth();
-
 	rndr->SetBoundingBox(hp->renderBBs);
 	if (objupdate) rndr->UpdateObjects();
         rndr->UpdateFrames();
         rndr->Render();
-
-	//fbRender.Unset();
-	//fbGUI.SetAsBoth();
-
+	
 	gr.DebugWrite(10, 140, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f)",
 		      p.x, p.y, p.z, q.x, q.y);
 	gr.DebugWrite(10, 180, "Camera rotation: %.1fº",
@@ -354,10 +350,10 @@ int main(int argc, char const *argv[])
         gr.DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
           "Enabled" : "Disabled");
 
+	fbGUI.SetAsBoth();
 	gr.Render();
-
-
-	//fbGUI.Unset();
+	fbGUI.Unset();
+	
 	win->Update();
 
         frame++;
@@ -372,6 +368,8 @@ int main(int argc, char const *argv[])
 	    pms = delta * 1.0;
 	}
 
+	
+	
 	gr.DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
 	//Locked in ~60 fps

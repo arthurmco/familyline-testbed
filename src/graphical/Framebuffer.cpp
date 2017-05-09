@@ -58,7 +58,7 @@ void Framebuffer::SetAsRead()
 void Framebuffer::SetAsBoth()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, fb_handle);
-    glViewport(0, 0, _width, _height);
+//    glViewport(0, 0, _width, _height);
 }
 
 void Framebuffer::SetAsWrite()
@@ -74,7 +74,7 @@ int Framebuffer::defWidth, Framebuffer::defHeight;
 void Framebuffer::Unset()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, defWidth, defHeight);
+//    glViewport(0, 0, defWidth, defHeight);
 }
 
 
