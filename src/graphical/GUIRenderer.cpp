@@ -20,6 +20,39 @@ static const float debug_msg_panel_pos[][3] =
 static const float panel_texture_coord[][2] =
 { {0, 1}, {1, 1}, {1, 0}, {0, 1}, {0, 0}, {1, 0}};
 
+/* Change panel z-index.
+   0 is most backgrounded, 100 is most foregrounded. */
+static void ChangePanelZIndex(PanelRenderObject& pro, int zindex,
+			       const int winW, const int winH)
+{
+    float znum = 1.0 - std::min(1.0f, zindex / 100.0f);
+    
+    int px, py, pw, ph;
+    pro.panel->GetBounds(px, py, pw, ph);
+
+    float relx = float(px)/winW, rely = float(py)/winH;
+    float relw = float(pw)/winW, relh = float(ph)/winH;
+	 
+    printf(" panel pos %d %d %d %d relpos %.2f %.2f %.2f %.2f\n",
+	   px, py, pw, ph, relx, rely, relw, relh);
+
+    /* Recreate the panel vertices */
+    float win_vectors[][3] =
+	{
+	    {relx, (rely+relh), znum}, {relx+relw, (rely+relh), znum},
+	    {relx+relw, (rely), znum},
+	    {relx, (rely+relh), znum}, {relx, rely, znum},
+	    {relx+relw, rely, znum}
+	};
+
+    glBindBuffer(GL_ARRAY_BUFFER, pro.vbo_vert);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(win_vectors), win_vectors, GL_STATIC_DRAW);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+}
+
+
 
 GUIRenderer::GUIRenderer(Window* w)
 {
@@ -54,9 +87,12 @@ GUIRenderer::GUIRenderer(Window* w)
     Log::GetLog()->Write("[GUIRenderer] Debug Cairo context is %p (texture %u)",
 			 debug_ctxt, _panels.back().tex_id);
     _panels.back().is_debug = 1;
-
+    ChangePanelZIndex(_panels.back(), 0, win_w, win_h);
+    
     _w = w;
 }
+
+
 
 bool surfaceChanged = false;
 
@@ -78,8 +114,8 @@ void GUIRenderer::DebugWrite(int x, int y, const char* fmt, ...)
 }
 
 void GUIRenderer::SetFramebuffer(Framebuffer* f) {
-	_f = f;
-	Log::GetLog()->Write("[GUIRenderer] Framebuffer now it's the texture #%d", f->GetTextureHandle());
+    _f = f;
+    Log::GetLog()->Write("[GUIRenderer] Framebuffer now it's the texture #%d", f->GetTextureHandle());
 
 }
 
@@ -87,14 +123,18 @@ bool fb_setup = false;
 bool GUIRenderer::Render()
 {
     glClearColor(0.0, 0.0, 0.0, 0.0);
-    glDisable(GL_DEPTH_TEST);
+    GLint depthf;
+    glGetIntegerv(GL_DEPTH_FUNC, &depthf);
+    
+    glDepthFunc(GL_LEQUAL);
+    
     sGUI->Use();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+
     this->Redraw(nullptr);
+    glDepthFunc(depthf);
 
     glClearColor(0.0, 0.0, 0.0, 1.0);
-    glEnable(GL_DEPTH_TEST);
     
     return true;
 }
@@ -144,6 +184,9 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
     glDisableVertexAttribArray(0);
 }
 
+
+
+
 /* Add a panel using the panel position or a new position */
 int GUIRenderer::AddPanel(GUI::IPanel* p)
 {
@@ -160,12 +203,12 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
 	   px, py, pw, ph, relx, rely, relw, relh);
 
     /* Create the panel vertices */
-    float win_vectors[][3] =
+    const float win_vectors[][3] =
 	{
-	    {relx, (rely+relh), 0.9f}, {relx+relw, (rely+relh), 0.9f},
-	    {relx+relw, (rely), 0.9f},
-	    {relx, (rely+relh), 0.9f}, {relx, rely, 0.9f},
-	    {relx+relw, rely, 0.9f}
+	    {relx, (rely+relh), 0.5f}, {relx+relw, (rely+relh), 0.5f},
+	    {relx+relw, (rely), 0.5f},
+	    {relx, (rely+relh), 0.5f}, {relx, rely, 0.5f},
+	    {relx+relw, rely, 0.5f}
 	};
 	 
     PanelRenderObject pro;
@@ -188,6 +231,8 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
+    printf(" panel vao %u vbo_vert %u vbo_tex %u\n", pro.vao, pro.vbo_vert,
+	   pro.vbo_tex);
 
     /* Create cairo context and surface for each panel */
     pro.csurf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pw, ph);
