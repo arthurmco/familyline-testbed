@@ -1,3 +1,4 @@
+
 #include "GUIRenderer.hpp"
 #include "gui/Panel.hpp"
 
@@ -126,12 +127,15 @@ bool GUIRenderer::Render()
     GLint depthf;
     glGetIntegerv(GL_DEPTH_FUNC, &depthf);    
     glDepthFunc(GL_LEQUAL);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     
     sGUI->Use();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     this->Redraw(nullptr);
     glDepthFunc(depthf);
+    glDisable(GL_BLEND);
 
     glClearColor(0.0, 0.0, 0.0, 1.0);
     
