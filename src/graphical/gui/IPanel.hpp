@@ -5,6 +5,7 @@
 
 #include "IControl.hpp"
 #include <cstdint>
+#include <glm/glm.hpp>
 
 #ifndef _GUI_IPANEL
 #define _GUI_IPANEL
@@ -24,7 +25,7 @@ namespace GUI {
 */
 class IPanel : public IControl {
 protected:
-    int _bgColor, _fgColor = 0xffffffff;  /* control back n fore color, in RGBA format */
+       
     int _xPos, _yPos;
     int _width, _height;
 

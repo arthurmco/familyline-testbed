@@ -9,7 +9,7 @@ Label::Label(int x, int y, const char* text)
     _yPos = y;
     _width = _text.size() * 9;
     _height = 16.0f;
-    _bgColor = 0xffffff00;
+    _bgColor = glm::vec4(255, 255, 255, 0);
     
 }
 
@@ -17,7 +17,7 @@ Label::Label(int x, int y, int w, int h, const char* text)
     : IPanel(x,y,w,h)
 {
     _text = std::string{text};
-    _bgColor = 0xffffff00;   
+    _bgColor = glm::vec4(255, 255, 255, 0);
 }
 
 const char* Label::GetText() const
@@ -39,13 +39,8 @@ void Label::SetText(char* txt, ...)
 
 void Label::Redraw(cairo_t* ctxt)
 {
-    float fa = (_fgColor & 0xff) / 255.0f;
-    float fb = ((_fgColor >> 8)  & 0xff) / 255.0f;
-    float fg = ((_fgColor >> 16)  & 0xff) / 255.0f;
-    float fr = ((_fgColor >> 24) & 0xff) / 255.0f;
-
     /* Redraw the text */
-    cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
+    cairo_set_source_rgba(ctxt, _fgColor.r, _fgColor.g, _fgColor.b, _fgColor.a);
     cairo_select_font_face(ctxt, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 
     /* Draw the text relative to container.

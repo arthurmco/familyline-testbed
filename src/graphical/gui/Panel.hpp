@@ -15,13 +15,21 @@ namespace Tribalia {
 namespace Graphics {
 namespace GUI {
 
+    struct PanelData {
+	IPanel* panel;
+	int x, y, w, h;
+
+	cairo_t* ctxt;
+	cairo_surface_t* csurf;
+    };
+    
 /*
     A panel is the most basic window structore for Tribalia's GUI
 */
 class Panel : public IContainer {
 private:
-
-    std::vector<Panel*> _panels;
+        
+    std::vector<PanelData> _panels;
 public:
     Panel();
     Panel(int x, int y, int w, int h);

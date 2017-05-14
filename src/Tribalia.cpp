@@ -267,8 +267,12 @@ int main(int argc, char const *argv[])
     Label lblVersion = Label(10, 10, "Tribalia " VERSION " commit " COMMIT);
     lblVersion.SetForeColor(255, 255, 255, 255);
 
+    Panel pnl = Panel(0, 0, 630, 100);
+    pnl.AddPanel(&lblVersion, 10, 10);
+    pnl.SetBackColor(0, 0, 0, 128);
+
+    gr.AddPanel(&pnl);
     gr.AddPanel(&lbl);
-    gr.AddPanel(&lblVersion);
 
     double pms = 0.0;
     

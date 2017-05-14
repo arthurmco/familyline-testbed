@@ -124,8 +124,7 @@ bool GUIRenderer::Render()
 {
     glClearColor(0.0, 0.0, 0.0, 0.0);
     GLint depthf;
-    glGetIntegerv(GL_DEPTH_FUNC, &depthf);
-    
+    glGetIntegerv(GL_DEPTH_FUNC, &depthf);    
     glDepthFunc(GL_LEQUAL);
     
     sGUI->Use();
@@ -146,8 +145,10 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
     sGUI->SetUniform("texPanel", 0);
 
     for (auto& p : _panels) {
-	if (!p.is_debug)
+	if (!p.is_debug) {
+	    cairo_set_operator(p.ctxt, CAIRO_OPERATOR_OVER);
 	    p.panel->Redraw(p.ctxt);
+	}
 	
 	cairo_surface_flush(p.csurf);
 	unsigned char* c = cairo_image_surface_get_data(p.csurf);
@@ -183,8 +184,6 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
     glBindVertexArray(0);
     glDisableVertexAttribArray(0);
 }
-
-
 
 
 /* Add a panel using the panel position or a new position */

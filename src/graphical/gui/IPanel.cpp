@@ -2,7 +2,7 @@
 
 using namespace Tribalia::Graphics::GUI;
 
-IPanel::IPanel(){_bgColor = 0xffffff00;}
+IPanel::IPanel(){_bgColor = glm::vec4(255, 255, 255, 0);}
 
 IPanel::IPanel(int x, int y, int w, int h)
 {
@@ -10,46 +10,84 @@ IPanel::IPanel(int x, int y, int w, int h)
     _yPos = y;
     _width = w;
     _height = h;
-    _bgColor = 0xffffff00;
+    _bgColor = glm::vec4(1,1,1,0);
 }
 
 /* Non-virtual functions...
     fuck off */
 
-int IPanel::GetBackColor() { return _bgColor; }
 int IPanel::GetBackColor(uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a)
 {
-    a = (uint8_t)_bgColor & 0xff;
-    b = (uint8_t)(_bgColor >> 8) & 0xff;
-    g = (uint8_t)(_bgColor >> 16) & 0xff;
-    r = (uint8_t)(_bgColor >> 24) & 0xff;
-    return _bgColor;
+    unsigned int _r, _g, _b, _a;
+    _r = int(_bgColor.r * 255) & 0xff;
+    _g = int(_bgColor.g * 255) & 0xff;
+    _b = int(_bgColor.b * 255) & 0xff;
+    _a = int(_bgColor.a * 255) & 0xff;
+
+    r = _r; g = _g; b = _b; a = _a;
+    
+    int color = r | (g << 8) | (b << 16) | (a << 24);
+    return color;
 }
+
+int IPanel::GetBackColor()
+{
+    uint8_t r,g,b,a;
+    return this->GetBackColor(r,g,b,a);    
+}
+
 void IPanel::SetBackColor(int rgba)
 {
-    _bgColor = rgba;
+    int r,g,b,a;
+
+    r = (rgba & 0xff);
+    g = (rgba >> 8) & 0xff;
+    b = (rgba >> 16) & 0xff;
+    a = (rgba >> 24) & 0xff;
+    
+    _bgColor = glm::vec4(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
 }
 void IPanel::SetBackColor(uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 {
-    _bgColor = a | (b << 8) | (g << 16) | (r << 24);
+    _bgColor = glm::vec4(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
 }
 
-int IPanel::GetForeColor() { return _fgColor; }
 int IPanel::GetForeColor(uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a)
 {
-    a = (uint8_t)_fgColor & 0xff;
-    b = (uint8_t)(_fgColor >> 8) & 0xff;
-    g = (uint8_t)(_fgColor >> 16) & 0xff;
-    r = (uint8_t)(_fgColor >> 24) & 0xff;
-    return _fgColor;
+    
+    unsigned int _r, _g, _b, _a;
+    _r = int(_fgColor.r * 255) & 0xff;
+    _g = int(_fgColor.g * 255) & 0xff;
+    _b = int(_fgColor.b * 255) & 0xff;
+    _a = int(_fgColor.a * 255) & 0xff;
+
+    r = _r; g = _g; b = _b; a = _a;
+    
+    int color = r | (g << 8) | (b << 16) | (a << 24);
+    return color;
+    
 }
+
+int IPanel::GetForeColor()
+{
+    uint8_t r,g,b,a;
+    return GetForeColor(r,g,b,a);    
+}
+
 void IPanel::SetForeColor(int rgba)
 {
-    _fgColor = rgba;
+    int r,g,b,a;
+
+    r = (rgba & 0xff);
+    g = (rgba >> 8) & 0xff;
+    b = (rgba >> 16) & 0xff;
+    a = (rgba >> 24) & 0xff;
+    
+    _fgColor = glm::vec4(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
 }
 void IPanel::SetForeColor(uint32_t r, uint32_t g, uint32_t b, uint32_t a)
 {
-    _fgColor = a | (b << 8) | (g << 16) | (r << 24);
+    _fgColor = glm::vec4(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
 }
 
 void IPanel::SetBounds(int x, int y, int w, int h) 
