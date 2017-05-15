@@ -13,9 +13,10 @@
 /*  A tent is a basic people storage building */
     class TestObject : public Tribalia::Logic::Building {
 private:
-    static const int TID = 3;
+    
 public:
-
+    static const int TID = 3;
+	
     TestObject() : Building(0, TID, "TestObject"){};
 	
     TestObject(int oid, float x, float y, float z);

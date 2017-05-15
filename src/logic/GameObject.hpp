@@ -52,14 +52,13 @@ namespace Tribalia {
     public:
         GameObject(int oid, int tid, const char* name);
 	GameObject(int oid, int tid, const char* name, float x, float y, float z);
-
 	void SetX(float); float GetX();
 	void SetY(float); float GetY();
 	void SetZ(float); float GetZ();
 
-	
+	int GetTypeID();	
         int GetObjectID();
-        int GetTypeID();
+	
         const char* GetName();
         void SetName(char*);
 
