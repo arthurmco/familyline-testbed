@@ -231,8 +231,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 	glm::vec3 p = TerrainRenderer::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
 	
 	AttackableObject* c = (AttackableObject*) 
-	    ObjectFactory::GetInstance()->GetObject(2)->Clone(
-		p.x, p.y, p.z);
+	    ObjectFactory::GetInstance()->GetObject(2, p.x, p.y, p.z);
 	this->GetCity()->AddObject(c);
 	printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, 1.0f, p.z);
 	
@@ -245,8 +244,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 	glm::vec3 p = TerrainRenderer::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
 	
 	AttackableObject* c = (AttackableObject*)
-	    ObjectFactory::GetInstance()->GetObject(3)->Clone(
-		p.x, p.y, p.z);
+	    ObjectFactory::GetInstance()->GetObject(3, p.x, p.y, p.z);
 	this->GetCity()->AddObject(c);
 	printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, 1.0f, p.z);
 	

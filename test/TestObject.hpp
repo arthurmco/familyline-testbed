@@ -1,7 +1,7 @@
 /***
     Test object for Tribalia
 
-    Copyright (C) 2016 Arthur M
+    Copyright (C) 2016, 2017 Arthur M
 ***/
 
 #include "logic/Building.hpp"
@@ -11,13 +11,16 @@
 #define TEST_OBJECT_H
 
 /*  A tent is a basic people storage building */
-    class TestObject : public Tribalia::Logic::Building {
+class TestObject : public Tribalia::Logic::Building {
 private:
     
 public:
     static const int TID = 3;
 	
-    TestObject() : Building(0, TID, "TestObject"){};
+    TestObject();
+
+/*  250 HP, 3 baseAtk, 1.0 baseArmor, 1.0 building material, 0.95 bulding
+    strength, 2 units of garrison capacity */
 	
     TestObject(int oid, float x, float y, float z);
 
@@ -27,6 +30,8 @@ public:
     /* Called on each engine loop, when an action is performed */
     virtual bool DoAction(void);
 
+    TestObject(const TestObject&);
+    
     ADD_CLONE_MACRO(TestObject, NULL)
 };
 

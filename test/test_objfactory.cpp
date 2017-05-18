@@ -10,24 +10,27 @@ void ObjectFactoryTest::SetUp()
 
 void ObjectFactoryTest::TearDown()
 {
-    delete _of;
+//    delete _of;
 }
 
 TEST_F(ObjectFactoryTest, TestIfCanGetObject) {
-    GameObject* go = _of->GetObject(TestObject::TID);
+    GameObject* go = _of->GetObject(TestObject::TID, 1, 1, 1);
 
     ASSERT_NE(go, nullptr);
+
+    delete go;
 }
 
 TEST_F(ObjectFactoryTest, TestIfAttributesArentLinked) {
-    GameObject* go1 = _of->GetObject(TestObject::TID);
-    GameObject* go2 = _of->GetObject(TestObject::TID);
+    GameObject* go1 = _of->GetObject(TestObject::TID, 1, 1, 1);
+    GameObject* go2 = _of->GetObject(TestObject::TID, 10, 1, 10);
 
     go1->AddProperty("malakoi", 200);
 
     ASSERT_FALSE(go2->HasProperty("malakoi")) << "The properties were cloned. You might need to fix the object copy constructor";
 
-    go2->AddProperty("malakoi", 200);
+    go2->AddProperty("malakoi", 100);
 
-    ASSERT_NE(go1->GetProperty<int>("malakoi"), go2->GetProperty<int>("malakoi"));
+    ASSERT_NE(go1->GetProperty<int>("malakoi"),
+	      go2->GetProperty<int>("malakoi"));
 }

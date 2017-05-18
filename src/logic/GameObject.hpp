@@ -8,6 +8,7 @@
 
 #include <map>
 #include <string>
+#include <cstring>
 
 #ifndef GAMEOBJECT_HPP
 #define GAMEOBJECT_HPP
@@ -15,22 +16,32 @@
 namespace Tribalia {
     namespace Logic {
 
+
     /*  The GameObject class represents the most basic game object
 
         It contains, however, a hashtable of properties, to allow
         extensibility.
      */
 
+	/* Macro to create a copy constructor */
+#define ADD_COPY_CTOR(classname) 				\
+	classname::classname(const classname& n) {		\
+	    CopyObject((GameObject*)this, (GameObject&)n);	\
+	}
+
 	/* Macro to easily add a 'cloning with personalized position' method.
 	 * Note that, for obligation, you'll have to have a constructor for your 
 	 * object that is of form (oid, x, y, z)
 	 */
 	#define ADD_CLONE_MACRO(classname, objname) \
-		virtual GameObject* Clone(float x, float y, float z, char* n = nullptr) { \
-			auto o = new classname{0, x, y, z}; 	\
-			if(n) o->SetName(n); 					\
-			return o;								\
-		}
+	    virtual GameObject* Clone(float x, float y, float z,	\
+				      char* n = nullptr) {		\
+		auto o = new classname{0, x, y, z};			\
+		o->CopyObject((GameObject*)o, (GameObject&)*this);	\
+		o->_xPos = x; o->_yPos = y; o->_zPos = z;		\
+		if(n) o->SetName(n);					\
+		return o;						\
+	    }
 
     class GameObject {
         friend class ObjectManager;
@@ -45,9 +56,12 @@ namespace Tribalia {
         int _xPos, _yPos, _zPos;
 	float _radius = -1.0f;
 
-	
         /* Property hashtable */
-        std::map<std::string, void*> _properties;
+        std::map<std::string, void*>* _properties;
+	std::map<std::string, size_t>* _sizemap;
+
+	void CopyObject(GameObject* dst, GameObject& src);
+	
 	
     public:
         GameObject(int oid, int tid, const char* name);
@@ -64,31 +78,26 @@ namespace Tribalia {
 
 	virtual GameObject* Clone(float x, float y, float z, char* n = nullptr) = 0;
 
+	GameObject(GameObject& o);
+
         /* Get a property value */
         template<typename T>
         T GetProperty(const char* name)
         {
             std::string sname{name};
 
-            if (_properties.find(sname) == _properties.end()){
+            if (_properties->find(sname) == _properties->end()){
                 return (T)0;
             }
 
-            return *(T*)_properties[sname];
+            return *(T*)_properties->at(sname);
 
         }
 
         /* Find a property */
         bool FindProperty(const char* name)
         {
-            std::string sname{name};
-
-            if (_properties.find(sname) == _properties.end()){
-                return false;
-            }
-
-            return true;
-
+            return HasProperty(name);
         }
 
         /* Set a property. Returns false if it doesn't exist */
@@ -97,11 +106,11 @@ namespace Tribalia {
         {
             std::string sname{name};
 
-            if (_properties.find(sname) == _properties.end()){
+            if (_properties->find(sname) == _properties->end()){
                 return false;
             }
 
-            T* prop = (T*)_properties[sname];
+            T* prop = (T*)_properties->at(sname);
             *prop = value;
 
             return true;
@@ -114,8 +123,9 @@ namespace Tribalia {
         {
             std::string sname{name};
 
-            if (_properties.find(sname) == _properties.end()){
-                _properties[sname] = new T;
+            if (_properties->find(sname) == _properties->end()){
+                _properties->emplace(sname, new T);
+		_sizemap->emplace(sname, sizeof(T));
                 return this->SetProperty(name, value);
 
             }
@@ -147,6 +157,7 @@ namespace Tribalia {
     #define SET_PROPERTY(name, val) \
         this->SetProperty(name, val)
     }
+
 }
 
 

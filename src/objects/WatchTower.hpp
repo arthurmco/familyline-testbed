@@ -18,7 +18,7 @@ private:
     static const int TID = 3;
 public:
 	
-	WatchTower() : Building(0, TID, "Watch Tower"){};
+    WatchTower();
 
     WatchTower(int oid, float x, float y, float z);
 
@@ -28,7 +28,9 @@ public:
     /* Called on each engine loop, when an action is performed */
     virtual bool DoAction(void);
 
-	ADD_CLONE_MACRO(WatchTower, NULL)
+    ADD_CLONE_MACRO(WatchTower, NULL)
+
+    WatchTower(const WatchTower&);
 };
 
 }

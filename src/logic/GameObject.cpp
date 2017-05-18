@@ -9,12 +9,7 @@
 using namespace Tribalia::Logic;
 
 GameObject::GameObject(int oid, int tid, const char* name) :
-    _oid(oid),
-    _tid(tid),
-    _name(name)
-{
-    _properties = std::map<std::string, void*>();
-}
+    GameObject(oid, tid, name, 0, 0, 0) {}
 
 GameObject::GameObject(int oid, int tid, const char* name,
 		       float x, float y, float z) :
@@ -23,9 +18,43 @@ GameObject::GameObject(int oid, int tid, const char* name,
     _name(name),
     _xPos(x), _yPos(y), _zPos(z)
 {
-    _properties = std::map<std::string, void*>();
+    _properties = new std::map<std::string, void*>();
+    _sizemap = new std::map<std::string, size_t>();
 }
-    
+
+void GameObject::CopyObject(GameObject* dst, GameObject& src)
+{
+    dst->_oid = -1;
+    dst->_tid = src._tid;
+    dst->_name = src._name;
+    dst->_xPos = src._xPos;
+    dst->_yPos = src._yPos;
+    dst->_zPos = src._zPos;
+    dst->_radius = src._radius;
+//    dst->_properties = new std::map<std::string, void*>();
+//    dst->_sizemap = new std::map<std::string, size_t>();
+
+    for (auto it : (*src._properties)) {
+
+	/* Do not copy some properties */
+	if (it.first == "mesh")
+	    continue;
+	
+	size_t s = src._sizemap->at(it.first);
+
+	void* data = (void*)new char[s];
+	memcpy(data, (void*)it.second, s);
+
+	dst->_properties->emplace(it.first, data);
+	dst->_sizemap->emplace(it.first, s);
+    } 
+
+}
+
+GameObject::GameObject(GameObject& o)
+{
+    CopyObject(this, o);
+}
 
 int GameObject::GetObjectID(){ return _oid; }
 int GameObject::GetTypeID(){ return _tid; }
@@ -46,5 +75,5 @@ bool GameObject::HasProperty(const char* name)
 {
     std::string sname{name};
 
-    return (_properties.find(sname) != _properties.end());
+    return (_properties->find(sname) != _properties->end());
 }

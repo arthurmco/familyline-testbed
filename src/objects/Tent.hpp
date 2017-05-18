@@ -18,7 +18,10 @@ private:
     static const int TID = 2;
 public:
 
-    Tent() : Building(0, TID, "Tent"){};
+    Tent();
+
+/*  250 HP, no baseAtk, 1.0 baseArmor, 1.0 building material, 0.95 bulding
+    strength, 2 units of garrison capacity */
 	
     Tent(int oid, float x, float y, float z);
 
@@ -28,7 +31,10 @@ public:
     /* Called on each engine loop, when an action is performed */
     virtual bool DoAction(void);
 
-    ADD_CLONE_MACRO(Tent, NULL)
+    ADD_CLONE_MACRO(Tent, "Tent")
+
+    Tent(const Tent&);
+    
 };
 
 }

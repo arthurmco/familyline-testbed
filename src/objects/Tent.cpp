@@ -3,6 +3,9 @@
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 
+Tent::Tent() : Building(0, TID, "Tent",
+		       0, 0, 0, 250, 0.1, 1.0, 1.0, 0.95, 2){};
+
 /*  250 HP, no baseAtk, 1.0 baseArmor, 1.0 building material, 0.95 bulding
     strength, 2 units of garrison capacity */
 Tent::Tent(int oid, float x, float y, float z)
@@ -17,3 +20,5 @@ bool Tent::Initialize() { return true; }
 
 /* Called on each engine loop, when an action is performed */
 bool Tent::DoAction(void) {return true; }
+
+ADD_COPY_CTOR(Tent)

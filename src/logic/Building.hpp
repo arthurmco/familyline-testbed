@@ -33,6 +33,7 @@ namespace Logic {
         void Train(Unit* unit);
 
     public:
+	Building() : Building(-1, -1, nullptr) {}
         Building(int oid, int tid, const char* name);
         Building(int oid, int tid, const char* name,
             float x, float y, float z);
