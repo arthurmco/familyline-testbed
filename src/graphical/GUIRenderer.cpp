@@ -38,13 +38,12 @@ static void ChangePanelZIndex(PanelRenderObject& pro, int zindex,
 	   px, py, pw, ph, relx, rely, relw, relh);
 
     /* Recreate the panel vertices */
-    float win_vectors[][3] =
-	{
-	    {relx, (rely+relh), znum}, {relx+relw, (rely+relh), znum},
-	    {relx+relw, (rely), znum},
-	    {relx, (rely+relh), znum}, {relx, rely, znum},
-	    {relx+relw, rely, znum}
-	};
+    float win_vectors[][3] = {
+	{relx, (rely+relh), znum}, {relx+relw, (rely+relh), znum},
+	{relx+relw, (rely), znum},
+	{relx, (rely+relh), znum}, {relx, rely, znum},
+	{relx+relw, rely, znum}
+    };
 
     glBindBuffer(GL_ARRAY_BUFFER, pro.vbo_vert);
     glBufferData(GL_ARRAY_BUFFER, sizeof(win_vectors), win_vectors, GL_STATIC_DRAW);
@@ -139,6 +138,57 @@ bool GUIRenderer::Render()
 
     glClearColor(0.0, 0.0, 0.0, 1.0);
     
+    return true;
+}
+
+/* Initialize the input subsystem
+   Basically, create and bind the listener */
+void GUIRenderer::InitInput()
+{
+    _il = new Input::InputListener();
+    Input::InputManager::GetInstance()->AddListener(
+	Input::EVENT_KEYEVENT | Input::EVENT_MOUSEMOVE | Input::EVENT_MOUSEEVENT,
+	_il);
+    
+}
+
+bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
+{
+    
+    /* Send event only to appropriated panel */
+    if (_il->PopEvent(ev)) {
+	int x = ev.mousex;
+	int y = ev.mousey;
+
+	for (auto& p : _panels) {
+	    if (p.is_debug) {
+		continue; // Do not send events to the debug panel
+	    }
+	    
+	    int px, py, pw, ph;
+	    p.panel->GetBounds(px, py, pw, ph);
+
+	    if (x < px || x > (px + pw)) {
+	        continue;
+	    }
+
+	    if (y < py || y > (py + ph)) {
+		continue;
+	    }
+
+	    // Send relative mouse coordinates
+	    Input::InputEvent rev;
+	    rev = ev;
+	    rev.mousex = ev.mousex - px;
+	    rev.mousey = ev.mousey - py;
+	    
+	    // Found the control. Send the event
+	    return p.panel->ProcessInput(rev);
+	}
+
+	return false; // No one processed the event
+    }
+
     return true;
 }
 

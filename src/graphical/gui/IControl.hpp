@@ -5,6 +5,8 @@
 #include <cairo/cairo.h>
 #include <glm/glm.hpp>
 
+#include "../../input/InputEvent.hpp"
+
 #ifndef _GUI_CONTROLUPDATER
 #define _GUI_CONTROLUPDATER
 
@@ -24,6 +26,9 @@ public:
     /* Redraws itself */
     virtual void Redraw(cairo_t* ctxt) = 0;
 
+    /* Process control input */
+    virtual bool ProcessInput(Input::InputEvent& ev) = 0;
+    
     virtual ~IControl(){}
 };
 

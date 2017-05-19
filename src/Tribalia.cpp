@@ -282,6 +282,8 @@ int main(int argc, char const *argv[])
 
     ObjectPathManager::getInstance()->SetTerrain(terr);
     
+    gr.InitInput();
+    
     do {
 
         ip->UpdateIntersectedObject();
@@ -291,6 +293,8 @@ int main(int argc, char const *argv[])
         player = true;
         gctx.elapsed_seconds = delta / 1000.0;
 
+	InputEvent ev;
+	gr.ProcessInput(ev);
 	hp->ProcessInput();
         if (!hp->Play(&gctx))
             player = false;
@@ -346,7 +350,7 @@ int main(int argc, char const *argv[])
 	if (objupdate) rndr->UpdateObjects();
         rndr->UpdateFrames();
         rndr->Render();
-	
+
 	gr.DebugWrite(10, 140, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f)",
 		      p.x, p.y, p.z, q.x, q.y);
 	gr.DebugWrite(10, 180, "Camera rotation: %.1fº",

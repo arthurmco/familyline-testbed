@@ -50,3 +50,9 @@ void Label::Redraw(cairo_t* ctxt)
     cairo_move_to(ctxt, 0, 14);
     cairo_show_text(ctxt, _text.c_str());
 }
+
+bool Label::ProcessInput(Input::InputEvent& ev)
+{
+    printf("Label hovered at relpos %dx%d\n", ev.mousex, ev.mousey);
+    return true;
+}

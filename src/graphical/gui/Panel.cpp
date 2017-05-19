@@ -59,6 +59,37 @@ int Panel::AddPanel(IPanel* p, int x, int y)
     _p->SetPosition(x, y);
     return this->AddPanel(p);
 }
+#include <cstdio>
+bool Panel::ProcessInput(Input::InputEvent& ev)
+{
+    int x = ev.mousex;
+    int y = ev.mousey;
+
+    for (auto& p : _panels) {
+	int px, py, pw, ph;
+	p.panel->GetBounds(px, py, pw, ph);
+	
+	if (x < px || x > (px + pw)) {
+	    continue;
+	}
+	
+	if (y < py || y > (py + ph)) {
+	    continue;
+	}
+	
+	// Send relative mouse coordinates
+	Input::InputEvent rev;
+	rev = ev;
+	rev.mousex = ev.mousex - px;
+	rev.mousey = ev.mousey - py;
+
+	// Found the control. Send the event
+	return p.panel->ProcessInput(rev);
+    }
+    
+    return false; // No one processed the event
+
+}
 
 /* Remove the panel */
 void Panel::RemovePanel(IPanel* p)

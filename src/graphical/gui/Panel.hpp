@@ -43,6 +43,7 @@ public:
     /* Remove the panel */
     virtual void RemovePanel(IPanel* p) override;
 
+    virtual bool ProcessInput(Input::InputEvent& ev) override;
 
 };
 

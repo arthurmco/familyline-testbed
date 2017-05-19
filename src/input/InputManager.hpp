@@ -37,10 +37,11 @@ namespace Input {
 
         static InputManager* im;
 
-		/* The default listener will catch the remaining events that other listeners didn't */
-		InputListener* default_listener;
+	/* The default listener will catch the remaining events that other listeners didn't */
+	InputListener* default_listener;
+	
     public:
-		void Initialize();
+	void Initialize();
 
         /* Get the top event (not taking it off the queue).
             Return false if no elements on queue */
@@ -53,7 +54,7 @@ namespace Input {
         void AddListener(int types, InputListener* listener);
         void RemoveListener(InputListener* listener);
 
-		InputListener* GetDefaultListener();
+	InputListener* GetDefaultListener();
 
         /* Receive events and send them to queues */
         void Run();

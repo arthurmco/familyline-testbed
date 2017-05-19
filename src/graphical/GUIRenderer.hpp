@@ -13,6 +13,9 @@
 #include "gui/IPanel.hpp"
 #include "gui/IContainer.hpp"
 
+#include "../input/InputListener.hpp"
+#include "../input/InputManager.hpp"
+
 #ifndef GUIRENDERER_HPP
 #define GUIRENDERER_HPP
 
@@ -55,6 +58,8 @@ private:
     Framebuffer* _f;
 
     ShaderProgram* sGUI;
+
+    Input::InputListener* _il;
 public:
     GUIRenderer(Window* w);
 
@@ -63,6 +68,14 @@ public:
     /* Write a message in the screen */
     void DebugWrite(int x, int y, const char* fmt, ...);
 
+    /* Initialize the input subsystem */
+    void InitInput();
+
+    /* Send input to other controls 
+     * Return true if we processed the event, false if not
+     */
+    virtual bool ProcessInput(Input::InputEvent& ev);
+    
     /* Render the GUI view */
     bool Render();
 

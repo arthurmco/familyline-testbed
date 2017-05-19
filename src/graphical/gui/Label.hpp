@@ -26,8 +26,10 @@ public:
     const char* GetText() const;
     void SetText(char* txt, ...);
 
-    virtual void Redraw(cairo_t* ctxt);
+    virtual void Redraw(cairo_t* ctxt) override;
 
+    virtual bool ProcessInput(Input::InputEvent& ev) override;
+	
 };
 
 }
