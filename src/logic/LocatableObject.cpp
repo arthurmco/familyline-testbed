@@ -2,11 +2,6 @@
 
 using namespace Tribalia::Logic;
 
-LocatableObject::LocatableObject(int oid, int tid, const char* name) :
-    GameObject(oid, tid, name, -1, -1, -1)
-    {
-        DEF_PROPERTY("rotation",-1);
-    }
 LocatableObject::LocatableObject(int oid, int tid, const char* name,
     float xPos, float yPos, float zPos) :
     GameObject(oid, tid, name, xPos, yPos, zPos)

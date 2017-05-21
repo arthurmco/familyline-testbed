@@ -31,15 +31,9 @@ namespace Tribalia {
 
         class AttackableObject : public LocatableObject {
         public:
-            AttackableObject(int oid, int tid, const char* name);
             AttackableObject(int oid, int tid, const char* name,
-                float x, float y, float z);
-            AttackableObject(int oid, int tid, const char* name,
-                float x, float y, float z, int maxHP,
-                float baseAtk, float baseArmor);
-            AttackableObject(int oid, int tid, const char* name,
-		float x, float y, float z, int maxHP, float HP,
-                float baseAtk, float baseArmor);
+		float x = -1, float y = -1, float z = -1, int maxHP = 1,
+		float HP = -1, float baseAtk = 0.0, float baseArmor = 0.0);
 
             int GetMaxHP(void);
             float GetHP(void);

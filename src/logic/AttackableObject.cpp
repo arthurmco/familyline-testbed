@@ -4,50 +4,14 @@ using namespace Tribalia::Logic;
 
 int attack_seed = 0;
 
-AttackableObject::AttackableObject(int oid, int tid, const char* name)
-    : LocatableObject(oid, tid, name)
-{
-    DEF_PROPERTY("maxHP", 1);
-    DEF_PROPERTY("HP", 1.0f);
-    DEF_PROPERTY("baseAtk", 0.0f);
-    DEF_PROPERTY("baseArmor", 0.0f);
-    DEF_PROPERTY("bonusUnitAtk", 1.0f);
-    DEF_PROPERTY("bonusBasicBuildingAtk", 1.0e-1f);
-    DEF_PROPERTY("bonusMediumBuildingAtk", 1.0e-2f);
-    DEF_PROPERTY("bonusAdvancedBuildingAtk", 1.0e-3f);
-    DEF_PROPERTY("experience", 0);
-    DEF_PROPERTY("city", nullptr);
-    DEF_PROPERTY("attackStatus", AST_ALIVE);
-    DEF_PROPERTY("attackRange", 1.0);
-	
-    /* This isn't reccomended, but we don't need a nice method
-     * just to calculate the attack chance */
-    srand((unsigned int)((uintptr_t)this & 0xffffffff));
-}
-
-AttackableObject::AttackableObject(int oid, int tid, const char* name,
-        float x, float y, float z)
-        : LocatableObject(oid, tid, name, x, y, z)
-{
-    DEF_PROPERTY("maxHP", 1);
-    DEF_PROPERTY("HP", 1.0f);
-    DEF_PROPERTY("baseAtk", 0.0f);
-    DEF_PROPERTY("baseArmor", 0.0f);
-    DEF_PROPERTY("bonusUnitAtk", 1.0f);
-    DEF_PROPERTY("bonusBasicBuildingAtk", 1.0e-1f);
-    DEF_PROPERTY("bonusMediumBuildingAtk", 1.0e-2f);
-    DEF_PROPERTY("bonusAdvancedBuildingAtk", 1.0e-3f);
-    DEF_PROPERTY("experience", 0);
-    DEF_PROPERTY("city", nullptr);
-    DEF_PROPERTY("attackStatus", AST_ALIVE);
-    DEF_PROPERTY("attackRange", 1.0);
-
-}
 AttackableObject::AttackableObject(int oid, int tid, const char* name,
         float x, float y, float z, int maxHP, float HP,
         float baseAtk, float baseArmor)
         : LocatableObject(oid, tid, name, x, y, z)
 {
+    if (HP < 0)
+	HP = float(maxHP);
+    
     DEF_PROPERTY("maxHP", maxHP);
     DEF_PROPERTY("HP", HP);
     DEF_PROPERTY("baseAtk", baseAtk);
@@ -61,27 +25,12 @@ AttackableObject::AttackableObject(int oid, int tid, const char* name,
     DEF_PROPERTY("attackStatus", AST_ALIVE);
     DEF_PROPERTY("attackRange", 1.0);
 
-}
-
-AttackableObject::AttackableObject(int oid, int tid, const char* name,
-	float x, float y, float z, int maxHP,
-        float baseAtk, float baseArmor)
-        : LocatableObject(oid, tid, name, x, y, z)
-{
-    DEF_PROPERTY("maxHP", maxHP);
-    DEF_PROPERTY("HP", (float)maxHP);
-    DEF_PROPERTY("baseAtk", baseAtk);
-    DEF_PROPERTY("baseArmor", baseArmor);
-    DEF_PROPERTY("bonusUnitAtk", 1.0f);
-    DEF_PROPERTY("bonusBasicBuildingAtk", 1.0e-1f);
-    DEF_PROPERTY("bonusMediumBuildingAtk", 1.0e-2f);
-    DEF_PROPERTY("bonusAdvancedBuildingAtk", 1.0e-3f);
-    DEF_PROPERTY("experience", 0);
-    DEF_PROPERTY("city", nullptr);
-    DEF_PROPERTY("attackStatus", AST_ALIVE);
-    DEF_PROPERTY("attackRange", 1.0);
+    /* This isn't reccomended, but we don't need a nice method
+     * just to calculate the attack chance */
+    srand((unsigned int)((uintptr_t)this & 0xffffffff));
 
 }
+
 
 int AttackableObject::GetMaxHP(void){
     return GET_PROPERTY(int,"maxHP");

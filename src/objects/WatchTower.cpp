@@ -4,12 +4,14 @@ using namespace Tribalia;
 using namespace Tribalia::Logic;
 
 WatchTower::WatchTower()
-    : Building(0, TID, "WatchTower", 0, 0, 0, 1000, 1.2, 1.5, 1.8, 1.12, 5){};
+    : Building(0, TID, "WatchTower", 0, 0, 0, 1000, -1,
+	       1.2, 1.5, 1.8, 1.12, 5){};
 
 /*  1000 HP, 1.2 baseAtk, 1.5 baseArmor, 1.8 building material, 1.12 bulding
     strength, 5 units of garrison capacity */
 WatchTower::WatchTower(int oid, float x, float y, float z)
-    : Building(oid, TID, "WatchTower", x, y, z, 1000, 1.2, 1.5, 1.8, 1.12, 5) {
+    : Building(oid, TID, "WatchTower", x, y, z, 1000, -1,
+	       1.2, 1.5, 1.8, 1.12, 5) {
         DEF_MESH("WatchTower.obj");
 
     }

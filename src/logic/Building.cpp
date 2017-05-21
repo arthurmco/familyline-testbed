@@ -3,42 +3,13 @@
 using namespace Tribalia::Logic;
 
 
-Building::Building(int oid, int tid, const char* name)
-    : AttackableObject(oid, tid, name)
-    {
-        DEF_PROPERTY("buildMaterial", 0.0f);
-        DEF_PROPERTY("buildingStrength", 1.0f);
-        DEF_PROPERTY("birthPointX", GetX());
-        DEF_PROPERTY("birthPointY", GetZ());
-    }
 
 Building::Building(int oid, int tid, const char* name,
-    float x, float y, float z)
-    : AttackableObject(oid, tid, name, x, y, z)
-    {
-        DEF_PROPERTY("buildMaterial", 0.0f);
-        DEF_PROPERTY("buildingStrength", 1.0f);
-        DEF_PROPERTY("birthPointX", GetX());
-        DEF_PROPERTY("birthPointY", GetZ());		
-        InitGarrisoning();
-    }
-
-Building::Building(int oid, int tid, const char* name,
-    float x, float y, float z, int maxHP,
-    float baseAtk, float baseArmor)
-    : AttackableObject(oid, tid, name, x, y, z, maxHP, baseAtk, baseArmor)
-    {
-        DEF_PROPERTY("buildMaterial", 0.0f);
-        DEF_PROPERTY("buildingStrength", 1.0f);
-	    DEF_PROPERTY("birthPointX", GetX());	
-        DEF_PROPERTY("birthPointY", GetZ());    
-        InitGarrisoning();
-    }
-Building::Building(int oid, int tid, const char* name,
-    float x, float y, float z, int maxHP,
-    float baseAtk, float baseArmor,
-    float buildMaterial, float buildingStrength, int garrisonCapacity)
-    : AttackableObject(oid, tid, name, x, y, z, maxHP, baseAtk, baseArmor)
+		   float x, float y, float z, int maxHP, float HP,
+		   float baseAtk, float baseArmor,
+		   float buildMaterial, float buildingStrength,
+		   int garrisonCapacity)
+    : AttackableObject(oid, tid, name, x, y, z, maxHP, HP, baseAtk, baseArmor)
     {
         DEF_PROPERTY("buildMaterial", buildMaterial);
         DEF_PROPERTY("buildingStrength", buildingStrength);

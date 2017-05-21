@@ -33,19 +33,13 @@ namespace Logic {
         void Train(Unit* unit);
 
     public:
-	Building() : Building(-1, -1, nullptr) {}
-        Building(int oid, int tid, const char* name);
         Building(int oid, int tid, const char* name,
-            float x, float y, float z);
-        Building(int oid, int tid, const char* name,
-            float x, float y, float z, int maxHP,
-            float baseAtk, float baseArmor);
-        Building(int oid, int tid, const char* name,
-		 float x, float y, float z, int maxHP,
-            float baseAtk, float baseArmor,
-            float buildMaterial, float BuildingStrength,
-			int garrisonCapacity);
-
+		 float x = -1, float y = -1, float z = -1,
+		 int maxHP = 1, float HP = -1, float baseAtk = 0.0,
+		 float baseArmor = 0.0, float buildMaterial = 0.0f,
+		 float BuildingStrength = 1.0f, int garrisonCapacity = 0);
+	Building() : Building(-1, -1, "") {}
+		     
         float GetBuildMaterial(); void SetBuildMaterial(float);
         float GetBuildingStrength(); void SetBuildingStrength(float);
 
