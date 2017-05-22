@@ -42,6 +42,7 @@
 
 #include "graphical/gui/Panel.hpp"
 #include "graphical/gui/Label.hpp"
+#include "graphical/gui/Button.hpp"
 
 #include "input/InputPicker.hpp"
 
@@ -273,6 +274,9 @@ int main(int argc, char const *argv[])
 
     gr.AddPanel(&pnl);
     gr.AddPanel(&lbl);
+
+    Button btn = Button(300, 200, 150, 40, "Test");
+    gr.AddPanel(&btn);
 
     double pms = 0.0;
     
