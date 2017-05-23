@@ -152,9 +152,9 @@ void GUIRenderer::InitInput()
     
 }
 
+GUI::IPanel* oldPanel = nullptr;
 bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
-{
-    
+{   
     /* Send event only to appropriated panel */
     if (_il->PopEvent(ev)) {
 	int x = ev.mousex;
@@ -183,9 +183,24 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 	    rev.mousey = ev.mousey - py;
 	    
 	    // Found the control. Send the event
-	    return p.panel->ProcessInput(rev);
+	    bool r = p.panel->ProcessInput(rev);
+	    if (oldPanel && oldPanel != p.panel) {
+		oldPanel->OnLostFocus();
+		oldPanel = p.panel;
+		p.panel->OnFocus();
+	    } else if (!oldPanel) {
+		oldPanel = p.panel;
+		p.panel->OnFocus();		
+	    }
+
+	    return r;
 	}
 
+	if (oldPanel) {
+	    oldPanel->OnLostFocus();
+	    oldPanel = nullptr;
+	}
+	
 	return false; // No one processed the event
     }
 

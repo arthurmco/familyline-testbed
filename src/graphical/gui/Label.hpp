@@ -29,7 +29,9 @@ public:
     virtual void Redraw(cairo_t* ctxt) override;
 
     virtual bool ProcessInput(Input::InputEvent& ev) override;
-	
+
+    virtual void OnFocus() override {}
+    virtual void OnLostFocus() override {}
 };
 
 }

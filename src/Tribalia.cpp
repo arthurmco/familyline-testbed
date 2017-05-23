@@ -276,6 +276,14 @@ int main(int argc, char const *argv[])
     gr.AddPanel(&lbl);
 
     Button btn = Button(300, 200, 150, 40, "Test");
+    btn.SetOnClickListener([&](GUI::IControl* c) {
+	    static int times = 0;
+	    times++;
+
+	    char ss[8];
+	    snprintf(ss, 7, "%d", times);
+	    lbl.SetText(ss);
+	});
     gr.AddPanel(&btn);
 
     double pms = 0.0;

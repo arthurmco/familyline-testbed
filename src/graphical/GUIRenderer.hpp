@@ -92,7 +92,8 @@ public:
     void SetBounds(int x, int y, int w, int h);
     void SetPosition(int x, int y);
 
-    
+    virtual void OnFocus() override {}
+    virtual void OnLostFocus() override {}
 
 };
 

@@ -73,21 +73,46 @@ void Button::Redraw(cairo_t* ctxt)
 bool Button::ProcessInput(Input::InputEvent& ev)
 {
     isInput = true;
-    glm::vec4 bgclick = glm::vec4(_actualbg.r / 1.71f, _actualbg.g / 1.71f,
-				  _actualbg.b / 1.71f, _actualbg.a * 1.71f);
+    glm::vec4 bgclick = glm::vec4(_bgColor.r / 1.71f, _bgColor.g / 1.71f,
+				  _bgColor.b / 1.71f, _bgColor.a * 1.71f);
+    glm::vec4 bghover = glm::vec4(_bgColor.r / 1.41f, _bgColor.g / 1.41f,
+				  _bgColor.b / 1.41f, _bgColor.a * 1.41f);
     
     switch (ev.eventType) {
     case Input::EVENT_MOUSEEVENT:
-	if (ev.event.mouseev.status != Input::KEY_KEYRELEASE)
+	if (ev.event.mouseev.status != Input::KEY_KEYRELEASE) {
 	    _actualbg = bgclick;
-	else
-	    _actualbg = _bgColor;
+
+	    if (onClickListener)
+		this->onClickListener(this);
+	} else {
+	    _actualbg = bghover;
+	}
 	break;
-    default:
-	_actualbg = _bgColor;
+    case Input::EVENT_MOUSEMOVE:
+	if (isHover)
+	    _actualbg = bghover;
 	break;
     }
     
-    printf("Button hovered\n");
     return true;
+}
+
+void Button::OnFocus()
+{
+    isHover = true;
+    printf("Focus in\n");
+}
+
+void Button::OnLostFocus()
+{
+    isHover = false;
+    printf("Focus out\n");
+    _actualbg = _bgColor;
+}
+
+void Button::SetOnClickListener(OnClickListener ocl)
+{
+    if (ocl)
+	onClickListener = ocl;
 }

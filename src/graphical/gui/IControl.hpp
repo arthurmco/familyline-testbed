@@ -28,6 +28,11 @@ public:
 
     /* Process control input */
     virtual bool ProcessInput(Input::InputEvent& ev) = 0;
+
+
+    /* Functions called when you gain or lost focus */
+    virtual void OnFocus() = 0;
+    virtual void OnLostFocus() = 0;
     
     virtual ~IControl(){}
 };

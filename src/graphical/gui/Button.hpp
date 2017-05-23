@@ -5,6 +5,7 @@
 
 #include "IPanel.hpp"
 #include <string>
+#include <functional>
 #include <cstdarg>
 #include <cstring>
 
@@ -15,6 +16,8 @@ namespace Tribalia {
 namespace Graphics {
 namespace GUI {
 
+    typedef std::function<void(IControl*)> OnClickListener;
+	     
 class Button : public IPanel {
 private:
     std::string _text;
@@ -24,6 +27,10 @@ private:
 
     cairo_text_extents_t extents;
     bool textChanged = true;
+
+    bool isHover = false;
+
+    OnClickListener onClickListener = nullptr;
     
 public:
     Button(int x, int y, int w, int h, const char* text);
@@ -34,7 +41,11 @@ public:
     virtual void Redraw(cairo_t* ctxt) override;
 
     virtual bool ProcessInput(Input::InputEvent& ev) override;
-	
+   
+    virtual void OnFocus() override;
+    virtual void OnLostFocus() override;
+
+    void SetOnClickListener(OnClickListener);
 };
 
 }
