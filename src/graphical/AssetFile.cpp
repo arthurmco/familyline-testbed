@@ -1,5 +1,6 @@
 #include "AssetFile.hpp"
 #include "../Log.hpp"
+#include "../config.h"
 
 using namespace Tribalia::Graphics;
 
@@ -22,12 +23,19 @@ static std::string Trim(std::string str)
 }
 
 #define SEPARATOR '/'
+#define STR_SEPARATOR "/"
 #if defined(_WIN32)
     #define SEPARATOR '\\'
+    #define STR_SEPARATOR "\\"
 #endif
 
+
 std::string AssetFile::GetAbsolutePath(std::string rel)
-{   
+{
+    printf("rel: %s\n", rel.c_str());
+    if (rel[0] == SEPARATOR)
+	return rel;
+    
     std::string dir = _path.substr(0, _path.find_last_of(SEPARATOR)+1);
     dir.append(rel);
     return dir;    
@@ -108,7 +116,25 @@ void AssetFile::BuildFileItemTree()
 
             i = l.find("path:");
             if (i != std::string::npos) {
-                path = GetAbsolutePath(Trim(l.substr(i+5)).c_str());
+		/* Process special 'variables' in path */
+		size_t p = std::string::npos;
+		path = Trim(l.substr(i+5));
+		p = path.find("$(MODELS_DIR)/");
+		if (p != std::string::npos) {
+		    path.replace(p, 14, std::string(MODELS_DIR));
+		}
+
+		p = path.find("$(TEXTURES_DIR)/");
+		if (p != std::string::npos) {
+		    path.replace(p, 16, std::string(TEXTURES_DIR));
+		}
+
+		p = path.find("$(MATERIALS_DIR)/");
+		if (p != std::string::npos) {
+		    path.replace(p, 17, std::string(MATERIALS_DIR));
+		}
+
+                path = GetAbsolutePath(path);
                 continue;
             }
 
@@ -131,8 +157,10 @@ void AssetFile::BuildFileItemTree()
             if (i != std::string::npos) {
                 AssetFileItem* afi = new AssetFileItem;
                 afi->name = name;
-                afi->path = path;
-                afi->type = type;
+
+		printf("%s\n", path.c_str());
+	        afi->path = path;
+	        afi->type = type;
 /*                printf("\t new asset found: %s, %s, %s\n", name.c_str(), type.c_str(), path.c_str());*/
                 /* Check if our material asset has been loaded */
                 if (type == "mesh") {

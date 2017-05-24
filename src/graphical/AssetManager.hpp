@@ -24,7 +24,7 @@ namespace Graphics {
 
 struct AssetGroup {
     char folder[256];   // Asset group folder
-    char tag[32];       // Asset group tag.
+    char tag[256];       // Asset group tag.
 };
 
 enum AssetType {
