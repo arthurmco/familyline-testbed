@@ -10,6 +10,7 @@
 
 
 #include "EnviroDefs.h"
+#include "config.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -140,6 +141,10 @@ int main(int argc, char const *argv[])
     Log::GetLog()->Write("git commit is " COMMIT);
 #endif
 
+    Log::GetLog()->Write("Default model directory is " MODELS_DIR);
+    Log::GetLog()->Write("Default texture directory is " TEXTURES_DIR);
+    Log::GetLog()->Write("Default material directory is " MATERIALS_DIR);
+
     ObjectManager* om = nullptr;
     HumanPlayer* hp = nullptr;
     Terrain* terr = nullptr;
@@ -171,7 +176,7 @@ int main(int argc, char const *argv[])
 
         hp = new HumanPlayer{"Arthur"};
 
-	terrFile = new TerrainFile("terrain_test.trtb");
+	terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
 	terr = terrFile->GetTerrain();
 
 	tc = new TeamCoordinator();
@@ -187,7 +192,7 @@ int main(int argc, char const *argv[])
 
         rndr->SetSceneManager(scenemng);
 
-        if (!am->ReadFromFile("assets.taif")) {
+        if (!am->ReadFromFile(ASSET_FILE_DIR "assets.taif")) {
             throw asset_exception(nullptr, "Invalid asset file!");
         }
 

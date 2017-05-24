@@ -1,4 +1,5 @@
 #include "Window.hpp"
+#include "../config.h"
 
 using namespace Tribalia::Graphics;
 
@@ -78,8 +79,8 @@ void Window::Show()
 
     /* Compile the shader */
     if (!winShader) {
-	Shader *sv = new Shader{ "shaders/Window.vert", SHADER_VERTEX };
-	Shader *sf = new Shader{ "shaders/Window.frag", SHADER_PIXEL };
+	Shader *sv = new Shader{ SHADERS_DIR "Window.vert", SHADER_VERTEX };
+	Shader *sf = new Shader{ SHADERS_DIR "Window.frag", SHADER_PIXEL };
 	
 	sv->Compile();
 	sf->Compile();

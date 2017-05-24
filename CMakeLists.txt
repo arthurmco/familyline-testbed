@@ -118,3 +118,33 @@ else()
   endif(IS_DEBUG)
 
 endif(MSVC)
+
+option(USE_RELATIVE_PATH "Set if you want the path to the game resources to be local" OFF)
+
+if (WIN32 OR USE_RELATIVE_PATH)
+	set(SHADERS_DIR "\"./shaders/\"")
+	set(ICONS_DIR "\"./icons/\"")
+	set(MATERIALS_DIR "\"./materials/\"")
+	set(MODELS_DIR "\"./models/\"")
+	set(TEXTURES_DIR "\"./textures/\"")
+	set(ASSET_FILE_DIR "\"./\"")
+else()
+	set(SHADERS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/shaders/\"")
+	set(ICONS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/icons/\"")
+	set(MATERIALS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/materials/\"")
+	set(MODELS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/models/\"")
+	set(TEXTURES_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/textures/\"")
+	set(ASSET_FILE_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/\"")
+endif(WIN32 OR USE_RELATIVE_PATH)
+
+configure_file("src/config.h.in" "src/config.h")
+
+install(TARGETS tribalia DESTINATION bin)
+install(DIRECTORY shaders DESTINATION share/tribalia)
+install(DIRECTORY textures DESTINATION share/tribalia)
+install(DIRECTORY icons DESTINATION share/tribalia)
+install(DIRECTORY materials DESTINATION share/tribalia)
+install(DIRECTORY models DESTINATION share/tribalia)
+install(FILES assets.taif DESTINATION share/tribalia)
+install(FILES terrain_test.trtb DESTINATION share/tribalia)
+

@@ -1,4 +1,5 @@
 #include "Renderer.hpp"
+#include "../config.h"
 
 using namespace Tribalia::Graphics;
 
@@ -37,10 +38,10 @@ void Renderer::InitializeShaders()
     Shader *sFrag, *sVert;
     Shader *fLines, *vLines;
 
-    sFrag = new Shader{"shaders/Forward.frag", SHADER_PIXEL};
-    sVert = new Shader{"shaders/Forward.vert", SHADER_VERTEX};
-    fLines = new Shader{ "shaders/Lines.frag", SHADER_PIXEL };
-    vLines = new Shader{ "shaders/Lines.vert", SHADER_VERTEX };
+    sFrag = new Shader{SHADERS_DIR "Forward.frag", SHADER_PIXEL};
+    sVert = new Shader{SHADERS_DIR "Forward.vert", SHADER_VERTEX};
+    fLines = new Shader{SHADERS_DIR "Lines.frag", SHADER_PIXEL };
+    vLines = new Shader{SHADERS_DIR "Lines.vert", SHADER_VERTEX };
 	
     if (!sFrag->Compile()) {
         throw shader_exception("Shader failed to compile", glGetError(),

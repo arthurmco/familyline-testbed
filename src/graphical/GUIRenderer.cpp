@@ -1,6 +1,7 @@
 
 #include "GUIRenderer.hpp"
 #include "gui/Panel.hpp"
+#include "../config.h"
 
 using namespace Tribalia::Graphics;
 
@@ -60,8 +61,8 @@ GUIRenderer::GUIRenderer(Window* w)
     w->GetSize(win_w, win_h);
 
     /* Compile the GUI shader */
-    auto sFrag = new Shader{"shaders/GUI.frag", SHADER_PIXEL};
-    auto sVert = new Shader{"shaders/GUI.vert", SHADER_VERTEX};
+    auto sFrag = new Shader{SHADERS_DIR "GUI.frag", SHADER_PIXEL};
+    auto sVert = new Shader{SHADERS_DIR "GUI.vert", SHADER_VERTEX};
     if (!sFrag->Compile()) {
         throw shader_exception("GUI shader failed to compile", glGetError(),
             sFrag->GetPath(), sFrag->GetType());
