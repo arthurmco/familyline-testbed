@@ -271,23 +271,12 @@ bool HumanPlayer::Play(GameContext* gctx)
 
 	    if (attack_set)
 		attacker = dynamic_cast<AttackableObject*>(_selected_obj);
-	    
-	    if (attacker && attacker->CheckAttackRange(attackee)) {
-		if (attackee->GetStatus() != AST_DEAD) {
-		    float f = attacker->Hit(attackee, gctx->elapsed_seconds);
-		    printf("%s dealt %.3f dmg on %s\n", attacker->GetName(), f,
-			   attackee->GetName());
 
-		    if (attackee->GetStatus() == AST_DEAD) {
-			printf("%s is dead\n", attackee->GetName());
-			gctx->om->UnregisterObject(attackee);
-		    }
-		}
-		       
-	    } else {
+	    if (attacker) {
+		CombatManager::GetInstance()->AddAttack(attacker, attackee);
 		attack_ready = false;
-		attacker = attackee = nullptr;
 	    }
+	    
 	} else {
 	    attack_ready = false;
 	    attacker = attackee = nullptr;

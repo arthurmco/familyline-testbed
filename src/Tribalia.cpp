@@ -295,7 +295,10 @@ int main(int argc, char const *argv[])
     ObjectPathManager::getInstance()->SetTerrain(terr);
     
     gr.InitInput();
-    
+
+    CombatManager::GetInstance()->SetOnDeath([&gctx](AttackableObject* at) {
+	    gctx.om->UnregisterObject(at); 
+	});
     do {
 
         ip->UpdateIntersectedObject();
@@ -350,7 +353,7 @@ int main(int argc, char const *argv[])
 	    }	    
         }
 
-
+	CombatManager::GetInstance()->DoAttacks(gctx.elapsed_seconds);
         glm::vec3 p = ip->GetTerrainProjectedPosition();
         glm::vec2 q = ip->GetGameProjectedPosition();
 
