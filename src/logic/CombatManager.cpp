@@ -30,13 +30,12 @@ void CombatManager::DoAttacks(double tick)
 
     /* Remove the ones marked for removal */
     for (auto it = it_removals.begin(); it != it_removals.end(); it++) {
-	if (_deathfunc)
+	if (_deathfunc && (*it)->defender->GetStatus() == AST_DEAD)
 	    _deathfunc((*it)->defender);
 
 	_combats.erase(*it);
     }
 
-    printf("%d\n", _combats.size());
 }
 
 void CombatManager::AddAttack(AttackableObject* attacker,
