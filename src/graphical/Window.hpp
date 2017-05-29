@@ -24,10 +24,10 @@ namespace Graphics {
         SDL_Window* _win;
         SDL_GLContext _glctxt;
 
-		ShaderProgram* winShader = nullptr;
+	ShaderProgram* winShader = nullptr;
 
-		Framebuffer* _f3D = nullptr;
-		Framebuffer* _fGUI = nullptr;
+	Framebuffer* _f3D = nullptr;
+	Framebuffer* _fGUI = nullptr;
 
         GLuint base_vao, base_vbo, base_index_vbo;
     public:
@@ -39,10 +39,10 @@ namespace Graphics {
         /* Updates the window content to the video card */
         void Update();
 
-		void Set3DFramebuffer(Framebuffer* f);
-		void SetGUIFramebuffer(Framebuffer* f);
+	void Set3DFramebuffer(Framebuffer* f);
+	void SetGUIFramebuffer(Framebuffer* f);
 
-		void GetSize(int& w, int& h);
+	void GetSize(int& w, int& h);
     };
 
 

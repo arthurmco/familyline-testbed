@@ -3,13 +3,24 @@
 using namespace Tribalia::Graphics::GUI;
 
 Button::Button(int x, int y, int w, int h, const char* text)
-    : IPanel(x,y,w,h)
+    : IPanel(int(x),int(y),w,h)
 {
     _text = std::string{text};
     _bgColor = glm::vec4(128, 128, 128, 255);
     _fgColor = glm::vec4(32, 0, 0, 255);
     _actualbg = _bgColor;
 }
+
+Button::Button(double x, double y, double w, double h, const char* text)
+    : IPanel(double(x),double(y),w,h, true)
+{
+    printf("t: %s\n", text);
+    _text = std::string{text};
+    _bgColor = glm::vec4(128, 128, 128, 255);
+    _fgColor = glm::vec4(32, 0, 0, 255);
+    _actualbg = _bgColor;
+}
+
 
 const char* Button::GetText() const
 {

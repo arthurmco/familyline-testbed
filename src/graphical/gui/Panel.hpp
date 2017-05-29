@@ -39,7 +39,8 @@ public:
     /* Add a panel using the panel position or a new position */
     virtual int AddPanel(IPanel* p) override;
     virtual int AddPanel(IPanel* p, int x, int y) override;
-
+    virtual int AddPanel(IPanel* p, double x, double y) override;
+    
     /* Remove the panel */
     virtual void RemovePanel(IPanel* p) override;
 

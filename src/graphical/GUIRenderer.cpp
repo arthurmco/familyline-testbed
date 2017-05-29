@@ -91,6 +91,8 @@ GUIRenderer::GUIRenderer(Window* w)
     ChangePanelZIndex(_panels.back(), 0, win_w, win_h);
     
     _w = w;
+    _width = win_w;
+    _height = win_h; 
 }
 
 
@@ -259,6 +261,8 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 /* Add a panel using the panel position or a new position */
 int GUIRenderer::AddPanel(GUI::IPanel* p)
 {
+    this->ResizePanelAbsolute(p);
+    
     Log::GetLog()->Write("GUIRenderer: Added panel (%#p)", p);
 
     /* Create panel vertices */
@@ -338,6 +342,12 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
 }
 
 int GUIRenderer::AddPanel(GUI::IPanel* p, int x, int y)
+{
+    p->SetPosition(x, y);
+    return AddPanel(p);
+}
+
+int GUIRenderer::AddPanel(GUI::IPanel* p, double x, double y)
 {
     p->SetPosition(x, y);
     return AddPanel(p);

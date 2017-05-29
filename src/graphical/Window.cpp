@@ -124,9 +124,12 @@ void Window::Update()
     glClear(GL_COLOR_BUFFER_BIT);
     
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _f3D->GetTextureHandle());
+    if (_f3D)
+	glBindTexture(GL_TEXTURE_2D, _f3D->GetTextureHandle());
+
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, _fGUI->GetTextureHandle());
+    if (_fGUI)
+	glBindTexture(GL_TEXTURE_2D, _fGUI->GetTextureHandle());
 
     winShader->SetUniform("texRender", 0);
     winShader->SetUniform("texGUI", 1);

@@ -22,7 +22,8 @@ class IContainer : public IPanel
 public:
     /* Add a panel using the panel position or a new position */
     virtual int AddPanel(IPanel* p) = 0;
-    virtual int AddPanel(IPanel* p, int x, int y) = 0;
+    virtual int AddPanel(IPanel* p, int x, int y) = 0; // add in absolute pos
+    virtual int AddPanel(IPanel* p, double x, double y) = 0; // add in relative pos
 
     /* Remove the panel */
     virtual void RemovePanel(IPanel* p) = 0;

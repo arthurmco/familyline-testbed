@@ -18,13 +18,18 @@ namespace GUI {
 class Label : public IPanel {
 private:
     std::string _text;
-
+    const char* _font_name;
+    unsigned int _font_size;
+    
 public:
     Label(int x, int y, const char* text);
     Label(int x, int y, int w, int h, const char* text);
-
+    Label(double x, double y, double w, double h, const char* text);
+    
     const char* GetText() const;
     void SetText(char* txt, ...);
+
+    void SetFontData(const char* name, unsigned int size);
 
     virtual void Redraw(cairo_t* ctxt) override;
 

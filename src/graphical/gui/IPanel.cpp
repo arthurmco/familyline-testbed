@@ -13,6 +13,23 @@ IPanel::IPanel(int x, int y, int w, int h)
     _bgColor = glm::vec4(1,1,1,0);
 }
 
+#include <cstdio>
+IPanel::IPanel(double x, double y, double w, double h, bool relative)
+{
+    _fxPos = x;
+    _fyPos = y;
+    if (relative) {
+	_fwidth = w;
+	_fheight = h;
+    } else {
+	_width = w;
+	_height = h;
+    }
+    printf("!! %p %.2f %.2f %.2f %.2f %s\n", this, x, y, w, h, (relative) ? "r" : "");
+    _bgColor = glm::vec4(1,1,1,0);
+}
+
+
 /* Non-virtual functions...
     fuck off */
 
@@ -112,3 +129,46 @@ void IPanel::GetBounds(int& x, int& y, int& w, int& h)
     h = _height;
     
 }
+
+void IPanel::SetBounds(double x, double y, double w, double h) 
+{
+    _xPos = x*_width;
+    _yPos = y*_height;;
+    _fwidth = w;
+    _fheight = h;
+}
+
+void IPanel::SetPosition(double x, double y)
+{
+    _xPos = x*_width;
+    _yPos = y*_height;
+}
+
+void IPanel::GetBounds(double& x, double& y, double& w, double& h)
+{
+    x = _xPos/_width;
+    y = _yPos/_height;
+    w = _fwidth;
+    h = _fheight;
+    
+}
+#include <cstdio>
+void IPanel::ResizePanelAbsolute(IPanel* _p)
+{
+    printf("%d %d\n", _width, _height);
+    printf("%p: %.3f %.3f %d %d\n", _p, _p->_fwidth, _p->_fheight, _p->_xPos, _p->_yPos);
+    if (_p->_fwidth <= 1 && _p->_fheight <= 1) {
+	_p->_width = double(_p->_fwidth * _width);
+	_p->_height = double(_p->_fheight * _height);
+
+	if (_p->_fxPos <= 1 && _p->_fyPos <= 1) {
+	    _p->_xPos = double(_p->_fxPos * _width);
+	    _p->_yPos = double(_p->_fyPos * _height);
+	}
+    }
+
+    printf("%p: end %d %d %d %d\n", _p, _p->_width, _p->_height, _p->_xPos, _p->_yPos);
+
+}
+
+

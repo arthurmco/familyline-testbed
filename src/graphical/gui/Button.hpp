@@ -34,7 +34,8 @@ private:
     
 public:
     Button(int x, int y, int w, int h, const char* text);
-
+    Button(double x, double y, double w, double h, const char* text);
+    
     const char* GetText() const;
     void SetText(char* txt, ...);
 

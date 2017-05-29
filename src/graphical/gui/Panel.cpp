@@ -42,6 +42,8 @@ void Panel::Redraw(cairo_t* ctxt)
 /* Add a panel using the panel position or a new position */
 int Panel::AddPanel(IPanel* p)
 {
+    this->ResizePanelAbsolute(p);
+    
     PanelData pd;
     pd.panel = p;
 
@@ -53,12 +55,21 @@ int Panel::AddPanel(IPanel* p)
     _panels.push_back(pd);
     return 1;
 }
+
 int Panel::AddPanel(IPanel* p, int x, int y)
 {
     Panel* _p = (Panel*)p;
     _p->SetPosition(x, y);
     return this->AddPanel(p);
 }
+
+int Panel::AddPanel(IPanel* p, double x, double y)
+{
+    Panel* _p = (Panel*)p;
+    _p->SetPosition(x, y);
+    return this->AddPanel(p);
+}
+
 #include <cstdio>
 bool Panel::ProcessInput(Input::InputEvent& ev)
 {

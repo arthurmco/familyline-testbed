@@ -29,13 +29,27 @@ protected:
     int _xPos, _yPos;
     int _width, _height;
 
+    double _fxPos = 2.0, _fyPos = 2.0;
+    double _fwidth = 640.0, _fheight = 480.0;
+
+    /* Resize the panel p according to the absolute size of the 'this'
+       panel (i.e, uses width and height of this panel to set the position
+       of 'p' panel */
+    void ResizePanelAbsolute(IPanel* p);
+
+    
 public:
     IPanel();
     IPanel(int x, int y, int w, int h);
+    IPanel(double x, double y, double w, double h, bool relative);
 
     void SetBounds(int x, int y, int w, int h);
     void SetPosition(int x, int y);
     void GetBounds(int& x, int& y, int& w, int& h);
+    
+    void SetBounds(double x, double y, double w, double h);
+    void SetPosition(double x, double y);
+    void GetBounds(double& x, double& y, double& w, double& h);
 
     /*  Non-virtual functions in an interface?
         C++ allows this. I won't implement this on every control I make. */
