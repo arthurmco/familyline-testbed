@@ -111,17 +111,17 @@ void InputManager::Run()
             ev.eventType = EVENT_MOUSEEVENT;
             //i will not depend of hacks.
             switch (e.button.button) {
-                case SDL_BUTTON_LEFT:
-                    ev.event.mouseev.button = MOUSE_LEFT;
-                    break;
-                case SDL_BUTTON_MIDDLE:
-                    ev.event.mouseev.button = MOUSE_MIDDLE;
-                    break;
-                case SDL_BUTTON_RIGHT:
-                    ev.event.mouseev.button = MOUSE_RIGHT;
-                    break;
-                default:
-                    ev.event.mouseev.button = e.button.button - MOUSE_LEFT;
+	    case SDL_BUTTON_LEFT:
+		ev.event.mouseev.button = MOUSE_LEFT;
+		break;
+	    case SDL_BUTTON_MIDDLE:
+		ev.event.mouseev.button = MOUSE_MIDDLE;
+		break;
+	    case SDL_BUTTON_RIGHT:
+		ev.event.mouseev.button = MOUSE_RIGHT;
+		break;
+	    default:
+		ev.event.mouseev.button = e.button.button - MOUSE_LEFT;
             }
 
             lastx = e.button.x;
@@ -136,7 +136,7 @@ void InputManager::Run()
             break;
         default:
             continue;
-    }
+	}
 
         ev.mousex = lastx;
         ev.mousey = lasty;
@@ -144,14 +144,14 @@ void InputManager::Run()
 
         _evt_queue.push(ev);
 
-		if (_evt_queue.size() > MAX_INPUT_QUEUE) {
-			_evt_queue.pop();
-		}
+	if (_evt_queue.size() > MAX_INPUT_QUEUE) {
+	    _evt_queue.pop();
+	}
 
     }
 
     /* Send events to appropriate listeners */
-	if (_listeners.size() <= 0) return;
+    if (_listeners.size() <= 0) return;
 
     while (!_evt_queue.empty()) {
         InputEvent ev = _evt_queue.front();
@@ -166,7 +166,7 @@ void InputManager::Run()
 
         if (event_received) {
             _evt_queue.pop();
-		}
+	}
 
     }
 
