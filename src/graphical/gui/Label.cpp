@@ -1,6 +1,7 @@
 #include "Label.hpp"
 
 using namespace Tribalia::Graphics::GUI;
+using namespace Tribalia;
 
 Label::Label(int x, int y, const char* text)
 {

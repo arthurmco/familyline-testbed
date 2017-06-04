@@ -1,6 +1,7 @@
 #include "Button.hpp"
 
 using namespace Tribalia::Graphics::GUI;
+using namespace Tribalia;
 
 Button::Button(int x, int y, int w, int h, const char* text)
     : IPanel(int(x),int(y),w,h)

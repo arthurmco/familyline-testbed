@@ -203,32 +203,32 @@ int main(int argc, char const *argv[])
     
     while (r) {
 
-	// Input
-	InputManager::GetInstance()->Run();
-	InputEvent ev;
-	guir->ProcessInput(ev);
+		// Input
+		InputManager::GetInstance()->Run();
+		InputEvent ev;
+		guir->ProcessInput(ev);
 	
-	if (deflistener->PopEvent(ev)) {
-	    /* Only listen for FINISH events.
-	       The others will be handled by the GUI listener */
-	    if (ev.eventType == EVENT_FINISH)
-		r = false;
-	}
+		if (deflistener->PopEvent(ev)) {
+			/* Only listen for FINISH events.
+			   The others will be handled by the GUI listener */
+			if (ev.eventType == EVENT_FINISH)
+			r = false;
+		}
 
-	// Render
-	fbGUI->SetAsBoth();
-	guir->Render();
-	fbGUI->Unset();
+		// Render
+		fbGUI->SetAsBoth();
+		guir->Render();
+		fbGUI->Unset();
 	
-	w->Update();
-	double e = SDL_GetTicks();
+		w->Update();
+		double e = SDL_GetTicks();
 
-	if ((e-b) < 1000/60.0)
-	    SDL_Delay((1000/60.0 - (e-b)));
+		if ((e-b) < 1000/60.0)
+			SDL_Delay((unsigned int)(1000/60.0 - (e-b)));
 
-	b = SDL_GetTicks();
+		b = SDL_GetTicks();
 	
-	frames++;
+		frames++;
     }
 
     

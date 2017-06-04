@@ -74,7 +74,7 @@ public:
     /* Send input to other controls 
      * Return true if we processed the event, false if not
      */
-    virtual bool ProcessInput(Input::InputEvent& ev);
+    virtual bool ProcessInput(Tribalia::Input::InputEvent& ev);
     
     /* Render the GUI view */
     bool Render();

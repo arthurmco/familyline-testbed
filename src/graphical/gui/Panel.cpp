@@ -1,6 +1,7 @@
 #include "Panel.hpp"
 
 using namespace Tribalia::Graphics::GUI;
+using namespace Tribalia;
 
 Panel::Panel()
 {

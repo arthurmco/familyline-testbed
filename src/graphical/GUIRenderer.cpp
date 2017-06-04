@@ -4,6 +4,7 @@
 #include "../config.h"
 
 using namespace Tribalia::Graphics;
+using namespace Tribalia;
 
 /* Game window width and height */
 int win_w, win_h;
