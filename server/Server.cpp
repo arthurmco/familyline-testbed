@@ -15,10 +15,12 @@
 
 int main(int argc, char const* argv[]) 
 {
+
 	printf("Tribalia Server " VERSION "\n");
 	printf("Copyright (C) 2016 Arthur M\n ");
 	printf("Listening on port %d\n", PORT);
 
+#ifndef _WIN32
 	/* Create the socket */
 	int sockfd = -1;
 	struct sockaddr_in addr;
@@ -67,5 +69,6 @@ int main(int argc, char const* argv[])
 
 		close(clisockfd);
 	}	
+#endif
 
 }	

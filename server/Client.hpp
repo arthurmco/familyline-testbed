@@ -6,12 +6,17 @@
 
 /* For network comm */
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
 /* for fd access (read(), close(), write()) */
 #include <unistd.h>
+#else
+#include <Windows.h>
+#endif
+
 #include <fcntl.h>
 
 #include <errno.h>
@@ -23,8 +28,9 @@
 class Client {
 private:
 	int sockfd;
+#ifndef _WIN32
 	struct in_addr addr;
-
+#endif
 public:
 	Client(int sockfd, struct in_addr addr);
 
