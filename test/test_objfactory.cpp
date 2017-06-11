@@ -14,6 +14,7 @@ void ObjectFactoryTest::TearDown()
 }
 
 TEST_F(ObjectFactoryTest, TestIfCanGetObject) {
+#undef GetObject
     GameObject* go = _of->GetObject(TestObject::TID, 1, 1, 1);
 
     ASSERT_NE(go, nullptr);
@@ -24,7 +25,7 @@ TEST_F(ObjectFactoryTest, TestIfCanGetObject) {
 TEST_F(ObjectFactoryTest, TestIfAttributesArentLinked) {
     GameObject* go1 = _of->GetObject(TestObject::TID, 1, 1, 1);
     GameObject* go2 = _of->GetObject(TestObject::TID, 10, 1, 10);
-
+#define GetObject GetObjectA
     go1->AddProperty("malakoi", 200);
 
     ASSERT_FALSE(go2->HasProperty("malakoi")) << "The properties were cloned. You might need to fix the object copy constructor";
