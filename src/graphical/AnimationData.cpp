@@ -25,7 +25,7 @@ void AnimationData::InsertFrame(int num, glm::vec3* vertices)
     bool hasDelta = false;
 
     /* Check if we had any difference from the base frame */
-    for (int v = 0; v < _vlist->size(); v++) {
+    for (unsigned int v = 0; v < _vlist->size(); v++) {
         if (vertices[v] != _vlist->at(v)) {
             hasDelta = true;
 
@@ -59,7 +59,8 @@ void AnimationData::InsertFrame(int num, glm::vec3* vertices)
     if (hasDelta) {
         _frames.emplace(num, vecaf);
     } else {
-        Log::GetLog()->Write("Frame %d ignored, same data than base frame", num);
+        Log::GetLog()->Write("animation-data",
+			     "Frame %d ignored, same data than base frame", num);
     }
 
 }

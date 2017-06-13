@@ -11,25 +11,25 @@ Texture* TextureOpener::TextureOpenBMP(FILE* f, const char* path) {
 
     char bmp_header[14];
     if (fread((void*)bmp_header, 1, 14, f) < 14) {
-	Log::GetLog()->Warning("TextureOpener: Unexpected EOF in BMP header while opening %s", path);	
+	Log::GetLog()->Warning("texture-opener", "Unexpected EOF in BMP header while opening %s", path);	
 	return nullptr;
     }
 
     if (bmp_header[0] != 'B' && bmp_header[1] != 'M') {
-	Log::GetLog()->Warning("TextureOpener: Invalid magic number while opening %s", path);	
+	Log::GetLog()->Warning("texture-opener", "Invalid magic number while opening %s", path);	
 	return nullptr;
     }
 
     unsigned off_pixels = *(unsigned int*)&bmp_header[0x0a];
 
     if (off_pixels == 0) {
-	Log::GetLog()->Warning("TextureOpener: Wrong pixel header while opening %s", path);	
+	Log::GetLog()->Warning("texture-opener", "Wrong pixel header while opening %s", path);	
 	return nullptr;
     }
 
     char dib_header[40];
     if (fread((void*)dib_header, 1, 40, f) < 40) {
-	Log::GetLog()->Warning("TextureOpener: Unexpected EOF in DIB header while opening %s", path);	
+	Log::GetLog()->Warning("texture-opener", "Unexpected EOF in DIB header while opening %s", path);	
 	return nullptr;
     }
    
@@ -46,13 +46,13 @@ Texture* TextureOpener::TextureOpenBMP(FILE* f, const char* path) {
 		bpp = *(unsigned short*)&dib_header[14];
 
 		if (dib_header[16] != 0) {
-			Log::GetLog()->Warning("TextureOpener: BMP Compression is not supported opening %s", path);	
+			Log::GetLog()->Warning("texture-opener", "BMP Compression is not supported opening %s", path);	
 			return nullptr;
 		}
     }
 
     if (width == 0 || height == 0 || bpp == 0) {
-		Log::GetLog()->Warning("TextureOpener: Invalid size while opening %s", path);	
+		Log::GetLog()->Warning("texture-opener", "Invalid size while opening %s", path);	
 		return nullptr;
     }
 
@@ -97,11 +97,11 @@ Texture* TextureOpener::TextureOpenBMP(FILE* f, const char* path) {
 
 Texture* TextureOpener::Open(const char* path)
 {
-    	Log::GetLog()->Write("TextureOpener: Opening %s", path);
+    	Log::GetLog()->Write("texture-opener", "Opening %s", path);
 	FILE* f = fopen(path, "rb");
 	
 	if (!f) {
-		Log::GetLog()->Warning("TextureOpener: File %s not found"
+		Log::GetLog()->Warning("texture-opener", "File %s not found"
 			" (error %d)", path, errno);
 		return nullptr;
 	}
@@ -150,8 +150,9 @@ Texture* TextureOpener::Open(const char* path)
 		    break;
 		}
 
-		Log::GetLog()->Warning("TextureOpener: Error '%s' while opening %s",
-			estr, path);
+		Log::GetLog()->Warning("texture-opener",
+				       "Error '%s' while opening %s",
+				       estr, path);
 		return nullptr;
 	}
 

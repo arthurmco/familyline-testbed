@@ -86,7 +86,8 @@ GUIRenderer::GUIRenderer(Window* w)
     this->AddPanel(new GUI::Panel(0, 0, win_w, win_h));
 
     debug_ctxt = _panels.back().ctxt;
-    Log::GetLog()->Write("[GUIRenderer] Debug Cairo context is %p (texture %u)",
+    Log::GetLog()->Write("gui-renderer",
+			 "Debug Cairo context is %p (texture %u)",
 			 debug_ctxt, _panels.back().tex_id);
     _panels.back().is_debug = 1;
     ChangePanelZIndex(_panels.back(), 0, win_w, win_h);
@@ -119,7 +120,8 @@ void GUIRenderer::DebugWrite(int x, int y, const char* fmt, ...)
 
 void GUIRenderer::SetFramebuffer(Framebuffer* f) {
     _f = f;
-    Log::GetLog()->Write("[GUIRenderer] Framebuffer now it's the texture #%d", f->GetTextureHandle());
+    Log::GetLog()->Write("gui-renderer",
+			 "Framebuffer now it's the texture #%d", f->GetTextureHandle());
 
 }
 
@@ -244,7 +246,7 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 
 	GLenum err = glGetError();
 	if (err != GL_NO_ERROR) {
-	    Log::GetLog()->Fatal("OpenGL error %#x", err);
+	    Log::GetLog()->Fatal("gui-renderer", "OpenGL error %#x", err);
 	}
 
 	cairo_save(p.ctxt);
@@ -264,7 +266,7 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
 {
     this->ResizePanelAbsolute(p);
     
-    Log::GetLog()->Write("GUIRenderer: Added panel (%#p)", p);
+    Log::GetLog()->Write("gui-renderer", "Added panel (%#p)", p);
 
     /* Create panel vertices */
     int px, py, pw, ph;
@@ -357,8 +359,18 @@ int GUIRenderer::AddPanel(GUI::IPanel* p, double x, double y)
 /* Remove the panel */
 void GUIRenderer::RemovePanel(GUI::IPanel* p)
 {
-
+    (void) p;
 }
 
- void GUIRenderer::SetBounds(int x, int y, int w, int h) {}
- void GUIRenderer::SetPosition(int x, int y) {}
+ void GUIRenderer::SetBounds(int x, int y, int w, int h)
+ {
+     (void) x;
+     (void) y;
+     (void) w;
+     (void) h;
+
+ }
+ void GUIRenderer::SetPosition(int x, int y)
+ {
+     SetBounds(x, y, 0, 0);
+ }

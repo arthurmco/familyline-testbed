@@ -18,7 +18,7 @@ int SceneManager::AddObject(SceneObject* obj)
 {
     obj->_id = _objects.size() + 1 + (uintptr_t)obj;
     this->_objects.push_back(obj);
-    Log::GetLog()->Write("Added object %s (ID %d) to the SceneManager",
+    Log::GetLog()->Write("scene-manager", "Added object %s (ID %d) to the SceneManager",
         obj->_name.c_str(), obj->_id);
          _listModified = true;
     return 1;
@@ -64,8 +64,8 @@ void SceneManager::RemoveObject(SceneObject* sco)
     for (auto it = _objects.begin(); it != _objects.end(); it++) {
      
         if ((*it)->GetID() == sco->GetID()) {
-            Log::GetLog()->Write("Object %s (at %.2f %.2f %.2f) removed "
-                "from the scene", sco->GetName(), npos.x, npos.y, npos.z);
+            Log::GetLog()->Write("scene-manager", "Object %s (at %.2f %.2f %.2f) removed from the scene",
+				 sco->GetName(), npos.x, npos.y, npos.z);
             _objects.erase(it);
              _listModified = true;
              break;

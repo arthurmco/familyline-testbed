@@ -35,12 +35,12 @@ int ObjectManager::RegisterObject(GameObject* o, bool overrideID)
     o->_oid = ori.oid;
 
     if (!o->Initialize()){
-        Log::GetLog()->Write("Initialization of object id %d failed",
+        Log::GetLog()->Write("object-manager", "Initialization of object id %d failed",
             o->_oid);
         return -1; //throw std::game_exception();
     }
 
-    Log::GetLog()->Write("Registered object %s, type %#x, id %d",
+    Log::GetLog()->Write("object-manager", "Registered object %s, type %#x, id %d",
         o->_name.c_str(), o->_tid, o->_oid);
 
     _objects.push_back(ori);
@@ -56,8 +56,7 @@ bool ObjectManager::UnregisterObject(GameObject* o)
     if ( this->UnregisterObject(o->GetObjectID()) ) {
         return true;
     } else {
-        Log::GetLog()->Write("Object %s (type %#x, id %d) not found in "
-            "object manager, so it didn't unregister",
+        Log::GetLog()->Write("object-manager", "Object %s (type %#x, id %d) not found in object manager, so it didn't unregister",
             o->_name.c_str(), o->_tid, o->_oid);
         return false;
 
@@ -73,14 +72,11 @@ bool ObjectManager::UnregisterObject(int id)
     for (auto it = _objects.begin(); it != _objects.end(); ++it){
         /* First search for it */
         if (it->oid == id){
-			_freeID.push_back(it->oid);
-			Log::GetLog()->Write("Unregistered object %s, type %#x, id %d",
-				it->obj->_name.c_str(), it->obj->_tid, it->obj->_oid);
-
+	    _freeID.push_back(it->oid);
+	    Log::GetLog()->Write("object-manager", "Unregistered object %s, type %#x, id %d",
+				 it->obj->_name.c_str(), it->obj->_tid, it->obj->_oid);
+	    
             _objects.erase(it);
-            
-            
-
             return true;
         }
 
@@ -110,8 +106,8 @@ bool ObjectManager::DoActionAll()
         if (it->obj->DoAction()){
             it->lastiter++;
         } else {
-            Log::GetLog()->Write("Object %s (id %d, type %d) returned false "
-            "in DoAction()", it->obj->GetName(),
+            Log::GetLog()->Write("object-manager",
+				 "Object %s (id %d, type %d) returned false in DoAction()", it->obj->GetName(),
             it->obj->GetObjectID(), it->obj->GetTypeID());
 
         }

@@ -54,7 +54,7 @@ bool ObjectRenderer::Check()
     }
 
     if (object_found > 0) {
-        Log::GetLog()->Write("Object renderer updated. %d objects found",
+        Log::GetLog()->Write("object-renderer", "updated, %d objects found",
             object_found);
         return true;
     }
@@ -63,7 +63,8 @@ bool ObjectRenderer::Check()
         if (!id->ok) {
             /*  ID is not ok, meaning that it wasn't been updated, meaning
                 that it doesn't exist. Remove it from the scene */
-            Log::GetLog()->Write("Removed object with id %d", id->ID);
+            Log::GetLog()->Write("object-renderer",
+				 "Removed object with id %d", id->ID);
             _sm->RemoveObject(id->m);
             _IDs.erase(id);
             return true;

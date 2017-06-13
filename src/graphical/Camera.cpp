@@ -18,7 +18,7 @@ Camera::Camera(glm::vec3 pos, float aspectRatio, glm::vec3 lookAt)
 
     _original_distance = lookAt - pos;
 
-    Log::GetLog()->Write("Created camera at (%.2f, %.2f, %.2f) "
+    Log::GetLog()->Write("camera", "Created cam at (%.2f, %.2f, %.2f) "
         "looking at (%.2f, %.2f, %.2f)",
         pos.x, pos.y, pos.z, lookAt.x, lookAt.y, lookAt.z);
 

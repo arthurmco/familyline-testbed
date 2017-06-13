@@ -18,7 +18,7 @@ Timer::Timer()
 int Timer::AddFunctionCall(double ms, TimerFunction f, void* opt_inst, void* opt_arg)
 {
     auto it_evt = _function_events.find(ms);
-    Log::GetLog()->Write("[Timer] Added function @%#p with instance %#p, arg %#p at each %.1f ms",
+    Log::GetLog()->Write("timer", "Added function @%#p with instance %#p, arg %#p at each %.1f ms",
         f, opt_inst, opt_arg, ms);
 
 

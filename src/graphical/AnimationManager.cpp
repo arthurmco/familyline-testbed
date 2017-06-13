@@ -6,13 +6,13 @@ static void RunAnimation(void* am, double delta, void* animation_data);
 
 void AnimationManager::AddAnimation(AnimationData* a)
 {
-    Log::GetLog()->Write("Added animation @%p", a);
+    Log::GetLog()->Write("animation-manager", "Added animation @%p", a);
     _animations.push_back(a);
     Timer::getInstance()->AddFunctionCall(30, &RunAnimation, (void*)this, (void*)a);
 }
 void AnimationManager::RemoveAnimation(AnimationData* a)
 {
-    Log::GetLog()->Write("Removed animation @%p", a);
+    Log::GetLog()->Write("animation-manager", "Removed animation @%p", a);
     _animations.remove(a);  // it's a pointer, should be fine
 }
 

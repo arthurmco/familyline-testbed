@@ -7,7 +7,7 @@ TextureManager* TextureManager::_tm = nullptr;
 /* Add texture, return its ID */
 int TextureManager::AddTexture(const char* name, Texture* t)
 {
-    Log::GetLog()->Write("Added texture %s (id %d)\n",
+    Log::GetLog()->Write("texture-manager", "Added texture %s (id %d)\n",
         name, t->GetHandle());
 
     t->SetName(name);
@@ -15,7 +15,8 @@ int TextureManager::AddTexture(const char* name, Texture* t)
     if (_textures.find(std::string{name}) == _textures.end()) {
         _textures[name] = t;
     } else {
-        Log::GetLog()->Warning("Texture %s already exists", name);
+        Log::GetLog()->Warning("texture-manager", "Texture %s already exists",
+			       name);
     }
 
     return t->GetHandle();

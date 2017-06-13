@@ -17,7 +17,8 @@ Framebuffer::Framebuffer(int w, int h, GLenum format)
 
     GLenum glerr = GL_NO_ERROR;
     if ((glerr = glGetError()) != GL_NO_ERROR) {
-	Log::GetLog()->Warning("[Framebuffer] GL error %#x while binding texture handle %d",
+	Log::GetLog()->Warning("framebuffer",
+			       "GL error %#x while binding texture handle %d",
 			       glerr, tex_handle);
     }
     
@@ -41,7 +42,7 @@ Framebuffer::Framebuffer(int w, int h, GLenum format)
 	throw new renderer_exception{ "The framebuffer is not complete",
 		(int)fb_error };
 
-    Log::GetLog()->Write("[Framebuffer] Created framebuffer id %#x texid %#x "
+    Log::GetLog()->Write("framebuffer", "Created framebuffer id %#x texid %#x "
 			 "with %d x %d", fb_handle, tex_handle, w, h);
 
     glBindTexture(GL_TEXTURE_2D, 0);

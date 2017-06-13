@@ -13,7 +13,7 @@ Texture::Texture(int width, int height, GLenum format, void* data)
     glGetError();    
     GLenum glerr = GL_NO_ERROR;
     if ((glerr = glGetError()) != GL_NO_ERROR) {
-	Log::GetLog()->Warning("[Texture] GL error %#x while binding texture handle %d",
+	Log::GetLog()->Warning("texture", "GL error %#x while binding texture handle %d",
 			       glerr, tex_handle);
     }
     
@@ -27,13 +27,13 @@ Texture::Texture(int width, int height, GLenum format, void* data)
 
     glerr = GL_NO_ERROR;
     if ((glerr = glGetError()) != GL_NO_ERROR) {
-	Log::GetLog()->Warning("[Texture] GL error %#x while creating texture handle %d",
+	Log::GetLog()->Warning("texture", "GL error %#x while creating texture handle %d",
 			       glerr, tex_handle);
     }
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    Log::GetLog()->Write("Created texture with %dx%d, format %#x, with id %d",
+    Log::GetLog()->Write("texture", "Created texture with %dx%d, format %#x, with id %d",
 			 width, height, format, tex_handle);
 
     // Unbind texture

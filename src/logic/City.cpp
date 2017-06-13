@@ -7,7 +7,7 @@ using namespace Tribalia::Logic;
     City::City(const char* name, Team* team)
         : _name{name}, _team(team)
         {
-            Log::GetLog()->Write("City %s created", name);
+            Log::GetLog()->Write("city", "City %s created", name);
 
         }
 
@@ -20,7 +20,7 @@ using namespace Tribalia::Logic;
             }
         }
 
-        Log::GetLog()->Write("No object with ID %d found on city %s",
+        Log::GetLog()->Write("city", "No object with ID %d found on city %s",
             ID, _name.c_str());
         return NULL;
     }
@@ -29,7 +29,7 @@ using namespace Tribalia::Logic;
     int City::AddObject(AttackableObject* a){
         _objects.push_back(a);
         a->SetProperty("city", this);
-        Log::GetLog()->Write("[City] Added %s (%d) to city %s", a->GetName(), a->GetObjectID(),
+        Log::GetLog()->Write("city", "Added %s (%d) to city %s", a->GetName(), a->GetObjectID(),
             _name.c_str());
         return a->GetObjectID();
     }
@@ -44,8 +44,7 @@ using namespace Tribalia::Logic;
             }
         }
 
-        Log::GetLog()->Write("Tried to delete object %s (ID %d) but city %s "
-            "doesn't have it",
+        Log::GetLog()->Write("city", "Tried to delete object %s (ID %d) but city %s doesn't have it",
             a->GetName(), a->GetObjectID(), _name.c_str());
         return false;
     }

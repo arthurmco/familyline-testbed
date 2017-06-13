@@ -135,15 +135,15 @@ int main(int argc, char const *argv[])
 	
     FILE* fLog = stderr;// fopen("log.txt", "w");
     Log::GetLog()->SetFile(fLog);
-    Log::GetLog()->Write("Tribalia " VERSION);
-    Log::GetLog()->Write("built on " __DATE__ " by " USERNAME);
+    Log::GetLog()->Write("", "Tribalia " VERSION);
+    Log::GetLog()->Write("", "built on " __DATE__ " by " USERNAME);
 #if defined(COMMIT)
-    Log::GetLog()->Write("git commit is " COMMIT);
+    Log::GetLog()->Write("", "git commit is " COMMIT);
 #endif
 
-    Log::GetLog()->Write("Default model directory is " MODELS_DIR);
-    Log::GetLog()->Write("Default texture directory is " TEXTURES_DIR);
-    Log::GetLog()->Write("Default material directory is " MATERIALS_DIR);
+    Log::GetLog()->Write("", "Default model directory is " MODELS_DIR);
+    Log::GetLog()->Write("", "Default texture directory is " TEXTURES_DIR);
+    Log::GetLog()->Write("", "Default material directory is " MATERIALS_DIR);
 
 
     Window* w = nullptr;
@@ -154,11 +154,11 @@ int main(int argc, char const *argv[])
 
 	InputManager::GetInstance()->Initialize();
     } catch (window_exception& we) {
-	Log::GetLog()->Fatal("Window creation error: %s (%d)", we.what(), we.code);
+	Log::GetLog()->Fatal("init", "Window creation error: %s (%d)", we.what(), we.code);
 	exit(EXIT_FAILURE);
     } catch (shader_exception &se) {
-	Log::GetLog()->Fatal("Shader error: %s [%d]", se.what(), se.code);
-	Log::GetLog()->Fatal("Shader file: %s, type %d", se.file.c_str(), se.type);
+	Log::GetLog()->Fatal("init", "Shader error: %s [%d]", se.what(), se.code);
+	Log::GetLog()->Fatal("init", "Shader file: %s, type %d", se.file.c_str(), se.type);
 	exit(EXIT_FAILURE);
     }
 
@@ -203,32 +203,32 @@ int main(int argc, char const *argv[])
     
     while (r) {
 
-		// Input
-		InputManager::GetInstance()->Run();
-		InputEvent ev;
-		guir->ProcessInput(ev);
+	// Input
+	InputManager::GetInstance()->Run();
+	InputEvent ev;
+	guir->ProcessInput(ev);
 	
-		if (deflistener->PopEvent(ev)) {
-			/* Only listen for FINISH events.
-			   The others will be handled by the GUI listener */
-			if (ev.eventType == EVENT_FINISH)
-			r = false;
-		}
+	if (deflistener->PopEvent(ev)) {
+	    /* Only listen for FINISH events.
+	       The others will be handled by the GUI listener */
+	    if (ev.eventType == EVENT_FINISH)
+		r = false;
+	}
 
-		// Render
-		fbGUI->SetAsBoth();
-		guir->Render();
-		fbGUI->Unset();
+	// Render
+	fbGUI->SetAsBoth();
+	guir->Render();
+	fbGUI->Unset();
 	
-		w->Update();
-		double e = SDL_GetTicks();
-
-		if ((e-b) < 1000/60.0)
-			SDL_Delay((unsigned int)(1000/60.0 - (e-b)));
-
-		b = SDL_GetTicks();
+	w->Update();
+	double e = SDL_GetTicks();
 	
-		frames++;
+	if ((e-b) < 1000/60.0)
+	    SDL_Delay((unsigned int)(1000/60.0 - (e-b)));
+	
+	b = SDL_GetTicks();
+	
+	frames++;
     }
 
     

@@ -57,12 +57,6 @@ Mesh* MD2Opener::Open(const char* file)
         throw mesh_exception("Invalid MD2 mesh version", errno, file);
     }
 
-    Log::GetLog()->Write("MD2Opener: %s has %d vertices, %d tris, %d "
-        "texcoords and %d frames", file,
-        hdr.num_vertices, hdr.num_tris, hdr.num_st, hdr.num_frames);
-    Log::GetLog()->Write("MD2Opener: skin (aka suggested texture) size is "
-        "%d x %d", hdr.skinwidth, hdr.skinheight);
-
     /*  A MD2 file contains fields specifying the triangles and fields
         specifying the vertices.
         We must parse the vertices first, and then the triangles */
@@ -82,12 +76,6 @@ Mesh* MD2Opener::Open(const char* file)
     auto scaleMult = glm::vec3(frame.scaleX, frame.scaleY, frame.scaleZ);
     auto transMult = glm::vec3(frame.transX, frame.transY, frame.transZ);
     frame.name[15] = 0;
-
-    Log::GetLog()->Write("MD2Opener: %s first frame is %s",
-        file, frame.name);
-    printf("Scale (%f, %f, %f), trans (%f %f %f)",
-        scaleMult.x, scaleMult.y, scaleMult.z,
-        transMult.x, transMult.y, transMult.z);
 
     auto vertsMD2 = new md2_vertex[hdr.num_vertices];
     auto trisMD2 = new md2_triangle[hdr.num_tris];

@@ -25,10 +25,10 @@ namespace Tribalia {
         Log();
 
 
-         void SetFile(FILE* f);
-         void Write(const char* fmt, ...);
-         void Warning(const char* fmt, ...);
-         void Fatal(const char* fmt, ...);
+	void SetFile(FILE* f);
+	void Write(const char* tag, const char* fmt, ...);
+	void Warning(const char* tag, const char* fmt, ...);
+	void Fatal(const char* tag, const char* fmt, ...);
 
          ~Log();
 

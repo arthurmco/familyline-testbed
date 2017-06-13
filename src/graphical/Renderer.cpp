@@ -177,12 +177,12 @@ void Renderer::UpdateObjects()
 		    
 		    /*** TODO: Sort lights by strength and send only the most strong ones ***/
 		    if (lri.lightCount > 4) {
-			Log::GetLog()->Warning("Maximum number of lights per render exceeded.");
+			Log::GetLog()->Warning("renderer", "Maximum number of lights per render exceeded.");
 			continue;
 		    }
 		    
 		    Light* light = (Light*)(*itScene);
-		    Log::GetLog()->Write("Renderer added light %s", light->GetName());
+		    Log::GetLog()->Write("renderer", "Renderer added light %s", light->GetName());
 		    int lR, lG, lB;
 		    light->GetColor(lR, lG, lB);
 		    lri.lightColors[lri.lightCount] = glm::vec3(lR / 255.0f, lG / 255.0f, lB / 255.0f);
@@ -193,7 +193,7 @@ void Renderer::UpdateObjects()
 		    
 		}
 		else {
-		    Log::GetLog()->Warning("Unsupported scene object! Skipping...");
+		    Log::GetLog()->Warning("renderer", "Unsupported scene object! Skipping...");
 		    continue;
 		}
 	    }
@@ -212,7 +212,8 @@ void Renderer::UpdateObjects()
 			}
 			
 			if (isDeleted) {
-			    Log::GetLog()->Write("Removing object ID %d from the cache",
+			    Log::GetLog()->Write("renderer",
+						 "Removing object ID %d from the cache",
 						 it2->ID);
 			    this->RemoveVertexData(it2->vao);
 			    this->RemoveBoundingBox(it2->bbvao);
@@ -314,7 +315,7 @@ bool Renderer::Render()
 
             GLenum err = glGetError();
             if (err != GL_NO_ERROR) {
-                Log::GetLog()->Fatal("OpenGL error %#x", err);
+                Log::GetLog()->Fatal("renderer", "OpenGL error %#x", err);
             }
         }
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -478,7 +479,7 @@ void Renderer::RenderBoundingBoxes()
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
-			Log::GetLog()->Fatal("OpenGL error %#x", err);
+		    Log::GetLog()->Fatal("renderer", "OpenGL error %#x", err);
 		}
 	}
 }
@@ -544,7 +545,7 @@ int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
 
 	glBindVertexArray(0);
 
-	Log::GetLog()->Write("Added bounding box of mesh vao %d with VAO %d (VBO %d)", 
+	Log::GetLog()->Write("renderer", "Added bounding box of mesh vao %d with VAO %d (VBO %d)", 
 		vri_mesh ? vri_mesh->vao : -1, vri.vao, vri.vbo_pos);
 
 	if (vri_mesh) {

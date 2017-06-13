@@ -14,7 +14,8 @@ AssetGroup* AssetManager::AddAssetGroup(const char* path, const char* tag)
     AssetGroup* grp = new AssetGroup{};
     strcpy(grp->tag, tag);
     strcpy(grp->folder, path);
-    Log::GetLog()->Write("Added asset group tag '%s', path '%s'",
+    Log::GetLog()->Write("asset-manager",
+			 "Added asset group tag '%s', path '%s'",
         grp->tag, grp->folder);
     _groups.push_back(grp);
     return grp;
@@ -23,35 +24,7 @@ AssetGroup* AssetManager::AddAssetGroup(const char* path, const char* tag)
 /* Query group folder for valid assets */
 void AssetManager::QueryAssetGroup(AssetGroup* grp)
 {
-/*    DIR *d, *dp = NULL, *dn = NULL;
-    const char* dpath = grp->folder;
-
-    while (d) {
-        d = opendir(dpath);
-
-        if (!d) {
-            Log::GetLog()->Write("Could not open %s: %s",
-                dpath, strerror(errno));
-        } else {
-            struct dirent* de;
-            std::string spath{grp->folder};
-
-            while (de = readdir(d)) {
-                spath += '/';
-                spath += dpath;
-
-
-            }
-
-        }
-
-        d = dn;
-        if (!d)
-            d = dp;
-
-    }
-
-	*/
+    (void) grp;
 }
 
 Asset* AssetManager::GetAsset(const char* name)
@@ -60,7 +33,8 @@ Asset* AssetManager::GetAsset(const char* name)
         if (!strcmp(name, it->name)) {
 	    Asset* at = (Asset*)it;
 	    if (!at->asset.mesh) {
-		Log::GetLog()->Write("AssetManager: Loading %s by demand", at->name);
+		Log::GetLog()->Write("asset-manager",
+				     "Loading %s by demand", at->name);
 		fflush(stdout);
 		this->LoadAsset(at);
 		
@@ -90,7 +64,8 @@ void AssetManager::AddAsset(AssetGroup* grp, Asset* a)
 
     static const char* aname[] =
         {"mesh", "material", "texture"};
-    Log::GetLog()->Write("Added asset %s path %s type %s (%d) to group %s",
+    Log::GetLog()->Write("asset-manager",
+			 "Added asset %s path %s type %s (%d) to group %s",
         a->name, a->path, aname[a->asset_type % 3], a->asset_type, grp->folder);
 }
 
@@ -259,8 +234,8 @@ bool AssetManager::LoadAsset(Asset* at)
 	} else if (ext == "md2") {
 	    o = new MD2Opener{};
 	} else {
-	    Log::GetLog()->Write("%s uses an unsupported extension",
-				 at->path);
+	    Log::GetLog()->Write("asset-manager",
+				 "%s uses an unsupported extension", at->path);
 	    break;
 	}
 	

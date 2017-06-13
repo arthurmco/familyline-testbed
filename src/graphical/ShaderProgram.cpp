@@ -12,8 +12,9 @@ ShaderProgram::ShaderProgram(Shader* vert, Shader* pixel)
     glAttachShader(this->_id, vert->GetID());
     glAttachShader(this->_id, pixel->GetID());
 
-    Log::GetLog()->Write("Shader program with id %d created", this->_id);
-    Log::GetLog()->Write("Shader program %d contains shaders %s and %s",
+    Log::GetLog()->Write("shader-program", "Shader program with id %d created",
+			 this->_id);
+    Log::GetLog()->Write("shader-program", "Shader program %d contains shaders %s and %s",
         this->_id, vert->GetPath(), pixel->GetPath());
 }
 bool ShaderProgram::Link()
@@ -31,7 +32,7 @@ bool ShaderProgram::Link()
         char* logdata = new char[logsize];
 
         glGetProgramInfoLog(this->_id, logsize, NULL, logdata);
-        Log::GetLog()->Warning("Shader program %d retrieved a log: \n%s",
+        Log::GetLog()->Warning("shader-program", "Shader program %d retrieved a log: \n%s",
             this->_id, logdata);
 
 	if (res == GL_TRUE)
@@ -68,8 +69,8 @@ bool ShaderProgram::SetUniform(const char* name, glm::mat4 value)
     GLint unif_id = GetUniformLocation(name);
 
     if (unif_id < 0) {
-        Log::GetLog()->Write("Uniform %s not found on shader %d",
-                name, _id);
+        Log::GetLog()->Write("shader-program",
+			     "Uniform %s not found on shader %d", name, _id);
     }
 
     glUniformMatrix4fv(unif_id, 1, GL_FALSE, (const GLfloat*)&value[0][0]);
@@ -103,7 +104,8 @@ bool ShaderProgram::SetUniform(const char* name, int value)
 	glUniform1i(unif_id, value);
 
 	if (unif_id < 0) {
-		Log::GetLog()->Write("Uniform %s not found on shader %d",
+		Log::GetLog()->Write("shader-program",
+				     "Uniform %s not found on shader %d",
 			name, _id);
 	}
 	
@@ -118,7 +120,7 @@ bool ShaderProgram::SetUniformArray(const char* name, int count, float* value)
 	glUniform1fv(unif_id, count, value);
 
 	if(unif_id < 0) {
-		Log::GetLog()->Write("Uniform %s not found on shader %d",
+		Log::GetLog()->Write("shader-program", "Uniform %s not found on shader %d",
 			name, _id);
 	}
 
@@ -134,7 +136,7 @@ bool ShaderProgram::SetUniformArray(const char* name, int count, glm::vec3* valu
 	glUniform3fv(unif_id, count, (const GLfloat*)&value[0]);
 
 	if(unif_id < 0) {
-		Log::GetLog()->Write("Uniform %s not found on shader %d",
+		Log::GetLog()->Write("shader-program", "Uniform %s not found on shader %d",
 			name, _id);
 	}
 

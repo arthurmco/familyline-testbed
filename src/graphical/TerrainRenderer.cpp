@@ -39,7 +39,7 @@ void TerrainRenderer::SetTerrain(Terrain* t)
     _t = t;
     _tdata = new TerrainDataInfo[t->GetSectionCount()];
 
-    Log::GetLog()->Write("Added terrain with %d sections",
+    Log::GetLog()->Write("terrain-renderer", "Added terrain with %d sections",
 	 t->GetSectionCount());
 
     for (int i = 0; i < t->GetSectionCount(); i++) {
@@ -186,8 +186,8 @@ void TerrainRenderer::Update()
                 }
 
                 _tdata[i].vao = _rend->AddVertexData(vd, &_wmatrix);
-                Log::GetLog()->Write("Generated terrain data for section %d, "
-                    "(%d %d), vao is %d", i, x, y, _tdata[i].vao);
+                Log::GetLog()->Write("terrain-renderer",
+				     "Generated terrain data for section %d, (%d %d), vao is %d", i, x, y, _tdata[i].vao);
             }
 
             offsetX += SEC_SIZE * SECTION_SIDE;

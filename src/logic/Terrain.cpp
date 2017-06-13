@@ -43,8 +43,7 @@ Terrain::Terrain(int w, int h)
                 break;
         }
 
-        Log::GetLog()->Write("Created terrain of %d x %d points, %d sections"
-            " (~ %.3f %s)", _width, _height, (_section_height * _section_width),
+        Log::GetLog()->Write("terrain", "Created terrain of %d x %d points, %d section (~ %.3f %s)", _width, _height, (_section_height * _section_width),
             size, unit);
 
     }
@@ -90,7 +89,8 @@ void Terrain::SetDescription(const char* d) { _description = std::string{d}; }
 /* Get raw terrain data and split it into sections */
 void Terrain::SetData(TerrainSlot* slot) {
 	if (!slot) {
-		Log::GetLog()->Warning("Terrain: data is a null pointer");
+		Log::GetLog()->Warning("terrain",
+				       "terrain slot data is a null pointer");
 	}
 
 	for (int sy = 0; sy < _section_height; sy++) {

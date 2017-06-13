@@ -178,7 +178,8 @@ void InputManager::AddListener(int types, InputListener* listener)
     InputListenerData ild;
     ild.type_mask = types;
     ild.listener = listener;
-    Log::GetLog()->Write("Adding listener for event mast %#x", types);
+    Log::GetLog()->Write("input-manager",
+			 "Adding listener for event mast %#x", types);
     _listeners.push_back(ild);
 }
 void InputManager::RemoveListener(InputListener* listener)

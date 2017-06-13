@@ -56,7 +56,7 @@ Shader::Shader(const char* path, int type)
     this->_id = glCreateShader(stype);
     glShaderSource(this->_id, 1, (const GLchar**)&filedata, NULL);
 
-    Log::GetLog()->Write("Shader %s sucessfully compiled as type %d",
+    Log::GetLog()->Write("shader", "Shader %s sucessfully compiled as type %d",
         path, type);
 
     this->_path = std::string{path};
@@ -80,7 +80,7 @@ bool Shader::Compile()
         char* logdata = new char[logsize];
 
         glGetShaderInfoLog(this->_id, logsize, NULL, logdata);
-        Log::GetLog()->Warning("Shader %s retrieved a log: \n%s",
+        Log::GetLog()->Warning("shader", "Shader %s retrieved a log: \n%s",
             this->_path.c_str(), logdata);
 		throw shader_exception(logdata, 0, this->_path.c_str(), this->_type);
 

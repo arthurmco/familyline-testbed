@@ -6,7 +6,8 @@ using namespace Tribalia::Logic;
 Player::Player(const char* name, int elo, int xp)
     : _name{name}, _elo(elo), _xp(xp)
 {
-    Log::GetLog()->Write("Created player %s (%d XP, %d ELO ranking score)",
+    Log::GetLog()->Write("player",
+			 "Created player %s (%d XP, %d ELO ranking score)",
             name, elo, xp);
 }
 
