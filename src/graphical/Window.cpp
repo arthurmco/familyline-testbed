@@ -3,7 +3,7 @@
 
 using namespace Tribalia::Graphics;
 
-Window::Window(int w, int h)
+Window::Window(int w, int h, unsigned win_opts)
 {
     _width = w;
     _height = h;
@@ -26,6 +26,9 @@ Window::Window(int w, int h)
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+
+    if (win_opts & WIN_DEBUG_CONTEXT)
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
     
     _win = SDL_CreateWindow("Tribalia",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h,

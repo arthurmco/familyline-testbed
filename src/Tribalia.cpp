@@ -150,10 +150,83 @@ int main(int argc, char const *argv[])
     Window* w = nullptr;
     GUIRenderer* guir = nullptr;
     try {
-	w = new Window(winW, winH);
+	w = new Window(winW, winH, WindowOptions::WIN_DEBUG_CONTEXT);
 	Framebuffer::SetDefaultSize(winW, winH);
 	w->Show();
 
+	if (GLEW_ARB_debug_output) {
+	    /* Create the callback */
+	    __glewDebugMessageCallbackARB(
+		[](GLuint source, GLuint type, unsigned int id, GLuint severity,
+		   int length, const char* msg, const void* userparam){
+
+		    (void) userparam;
+		    
+#define	DEBUG_SOURCE_API_ARB                              0x8246
+#define	DEBUG_SOURCE_WINDOW_SYSTEM_ARB                    0x8247
+#define	DEBUG_SOURCE_SHADER_COMPILER_ARB                  0x8248
+#define	DEBUG_SOURCE_THIRD_PARTY_ARB                      0x8249
+#define	DEBUG_SOURCE_APPLICATION_ARB                      0x824A
+#define	DEBUG_SOURCE_OTHER_ARB                            0x824B
+		    
+		    const char *ssource, *stype, *sseverity;
+		    switch (source) {
+		    case DEBUG_SOURCE_API_ARB: ssource = "OpenGL API"; break;
+		    case DEBUG_SOURCE_WINDOW_SYSTEM_ARB: ssource = "window system"; break;
+		    case DEBUG_SOURCE_SHADER_COMPILER_ARB: ssource = "shader compiler"; break;
+		    case DEBUG_SOURCE_THIRD_PARTY_ARB: ssource = "third party"; break;
+		    case DEBUG_SOURCE_APPLICATION_ARB: ssource = "application"; break;
+		    case DEBUG_SOURCE_OTHER_ARB: ssource = "other"; break;
+		    default: ssource = "unknown"; break;
+		    }
+
+#define DEBUG_TYPE_ERROR_ARB                              0x824C
+#define DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB                0x824D
+#define DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB                 0x824E
+#define DEBUG_TYPE_PORTABILITY_ARB                        0x824F
+#define DEBUG_TYPE_PERFORMANCE_ARB                        0x8250
+#define DEBUG_TYPE_OTHER_ARB                              0x8251
+
+		    switch (type) {
+		    case DEBUG_TYPE_ERROR_ARB: stype = "error"; break;
+		    case DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB: stype = "deprecated behavior"; break;
+		    case DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB: stype = "undefined behavior"; break;
+		    case DEBUG_TYPE_PORTABILITY_ARB: stype = "portability issue"; break;
+		    case DEBUG_TYPE_PERFORMANCE_ARB: stype = "performance"; break;
+		    case DEBUG_TYPE_OTHER_ARB: stype = "other"; break;
+		    default: stype = "unknown"; break;
+		    }
+		    
+#define DEBUG_SEVERITY_HIGH_ARB                           0x9146
+#define DEBUG_SEVERITY_MEDIUM_ARB                         0x9147
+#define DEBUG_SEVERITY_LOW_ARB                            0x9148
+
+		    switch (severity) {
+		    case DEBUG_SEVERITY_HIGH_ARB: sseverity = "HIGH"; break;
+		    case DEBUG_SEVERITY_MEDIUM_ARB: sseverity = "MEDIUM"; break;
+		    case DEBUG_SEVERITY_LOW_ARB: sseverity = "LOW"; break;
+		    default: sseverity = "????"; break;
+		    }
+
+		    char* m = new char[std::min(length*2, length+70)];
+
+		    sprintf(m, "(%d) PRIO: %s (source: %s | type: %s) %s",
+			    id, sseverity, ssource, stype, msg);
+
+		    if (severity == DEBUG_SEVERITY_MEDIUM_ARB ||
+			severity == DEBUG_SEVERITY_HIGH_ARB) {
+			Log::GetLog()->Warning("gl-debug-output", m);
+		    } else {
+			Log::GetLog()->Write("gl-debug-output", m);
+		    }
+
+		    delete[] m;
+		    
+		}, nullptr);
+	} else {
+	    Log::GetLog()->Warning("init", "GLEW_ARB_debug_output not supported");
+	}
+	
 	InputManager::GetInstance()->Initialize();
 
 	fbGUI = new Framebuffer{ winW, winH, GL_UNSIGNED_BYTE };

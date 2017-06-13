@@ -18,6 +18,11 @@
 namespace Tribalia {
 namespace Graphics {
 
+    /* A list of options to be passed when creating the window  or gl context */
+    enum WindowOptions {
+	WIN_DEBUG_CONTEXT = 0x1, // Enable OpenGL debugging extensions (aka ARB_debug_output)
+    };
+    
     class Window {
     private:
         int _width, _height;
@@ -31,7 +36,7 @@ namespace Graphics {
 
         GLuint base_vao, base_vbo, base_index_vbo;
     public:
-        Window(int w, int h);
+        Window(int w, int h, unsigned win_opts);
 
         /* Shows the window */
         void Show();
