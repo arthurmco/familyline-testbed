@@ -36,9 +36,6 @@ static void ChangePanelZIndex(PanelRenderObject& pro, int zindex,
     float relx = float(px)/winW, rely = float(py)/winH;
     float relw = float(pw)/winW, relh = float(ph)/winH;
 	 
-    printf(" panel pos %d %d %d %d relpos %.2f %.2f %.2f %.2f\n",
-	   px, py, pw, ph, relx, rely, relw, relh);
-
     /* Recreate the panel vertices */
     float win_vectors[][3] = {
 	{relx, (rely+relh), znum}, {relx+relw, (rely+relh), znum},
@@ -275,9 +272,6 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
     float relx = float(px)/win_w, rely = float(py)/win_h;
     float relw = float(pw)/win_w, relh = float(ph)/win_h;
 	 
-    printf(" panel pos %d %d %d %d relpos %.2f %.2f %.2f %.2f\n",
-	   px, py, pw, ph, relx, rely, relw, relh);
-
     /* Create the panel vertices */
     const float win_vectors[][3] =
 	{
@@ -307,8 +301,6 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
-    printf(" panel vao %u vbo_vert %u vbo_tex %u\n", pro.vao, pro.vbo_vert,
-	   pro.vbo_tex);
 
     /* Create cairo context and surface for each panel */
     pro.csurf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pw, ph);

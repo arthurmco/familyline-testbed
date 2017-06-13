@@ -13,7 +13,6 @@ IPanel::IPanel(int x, int y, int w, int h)
     _bgColor = glm::vec4(1,1,1,0);
 }
 
-#include <cstdio>
 IPanel::IPanel(double x, double y, double w, double h, bool relative)
 {
     _fxPos = x;
@@ -25,7 +24,6 @@ IPanel::IPanel(double x, double y, double w, double h, bool relative)
 	_width = w;
 	_height = h;
     }
-    printf("!! %p %.2f %.2f %.2f %.2f %s\n", this, x, y, w, h, (relative) ? "r" : "");
     _bgColor = glm::vec4(1,1,1,0);
 }
 
@@ -152,11 +150,9 @@ void IPanel::GetBounds(double& x, double& y, double& w, double& h)
     h = _fheight;
     
 }
-#include <cstdio>
+
 void IPanel::ResizePanelAbsolute(IPanel* _p)
 {
-    printf("%d %d\n", _width, _height);
-    printf("%p: %.3f %.3f %d %d\n", _p, _p->_fwidth, _p->_fheight, _p->_xPos, _p->_yPos);
     if (_p->_fwidth <= 1 && _p->_fheight <= 1) {
 	_p->_width = double(_p->_fwidth * _width);
 	_p->_height = double(_p->_fheight * _height);
@@ -166,8 +162,6 @@ void IPanel::ResizePanelAbsolute(IPanel* _p)
 	    _p->_yPos = double(_p->_fyPos * _height);
 	}
     }
-
-    printf("%p: end %d %d %d %d\n", _p, _p->_width, _p->_height, _p->_xPos, _p->_yPos);
 
 }
 
