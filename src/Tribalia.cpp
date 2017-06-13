@@ -145,14 +145,25 @@ int main(int argc, char const *argv[])
     Log::GetLog()->Write("", "Default texture directory is " TEXTURES_DIR);
     Log::GetLog()->Write("", "Default material directory is " MATERIALS_DIR);
 
-
+    Framebuffer* fbGUI = nullptr;
+    Framebuffer* fb3D = nullptr;
     Window* w = nullptr;
+    GUIRenderer* guir = nullptr;
     try {
 	w = new Window(winW, winH);
 	Framebuffer::SetDefaultSize(winW, winH);
 	w->Show();
 
 	InputManager::GetInstance()->Initialize();
+
+	fbGUI = new Framebuffer{ winW, winH, GL_UNSIGNED_BYTE };
+	fb3D = new Framebuffer{ winW, winH, GL_UNSIGNED_BYTE };
+	w->SetGUIFramebuffer(fbGUI);
+	w->Set3DFramebuffer(fb3D);
+
+	guir = new GUIRenderer{w};
+	guir->SetFramebuffer(fbGUI);
+
     } catch (window_exception& we) {
 	Log::GetLog()->Fatal("init", "Window creation error: %s (%d)", we.what(), we.code);
 	exit(EXIT_FAILURE);
@@ -161,15 +172,6 @@ int main(int argc, char const *argv[])
 	Log::GetLog()->Fatal("init", "Shader file: %s, type %d", se.file.c_str(), se.type);
 	exit(EXIT_FAILURE);
     }
-
-    
-    Framebuffer* fbGUI = new Framebuffer{ winW, winH, GL_UNSIGNED_BYTE };
-    Framebuffer* fb3D = new Framebuffer{ winW, winH, GL_UNSIGNED_BYTE };
-    w->SetGUIFramebuffer(fbGUI);
-    w->Set3DFramebuffer(fb3D);
-
-    GUIRenderer* guir = new GUIRenderer{w};
-    guir->SetFramebuffer(fbGUI);
 
     /* Render the menu */
     bool r = true;
