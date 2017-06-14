@@ -146,6 +146,8 @@ int Game::RunLoop()
 
     int delta = 1;
     double pms = 0.0;
+
+    double maxdelta = 0, mindelta = 99, sumfps = 0;
     
     do {
 
@@ -243,12 +245,27 @@ int Game::RunLoop()
 	
     	gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
-    	//Locked in ~60 fps
-        if (delta < 1000/60.0) {
-    	    SDL_Delay(1000/60.0 - delta);
+    	//Locked in ~120 fps
+        if (delta < 1000/120.0) {
+    	    SDL_Delay(1000/120.0 - delta);
         }
+
+	if (delta < mindelta)
+	    mindelta = delta;
+
+	if (delta > maxdelta)
+	    maxdelta = delta;
+
+	sumfps += (1000 / delta);
 
     } while (player);
 
+    double maxfps = 1000/mindelta;// less delta, more fps
+    double minfps = 1000/maxdelta;
+    double avgfps = sumfps / frame;
+    Log::GetLog()->Write("game", "fps max: %.3f (%.3f ms), min: %.3f (%.3f ms), avg: %.3f",
+			 maxfps, mindelta, minfps, maxdelta, avgfps);
+    Log::GetLog()->Write("game", "Total frames: %d", frame);
+    
     return 0;
 }
