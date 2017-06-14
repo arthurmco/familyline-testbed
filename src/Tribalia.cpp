@@ -154,77 +154,78 @@ int main(int argc, char const *argv[])
 	Framebuffer::SetDefaultSize(winW, winH);
 	w->Show();
 
-	if (GLEW_ARB_debug_output) {
-	    /* Create the callback */
-	    __glewDebugMessageCallbackARB(
-		[](GLuint source, GLuint type, unsigned int id, GLuint severity,
-		   int length, const char* msg, const void* userparam){
+	if (GLEW_ARB_debug_output && glDebugMessageCallbackARB) {
+		auto gl_debug_callback = [](GLuint source, GLuint type, unsigned int id, GLuint severity,
+			int length, const char* msg, const void* userparam) {
 
-		    (void) userparam;
-		    
-#define	DEBUG_SOURCE_API_ARB                              0x8246
-#define	DEBUG_SOURCE_WINDOW_SYSTEM_ARB                    0x8247
-#define	DEBUG_SOURCE_SHADER_COMPILER_ARB                  0x8248
-#define	DEBUG_SOURCE_THIRD_PARTY_ARB                      0x8249
-#define	DEBUG_SOURCE_APPLICATION_ARB                      0x824A
-#define	DEBUG_SOURCE_OTHER_ARB                            0x824B
-		    
-		    const char *ssource, *stype, *sseverity;
-		    switch (source) {
-		    case DEBUG_SOURCE_API_ARB: ssource = "OpenGL API"; break;
-		    case DEBUG_SOURCE_WINDOW_SYSTEM_ARB: ssource = "window system"; break;
-		    case DEBUG_SOURCE_SHADER_COMPILER_ARB: ssource = "shader compiler"; break;
-		    case DEBUG_SOURCE_THIRD_PARTY_ARB: ssource = "third party"; break;
-		    case DEBUG_SOURCE_APPLICATION_ARB: ssource = "application"; break;
-		    case DEBUG_SOURCE_OTHER_ARB: ssource = "other"; break;
-		    default: ssource = "unknown"; break;
-		    }
+			(void)userparam;
 
-#define DEBUG_TYPE_ERROR_ARB                              0x824C
-#define DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB                0x824D
-#define DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB                 0x824E
-#define DEBUG_TYPE_PORTABILITY_ARB                        0x824F
-#define DEBUG_TYPE_PERFORMANCE_ARB                        0x8250
-#define DEBUG_TYPE_OTHER_ARB                              0x8251
+			const char *ssource, *stype, *sseverity;
+			switch (source) {
+			case GL_DEBUG_SOURCE_API: ssource = "OpenGL API"; break;
+			case GL_DEBUG_SOURCE_WINDOW_SYSTEM: ssource = "window system"; break;
+			case GL_DEBUG_SOURCE_SHADER_COMPILER: ssource = "shader compiler"; break;
+			case GL_DEBUG_SOURCE_THIRD_PARTY: ssource = "third party"; break;
+			case GL_DEBUG_SOURCE_APPLICATION: ssource = "application"; break;
+			case GL_DEBUG_SOURCE_OTHER: ssource = "other"; break;
+			default: ssource = "unknown"; break;
+			}
 
-		    switch (type) {
-		    case DEBUG_TYPE_ERROR_ARB: stype = "error"; break;
-		    case DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB: stype = "deprecated behavior"; break;
-		    case DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB: stype = "undefined behavior"; break;
-		    case DEBUG_TYPE_PORTABILITY_ARB: stype = "portability issue"; break;
-		    case DEBUG_TYPE_PERFORMANCE_ARB: stype = "performance"; break;
-		    case DEBUG_TYPE_OTHER_ARB: stype = "other"; break;
-		    default: stype = "unknown"; break;
-		    }
-		    
-#define DEBUG_SEVERITY_HIGH_ARB                           0x9146
-#define DEBUG_SEVERITY_MEDIUM_ARB                         0x9147
-#define DEBUG_SEVERITY_LOW_ARB                            0x9148
+			switch (type) {
+			case GL_DEBUG_TYPE_ERROR: stype = "error"; break;
+			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: stype = "deprecated behavior"; break;
+			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: stype = "undefined behavior"; break;
+			case GL_DEBUG_TYPE_PORTABILITY: stype = "portability issue"; break;
+			case GL_DEBUG_TYPE_PERFORMANCE: stype = "performance"; break;
+			case GL_DEBUG_TYPE_OTHER: stype = "other"; break;
+			default: stype = "unknown"; break;
+			}
 
-		    switch (severity) {
-		    case DEBUG_SEVERITY_HIGH_ARB: sseverity = "HIGH"; break;
-		    case DEBUG_SEVERITY_MEDIUM_ARB: sseverity = "MEDIUM"; break;
-		    case DEBUG_SEVERITY_LOW_ARB: sseverity = "LOW"; break;
-		    default: sseverity = "????"; break;
-		    }
+			switch (severity) {
+			case GL_DEBUG_SEVERITY_HIGH: sseverity = "PRIO: HIGH"; break;
+			case GL_DEBUG_SEVERITY_MEDIUM: sseverity = "PRIO: MEDIUM"; break;
+			case GL_DEBUG_SEVERITY_LOW: sseverity = "PRIO: LOW"; break;
+			case GL_DEBUG_SEVERITY_NOTIFICATION: sseverity = ""; break;
+			default: sseverity = "PRIO: ????"; break;
+			}
 
-		    char* m = new char[std::min(length*2, length+70)];
+			char* m = new char[std::max(length * 2, length + 70)];
 
-		    sprintf(m, "(%d) PRIO: %s (source: %s | type: %s) %s",
-			    id, sseverity, ssource, stype, msg);
+			sprintf(m, "(%d) %s (source: %s | type: %s) %s",
+				id, sseverity, ssource, stype, msg);
 
-		    if (severity == DEBUG_SEVERITY_MEDIUM_ARB ||
-			severity == DEBUG_SEVERITY_HIGH_ARB) {
-			Log::GetLog()->Warning("gl-debug-output", m);
-		    } else {
-			Log::GetLog()->Write("gl-debug-output", m);
-		    }
+			if (severity == GL_DEBUG_SEVERITY_MEDIUM ||
+				severity == GL_DEBUG_SEVERITY_HIGH) {
+				Log::GetLog()->Warning("gl-debug-output", m);
+			}
+			else {
+				Log::GetLog()->Write("gl-debug-output", m);
+			}
 
-		    delete[] m;
-		    
-		}, nullptr);
+			delete[] m;
+
+		};
+
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		
+		if (GL_KHR_debug && glDebugMessageCallback) {
+			// Try KHR_debug first
+			Log::GetLog()->Write("init", "KHR_debug supported");
+			glDebugMessageCallback(gl_debug_callback, nullptr);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+		} else {
+			// Try ARB_debug_output as a fallback (it's older, but best supported)
+			Log::GetLog()->Write("init", "ARB_debug_output supported");
+
+			/* Create the callback */
+			glDebugMessageCallbackARB(gl_debug_callback, nullptr);
+			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+		}
+		
 	} else {
-	    Log::GetLog()->Warning("init", "GLEW_ARB_debug_output not supported");
+	    Log::GetLog()->Warning("init", "ARB_debug_output not supported");
 	}
 	
 	InputManager::GetInstance()->Initialize();
@@ -266,7 +267,7 @@ int main(int argc, char const *argv[])
     bquit.SetOnClickListener([&r](GUI::IControl* cc) {
 	    r = false;
 	});
-    bnew.SetOnClickListener([&](GUI::IControl* cc) {
+    bnew.SetOnClickListener([](GUI::IControl* cc) {
 	    printf("New Game\n");
 	});    
     
@@ -277,33 +278,33 @@ int main(int argc, char const *argv[])
     guir->InitInput();
     
     while (r) {
+		// Input
+		InputManager::GetInstance()->Run();
+		InputEvent ev;
+		guir->ProcessInput(ev);
+	
+		if (deflistener->PopEvent(ev)) {
+			/* Only listen for FINISH events.
+			   The others will be handled by the GUI listener */
+			if (ev.eventType == EVENT_FINISH)
+			r = false;
+		}
 
-	// Input
-	InputManager::GetInstance()->Run();
-	InputEvent ev;
-	guir->ProcessInput(ev);
+		// Render
+		fbGUI->SetAsBoth();
+		guir->DebugWrite(20, 20, "Test");
+		guir->Render();
+		fbGUI->Unset();
 	
-	if (deflistener->PopEvent(ev)) {
-	    /* Only listen for FINISH events.
-	       The others will be handled by the GUI listener */
-	    if (ev.eventType == EVENT_FINISH)
-		r = false;
-	}
-
-	// Render
-	fbGUI->SetAsBoth();
-	guir->Render();
-	fbGUI->Unset();
+		w->Update();
+		double e = SDL_GetTicks();
 	
-	w->Update();
-	double e = SDL_GetTicks();
+		if ((e-b) < 1000/60.0)
+			SDL_Delay((unsigned int)(1000/60.0 - (e-b)));
 	
-	if ((e-b) < 1000/60.0)
-	    SDL_Delay((unsigned int)(1000/60.0 - (e-b)));
+			b = SDL_GetTicks();
 	
-	b = SDL_GetTicks();
-	
-	frames++;
+		frames++;
     }
 
     

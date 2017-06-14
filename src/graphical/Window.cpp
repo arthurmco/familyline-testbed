@@ -27,9 +27,15 @@ Window::Window(int w, int h, unsigned win_opts)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
-    if (win_opts & WIN_DEBUG_CONTEXT)
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-    
+	auto fflags = 0;
+	SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &fflags);
+	fflags |= SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG | SDL_GL_CONTEXT_RESET_ISOLATION_FLAG;
+
+	if (win_opts & WIN_DEBUG_CONTEXT) {
+		fflags |= SDL_GL_CONTEXT_DEBUG_FLAG;
+	}
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, fflags);
     _win = SDL_CreateWindow("Tribalia",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h,
         SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
@@ -82,14 +88,14 @@ void Window::Show()
 
     /* Compile the shader */
     if (!winShader) {
-	Shader *sv = new Shader{ SHADERS_DIR "Window.vert", SHADER_VERTEX };
-	Shader *sf = new Shader{ SHADERS_DIR "Window.frag", SHADER_PIXEL };
+		Shader *sv = new Shader{ SHADERS_DIR "Window.vert", SHADER_VERTEX };
+		Shader *sf = new Shader{ SHADERS_DIR "Window.frag", SHADER_PIXEL };
 	
-	sv->Compile();
-	sf->Compile();
+		sv->Compile();
+		sf->Compile();
 	
-	winShader = new ShaderProgram{ sv, sf };
-	winShader->Link();
+		winShader = new ShaderProgram{ sv, sf };
+		winShader->Link();
 	
     }
 
@@ -119,7 +125,6 @@ void Window::Show()
 /* Updates the window content to the video card */
 void Window::Update()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _width, _height);
 
     glDisable(GL_DEPTH_TEST);
@@ -157,13 +162,18 @@ void Window::Update()
     
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
-	printf("GL error %#x\n", err);
+		printf("GL error %#x\n", err);
     }
     
 
     glDisableVertexAttribArray(0);
     glBindVertexArray(0);
-    glActiveTexture(GL_TEXTURE0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
     glEnable(GL_DEPTH_TEST);
 }
 
