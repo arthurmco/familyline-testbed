@@ -8,8 +8,8 @@ out vec4 color;
 
 void main() {
 
-    vec4 crender = texture2D(texRender, uv);
-    vec4 cgui = texture2D(texGUI, vec2(uv.x, 1.0-uv.y));
+    vec4 crender = texture(texRender, uv);
+    vec4 cgui = texture(texGUI, vec2(uv.x, 1.0-uv.y));
 
     color = vec4(mix(crender, cgui, cgui.a).rgb, 1.0);
 }
