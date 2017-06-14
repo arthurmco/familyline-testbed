@@ -79,6 +79,10 @@ GUIRenderer::GUIRenderer(Window* w)
             shnum, SHADER_PROGRAM);
     }
 
+    
+    attrPos = sGUI->GetAttributeLocation("position");
+    attrTex = sGUI->GetAttributeLocation("in_uv");
+
     /* Create a panel for debug messages */
     this->AddPanel(new GUI::Panel(0, 0, win_w, win_h));
 
@@ -92,9 +96,6 @@ GUIRenderer::GUIRenderer(Window* w)
     _w = w;
     _width = win_w;
     _height = win_h; 
-
-	attrPos = sGUI->GetAttributeLocation("position");
-	attrTex = sGUI->GetAttributeLocation("in_uv");
 }
 
 
