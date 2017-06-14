@@ -27,18 +27,18 @@ Window::Window(int w, int h, unsigned win_opts)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
-	auto fflags = 0;
-	SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &fflags);
-	fflags |= SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG | SDL_GL_CONTEXT_RESET_ISOLATION_FLAG;
+    auto fflags = 0;
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &fflags);
+    fflags |= SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
+    
+    if (win_opts & WIN_DEBUG_CONTEXT) {
+	fflags |= SDL_GL_CONTEXT_DEBUG_FLAG;
+    }
 
-	if (win_opts & WIN_DEBUG_CONTEXT) {
-		fflags |= SDL_GL_CONTEXT_DEBUG_FLAG;
-	}
-
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, fflags);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, fflags);
     _win = SDL_CreateWindow("Tribalia",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+			    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h,
+			    SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
 
     if (!_win) {
         char err[1024] = "SDL window creation error: ";
