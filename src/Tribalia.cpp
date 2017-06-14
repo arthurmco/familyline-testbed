@@ -15,6 +15,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <ctime>
 
 #include <cstring>
 
@@ -73,6 +74,7 @@ static void show_help()
 	printf("--version:\tPrint version and, if compiled inside a Git repo, commit hash\n");
 	printf("--help:\t\tPrint this help information\n");
 	printf("--size <W>x<H>: Changes the game resolution to <W>x<H> pixels\n");
+	printf("--log [<filename>|screen]: Logs to filename 'filename', or screen to log to screen, or wherever stderr is bound to");
 }
 
 /* Retrieves video RAM size
@@ -134,25 +136,57 @@ static int check_size(int i, int argc, char const* argv[])
 int main(int argc, char const *argv[])
 {
     //int winW = 640, winH = 480;
-	if (get_arg_index("--version",argc,argv) >= 0) {
-	    show_version();
-	    return EXIT_SUCCESS;
+    if (get_arg_index("--version",argc,argv) >= 0) {
+	show_version();
+	return EXIT_SUCCESS;
+    }
+
+    int i =  get_arg_index("--size", argc, argv);
+    if (i >= 0) {
+	if( check_size(i, argc, argv) < 0) {
+	    return EXIT_FAILURE;
+	}
+    }
+
+    if (get_arg_index("--help", argc, argv) >= 0) {
+	show_help();
+	return EXIT_SUCCESS;
+    }
+
+
+    FILE* fLog = nullptr;
+    
+    i = get_arg_index("--log", argc, argv);
+    if (i >= 0) {
+	if ((i + 1) >= argc) {
+	    fprintf(stderr, "--log: expected a filename or 'screen'\n");
+	    return EXIT_FAILURE;
 	}
 
-	int i =  get_arg_index("--size", argc, argv);
-	if (i >= 0) {
-	    if( check_size(i, argc, argv) < 0) {
-		return EXIT_FAILURE;
-	    }
+	fprintf(stderr, "logging in %s\n", argv[i+1]);
+	if (!strcmp(argv[i+1], "screen")) {
+	    fLog = stderr;
+	} else {
+	    fLog = fopen(argv[i+1], "a");
+	    fputs("\n\n", fLog);
 	}
-
-	if (get_arg_index("--help", argc, argv) >= 0) {
-		show_help();
-		return EXIT_SUCCESS;
+	if (!fLog) {
+	    perror("Could not create log file: ");
+	    fprintf(stderr, "Using defaults");
 	}
+    }
 
-	
-    FILE* fLog = stderr;// fopen("log.txt", "w");
+    if (!fLog) {
+	/* Tries to create tribalia.log, fallback to stderr if it can't */
+	fLog = fopen("tribalia.log", "a");
+	fputs("\n\n", fLog);
+	if (!fLog) {
+	    perror("Could not create log file: ");
+	    fprintf(stderr, "Falling back to stderr");
+	    fLog = stderr;
+	}
+    }
+
     Log::GetLog()->SetFile(fLog);
     Log::GetLog()->Write("", "Tribalia " VERSION);
     Log::GetLog()->Write("", "built on " __DATE__ " by " USERNAME);
@@ -160,6 +194,13 @@ int main(int argc, char const *argv[])
     Log::GetLog()->Write("", "git commit is " COMMIT);
 #endif
 
+    char timestr[32];
+
+    auto tm = time(NULL);
+    auto tminfo = localtime(&tm);
+    strftime(timestr, 32, "%F %T", tminfo);
+    Log::GetLog()->Write("", "Actual date is %s", timestr);
+   
     Log::GetLog()->Write("", "Default model directory is " MODELS_DIR);
     Log::GetLog()->Write("", "Default texture directory is " TEXTURES_DIR);
     Log::GetLog()->Write("", "Default material directory is " MATERIALS_DIR);
