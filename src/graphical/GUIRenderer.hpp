@@ -60,6 +60,8 @@ private:
     ShaderProgram* sGUI;
 
     Input::InputListener* _il;
+
+	GLint attrPos, attrTex;
 public:
     GUIRenderer(Window* w);
 

@@ -147,6 +147,18 @@ bool ShaderProgram::SetUniformArray(const char* name, int count, glm::vec3* valu
 }
 
 
+/* Gets the location of a shader input attribute */
+int ShaderProgram::GetAttributeLocation(const char* name)
+{
+	auto i = glGetAttribLocation(_id, name);
+	if (i < 0) {
+		Log::GetLog()->Write("shader-program", "Attribute %s not found on shader %d", 
+			name, _id);
+	}
+
+	return i;
+}
+
 GLint ShaderProgram::GetID()
 {
     return this->_id;

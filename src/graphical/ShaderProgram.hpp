@@ -44,6 +44,9 @@ namespace Graphics {
 		bool SetUniformArray(const char* name, int count, float* value);
 		bool SetUniformArray(const char* name, int count, glm::vec3* value);
 
+		/* Gets the location of a shader input attribute */
+		int GetAttributeLocation(const char* name);
+
         GLint GetID();
 
     };

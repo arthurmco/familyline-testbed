@@ -21,7 +21,7 @@ static const float debug_msg_panel_pos[][3] =
    texture coordinates
 */
 static const float panel_texture_coord[][2] =
-{ {0, 1}, {1, 1}, {1, 0}, {0, 1}, {0, 0}, {1, 0}};
+{ {0, 1 }, { 1, 1 }, { 1, 0}, {0, 1 }, {0, 0}, {1, 0}};
 
 /* Change panel z-index.
    0 is most backgrounded, 100 is most foregrounded. */
@@ -92,6 +92,9 @@ GUIRenderer::GUIRenderer(Window* w)
     _w = w;
     _width = win_w;
     _height = win_h; 
+
+	attrPos = sGUI->GetAttributeLocation("position");
+	attrTex = sGUI->GetAttributeLocation("in_uv");
 }
 
 
@@ -188,12 +191,12 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 	    // Found the control. Send the event
 	    bool r = p.panel->ProcessInput(rev);
 	    if (oldPanel && oldPanel != p.panel) {
-		oldPanel->OnLostFocus();
-		oldPanel = p.panel;
-		p.panel->OnFocus();
+			oldPanel->OnLostFocus();
+			oldPanel = p.panel;
+			p.panel->OnFocus();
 	    } else if (!oldPanel) {
-		oldPanel = p.panel;
-		p.panel->OnFocus();		
+			oldPanel = p.panel;
+			p.panel->OnFocus();		
 	    }
 
 	    return r;
@@ -214,6 +217,7 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 void GUIRenderer::Redraw(cairo_t* ctxt)
 {
     glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
     sGUI->SetUniform("texPanel", 0);
 
     for (auto& p : _panels) {
@@ -227,13 +231,13 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	
 	glBindVertexArray(p.vao);
 
-	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(attrPos);
 	glBindBuffer(GL_ARRAY_BUFFER, p.vbo_vert);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(attrPos, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(attrTex);
 	glBindBuffer(GL_ARRAY_BUFFER, p.vbo_tex);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(attrTex, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	
 	glBindTexture(GL_TEXTURE_2D, p.tex_id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, p.pw, p.ph, 0, GL_BGRA,
@@ -255,6 +259,8 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
     }
     glBindVertexArray(0);
     glDisableVertexAttribArray(0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
@@ -268,10 +274,10 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
     /* Create panel vertices */
     int px, py, pw, ph;
     p->GetBounds(px, py, pw, ph);
-
+	
     float relx = float(px)/win_w, rely = float(py)/win_h;
     float relw = float(pw)/win_w, relh = float(ph)/win_h;
-	 
+	
     /* Create the panel vertices */
     const float win_vectors[][3] =
 	{
@@ -289,16 +295,15 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
     /* Create vertex information */
     glGenBuffers(1, &(pro.vbo_vert));
     glBindBuffer(GL_ARRAY_BUFFER, pro.vbo_vert);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(win_vectors), win_vectors, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 18, win_vectors, GL_STATIC_DRAW);
+    glVertexAttribPointer(attrPos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(attrPos);
 
     glGenBuffers(1, &(pro.vbo_tex));
     glBindBuffer(GL_ARRAY_BUFFER, pro.vbo_tex);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(panel_texture_coord),
-		 panel_texture_coord, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(1);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, panel_texture_coord, GL_STATIC_DRAW);
+    glVertexAttribPointer(attrTex, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(attrTex);
 
     glBindVertexArray(0);
 
@@ -320,7 +325,6 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
 		 GL_UNSIGNED_BYTE,
 		 (void*)cairo_image_surface_get_data(pro.csurf));
 
-       	
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
