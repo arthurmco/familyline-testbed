@@ -12,11 +12,6 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 {
     int winW, winH;
     w->GetSize(winW, winH);
-
-    auto pgctx = &gctx;
-    static auto death_callback = [&pgctx](Logic::AttackableObject* at) {
-	pgctx->om->UnregisterObject(at); 
-    };
     
     try {
     	/* Initialise things */
@@ -137,12 +132,15 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
     ObjectPathManager::getInstance()->SetTerrain(terr);
 
     
-    CombatManager::GetInstance()->SetOnDeath(death_callback);
+    
 
 }
 
 int Game::RunLoop()
 {
+    CombatManager::GetInstance()->SetOnDeath([&](Logic::AttackableObject* at) {
+	    gctx.om->UnregisterObject(at);
+	});
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
 
