@@ -14,8 +14,9 @@ ObjectRenderer::ObjectRenderer(ObjectManager* om, Tribalia::Graphics::SceneManag
 bool ObjectRenderer::Check()
 {
     for (auto id_it = _IDs.begin(); id_it != _IDs.end(); ++id_it) {
-        id_it->ok = false;        
+	id_it->ok = false;        
     }
+    
 
     int object_found = 0;
     for (auto it = _om->_objects.begin(); it != _om->_objects.end(); ++it) {

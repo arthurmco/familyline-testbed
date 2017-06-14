@@ -355,7 +355,14 @@ int GUIRenderer::AddPanel(GUI::IPanel* p, double x, double y)
 /* Remove the panel */
 void GUIRenderer::RemovePanel(GUI::IPanel* p)
 {
-    (void) p;
+    for (auto it = _panels.begin(); it != _panels.end(); it++) {
+	if (it->panel == p) {
+	    //TODO: remove VAO/VBO and destroy texture and cairo surface
+	    
+	    _panels.erase(it);
+	    return;
+	}
+    }
 }
 
  void GUIRenderer::SetBounds(int x, int y, int w, int h)
