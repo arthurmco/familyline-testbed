@@ -24,7 +24,7 @@ TerrainRenderer::TerrainRenderer(Renderer* r)
 	MaterialData(glm::vec3(0.3, 0.3, 0.3),
 		     glm::vec3(0.4, 1.0, 0.4),
 		     glm::vec3(0.02)));
-    t0->SetTexture(TextureOpener::Open("textures/terrain/grass.png"));
+    t0->SetTexture(TextureOpener::OpenFile("textures/terrain/grass.png")->GetTextureCut(0, 0, 1, 1));
     MaterialManager::GetInstance()->AddMaterial(t0);
     
     this->AddMaterial(0, t0);

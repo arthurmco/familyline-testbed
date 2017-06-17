@@ -6,8 +6,8 @@ using namespace Tribalia::Graphics;
 static bool isDevilOn = false;
 
 
-Texture* TextureOpener::TextureOpenBMP(FILE* f, const char* path) {
-    Texture* t = nullptr;
+TextureFile* TextureOpener::TextureOpenBMP(FILE* f, const char* path) {
+    TextureFile* t = nullptr;
 
     char bmp_header[14];
     if (fread((void*)bmp_header, 1, 14, f) < 14) {
@@ -71,7 +71,7 @@ Texture* TextureOpener::TextureOpenBMP(FILE* f, const char* path) {
 		   of 4. */
 		char* row = new char[row_size];
 		if (fread((void*)row, 1, row_size, f) < row_size) {
-			printf("EEE %d", y);
+			printf("EEE %zu", y);
 			return t;
 		}
 
@@ -82,20 +82,28 @@ Texture* TextureOpener::TextureOpenBMP(FILE* f, const char* path) {
 			image_grid[ (height-y-1)*width*bytespp + x*bytespp ] = row[x*bytespp];
 			image_grid[ (height-y-1)*width*bytespp + x*bytespp + 1 ] = row[x*bytespp+1];
 			image_grid[ (height-y-1)*width*bytespp + x*bytespp + 2 ] = row[x*bytespp+2];
+
 		}
 
 		delete[] row;
     }
     
     const GLenum iformat = GL_BGR; //default format for bitmap images.
-    t = new Texture(width, height, iformat, image_grid);
+
+    /* Create an image */
+    ILuint handle;
+    ilGenImages(1, &handle);
+    ilBindImage(handle);
+    ilTexImage(width, height, 1, 3, iformat, IL_UNSIGNED_BYTE, image_grid);
+    t = new TextureFile(handle, iformat);
+    ilBindImage(0);
     
     fclose(f);
     return t;
 }
 
 
-Texture* TextureOpener::Open(const char* path)
+TextureFile* TextureOpener::OpenFile(const char* path)
 {
     	Log::GetLog()->Write("texture-opener", "Opening %s", path);
 	FILE* f = fopen(path, "rb");
@@ -150,25 +158,31 @@ Texture* TextureOpener::Open(const char* path)
 		    break;
 		}
 
-		Log::GetLog()->Warning("texture-opener",
+		Log::GetLog()->Fatal("texture-opener",
 				       "Error '%s' while opening %s",
 				       estr, path);
 		return nullptr;
 	}
 
-	int width = ilGetInteger(IL_IMAGE_WIDTH);
-	int height = ilGetInteger(IL_IMAGE_HEIGHT);
-	GLenum format;
+	auto format = ilGetInteger(IL_IMAGE_FORMAT);
 
-	format = ilGetInteger(IL_IMAGE_FORMAT);
-
-	unsigned char* data = ilGetData();
-	Texture* tex = new Texture(width, height, format, data);
-		
 	/* Clean up image */
 	ilBindImage(0);
-	ilDeleteImage(handle);	
 
 	/* Returns texture */
-	return tex;
+	return new TextureFile(handle, format);
+}
+
+Texture* TextureOpener::OpenTexture(const char* path)
+{
+    auto f = TextureOpener::OpenFile(path);
+
+    ilBindImage(f->GetHandle());
+    int width = ilGetInteger(IL_IMAGE_WIDTH);
+    int height = ilGetInteger(IL_IMAGE_HEIGHT);
+    ilBindImage(0);
+    
+    auto t = f->GetTextureCut(0, 0, width, height);
+    delete f;
+    return t;
 }

@@ -21,15 +21,33 @@
 namespace Tribalia {
 namespace Graphics {
 
+class TextureFile
+{
+private:
+    ILuint _handle;
+    GLenum _format;
+public:
+    ILuint GetHandle() const;
+
+    TextureFile(ILuint handle, GLenum format);
+
+    /* Get a texture from a cut in the loaded image */
+    Texture* GetTextureCut(int x = 0, int y = 0, int w = 0, int h = 0);
+
+    ~TextureFile();
+        
+};
+    
 class TextureOpener
 {
 private:
-    static Texture* TextureOpenBMP(FILE*, const char*);
+    static TextureFile* TextureOpenBMP(FILE*, const char*);
     
 public:
     /* 	Opens a image as a texture. Returns a texture
 	object, or nullptr if texture wasn't found */
-    static Texture* Open(const char* path);
+    static TextureFile* OpenFile(const char* path);
+    static Texture* OpenTexture(const char* path);
 
 
 };

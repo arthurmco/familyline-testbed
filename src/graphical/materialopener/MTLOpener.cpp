@@ -86,7 +86,7 @@ std::vector<Material*> MTLOpener::Open(const char* file)
             std::string texname{texpath};
             texname[texname.find_last_of('.')] = 0;
 
-            Texture* t = TextureOpener::Open(texpath);
+            Texture* t = TextureOpener::OpenTexture(texpath);
 
             if (t) {
                 TextureManager::GetInstance()->AddTexture(texname.c_str(), t);

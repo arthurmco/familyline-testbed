@@ -191,8 +191,7 @@ bool AssetManager::LoadAsset(Asset* at)
 
     switch (at->asset_type) {
     case ASSET_TEXTURE: {
-	TextureOpener o;
-	at->asset.texture = o.Open(at->path);
+	at->asset.texture = TextureOpener::OpenTexture(at->path);
 	
 	if (at->asset.texture) {
 	    std::string fname{ at->path };

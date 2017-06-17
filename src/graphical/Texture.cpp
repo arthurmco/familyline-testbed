@@ -38,11 +38,14 @@ Texture::Texture(int width, int height, GLenum format, void* data)
 			       glerr, tex_handle);
     }
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+		    GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+		    GL_NEAREST);
     Log::GetLog()->Write("texture", "Created texture with %dx%d, format %#x, with id %d",
 			 width, height, format, tex_handle);
 
+    
     // Unbind texture
     glBindTexture(GL_TEXTURE_2D, 0);
     _tex_handle = tex_handle;
