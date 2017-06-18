@@ -74,7 +74,7 @@ static void show_help()
 	printf("--version:\tPrint version and, if compiled inside a Git repo, commit hash\n");
 	printf("--help:\t\tPrint this help information\n");
 	printf("--size <W>x<H>: Changes the game resolution to <W>x<H> pixels\n");
-	printf("--log [<filename>|screen]: Logs to filename 'filename', or screen to log to screen, or wherever stderr is bound to");
+	printf("--log [<filename>|screen]: Logs to filename 'filename', or screen to log to screen, or wherever stderr is bound to\n");
 }
 
 /* Retrieves video RAM size
@@ -215,54 +215,91 @@ int main(int argc, char const *argv[])
 	w->Show();
 
 	if (GLEW_ARB_debug_output && glDebugMessageCallbackARB) {
+	    struct LogTime {
+		unsigned qt = 0;
+		unsigned lastsec = 0;
+	    };
+	    
 		auto gl_debug_callback = [](GLuint source, GLuint type, unsigned int id, GLuint severity,
-			int length, const char* msg, const void* userparam) {
+					    int length, const char* msg, const void* userparam) {
+   		    (void)userparam;
 
-			(void)userparam;
+		    /* Handle log suppressing */
+		    static std::map<unsigned, LogTime> id_qt_map;
+		    static unsigned lastsupp = (unsigned)-1;
+		    auto t = time(NULL);
 
-			const char *ssource, *stype, *sseverity;
-			switch (source) {
-			case GL_DEBUG_SOURCE_API: ssource = "OpenGL API"; break;
-			case GL_DEBUG_SOURCE_WINDOW_SYSTEM: ssource = "window system"; break;
-			case GL_DEBUG_SOURCE_SHADER_COMPILER: ssource = "shader compiler"; break;
-			case GL_DEBUG_SOURCE_THIRD_PARTY: ssource = "third party"; break;
-			case GL_DEBUG_SOURCE_APPLICATION: ssource = "application"; break;
-			case GL_DEBUG_SOURCE_OTHER: ssource = "other"; break;
-			default: ssource = "unknown"; break;
-			}
+		    /* Unban after a long time */
+		    if (id == lastsupp && id_qt_map[id].lastsec < t+5) {
+			id_qt_map[id].qt = 0;
+			return;
+		    } else {
+			lastsupp = -1;
+		    }
+		    
+		    if (t >= id_qt_map[id].lastsec) {
+			id_qt_map[id].qt++;
+			id_qt_map[id].lastsec = t;
+		    }
 
-			switch (type) {
-			case GL_DEBUG_TYPE_ERROR: stype = "error"; break;
-			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: stype = "deprecated behavior"; break;
-			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: stype = "undefined behavior"; break;
-			case GL_DEBUG_TYPE_PORTABILITY: stype = "portability issue"; break;
-			case GL_DEBUG_TYPE_PERFORMANCE: stype = "performance"; break;
-			case GL_DEBUG_TYPE_OTHER: stype = "other"; break;
-			default: stype = "unknown"; break;
-			}
+		    if (id_qt_map[id].qt > 20 && id_qt_map[id].lastsec <= t) {
+			Log::GetLog()->Write("gl-debug-output", "Suppressing id %d messages because they are too many", id);
+			lastsupp = id;
+			return;
+		    }
 
-			switch (severity) {
-			case GL_DEBUG_SEVERITY_HIGH: sseverity = "PRIO: HIGH"; break;
-			case GL_DEBUG_SEVERITY_MEDIUM: sseverity = "PRIO: MEDIUM"; break;
-			case GL_DEBUG_SEVERITY_LOW: sseverity = "PRIO: LOW"; break;
-			case GL_DEBUG_SEVERITY_NOTIFICATION: sseverity = ""; break;
-			default: sseverity = "PRIO: ????"; break;
-			}
+		    id_qt_map[id].lastsec = t;
 
-			char* m = new char[std::max(length * 2, length + 70)];
+		    	
+		    /* Handle message parsing and display */
+		    const char *ssource, *stype, *sseverity;
+		    switch (source) {
+		    case GL_DEBUG_SOURCE_API: ssource = "OpenGL API"; break;
+		    case GL_DEBUG_SOURCE_WINDOW_SYSTEM: ssource = "window system"; break;
+		    case GL_DEBUG_SOURCE_SHADER_COMPILER: ssource = "shader compiler"; break;
+		    case GL_DEBUG_SOURCE_THIRD_PARTY: ssource = "third party"; break;
+		    case GL_DEBUG_SOURCE_APPLICATION: ssource = "application"; break;
+		    case GL_DEBUG_SOURCE_OTHER: ssource = "other"; break;
+		    default: ssource = "unknown"; break;
+		    }
 
-			sprintf(m, "(%d) %s (source: %s | type: %s) %s",
-				id, sseverity, ssource, stype, msg);
+		    switch (type) {
+		    case GL_DEBUG_TYPE_ERROR: stype = "error"; break;
+		    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: stype = "deprecated behavior"; break;
+		    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: stype = "undefined behavior"; break;
+		    case GL_DEBUG_TYPE_PORTABILITY: stype = "portability issue"; break;
+		    case GL_DEBUG_TYPE_PERFORMANCE: stype = "performance"; break;
+		    case GL_DEBUG_TYPE_OTHER: stype = "other"; break;
+		    default: stype = "unknown"; break;
+		    }
 
-			if (severity == GL_DEBUG_SEVERITY_MEDIUM ||
-				severity == GL_DEBUG_SEVERITY_HIGH) {
-				Log::GetLog()->Warning("gl-debug-output", m);
-			}
-			else {
-				Log::GetLog()->Write("gl-debug-output", m);
-			}
+		    switch (severity) {
+		    case GL_DEBUG_SEVERITY_HIGH: sseverity = "PRIO: HIGH"; break;
+		    case GL_DEBUG_SEVERITY_MEDIUM: sseverity = "PRIO: MEDIUM"; break;
+		    case GL_DEBUG_SEVERITY_LOW: sseverity = "PRIO: LOW"; break;
+		    case GL_DEBUG_SEVERITY_NOTIFICATION: sseverity = ""; break;
+		    default: sseverity = "PRIO: ????"; break;
+		    }
 
-			delete[] m;
+		    char* m = new char[std::max(length * 2, length + 70)];
+
+		    sprintf(m, "(%d) %s (source: %s | type: %s) %s",
+			    id, sseverity, ssource, stype, msg);
+
+		    auto l = strlen(m);
+		    if (m[l-1] == '\n')
+			m[l-1] = 0;
+
+
+		    if (severity == GL_DEBUG_SEVERITY_MEDIUM ||
+			severity == GL_DEBUG_SEVERITY_HIGH) {
+			Log::GetLog()->Warning("gl-debug-output", m);
+		    }
+		    else {
+			Log::GetLog()->Write("gl-debug-output", m);
+		    }
+
+		    delete[] m;
 
 		};
 
