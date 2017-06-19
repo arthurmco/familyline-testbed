@@ -1,6 +1,7 @@
 #include "Log.hpp"
 
 using namespace Tribalia;
+using namespace std::chrono;
 
 Log* Log::l = NULL;
 
@@ -14,7 +15,7 @@ Log* Log::GetLog(){
 
 Log::Log()
 {
-    time(&_time);
+    start = steady_clock::now();
 }
 
 void Log::SetFile(FILE* f)
@@ -32,6 +33,12 @@ void Log::SetFile(FILE* f)
 #define YELLOW "\033[33m"
 #define NORMAL "\033[0m"
 
+double Log::GetDelta() {
+    decltype(start) now = steady_clock::now();
+    auto deltatime = duration_cast<duration<double>>(now-start);
+    return deltatime.count();
+}
+
 void Log::Write(const char* tag, const char* fmt, ...)
 {
     if (!this->_logFile) return;
@@ -39,9 +46,8 @@ void Log::Write(const char* tag, const char* fmt, ...)
     const char* colon = (tag[0] == '\0') ? "" : ":";
     
     /* Print timestamp */
-    time_t now;
-    time(&now);
-    fprintf(_logFile, "[%8u] " BOLD "%s%s " NORMAL, (int)(now-_time), tag, colon);
+    
+    fprintf(_logFile, "[%13.4f] " BOLD "%s%s " NORMAL, GetDelta(), tag, colon);
 
     /* Print message */
     va_list vl;
@@ -61,10 +67,8 @@ void Log::Fatal(const char* tag, const char* fmt, ...)
     if (!this->_logFile) return;
     
     /* Print timestamp */
-    time_t now;
-    time(&now);
-    fprintf(_logFile, "[%8u] " RED "" BOLD "%s: (FATAL) " 
-	    NORMAL "" RED, (int)(now-_time), tag);
+    fprintf(_logFile, "[%13.4f] " RED "" BOLD "%s: (FATAL) " 
+	    NORMAL "" RED, GetDelta(), tag);
 
     /* Print message */
     va_list vl;
@@ -84,10 +88,8 @@ void Log::Warning(const char* tag, const char* fmt, ...)
     if (!this->_logFile) return;
 	
     /* Print timestamp */
-    time_t now;
-    time(&now);
-    fprintf(_logFile, "[%8u] " YELLOW "" BOLD "%s: (WARNING) " 
-	    NORMAL "" YELLOW, (int)(now-_time), tag);
+    fprintf(_logFile, "[%13.4f] " YELLOW "" BOLD "%s: (WARNING) " 
+	    NORMAL "" YELLOW, GetDelta(), tag);
 
     /* Print message */
     va_list vl;
