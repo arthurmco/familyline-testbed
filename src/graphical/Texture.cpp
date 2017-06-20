@@ -119,3 +119,11 @@ glm::mat4 Texture::GetOffsetMatrix()
 	);
 	
 }
+
+/* Get maximum possible size for a texture */
+size_t Texture::GetMaximumSize()
+{
+    auto maxtex = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxtex);
+    return (size_t)maxtex;
+}

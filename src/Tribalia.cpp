@@ -328,8 +328,7 @@ int main(int argc, char const *argv[])
 	Log::GetLog()->Write("", "Rendering Device Vendor: %s", glGetString(GL_VENDOR));
 	Log::GetLog()->Write("", "Rendering Device Name: %s", glGetString(GL_RENDERER));
 
-	auto maxtex = 0;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxtex);
+	auto maxtex = Texture::GetMaximumSize();
 	Log::GetLog()->Write("", "Maximum texture size: %dx%d", maxtex, maxtex);
 
 	auto vram = get_video_ram_size();
@@ -374,9 +373,11 @@ int main(int argc, char const *argv[])
     Button bnew = Button(0.1, 0.2, 0.8, 0.1, "New Game");
     Button bquit = Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
     bquit.SetOnClickListener([&r](GUI::IControl* cc) {
+	    (void) cc;
 	    r = false;
 	});
     bnew.SetOnClickListener([&](GUI::IControl* cc) {
+	    (void) cc;
 	    guir->RemovePanel(&l);
 	    guir->RemovePanel(&lv);
 	    guir->RemovePanel(&bnew);
@@ -416,9 +417,9 @@ int main(int argc, char const *argv[])
 		double e = SDL_GetTicks();
 	
 		if ((e-b) < 1000/60.0)
-			SDL_Delay((unsigned int)(1000/60.0 - (e-b)));
+		    SDL_Delay((unsigned int)(1000/60.0 - (e-b)));
 	
-			b = SDL_GetTicks();
+		b = SDL_GetTicks();
 	
 		frames++;
     }

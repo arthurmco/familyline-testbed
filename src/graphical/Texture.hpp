@@ -53,6 +53,11 @@ public:
     /* Retrieves a offset matrix, for automatic conversion between local
        and global texcoords */
     glm::mat4 GetOffsetMatrix();
+
+
+    /* Get maximum possible size for a texture */
+    static size_t GetMaximumSize();
+    
 };
 
 } /* Graphics */

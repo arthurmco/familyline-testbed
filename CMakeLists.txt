@@ -99,6 +99,7 @@ else()
   target_link_libraries(tribalia "GL")
   target_link_libraries(tribalia "GLEW")
   target_link_libraries(tribalia "IL")
+  target_link_libraries(tribalia "ILU")
   target_link_libraries(tribalia "cairo")
 
   if(DO_TESTS)
