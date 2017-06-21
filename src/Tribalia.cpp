@@ -8,7 +8,9 @@
 
 #define GLM_FORCE_RADIANS
 
+#ifdef linux
 #include <GL/glxew.h>
+#endif
 
 #include "EnviroDefs.h"
 #include "config.h"
@@ -100,7 +102,9 @@ static int get_video_ram_size() {
 	glGetIntegerv(GL_RENDERBUFFER_FREE_MEMORY_ATI, freerb);
 
 	vram = (freevbo[0] + freetex[0] + freerb[0]) / 1024;
-    } else if (GLXEW_MESA_query_renderer) {
+    } 
+#ifdef linux
+	else if (GLXEW_MESA_query_renderer) {
 	// Generic: MESA
 	Log::GetLog()->Write("init", "GLX_MESA_query_renderer is supported");
 
@@ -110,7 +114,7 @@ static int get_video_ram_size() {
 
 	vram = (int) uvram;
     }
-
+#endif
     return vram;
 }
 

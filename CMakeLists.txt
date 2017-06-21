@@ -107,6 +107,7 @@ else()
   	target_link_libraries(tribalia-tests "GL")
   	target_link_libraries(tribalia-tests "GLEW")
   	target_link_libraries(tribalia-tests "IL")
+  	target_link_libraries(tribalia-tests "ILU")
   	target_link_libraries(tribalia-tests "cairo")
   endif(DO_TESTS)
 
