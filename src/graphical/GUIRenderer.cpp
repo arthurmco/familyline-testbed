@@ -3,6 +3,8 @@
 #include "gui/Panel.hpp"
 #include "../config.h"
 
+#include <algorithm>
+
 using namespace Tribalia::Graphics;
 using namespace Tribalia;
 
@@ -135,7 +137,7 @@ bool GUIRenderer::Render()
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    
+
     sGUI->Use();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -167,7 +169,10 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 	int x = ev.mousex;
 	int y = ev.mousey;
 
-	for (auto& p : _panels) {
+	/* Reverse the iterator so the most-higher z-indexes get 
+	   input first */
+	for (auto it = _panels.rbegin(); it != _panels.rend(); it++) {
+	    auto p = *it;
 	    if (p.is_debug) {
 		continue; // Do not send events to the debug panel
 	    }
@@ -191,6 +196,8 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 	    
 	    // Found the control. Send the event
 	    bool r = p.panel->ProcessInput(rev);
+	    if (!r) continue;
+	    
 	    if (oldPanel && oldPanel != p.panel) {
 			oldPanel->OnLostFocus();
 			oldPanel = p.panel;
@@ -338,6 +345,18 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
     /* Upload panel */
     pro.panel = p;
     _panels.push_back(pro);
+
+    /* Sort panels based on z-index 
+       Best to sort at each insertion
+     */
+    std::sort(_panels.begin(), _panels.end(),
+	      [](PanelRenderObject a, PanelRenderObject b) {
+		  /* order so that elements with less z-index are renderer
+		     first */
+		  return (a.panel->GetZIndex() > b.panel->GetZIndex());
+	      }
+	);
+    
 	 
     return 1;
 }
