@@ -8,7 +8,7 @@
 
 #define GLM_FORCE_RADIANS
 
-#ifdef linux
+#ifdef __linux__
 #include <GL/glxew.h>
 #endif
 
@@ -33,6 +33,7 @@
 #include "graphical/gui/Panel.hpp"
 #include "graphical/gui/Label.hpp"
 #include "graphical/gui/Button.hpp"
+#include "graphical/gui/ImageControl.hpp"
 
 #include "input/InputPicker.hpp"
 
@@ -103,7 +104,7 @@ static int get_video_ram_size() {
 
 	vram = (freevbo[0] + freetex[0] + freerb[0]) / 1024;
     } 
-#ifdef linux
+#ifdef __linux__
 	else if (GLXEW_MESA_query_renderer) {
 	// Generic: MESA
 	Log::GetLog()->Write("init", "GLX_MESA_query_renderer is supported");
@@ -369,13 +370,25 @@ int main(int argc, char const *argv[])
 
     Label l = Label(0.37, 0.03, 0.25, 0.1, "TRIBALIA");
     l.SetForeColor(230, 240, 235, 255);
+    l.SetBackColor(0, 0, 0, 1);
     l.SetFontData("Garamond", 32);
-
+    
     Label lv = Label(0.35, 0.8, 0.4, 0.1, "Version " VERSION ", commit " COMMIT);
-    lv.SetForeColor(255, 255, 255, 255);
+    lv.SetForeColor(190, 0, 0, 255);
+    lv.SetBackColor(0, 0, 0, 255);
     
     Button bnew = Button(0.1, 0.2, 0.8, 0.1, "New Game");
+    bnew.SetBackColor(127, 127, 127, 181);
+    bnew.SetForeColor(255, 0, 0, 255);
+    
     Button bquit = Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
+    bquit.SetBackColor(127, 127, 127, 181);
+    bquit.SetForeColor(255, 0, 0, 255);
+    
+    ImageControl ilogo = ImageControl(0.2, 0.1, 0.6, 0.9,
+				      "icons/tribalia-logo.png");
+    ilogo.SetZIndex(0.9);
+    
     bquit.SetOnClickListener([&r](GUI::IControl* cc) {
 	    (void) cc;
 	    r = false;
@@ -386,16 +399,18 @@ int main(int argc, char const *argv[])
 	    guir->RemovePanel(&lv);
 	    guir->RemovePanel(&bnew);
 	    guir->RemovePanel(&bquit);
+	    guir->RemovePanel(&ilogo);
 	    
 	    printf("New Game\n");
 	    auto g = Game(w, fb3D, fbGUI, guir);
 	    exit(g.RunLoop());
-	});    
-    
+	});
+
     guir->AddPanel(&l);
     guir->AddPanel(&lv);
     guir->AddPanel(&bnew);
     guir->AddPanel(&bquit);
+    guir->AddPanel(&ilogo);
     guir->InitInput();
     
     while (r) {
