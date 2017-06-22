@@ -10,7 +10,7 @@ Label::Label(int x, int y, const char* text)
     _yPos = y;
     _width = _text.size() * 9;
     _height = 16.0f;
-    _bgColor = glm::vec4(255, 255, 255, 0);
+    _bgColor = glm::vec4(1, 1, 1, 0);
     _font_name = "monospace";
     _font_size = 14;
 }
@@ -28,7 +28,7 @@ Label::Label(double x, double y, double w, double h, const char* text)
     : IPanel(x,y,w,h, true)
 {
     _text = std::string{text};
-    _bgColor = glm::vec4(255, 255, 255, 0);
+    _bgColor = glm::vec4(1, 1, 1, 0);
     _font_name = "monospace";
     _font_size = 14;
 }

@@ -7,19 +7,17 @@ Button::Button(int x, int y, int w, int h, const char* text)
     : IPanel(int(x),int(y),w,h)
 {
     _text = std::string{text};
-    _bgColor = glm::vec4(128, 128, 128, 255);
-    _fgColor = glm::vec4(32, 0, 0, 255);
+    _bgColor = glm::vec4(0.5, 0.5, 0.5, 1);
+    _fgColor = glm::vec4(0.85, 0, 0, 1);
     _actualbg = _bgColor;
 }
 
 Button::Button(double x, double y, double w, double h, const char* text)
     : IPanel(double(x),double(y),w,h, true)
 {
-    printf("t: %s\n", text);
     _text = std::string{text};
-    _bgColor = glm::vec4(128, 128, 128, 255);
-    _fgColor = glm::vec4(32, 0, 0, 255);
-    _actualbg = _bgColor;
+    _bgColor = glm::vec4(0.5, 0.5, 0.5, 1);
+    _fgColor = glm::vec4(0.85, 0, 0, 1);
 }
 
 
@@ -43,10 +41,13 @@ void Button::SetText(char* txt, ...)
 
 void Button::Redraw(cairo_t* ctxt)
 {
+    if (!isClick && !isHover)
+	_actualbg = _bgColor;
+        
     /* Fill square */
     cairo_rectangle(ctxt, 0, 0, _width, _height);
-    cairo_set_source_rgba(ctxt, _actualbg.r/255, _actualbg.g/255,
-			  _actualbg.b/255, _actualbg.a/255);
+    cairo_set_source_rgba(ctxt, _actualbg.r, _actualbg.g,
+			  _actualbg.b, _actualbg.a);
     cairo_fill(ctxt);
 
 
@@ -56,8 +57,8 @@ void Button::Redraw(cairo_t* ctxt)
     glm::vec4 bstroke = glm::vec4(_actualbg.r / 1.41, _actualbg.g / 1.41,
 				  _actualbg.b / 1.41, _actualbg.a);
     
-    cairo_set_source_rgba(ctxt, bstroke.r/255, bstroke.g/255, bstroke.b/255,
-			  bstroke.a/255);
+    cairo_set_source_rgba(ctxt, bstroke.r, bstroke.g, bstroke.b,
+			  bstroke.a);
     cairo_set_line_width(ctxt, 4.0);
     cairo_stroke(ctxt);
     
@@ -95,9 +96,12 @@ bool Button::ProcessInput(Input::InputEvent& ev)
 	if (ev.event.mouseev.status != Input::KEY_KEYRELEASE) {
 	    _actualbg = bgclick;
 
-	    if (onClickListener)
+	    if (onClickListener && !isClick )
 		this->onClickListener(this);
+
+	    isClick = true;
 	} else {
+	    isClick = false;
 	    _actualbg = bghover;
 	}
 	break;

@@ -29,6 +29,7 @@ private:
     bool textChanged = true;
 
     bool isHover = false;
+    bool isClick = false;
 
     OnClickListener onClickListener = nullptr;
     
