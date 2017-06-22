@@ -278,14 +278,15 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
 	
     float relx = float(px)/win_w, rely = float(py)/win_h;
     float relw = float(pw)/win_w, relh = float(ph)/win_h;
+    float zindex = float(p->GetZIndex());
 	
     /* Create the panel vertices */
     const float win_vectors[][3] =
 	{
-	    {relx, (rely+relh), 0.5f}, {relx+relw, (rely+relh), 0.5f},
-	    {relx+relw, (rely), 0.5f},
-	    {relx, (rely+relh), 0.5f}, {relx, rely, 0.5f},
-	    {relx+relw, rely, 0.5f}
+	    {relx, (rely+relh), zindex}, {relx+relw, (rely+relh), zindex},
+	    {relx+relw, (rely), zindex},
+	    {relx, (rely+relh), zindex}, {relx, rely, zindex},
+	    {relx+relw, rely, zindex}
 	};
 	 
     PanelRenderObject pro;

@@ -31,7 +31,7 @@ IPanel::IPanel(double x, double y, double w, double h, bool relative)
 /* Non-virtual functions...
     fuck off */
 
-int IPanel::GetBackColor(uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a)
+int IPanel::GetBackColor(uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a) const
 {
     unsigned int _r, _g, _b, _a;
     _r = int(_bgColor.r * 255) & 0xff;
@@ -45,7 +45,7 @@ int IPanel::GetBackColor(uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a)
     return color;
 }
 
-int IPanel::GetBackColor()
+int IPanel::GetBackColor() const
 {
     uint8_t r,g,b,a;
     return this->GetBackColor(r,g,b,a);    
@@ -67,7 +67,7 @@ void IPanel::SetBackColor(uint32_t r, uint32_t g, uint32_t b, uint32_t a)
     _bgColor = glm::vec4(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
 }
 
-int IPanel::GetForeColor(uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a)
+int IPanel::GetForeColor(uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a) const
 {
     
     unsigned int _r, _g, _b, _a;
@@ -83,7 +83,7 @@ int IPanel::GetForeColor(uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a)
     
 }
 
-int IPanel::GetForeColor()
+int IPanel::GetForeColor() const
 {
     uint8_t r,g,b,a;
     return GetForeColor(r,g,b,a);    
@@ -119,7 +119,7 @@ void IPanel::SetPosition(int x, int y)
     _yPos = y;
 }
 
-void IPanel::GetBounds(int& x, int& y, int& w, int& h)
+void IPanel::GetBounds(int& x, int& y, int& w, int& h) const
 {
     x = _xPos;
     y = _yPos;
@@ -142,7 +142,7 @@ void IPanel::SetPosition(double x, double y)
     _yPos = y*_height;
 }
 
-void IPanel::GetBounds(double& x, double& y, double& w, double& h)
+void IPanel::GetBounds(double& x, double& y, double& w, double& h) const
 {
     x = _xPos/_width;
     y = _yPos/_height;
@@ -166,3 +166,5 @@ void IPanel::ResizePanelAbsolute(IPanel* _p)
 }
 
 
+void IPanel::SetZIndex(double z) { _zindex = z; }
+double IPanel::GetZIndex() const { return _zindex; }
