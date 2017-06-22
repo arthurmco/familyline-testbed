@@ -224,18 +224,26 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 /* Redraw the child controls */
 void GUIRenderer::Redraw(cairo_t* ctxt)
 {
+    (void)ctxt;
     glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     sGUI->SetUniform("texPanel", 0);
 
     for (auto& p : _panels) {
-	if (!p.is_debug) {
+	bool isdirty = p.panel->IsDirty();
+	if (!p.is_debug)  {
 	    cairo_set_operator(p.ctxt, CAIRO_OPERATOR_OVER);
 	    p.panel->Redraw(p.ctxt);
 	}
-	
-	cairo_surface_flush(p.csurf);
-	unsigned char* c = cairo_image_surface_get_data(p.csurf);
+	unsigned char* c = nullptr;
+
+
+	if (isdirty) {
+	    cairo_surface_flush(p.csurf);
+	    c = cairo_image_surface_get_data(p.csurf);
+	} else {
+	    c = new unsigned char[p.pw*p.ph*4];
+	}
 	
 	glBindVertexArray(p.vao);
 
@@ -248,8 +256,11 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	glVertexAttribPointer(attrTex, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	
 	glBindTexture(GL_TEXTURE_2D, p.tex_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, p.pw, p.ph, 0, GL_BGRA,
-		     GL_UNSIGNED_BYTE, c);
+
+	if (isdirty) {
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, p.pw, p.ph, 0, GL_BGRA,
+			 GL_UNSIGNED_BYTE, c);
+	}
 	
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -258,17 +269,19 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	    Log::GetLog()->Fatal("gui-renderer", "OpenGL error %#x", err);
 	}
 
+//	if (isdirty) {
 	cairo_save(p.ctxt);
 	cairo_set_source_rgba(p.ctxt, 0.0, 0.0, 0.0, 0.0);
 	cairo_set_operator(p.ctxt, CAIRO_OPERATOR_SOURCE);
 	cairo_paint(p.ctxt);
-	cairo_restore(p.ctxt); 
+	cairo_restore(p.ctxt);
+//	}
 	
     }
     glBindVertexArray(0);
     glDisableVertexAttribArray(0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 

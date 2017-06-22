@@ -36,10 +36,12 @@ public:
     
     virtual void Redraw(cairo_t* ctxt) override;
 
-    virtual bool ProcessInput(Input::InputEvent& ev) {return false;}
+    virtual bool ProcessInput(Input::InputEvent& ev) override {return false;}
 
     virtual void OnFocus() override {}
     virtual void OnLostFocus() override {}
+
+    virtual bool IsDirty() const override { return true; }
 };
 
 }

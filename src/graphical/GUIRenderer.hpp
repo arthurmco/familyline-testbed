@@ -98,6 +98,7 @@ public:
     virtual void OnFocus() override {}
     virtual void OnLostFocus() override {}
 
+    virtual bool IsDirty() const override { return true; }
 };
 
 } /* Graphics */

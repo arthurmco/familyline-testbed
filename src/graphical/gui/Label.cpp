@@ -13,6 +13,7 @@ Label::Label(int x, int y, const char* text)
     _bgColor = glm::vec4(1, 1, 1, 0);
     _font_name = "monospace";
     _font_size = 14;
+    _dirty = true;
 }
 
 Label::Label(int x, int y, int w, int h, const char* text)
@@ -22,6 +23,7 @@ Label::Label(int x, int y, int w, int h, const char* text)
     _bgColor = glm::vec4(255, 255, 255, 0);
     _font_name = "monospace";
     _font_size = 14;
+    _dirty = true;
 }
 
 Label::Label(double x, double y, double w, double h, const char* text)
@@ -31,6 +33,7 @@ Label::Label(double x, double y, double w, double h, const char* text)
     _bgColor = glm::vec4(1, 1, 1, 0);
     _font_name = "monospace";
     _font_size = 14;
+    _dirty = true;
 }
 
 
@@ -46,6 +49,7 @@ void Label::SetText(char* txt, ...)
     char* s = new char[512+strlen(txt)];
     vsprintf(s, txt, vl);
     va_end(vl);
+    _dirty = true;
 
     _text = std::string{s};
 }
@@ -63,6 +67,8 @@ void Label::Redraw(cairo_t* ctxt)
     cairo_set_font_size(ctxt, double(_font_size));
     cairo_move_to(ctxt, 0, _font_size);
     cairo_show_text(ctxt, _text.c_str());
+
+    _dirty = false;
 }
 
 bool Label::ProcessInput(Input::InputEvent& ev)
@@ -75,4 +81,5 @@ void Label::SetFontData(const char* name, unsigned int size)
 {
     _font_name = name;
     _font_size = size;
+    _dirty = true;
 }

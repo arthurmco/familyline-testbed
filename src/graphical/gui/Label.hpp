@@ -20,6 +20,7 @@ private:
     std::string _text;
     const char* _font_name;
     unsigned int _font_size;
+    bool _dirty = true;
     
 public:
     Label(int x, int y, const char* text);
@@ -37,6 +38,8 @@ public:
 
     virtual void OnFocus() override {}
     virtual void OnLostFocus() override {}
+
+    virtual bool IsDirty() const override { return _dirty; }
 };
 
 }

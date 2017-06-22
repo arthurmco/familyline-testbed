@@ -21,7 +21,7 @@ class IControl {
 protected:
      /* Control back n fore color, in RGBA format */
     glm::vec4 _bgColor, _fgColor;
-    
+
 public:
     /* Redraws itself */
     virtual void Redraw(cairo_t* ctxt) = 0;
@@ -33,6 +33,8 @@ public:
     /* Functions called when you gain or lost focus */
     virtual void OnFocus() = 0;
     virtual void OnLostFocus() = 0;
+
+    virtual bool IsDirty() const = 0;
     
     virtual ~IControl(){}
 };

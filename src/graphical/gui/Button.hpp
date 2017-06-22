@@ -48,6 +48,8 @@ public:
     virtual void OnLostFocus() override;
 
     void SetOnClickListener(OnClickListener);
+
+    virtual bool IsDirty() const override { return true; }
 };
 
 }
