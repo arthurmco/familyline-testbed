@@ -75,7 +75,9 @@ void AssetFile::BuildFileItemTree()
     std::vector<DeferredLink> deferred_texture_assets;
 
     rewind(_fAsset);
+    unsigned lineno = 0;
     while (!feof(_fAsset)) {
+	lineno++;
         // Get char and take out \n and \r
         char line[256];
         fgets(line, 255, _fAsset);
@@ -98,10 +100,15 @@ void AssetFile::BuildFileItemTree()
             }
         }
 
-        /* Find the '{' corresponding to a new asset */
+	 /* Find the '{' corresponding to a new asset */
         size_t brktpos = l.find_last_of('{');
         if (brktpos != std::string::npos) {
-            name = Trim(l.substr(0, brktpos-1));
+	    if (isInAsset) {
+		// We didn't ended the last asset
+		Log::GetLog()->Fatal("asset-file",
+				     "Parsing error: Declaring new asset inside asset %s on line %d (did you forgot a '}')?", name.c_str(), lineno);
+	    }
+            name = Trim(l.substr(0, brktpos-1));	    
             isInAsset = true;
         }
 
@@ -178,7 +185,6 @@ void AssetFile::BuildFileItemTree()
                             DeferredLink dl;
                             dl.afi = afi;
                             dl.asset = material_asset;
-			    Log::GetLog()->Warning("%s material not found, deferred load", material_asset.c_str());
                             deferred_material_assets.push_back(dl);
                         }
                         
@@ -198,7 +204,6 @@ void AssetFile::BuildFileItemTree()
                             DeferredLink dl;
                             dl.afi = afi;
                             dl.asset = texture_asset;
-			    Log::GetLog()->Warning("%s texture not found, deferred load", texture_asset.c_str());
 
                             deferred_texture_assets.push_back(dl);
                         }
@@ -213,7 +218,6 @@ void AssetFile::BuildFileItemTree()
 			     it++) {
 			    if (it->asset == name) {
 				it->afi->depends.push_back(afi);
-				printf("%s material loaded now\n", name.c_str());
 				deferred_material_assets.erase(it);
 				breaks = false;
 				break;
@@ -237,7 +241,6 @@ void AssetFile::BuildFileItemTree()
 			     it++) {
 			    if (it->asset == name) {
 				it->afi->depends.push_back(afi);
-				printf("%s texture loaded now\n", name.c_str());
 				deferred_texture_assets.erase(it);
 				breaks = false;
 				break;
@@ -268,19 +271,28 @@ void AssetFile::BuildFileItemTree()
     }
 
     if (deferred_texture_assets.size() > 0) {
-	Log::GetLog()->Warning("asset-file", "Unrecognized textures: %d", deferred_texture_assets.size());
+	std::string texture_str = "";
 	for (auto& unrecog : deferred_texture_assets) {
-	    Log::GetLog()->Warning("", "\tTexture name: '%s', referenced in '%s'", unrecog.asset.c_str(),
-				   unrecog.afi->name.c_str());
+	    char ttext[512];
+	    snprintf(ttext, 511, "\n\t\tTexture name: '%s', referenced in '%s'\n",
+		     unrecog.asset.c_str(), unrecog.afi->name.c_str());
+	    texture_str.append(ttext);
 	}
+	
+	Log::GetLog()->Warning("asset-file", "Unrecognized textures: %d %s", deferred_texture_assets.size(), texture_str.c_str());
+		
     }
 
     if (deferred_material_assets.size() > 0) {
-	Log::GetLog()->Warning("asset-file", "Unrecognized materials: %d", deferred_material_assets.size());
+	std::string mat_str = "";
 	for (auto& unrecog : deferred_material_assets) {
-	    Log::GetLog()->Warning("", "\tTexture name: '%s', referenced in '%s'", unrecog.asset.c_str(),
-				   unrecog.afi->name.c_str());
+	    char tmat[512];
+	    snprintf(tmat, 511, "\n\t\tTexture name: '%s', referenced in '%s'",
+		     unrecog.asset.c_str(),   unrecog.afi->name.c_str());
+	    mat_str.append(tmat);
 	}
+	    
+	Log::GetLog()->Warning("asset-file", "Unrecognized materials: %d%s", deferred_material_assets.size(), mat_str.c_str());
     }
 
     for (auto& it : _file_items) {
