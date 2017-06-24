@@ -1,5 +1,6 @@
 #include "ImageControl.hpp"
 
+using namespace Tribalia::Graphics;
 using namespace Tribalia::Graphics::GUI;
 
 /* Load the image from a filename.
