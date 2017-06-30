@@ -8,7 +8,7 @@
 # Parameters: maketerrain SOURCE DESTINY
 
 import sys, os, stat, struct
-import Image
+from PIL import Image
 
 if len(sys.argv) < 3:
     print('%s: converts an image (as a heightmap) to a Tribalia terrain' %
