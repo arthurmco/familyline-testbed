@@ -18,6 +18,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <unistd.h>
 
 #include <cstring>
 
@@ -46,6 +47,11 @@ using namespace Tribalia::Logic;
 using namespace Tribalia::Graphics;
 using namespace Tribalia::Graphics::GUI;
 using namespace Tribalia::Input;
+
+#ifdef WIN32
+#define _isatty isatty
+#define _fileno fileno
+#endif
 
 #ifdef _MSC_VER
     #undef main  //somehow vs does not find main()
@@ -182,13 +188,18 @@ int main(int argc, char const *argv[])
     }
 
     if (!fLog) {
-	/* Tries to create tribalia.log, fallback to stderr if it can't */
-	fLog = fopen("tribalia.log", "a");
-	fputs("\n\n", fLog);
-	if (!fLog) {
-	    perror("Could not create log file: ");
-	    fprintf(stderr, "Falling back to stderr");
+	if (isatty(fileno(stderr))) {
 	    fLog = stderr;
+	} else {
+	    errno = 0; // no need to worry
+	    /* Tries to create tribalia.log, fallback to stderr if it can't */
+	    fLog = fopen("tribalia.log", "a");
+	    fputs("\n\n", fLog);
+	    if (!fLog) {
+		perror("Could not create log file: ");
+		fprintf(stderr, "Falling back to stderr");
+		fLog = stderr;
+	    }
 	}
     }
 
