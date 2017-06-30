@@ -373,16 +373,16 @@ int main(int argc, char const *argv[])
     l.SetBackColor(0, 0, 0, 1);
     l.SetFontData("Garamond", 32);
     
-    Label lv = Label(0.35, 0.8, 0.4, 0.1, "Version " VERSION ", commit " COMMIT);
-    lv.SetForeColor(190, 0, 0, 255);
-    lv.SetBackColor(0, 0, 0, 255);
+    Label lv = Label(0.32, 0.8, 0.4, 0.05, "Version " VERSION ", commit " COMMIT);
+    lv.SetForeColor(255, 255, 255, 255);
+    lv.SetBackColor(0, 0, 0, 192);
     
     Button bnew = Button(0.1, 0.2, 0.8, 0.1, "New Game");
-    bnew.SetBackColor(127, 127, 127, 181);
+    bnew.SetBackColor(212, 212, 212, 181);
     bnew.SetForeColor(255, 0, 0, 255);
     
     Button bquit = Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
-    bquit.SetBackColor(127, 127, 127, 181);
+    bquit.SetBackColor(212, 212, 212, 181);
     bquit.SetForeColor(255, 0, 0, 255);
     
     ImageControl ilogo = ImageControl(0.2, 0.1, 0.6, 0.9,
