@@ -26,7 +26,7 @@ int MaterialManager::AddMaterial(Material* m)
 /* Add materials*/
 void MaterialManager::AddMaterials(std::vector<Material*> materials)
 {
-    for (int i = 0; i < materials.size(); i++) {
+    for (unsigned i = 0; i < materials.size(); i++) {
         this->AddMaterial(materials[i]);
     }
 }

@@ -241,13 +241,14 @@ int Game::RunLoop()
     	    pms = delta * 1.0;
     	}
 
-	
-	
     	gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
+	#define FPS_LOCK 120.0
+	
     	//Locked in ~120 fps
-        if (delta < 1000/120.0) {
-    	    SDL_Delay(1000/120.0 - delta);
+        if (delta < 1000/FPS_LOCK) {
+	    auto sleepdelta = int((1000/FPS_LOCK) - delta);
+    	    SDL_Delay(sleepdelta);
         }
 
 	if (delta < mindelta)

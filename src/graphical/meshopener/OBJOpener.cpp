@@ -109,6 +109,7 @@ Mesh* OBJOpener::Open(const char* file)
                     break;
                 }
             }
+	    break;
         } // End of vertex info
         case 'f': {
             fline++;

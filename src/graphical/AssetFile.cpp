@@ -105,8 +105,9 @@ void AssetFile::BuildFileItemTree()
         if (brktpos != std::string::npos) {
 	    if (isInAsset) {
 		// We didn't ended the last asset
-		Log::GetLog()->Fatal("asset-file",
-				     "Parsing error: Declaring new asset inside asset %s on line %d (did you forgot a '}')?", name.c_str(), lineno);
+		Log::GetLog()->Fatal(
+		    "asset-file",
+		    "Parsing error: Declaring new asset inside asset %s on line %d (did you forgot a '}')?", name.c_str(), lineno);
 	    }
             name = Trim(l.substr(0, brktpos-1));	    
             isInAsset = true;
