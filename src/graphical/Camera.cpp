@@ -22,6 +22,9 @@ Camera::Camera(glm::vec3 pos, float aspectRatio, glm::vec3 lookAt)
         "looking at (%.2f, %.2f, %.2f)",
         pos.x, pos.y, pos.z, lookAt.x, lookAt.y, lookAt.z);
 
+    /* The maximum zoom is 2 times bigger than the starting ypos */
+    _posystart = pos.y/2;
+    _zoom = 0.5;
 
     CalculateVectors();
 }
@@ -85,6 +88,7 @@ void Camera::CalculateVectors()
     'circular way'. I will use the glm rotation functions */
 void Camera::AddRotation(glm::vec3 axis, float angle)
 {
+    (void) axis;
 
     glm::vec3 l = this->_lookAt;
     
@@ -104,8 +108,8 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
 
     _lookAt = glm::vec3(_pos.x-vx, _lookAtOriginal.y, _pos.z-vz);
 
-
-
+    _lookdelta = dist;
+    printf("dist: %.3f \n", dist);
     this->_isViewChanged = true;
 }
 
@@ -149,4 +153,28 @@ glm::vec3 Camera::Project(int mouse_x, int mouse_y, int screenw, int screenh) co
     glm::vec4 world_eye = glm::inverse(_viewMatrix) * ray_eye;
 
     return glm::normalize(glm::vec3(world_eye.x, world_eye.y, world_eye.z));
+}
+
+float Camera::GetZoomLevel() const
+{
+    return _zoom;
+}
+
+void Camera::SetZoomLevel(float f)
+{
+    f = std::fmin(1.0, std::fmax(f, 0.0));
+    _zoom = f;
+
+    /*
+     * zoom 0 = posystart*2
+     * zoom 1 = posystart/2
+     */
+
+    f = 1.0-f;
+    float nposy = _posystart + (2 * _posystart * f);
+    _pos.y = nposy;
+    _isViewChanged = true;
+
+    printf("nposy: %.3f (%.2f) \n", nposy, _zoom);
+   
 }

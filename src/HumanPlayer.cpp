@@ -46,6 +46,9 @@ bool attack_set = false, attack_ready = false;
 bool build_tent = false, build_tower = false;
 bool remove_object = false;
 
+bool zoom_in = false;
+bool zoom_out = false;
+
 AttackableObject *attacker, *attackee;
 
 InputListener ilt;
@@ -139,6 +142,26 @@ bool HumanPlayer::ProcessInput()
 	    case SDLK_k:
 		attack_set = true;
 		break;
+
+	    case SDLK_PLUS:
+	    case SDLK_KP_PLUS:
+		if (ev.event.keyev.status != KEY_KEYPRESS)
+		    zoom_in = false;
+		else
+		    zoom_in = true;
+		
+		break;
+		
+	    case SDLK_MINUS:
+	    case SDLK_KP_MINUS:
+		if (ev.event.keyev.status != KEY_KEYPRESS)
+		    zoom_out = false;
+		else
+		    zoom_out = true;
+		break;
+	    
+	    
+
             }
 	    
         } else if (ev.eventType == EVENT_MOUSEEVENT ) {
@@ -281,6 +304,19 @@ bool HumanPlayer::Play(GameContext* gctx)
 	    attack_ready = false;
 	    attacker = attackee = nullptr;
 	}
+    }
+
+    if (zoom_in || zoom_out) {
+	float zfac = (gctx->elapsed_seconds * 0.25);
+	float z = _cam->GetZoomLevel();
+
+	if (zoom_in) 
+	    z += zfac;
+
+	if (zoom_out)
+	    z -= zfac;
+
+	_cam->SetZoomLevel(z);
     }
 
     

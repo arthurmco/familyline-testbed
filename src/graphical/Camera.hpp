@@ -49,6 +49,10 @@ namespace Graphics {
         /* Camera default rotation, in radians */
         float _rotation = M_PI/4;
 
+	float _zoom;
+	float _posystart;
+	float _lookdelta;
+
         glm::mat4 _viewMatrix, _projMatrix;
 
         void CalculateVectors();
@@ -78,6 +82,9 @@ namespace Graphics {
         glm::mat4 GetViewMatrix();
         glm::mat4 GetProjectionMatrix();
 
+	float GetZoomLevel() const;
+	void SetZoomLevel(float);
+	
         /*  Get the cursor position and return a ray to the scene in
             world space */
         glm::vec3 Project(int mouse_x, int mouse_y, int screenw, int screenh) const;
