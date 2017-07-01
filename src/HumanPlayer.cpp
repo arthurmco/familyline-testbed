@@ -48,6 +48,7 @@ bool remove_object = false;
 
 bool zoom_in = false;
 bool zoom_out = false;
+bool zoom_mouse = false;
 
 AttackableObject *attacker, *attackee;
 
@@ -57,7 +58,13 @@ bool HumanPlayer::ProcessInput()
 {
     _updated = false;
     InputManager::GetInstance()->Run();
-    
+
+    if (zoom_mouse) {
+	zoom_in = false;
+	zoom_out = false;
+	zoom_mouse = false;
+    }
+
     while (InputManager::GetInstance()->GetDefaultListener()->PopEvent(ev)) {
         if (ev.eventType == EVENT_FINISH) {
 	    exit_game = true;
@@ -166,6 +173,19 @@ bool HumanPlayer::ProcessInput()
 	    
         } else if (ev.eventType == EVENT_MOUSEEVENT ) {
 	    if (attack_set && attack_ready) { attack_set = false; }
+
+	    if (ev.event.mouseev.scrolly > 0) {
+		zoom_in = true;
+		zoom_out = false;
+		zoom_mouse = true;
+	    }
+
+	    if (ev.event.mouseev.scrolly < 0) {
+		zoom_out = true;
+		zoom_in = false;
+		zoom_mouse = true;
+	    }
+
 	    
             if (ev.event.mouseev.button == MOUSE_LEFT) {
 	        attack_set = false;
@@ -308,6 +328,10 @@ bool HumanPlayer::Play(GameContext* gctx)
 
     if (zoom_in || zoom_out) {
 	float zfac = (gctx->elapsed_seconds * 0.25);
+
+	if (zoom_mouse)
+	    zfac *= 5;
+	
 	float z = _cam->GetZoomLevel();
 
 	if (zoom_in) 

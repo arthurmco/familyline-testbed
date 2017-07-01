@@ -109,7 +109,6 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
     _lookAt = glm::vec3(_pos.x-vx, _lookAtOriginal.y, _pos.z-vz);
 
     _lookdelta = dist;
-    printf("dist: %.3f \n", dist);
     this->_isViewChanged = true;
 }
 
@@ -174,7 +173,5 @@ void Camera::SetZoomLevel(float f)
     float nposy = _posystart + (2 * _posystart * f);
     _pos.y = nposy;
     _isViewChanged = true;
-
-    printf("nposy: %.3f (%.2f) \n", nposy, _zoom);
    
 }

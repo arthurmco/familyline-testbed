@@ -19,13 +19,13 @@ enum EventType {
 };
 
 enum MouseButton {
-    MOUSE_LEFT,
+    MOUSE_LEFT = 1,
     MOUSE_MIDDLE,
     MOUSE_RIGHT,
 };
 
 enum KeyStatus {
-    KEY_KEYPRESS,
+    KEY_KEYPRESS = 1,
     KEY_KEYRELEASE,
     KEY_KEYREPEAT,
 };
@@ -39,6 +39,7 @@ struct InputEvent {
         struct {
             int button;
             int status;
+	    short scrollx, scrolly;
             int reserved; //for holo display things
         } mouseev;
         struct {

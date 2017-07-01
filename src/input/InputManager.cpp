@@ -73,7 +73,7 @@ void InputManager::Run()
     /* Get event data from SDL */
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
-        InputEvent ev;
+        InputEvent ev = {};
         switch (e.type) {
         case SDL_QUIT:
         case SDL_APP_TERMINATING:
@@ -106,6 +106,10 @@ void InputManager::Run()
             lastz = 0;
             ev.eventType = EVENT_MOUSEMOVE;
             break;
+	case SDL_MOUSEWHEEL:
+	    ev.eventType = EVENT_MOUSEEVENT;
+	    ev.event.mouseev.scrolly = e.wheel.y;
+	    break;	    
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
             ev.eventType = EVENT_MOUSEEVENT;
