@@ -21,8 +21,12 @@ class IControl {
 protected:
      /* Control back n fore color, in RGBA format */
     glm::vec4 _bgColor, _fgColor;
+    float _opacity = 1.0;
 
 public:
+    float GetOpacity() const { return _opacity; }
+    void SetOpacity(float f) { _opacity = f; }
+    
     /* Redraws itself */
     virtual void Redraw(cairo_t* ctxt) = 0;
 

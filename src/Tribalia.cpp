@@ -399,6 +399,7 @@ int main(int argc, char const *argv[])
     ImageControl ilogo = ImageControl(0.2, 0.1, 0.6, 0.9,
 				      "icons/tribalia-logo.png");
     ilogo.SetZIndex(0.9);
+    ilogo.SetOpacity(0.5);
     
     bquit.SetOnClickListener([&r](GUI::IControl* cc) {
 	    (void) cc;

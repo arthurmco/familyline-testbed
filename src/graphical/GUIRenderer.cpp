@@ -230,6 +230,8 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
     sGUI->SetUniform("texPanel", 0);
 
     for (auto& p : _panels) {
+	sGUI->SetUniform("opacity", p.panel->GetOpacity());
+	
 	bool isdirty = p.panel->IsDirty();
 	if (!p.is_debug)  {
 	    cairo_set_operator(p.ctxt, CAIRO_OPERATOR_OVER);
@@ -241,8 +243,6 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	if (isdirty) {
 	    cairo_surface_flush(p.csurf);
 	    c = cairo_image_surface_get_data(p.csurf);
-	} else {
-	    c = new unsigned char[p.pw*p.ph*4];
 	}
 	
 	glBindVertexArray(p.vao);
