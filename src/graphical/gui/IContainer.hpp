@@ -18,7 +18,7 @@ namespace GUI {
 */
 
 class IContainer : public IPanel
-{
+{    
 public:
     /* Add a panel using the panel position or a new position */
     virtual int AddPanel(IPanel* p) = 0;

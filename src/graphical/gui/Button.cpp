@@ -1,4 +1,5 @@
 #include "Button.hpp"
+#include "Label.hpp"
 
 using namespace Tribalia::Graphics::GUI;
 using namespace Tribalia;
@@ -6,41 +7,49 @@ using namespace Tribalia;
 Button::Button(int x, int y, int w, int h, const char* text)
     : IPanel(int(x),int(y),w,h)
 {
-    _text = std::string{text};
+    panel_data.panel = new Label{0, 0, text};
     _bgColor = glm::vec4(0.5, 0.5, 0.5, 1);
     _fgColor = glm::vec4(0.85, 0, 0, 1);
     _actualbg = _bgColor;
+
 }
 
 Button::Button(double x, double y, double w, double h, const char* text)
     : IPanel(double(x),double(y),w,h, true)
 {
-    _text = std::string{text};
+    panel_data.panel = new Label{0, 0, text};
     _bgColor = glm::vec4(0.5, 0.5, 0.5, 1);
     _fgColor = glm::vec4(0.85, 0, 0, 1);
+    _actualbg = _bgColor;    
 }
 
 
-const char* Button::GetText() const
+const IPanel* Button::GetPanel()
 {
-    return _text.c_str();
+    panel_changed = panel_data.panel->IsDirty();
+    return panel_data.panel;
 }
-
-void Button::SetText(char* txt, ...)
-{
-    va_list vl;
-    va_start(vl, txt);
-    char* s = new char[512+strlen(txt)];
-    vsprintf(s, txt, vl);
-    va_end(vl);
-
-    textChanged = true;
-    _text = std::string{s};
-}
-
 
 void Button::Redraw(cairo_t* ctxt)
 {
+    if (!panel_data.panel_ctxt) {
+	printf("-- %d %d\n", this->_width, this->_height);
+	panel_data.panel_surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+							   _width, _height);
+	panel_data.panel_ctxt = cairo_create(panel_data.panel_surf);
+
+    }
+    
+    if (panel_data.panel->IsDirty()) {
+	cairo_save(panel_data.panel_ctxt);
+	cairo_set_source_rgba(panel_data.panel_ctxt, 0.0, 0.0, 0.0, 0.0);
+	cairo_set_operator(panel_data.panel_ctxt, CAIRO_OPERATOR_SOURCE);
+	cairo_paint(panel_data.panel_ctxt);
+	cairo_restore(panel_data.panel_ctxt); 
+
+	panel_data.panel->Redraw(panel_data.panel_ctxt);
+    }
+
     if (!isClick && !isHover)
 	_actualbg = _bgColor;
         
@@ -51,7 +60,6 @@ void Button::Redraw(cairo_t* ctxt)
     cairo_fill(ctxt);
 
 
-    
     /* Draw square */
     cairo_rectangle(ctxt, 2, 2, _width-4, _height-4);
     glm::vec4 bstroke = glm::vec4(_actualbg.r / 1.41, _actualbg.g / 1.41,
@@ -61,26 +69,11 @@ void Button::Redraw(cairo_t* ctxt)
 			  bstroke.a);
     cairo_set_line_width(ctxt, 4.0);
     cairo_stroke(ctxt);
-    
 
-    /* If text changed, remeasure it, so the label will be in the
-       exact center of the button */
-    if (textChanged) {
-	cairo_text_extents(ctxt, _text.c_str(), &extents);	
-	textChanged = false;
-	printf("%.2f x %.2f\n", extents.width, extents.height);
-    }
+    /* Paint the other object over */
+    cairo_set_source_surface(ctxt, panel_data.panel_surf, 0, 0);
+    cairo_paint(ctxt);
 
-    /* Draw text */
-    cairo_set_source_rgba(ctxt, _fgColor.r, _fgColor.g, _fgColor.b, _fgColor.a);
-    cairo_select_font_face(ctxt, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(ctxt, 14.0);
-    cairo_move_to(ctxt, (_width-6)/2.0 - (extents.width)/2.0,
-		  (_height)/2.0 + (extents.height) - (extents.height)/2.0);
-		  
-		  
-    cairo_show_text(ctxt, _text.c_str());
-    
 }
 
 bool Button::ProcessInput(Input::InputEvent& ev)

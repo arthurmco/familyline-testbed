@@ -11,6 +11,7 @@ Label::Label(int x, int y, const char* text)
     _width = _text.size() * 9;
     _height = 16.0f;
     _bgColor = glm::vec4(1, 1, 1, 0);
+    _fgColor = glm::vec4(0, 0, 0, 1);
     _font_name = "monospace";
     _font_size = 14;
     _dirty = true;
@@ -21,6 +22,7 @@ Label::Label(int x, int y, int w, int h, const char* text)
 {
     _text = std::string{text};
     _bgColor = glm::vec4(255, 255, 255, 0);
+    _fgColor = glm::vec4(0, 0, 0, 1);
     _font_name = "monospace";
     _font_size = 14;
     _dirty = true;

@@ -20,13 +20,17 @@ namespace GUI {
 	     
 class Button : public IPanel {
 private:
-    std::string _text;
+//    std::string _text;
+    struct {
+	IPanel* panel;
+	cairo_surface_t* panel_surf;
+	cairo_t* panel_ctxt = nullptr;
+    } panel_data;
 
     glm::vec4 _actualbg;
     bool isInput = true;
 
-    cairo_text_extents_t extents;
-    bool textChanged = true;
+    bool panel_changed = true;
 
     bool isHover = false;
     bool isClick = false;
@@ -37,8 +41,7 @@ public:
     Button(int x, int y, int w, int h, const char* text);
     Button(double x, double y, double w, double h, const char* text);
     
-    const char* GetText() const;
-    void SetText(char* txt, ...);
+    const IPanel* GetPanel();
 
     virtual void Redraw(cairo_t* ctxt) override;
 
