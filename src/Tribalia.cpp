@@ -10,6 +10,8 @@
 
 #ifdef __linux__
 #include <GL/glxew.h>
+#include <unistd.h>
+
 #endif
 
 #include "EnviroDefs.h"
@@ -18,7 +20,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
-#include <unistd.h>
 
 #include <cstring>
 
@@ -49,8 +50,9 @@ using namespace Tribalia::Graphics::GUI;
 using namespace Tribalia::Input;
 
 #ifdef WIN32
-#define _isatty isatty
-#define _fileno fileno
+#include <io.h>
+#define isatty _isatty
+#define fileno _fileno
 #endif
 
 #ifdef _MSC_VER
