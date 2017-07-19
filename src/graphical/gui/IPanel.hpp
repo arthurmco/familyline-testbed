@@ -66,6 +66,12 @@ public:
     int GetForeColor(uint8_t& r, uint8_t& g, uint8_t& b, uint8_t& a) const;
     void SetForeColor(int rgba);
     void SetForeColor(uint32_t r, uint32_t g, uint32_t b, uint32_t a);
+
+    /* Get the size of the real data in the control, the area that is
+     * really occupied 
+     */
+    virtual int GetDataWidth() const { return _width; }
+    virtual int GetDataHeight() const { return _height; }
     
     virtual ~IPanel(){}
 };

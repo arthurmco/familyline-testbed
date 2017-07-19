@@ -21,6 +21,8 @@ private:
     const char* _font_name;
     unsigned int _font_size;
     bool _dirty = true;
+
+    int _textWidth = 0, _textHeight = 0;
     
 public:
     Label(int x, int y, const char* text);
@@ -40,6 +42,10 @@ public:
     virtual void OnLostFocus() override {}
 
     virtual bool IsDirty() const override { return _dirty; }
+
+    /* Get width that is occupied by the text, in pixels */
+    int GetDataWidth() const override;
+    int GetDataHeight() const override;
 };
 
 }

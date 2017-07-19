@@ -32,6 +32,9 @@ const IPanel* Button::GetPanel()
 
 void Button::Redraw(cairo_t* ctxt)
 {
+    int offsx = (_width-4)/2 - ( panel_data.panel->GetDataWidth() / 2 );
+    int offsy = (_height-4)/2 - ( panel_data.panel->GetDataHeight());
+    
     if (!panel_data.panel_ctxt) {
 	printf("-- %d %d\n", this->_width, this->_height);
 	panel_data.panel_surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
@@ -71,7 +74,7 @@ void Button::Redraw(cairo_t* ctxt)
     cairo_stroke(ctxt);
 
     /* Paint the other object over */
-    cairo_set_source_surface(ctxt, panel_data.panel_surf, 0, 0);
+    cairo_set_source_surface(ctxt, panel_data.panel_surf, 4+offsx, offsy);
     cairo_paint(ctxt);
 
 }

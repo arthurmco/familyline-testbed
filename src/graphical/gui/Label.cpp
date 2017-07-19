@@ -68,8 +68,16 @@ void Label::Redraw(cairo_t* ctxt)
     */
     cairo_set_font_size(ctxt, double(_font_size));
     cairo_move_to(ctxt, 0, _font_size);
-    cairo_show_text(ctxt, _text.c_str());
 
+    cairo_text_extents_t extents;
+    cairo_text_extents(ctxt, _text.c_str(), &extents);
+    _textWidth = extents.width;
+    _textHeight = extents.height;
+    
+    cairo_show_text(ctxt, _text.c_str());
+    
+    
+    
     _dirty = false;
 }
 
@@ -85,3 +93,6 @@ void Label::SetFontData(const char* name, unsigned int size)
     _font_size = size;
     _dirty = true;
 }
+
+int Label::GetDataWidth() const { return _textWidth; }
+int Label::GetDataHeight() const { return _textHeight; }
