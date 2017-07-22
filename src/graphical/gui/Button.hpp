@@ -31,6 +31,7 @@ private:
     bool isInput = true;
 
     bool panel_changed = true;
+    bool _dirty = true;
 
     bool isHover = false;
     bool isClick = false;
@@ -52,7 +53,9 @@ public:
 
     void SetOnClickListener(OnClickListener);
 
-    virtual bool IsDirty() const override { return true; }
+    virtual bool IsDirty() const override {
+	return _dirty;
+    }
 };
 
 }

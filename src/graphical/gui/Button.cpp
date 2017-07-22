@@ -32,11 +32,12 @@ const IPanel* Button::GetPanel()
 
 void Button::Redraw(cairo_t* ctxt)
 {
+    _dirty = (!panel_data.panel_ctxt || isClick || isHover);
+    
     int offsx = (_width-4)/2 - ( panel_data.panel->GetDataWidth() / 2 );
     int offsy = (_height-4)/2 - ( panel_data.panel->GetDataHeight());
     
     if (!panel_data.panel_ctxt) {
-	printf("-- %d %d\n", this->_width, this->_height);
 	panel_data.panel_surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
 							   _width, _height);
 	panel_data.panel_ctxt = cairo_create(panel_data.panel_surf);
@@ -53,7 +54,7 @@ void Button::Redraw(cairo_t* ctxt)
 	panel_data.panel->Redraw(panel_data.panel_ctxt);
     }
 
-    if (!isClick && !isHover)
+    if (!isClick && !isHover) 
 	_actualbg = _bgColor;
         
     /* Fill square */
@@ -77,6 +78,8 @@ void Button::Redraw(cairo_t* ctxt)
     cairo_set_source_surface(ctxt, panel_data.panel_surf, 4+offsx, offsy);
     cairo_paint(ctxt);
 
+    _dirty = (false);
+    
 }
 
 bool Button::ProcessInput(Input::InputEvent& ev)
@@ -86,27 +89,32 @@ bool Button::ProcessInput(Input::InputEvent& ev)
 				  _bgColor.b / 1.71f, _bgColor.a * 1.71f);
     glm::vec4 bghover = glm::vec4(_bgColor.r / 1.41f, _bgColor.g / 1.41f,
 				  _bgColor.b / 1.41f, _bgColor.a * 1.41f);
-    
+
+    _dirty = true;
     switch (ev.eventType) {
     case Input::EVENT_MOUSEEVENT:
 	if (ev.event.mouseev.status != Input::KEY_KEYRELEASE) {
 	    _actualbg = bgclick;
 
-	    if (onClickListener && !isClick )
+	    if (onClickListener && !isClick ) {
 		this->onClickListener(this);
+	    }
 
 	    isClick = true;
+	    _dirty = true;
 	} else {
 	    isClick = false;
+	    _dirty = true;
 	    _actualbg = bghover;
 	}
 	break;
     case Input::EVENT_MOUSEMOVE:
-	if (isHover)
+	if (isHover) {
 	    _actualbg = bghover;
+	}
 	break;
     }
-    
+
     return true;
 }
 
@@ -114,6 +122,7 @@ void Button::OnFocus()
 {
     isHover = true;
     printf("Focus in\n");
+    _dirty = true;
 }
 
 void Button::OnLostFocus()
@@ -121,6 +130,7 @@ void Button::OnLostFocus()
     isHover = false;
     printf("Focus out\n");
     _actualbg = _bgColor;
+    _dirty = true;
 }
 
 void Button::SetOnClickListener(OnClickListener ocl)
