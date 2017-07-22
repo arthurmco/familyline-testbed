@@ -28,12 +28,18 @@ private:
     GLenum _format;
 public:
     ILuint GetHandle() const;
+    GLenum GetFormat() const;
+
+    /* TODO: Make ImageControl read the texture data */
 
     TextureFile(ILuint handle, GLenum format);
 
     /* Get a texture from a cut in the loaded image */
     Texture* GetTextureCut(int x = 0, int y = 0, int w = 0, int h = 0);
 
+    /* Get texture raw data from a cut */
+    unsigned char* GetTextureRaw(int x = 0, int y = 0, int w = 0, int h = 0);
+    
     ~TextureFile();
         
 };

@@ -8,9 +8,9 @@ TextureFile::TextureFile(ILuint handle, GLenum format)
     
 { }
 
-Texture* TextureFile::GetTextureCut(int x, int y, int w, int h)
+unsigned char* TextureFile::GetTextureRaw(int x, int y, int w, int h)
 {
-    const auto maxtex = Texture::GetMaximumSize();
+   const auto maxtex = Texture::GetMaximumSize();
     auto lhandle = _handle;
 
     if ((unsigned)w > maxtex || (unsigned)h > maxtex) {
@@ -43,13 +43,22 @@ Texture* TextureFile::GetTextureCut(int x, int y, int w, int h)
     
     ilCopyPixels(x, y, 0, w, h, 1, _format, IL_UNSIGNED_BYTE, c);
     ilBindImage(0);
+    return (unsigned char*)c;
+}
 
-    return new Texture(w, h, _format, c);
+Texture* TextureFile::GetTextureCut(int x, int y, int w, int h)
+{
+    return new Texture(w, h, _format, GetTextureRaw(x, y, w, h));
 }
 
 ILuint TextureFile::GetHandle() const
 {
     return _handle;
+}
+
+GLenum TextureFile::GetFormat() const
+{
+    return _format;
 }
 
 TextureFile::~TextureFile()
