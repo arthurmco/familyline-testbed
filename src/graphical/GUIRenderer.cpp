@@ -235,7 +235,9 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	bool isdirty = p.panel->IsDirty();
 	if (!p.is_debug)  {
 	    cairo_set_operator(p.ctxt, CAIRO_OPERATOR_OVER);
-	    p.panel->Redraw(p.ctxt);
+
+	    if (isdirty)
+		p.panel->Redraw(p.ctxt);
 	}
 	unsigned char* c = nullptr;
 
