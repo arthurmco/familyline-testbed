@@ -31,8 +31,10 @@ public:
     ImageControl(double x, double y, double w, double h, const char* file);
 
     /* Load the image from a texture file object */
-    ImageControl(int x, int y, int w, int h, TextureFile* f);
-    ImageControl(double x, double y, double w, double h, TextureFile* f);
+    ImageControl(int x, int y, int w, int h, TextureFile* f,
+		 int cx, int cy, int cw, int ch);
+    ImageControl(double x, double y, double w, double h, TextureFile* f,
+		 int cx, int cy, int cw, int ch);
     
     virtual void Redraw(cairo_t* ctxt) override;
 
@@ -42,6 +44,9 @@ public:
     virtual void OnLostFocus() override {}
 
     virtual bool IsDirty() const override { return true; }
+
+    int GetDataWidth() const override; 
+    int GetDataHeight() const override;
 };
 
 }

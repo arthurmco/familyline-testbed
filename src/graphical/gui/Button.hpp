@@ -39,8 +39,11 @@ private:
     OnClickListener onClickListener = nullptr;
     
 public:
+    Button(int x, int y, int w, int h, IPanel* pnl);
+    Button(double x, double y, double w, double h, IPanel* pnl);
     Button(int x, int y, int w, int h, const char* text);
     Button(double x, double y, double w, double h, const char* text);
+
     
     const IPanel* GetPanel();
 

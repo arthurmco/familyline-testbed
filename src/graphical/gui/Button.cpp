@@ -5,19 +5,26 @@ using namespace Tribalia::Graphics::GUI;
 using namespace Tribalia;
 
 Button::Button(int x, int y, int w, int h, const char* text)
+    : Button(x, y, w, h, new Label(0, 0, text)) {}
+
+Button::Button(double x, double y, double w, double h, const char* text)
+    : Button(x, y, w, h, new Label(0, 0, text)) {}
+
+
+Button::Button(int x, int y, int w, int h, IPanel* pnl)
     : IPanel(int(x),int(y),w,h)
 {
-    panel_data.panel = new Label{0, 0, text};
+    panel_data.panel = pnl;
     _bgColor = glm::vec4(0.5, 0.5, 0.5, 1);
     _fgColor = glm::vec4(0.85, 0, 0, 1);
     _actualbg = _bgColor;
 
 }
 
-Button::Button(double x, double y, double w, double h, const char* text)
+Button::Button(double x, double y, double w, double h, IPanel* pnl)
     : IPanel(double(x),double(y),w,h, true)
 {
-    panel_data.panel = new Label{0, 0, text};
+    panel_data.panel = pnl;
     _bgColor = glm::vec4(0.5, 0.5, 0.5, 1);
     _fgColor = glm::vec4(0.85, 0, 0, 1);
     _actualbg = _bgColor;    

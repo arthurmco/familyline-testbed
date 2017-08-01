@@ -31,7 +31,7 @@ ImageControl::ImageControl(double x, double y, double w, double h,
 	default: ststr = "Unknown error"; break;
 	}
 
-	Log::GetLog()->Fatal("gui-image-control", "Error trying to open %s: %s",
+	 Log::GetLog()->Fatal("gui-image-control", "Error trying to open %s: %s",
 			     file, ststr);
     }
 
@@ -45,16 +45,50 @@ ImageControl::ImageControl(double x, double y, double w, double h,
 }
 
 /* Load the image from a texture file object */
-ImageControl::ImageControl(int x, int y, int w, int h, TextureFile* f)
+ImageControl::ImageControl(int x, int y, int w, int h, TextureFile* f,
+			   int cx, int cy, int cw, int ch)
     : IPanel(x,y,w,h)
 {
+    auto* idata = f->GetTextureRaw(cx, cy, cw, ch);
+    _bgColor = glm::vec4(255, 255, 255, 0);
+
+    auto ofmt = f->GetFormat();
+    auto fmt = (ofmt == IL_BGR || ofmt == IL_RGB) ? CAIRO_FORMAT_RGB24 :
+	CAIRO_FORMAT_ARGB32;
+        
+    _image = cairo_image_surface_create_for_data(
+	idata, fmt, cw, ch,  cairo_format_stride_for_width(fmt, cw));
+
+    _image_ctxt = cairo_create(_image);
+    double x2, x1, y2, y1;
+    cairo_clip_extents(_image_ctxt, &x1, &y1, &x2, &y2);
+
+    _imgW = x2-x1;
+    _imgH = y2-y1;
+
     
 }
 
-ImageControl::ImageControl(double x, double y, double w, double h, TextureFile* f)
+ImageControl::ImageControl(double x, double y, double w, double h, TextureFile* f,
+			   int cx, int cy, int cw, int ch)
     : IPanel(x,y,w,h,true)
 {
+    auto* idata = f->GetTextureRaw(cx, cy, cw, ch);
+    _bgColor = glm::vec4(255, 255, 255, 0);
 
+    auto ofmt = f->GetFormat();
+    auto fmt = (ofmt == IL_BGR || ofmt == IL_RGB) ? CAIRO_FORMAT_RGB24 :
+	CAIRO_FORMAT_ARGB32;
+        
+    _image = cairo_image_surface_create_for_data(
+	idata, fmt, cw, ch,  cairo_format_stride_for_width(fmt, cw));
+
+    _image_ctxt = cairo_create(_image);
+    double x2, x1, y2, y1;
+    cairo_clip_extents(_image_ctxt, &x1, &y1, &x2, &y2);
+
+    _imgW = x2-x1;
+    _imgH = y2-y1;
 }
 
 void ImageControl::Redraw(cairo_t* ctxt)
@@ -70,7 +104,14 @@ void ImageControl::Redraw(cairo_t* ctxt)
     cairo_restore(ctxt);
 }
 
-
+int ImageControl::GetDataWidth() const
+{
+    return _width;
+}
+int ImageControl::GetDataHeight() const
+{
+    return _height;
+}
 
 
 

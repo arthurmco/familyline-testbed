@@ -131,9 +131,6 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
     ObjectPathManager::getInstance()->SetTerrain(terr);
 
-    
-    
-
 }
 
 int Game::RunLoop()
@@ -148,6 +145,7 @@ int Game::RunLoop()
     double pms = 0.0;
 
     double maxdelta = 0, mindelta = 99, sumfps = 0;
+
     
     do {
 
