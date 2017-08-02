@@ -21,6 +21,9 @@ namespace Logic {
         std::string name;
         char* flag; //pointer to a raw bitmap.
 	void* tinfo; //pointer to a TeamCities structure
+
+	Team();
+	Team(int id, const char* name);
     };
 
     class City {
@@ -48,7 +51,9 @@ namespace Logic {
 
         int CountObjects();
 
-        const char* GetName();
+        const char* GetName() const;
+	Team* GetTeam() const;
+	
     };
 
 

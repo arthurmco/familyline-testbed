@@ -25,6 +25,9 @@ struct TeamCities {
        Every other one is neutral */
     std::list<Team*> friends;
     std::list<Team*> foes;
+
+    TeamCities();
+    TeamCities(Team team);
 };
 
 /* Diplomacy */

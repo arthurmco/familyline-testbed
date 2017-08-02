@@ -121,6 +121,11 @@ void AttackableObject::SetStatus(AttackableStatus a){
 	    
 float AttackableObject::Hit(AttackableObject* other, double tick) 
 {
+    /* Check if other object is attackable */
+    if (!this->CheckIfAttackable(other)) {
+	return 0;
+    }
+    
     /* Check if this object is invulnerable.
        We can't damage nor be damaged by invulnerable or dead attackers */
     if (this->GetStatus() == AST_INVULNERABLE ||

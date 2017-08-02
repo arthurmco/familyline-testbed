@@ -3,8 +3,25 @@
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 
+#include "Team.hpp"
 
-    City::City(const char* name, Team* team)
+Team::Team(int id, const char* name) {
+    this->id = id;
+    this->name = std::string(name);
+    this->flag = nullptr;
+    this->tinfo = (void*)new TeamCities(*this);
+    
+}
+
+Team::Team() {
+    this->id = -1;
+    this->name = "";
+    this->flag = nullptr;
+    this->tinfo = nullptr;
+}
+
+
+City::City(const char* name, Team* team)
         : _name{name}, _team(team)
         {
             Log::GetLog()->Write("city", "City %s created", name);
@@ -54,5 +71,6 @@ using namespace Tribalia::Logic;
     }
 
 
-    const char* City::GetName() { return _name.c_str(); }
+const char* City::GetName() const { return _name.c_str(); }
+Team* City::GetTeam() const { return _team; }
 
