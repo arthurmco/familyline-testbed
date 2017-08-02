@@ -14,6 +14,22 @@ Panel::Panel(int x, int y, int w, int h)
     SetBounds(x,y,w,h);
 }
 
+Panel::Panel(double x, double y, double w, double h, bool rel)
+    : Panel()
+{
+    _fxPos = x;
+    _fyPos = y;
+    if (rel) {
+	_fwidth = w;
+	_fheight = h;
+    } else {
+	_width = w;
+	_height = h;
+    }
+ 
+}
+
+
 void Panel::Redraw(cairo_t* ctxt)
 {
     /* Paint background */
@@ -71,12 +87,12 @@ int Panel::AddPanel(IPanel* p, double x, double y)
     return this->AddPanel(p);
 }
 
-#include <cstdio>
 bool Panel::ProcessInput(Input::InputEvent& ev)
 {
     int x = ev.mousex;
     int y = ev.mousey;
-
+    bool processed = false;
+    
     for (auto& p : _panels) {
 	int px, py, pw, ph;
 	p.panel->GetBounds(px, py, pw, ph);
@@ -96,11 +112,37 @@ bool Panel::ProcessInput(Input::InputEvent& ev)
 	rev.mousey = ev.mousey - py;
 
 	// Found the control. Send the event
-	return p.panel->ProcessInput(rev);
+	bool r = p.panel->ProcessInput(rev);
+	if (!r) continue;
+	processed = true;
+	
+	if (oldPanel && oldPanel != p.panel) {
+	    oldPanel->OnLostFocus();
+	    oldPanel = p.panel;
+	    p.panel->OnFocus();
+	} else if (!oldPanel) {
+	    oldPanel = p.panel;
+	    p.panel->OnFocus();		
+	}  
+
     }
-    
+
+    if (processed) return true;
+
+    if (oldPanel) {
+	oldPanel->OnLostFocus();
+	oldPanel = nullptr;
+    }
+
     return false; // No one processed the event
 
+}
+
+void Panel::OnLostFocus() {
+    if (oldPanel) {
+	oldPanel->OnLostFocus();
+	oldPanel = nullptr;
+    }
 }
 
 /* Remove the panel */

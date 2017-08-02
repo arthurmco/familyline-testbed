@@ -60,8 +60,9 @@ private:
     ShaderProgram* sGUI;
 
     Input::InputListener* _il;
+    GUI::IPanel* oldPanel = nullptr;
 
-	GLint attrPos, attrTex;
+    GLint attrPos, attrTex;
 public:
     GUIRenderer(Window* w);
 

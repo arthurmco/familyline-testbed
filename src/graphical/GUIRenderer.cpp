@@ -161,7 +161,6 @@ void GUIRenderer::InitInput()
     
 }
 
-GUI::IPanel* oldPanel = nullptr;
 bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 {   
     /* Send event only to appropriated panel */
@@ -199,12 +198,12 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 	    if (!r) continue;
 	    
 	    if (oldPanel && oldPanel != p.panel) {
-			oldPanel->OnLostFocus();
-			oldPanel = p.panel;
-			p.panel->OnFocus();
+		oldPanel->OnLostFocus();
+		oldPanel = p.panel;
+		p.panel->OnFocus();
 	    } else if (!oldPanel) {
-			oldPanel = p.panel;
-			p.panel->OnFocus();		
+		oldPanel = p.panel;
+		p.panel->OnFocus();		
 	    }
 
 	    return r;

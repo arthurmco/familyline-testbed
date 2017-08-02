@@ -30,9 +30,11 @@ class Panel : public IContainer {
 private:
         
     std::vector<PanelData> _panels;
+    IPanel* oldPanel = nullptr;
 public:
     Panel();
     Panel(int x, int y, int w, int h);
+    Panel(double x, double y, double w, double h, bool rel);
 
     virtual void Redraw(cairo_t* ctxt) override;
 
@@ -47,7 +49,7 @@ public:
     virtual bool ProcessInput(Input::InputEvent& ev) override;
 
     virtual void OnFocus() override {}
-    virtual void OnLostFocus() override {}
+    virtual void OnLostFocus() override;
 
     virtual bool IsDirty() const override { return true; }
 };
