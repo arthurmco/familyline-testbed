@@ -41,9 +41,10 @@ void Button::Redraw(cairo_t* ctxt)
 {
     _dirty = (!panel_data.panel_ctxt || isClick || isHover);
     
-    int offsx = (_width-4)/2 - ( panel_data.panel->GetDataWidth() / 2 );
-    int offsy = (_height-4)/2 - ( panel_data.panel->GetDataHeight());
-    
+    int offsx = std::max((_width-4)/2 - ( panel_data.panel->GetDataWidth() / 2 ), 0);
+    int offsy = std::max((_height-4)/2 - ( panel_data.panel->GetDataHeight()), 0);
+
+   
     if (!panel_data.panel_ctxt) {
 	panel_data.panel_surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
 							   _width, _height);
@@ -85,7 +86,12 @@ void Button::Redraw(cairo_t* ctxt)
     cairo_set_source_surface(ctxt, panel_data.panel_surf, 4+offsx, offsy);
     cairo_paint(ctxt);
 
-    _dirty = (false);
+    if (firstDraw) {
+	_dirty = false;
+    } else {
+	_dirty = true;
+	firstDraw = true;
+    }
     
 }
 

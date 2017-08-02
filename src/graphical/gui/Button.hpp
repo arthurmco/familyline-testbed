@@ -33,6 +33,7 @@ private:
     bool panel_changed = true;
     bool _dirty = true;
 
+    bool firstDraw = false;
     bool isHover = false;
     bool isClick = false;
 
