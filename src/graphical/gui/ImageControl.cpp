@@ -11,7 +11,14 @@ ImageControl::ImageControl(int x, int y, int w, int h, const char* file)
 {
     _bgColor = glm::vec4(255, 255, 255, 0);
     _image = cairo_image_surface_create_from_png(file);
+    _image_ctxt = cairo_create(_image);
+    double x2, x1, y2, y1;
+    cairo_clip_extents(_image_ctxt, &x1, &y1, &x2, &y2);
 
+    _imgW = x2-x1;
+    _imgH = y2-y1;
+
+    printf("%s - %.1f %.1f\n", file, _imgW, _imgH);
 }
 
 ImageControl::ImageControl(double x, double y, double w, double h,
@@ -41,6 +48,7 @@ ImageControl::ImageControl(double x, double y, double w, double h,
 
     _imgW = x2-x1;
     _imgH = y2-y1;
+
 
 }
 
