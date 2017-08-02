@@ -37,6 +37,7 @@
 #include "graphical/gui/Panel.hpp"
 #include "graphical/gui/Label.hpp"
 #include "graphical/gui/Button.hpp"
+#include "graphical/gui/ImageControl.hpp"
 
 #include "input/InputPicker.hpp"
 

@@ -101,18 +101,10 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
     widgets.p->SetBackColor(255, 0, 0, 25);
     gr->AddPanel(widgets.p);
 
-    widgets.lbl = new Label(120, 460, "This is a true label");
-    widgets.lbl->SetForeColor(255, 128, 0, 255);
-
     widgets.lblVersion = new Label(10, 10, "Tribalia " VERSION " commit " COMMIT);
     widgets.lblVersion->SetForeColor(255, 255, 255, 255);
 
-    widgets.pnl = new Panel(0, 0, 630, 100);
-    widgets.pnl->AddPanel(widgets.lblVersion, 10, 10);
-    widgets.pnl->SetBackColor(0, 0, 0, 128);
-
-    gr->AddPanel(widgets.pnl);
-    gr->AddPanel(widgets.lbl);
+    gr->AddPanel(widgets.lblVersion);
 
     widgets.btn = new Button(300, 200, 150, 40, "Test");
     widgets.btn->SetOnClickListener([&](GUI::IControl* c) {
@@ -138,14 +130,29 @@ int Game::RunLoop()
     CombatManager::GetInstance()->SetOnDeath([&](Logic::AttackableObject* at) {
 	    gctx.om->UnregisterObject(at);
 	});
+
+    Panel pnl = Panel(0.0, 0.8, 1.0, 0.2, true);
+    pnl.SetBackColor(0, 0, 0, 185);
+
+    Button btnTent = Button(0, 16, 64, 64, new ImageControl(0,0,60,60,
+							   "icons/tent.png"));
+    btnTent.SetBackColor(190, 190, 190, 255);
+    pnl.AddPanel(&btnTent);
+    
+    Button btnWatchTower = Button(70, 16, 64, 64, new ImageControl(0,0,60,60,
+						     "icons/watchtower.png"));
+    btnWatchTower.SetBackColor(190, 190, 190, 255);
+    pnl.AddPanel(&btnWatchTower);
+        
+    gr->AddPanel(&pnl);
+    
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
 
     int delta = 1;
     double pms = 0.0;
 
-    double maxdelta = 0, mindelta = 99, sumfps = 0;
-
+    double maxdelta = 0, mindelta = 99, sumfps = 0;  
     
     do {
 
