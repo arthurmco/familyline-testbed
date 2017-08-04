@@ -29,7 +29,6 @@ Panel::Panel(double x, double y, double w, double h, bool rel)
  
 }
 
-
 void Panel::Redraw(cairo_t* ctxt)
 {
     /* Paint background */
@@ -37,7 +36,7 @@ void Panel::Redraw(cairo_t* ctxt)
     cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
     cairo_paint(ctxt);
     
-    for (auto& p : _panels) {
+    for (auto& p : _panels) {	
 	
 	/* Redraw other panels, then put the panel data here */
 	p.panel->Redraw(p.ctxt);

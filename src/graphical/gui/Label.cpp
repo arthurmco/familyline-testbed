@@ -51,9 +51,9 @@ void Label::SetText(char* txt, ...)
     char* s = new char[512+strlen(txt)];
     vsprintf(s, txt, vl);
     va_end(vl);
-    _dirty = true;
-
+    
     _text = std::string{s};
+    _dirty = true;
 }
 
 

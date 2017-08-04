@@ -106,17 +106,6 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
     gr->AddPanel(widgets.lblVersion);
 
-    widgets.btn = new Button(300, 200, 150, 40, "Test");
-    widgets.btn->SetOnClickListener([&](GUI::IControl* c) {
-    	    static int times = 0;
-    	    times++;
-
-    	    char ss[8];
-    	    snprintf(ss, 7, "%d", times);
-    	    widgets.lbl->SetText(ss);
-    	});
-    gr->AddPanel(widgets.btn);
-
     /* Adds the objects to the factory */
     ObjectFactory::GetInstance()->AddObject(new WatchTower);
     ObjectFactory::GetInstance()->AddObject(new Tent);
@@ -143,8 +132,14 @@ int Game::RunLoop()
 						     "icons/watchtower.png"));
     btnWatchTower.SetBackColor(190, 190, 190, 255);
     pnl.AddPanel(&btnWatchTower);
-        
+
     gr->AddPanel(&pnl);
+    Button btnExit = Button(0.7, 0.05, 0.2, 0.5, "Exit");
+    btnExit.SetOnClickListener([&](GUI::IControl* cc) {
+	    player = false;
+	});
+    pnl.AddPanel(&btnExit);
+        
     
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
