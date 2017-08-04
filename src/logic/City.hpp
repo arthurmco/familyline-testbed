@@ -24,6 +24,8 @@ namespace Logic {
 
 	Team();
 	Team(int id, const char* name);
+
+	inline bool operator==(const Team& other) { return this->id == other.id; }
     };
 
     class City {
@@ -52,7 +54,9 @@ namespace Logic {
         int CountObjects();
 
         const char* GetName() const;
+
 	Team* GetTeam() const;
+	void SetTeam(Team* t);
 	
     };
 

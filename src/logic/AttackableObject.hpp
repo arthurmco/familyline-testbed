@@ -72,7 +72,7 @@ namespace Tribalia {
 	    /* Check if other object can be attacked.
 	       The other object can be, for example, an ally
 	       In this case, makes no sense to attack him */	       
-	    bool CheckIfAttackable(AttackableObject* other) { return true; }
+	    bool CheckIfAttackable(AttackableObject* other);
 
 
         protected:

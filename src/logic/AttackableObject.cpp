@@ -1,4 +1,5 @@
 #include "AttackableObject.hpp"
+#include "TeamCoordinator.hpp"
 
 using namespace Tribalia::Logic;
 
@@ -118,7 +119,26 @@ void AttackableObject::SetStatus(AttackableStatus a){
     if (a != AST_DEAD)
 	SET_PROPERTY("attackStatus", a);
 }
-	    
+
+/* Check if other object can be attacked.
+   The other object can be, for example, an ally
+   In this case, makes no sense to attack him */
+bool AttackableObject::CheckIfAttackable(AttackableObject* other)
+{ 
+    City* thiscity = this->GetProperty<City*>("city");
+    City* othercity = other->GetProperty<City*>("city");
+
+    // No city. Assume neutral. Neutrals can be attacked
+    if (!thiscity || !othercity) return true;
+
+    Team* thist = thiscity->GetTeam();
+    Team* othert = othercity->GetTeam();
+
+    TeamCoordinator tc;
+    return !(tc.GetDiplomacyFor(thist, othert) == DIPLOMACY_FRIEND);
+    
+}
+
 float AttackableObject::Hit(AttackableObject* other, double tick) 
 {
     /* Check if other object is attackable */

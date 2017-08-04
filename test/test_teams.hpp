@@ -7,6 +7,7 @@
 
 #include "logic/City.hpp"
 #include "logic/Team.hpp"
+#include "logic/TeamCoordinator.hpp"
 #include "TestObject.hpp"
 
 class TeamRelationTest : public ::testing::Test {
