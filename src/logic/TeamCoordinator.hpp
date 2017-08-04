@@ -22,7 +22,7 @@ namespace Logic {
 ***/
 class TeamCoordinator {
 private:
-    std::vector<TeamCities> teamlist;
+    std::vector<TeamCities*> teamlist;
 
     /* 'Forks' a city into a new team */
     Team* ForkCity(City* c);

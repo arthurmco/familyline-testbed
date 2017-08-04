@@ -9,8 +9,7 @@ Team::Team(int id, const char* name) {
     this->id = id;
     this->name = std::string(name);
     this->flag = nullptr;
-    this->tinfo = (void*)new TeamCities(*this);
-    
+    this->tinfo = (void*)new TeamCities(this);
 }
 
 Team::Team() {

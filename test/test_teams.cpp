@@ -114,7 +114,7 @@ TEST_F(TeamRelationTest, TestIfForkingTeamWorks) {
     EXPECT_EQ(t1, c11->GetTeam());
     EXPECT_EQ(t1, c12->GetTeam());
     EXPECT_EQ(t3, c22->GetTeam());
-    EXPECT_NE(t2, c21->GetTeam());
+    EXPECT_NE(t3, c21->GetTeam());
     EXPECT_NE(t2, c22->GetTeam());
     EXPECT_NE(t1, c22->GetTeam());    
 }
@@ -139,8 +139,14 @@ TEST_F(TeamRelationTest, TestIfForkingTeamToAllyAttacks) {
     tc.SetDiplomacyFor(t3, DIPLOMACY_FRIEND, t2);
 
     TestObject o1(1, 1, 1, 1);
+    c11->AddObject(&o1);
+    
     TestObject o2(2, 2, 1, 2);
-    TestObject o3(3, 3, 1, 2);    
+    c21->AddObject(&o2);
+    
+    TestObject o3(3, 3, 1, 2);
+    c22->AddObject(&o3);
+    
     ASSERT_FALSE(o3.CheckIfAttackable(&o1));
     ASSERT_FALSE(o3.CheckIfAttackable(&o2));
 }
@@ -165,8 +171,14 @@ TEST_F(TeamRelationTest, TestIfForkingTeamToEnemyAttacks) {
     tc.SetDiplomacyFor(t3, DIPLOMACY_FOE, t2);
 
     TestObject o1(1, 1, 1, 1);
+    c11->AddObject(&o1);
+     
     TestObject o2(2, 2, 1, 2);
-    TestObject o3(3, 3, 1, 2);    
+    c21->AddObject(&o2);
+    
+    TestObject o3(3, 3, 1, 2);
+    c22->AddObject(&o3);
+    
     ASSERT_TRUE(o3.CheckIfAttackable(&o1));
     ASSERT_TRUE(o3.CheckIfAttackable(&o2));
 }

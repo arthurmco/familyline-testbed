@@ -18,7 +18,7 @@ namespace Tribalia {
 namespace Logic {
 
 struct TeamCities {
-    Team team;
+    Team* team;
     std::list<City*> cities;
 
     /* Friends and foes list. Explicitly defined
@@ -27,7 +27,7 @@ struct TeamCities {
     std::list<Team*> foes;
 
     TeamCities();
-    TeamCities(Team team);
+    TeamCities(Team* team);
 };
 
 /* Diplomacy */

@@ -9,9 +9,15 @@ TeamCoordinator::TeamCoordinator()
 
 void TeamCoordinator::AddTeam(Team* t)
 {
-    TeamCities te;
-    te.team = *t;
-    this->teamlist.push_back(te);
+    if (t->tinfo != nullptr) {
+	TeamCities* tc = (TeamCities*)t->tinfo;
+	tc->team = t;
+	this->teamlist.push_back(tc);
+    } else {
+	TeamCities* te = new TeamCities();
+	te->team = t;
+	this->teamlist.push_back(te);
+    }
 }
 
 Team* TeamCoordinator::CreateTeam(const char* name)
@@ -26,11 +32,12 @@ bool TeamCoordinator::AddCity(Team* t, City* c)
 {
     bool isHere = false;
     for (auto& tt : teamlist) {
-	if (tt.team.id == t->id) {
+	if (tt->team->id == t->id) {
 	    isHere = true;
-	    tt.cities.push_back(c);
-	    t->tinfo = &tt;
+	    tt->cities.push_back(c);
+	    t->tinfo = tt;
 	    c->SetTeam(t);
+	    t->cref++;
 	    break;
 	}
     }
@@ -43,7 +50,32 @@ bool TeamCoordinator::AddCity(Team* t, City* c)
    we're going to create a new team just for it */
 void TeamCoordinator::RemoveCity(City* c)
 {
+    Team* oldt = c->GetTeam();
+    TeamCities* oldtc = (TeamCities*)oldt->tinfo;
+    printf("oldid %d", oldt->id);
+
+    for (auto ct = oldtc->cities.begin(); ct != oldtc->cities.end(); ++ct) {
+	if (!strcmp((*ct)->GetName(), c->GetName())) {
+	    oldtc->cities.erase(ct);
+	    break;
+	}
+    }
     
+    int oldtref = oldt->cref--;
+
+    auto t = this->CreateTeam(c->GetName());
+    printf("| newid %d\n", t->id);
+
+    TeamCities* newtc = new TeamCities(*oldtc);
+    newtc->cities.clear();
+    t->tinfo = newtc;
+    
+    this->AddTeam(t);
+    this->AddCity(t, c);
+
+    if (oldtref < 0) {
+	delete oldt;
+    }
 }
 
 TeamDiplomacy TeamCoordinator::GetDiplomacyFor(Team* __restrict t1, Team* __restrict t2)

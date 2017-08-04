@@ -2,10 +2,10 @@
 
 using namespace Tribalia::Logic;
 
-TeamCities::TeamCities(Team team) {
+TeamCities::TeamCities(Team* team) {
     this->team = team;
 }
 
 TeamCities::TeamCities()
-    : TeamCities(Team()) {this->team.tinfo = this;  }
+    : TeamCities(new Team()) {this->team->tinfo = this; }
 
