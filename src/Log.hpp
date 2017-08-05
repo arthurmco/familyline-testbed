@@ -23,6 +23,13 @@ namespace Tribalia {
         static Log* l;
 	double GetDelta();
 
+	const char* L_BOLD = "\033[1m";
+	const char* L_RED = "\033[31m";
+	const char* L_BOLDRED = "\033[31;1m";
+	const char* L_YELLOW = "\033[33m";
+	const char* L_BOLDYELLOW = "\033[33;1m";
+	const char* L_NORMAL = "\033[0m";
+	
     public:
         Log();
 	

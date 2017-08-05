@@ -1,5 +1,16 @@
 #include "Log.hpp"
 
+#ifdef WIN32
+#include <io.h>
+#define isatty _isatty
+#define fileno _fileno
+#else
+#include <unistd.h>
+#endif
+
+#include <cstring> // strcmp
+#include <cstdlib> // getenv
+
 using namespace Tribalia;
 using namespace std::chrono;
 
@@ -25,13 +36,34 @@ void Log::SetFile(FILE* f)
         fclose(this->_logFile);
     }
 
+    if (isatty(fileno(f))) {
+	if (!strcmp("xterm-256color", getenv("TERM"))) {
+	    L_BOLD = "\033[1m";  
+	    L_RED = "\033[31m";
+	    L_BOLDRED = "\033[31;1m";  
+	    L_YELLOW = "\033[38;5;220m";
+	    L_BOLDYELLOW = "\033[38;5;220;1m";
+	    L_NORMAL = "\033[0m";
+	} else {
+	    L_BOLD = "\033[1m";  
+	    L_RED = "\033[31m";
+	    L_BOLDRED = "\033[31;1m";  
+	    L_YELLOW = "\033[33m";
+	    L_BOLDYELLOW = "\033[33;1m";
+	    L_NORMAL = "\033[0m";
+	}
+    } else {
+	L_BOLD = "";  
+	L_RED = "";
+	L_BOLDRED  = "";
+	L_YELLOW = "";
+	L_BOLDYELLOW = "";
+	L_NORMAL = "";	
+    }
+    
+
     this->_logFile = f;
 }
-
-#define BOLD "\033[1m"
-#define RED "\033[31m"
-#define YELLOW "\033[33m"
-#define NORMAL "\033[0m"
 
 double Log::GetDelta() {
     decltype(start) now = steady_clock::now();
@@ -47,7 +79,8 @@ void Log::Write(const char* tag, const char* fmt, ...)
     
     /* Print timestamp */
     
-    fprintf(_logFile, "[%13.4f] " BOLD "%s%s " NORMAL, GetDelta(), tag, colon);
+    fprintf(_logFile, "[%13.4f] %s%s%s%s ", GetDelta(), L_BOLD, tag, colon,
+	L_NORMAL);
 
     /* Print message */
     va_list vl;
@@ -58,7 +91,7 @@ void Log::Write(const char* tag, const char* fmt, ...)
     va_end(vl);
 
     /* Print line terminator */
-    fputs(NORMAL "\r\n", _logFile);
+    fprintf(_logFile, "%s\r\n", L_NORMAL);
     fflush(this->_logFile);
 }
 
@@ -67,8 +100,8 @@ void Log::Fatal(const char* tag, const char* fmt, ...)
     if (!this->_logFile) return;
     
     /* Print timestamp */
-    fprintf(_logFile, "[%13.4f] " RED "" BOLD "%s: (FATAL) " 
-	    NORMAL "" RED, GetDelta(), tag);
+    fprintf(_logFile, "[%13.4f] %s%s: (FATAL) %s%s", 
+	    GetDelta(), L_BOLDRED, tag, L_NORMAL, L_RED);
 
     /* Print message */
     va_list vl;
@@ -79,7 +112,7 @@ void Log::Fatal(const char* tag, const char* fmt, ...)
     va_end(vl);
 
     /* Print line terminator */
-    fputs(NORMAL "\r\n", _logFile);
+    fprintf(_logFile, "%s\r\n", L_NORMAL);
     fflush(this->_logFile);
 }
 
@@ -88,8 +121,8 @@ void Log::Warning(const char* tag, const char* fmt, ...)
     if (!this->_logFile) return;
 	
     /* Print timestamp */
-    fprintf(_logFile, "[%13.4f] " YELLOW "" BOLD "%s: (WARNING) " 
-	    NORMAL "" YELLOW, GetDelta(), tag);
+    fprintf(_logFile, "[%13.4f] %s%s: (WARNING) %s%s",
+	    GetDelta(), L_BOLDYELLOW, tag, L_NORMAL, L_YELLOW);
 
     /* Print message */
     va_list vl;
@@ -100,6 +133,6 @@ void Log::Warning(const char* tag, const char* fmt, ...)
     va_end(vl);
 
     /* Print line terminator */
-    fputs(NORMAL "\r\n", _logFile);
+    fprintf(_logFile, "%s\r\n", L_NORMAL);
     fflush(this->_logFile);
 }
