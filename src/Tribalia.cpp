@@ -272,13 +272,13 @@ int main(int argc, char const *argv[])
 		    /* Handle message parsing and display */
 		    const char *ssource, *stype, *sseverity;
 		    switch (source) {
-		    case GL_DEBUG_SOURCE_API: ssource = "OpenGL API"; break;
-		    case GL_DEBUG_SOURCE_WINDOW_SYSTEM: ssource = "window system"; break;
-		    case GL_DEBUG_SOURCE_SHADER_COMPILER: ssource = "shader compiler"; break;
-		    case GL_DEBUG_SOURCE_THIRD_PARTY: ssource = "third party"; break;
-		    case GL_DEBUG_SOURCE_APPLICATION: ssource = "application"; break;
-		    case GL_DEBUG_SOURCE_OTHER: ssource = "other"; break;
-		    default: ssource = "unknown"; break;
+		    case GL_DEBUG_SOURCE_API: ssource = "gl-debug-opengl-api"; break;
+		    case GL_DEBUG_SOURCE_WINDOW_SYSTEM: ssource = "gl-debug-window-system"; break;
+		    case GL_DEBUG_SOURCE_SHADER_COMPILER: ssource = "gl-debug-shader-compiler"; break;
+		    case GL_DEBUG_SOURCE_THIRD_PARTY: ssource = "gl-debug-third-party"; break;
+		    case GL_DEBUG_SOURCE_APPLICATION: ssource = "gl-debug-application"; break;
+		    case GL_DEBUG_SOURCE_OTHER: ssource = "gl-debug-other"; break;
+		    default: ssource = "gl-debug"; break;
 		    }
 
 		    switch (type) {
@@ -292,31 +292,35 @@ int main(int argc, char const *argv[])
 		    }
 
 		    switch (severity) {
-		    case GL_DEBUG_SEVERITY_HIGH: sseverity = "PRIO: HIGH"; break;
-		    case GL_DEBUG_SEVERITY_MEDIUM: sseverity = "PRIO: MEDIUM"; break;
-		    case GL_DEBUG_SEVERITY_LOW: sseverity = "PRIO: LOW"; break;
+		    case GL_DEBUG_SEVERITY_HIGH: sseverity = ""; break;
+		    case GL_DEBUG_SEVERITY_MEDIUM: sseverity = ""; break;
+		    case GL_DEBUG_SEVERITY_LOW: sseverity = " low prio: "; break;
 		    case GL_DEBUG_SEVERITY_NOTIFICATION: sseverity = ""; break;
-		    default: sseverity = "PRIO: ????"; break;
+		    default: sseverity = " PRIO: ????"; break;
 		    }
 
 		    char* m = new char[std::max(length * 2, length + 70)];
 
-		    sprintf(m, "(%d) %s (source: %s | type: %s) %s",
-			    id, sseverity, ssource, stype, msg);
+		    sprintf(m, "[#%d]%s %s: %s",
+			    id, sseverity, stype, msg);
 
 		    auto l = strlen(m);
 		    if (m[l-1] == '\n')
 			m[l-1] = 0;
 
+		    switch(severity) {
+		    case GL_DEBUG_SEVERITY_HIGH:
+			Log::GetLog()->Fatal(ssource, m);
+			break;
+		    case GL_DEBUG_SEVERITY_MEDIUM:
+			Log::GetLog()->Warning(ssource, m);
+			break;
 
-		    if (severity == GL_DEBUG_SEVERITY_MEDIUM ||
-			severity == GL_DEBUG_SEVERITY_HIGH) {
-			Log::GetLog()->Warning("gl-debug-output", m);
+		    default:
+			Log::GetLog()->Write(ssource, m);
+			break;
 		    }
-		    else {
-			Log::GetLog()->Write("gl-debug-output", m);
-		    }
-
+		    
 		    delete[] m;
 
 		};
