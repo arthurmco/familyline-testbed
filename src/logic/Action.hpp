@@ -48,122 +48,19 @@ namespace Logic {
     
     /* Represents an individual action */
     struct Action {
-	char* name;
-	char* assetname;
+	std::string name;
+	std::string assetname;
 	ActionHandler handler = nullptr;
 	size_t refcount = 1;
 
 	Action(const char* name, const char* assetname)
-	    : name((char*)name), assetname((char*)assetname) {}
+	    : name(name), assetname(assetname) {}
 	
 	Action()
-	    : Action("", "") {}
+	    : Action("", "") {} 
 
-	~Action() {
-	    if (refcount == 0) {
-		delete name;
-		delete assetname;
-	    }
-	}
-
-	Action(const Action& other)
-	: handler(other.handler), refcount(1) {
-
-	    char *nname = nullptr, *nasset = nullptr;
-
-	    if (other.name) {
-		nname = new char[strlen(other.name)+1];
-		strcpy(nname, other.name);
-	    }
-
-	    if (other.assetname) {
-		nasset = new char[strlen(other.assetname)+1];
-		strcpy(nasset, other.assetname);
-	    }
-
-	    this->name = nname;
-	    this->assetname = nasset;
-	    this->handler = other.handler;
-	    this->refcount = 1;
-	}
-
-	
-	Action& operator=(const Action& other){
-
-	    char *nname = nullptr, *nasset = nullptr;
-
-	    if (other.name) {
-		nname = new char[strlen(other.name)+1];
-		strcpy(nname, other.name);
-	    }
-
-	    if (other.assetname) {
-		nasset = new char[strlen(other.assetname)+1];
-		strcpy(nasset, other.assetname);
-	    }
-
-	    this->name = nname;
-	    this->assetname = nasset;
-	    this->handler = other.handler;
-	    this->refcount = 1;
-	    return *this;
-	}
-
-	Action& operator=(const Action&& other) {
-
-	    if (this == &other)
-		return *this;
-
-	    char *nname = nullptr, *nasset = nullptr;
-
-	    if (other.name) {
-		nname = new char[strlen(other.name)+1];
-		strcpy(nname, other.name);
-		delete other.name;
-	    }
-
-	    if (other.assetname) {
-		nasset = new char[strlen(other.assetname)+1];
-		strcpy(nasset, other.assetname);
-		delete other.assetname;
-	    }
-
-	    this->name = nname;
-	    this->assetname = nasset;
-	    this->handler = other.handler;
-	    this->refcount = other.refcount;
-	    return *this;
-	    
-	}
-	
-	Action(const Action&& other)
-	    : handler(other.handler), refcount(other.refcount) {
-
-	    if (this == &other)
-		return;
-
-	    char *nname = nullptr, *nasset = nullptr;
-
-	    if (other.name) {
-		nname = new char[strlen(other.name)+1];
-		strcpy(nname, other.name);
-		delete other.name;
-	    }
-
-	    if (other.assetname) {
-		nasset = new char[strlen(other.assetname)+1];
-		strcpy(nasset, other.assetname);
-		delete other.assetname;
-	    }
-
-	    this->name = nname;
-	    this->assetname = nasset;
-	}
-
-
-
-	      
     };
+
     
 }
 }

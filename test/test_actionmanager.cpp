@@ -7,10 +7,10 @@ void TestActionManager::RunAction(const char* name) {
     d.xPos = 50;
     d.yPos = 50;
     d.actionOrigin = tobj;
-    
-    if (_actions.find(name) != _actions.end()) {
-	auto ac = _actions[name];
-	ret[name] = ac.handler(&ac, d);
+
+    auto it = _actions.find(name);
+    if (it != _actions.end()) {
+	ret[name] = it->second.handler(&it->second, d);
     }
 }
 
@@ -29,13 +29,13 @@ TEST_F(ActionManagerTest, TestIfActionRuns) {
     Action tac("test-action-1", "test-asset-1");
     bool did_ran = false;
 
-    char *acname = nullptr, *acasset = nullptr;
+    const char *acname = nullptr, *acasset = nullptr;
     size_t acref = 0;
     
     tac.handler = [&](Action* ac, ActionData acdata) -> bool
 	{
-	    acname = ac->name;
-	    acasset = ac->assetname;
+	    acname = ac->name.c_str();
+	    acasset = ac->assetname.c_str();
 	    acref = ac->refcount;
 	    
 	    did_ran = true;
@@ -44,12 +44,12 @@ TEST_F(ActionManagerTest, TestIfActionRuns) {
 
     am->AddAction(tac);
     am->RunAction("test-action-1");
+    ASSERT_TRUE(did_ran);
     ASSERT_NE(nullptr, acname);
     ASSERT_NE(nullptr, acasset);
-    ASSERT_FALSE(strcmp(tac.name, acname));
-    ASSERT_FALSE(strcmp(tac.assetname, acasset));
+    ASSERT_FALSE(strcmp(tac.name.c_str(), acname));
+    ASSERT_FALSE(strcmp(tac.assetname.c_str(), acasset));
     ASSERT_EQ(1, acref);
-    ASSERT_TRUE(did_ran);
 }
 
 TEST_F(ActionManagerTest, TestIfActionRemoves) {
@@ -101,12 +101,12 @@ TEST_F(ActionManagerTest, TestIfActionVisible) {
 
     bool isv1 = false, isv2 = false;
     for (auto& it : vact) {
-	if (!strcmp(it->name, "test-action-visible-1")) {
+	if (!strcmp(it->name.c_str(), "test-action-visible-1")) {
 	    isv1 = true;
 	    continue;
 	}
 
-	if (!strcmp(it->name, "test-action-visible-2")) {
+	if (!strcmp(it->name.c_str(), "test-action-visible-2")) {
 	    isv2 = true;
 	    continue;
 	}
