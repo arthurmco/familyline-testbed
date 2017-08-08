@@ -137,10 +137,14 @@ int Game::RunLoop()
     gr->AddPanel(&pnl);
     Button btnExit = Button(0.7, 0.05, 0.2, 0.5, "Exit");
     btnExit.SetOnClickListener([&](GUI::IControl* cc) {
+	    (void)cc;
 	    player = false;
 	});
     pnl.AddPanel(&btnExit);
-        
+
+    Label lblBuilding = Label(10, 70, 640, 30, "!!!");
+    lblBuilding.SetForeColor(255, 255, 255, 255);
+    gr->AddPanel(&lblBuilding);        
     
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
@@ -175,6 +179,14 @@ int Game::RunLoop()
     	objrend->Update();
 
         LocatableObject* selected = hp->GetSelectedObject();
+
+	if (BuildQueue::GetInstance()->GetNext()) {
+	    lblBuilding.SetText("Click to build %s",
+				BuildQueue::GetInstance()->GetNext()->GetName());
+	} else {
+	    lblBuilding.SetText("\0");
+	}
+	
         auto locc = ip->GetIntersectedObject();
         if (locc) {
             gr->DebugWrite(10, 100, "Hovering object '%s'", locc->GetName());

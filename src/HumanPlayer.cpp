@@ -49,6 +49,7 @@ bool remove_object = false;
 bool zoom_in = false;
 bool zoom_out = false;
 bool zoom_mouse = false;
+bool build_something = false;
 
 AttackableObject *attacker, *attackee;
 
@@ -258,6 +259,25 @@ bool HumanPlayer::Play(GameContext* gctx)
     else if (rotate_right)
         _cam->AddRotation(glm::vec3(0, 1, 0), glm::radians(-1.0f));
 
+    if (mouse_click && build_something) {
+	if (BuildQueue::GetInstance()->GetNext()) {
+	    glm::vec3 p = TerrainRenderer::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
+
+	    auto* build = BuildQueue::GetInstance()->BuildNext(p);
+	    AttackableObject* c = dynamic_cast<AttackableObject*>(build);
+
+	    if (c) {
+		BuildQueue::GetInstance()->Clear();
+		build->SetY(p.y);
+		this->GetCity()->AddObject(c);
+		printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, p.y, p.z);
+		int id = gctx->om->RegisterObject(c);
+		printf("%s has id %d now\n", c->GetName(), id);
+	    }
+	    
+	}
+    }
+    
 
     LocatableObject* l = _ip->GetIntersectedObject();
     if (l) {
@@ -270,30 +290,19 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
 
     if (build_tent) {
+	BuildQueue::GetInstance()->Add( (LocatableObject*)
+	    ObjectFactory::GetInstance()->GetObject(2, 0, 0, 0));
 	
-	glm::vec3 p = TerrainRenderer::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
-	
-	AttackableObject* c = (AttackableObject*) 
-	    ObjectFactory::GetInstance()->GetObject(2, p.x, p.y, p.z);
-	this->GetCity()->AddObject(c);
-	printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, 1.0f, p.z);
-	
-	int id = gctx->om->RegisterObject(c);
-	printf("%s has id %d now\n", c->GetName(), id);
 	build_tent = false;
+	build_something = true;
     }
 
     if (build_tower) {
-	glm::vec3 p = TerrainRenderer::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
-	
-	AttackableObject* c = (AttackableObject*)
-	    ObjectFactory::GetInstance()->GetObject(3, p.x, p.y, p.z);
-	this->GetCity()->AddObject(c);
-	printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, 1.0f, p.z);
-	
-	int id = gctx->om->RegisterObject(c);
-	printf("%s has id %d now\n", c->GetName(), id);
+	BuildQueue::GetInstance()->Add( (LocatableObject*)
+	    ObjectFactory::GetInstance()->GetObject(3, 0, 0, 0));
+
 	build_tower = false;
+	build_something = true;
     }
 
     if (remove_object) {	

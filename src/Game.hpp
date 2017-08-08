@@ -18,6 +18,7 @@
 #include "logic/TerrainFile.hpp"
 #include "logic/Team.hpp"
 #include "logic/TeamCoordinator.hpp"
+#include "logic/BuildQueue.hpp"
 
 #include "graphical/Camera.hpp"
 #include "graphical/AssetFile.hpp"

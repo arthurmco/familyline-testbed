@@ -44,7 +44,7 @@ const char* Label::GetText() const
     return _text.c_str();
 }
 
-void Label::SetText(char* txt, ...)
+void Label::SetText(const char* txt, ...)
 {
     va_list vl;
     va_start(vl, txt);
@@ -75,8 +75,6 @@ void Label::Redraw(cairo_t* ctxt)
     _textHeight = extents.height;
     
     cairo_show_text(ctxt, _text.c_str());
-    
-    
     
     _dirty = false;
 }

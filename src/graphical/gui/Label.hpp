@@ -30,7 +30,7 @@ public:
     Label(double x, double y, double w, double h, const char* text);
     
     const char* GetText() const;
-    void SetText(char* txt, ...);
+    void SetText(const char* txt, ...);
 
     void SetFontData(const char* name, unsigned int size);
 
