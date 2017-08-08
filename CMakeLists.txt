@@ -111,7 +111,7 @@ else()
   	target_link_libraries(tribalia-tests "cairo")
   endif(DO_TESTS)
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra")
 
   if (IS_DEBUG)
 		  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
