@@ -1,0 +1,59 @@
+* Tribalia TODO list
+
+** 0.1.x 
+
+*** TODO Bind actions to the action panel buttons
+   The action panel (that one with the two buttons) needs to have its
+   buttons binded to some action. It is not recommended to expose the
+   button callbacks to the HumanPlayer interface (or any other player)
+
+   
+   A solution might be pass an object (like the *GUIActionManager* itself)
+   that could inherit from ActionManager.
+
+   It will receive a _GUI::Panel_ as a parameter, and it will fill it with
+   some actions.
+
+   :IDEAS:
+   - Add a way to automatically convert an typeid plus some basic action
+     into an action name (like tid 2 and build into 2-build). This might
+     standardize these things now, and avoid someone making complicated
+     names for its actions later.
+     - Put it into an static method in _GUIActionManager_ ?
+     
+
+*** TODO Create a better map editor
+    Create a better map editor for this game. It will have to do tree
+    things:
+    - Import it from a file
+    - Make it able to edit the terrain contents
+    - Support *resizing* a terrain 
+    - Support creating a terrain (this will envolve, basically, creating a
+      1x1 terrain, then resizing it)
+
+    Refer to [[../docs/terrain_contrib.md][the terrain documentation]] for more information
+
+    :IDEAS:
+    - *MAKE IT IN ELISP*: Create a major mode in Emacs for editing Tribalia
+      maps. 
+
+*** Launch 0.2.0
+    Tries to compile on Windows, and fix all Visual Studio
+    incompatibilities that might be introduced. 
+
+    Then, *RELEASE*
+
+** 0.2.x
+
+   The 0.3.0 release will feature a basic AI player that will fight against
+   you in the game. It does not have to be good (in the sense of be
+   challenging), but it have to work with less bugs as possible.
+
+*** Make an AI demo
+*** Create a textbox
+
+
+
+
+
+   
