@@ -98,10 +98,6 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
     pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
     hp->SetPathfinder(pathf);
 
-    widgets.p = new Panel{0, 0, 320, 240};
-    widgets.p->SetBackColor(255, 0, 0, 25);
-    gr->AddPanel(widgets.p);
-
     widgets.lblVersion = new Label(10, 10, "Tribalia " VERSION " commit " COMMIT);
     widgets.lblVersion->SetForeColor(255, 255, 255, 255);
 

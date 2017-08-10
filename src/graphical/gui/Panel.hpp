@@ -52,6 +52,10 @@ public:
     virtual void OnLostFocus() override;
 
     virtual bool IsDirty() const override { return true; }
+
+    void ClearChildren();
+
+    virtual ~Panel();
 };
 
 }

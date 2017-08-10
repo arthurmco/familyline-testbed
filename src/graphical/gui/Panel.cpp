@@ -149,3 +149,12 @@ void Panel::RemovePanel(IPanel* p)
 {
 
 }
+
+void Panel::ClearChildren() {
+    _panels.clear();
+    oldPanel = nullptr;
+}
+
+Panel::~Panel() {
+    this->ClearChildren();
+}
