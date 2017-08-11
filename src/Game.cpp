@@ -1,4 +1,5 @@
 
+
 #include "Game.hpp"
 
 using namespace Tribalia;
@@ -117,26 +118,20 @@ int Game::RunLoop()
 	    gctx.om->UnregisterObject(at);
 	});
 
+    
     Panel pnl = Panel(0.0, 0.8, 1.0, 0.2, true);
     pnl.SetBackColor(0, 0, 0, 185);
-
-    Button btnTent = Button(0, 16, 64, 64, new ImageControl(0,0,60,60,
-							   "icons/tent.png"));
-    btnTent.SetBackColor(190, 190, 190, 255);
-    pnl.AddPanel(&btnTent);
-    
-    Button btnWatchTower = Button(70, 16, 64, 64, new ImageControl(0,0,60,60,
-						     "icons/watchtower.png"));
-    btnWatchTower.SetBackColor(190, 190, 190, 255);
-    pnl.AddPanel(&btnWatchTower);
-
     gr->AddPanel(&pnl);
-    Button btnExit = Button(0.7, 0.05, 0.2, 0.5, "Exit");
+    
+    GUIActionManager* gam = new GUIActionManager(&pnl);
+    hp->SetActionManager(gam);
+
+/*    Button btnExit = Button(0.7, 0.05, 0.2, 0.5, "Exit");
     btnExit.SetOnClickListener([&](GUI::IControl* cc) {
 	    (void)cc;
 	    player = false;
 	});
-    pnl.AddPanel(&btnExit);
+	pnl.AddPanel(&btnExit); */
 
     Label lblBuilding = Label(10, 70, 640, 30, "!!!");
     lblBuilding.SetForeColor(255, 255, 255, 255);
@@ -218,6 +213,7 @@ int Game::RunLoop()
 
         AnimationManager::GetInstance()->Iterate();
     	ObjectPathManager::getInstance()->UpdatePaths();
+	gam->UpdateBasePanel();
 
     	fb3D->SetAsBoth();
     	rndr->SetBoundingBox(hp->renderBBs);

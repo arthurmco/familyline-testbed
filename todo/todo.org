@@ -1,8 +1,9 @@
+
 * Tribalia TODO list
 
 ** 0.1.x 
 
-*** TODO Bind actions to the action panel buttons
+*** DOING Bind actions to the action panel buttons
    The action panel (that one with the two buttons) needs to have its
    buttons binded to some action. It is not recommended to expose the
    button callbacks to the HumanPlayer interface (or any other player)
@@ -20,8 +21,12 @@
      standardize these things now, and avoid someone making complicated
      names for its actions later.
      - Put it into an static method in _GUIActionManager_ ?
-     
 
+   - *SUGGESTION:* Make GUIActionManager also bind actions to
+     keypresses (?)
+  
+     
+   
 *** TODO Create a better map editor
     Create a better map editor for this game. It will have to do tree
     things:
@@ -37,12 +42,12 @@
     - *MAKE IT IN ELISP*: Create a major mode in Emacs for editing Tribalia
       maps. 
 
-*** Launch 0.2.0
+*** TODO Launch 0.2.0
     Tries to compile on Windows, and fix all Visual Studio
     incompatibilities that might be introduced. 
 
     Then, *RELEASE*
-
+    
 ** 0.2.x
 
    The 0.3.0 release will feature a basic AI player that will fight against
@@ -51,8 +56,7 @@
 
 *** Make an AI demo
 *** Create a textbox
-
-
+    
 
 
 

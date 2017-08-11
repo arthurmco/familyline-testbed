@@ -12,9 +12,7 @@
 #ifndef BUTTON_HPP
 #define BUTTON_HPP
 
-namespace Tribalia {
-namespace Graphics {
-namespace GUI {
+namespace Tribalia::Graphics::GUI {
 
     typedef std::function<void(IControl*)> OnClickListener;
 	     
@@ -62,8 +60,6 @@ public:
     }
 };
 
-}
-}
 }
 
 #endif

@@ -12,8 +12,7 @@
 #ifndef ACTION_HPP
 #define ACTION_HPP
 
-namespace Tribalia {
-namespace Logic {
+namespace Tribalia::Logic {
 
     /* An action is any predefined command done by an object.
        Examples are: train unit, build construction, repair...
@@ -62,7 +61,7 @@ namespace Logic {
     };
 
     
-}
+
 }
 
 

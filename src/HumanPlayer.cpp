@@ -23,6 +23,30 @@ void HumanPlayer::SetCamera(Tribalia::Graphics::Camera* c) { _cam = c;}
 void HumanPlayer::SetPicker(Tribalia::Input::InputPicker* ip) { _ip = ip; }
 void HumanPlayer::SetPathfinder(Tribalia::Logic::PathFinder* p) { _pf = p; }
 
+bool build_tent = false, build_tower = false;
+
+void HumanPlayer::SetActionManager(Tribalia::Graphics::GUIActionManager* gam)
+{
+    _gam = gam;
+
+    Action tent = Action("tent-build", "icons/tent.png");
+    tent.handler = [&](...) {
+	printf("Tent built");
+	build_tent = true;
+	return true;
+    };
+
+    Action tower = Action("tower-build", "icons/watchtower.png");
+    tower.handler = [&](...) {
+	printf("Tower built");
+	build_tower = true;
+	return true;
+    };
+    
+    _gam->AddVisibleAction(tent);
+    _gam->AddVisibleAction(tower);
+}
+
 /***
     Virtual function called on each iteration.
 
@@ -43,7 +67,7 @@ bool exit_game = false;
 
 bool attack_set = false, attack_ready = false;
 
-bool build_tent = false, build_tower = false;
+
 bool remove_object = false;
 
 bool zoom_in = false;

@@ -11,6 +11,7 @@
 #include "logic/ObjectFactory.hpp"
 #include "graphical/Camera.hpp"
 #include "graphical/TerrainRenderer.hpp"
+#include "graphical/GUIActionManager.hpp"
 #include "logic/ObjectRenderer.hpp"
 #include "logic/ObjectPathManager.hpp"
 #include "logic/BuildQueue.hpp"
@@ -25,15 +26,16 @@
     {
     private:
         Tribalia::Graphics::Camera* _cam;
-		Tribalia::Input::InputPicker* _ip;
+	Tribalia::Input::InputPicker* _ip;
 
         Tribalia::Logic::LocatableObject* _selected_obj = nullptr;
         Tribalia::Logic::PathFinder* _pf = nullptr;
-
+	Tribalia::Graphics::GUIActionManager* _gam = nullptr;
+	
         bool _updated = false;
 
     public:
-		bool renderBBs = false;
+	bool renderBBs = false;
 
         Tribalia::Logic::ObjectRenderer* objr;
 
@@ -62,6 +64,7 @@
 		void SetPicker(Tribalia::Input::InputPicker* ip);
         void SetInputManager(Tribalia::Input::InputManager*);
         void SetPathfinder(Tribalia::Logic::PathFinder*);
+	void SetActionManager(Tribalia::Graphics::GUIActionManager* );
 
         virtual bool HasUpdatedObject();
 
