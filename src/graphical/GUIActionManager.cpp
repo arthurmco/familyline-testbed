@@ -25,9 +25,13 @@ void GUIActionManager::AddVisibleAction(Action a)
 {
     this->AddAction(a);
     auto* aptr = &(this->_actions[a.name]);
+    SetActionVisible(aptr);
+}
 
+void GUIActionManager::SetActionVisible(Action* a)
+{
     GUIAction guiact;
-    guiact.action = aptr;
+    guiact.action = a;
 
     int px, py, pw, ph;
     _base_panel->GetBounds(px, py, pw, ph);
@@ -44,7 +48,7 @@ void GUIActionManager::AddVisibleAction(Action a)
     }
     
     guiact.btn = new GUI::Button(x + default_margin, y + default_margin, w, h,
-				 a.name.c_str());
+				 a->name.c_str());
     Action* act = guiact.action;
     guiact.btn->SetOnClickListener( [act, this](...) {
 	    this->RunAction(act->name.c_str());
@@ -54,6 +58,27 @@ void GUIActionManager::AddVisibleAction(Action a)
     lasty = y;
     gui_actions.push_back(guiact);
     is_dirty = true;
+}
+
+void GUIActionManager::SetVisibleActions(std::vector<char*> actions)
+{
+    ClearVisibleActions();
+    ActionManager::SetVisibleActions(actions);
+
+    for (auto& actname : actions) {
+	auto* aptr = &(this->_actions[actname]);
+	SetActionVisible(aptr);
+    }
+}
+
+void GUIActionManager::RemoveAction(const char* name)
+{
+    auto* aptr = &(this->_actions[name]);
+    std::remove_if(gui_actions.begin(), gui_actions.end(), [&](GUIAction& a) {
+	    return (a.action->name == aptr->name);
+	});
+
+    ActionManager::RemoveAction(name);
 }
 
 /* Update the 'base_panel' with all visible actions there */

@@ -33,7 +33,9 @@ namespace Tribalia::Graphics {
 	const int default_margin = 8;
 
 	bool is_dirty = false;
-		
+
+	void SetActionVisible(Logic::Action*);
+	
     public:
 	GUIActionManager(GUI::Panel* base_panel);
 
@@ -42,6 +44,9 @@ namespace Tribalia::Graphics {
 
 	/* Add/replace action, and make it visible */
 	void AddVisibleAction(Logic::Action);
+
+	void SetVisibleActions(std::vector<char*> actions);
+	void RemoveAction(const char* name);
 
 
 	/* Update the 'base_panel' with all visible actions there */

@@ -26,6 +26,7 @@ namespace Tribalia::Logic {
 	
     public:	
 	void AddAction(Action);
+	
 	void RemoveAction(const char* name);
 	
 	virtual void RunAction(const char* name) = 0;

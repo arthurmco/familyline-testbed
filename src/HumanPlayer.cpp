@@ -43,8 +43,9 @@ void HumanPlayer::SetActionManager(Tribalia::Graphics::GUIActionManager* gam)
 	return true;
     };
     
-    _gam->AddVisibleAction(tent);
-    _gam->AddVisibleAction(tower);
+    _gam->AddAction(tent);
+    _gam->AddAction(tower);
+    _gam->SetVisibleActions({"tent-build", "tower-build"});
 }
 
 /***
