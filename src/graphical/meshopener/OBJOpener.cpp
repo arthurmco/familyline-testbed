@@ -212,8 +212,9 @@ Mesh* OBJOpener::Open(const char* file)
 		}
 	}
 
-    Log::GetLog()->Write("Opened mesh \"%s\": (OBJ format) %d (%d) vertices, "
-        "%d (%d) normals, %d texcoords, file is '%s'",
+	Log::GetLog()->Write("mesh-obj-opener", "Opened mesh \"%s\": "
+			     "(OBJ format) %d (%d) vertices, "
+			     "%d (%d) normals, %d texcoords, file is '%s'",
         mName, verts.size(), realVerts.size(),
         normals.size(), realNormals.size(), texcoords.size(), file);
 
