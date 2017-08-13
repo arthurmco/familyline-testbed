@@ -291,11 +291,10 @@ int GUIRenderer::AddPanel(GUI::IPanel* p)
 {
     this->ResizePanelAbsolute(p);
     
-    Log::GetLog()->Write("gui-renderer", "Added panel (%#p)", p);
-
     /* Create panel vertices */
     int px, py, pw, ph;
     p->GetBounds(px, py, pw, ph);
+    Log::GetLog()->Write("gui-renderer", "Added panel [%d %d %d %d]", px, py, pw, ph);
 	
     float relx = float(px)/win_w, rely = float(py)/win_h;
     float relw = float(pw)/win_w, relh = float(ph)/win_h;
@@ -390,14 +389,20 @@ int GUIRenderer::AddPanel(GUI::IPanel* p, double x, double y)
 /* Remove the panel */
 void GUIRenderer::RemovePanel(GUI::IPanel* p)
 {
-    for (auto it = _panels.begin(); it != _panels.end(); it++) {
-	if (it->panel == p) {
-	    //TODO: remove VAO/VBO and destroy texture and cairo surface
-	    
-	    _panels.erase(it);
-	    return;
-	}
-    }
+    _panels.erase(std::remove_if(_panels.begin(), _panels.end(),
+				 [&](PanelRenderObject& pro) {
+	    if (pro.panel == p) {
+		int px, py, pw, ph;
+		p->GetBounds(px, py, pw, ph);
+		Log::GetLog()->Write("gui-renderer",
+				     "Removing panel [%d %d %d %d]",
+				     px, py, pw, ph);
+		return true;
+	    }
+
+	    return false;
+		
+				 }));
 }
 
  void GUIRenderer::SetBounds(int x, int y, int w, int h)

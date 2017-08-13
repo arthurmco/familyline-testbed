@@ -1,6 +1,6 @@
 /*  GUI rendering class
 
-    Copyright (C) 2016 Arthur M
+    Copyright (C) 2016, 2017 Arthur M
 */
 
 #include <cairo/cairo.h>
@@ -9,6 +9,7 @@
 #include <cstdarg>
 #include <vector>
 
+#include <algorithm>
 #include "Window.hpp"
 #include "gui/IPanel.hpp"
 #include "gui/IContainer.hpp"
@@ -19,8 +20,7 @@
 #ifndef GUIRENDERER_HPP
 #define GUIRENDERER_HPP
 
-namespace Tribalia {
-namespace Graphics {
+namespace Tribalia::Graphics {
 
 /* Stores everything needed to render a panel, including panel data itself */
 struct PanelRenderObject {
@@ -102,8 +102,7 @@ public:
     virtual bool IsDirty() const override { return true; }
 };
 
-} /* Graphics */
-} /* Tribalia */
+} /* Tribalia::Graphics */
 
 
 #endif /* end of include guard: GUIRENDERER_HPP */
