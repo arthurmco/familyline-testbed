@@ -3,7 +3,7 @@
 
 ** 0.1.x 
 
-*** DOING Bind actions to the action panel buttons
+*** DONE Bind actions to the action panel buttons
    The action panel (that one with the two buttons) needs to have its
    buttons binded to some action. It is not recommended to expose the
    button callbacks to the HumanPlayer interface (or any other player)
@@ -27,7 +27,7 @@
   
      
    
-*** TODO Create a better map editor
+*** DOING Create a better map editor
     Create a better map editor for this game. It will have to do tree
     things:
     - Import it from a file
