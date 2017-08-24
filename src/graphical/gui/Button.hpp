@@ -6,6 +6,7 @@
 #include "IPanel.hpp"
 #include <string>
 #include <functional>
+#include <algorithm> // for max()
 #include <cstdarg>
 #include <cstring>
 
