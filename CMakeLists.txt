@@ -88,7 +88,7 @@ if (MSVC)
   	target_link_libraries(tribalia-tests ${CAIRO_LIB})
   endif(DO_TESTS)
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /GR /W4")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /GR /W4 /std:c++latest")
 
 else()
 	

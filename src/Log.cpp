@@ -37,7 +37,8 @@ void Log::SetFile(FILE* f)
     }
 
     if (isatty(fileno(f))) {
-	if (!strcmp("xterm-256color", getenv("TERM"))) {
+	if (getenv("TERM") &&
+		!strcmp("xterm-256color", getenv("TERM"))) {
 	    L_BOLD = "\033[1m";  
 	    L_RED = "\033[31m";
 	    L_BOLDRED = "\033[31;1m";  

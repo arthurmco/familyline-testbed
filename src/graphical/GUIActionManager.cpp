@@ -104,7 +104,11 @@ void GUIActionManager::RunAction(const char* name)
 {
     for (auto& f : this->gui_actions) {
 	if (!strcmp(name, f.action->name.c_str())) {
-	    ActionData ad;
+		ActionData ad;
+		ad.xPos = 0;
+		ad.yPos = 0;
+		ad.actionOrigin = nullptr;
+
 	    f.action->handler(f.action, ad);
 	}
     }
