@@ -15,6 +15,7 @@ enum EventType {
     EVENT_MOUSEMOVE = 2,
     EVENT_MOUSEEVENT = 4,   /* Mouse event */
     EVENT_FINISH = 8,       /* Finish request (i.e window closing) */
+    EVENT_DEFAULT_LISTENER = 65536,
     EVENT_ALL_EVENTS = -1
 };
 
@@ -31,6 +32,9 @@ enum KeyStatus {
 };
 
 struct InputEvent {
+    // Event ID
+    unsigned int eventid;
+    
     //Event type (key or mouse event)
     int eventType;
     //Mouse X, Y and Z (last one reserved for holographic displays)

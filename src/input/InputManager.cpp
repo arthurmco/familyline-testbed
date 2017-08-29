@@ -1,3 +1,4 @@
+
 #include "InputManager.hpp"
 
 using namespace Tribalia::Input;
@@ -6,8 +7,10 @@ InputManager* InputManager::im = nullptr;
 
 
 void InputManager::Initialize() {
+    if (!default_listener) {
 	default_listener = new InputListener;
-	this->AddListener(EVENT_ALL_EVENTS, default_listener);
+	this->AddListener(EVENT_ALL_EVENTS, default_listener, 0.0001);
+    }
 }
 
 InputListener* InputManager::GetDefaultListener() { return default_listener; }
@@ -65,6 +68,19 @@ bool InputManager::PopEvent(InputEvent* ev)
     return true;
 }
 
+unsigned int InputManager::FindEIDForKeyEvent(InputEvent& ev)
+{
+    for (const auto& list_item : listener_map) {
+	auto other_ev = list_item.second.ev;
+	if (ev.eventType == other_ev.eventType &&
+	    ev.event.keyev.scancode == other_ev.event.keyev.scancode &&
+	    ev.event.keyev.status != other_ev.event.keyev.status)
+	    return list_item.first;
+    }
+
+    return 0;
+}
+
 int lastx, lasty, lastz;
 
 /* Receive events and send them to queues */
@@ -73,14 +89,22 @@ void InputManager::Run()
     /* Get event data from SDL */
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
+	auto next_eid = ++_last_eid;
+	if (next_eid == 0) {
+	    Log::GetLog()->Warning("input-manager",
+				   "Event ID overflew");
+	}
+	
         InputEvent ev = {};
         switch (e.type) {
         case SDL_QUIT:
         case SDL_APP_TERMINATING:
+	    ev.eventid = next_eid;
             ev.eventType = EVENT_FINISH;
             break;
 
         case SDL_WINDOWEVENT:
+	    ev.eventid = next_eid;
             if (e.window.event == SDL_WINDOWEVENT_CLOSE)
                 ev.eventType = EVENT_FINISH;
             else
@@ -88,7 +112,7 @@ void InputManager::Run()
             break;
 
         case SDL_KEYDOWN:
-        case SDL_KEYUP:
+        case SDL_KEYUP:    
             ev.eventType = EVENT_KEYEVENT;
 
             ev.event.keyev.scancode = e.key.keysym.sym;
@@ -98,8 +122,21 @@ void InputManager::Run()
                 ev.event.keyev.status = KEY_KEYREPEAT;
 
             ev.event.keyev.char_utf8 = ' ';
+	    if (e.type == SDL_KEYDOWN) {
+		ev.eventid = next_eid;
+		listener_map[next_eid] = InputListenerMap(ev, nullptr);
+	    } else {
+		auto eid = FindEIDForKeyEvent(ev);
+		if (eid > 0) {
+		    ev.eventid = eid;
+		} else {
+		    ev.eventid = next_eid;
+		}
+	    }
+
             break;
         case SDL_MOUSEMOTION:
+	    ev.eventid = next_eid;
             /* Only update the last* variables */
             lastx = e.motion.x;
             lasty = e.motion.y;
@@ -107,11 +144,13 @@ void InputManager::Run()
             ev.eventType = EVENT_MOUSEMOVE;
             break;
 	case SDL_MOUSEWHEEL:
+	    ev.eventid = next_eid;
 	    ev.eventType = EVENT_MOUSEEVENT;
 	    ev.event.mouseev.scrolly = e.wheel.y;
 	    break;	    
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
+	    ev.eventid = next_eid;
             ev.eventType = EVENT_MOUSEEVENT;
             //i will not depend of hacks.
             switch (e.button.button) {
@@ -157,34 +196,85 @@ void InputManager::Run()
     /* Send events to appropriate listeners */
     if (_listeners.size() <= 0) return;
 
+    if (!current_listener)
+	current_listener = default_listener;
+    
     while (!_evt_queue.empty()) {
         InputEvent ev = _evt_queue.front();
-
         bool event_received = false;
-        for (auto it = _listeners.begin(); it != _listeners.end(); it++) {
-            if (it->type_mask & ev.eventType) {
-                it->listener->OnListen(ev);
+
+        for (auto& l : _listeners) {
+	    
+	    /* We'll change the current listener
+	       Flush all pending events for this listener */
+	    for (auto it = listener_map.begin();
+		 it != listener_map.end();
+		 ++it) {
+		InputListenerMap m = it->second;
+		if (m.l == l.listener) {
+		    m.l->OnListen(ev);
+			printf("Erasing %d\n", it->first);
+			listener_map.erase(it->first);
+		}
+		
+	    }
+	
+	
+	    event_received = false;
+            if (l.type_mask & ev.eventType) {
+                l.listener->OnListen(ev);
                 event_received = true;
-            }
+	    } else {
+		continue;
+	    }
+
+	    if (l.listener->GetAcception() && event_received) {
+		
+		current_listener = l.listener;
+
+		/* Check the pending event and see if the event is pending but
+		   isn't 'closed', i.e, the 'starting' event has no 'ending'
+		   event (like a keydown isn't accompained with a keyup event) */
+		auto listmap = listener_map.find(ev.eventid);
+		if (listmap != listener_map.end()) {
+		    if (listmap->first == ev.eventid) {
+			if (!listmap->second.l) {
+			    printf("\t registered (id %d) to listener %p\n",
+				   ev.eventid, current_listener);
+			    listmap->second.l = l.listener;
+			}
+		    }
+		}
+	    }
+
         }
 
         if (event_received) {
             _evt_queue.pop();
 	}
-
     }
 
 }
 
 
-void InputManager::AddListener(int types, InputListener* listener)
+void InputManager::AddListener(int types, InputListener* listener, float order)
 {
     InputListenerData ild;
     ild.type_mask = types;
     ild.listener = listener;
+    ild.order = order;
     Log::GetLog()->Write("input-manager",
-			 "Adding listener for event mast %#x", types);
+			 "Adding listener order %.3f for event mast %#x",
+			 order, types);
     _listeners.push_back(ild);
+
+    /* Order by decreasing order number */
+    std::sort(_listeners.begin(), _listeners.end(),
+	      [](const InputListenerData& i1, const InputListenerData& i2) {
+		  return (i1.order >= i2.order);
+	      });
+    
+
 }
 void InputManager::RemoveListener(InputListener* listener)
 {
@@ -194,4 +284,9 @@ void InputManager::RemoveListener(InputListener* listener)
             return;
         }
     }
+}
+
+InputListener* InputManager::GetCurrentListener()
+{
+    return current_listener;
 }

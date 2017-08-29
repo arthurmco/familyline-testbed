@@ -154,15 +154,22 @@ bool GUIRenderer::Render()
    Basically, create and bind the listener */
 void GUIRenderer::InitInput()
 {
+    if (_il) {
+	Log::GetLog()->Fatal("gui-renderer",
+			     "Setting input when input was already set");
+    }
+    
     _il = new Input::InputListener();
     Input::InputManager::GetInstance()->AddListener(
 	Input::EVENT_KEYEVENT | Input::EVENT_MOUSEMOVE | Input::EVENT_MOUSEEVENT,
-	_il);
+	_il, 0.8);
     
 }
 
 bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
-{   
+{
+    _il->GetAcception(); // resets
+    
     /* Send event only to appropriated panel */
     if (_il->PopEvent(ev)) {
 	int x = ev.mousex;
@@ -206,7 +213,8 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 		p.panel->OnFocus();		
 	    }
 
-	    return r;
+	    _il->SetAccept();
+	    return true;
 	}
 
 	if (oldPanel) {
@@ -217,7 +225,8 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 	return false; // No one processed the event
     }
 
-    return true;
+    _il->GetAcception();
+    return false;
 }
 
 /* Redraw the child controls */
@@ -417,3 +426,12 @@ void GUIRenderer::RemovePanel(GUI::IPanel* p)
  {
      SetBounds(x, y, 0, 0);
  }
+
+GUIRenderer::~GUIRenderer()
+{
+    if (_il) {
+	Input::InputManager::GetInstance()->RemoveListener(_il);
+	delete _il;
+    }
+
+}

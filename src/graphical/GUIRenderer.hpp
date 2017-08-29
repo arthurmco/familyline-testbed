@@ -59,7 +59,7 @@ private:
 
     ShaderProgram* sGUI;
 
-    Input::InputListener* _il;
+    Input::InputListener* _il = nullptr;
     GUI::IPanel* oldPanel = nullptr;
 
     GLint attrPos, attrTex;
@@ -100,6 +100,8 @@ public:
     virtual void OnLostFocus() override {}
 
     virtual bool IsDirty() const override { return true; }
+
+    ~GUIRenderer();
 };
 
 } /* Tribalia::Graphics */

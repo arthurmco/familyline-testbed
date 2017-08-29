@@ -133,7 +133,7 @@ bool Panel::ProcessInput(Input::InputEvent& ev)
 	oldPanel = nullptr;
     }
 
-    return false; // No one processed the event
+    return true; // No one processed the event
 
 }
 

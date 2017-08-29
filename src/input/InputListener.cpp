@@ -19,3 +19,18 @@ bool InputListener::PopEvent(InputEvent& ev)
     _events.pop();
     return true;
 }
+
+/* Call if you 'accept' the input, i.e, you already took care of it and
+    no one should take care */
+void InputListener::SetAccept()
+{
+    inputAccepted = true;
+}
+
+/* Retrieves (and resets) input acception status */
+bool InputListener::GetAcception()
+{
+    bool r = inputAccepted;
+    inputAccepted = false;
+    return r;
+}
