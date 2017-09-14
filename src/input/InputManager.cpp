@@ -67,9 +67,26 @@ bool InputManager::PopEvent(InputEvent* ev)
     return true;
 }
 
+unsigned int InputManager::FindEIDForMouseEvent(InputEvent& ev)
+{
+    /* Check the listeners, in reverse order.
+       We want to get the newer ones first */
+    for (auto it = listener_map.crbegin(); it != listener_map.crend(); ++it) {
+	auto list_item = *it;
+	auto other_ev = list_item.second.ev;
+	if (ev.eventType == other_ev.eventType &&
+	    ev.event.mouseev.button == other_ev.event.mouseev.button &&
+	    ev.event.mouseev.status != other_ev.event.mouseev.status)
+	    return list_item.first;
+    }
+
+    return 0;
+}
+
 unsigned int InputManager::FindEIDForKeyEvent(InputEvent& ev)
 {
-    for (const auto& list_item : listener_map) {
+    for (auto it = listener_map.crbegin(); it != listener_map.crend(); ++it) {
+	auto list_item = *it;
 	auto other_ev = list_item.second.ev;
 	if (ev.eventType == other_ev.eventType &&
 	    ev.event.keyev.scancode == other_ev.event.keyev.scancode &&
@@ -79,8 +96,6 @@ unsigned int InputManager::FindEIDForKeyEvent(InputEvent& ev)
 
     return 0;
 }
-
-int lastx, lasty, lastz;
 
 void InputManager::ConvertEvents()
 {
@@ -94,6 +109,8 @@ void InputManager::ConvertEvents()
 	}
 	
         InputEvent ev = {};
+	ev.isPaired = false;
+	
         switch (e.type) {
         case SDL_QUIT:
         case SDL_APP_TERMINATING:
@@ -109,15 +126,20 @@ void InputManager::ConvertEvents()
                 continue;
             break;
 
+	case SDL_KEYUP:
         case SDL_KEYDOWN:
-        case SDL_KEYUP:    
             ev.eventType = EVENT_KEYEVENT;
+	    ev.isPaired = true;
 
             ev.event.keyev.scancode = e.key.keysym.sym;
             ev.event.keyev.status = (e.key.state == SDL_PRESSED) ?
                 KEY_KEYPRESS : KEY_KEYRELEASE;
-            if (e.key.repeat > 0)
-                ev.event.keyev.status = KEY_KEYREPEAT;
+
+            if (e.key.repeat > 0) {
+                ev.event.keyev.status = KEY_KEYREPEAT;  
+	    }
+
+	    printf(">> %x %d\n", e.key.state, e.key.repeat);
 
             ev.event.keyev.char_utf8 = ' ';
 	    if (e.key.state == SDL_PRESSED) {
@@ -131,7 +153,7 @@ void InputManager::ConvertEvents()
 		    ev.eventid = next_eid;
 		}
 	    }
-
+		
             break;
         case SDL_MOUSEMOTION:
 	    ev.eventid = next_eid;
@@ -139,6 +161,11 @@ void InputManager::ConvertEvents()
             lastx = e.motion.x;
             lasty = e.motion.y;
             lastz = 0;
+
+	    if ((last_motion_timestamp + 1) > e.motion.timestamp)
+		continue;		
+
+	    last_motion_timestamp = e.motion.timestamp;
             ev.eventType = EVENT_MOUSEMOVE;
             break;
 	case SDL_MOUSEWHEEL:
@@ -149,6 +176,7 @@ void InputManager::ConvertEvents()
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
 	    ev.eventid = next_eid;
+	    ev.isPaired = true;
             ev.eventType = EVENT_MOUSEEVENT;
             //i will not depend of hacks.
             switch (e.button.button) {
@@ -174,6 +202,19 @@ void InputManager::ConvertEvents()
             if (e.button.clicks % 2 == 0)
                 ev.event.keyev.status = KEY_KEYREPEAT;
 
+	    if (e.button.state == SDL_PRESSED) {
+		ev.eventid = next_eid;
+		listener_map[next_eid] = InputListenerMap(ev, nullptr);
+	    } else {
+		auto eid = FindEIDForMouseEvent(ev);
+		if (eid > 0) {
+		    ev.eventid = eid;
+		} else {
+		    ev.eventid = next_eid;
+		}
+	    }
+
+
             break;
         default:
             continue;
@@ -183,6 +224,8 @@ void InputManager::ConvertEvents()
         ev.mousey = lasty;
         ev.mousez = lastz;
 
+	printf("event id %d generated\n"
+	       "\t typeid %x \n", ev.eventid, ev.eventType);
         _evt_queue.push(ev);
 
 	if (_evt_queue.size() > MAX_INPUT_QUEUE) {
@@ -194,17 +237,15 @@ void InputManager::ConvertEvents()
 }
 
 
-/* Receive events and send them to queues */
+/* Receive events and send them to the listener queues. */
 void InputManager::Run()
 {
-    /* Defaults default listener acceptance to true */
-    default_listener->SetAccept();
-    
     this->ConvertEvents();
     
     /* Send events to appropriate listeners */
     if (_listeners.size() <= 0) return;
-    
+
+    default_listener->SetAccept();
     if (!current_listener) {
 	current_listener = default_listener;
     }
@@ -212,75 +253,22 @@ void InputManager::Run()
     while (!_evt_queue.empty()) {
 		
         InputEvent ev = _evt_queue.front();
-        bool event_received = false;
-	
-        for (auto& l : _listeners) {
-	    	
-	    event_received = false;
-	    if (l.type_mask & ev.eventType) {
-                l.listener->OnListen(ev);
-                event_received = true;
-	    } else {
-		continue;
-	    }
-	    	    
-	    if (l.listener->GetAcception() && event_received) {
-		
-		printf("\t event (%#x) accepted by %s\n",
-		       ev.eventType, current_listener->GetName());
+	_evt_queue.pop();
 
-		/* Add it to the listener map if ID isn't there,
-		 *  remove it if is 
-		 */
-		auto event_iter = listener_map.find(ev.eventid);
-		if (event_iter == listener_map.end()) {
-		    printf("\t registered (id %d type %x) to listener %s\n",
-			       ev.eventid, ev.eventType, l.listener->GetName());
-		    listener_map[ev.eventid] = InputListenerMap(ev, l.listener);
-		    event_iter = listener_map.find(ev.eventid);
-		}
+	/* Check the avaliable listeners. */
+	for (auto& it : _listeners) {
+	    if (it.type_mask & ev.eventType) {
+		it.listener->OnListen(ev);
+		if (!it.listener->GetAcception())
+		    continue;
 
-		printf("\t calling (id %d type %x) to listener %s\n",
-		       ev.eventid, ev.eventType, l.listener->GetName());
-		if (!event_iter->second.l) {
-		    event_iter->second.l = l.listener;
-		}
-		
-		event_iter->second.l->OnListen(ev);
-		listener_map.erase(event_iter);
-       
-		if (current_listener != l.listener) {
-		    /* We'll change the current listener
-		       Flush all pending events for this listener */
-		    for (auto it = listener_map.begin();
-			 it != listener_map.end();
-			 ) {
-			InputListenerMap m = it->second;
-			if (m.l == current_listener) {
-			    m.l->OnListen(ev);
-			    default_listener->OnListen(ev);
-			    printf("Erasing %d from %s\n",
-				   it->first, m.l->GetName());
-			    it = listener_map.erase(it);
-			} else {
-			    ++it;
-			}
-		    }
-		    
-		}
+		printf("\t event id %d popped in %s \n", ev.eventid,
+		       it.listener->GetName());
 
-		current_listener = l.listener;
-	       		
 		break;
 	    }
-
-        }
-
-        if (event_received) {
-            _evt_queue.pop();
-	} else {
-	    current_listener = nullptr;
 	}
+      
     }
 
 }

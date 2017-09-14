@@ -168,8 +168,7 @@ void GUIRenderer::InitInput()
 
 bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 {
-    _il->GetAcception(); // resets
-    
+
     /* Send event only to appropriated panel */
     if (_il->PopEvent(ev)) {
 	int x = ev.mousex;
@@ -194,6 +193,8 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 		continue;
 	    }
 
+	    _il->SetAccept();
+	    
 	    // Send relative mouse coordinates
 	    Input::InputEvent rev;
 	    rev = ev;
@@ -213,7 +214,6 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 		p.panel->OnFocus();		
 	    }
 
-	    _il->SetAccept();
 	    return true;
 	}
 
@@ -221,11 +221,11 @@ bool GUIRenderer::ProcessInput(Input::InputEvent& ev)
 	    oldPanel->OnLostFocus();
 	    oldPanel = nullptr;
 	}
-	
+
+	_il->GetAcception(); // resets
 	return false; // No one processed the event
     }
 
-    _il->GetAcception();
     return false;
 }
 

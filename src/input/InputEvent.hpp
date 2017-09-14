@@ -31,12 +31,16 @@ enum KeyStatus {
     KEY_KEYREPEAT,
 };
 
-struct InputEvent {
+struct InputEvent {    
     // Event ID
     unsigned int eventid;
     
     //Event type (key or mouse event)
     int eventType;
+
+    //Is event paired with another event?
+    bool isPaired;
+    
     //Mouse X, Y and Z (last one reserved for holographic displays)
     int mousex, mousey, mousez;
     union {

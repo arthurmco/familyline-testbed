@@ -59,7 +59,12 @@ namespace Tribalia::Input {
 	InputListener* current_listener = nullptr;
 	unsigned int _last_eid = 0;
 
-	unsigned int FindEIDForKeyEvent(InputEvent& ev);
+	unsigned int FindEIDForKeyEvent(InputEvent& ev);	
+	unsigned int FindEIDForMouseEvent(InputEvent& ev);
+
+	int lastx, lasty, lastz;
+	std::vector<int> lastscancodes;
+	unsigned int last_motion_timestamp = 0;
 
 	/* Convert the SDL event in the event queue to 
 	   Tribalia events */

@@ -10,6 +10,7 @@ void Cursor::GetPositions(int& x, int& y)
     if (_listener->PopEvent(ev)) {
         _x = ev.mousex;
         _y = ev.mousey;
+	_listener->SetAccept();
     }
 
     x = _x;
@@ -18,6 +19,6 @@ void Cursor::GetPositions(int& x, int& y)
 
 Cursor::Cursor()
 {
-    _listener = new InputListener{};
+    _listener = new InputListener{"cursor"};
     InputManager::GetInstance()->AddListener(EVENT_MOUSEMOVE, _listener, 0.01);
 }
