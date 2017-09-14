@@ -1,6 +1,15 @@
 #include "InputListener.hpp"
+#include "../Log.hpp"
 
 using namespace Tribalia::Input;
+
+InputListener::InputListener(const char* name)
+{
+    this->name = const_cast<char*>(name);
+    Log::GetLog()->Write("input-listener", "Created input listener '%s'",
+			 name);
+}
+    
 
 /* Called only by the InputManager class when you receive a wished event */
 void InputListener::OnListen(InputEvent e)
@@ -33,4 +42,14 @@ bool InputListener::GetAcception()
     bool r = inputAccepted;
     inputAccepted = false;
     return r;
+}
+
+char* InputListener::GetName() const
+{
+    return this->name;
+}
+
+void InputListener::SetName(char* n)
+{
+    this->name = n;
 }

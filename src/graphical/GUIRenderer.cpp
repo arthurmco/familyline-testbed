@@ -159,7 +159,7 @@ void GUIRenderer::InitInput()
 			     "Setting input when input was already set");
     }
     
-    _il = new Input::InputListener();
+    _il = new Input::InputListener("gui-listener");
     Input::InputManager::GetInstance()->AddListener(
 	Input::EVENT_KEYEVENT | Input::EVENT_MOUSEMOVE | Input::EVENT_MOUSEEVENT,
 	_il, 0.8);

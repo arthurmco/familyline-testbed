@@ -60,6 +60,10 @@ namespace Tribalia::Input {
 	unsigned int _last_eid = 0;
 
 	unsigned int FindEIDForKeyEvent(InputEvent& ev);
+
+	/* Convert the SDL event in the event queue to 
+	   Tribalia events */
+	void ConvertEvents();
 	
     public:
 	void Initialize();

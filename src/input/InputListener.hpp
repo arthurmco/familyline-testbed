@@ -10,15 +10,17 @@
 #ifndef INPUTLISTENER_HPP
 #define INPUTLISTENER_HPP
 
-namespace Tribalia {
-namespace Input {
+namespace Tribalia::Input {
 
 class InputListener {
 private:
     std::queue<InputEvent> _events;
     bool inputAccepted = false;
+    char* name;
     
 public:
+    InputListener(const char* name = "default");
+    
     /* Called only by the InputManager class when you receive a wished event */
     void OnListen(InputEvent e);
 
@@ -31,9 +33,11 @@ public:
 
     /* Retrieves (and resets) input acception status */
     bool GetAcception();
+
+    char* GetName() const ;
+    void SetName(char*);
 };
 
-}
 }
 
 #endif /* end of include guard: INPUTLISTENER_HPP */

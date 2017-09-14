@@ -1,4 +1,3 @@
-
 #include "InputManager.hpp"
 
 using namespace Tribalia::Input;
@@ -83,10 +82,9 @@ unsigned int InputManager::FindEIDForKeyEvent(InputEvent& ev)
 
 int lastx, lasty, lastz;
 
-/* Receive events and send them to queues */
-void InputManager::Run()
+void InputManager::ConvertEvents()
 {
-    /* Get event data from SDL */
+        /* Get event data from SDL */
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
 	auto next_eid = ++_last_eid;
@@ -122,7 +120,7 @@ void InputManager::Run()
                 ev.event.keyev.status = KEY_KEYREPEAT;
 
             ev.event.keyev.char_utf8 = ' ';
-	    if (e.type == SDL_KEYDOWN) {
+	    if (e.key.state == SDL_PRESSED) {
 		ev.eventid = next_eid;
 		listener_map[next_eid] = InputListenerMap(ev, nullptr);
 	    } else {
@@ -193,64 +191,95 @@ void InputManager::Run()
 
     }
 
+}
+
+
+/* Receive events and send them to queues */
+void InputManager::Run()
+{
+    /* Defaults default listener acceptance to true */
+    default_listener->SetAccept();
+    
+    this->ConvertEvents();
+    
     /* Send events to appropriate listeners */
     if (_listeners.size() <= 0) return;
-
-    if (!current_listener)
-	current_listener = default_listener;
     
+    if (!current_listener) {
+	current_listener = default_listener;
+    }
+   
     while (!_evt_queue.empty()) {
+		
         InputEvent ev = _evt_queue.front();
         bool event_received = false;
-
+	
         for (auto& l : _listeners) {
-	    
-	    /* We'll change the current listener
-	       Flush all pending events for this listener */
-	    for (auto it = listener_map.begin();
-		 it != listener_map.end();
-		 ++it) {
-		InputListenerMap m = it->second;
-		if (m.l == l.listener) {
-		    m.l->OnListen(ev);
-			printf("Erasing %d\n", it->first);
-			listener_map.erase(it->first);
-		}
-		
-	    }
-	
-	
+	    	
 	    event_received = false;
-            if (l.type_mask & ev.eventType) {
+	    if (l.type_mask & ev.eventType) {
                 l.listener->OnListen(ev);
                 event_received = true;
 	    } else {
 		continue;
 	    }
-
+	    	    
 	    if (l.listener->GetAcception() && event_received) {
 		
-		current_listener = l.listener;
+		printf("\t event (%#x) accepted by %s\n",
+		       ev.eventType, current_listener->GetName());
 
-		/* Check the pending event and see if the event is pending but
-		   isn't 'closed', i.e, the 'starting' event has no 'ending'
-		   event (like a keydown isn't accompained with a keyup event) */
-		auto listmap = listener_map.find(ev.eventid);
-		if (listmap != listener_map.end()) {
-		    if (listmap->first == ev.eventid) {
-			if (!listmap->second.l) {
-			    printf("\t registered (id %d) to listener %p\n",
-				   ev.eventid, current_listener);
-			    listmap->second.l = l.listener;
+		/* Add it to the listener map if ID isn't there,
+		 *  remove it if is 
+		 */
+		auto event_iter = listener_map.find(ev.eventid);
+		if (event_iter == listener_map.end()) {
+		    printf("\t registered (id %d type %x) to listener %s\n",
+			       ev.eventid, ev.eventType, l.listener->GetName());
+		    listener_map[ev.eventid] = InputListenerMap(ev, l.listener);
+		    event_iter = listener_map.find(ev.eventid);
+		}
+
+		printf("\t calling (id %d type %x) to listener %s\n",
+		       ev.eventid, ev.eventType, l.listener->GetName());
+		if (!event_iter->second.l) {
+		    event_iter->second.l = l.listener;
+		}
+		
+		event_iter->second.l->OnListen(ev);
+		listener_map.erase(event_iter);
+       
+		if (current_listener != l.listener) {
+		    /* We'll change the current listener
+		       Flush all pending events for this listener */
+		    for (auto it = listener_map.begin();
+			 it != listener_map.end();
+			 ) {
+			InputListenerMap m = it->second;
+			if (m.l == current_listener) {
+			    m.l->OnListen(ev);
+			    default_listener->OnListen(ev);
+			    printf("Erasing %d from %s\n",
+				   it->first, m.l->GetName());
+			    it = listener_map.erase(it);
+			} else {
+			    ++it;
 			}
 		    }
+		    
 		}
+
+		current_listener = l.listener;
+	       		
+		break;
 	    }
 
         }
 
         if (event_received) {
             _evt_queue.pop();
+	} else {
+	    current_listener = nullptr;
 	}
     }
 
