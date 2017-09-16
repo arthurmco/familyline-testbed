@@ -22,33 +22,6 @@ bool InputManager::GetEvent(InputEvent* ev)
         return false;
 
     *ev = _evt_queue.front();
-
-    // printf("\t event: ");
-    // switch (ev->eventType) {
-    //     case EVENT_MOUSEEVENT:
-    //         printf("mouse, button %d , status %d ",
-    //             ev->event.mouseev.button, ev->event.mouseev.status);
-    //         break;
-    //
-    //     case EVENT_KEYEVENT:
-    //         printf("keyboard, scancode %d (char %c), status %d",
-    //             ev->event.keyev.scancode,
-    //             (char)ev->event.keyev.char_utf8 & 0xff,
-    //             ev->event.keyev.status);
-    //         break;
-    //
-    //     case EVENT_FINISH:
-    //         printf("finish requested");
-    //         break;
-    //
-    //     default:
-    //         printf("unknown");
-    //         break;
-    // }
-    //
-    // printf(", mouse coords (%d %d %d)\n",
-    //     ev->mousex, ev->mousey, ev->mousez);
-
     return true;
 }
 
@@ -127,6 +100,10 @@ void InputManager::ConvertEvents()
             break;
 
 	case SDL_KEYUP:
+	    std::remove_if(lastscancodes.begin(), lastscancodes.end(),
+			   [&e](int val) { return val == e.key.keysym.sym; });
+	    [[fallthrough]];
+	    
         case SDL_KEYDOWN:
             ev.eventType = EVENT_KEYEVENT;
 	    ev.isPaired = true;
@@ -136,7 +113,16 @@ void InputManager::ConvertEvents()
                 KEY_KEYPRESS : KEY_KEYRELEASE;
 
             if (e.key.repeat > 0) {
-                ev.event.keyev.status = KEY_KEYREPEAT;  
+                ev.event.keyev.status = KEY_KEYREPEAT;
+
+		if (std::find(lastscancodes.begin(), lastscancodes.end(),
+			      ev.event.keyev.scancode) == lastscancodes.end()) {
+		    lastscancodes.push_back(ev.event.keyev.scancode);	    
+		} else {
+		    /* Only let one repeat event pass */
+		    continue;		    		    
+		}
+		
 	    }
 
 	    printf(">> %x %d\n", e.key.state, e.key.repeat);
@@ -251,9 +237,26 @@ void InputManager::Run()
     }
    
     while (!_evt_queue.empty()) {
-		
-        InputEvent ev = _evt_queue.front();
+	InputEvent ev = _evt_queue.front();
 	_evt_queue.pop();
+
+	/* Resolve paired events */
+	for (auto it = listener_map.begin();
+	     it != listener_map.end();
+	    ) {
+	    if (it->first == ev.eventid) {
+		if (it->second.l) {
+		    printf("\t eid %d resolved\n", it->first);
+		    it->second.l->OnListen(ev);
+
+		    /* Small fix to solve that weird bug when camera was
+		       forever going */
+		    default_listener->OnListen(ev);
+		}
+	    }
+
+	    it++;
+	}
 
 	/* Check the avaliable listeners. */
 	for (auto& it : _listeners) {
@@ -264,6 +267,16 @@ void InputManager::Run()
 
 		printf("\t event id %d popped in %s \n", ev.eventid,
 		       it.listener->GetName());
+
+		current_listener = it.listener;
+
+		/* Attribute paired events to the current listener */
+		for(auto& list : listener_map) {
+		    if (!list.second.l) {
+			list.second.l = current_listener;
+			printf("\t eid is paired\n");
+		    }
+		}
 
 		break;
 	    }
