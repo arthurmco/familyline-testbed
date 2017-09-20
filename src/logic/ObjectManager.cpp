@@ -5,6 +5,10 @@ using namespace Tribalia::Logic;
 
 int ObjectManager::AssignID()
 {
+    /* No free ID? Return the obvious choice */
+    if (_freeID.empty())
+	return _objects.size();
+    
     /* Check the itens on freeID list. Returns the first */
     for (auto it = _freeID.begin(); it != _freeID.end(); ++it){
             int id = *it;
@@ -12,9 +16,7 @@ int ObjectManager::AssignID()
             return id;
     }
 
-    /* No free ID? Return the obvious choice */
     return _objects.size();
-
 }
 
 /* Register an object. Return its ID
