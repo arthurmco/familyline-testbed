@@ -25,6 +25,8 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
+namespace Tribalia::Server {
+
 class Client {
 private:
 	int sockfd;
@@ -42,4 +44,5 @@ public:
 	void Close();
 };
 
+}
 #endif

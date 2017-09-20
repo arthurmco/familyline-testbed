@@ -11,7 +11,7 @@ project(Tribalia)
 SET(GEN_HEADER "${CMAKE_SOURCE_DIR}/src/EnviroDefs.h")
 configure_file("${CMAKE_SOURCE_DIR}/src/EnviroDefs.h.in" "${CMAKE_SOURCE_DIR}/src/EnviroDefs.h" @ONLY)
 
-SET(T_VERSION "0.1.5")
+SET(T_VERSION "0.1.6")
 
 file(APPEND "${GEN_HEADER}" "#define VERSION \"${T_VERSION}\" \n")
 

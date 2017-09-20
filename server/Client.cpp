@@ -1,4 +1,5 @@
 #include "Client.hpp"
+using namespace Tribalia::Server;
 
 Client::Client(int sockfd, struct in_addr addr)
 {
