@@ -1,49 +1,61 @@
 #include "Client.hpp"
+#include <cstdio>
 using namespace Tribalia::Server;
 
 Client::Client(int sockfd, struct in_addr addr)
 {
-#ifndef _WIN32
-	this->sockfd = sockfd;
-	this->addr = addr;
+    this->sockfd = sockfd;
+    this->addr = addr;
 
-	// Set socket to non-blocking
-	int flags = fcntl(sockfd, F_GETFL, 0);
-	fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
-#endif
 }
 
 void Client::Send(char* m)
 {
-#ifndef _WIN32
-	write(this->sockfd, m, strlen(m));
-#endif
+    write(this->sockfd, m, strlen(m));
 }
 
 /* Returns false if no message received,
  * or true if message received, and outputs the message on m */
 bool Client::Receive(char* m, size_t len)
 {
-#ifndef _WIN32
-	auto res = read(this->sockfd, m, len);	
-	if (res < 0) {
-		if (errno == EAGAIN || errno == EINTR) {
-			/* 	No data avaliable
-			 	Even if we're interrupted, show this as no data avaliable,
-				because you can always come back to get the real data.
-			 */
-			return false;
-		}
-	}
-#endif
-	return true;
+    if (buffer_ptr_send <= buffer_ptr_recv) {
+	buffer_ptr_send = buffer_ptr_recv = 0;
+	return false;
+    }
 
+    len = std::min(len, (buffer_ptr_send - buffer_ptr_recv));
+    strncpy(m, &buffer[buffer_ptr_recv], len);
+
+    if (buffer_ptr_recv+len > MAX_CLIENT_BUFFER) {
+	fprintf(stderr, "Error: client buffer %d overflow recv\n", this->sockfd);
+	return false;
+    }
+
+    buffer_ptr_recv += len;
+    return true;
+}
+
+/* Injects message in the client
+   Only meant to be called from the server */
+void Client::InjectMessage(char* m, size_t len)
+{
+    if (buffer_ptr_send <= buffer_ptr_recv) {
+	buffer_ptr_send = buffer_ptr_recv = 0;
+    }
+    
+    strncpy(&buffer[buffer_ptr_send], m, len);
+
+    if (buffer_ptr_send+len > MAX_CLIENT_BUFFER) {
+	fprintf(stderr, "Error: client buffer %d overflow\n", this->sockfd);
+	return;
+    }
+
+    buffer_ptr_send += len;
 }
 
 
 void Client::Close()
 {
-#ifndef _WIN32
-	close(this->sockfd);
-#endif
+    shutdown(this->sockfd, 2);
+    close(this->sockfd);
 }

@@ -109,9 +109,11 @@ Client* ServerManager::RetrieveClient(bool blocks)
 	write(clisockfd, (void*)strmsg, strlen(strmsg));
     }
 
-    shutdown(clisockfd, 2);    
-    close(clisockfd);
-    return nullptr;
+    std::shared_ptr<Client> c = std::make_shared<Client>(clisockfd,
+							 cliaddr.sin_addr);
+    printf("Client added (fd %d), address %s\n", clisockfd, ipstr);    
+    clients.push_back(c);
+    return c.get();
 }
 
 ServerManager::~ServerManager()

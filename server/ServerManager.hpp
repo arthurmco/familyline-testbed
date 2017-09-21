@@ -5,6 +5,9 @@
    Copyright (C) 2017 Arthur M
 
 ***/
+#include <vector>
+#include <memory>
+
 #include <sys/types.h>
 #ifndef _WIN32
 #include <sys/socket.h>
@@ -34,10 +37,12 @@ namespace Tribalia::Server {
     private:
 	unsigned int port;
 	
-	int sockfd;
+	socket_t sockfd;
 	struct sockaddr_in addr;
 
 	bool started = false;
+
+	std::vector<std::shared_ptr<Client>> clients;
 	
     public:
         /* Starts a server manager in the specified port */
@@ -49,6 +54,10 @@ namespace Tribalia::Server {
 	 */
 	Client* RetrieveClient(bool blocks = false);
 
+
+	/* Poll for messages and redirect them to the appropriate client */
+	void RetrieveMessages();
+	
 	~ServerManager();
 
     };
