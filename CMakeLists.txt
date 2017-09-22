@@ -47,12 +47,18 @@ add_executable(tribalia-server ${SRC_SERVER})
 include("test/unit-tests.cmake")
 
 # Add packages natively supported by cmake
-find_package(GLEW REQUIRED HINTS $ENV{TRIBALIA_FIND_PKG})
-find_package(DevIL REQUIRED HINTS $ENV{TRIBALIA_FIND_PKG})
+find_package(GLEW REQUIRED)
+find_package(DevIL REQUIRED)
 
 include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR})
 
 if (MSVC)
+
+  # Add packages natively supported by cmake
+  find_package(GLEW REQUIRED HINTS $ENV{TRIBALIA_FIND_PKG})
+  find_package(DevIL REQUIRED HINTS $ENV{TRIBALIA_FIND_PKG})
+
+  
   # Set include directories
   SET(SDL_INCLUDE "." CACHE PATH "SDL2 include directory")
   SET(GLM_INCLUDE "." CACHE PATH "GLM include directory")
