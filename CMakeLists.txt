@@ -4,7 +4,7 @@
 # Copyright (C) 2016 Arthur M
 ####
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 project(Tribalia)
 
@@ -38,8 +38,6 @@ file(GLOB SRC_BASE "${CMAKE_SOURCE_DIR}/src/*.cpp")
 # Tribalia server data
 file(GLOB_RECURSE SRC_SERVER "${CMAKE_SOURCE_DIR}/server/*.cpp")
 
-#include_directories(${SDL2_INCLUDE_DIR})
-
 #Compilation data
 
 add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT} ${SRC_OBJECTS})
@@ -48,41 +46,40 @@ add_executable(tribalia-server ${SRC_SERVER})
 # Add test suites
 include("test/unit-tests.cmake")
 
+# Add packages natively supported by cmake
+find_package(GLEW REQUIRED HINTS $ENV{TRIBALIA_FIND_PKG})
+find_package(DevIL REQUIRED HINTS $ENV{TRIBALIA_FIND_PKG})
+
+include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR})
+
 if (MSVC)
   # Set include directories
   SET(SDL_INCLUDE "." CACHE PATH "SDL2 include directory")
-  SET(GLEW_INCLUDE "." CACHE PATH "GLEW include directory")
   SET(GLM_INCLUDE "." CACHE PATH "GLM include directory")
-  SET(DEVIL_INCLUDE "." CACHE PATH "DevIL include directory")
   SET(CAIRO_INCLUDE "." CACHE PATH "Cairo include directory")
 
-  include_directories(AFTER ${SDL_INCLUDE} ${GLEW_INCLUDE} ${GLM_INCLUDE} ${DEVIL_INCLUDE} ${CAIRO_INCLUDE})
+  include_directories(AFTER ${SDL_INCLUDE} ${GLM_INCLUDE} ${CAIRO_INCLUDE})
 
   #Set library directories
   SET(SDL_LIB_FOLDER "." CACHE PATH "SDL2 library directory")
-  SET(GLEW_LIB_FOLDER "." CACHE PATH "GLEW library directory")
-  SET(DEVIL_LIB_FOLDER "." CACHE PATH "DevIL library folder")
   SET(CAIRO_LIB_FOLDER "." CACHE PATH "Cairo library folder")
-
+  
   find_library(SDL_LIB "SDL2.lib" ${SDL_LIB_FOLDER})
-  find_library(GLEW_LIB "glew32.lib" ${GLEW_LIB_FOLDER})
-  find_library(DEVIL_LIB "devil.lib" ${DEVIL_LIB_FOLDER})
-  find_library(DEVIL_ILU_LIB "ILU.lib" ${DEVIL_LIB_FOLDER})
   find_library(CAIRO_LIB "cairo.lib" ${CAIRO_LIB_FOLDER})
 
   link_directories(${SDL_LIB} ${GLEW_LIB})
-
+  
   target_link_libraries(tribalia ${SDL_LIB})
   target_link_libraries(tribalia "opengl32.lib")
-  target_link_libraries(tribalia ${GLEW_LIB})
-  target_link_libraries(tribalia ${DEVIL_LIB})
-  target_link_libraries(tribalia ${DEVIL_ILU_LIB})
+  target_link_libraries(tribalia ${GLEW_LIBRARY})
+  target_link_libraries(tribalia ${IL_LIBRARIES})
+  target_link_libraries(tribalia ${ILU_LIBRARIES})
   target_link_libraries(tribalia ${CAIRO_LIB})
 
   if (DO_TESTS)
   	target_link_libraries(tribalia-tests ${SDL_LIB})
   	target_link_libraries(tribalia-tests "opengl32.lib")
-  	target_link_libraries(tribalia-tests ${GLEW_LIB})
+  	target_link_libraries(tribalia-tests ${GLEW_LIBRARY})
   	target_link_libraries(tribalia-tests ${DEVIL_LIB})
   	target_link_libraries(tribalia-tests ${DEVIL_ILU_LIB})
   	target_link_libraries(tribalia-tests ${CAIRO_LIB})
@@ -94,27 +91,37 @@ else()
 	
   # Some compiler-dependant options
   option(IS_DEBUG "Set if you want to output debugging symbols" OFF)
+
+  find_package(PkgConfig REQUIRED)
+  pkg_search_module(SDL2 REQUIRED sdl2) # finds sdl
+  pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
+  pkg_search_module(GLM REQUIRED glm) # finds glm
+
   
-  target_link_libraries(tribalia "SDL2")
+  target_link_libraries(tribalia ${SDL2_LIBRARIES})
   target_link_libraries(tribalia "GL")
-  target_link_libraries(tribalia "GLEW")
-  target_link_libraries(tribalia "IL")
-  target_link_libraries(tribalia "ILU")
-  target_link_libraries(tribalia "cairo")
+  target_link_libraries(tribalia ${GLEW_LIBRARY})
+  target_link_libraries(tribalia ${IL_LIBRARIES})
+  target_link_libraries(tribalia ${ILU_LIBRARIES})
+  target_link_libraries(tribalia ${CAIRO_LIBRARIES})
+  target_link_libraries(tribalia ${GLM_LIBRARIES})
 
   if(DO_TESTS)
-  	target_link_libraries(tribalia-tests "SDL2")
+  	target_link_libraries(tribalia-tests ${SDL2_LIBRARIES})
   	target_link_libraries(tribalia-tests "GL")
-  	target_link_libraries(tribalia-tests "GLEW")
-  	target_link_libraries(tribalia-tests "IL")
-  	target_link_libraries(tribalia-tests "ILU")
-  	target_link_libraries(tribalia-tests "cairo")
+  	target_link_libraries(tribalia-tests ${GLEW_LIBRARY})
+  	target_link_libraries(tribalia-tests ${IL_LIBRARIES})
+  	target_link_libraries(tribalia-tests ${ILU_LIBRARIES})
+  	target_link_libraries(tribalia-tests ${CAIRO_LIBRARIES})
+	target_link_libraries(tribalia-tests ${GLM_LIBRARIES})
   endif(DO_TESTS)
 
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SDL2_CFLAGS_OTHER}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra")
+  include_directories(AFTER ${SDL2_INCLUDE_DIRS} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS})
 
   if (IS_DEBUG)
-		  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
   endif(IS_DEBUG)
 
 endif(MSVC)
@@ -139,6 +146,7 @@ endif(WIN32 OR USE_RELATIVE_PATH)
 
 configure_file("src/config.h.in" "src/config.h")
 
+# Install locations
 install(TARGETS tribalia DESTINATION bin)
 install(DIRECTORY shaders DESTINATION share/tribalia)
 install(DIRECTORY textures DESTINATION share/tribalia)

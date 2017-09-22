@@ -19,3 +19,8 @@ If you are building on Linux, type the following command:
 
 `# apt-get install libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev
 libcairo2 libcairo2-dev`
+
+
+## Caveats
+
+On Windows, you will might need to use the environment variable `TRIBALIA_FIND_PKG` to tell cmake where some dependencies can be found.
