@@ -62,6 +62,7 @@ namespace Tribalia::Server {
 	bool IsClosed();
 
 	socket_t GetSocket();
+	struct in_addr GetAddress();
     };
 
 }

@@ -20,7 +20,7 @@ ServerManager::ServerManager(int port)
     }
     
 
-    if (listen(sockfd, 0) < 0) {
+    if (listen(sockfd, 12) < 0) {
 	char* syserr = strerror(errno);
 	char excerr[strlen(syserr) + 48];
 	sprintf(excerr, "Error while listening socket: %s", syserr);
@@ -109,7 +109,9 @@ do_retrieve_client:
 	char* stranswer = new char[600];
 
 	sprintf(stranswer, "<html>"
-	    "<head><title>Tribalia Test Server</title></head>"
+	    "<head><title>Tribalia Test Server</title>"
+		"<meta name=\"viewport\" content=\"width=device-width, "
+		"initial-scale=1\"></head>"
 		"<body>This is a test message from the server. <br/> "
 		"You are <b>%s</b></body>", ipstr);
 
@@ -173,7 +175,7 @@ void ServerManager::RetrieveMessages() {
     auto res = ppoll(pfds, client_qt, &timeout, &sigset);
     if (res > 0) {
 	// some descriptors are ready
-	printf("Retrieving message from sockets: ");
+//	printf("Retrieving message from sockets: ");
     
 	char readbuf[1536];
 	for (size_t i = 0; i < client_qt; i++) {

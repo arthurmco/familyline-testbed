@@ -66,7 +66,5 @@ void Client::Close()
 
 bool Client::IsClosed() { return this->closed; }
 
-socket_t Client::GetSocket()
-{
-    return this->sockfd;
-}
+socket_t Client::GetSocket() { return this->sockfd; }
+struct in_addr Client::GetAddress() { return this->addr; }
