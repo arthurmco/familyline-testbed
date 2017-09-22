@@ -30,13 +30,30 @@ ServerManager::ServerManager(int port)
 
     started = true;
 }
-	
+
+bool blocked = true;
+
 /* Retrieve a client, if available
    If blocks = true, blocks until next client is available.
    If is false, then return null if no client available
 */
 Client* ServerManager::RetrieveClient(bool blocks)
 {
+    if (blocked != blocks) {
+	/* Set socket to nonblocking if set to nonblock, or to
+	 blocking if not*/
+	int flags = fcntl(this->sockfd, F_GETFL, 0);
+	if (flags < 0) {
+	    return nullptr;
+	}
+	flags = blocks ? (flags &= O_NONBLOCK) : (flags |= O_NONBLOCK);
+	fcntl(this->sockfd, F_SETFL, flags);
+    }
+
+    blocked = blocks;
+do_retrieve_client:
+
+    
     struct sockaddr_in cliaddr;
     memset(&cliaddr, 0, sizeof(struct sockaddr_in));
 
@@ -44,6 +61,11 @@ Client* ServerManager::RetrieveClient(bool blocks)
     int clisockfd = accept(sockfd, (struct sockaddr*)&cliaddr, &cliaddr_len);
 
     if (clisockfd < 0) {
+	if (errno == EAGAIN || errno == EWOULDBLOCK) {
+	    if (!blocks)
+		return nullptr;
+	}
+	
 	char* syserr = strerror(errno);
 	char excerr[strlen(syserr) + 48];
 	sprintf(excerr, "Error while accepting socket: %s", syserr);
@@ -64,7 +86,14 @@ Client* ServerManager::RetrieveClient(bool blocks)
 	sprintf(excerr, "Error while reading from socket: %s", syserr);
 	throw ServerManagerError{excerr};
     }
-    
+
+    if (sread == 0) {
+	if (blocks)
+	    goto do_retrieve_client;
+	
+	return nullptr;
+    }
+
     printf("%zu bytes read, content follows:\n", (size_t)sread);
     str[sread+1] = 0;
     printf("%s\n===========================", str);
@@ -114,6 +143,78 @@ Client* ServerManager::RetrieveClient(bool blocks)
     printf("Client added (fd %d), address %s\n", clisockfd, ipstr);    
     clients.push_back(c);
     return c.get();
+}
+
+
+/* Poll for messages and redirect them to the appropriate client */
+void ServerManager::RetrieveMessages() {
+    std::remove_if(clients.begin(), clients.end(), [](std::shared_ptr<Client> c)
+		   {  return c->IsClosed(); });
+    
+    auto client_qt = clients.size();
+    if (client_qt == 0)
+	return;
+
+    /* Build the pollfds */
+    struct pollfd pfds[client_qt];
+    memset(pfds, 0, sizeof(pfds));
+
+    const struct timespec timeout = {0, 30000000}; // 30 ms timeout
+    sigset_t sigset;
+    sigemptyset(&sigset);
+    sigaddset(&sigset, SIGINT);
+    sigaddset(&sigset, SIGTERM);
+    
+    for (size_t i = 0; i < client_qt; i++) {
+	pfds[i].fd = clients[i]->GetSocket();
+	pfds[i].events = POLLIN | POLLHUP;  // poll for read and conn end
+    }
+
+    auto res = ppoll(pfds, client_qt, &timeout, &sigset);
+    if (res > 0) {
+	// some descriptors are ready
+	printf("Retrieving message from sockets: ");
+    
+	char readbuf[1536];
+	for (size_t i = 0; i < client_qt; i++) {
+	    if (pfds[i].revents) {
+		if (pfds[i].revents & POLLIN) {
+		    auto& cli = clients[i];
+
+		    auto readnum = read(cli->GetSocket(), (void*)readbuf, 1535);
+		    if (readnum == 0)
+			continue;
+		    
+		    printf("%d (%zd)", cli->GetSocket(), readnum);
+		    
+		    cli->InjectMessage(readbuf, size_t(readnum));
+		    memset(readbuf, 0, readnum);
+		}
+
+		if (pfds[i].revents & POLLHUP) {
+		    auto& cli = clients[i];
+		    printf(" %d (disconnected)", cli->GetSocket());
+
+		    clients[i]->Close();
+		}
+
+		printf("\n");
+
+	    }
+	}
+	
+
+    } else if (res == 0) {
+	// none ready
+	return;
+    } else {
+	// error
+	char* syserr = strerror(errno);
+	char excerr[strlen(syserr) + 48];
+	sprintf(excerr, "Error while polling socket: %s", syserr);
+	throw ServerManagerError{excerr};
+    }
+
 }
 
 ServerManager::~ServerManager()

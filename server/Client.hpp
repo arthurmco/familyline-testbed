@@ -41,6 +41,8 @@ namespace Tribalia::Server {
 
 	size_t buffer_ptr_send = 0, buffer_ptr_recv = 0;
 	char buffer[MAX_CLIENT_BUFFER];
+
+	bool closed = true;
 	
     public:
 	Client(int sockfd, struct in_addr addr);
@@ -57,6 +59,7 @@ namespace Tribalia::Server {
 	// void InjectMessage(MessagePacket pkt)
 
 	void Close();
+	bool IsClosed();
 
 	socket_t GetSocket();
     };

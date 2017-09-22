@@ -9,6 +9,7 @@
 #include <memory>
 
 #include <sys/types.h>
+
 #ifndef _WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -16,8 +17,13 @@
 
 /* for fd access (read(), close(), write()) */
 #include <unistd.h>
+
+#include <signal.h>
+#include <poll.h>
+
 #else
 #include <Windows.h>
+
 #endif
 
 #include <fcntl.h>
@@ -53,7 +59,6 @@ namespace Tribalia::Server {
 	   If is false, then return null if no client available
 	 */
 	Client* RetrieveClient(bool blocks = false);
-
 
 	/* Poll for messages and redirect them to the appropriate client */
 	void RetrieveMessages();

@@ -6,7 +6,7 @@ Client::Client(int sockfd, struct in_addr addr)
 {
     this->sockfd = sockfd;
     this->addr = addr;
-
+    this->closed = false;
 }
 
 void Client::Send(char* m)
@@ -56,6 +56,17 @@ void Client::InjectMessage(char* m, size_t len)
 
 void Client::Close()
 {
-    shutdown(this->sockfd, 2);
-    close(this->sockfd);
+    if (!this->closed) {
+	shutdown(this->sockfd, 2);
+	close(this->sockfd);
+    }
+
+    this->closed = true;
+}
+
+bool Client::IsClosed() { return this->closed; }
+
+socket_t Client::GetSocket()
+{
+    return this->sockfd;
 }
