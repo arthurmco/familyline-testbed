@@ -157,7 +157,7 @@ do_retrieve_client:
 /* Poll for messages and redirect them to the appropriate client */
 void ServerManager::RetrieveMessages() {
     std::remove_if(clients.begin(), clients.end(), [](std::shared_ptr<Client> c)
-		   {  return c->IsClosed(); });
+		   {  return !c || !c.get() || c->IsClosed(); });
     
     auto client_qt = clients.size();
     if (client_qt == 0)
@@ -172,26 +172,35 @@ void ServerManager::RetrieveMessages() {
     sigemptyset(&sigset);
     sigaddset(&sigset, SIGINT);
     sigaddset(&sigset, SIGTERM);
-    
+
+    size_t client_poll_qt = 0;
     for (size_t i = 0; i < client_qt; i++) {
-	pfds[i].fd = clients[i]->GetSocket();
-	pfds[i].events = POLLIN | POLLHUP;  // poll for read and conn end
+	if (clients[i]) {
+	    pfds[i].fd = clients[i]->GetSocket();
+	    pfds[i].events = POLLIN | POLLHUP;  // poll for read and conn end
+	    client_poll_qt++;
+	}
     }
 
-    auto res = ppoll(pfds, client_qt, &timeout, &sigset);
+    auto res = ppoll(pfds, client_poll_qt, &timeout, &sigset);
     if (res > 0) {
 	// some descriptors are ready
 //	printf("Retrieving message from sockets: ");
     
 	char readbuf[1536];
-	for (size_t i = 0; i < client_qt; i++) {
+	for (size_t i = 0; i < client_poll_qt; i++) {
 	    if (pfds[i].revents) {
 		if (pfds[i].revents & POLLIN) {
 		    auto& cli = clients[i];
 
 		    auto readnum = read(cli->GetSocket(), (void*)readbuf, 1535);
-		    if (readnum == 0)
+		    if (readnum == 0) {
+			/* Return 0 in reads means remote disconnection  */
+			printf(" %d (disconnected)", cli->GetSocket());
+			cli->Close();
 			continue;
+
+		    }
 		    
 		    printf("%d (%zd)", cli->GetSocket(), readnum);
 		    
@@ -202,8 +211,7 @@ void ServerManager::RetrieveMessages() {
 		if (pfds[i].revents & POLLHUP) {
 		    auto& cli = clients[i];
 		    printf(" %d (disconnected)", cli->GetSocket());
-
-		    clients[i]->Close();
+		    cli->Close();
 		}
 
 		printf("\n");

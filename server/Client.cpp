@@ -11,7 +11,8 @@ Client::Client(int sockfd, struct in_addr addr)
 
 void Client::Send(char* m)
 {
-    write(this->sockfd, m, strlen(m));
+    if (!this->closed)
+	write(this->sockfd, m, strlen(m));
 }
 
 /* Returns false if no message received,

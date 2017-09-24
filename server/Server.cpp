@@ -10,12 +10,17 @@
 #include <list>
 
 #include <signal.h>
+#include <ctime>
+#include <string>
+#include <cstdio>
 
 using namespace Tribalia::Server;
 
 volatile bool continue_main = true;
 
 static void test_http_respond(Client* c, const char* msg) {
+    if (!c) return;
+    
     std::string sstr{msg};
     /* Test html service */
     if (sstr.find("GET / HTTP/1.1") != std::string::npos ||
@@ -90,6 +95,10 @@ int main(int argc, char const* argv[])
 	    }
 
 	    for (auto& cli : clis) {
+		if (cli->IsClosed()) {
+		    continue;
+		}
+		
 		char m[2049];
 		memset(m, 0, 2048);
 		if (cli->Receive(m, 2048)) {
