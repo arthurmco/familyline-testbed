@@ -75,10 +75,10 @@ void AnimationData::BakeVertexData(glm::vec3* vlist)
         return;
     }
 
-    for (int i = 0; i < _vlist->size(); i++) {
+    for (unsigned i = 0; i < _vlist->size(); i++) {
         bool found = false;
         for (AnimationFrame& f : _frames[_frameActual]) {
-            if (f.vindex == i) {
+            if (f.vindex >= 0 && unsigned(f.vindex) == i) {
                 vlist[i] = _vlist->at(i) + f.coords;
                 found = true;
                 break;
