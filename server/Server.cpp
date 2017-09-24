@@ -74,11 +74,10 @@ int main(int argc, char const* argv[])
     oact.sa_handler = [](int sig){ (void)sig; continue_main = false; };
     sigemptyset(&oact.sa_mask);
     oact.sa_flags = SA_RESTART;
-    sigaction(SIGINT, &oact, nullptr);
-    
+    sigaction(SIGINT, &oact, nullptr);  
     
     printf("Tribalia Server " VERSION "\n");
-    printf("Copyright (C) 2016 Arthur M\n ");
+    printf("Copyright (C) 2017 Arthur M\n ");
     printf("Listening on port 12000\n");
     puts("\n");
 
@@ -87,6 +86,7 @@ int main(int argc, char const* argv[])
 	
     try {
 	sm = new ServerManager{};
+	
 	while (continue_main) {
 	    sm->RetrieveMessages();
 	    Client* c = sm->RetrieveClient(false);
@@ -100,6 +100,7 @@ int main(int argc, char const* argv[])
 		}
 		
 		char m[2049];
+		
 		memset(m, 0, 2048);
 		if (cli->Receive(m, 2048)) {
 		    printf("From %d: "

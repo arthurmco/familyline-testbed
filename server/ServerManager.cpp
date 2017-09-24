@@ -31,6 +31,48 @@ ServerManager::ServerManager(int port)
     started = true;
 }
 
+/* Set server network address, in form of 
+   ip/netmask (ex: 192.168.1.0/255)
+*/
+void ServerManager::SetNetworkAddress(char* naddr)
+{
+    char* saddr = strdup(naddr);
+    char* snetmask = strchr(saddr, '/');
+    auto addrlen = size_t(snetmask - saddr);
+    snetmask++;
+
+    int netmask = atoi(snetmask);
+    saddr[addrlen] = 0;
+    
+    printf("Changed server network to %s/%d\n", saddr, netmask);
+
+    inet_aton(saddr, &(this->serv_net_addr_base));
+    serv_netmask = short(netmask & 0xffff);
+
+    free(saddr);   
+}
+
+/* Check if address is from the same network as the server
+   Return if is not
+*/
+bool ServerManager::CheckAddress(struct in_addr* addr)
+{
+    if (addr->s_addr == htonl(INADDR_LOOPBACK))
+	return true; // loopback is always valid
+
+    if (serv_net_addr_base.s_addr == INADDR_ANY)
+	return true; // any address, always valid
+
+    auto cli_saddr = htonl(addr->s_addr);
+    auto serv_saddr = htonl(this->serv_net_addr_base.s_addr);
+    auto mask = (1 << this->serv_netmask) - 1;
+
+    mask = mask << ((8*sizeof(cli_saddr)) - this->serv_netmask);
+
+    return ((cli_saddr & mask) == (serv_saddr & mask));
+}
+
+
 bool blocked = true;
 
 /* Retrieve a client, if available
@@ -74,6 +116,12 @@ do_retrieve_client:
 
     char ipstr[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, (void*)&(cliaddr.sin_addr), ipstr, INET_ADDRSTRLEN);
+    if (!this->CheckAddress(&(cliaddr.sin_addr))) {
+	printf("Socket refused: not in the same network "
+	       "(fd %d), address %s\n", clisockfd, ipstr);
+	return nullptr;
+    }   
+    
     printf("Socket accepted (fd %d), address %s\n", clisockfd, ipstr);
 
     char* str = new char[1492];

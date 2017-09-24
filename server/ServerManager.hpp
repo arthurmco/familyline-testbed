@@ -49,10 +49,23 @@ namespace Tribalia::Server {
 	bool started = false;
 
 	std::vector<std::shared_ptr<Client>> clients;
+
+	struct in_addr serv_net_addr_base = {INADDR_ANY};
+	short serv_netmask = 32;
+        
+	/* Check if address is from the same network as the server
+	   Return if is not
+	*/
+	bool CheckAddress(struct in_addr* addr);
 	
     public:
         /* Starts a server manager in the specified port */
 	ServerManager(int port = 12000);
+
+	/* Set server network address, in form of 
+	   ip/netmask (ex: 192.168.1.0/255)
+	*/
+	void SetNetworkAddress(char* naddr);
 	
         /* Retrieve a client, if available
 	   If blocks = true, blocks until next client is available.
