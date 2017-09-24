@@ -23,4 +23,10 @@ libcairo2 libcairo2-dev`
 
 ## Caveats
 
-On Windows, you will might need to use the environment variable `TRIBALIA_FIND_PKG` to tell cmake where some dependencies can be found.
+ - Your compiler needs to support C++17.
+
+ - On Windows, you will might need to use the environment variable `TRIBALIA_FIND_PKG` to tell cmake where some dependencies can be found.
+ 
+ - On FreeBSD, you need to install pkg-config, it finds some dependencies this way ( use `pkg install pkgconf`)
+
+ - Only clang++ > 5 is supported (something to do with template deduction, supported in gcc7 and in libstdc++  but not in clang5).

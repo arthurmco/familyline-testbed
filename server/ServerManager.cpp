@@ -78,7 +78,13 @@ do_retrieve_client:
 
     char* str = new char[1492];
     auto sread = read(clisockfd, (void*)str, 1490);
-    if (sread < 0) {
+
+    /* Remove nonblocking from the client.
+       We use poll(), no need for this */
+    int flags = fcntl(clisockfd, F_GETFL, 0);
+    fcntl(this->sockfd, F_SETFL, flags ^ O_NONBLOCK);
+    
+    if (sread < 0) {	
 	shutdown(clisockfd, 2);
 	close(clisockfd);
 	char* syserr = strerror(errno);
