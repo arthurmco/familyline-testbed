@@ -125,8 +125,6 @@ void InputManager::ConvertEvents()
 		
 	    }
 
-	    printf(">> %x %d\n", e.key.state, e.key.repeat);
-
             ev.event.keyev.char_utf8 = ' ';
 	    if (e.key.state == SDL_PRESSED) {
 		ev.eventid = next_eid;
@@ -210,8 +208,6 @@ void InputManager::ConvertEvents()
         ev.mousey = lasty;
         ev.mousez = lastz;
 
-	printf("event id %d generated\n"
-	       "\t typeid %x \n", ev.eventid, ev.eventType);
         _evt_queue.push(ev);
 
 	if (_evt_queue.size() > MAX_INPUT_QUEUE) {
@@ -246,7 +242,6 @@ void InputManager::Run()
 	    ) {
 	    if (it->first == ev.eventid) {
 		if (it->second.l) {
-		    printf("\t eid %d resolved\n", it->first);
 		    it->second.l->OnListen(ev);
 
 		    /* Small fix to solve that weird bug when camera was
@@ -265,16 +260,12 @@ void InputManager::Run()
 		if (!it.listener->GetAcception())
 		    continue;
 
-		printf("\t event id %d popped in %s \n", ev.eventid,
-		       it.listener->GetName());
-
 		current_listener = it.listener;
 
 		/* Attribute paired events to the current listener */
 		for(auto& list : listener_map) {
 		    if (!list.second.l) {
 			list.second.l = current_listener;
-			printf("\t eid is paired\n");
 		    }
 		}
 
