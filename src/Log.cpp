@@ -45,6 +45,7 @@ void Log::SetFile(FILE* f)
 	    L_YELLOW = "\033[38;5;220m";
 	    L_BOLDYELLOW = "\033[38;5;220;1m";
 	    L_NORMAL = "\033[0m";
+	    L_DEBUG = "\033[3m";
 	} else {
 	    L_BOLD = "\033[1m";  
 	    L_RED = "\033[31m";
@@ -52,6 +53,7 @@ void Log::SetFile(FILE* f)
 	    L_YELLOW = "\033[33m";
 	    L_BOLDYELLOW = "\033[33;1m";
 	    L_NORMAL = "\033[0m";
+	    L_DEBUG = "\033[1;30m";
 	}
     } else {
 	L_BOLD = "";  
@@ -59,7 +61,8 @@ void Log::SetFile(FILE* f)
 	L_BOLDRED  = "";
 	L_YELLOW = "";
 	L_BOLDYELLOW = "";
-	L_NORMAL = "";	
+	L_NORMAL = "";
+	L_DEBUG = "";
     }
     
 
@@ -70,6 +73,29 @@ double Log::GetDelta() {
     decltype(start) now = steady_clock::now();
     auto deltatime = duration_cast<duration<double>>(now-start);
     return deltatime.count();
+}
+
+void Log::InfoWrite(const char* tag, const char* fmt, ...) {
+    if (!this->_logFile) return;
+
+    const char* colon = (tag[0] == '\0') ? "" : ":";
+    
+    /* Print timestamp */
+    
+    fprintf(_logFile, "[%13.4f] %s%s%s ", GetDelta(), tag, colon,
+	L_DEBUG);
+
+    /* Print message */
+    va_list vl;
+    va_start(vl, fmt);
+
+    vfprintf(_logFile, fmt, vl);
+
+    va_end(vl);
+
+    /* Print line terminator */
+    fprintf(_logFile, "%s\r\n", L_NORMAL);
+    fflush(this->_logFile);
 }
 
 void Log::Write(const char* tag, const char* fmt, ...)

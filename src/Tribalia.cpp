@@ -1,4 +1,5 @@
 
+
 /***
     Tribalia main file
 
@@ -219,9 +220,9 @@ int main(int argc, char const *argv[])
     strftime(timestr, 32, "%F %T", tminfo);
     Log::GetLog()->Write("", "Actual date is %s", timestr);
    
-    Log::GetLog()->Write("", "Default model directory is " MODELS_DIR);
-    Log::GetLog()->Write("", "Default texture directory is " TEXTURES_DIR);
-    Log::GetLog()->Write("", "Default material directory is " MATERIALS_DIR);
+    Log::GetLog()->InfoWrite("", "Default model directory is " MODELS_DIR);
+    Log::GetLog()->InfoWrite("", "Default texture directory is " TEXTURES_DIR);
+    Log::GetLog()->InfoWrite("", "Default material directory is " MATERIALS_DIR);
 
     Framebuffer* fbGUI = nullptr;
     Framebuffer* fb3D = nullptr;
