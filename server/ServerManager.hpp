@@ -73,8 +73,8 @@ namespace Tribalia::Server {
 	 */
 	Client* RetrieveClient(bool blocks = false);
 
-	/* Poll for messages and redirect them to the appropriate client */
-	void RetrieveMessages();
+	/* Poll for TCP messages and redirect them to the appropriate client */
+	void RetrieveTCPMessages();
 	
 	~ServerManager();
 

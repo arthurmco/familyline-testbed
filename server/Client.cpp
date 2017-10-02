@@ -6,27 +6,78 @@ Client::Client(int sockfd, struct in_addr addr)
 {
     this->sockfd = sockfd;
     this->addr = addr;
+
+    /* Set client name as its IP */
+    char ipstr[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, (void*)&addr, ipstr, INET_ADDRSTRLEN);
+
+    char cname[INET_ADDRSTRLEN+6];
+    sprintf(cname, "<<%s>>", ipstr);
+    this->name = std::string{cname};
+        
     this->closed = false;
 }
 
-void Client::Send(char* m)
+void Client::SendTCP(char* m)
 {
     if (!this->closed)
 	write(this->sockfd, m, strlen(m));
 }
 
+
 /* Returns false if no message received,
  * or true if message received, and outputs the message on m */
-bool Client::Receive(char* m, size_t len)
+bool Client::ReceiveTCP(char* m, size_t len)
 {
     if (buffer_ptr_send <= buffer_ptr_recv) {
 	buffer_ptr_send = buffer_ptr_recv = 0;
 	return false;
     }
 
+    if (this->check_headers) {
+	// try to find the starting message token
+	const char start_token = '[';
+	bool st_token_found = false;
+
+	do {
+	    if (buffer[buffer_ptr_recv] == start_token) {
+		st_token_found = true;
+		break;
+	    }
+
+	    buffer_ptr_recv++;
+	} while (buffer_ptr_recv < buffer_ptr_send);
+
+	if (!st_token_found) {
+	    return false;
+	}
+    }
+
     len = std::min(len, (buffer_ptr_send - buffer_ptr_recv));
     strncpy(m, &buffer[buffer_ptr_recv], len);
 
+    /* Tries to end a message on the end token */
+    const char end_token = ']';
+    bool token_found = false;
+    char* tokpos = m;
+    do {
+	char* ntok = strchr(tokpos, end_token);
+	if (!ntok) {
+	    break;  // no token found, end it anyway...
+	}
+	
+	if (*(ntok - 1) != '\\') {
+	    // If token isn't escaped, end it.
+	    ntok++;
+	    len = size_t(ntok - m);
+	    *ntok = '\0';
+	    token_found = true;
+	}
+
+	tokpos = ++ntok;
+	
+    } while (!token_found);
+    
     if (buffer_ptr_recv+len > MAX_CLIENT_BUFFER) {
 	fprintf(stderr, "Error: client buffer %d overflow recv\n", this->sockfd);
 	return false;
@@ -38,12 +89,12 @@ bool Client::Receive(char* m, size_t len)
 
 /* Injects message in the client
    Only meant to be called from the server */
-void Client::InjectMessage(char* m, size_t len)
+void Client::InjectMessageTCP(char* m, size_t len)
 {
     if (buffer_ptr_send <= buffer_ptr_recv) {
 	buffer_ptr_send = buffer_ptr_recv = 0;
     }
-    
+
     strncpy(&buffer[buffer_ptr_send], m, len);
 
     if (buffer_ptr_send+len > MAX_CLIENT_BUFFER) {
@@ -65,7 +116,16 @@ void Client::Close()
     this->closed = true;
 }
 
-bool Client::IsClosed() { return this->closed; }
+bool Client::IsClosed() const { return this->closed; }
 
-socket_t Client::GetSocket() { return this->sockfd; }
-struct in_addr Client::GetAddress() { return this->addr; }
+socket_t Client::GetSocket() const { return this->sockfd; }
+struct in_addr Client::GetAddress() const { return this->addr; }
+
+
+bool Client::CheckHeaders() const  { return this->check_headers; }
+void Client::SetCheckHeaders(bool val) { this->check_headers = val; }
+
+ConnectionStatus Client::GetStatus() const { return this->cstatus; }
+
+const char*  Client::GetName() const { return this->name.c_str(); }
+void  Client::SetName(char* n) { this->name = std::string{n}; }

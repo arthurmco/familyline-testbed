@@ -152,58 +152,35 @@ do_retrieve_client:
     str[sread+1] = 0;
     printf("%s\n===========================", str);
 
-
     std::string sstr{str};
     /* Test html service */
-    if (sstr.find("GET / HTTP/1.1") != std::string::npos ||
-	sstr.find("GET / HTTP/1.0") != std::string::npos) {
+    if (sstr.find("[TRIBALIA CONNECT]\n") != std::string::npos ) {
+	char connback[48+INET_ADDRSTRLEN];
 
-	printf("Got valid answer\n");
-
-	char* stranswer = new char[600];
-
-	sprintf(stranswer, "<html>"
-	    "<head><title>Tribalia Test Server</title>"
-		"<meta name=\"viewport\" content=\"width=device-width, "
-		"initial-scale=1\"></head>"
-		"<body>This is a test message from the server. <br/> "
-		"You are <b>%s</b></body>", ipstr);
-
-	printf("Serving %zu bytes of content\n", strlen(stranswer));
-	char* strmsg = new char[strlen(stranswer)+300];
-
-	char strdate[64];
-
-	time_t rawtime;
-	struct tm* timeinfo;
-	
-	time(&rawtime);
-	timeinfo = gmtime(&rawtime);
-
-	strftime(strdate, 64, "%a, %d %h %Y %T GMT", timeinfo);
-	
-	sprintf(strmsg, ""
-	    "HTTP/1.1 200 OK\r\n"
-	    "Date: %s\r\n"
-	    "Status: 200 OK\r\n"
-	    "Content-Type: text/html; charset=utf-8\r\n"
-	    "Content-Length: %zu\r\n" 
-	    "Server: tribalia-server\r\n"
-		"\r\n\r\n%s", strdate, strlen(stranswer), stranswer);
+	sprintf(connback, "[TRIBALIA CONNECT %s]\n", ipstr);
+	if (write(clisockfd, connback, strlen(connback)) > 0) {
 		
-	write(clisockfd, (void*)strmsg, strlen(strmsg));
+	    std::shared_ptr<Client> c =
+		std::make_shared<Client>(clisockfd, cliaddr.sin_addr);
+	    printf("Client added (fd %d), address %s\n", clisockfd, ipstr);    
+	    clients.push_back(c);
+	    return c.get();
+	}
     }
 
-    std::shared_ptr<Client> c = std::make_shared<Client>(clisockfd,
-							 cliaddr.sin_addr);
-    printf("Client added (fd %d), address %s\n", clisockfd, ipstr);    
-    clients.push_back(c);
-    return c.get();
+    shutdown(clisockfd, 2);
+    close(clisockfd);
+    
+    if (blocks)
+	goto do_retrieve_client;
+    
+    return nullptr;
+
 }
 
 
-/* Poll for messages and redirect them to the appropriate client */
-void ServerManager::RetrieveMessages() {
+/* Poll for TCP messages and redirect them to the appropriate client */
+void ServerManager::RetrieveTCPMessages() {
     std::remove_if(clients.begin(), clients.end(), [](std::shared_ptr<Client> c)
 		   {  return !c || !c.get() || c->IsClosed(); });
     
@@ -250,9 +227,14 @@ void ServerManager::RetrieveMessages() {
 
 		    }
 		    
-		    printf("%d (%zd)", cli->GetSocket(), readnum);
+		    if (cli->CheckHeaders() &&
+			strncmp(readbuf, "[TRIBALIA", 9) != 0) {
+			printf("error: bad header from %d\n", cli->GetSocket());
+			cli->Close();
+			continue;
+		    }
 		    
-		    cli->InjectMessage(readbuf, size_t(readnum));
+		    cli->InjectMessageTCP(readbuf, size_t(readnum));
 		    memset(readbuf, 0, readnum);
 		}
 
@@ -262,7 +244,6 @@ void ServerManager::RetrieveMessages() {
 		    cli->Close();
 		}
 
-		printf("\n");
 
 	    }
 	}
