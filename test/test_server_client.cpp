@@ -18,6 +18,7 @@ TEST_F(ClientTest, TestMessagePushSimple) {
 
     c->InjectMessageTCP("Hello ", 6);
     c->InjectMessageTCP("world ", 6);
+    c->SetCheckHeaders(false);
 
     char nc[13];
     memset(&nc, 0, 13);
@@ -40,7 +41,8 @@ TEST_F(ClientTest, TestMessagePushComplex) {
 
     c->InjectMessageTCP("Hello ", 6);
     c->InjectMessageTCP("world ", 6);
-
+    c->SetCheckHeaders(false);
+    
     char nc[13];
     memset(&nc, 0, 13);
 
@@ -64,7 +66,8 @@ TEST_F(ClientTest, TestIfReceiveReturnFalseNoMessage) {
     Client* c = new Client(0, a);
 
     c->InjectMessageTCP("Hello ", 6);
-
+    c->SetCheckHeaders(false);
+    
     char nc[13];
     memset(&nc, 0, 13);
     EXPECT_TRUE(c->ReceiveTCP(nc, 6));
@@ -75,7 +78,8 @@ TEST_F(ClientTest, TestIfReceiveReturnFalseNoMessage) {
 TEST_F(ClientTest, TestIfReceiveTokenCorrect) {
     struct in_addr a = {};
     Client* c = new Client(0, a);
-
+    c->SetCheckHeaders(false);
+    
     c->InjectMessageTCP("[ I AM TOKEN 1][I AM TOKEN 2]", 29);
 
     char nc[26];
