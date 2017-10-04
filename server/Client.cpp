@@ -18,7 +18,7 @@ Client::Client(int sockfd, struct in_addr addr)
     this->closed = false;
 }
 
-void Client::SendTCP(char* m)
+void Client::SendTCP(const char* m)
 {
     if (!this->closed)
 	write(this->sockfd, m, strlen(m));
@@ -126,6 +126,11 @@ bool Client::CheckHeaders() const  { return this->check_headers; }
 void Client::SetCheckHeaders(bool val) { this->check_headers = val; }
 
 ConnectionStatus Client::GetStatus() const { return this->cstatus; }
+
+void Client::AdvanceStatus() {
+    if (this->cstatus <= CS_INGAME)
+	this->cstatus = ConnectionStatus(int(this->cstatus) + 1);
+}
 
 const char*  Client::GetName() const { return this->name.c_str(); }
 void  Client::SetName(char* n) { this->name = std::string{n}; }

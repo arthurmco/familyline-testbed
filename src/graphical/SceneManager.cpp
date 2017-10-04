@@ -18,7 +18,7 @@ int SceneManager::AddObject(SceneObject* obj)
 {
     obj->_id = _objects.size() + 1 + (uintptr_t)obj;
     this->_objects.push_back(obj);
-    Log::GetLog()->Write("scene-manager", "Added object %s (ID %d) to the SceneManager",
+    Log::GetLog()->Write("scene-manager", "Added object %s (ID %u) to the SceneManager",
         obj->_name.c_str(), obj->_id);
          _listModified = true;
     return 1;

@@ -9,8 +9,8 @@
 
 /* For network comm */
 #include <sys/types.h>
-#ifndef _WIN32
 
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -38,7 +38,7 @@ namespace Tribalia::Server {
     /* Define the connection status, obviously */
     enum ConnectionStatus {
 	/* Initial disconnected status */
-	CS_DISCONNECTED,
+	CS_DISCONNECTED = 0,
 	
 	/* Stabilishing initial communications, determining if
 	   client is really valid and what it does offer */
@@ -75,7 +75,7 @@ namespace Tribalia::Server {
     public:
 	Client(int sockfd, struct in_addr addr);
 	
-	void SendTCP(char* m);
+	void SendTCP(const char* m);
 
         /* Returns false if no message received,
  	 * or true if message received, and outputs the message on m */
@@ -105,6 +105,8 @@ namespace Tribalia::Server {
 	 */
 	ConnectionStatus GetStatus() const;
 
+	void AdvanceStatus();
+
 	const char* GetName() const;
 	void SetName(char* n);
 	
@@ -118,6 +120,8 @@ namespace Tribalia::Server {
 	VersionQueried,
 	CapabilityQuery,
 	CapabilityQueried,
+	PlayerInfoRetrieve,
+	PlayerInfoRetrieved,
 	ClientReady,
     };
 
