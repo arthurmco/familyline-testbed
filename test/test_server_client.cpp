@@ -91,3 +91,22 @@ TEST_F(ClientTest, TestIfReceiveTokenCorrect) {
     EXPECT_EQ(0, strcmp(nc, "[I AM TOKEN 2]")) << "Message not flushed '" << nc << "' != '[I AM TOKEN 2]";
 
 }
+
+TEST_F(ClientTest, TestHeaderCheckCorrect) {
+    struct in_addr a = {};
+    Client* c = new Client(0, a);
+    c->SetCheckHeaders(true);
+    
+    c->InjectMessageTCP("[TRIBALIA H1]%%%!!!@@@[TRIBALIA H2]", 35);
+    
+
+    char nc[26];
+    c->ReceiveTCP(nc, 20);
+    EXPECT_EQ(0, strcmp(nc, "[TRIBALIA H1]")) << "Message not flushed '" << nc << "' != '[TRIBALIA H1]";
+
+    memset(&nc, 0, 20);
+    c->ReceiveTCP(nc, 15);
+    EXPECT_EQ(0, strcmp(nc, "[TRIBALIA H2]")) << "Message not flushed '" << nc << "' != '[TRIBALIA H2]";
+
+}
+
