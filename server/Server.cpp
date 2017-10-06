@@ -1,12 +1,13 @@
 /***
  	Tribalia server entry point	
 
-	Copyright (C) 2016 Arthur M
+	Copyright (C) 2016, 2017 Arthur M
 ***/
 
 #include "../src/EnviroDefs.h"
 
 #include "ServerManager.hpp"
+#include "ChatManager.hpp"
 #include <list>
 
 #include <signal.h>
@@ -32,12 +33,14 @@ int main(int argc, char const* argv[])
     puts("\n");
 
     ServerManager* sm = nullptr;
+    ChatManager* chm = nullptr;
     std::list<Client*> clis;
 
     TCPConnectionInitiator tci;
 	
     try {
 	sm = new ServerManager{};
+	chm = new ChatManager{};
 	
 	while (continue_main) {
 	    sm->RetrieveTCPMessages();
@@ -55,10 +58,15 @@ int main(int argc, char const* argv[])
 		    continue;
 		}
 
-		if (cli->GetStatus() > CS_CONNECTED) {
+		if (cli->GetStatus() >= CS_CONNECTED) {
 		    char m[2049];
 		
 		    memset(m, 0, 2048);
+		    while (auto cm = chm->CheckMessage(cli)) {
+			printf("[%s] \033[3m%s\033[0m\n", cli->GetName(),
+			       cm->message);
+		    }
+		    
 		    if (cli->ReceiveTCP(m, 2048)) {
 		    
 			printf("From %d: "

@@ -147,8 +147,9 @@ const char*  Client::GetName() const { return this->name.c_str(); }
 void  Client::SetName(char* n) { this->name = std::string{n}; }
 
 unsigned int Client::GetID() const {
-    unsigned long long l =  (unsigned long long)this +
+/*    unsigned long long l =  (unsigned long long)this +
 	(unsigned long long)buffer;
 
-    return (unsigned int)((l & 0xffffffff) + (l << 32));
+	return (unsigned int)((l & 0xffffffff) + (l << 32)); */
+    return strlen(this->name.c_str());
 }
