@@ -76,10 +76,14 @@ namespace Tribalia::Server {
 	Client(int sockfd, struct in_addr addr);
 	
 	void SendTCP(const char* m);
-
+	
+        /* 'Peek' a message, i.e read but not remove it from the queue 
+           Return message length or 0 if no message received */	
+	size_t PeekTCP(char* m, size_t len);
+	
         /* Returns false if no message received,
  	 * or true if message received, and outputs the message on m */
-	bool ReceiveTCP(char* m, size_t len);
+        size_t ReceiveTCP(char* m, size_t len);
   
 
 	/* Injects message in the client
@@ -109,6 +113,8 @@ namespace Tribalia::Server {
 
 	const char* GetName() const;
 	void SetName(char* n);
+
+	unsigned int GetID() const;
 	
     };
 

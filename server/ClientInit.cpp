@@ -116,10 +116,7 @@ void TCPConnectionInitiator::Process()
 		continue;
 	    }
 	 
-	    {
-		// autosort an id for the client
-		unsigned long client_id = (unsigned long)tinit.cli;
-	    
+	    {    
 		char sname[32], sinfo[32], splayername[64];
 		int playerxp;
 	    
@@ -136,7 +133,8 @@ void TCPConnectionInitiator::Process()
 		tinit.cli->SetName(splayername);
 
 		char ssendmsg[96];
-		sprintf(ssendmsg, "[TRIBALIA PLAYERINFO %lu]\n", client_id);
+		sprintf(ssendmsg, "[TRIBALIA PLAYERINFO %u]\n",
+			tinit.cli->GetID());
 		tinit.cli->SendTCP(ssendmsg);
 	    }
 	    

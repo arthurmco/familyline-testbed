@@ -25,13 +25,13 @@ void Client::SendTCP(const char* m)
 }
 
 
-/* Returns false if no message received,
- * or true if message received, and outputs the message on m */
-bool Client::ReceiveTCP(char* m, size_t len)
-{
-    if (buffer_ptr_send <= buffer_ptr_recv) {
+/* 'Peek' a message, i.e read but not remove it from the queue 
+   Return message length or 0 if no message received
+*/
+size_t Client::PeekTCP(char* m, size_t len) {
+        if (buffer_ptr_send <= buffer_ptr_recv) {
 	buffer_ptr_send = buffer_ptr_recv = 0;
-	return false;
+	return 0;
     }
 
     if (this->check_headers) {
@@ -78,13 +78,24 @@ bool Client::ReceiveTCP(char* m, size_t len)
 	
     } while (!token_found);
     
-    if (buffer_ptr_recv+len > MAX_CLIENT_BUFFER) {
+    return len;
+}
+
+/* Returns 0 if no message received,
+ * or strlen(message) if message received, and outputs the message on m */
+size_t Client::ReceiveTCP(char* m, size_t len)
+{
+    auto peek = this->PeekTCP(m, len);
+    
+    if (buffer_ptr_recv+peek > MAX_CLIENT_BUFFER) {
 	fprintf(stderr, "Error: client buffer %d overflow recv\n", this->sockfd);
-	return false;
+	return 0;
     }
 
-    buffer_ptr_recv += len;
-    return true;
+    if (peek > 0)
+	buffer_ptr_recv += peek;
+    
+    return peek;
 }
 
 /* Injects message in the client
@@ -134,3 +145,10 @@ void Client::AdvanceStatus() {
 
 const char*  Client::GetName() const { return this->name.c_str(); }
 void  Client::SetName(char* n) { this->name = std::string{n}; }
+
+unsigned int Client::GetID() const {
+    unsigned long long l =  (unsigned long long)this +
+	(unsigned long long)buffer;
+
+    return (unsigned int)((l & 0xffffffff) + (l << 32));
+}
