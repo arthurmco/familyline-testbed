@@ -31,6 +31,7 @@ void TCPConnectionInitiator::Process()
     char recvbuffer[256];
     
     for (auto& tinit : _initClients) {
+
 	tinit.iters++;	   
 	switch (tinit.step) {
 	case InitConnect:
@@ -70,6 +71,7 @@ void TCPConnectionInitiator::Process()
 		if (vmaj != 0 || vmin != 1) {
 		    fprintf(stderr, "Client %s has unsupported version (%u.%u)",
 			    tinit.cli->GetName(), vmaj, vmin);
+		    tinit.cli->SendTCP("[TRIBALIA ERROR 001 Unsupported version]");
 		    tinit.cli->Close();
 		    continue;	    
 		}

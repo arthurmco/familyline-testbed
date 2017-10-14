@@ -57,7 +57,7 @@ ChatMessage* ChatManager::CheckMessage(Client* c)
 	return nullptr;
     }
 
-    strncpy(smessage, &msg[msgpos+1], mlen);
+    strncpy(smessage, &msg[msgpos+1], std::min(mlen, size_t(255)));
     int did = 0;
 
     // Determine destination
