@@ -104,8 +104,10 @@ do_retrieve_client:
 
     if (clisockfd < 0) {
 	if (errno == EAGAIN || errno == EWOULDBLOCK) {
-	    if (!blocks)
+	    if (!blocks) {
+		usleep(100);
 		return nullptr;
+	    }
 	}
 	
 	char* syserr = strerror(errno);

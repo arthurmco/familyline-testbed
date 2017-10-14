@@ -78,7 +78,6 @@ int main(int argc, char const* argv[])
 	    }
 	    
 	    
-	    usleep(100);
 	}
 	
 	delete sm;	    
