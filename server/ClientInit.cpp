@@ -32,6 +32,9 @@ void TCPConnectionInitiator::Process()
     
     for (auto& tinit : _initClients) {
 
+	if (tinit.cli->GetStatus() >= CS_CONNECTED)
+	    continue;
+
 	tinit.iters++;	   
 	switch (tinit.step) {
 	case InitConnect:
@@ -154,7 +157,8 @@ void TCPConnectionInitiator::Process()
     std::remove_if(_initClients.begin(), _initClients.end(),
 		   [](TCPInit c) {
 		       return c.cli->IsClosed() ||
-			   c.step == TCPInitStep::ClientReady; });
+			   c.step == TCPInitStep::ClientReady ||
+			   c.cli->GetStatus() >= CS_CONNECTED; });
 }
 
 /* Check if we have clients to be initialized */
