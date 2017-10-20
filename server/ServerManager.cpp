@@ -41,7 +41,7 @@ void ServerManager::SetNetworkAddress(char* naddr)
     auto addrlen = size_t(snetmask - saddr);
     snetmask++;
 
-    int netmask = atoi(snetmask);
+    int netmask = std::stoi(snetmask);
     saddr[addrlen] = 0;
     
     printf("Changed server network to %s/%d\n", saddr, netmask);
@@ -105,6 +105,9 @@ do_retrieve_client:
     if (clisockfd < 0) {
 	if (errno == EAGAIN || errno == EWOULDBLOCK) {
 	    if (!blocks) {
+		/* This sleep is merely to force the processor to change
+		   tasks, and not make our process 100% of CPU with no need
+		*/
 		usleep(100);
 		return nullptr;
 	    }

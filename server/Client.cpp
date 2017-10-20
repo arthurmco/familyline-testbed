@@ -29,7 +29,7 @@ void Client::SendTCP(const char* m)
    Return message length or 0 if no message received
 */
 size_t Client::PeekTCP(char* m, size_t len) {
-        if (buffer_ptr_send <= buffer_ptr_recv) {
+    if (buffer_ptr_send <= buffer_ptr_recv) {
 	buffer_ptr_send = buffer_ptr_recv = 0;
 	return 0;
     }
@@ -122,6 +122,12 @@ void Client::Close()
     if (!this->closed) {
 	shutdown(this->sockfd, 2);
 	close(this->sockfd);
+	
+	if (this->udp_init) {
+	    shutdown(this->udp_socket, 2);
+	    close(this->udp_socket);
+	    this->udp_init = false;
+	}
     }
 
     this->closed = true;
@@ -152,4 +158,78 @@ unsigned int Client::GetID() const {
 
 	return (unsigned int)((l & 0xffffffff) + (l << 32)); */
     return strlen(this->name.c_str());
+}
+
+void Client::SendUDP(UDPMessage m)
+{
+    udp_buffer_send.push(m);
+}
+
+bool Client::PeekUDP(UDPMessage& m)
+{
+    if (udp_buffer_recv.size() == 0 || !udp_init)
+	return false;
+
+    auto msg = udp_buffer_recv.front();
+    m = msg;
+    return true;
+}
+
+bool Client::ReceiveUDP(UDPMessage& m)
+{
+    auto r = this->PeekUDP(m);
+    if (!r)
+	return false;
+
+    udp_buffer_recv.pop();
+    return true;
+}
+
+/* Injects UDP messages
+   Needs to have the checksum checked */
+void Client::InjectMessageUDP(UDPMessage m)
+{
+    udp_buffer_recv.push(m);
+}
+
+bool Client::RetrieveSendUDP(UDPMessage& m)
+{
+    if (udp_buffer_send.size() == 0 || !udp_init)
+	return false;
+
+    auto msg = udp_buffer_send.front();
+    m = msg;
+    udp_buffer_send.pop();
+    return true;
+}
+
+/* Initialize the "UDP part" of the client */
+bool Client::InitUDP(struct in_addr udp_addr, int port)
+{
+    memset((void*)&this->udp_addr, 0, sizeof(this->udp_addr));
+    this->udp_addr.sin_family = AF_INET;
+    this->udp_addr.sin_port = htons(port);
+    this->udp_addr.sin_addr = udp_addr;
+
+    this->udp_socket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (this->udp_socket < 0)
+	return false;
+
+    if (bind(this->udp_socket, (struct sockaddr*)&this->udp_addr,
+	     sizeof(this->udp_addr)) < 0) {
+	return false;
+    }
+
+    this->udp_init = true;
+    return true;
+}
+
+bool Client::CheckUDP() const
+{
+    return this->udp_init;
+}
+
+socket_t Client::GetUDPSocket() const
+{
+    return this->udp_socket;
 }

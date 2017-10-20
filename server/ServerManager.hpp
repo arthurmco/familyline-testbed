@@ -73,6 +73,18 @@ namespace Tribalia::Server {
 	 */
 	Client* RetrieveClient(bool blocks = false);
 
+	/* Update our client so it will be able to receive/send UDP messages.
+	   UDP messages carry game objects (constructions, units etc) status
+	   changing. TCP messages carries only game control changes and
+	   chat.
+
+	   Therefore, making the game UDP available means that the game is
+	   about to start
+
+	   Returns true if it could, false if could not.
+	*/
+	bool EnableUDPClient(Client* c);
+
 	/* Poll for TCP messages and redirect them to the appropriate client */
 	void RetrieveTCPMessages();
 	
