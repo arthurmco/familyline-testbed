@@ -213,11 +213,8 @@ bool PathFinder::MakePath(glm::vec2 from, glm::vec2 to, std::list<PathNode*>& no
 
     }
 
-    printf("-- ok, realigning\n");
-
     /* Find the correct path */
     for (PathNode* n = lclosed.back(); n; n = n->prev) {
-	printf("%p (%f %f) -> %p\n ", n, n->pos.x, n->pos.y, n->prev);
 	nodelist.push_back(n);
     }
     
@@ -271,8 +268,8 @@ std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* o, glm::vec2 dest
     /* Unmap our object */
     this->ClearPathmap(r*2, r*2, from.x-r, from.y-r);
     
-    printf("from: %.2f %.2f, to %.2f %.2f\n\n",
-	   from.x, from.y, destination.x, destination.y);
+//    printf("from: %.2f %.2f, to %.2f %.2f\n\n",
+//	   from.x, from.y, destination.x, destination.y);
     
     MakePath(from, destination, nodelist);
 

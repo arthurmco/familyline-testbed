@@ -61,7 +61,7 @@
 	
 	
         void SetCamera(Tribalia::Graphics::Camera*);
-		void SetPicker(Tribalia::Input::InputPicker* ip);
+	void SetPicker(Tribalia::Input::InputPicker* ip);
         void SetInputManager(Tribalia::Input::InputManager*);
         void SetPathfinder(Tribalia::Logic::PathFinder*);
 	void SetActionManager(Tribalia::Graphics::GUIActionManager* );
