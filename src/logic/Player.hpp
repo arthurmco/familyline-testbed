@@ -9,6 +9,7 @@
 
 #include "City.hpp"
 #include "GameContext.hpp"
+#include "GameActionManager.hpp"
 
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
@@ -17,17 +18,22 @@ namespace Tribalia {
 namespace Logic {
 
     class Player {
-
     protected:
         std::string _name;
         int _elo, _xp;
-        std::vector<City*> _cities;
+        City* _city;
 
+	GameActionManager* _gam;
+
+	// Auxiliar functions to register game actions
+	void RegisterCreation(GameObject*);
+	void RegisterMove(GameObject*, glm::vec2 position);
+	void RegisterAttack(GameObject* attacker, GameObject* attackee);
+	void RegisterDestroy(GameObject*);
     public:
-        Player(const char* name, int elo=0, int xp=0);
+        Player(const char* name, int xp=0, GameActionManager* gam = nullptr);
 
         City* GetCity();
-        City* GetCity(const char* name);
 
         void AddCity(City*);
         /***
@@ -50,9 +56,8 @@ namespace Logic {
         virtual bool HasUpdatedObject() = 0;
 
 
-
-        const char* GetName();
-        int GetXP();
+        const char* GetName() const;
+        int GetXP() const;
 
     };
 

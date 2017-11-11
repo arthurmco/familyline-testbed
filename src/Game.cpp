@@ -23,7 +23,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         gctx.om = om;
 
-        hp = new HumanPlayer{"Arthur"};
+        hp = new HumanPlayer{"Arthur", 0, &gam};
 
     	terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
     	terr = terrFile->GetTerrain();

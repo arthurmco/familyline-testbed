@@ -61,6 +61,8 @@ namespace Tribalia {
         std::map<std::string, void*>* _properties;
 	std::map<std::string, size_t>* _sizemap;
 
+	/* Copy an object, alongside with its properties, to another
+	   object */
 	void CopyObject(GameObject* dst, GameObject& src);
 	
 	

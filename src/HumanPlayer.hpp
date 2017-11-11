@@ -39,7 +39,8 @@
 
         Tribalia::Logic::ObjectRenderer* objr;
 
-        HumanPlayer(const char* name, int elo=0, int xp=0);
+        HumanPlayer(const char* name, int xp=0,
+		    Tribalia::Logic::GameActionManager* gam = nullptr);
 
 
         /***

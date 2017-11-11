@@ -19,6 +19,7 @@
 #include "logic/Team.hpp"
 #include "logic/TeamCoordinator.hpp"
 #include "logic/BuildQueue.hpp"
+#include "logic/GameActionManager.hpp"
 
 #include "graphical/Camera.hpp"
 #include "graphical/AssetFile.hpp"
@@ -61,6 +62,7 @@ private:
     Logic::TerrainFile* terrFile;
     
     Logic::GameContext gctx;
+    Logic::GameActionManager gam;
     
     Graphics::Window* win = nullptr;
     Graphics::Renderer* rndr = nullptr;

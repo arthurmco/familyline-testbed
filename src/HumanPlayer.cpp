@@ -7,11 +7,11 @@ using namespace Tribalia::Graphics;
 using namespace Tribalia::Logic;
 using namespace Tribalia::Input;
 
-HumanPlayer::HumanPlayer(const char* name, int elo, int xp)
-    : Player(name, elo, xp)
+HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
+    : Player(name, xp, gam)
     {
         /* Initialize input subsystems */
-		srand((size_t)name*elo);
+		srand((size_t)name*xp);
 
          /* Create a city for it */
          City* c = new City{name, nullptr};
@@ -236,9 +236,8 @@ bool HumanPlayer::ProcessInput()
 					
 			ObjectPathManager::getInstance()->AddPath(
 			    _selected_obj, &path);
-		    
-			//_selected_obj->SetX(lp.x);
-			//_selected_obj->SetZ(lp.y);
+
+			this->RegisterMove(_selected_obj, to);
 			_updated = true;
 		    } else {
 			attack_ready = true;
@@ -297,7 +296,9 @@ bool HumanPlayer::Play(GameContext* gctx)
 		this->GetCity()->AddObject(c);
 		printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, p.y, p.z);
 		int id = gctx->om->RegisterObject(c);
+		this->RegisterCreation(c);
 		printf("%s has id %d now\n", c->GetName(), id);
+
 	    }
 	    
 	}
@@ -334,7 +335,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 	LocatableObject* l = _ip->GetIntersectedObject();
 	if (l) {
 	    printf("Deleting object %s", l->GetName());
-	    
+	    this->RegisterDestroy(l);
 	    gctx->om->UnregisterObject(l);
 	}
 	remove_object = false;
@@ -351,6 +352,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 
 	    if (attacker) {
 		CombatManager::GetInstance()->AddAttack(attacker, attackee);
+		this->RegisterAttack(attacker, attackee);
 		attack_ready = false;
 	    }
 	    

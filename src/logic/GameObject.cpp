@@ -23,6 +23,8 @@ GameObject::GameObject(int oid, int tid, const char* name,
     _sizemap = new std::map<std::string, size_t>();
 }
 
+/* Copy an object, alongside with its properties, to another
+   object */
 void GameObject::CopyObject(GameObject* dst, GameObject& src)
 {
     dst->_oid = -1;
