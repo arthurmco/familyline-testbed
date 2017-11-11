@@ -43,10 +43,12 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
 
   add_executable(tribalia-tests ${SRC_TEST_FILES} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT} ${SRC_SERVER_TEST}
 	  "${CMAKE_SOURCE_DIR}/src/Log.cpp" "${CMAKE_SOURCE_DIR}/src/Timer.cpp") 
+
+  target_compile_options(tribalia-tests PUBLIC "-fsanitize=address")
   include_directories("${CMAKE_SOURCE_DIR}/src")
   include_directories("${CMAKE_SOURCE_DIR}/server")
   target_link_libraries( tribalia-tests
-    gtest gtest_main)
+    gtest gtest_main "-fsanitize=address")
 
   add_test(NAME general-test COMMAND tribalia-tests)
 endif(DO_TESTS)
