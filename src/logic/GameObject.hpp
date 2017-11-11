@@ -145,7 +145,7 @@ namespace Tribalia {
         /* Called on each engine loop, when an action is performed */
         virtual bool DoAction(void) = 0;
 
-	virtual ~GameObject() {}
+	virtual ~GameObject();
     };
 
     /* Helper macros to ease property handling */

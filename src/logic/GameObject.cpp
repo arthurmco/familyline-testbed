@@ -57,6 +57,12 @@ GameObject::GameObject(GameObject& o)
     CopyObject(this, o);
 }
 
+GameObject::~GameObject()
+{
+    this->_properties->clear();
+
+}
+
 int GameObject::GetObjectID(){ return _oid; }
 int GameObject::GetTypeID(){ return _tid; }
 const char* GameObject::GetName() { return _name.c_str(); }
