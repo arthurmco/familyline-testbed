@@ -55,7 +55,7 @@ int ObjectManager::RegisterObject(GameObject* o, bool overrideID)
 /* Unregister an object */
 bool ObjectManager::UnregisterObject(GameObject* o)
 {
-    if ( this->UnregisterObject(o->GetObjectID()) ) {
+    if ( o && this->UnregisterObject(o->GetObjectID()) ) {
         return true;
     } else {
         Log::GetLog()->Write("object-manager", "Object %s (type %#x, id %d) not found in object manager, so it didn't unregister",

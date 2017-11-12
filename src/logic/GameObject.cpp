@@ -68,8 +68,6 @@ GameObject::GameObject(GameObject& o)
 GameObject::~GameObject()
 {
     for (auto it = _properties.begin(); it != _properties.end(); it++) {
-	printf("[%d} freeing %s -> %p\n", this->GetObjectID(),
-	       it->first.c_str(), it->second);
         free(it->second);
     }
     
