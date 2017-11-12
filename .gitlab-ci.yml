@@ -38,5 +38,7 @@ unit-test:
     - apt update
     - bash ./scripts/install
   script:
-    - ./tribalia-tests
+    - ./tribalia-tests 2> ./cerrors.txt
+  artifacts:
+    - ./cerrors.txt
 

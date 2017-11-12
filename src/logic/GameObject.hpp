@@ -127,7 +127,11 @@ namespace Tribalia {
             std::string sname{name};
 
             if (_properties->find(sname) == _properties->end()){
-                _properties->emplace(sname, new T);
+		auto mem = malloc(sizeof(T));
+		printf("[%d} creating %s -> %p\n", this->GetObjectID(),
+		       name, mem);
+		
+                _properties->emplace(sname, mem);
 		_sizemap->emplace(sname, sizeof(T));
                 return this->SetProperty(name, value);
 

@@ -32,6 +32,8 @@ TEST_F(ClientTest, TestMessagePushSimple) {
 
     c->ReceiveTCP(nc, 5);
     EXPECT_EQ(0, strcmp(nc, "fags ")) << "Message not flushed";
+
+    delete c;	
 }
 
 TEST_F(ClientTest, TestMessagePushComplex) {
@@ -59,6 +61,7 @@ TEST_F(ClientTest, TestMessagePushComplex) {
     c->ReceiveTCP(nc, 99);
     EXPECT_EQ(0, strcmp(nc, " fags ")) << "Message not flushed '"<< nc << "' != ' fags '";
 
+    delete c;
 }
 
 TEST_F(ClientTest, TestIfReceiveReturnFalseNoMessage) {
@@ -73,6 +76,7 @@ TEST_F(ClientTest, TestIfReceiveReturnFalseNoMessage) {
     EXPECT_TRUE(c->ReceiveTCP(nc, 6));
     EXPECT_FALSE(c->ReceiveTCP(nc, 6));
 
+    delete c;
 }
 
 TEST_F(ClientTest, TestIfReceiveTokenCorrect) {
@@ -90,6 +94,7 @@ TEST_F(ClientTest, TestIfReceiveTokenCorrect) {
     c->ReceiveTCP(nc, 20);
     EXPECT_EQ(0, strcmp(nc, "[I AM TOKEN 2]")) << "Message not flushed '" << nc << "' != '[I AM TOKEN 2]";
 
+    delete c;
 }
 
 TEST_F(ClientTest, TestHeaderCheckCorrect) {
@@ -108,5 +113,6 @@ TEST_F(ClientTest, TestHeaderCheckCorrect) {
     c->ReceiveTCP(nc, 15);
     EXPECT_EQ(0, strcmp(nc, "[TRIBALIA H2]")) << "Message not flushed '" << nc << "' != '[TRIBALIA H2]";
 
+    delete c;
 }
 

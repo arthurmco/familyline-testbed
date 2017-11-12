@@ -45,10 +45,17 @@ void GameObject::CopyObject(GameObject* dst, GameObject& src)
 	
 	size_t s = src._sizemap->at(it.first);
 
-	void* data = (void*)new char[s];
+	void* data = malloc(s);
 	memcpy(data, (void*)it.second, s);
 
-	dst->_properties->emplace(it.first, data);
+	auto dst_find = dst->_properties->find(it.first);
+	if (dst_find != dst->_properties->end()) {
+	    void* prop = it.second;
+	    memcpy(prop, dst_find->second, s);
+	} else {
+	    dst->_properties->emplace(it.first, data);
+	}
+	
 	dst->_sizemap->emplace(it.first, s);
     } 
 
@@ -61,8 +68,16 @@ GameObject::GameObject(GameObject& o)
 
 GameObject::~GameObject()
 {
+    for (auto it = _properties->begin(); it != _properties->end(); it++) {
+	printf("[%d} freeing %s -> %p\n", this->GetObjectID(),
+	       it->first.c_str(), it->second);
+        free(it->second);
+    }
+    
     this->_properties->clear();
-
+    delete this->_properties;
+    delete this->_sizemap;
+    
 }
 
 int GameObject::GetObjectID(){ return _oid; }
