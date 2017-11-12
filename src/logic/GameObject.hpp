@@ -58,8 +58,8 @@ namespace Tribalia {
 	float _radius = -1.0f;
 
         /* Property hashtable */
-        std::map<std::string, void*>* _properties;
-	std::map<std::string, size_t>* _sizemap;
+        std::map<std::string, void*> _properties;
+	std::map<std::string, size_t> _sizemap;
 
 	/* Copy an object, alongside with its properties, to another
 	   object */
@@ -89,11 +89,11 @@ namespace Tribalia {
         {
             std::string sname{name};
 
-            if (_properties->find(sname) == _properties->end()){
+            if (_properties.find(sname) == _properties.end()){
                 return (T)0;
             }
 
-            return *(T*)_properties->at(sname);
+            return *(T*)_properties.at(sname);
 
         }
 
@@ -109,11 +109,11 @@ namespace Tribalia {
         {
             std::string sname{name};
 
-            if (_properties->find(sname) == _properties->end()){
+            if (_properties.find(sname) == _properties.end()){
                 return false;
             }
 
-            T* prop = (T*)_properties->at(sname);
+            T* prop = (T*)_properties.at(sname);
             *prop = value;
 
             return true;
@@ -126,13 +126,13 @@ namespace Tribalia {
         {
             std::string sname{name};
 
-            if (_properties->find(sname) == _properties->end()){
+            if (_properties.find(sname) == _properties.end()){
 		auto mem = malloc(sizeof(T));
 		printf("[%d} creating %s -> %p\n", this->GetObjectID(),
 		       name, mem);
 		
-                _properties->emplace(sname, mem);
-		_sizemap->emplace(sname, sizeof(T));
+                _properties.emplace(sname, mem);
+		_sizemap.emplace(sname, sizeof(T));
                 return this->SetProperty(name, value);
 
             }

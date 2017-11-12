@@ -7,10 +7,18 @@ PathFinder::PathFinder(ObjectManager* om)
     : _om(om)
 { }
 
+PathFinder::~PathFinder()
+{
+    delete[] _pathing_slots;
+}
+
 void PathFinder::InitPathmap(int w, int h)
 {
     _mapWidth = w;
     _mapHeight = h;
+    if (_pathing_slots)
+	delete[] _pathing_slots;
+    
     _pathing_slots = new unsigned char[w*h];
 }
 void PathFinder::UpdatePathmap(int w, int h, int x, int y)

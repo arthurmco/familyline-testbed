@@ -14,8 +14,7 @@ void TeamCoordinator::AddTeam(Team* t)
 	tc->team = t;
 	this->teamlist.push_back(tc);
     } else {
-	TeamCities* te = new TeamCities();
-	te->team = t;
+	TeamCities* te = new TeamCities(t);
 	this->teamlist.push_back(te);
     }
 }

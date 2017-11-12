@@ -51,6 +51,7 @@ namespace Logic {
 	
     public:
 	PathFinder(ObjectManager*);
+	~PathFinder();
 
 	void InitPathmap(int w, int h);
 	void UpdatePathmap(int w, int h, int x = 0, int y = 0);

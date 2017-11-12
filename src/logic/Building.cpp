@@ -45,7 +45,7 @@ inline void Building::InitGarrisoning(int capacity)
 	this->_maximumCapacityUnits = capacity;
 	this->_garrisonedCount = 0;
 	if (capacity > 0) {
-		this->_garrisonedUnits = new Unit*[capacity];		
+	    this->_garrisonedUnits.resize(capacity);
 	}
 }
 

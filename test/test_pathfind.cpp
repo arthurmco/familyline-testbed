@@ -16,6 +16,7 @@ void PathfinderTest::SetUp()
 
 void PathfinderTest::TearDown()
 {
+    delete o;
     delete _pf;
     delete _om;
 }
@@ -130,5 +131,8 @@ TEST_F(PathfinderTest, TestIfPathfindingPutObjectInOtherObjectPosition){
     EXPECT_GE(36, vlast.x);
     EXPECT_LE(28, vlast.y);
     EXPECT_GE(36, vlast.y);
+
+    _om->UnregisterObject(c);
+    delete c;
      
 }

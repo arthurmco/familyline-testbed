@@ -24,7 +24,7 @@ namespace Logic {
 	/*	The maximum amount of people that can be garrisoned inside the 
 		building */
 	int _maximumCapacityUnits;
-	Unit** _garrisonedUnits;
+	std::list<Unit*> _garrisonedUnits;
 	int _garrisonedCount;
 
         /*  Train an unit. 

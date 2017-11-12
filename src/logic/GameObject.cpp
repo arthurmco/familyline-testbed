@@ -19,8 +19,8 @@ GameObject::GameObject(int oid, int tid, const char* name,
     _name(name),
     _xPos(x), _yPos(y), _zPos(z)
 {
-    _properties = new std::map<std::string, void*>();
-    _sizemap = new std::map<std::string, size_t>();
+//    _properties = new std::map<std::string, void*>();
+//    _sizemap = new std::map<std::string, size_t>();
 }
 
 /* Copy an object, alongside with its properties, to another
@@ -37,26 +37,25 @@ void GameObject::CopyObject(GameObject* dst, GameObject& src)
 //    dst->_properties = new std::map<std::string, void*>();
 //    dst->_sizemap = new std::map<std::string, size_t>();
 
-    for (auto it : (*src._properties)) {
+    for (auto it : src._properties) {
 
 	/* Do not copy some properties */
 	if (it.first == "mesh")
 	    continue;
 	
-	size_t s = src._sizemap->at(it.first);
+	size_t s = src._sizemap.at(it.first);
 
-	void* data = malloc(s);
-	memcpy(data, (void*)it.second, s);
-
-	auto dst_find = dst->_properties->find(it.first);
-	if (dst_find != dst->_properties->end()) {
+	auto dst_find = dst->_properties.find(it.first);
+	if (dst_find != dst->_properties.end()) {
 	    void* prop = it.second;
 	    memcpy(prop, dst_find->second, s);
 	} else {
-	    dst->_properties->emplace(it.first, data);
+	    void* data = malloc(s);
+	    memcpy(data, (void*)it.second, s);
+	    dst->_properties.emplace(it.first, data);
 	}
 	
-	dst->_sizemap->emplace(it.first, s);
+	dst->_sizemap.emplace(it.first, s);
     } 
 
 }
@@ -68,15 +67,13 @@ GameObject::GameObject(GameObject& o)
 
 GameObject::~GameObject()
 {
-    for (auto it = _properties->begin(); it != _properties->end(); it++) {
+    for (auto it = _properties.begin(); it != _properties.end(); it++) {
 	printf("[%d} freeing %s -> %p\n", this->GetObjectID(),
 	       it->first.c_str(), it->second);
         free(it->second);
     }
     
-    this->_properties->clear();
-    delete this->_properties;
-    delete this->_sizemap;
+    this->_properties.clear();
     
 }
 
@@ -99,5 +96,5 @@ bool GameObject::HasProperty(const char* name)
 {
     std::string sname{name};
 
-    return (_properties->find(sname) != _properties->end());
+    return (_properties.find(sname) != _properties.end());
 }
