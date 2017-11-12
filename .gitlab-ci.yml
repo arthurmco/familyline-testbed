@@ -39,6 +39,3 @@ unit-test:
     - bash ./scripts/install
   script:
     - ./tribalia-tests 2> ./cerrors.txt
-  artifacts:
-    - ./cerrors.txt
-
