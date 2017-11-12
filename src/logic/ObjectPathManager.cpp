@@ -5,18 +5,27 @@ using namespace Tribalia::Logic;
 
 
 /* 	Adds a path from object 'o' to the path manager 
-Returns true if added successfully, or false if there's already a path there
-	for the same object
+	Returns true if added successfully, or false if there's already a path 
+	there for the same object
  */
 bool ObjectPathManager::AddPath(LocatableObject* o, 
 				std::vector<glm::vec2>* path)
 {
 	for (auto& ref : _pathrefs) {
 		if (ref.lc->GetObjectID() == o->GetObjectID()) {
-			return false;
+		    /* If we had some object following a path and set a new
+		       path for that object, interrupt the path for this one 
+		       and make it follow the new path
+
+		       This is the default behavior of all RTS games
+		    */
+		    ref.interrupted = true;
 		}
 	}
 
+	std::remove_if(_pathrefs.begin(), _pathrefs.end(), [](ObjectPathRef& r)
+		       { return r.interrupted; });
+			   
 	_pathrefs.emplace_back(maxpathID++, o, 
 			       new std::vector<glm::vec2>(*path));	
 	return true;

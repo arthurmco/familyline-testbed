@@ -1,6 +1,8 @@
 /*
  	Manages object movement paths and update them in the game
 
+	Copyright (C) 2017 Arthur M
+
 */
 
 #include <map>
@@ -18,20 +20,21 @@ namespace Logic {
 
 /* The object path unit */
 struct ObjectPathRef {
-	int pathid;
-	LocatableObject* lc;
-	std::vector<glm::vec2>* path;
-	glm::vec2 path_point;
-	unsigned int path_ptr = 0;
-
-	ObjectPathRef(int pathid, LocatableObject* lc, 
-		      std::vector<glm::vec2>* path)
+    int pathid;
+    LocatableObject* lc;
+    std::vector<glm::vec2>* path;
+    glm::vec2 path_point;
+    unsigned int path_ptr = 0;
+    bool interrupted = false;
+    
+    ObjectPathRef(int pathid, LocatableObject* lc, 
+		  std::vector<glm::vec2>* path)
 	{
-		this->pathid = pathid;
-		this->lc = lc;
-		this->path = path;
-		this->path_point = (*path)[0];
-		this->path_ptr = 0;
+	    this->pathid = pathid;
+	    this->lc = lc;
+	    this->path = path;
+	    this->path_point = (*path)[0];
+	    this->path_ptr = 0;
 	}
 };
 
@@ -42,8 +45,8 @@ private:
     
 public:
     /* 	Adds a path from object 'o' to the path manager 
-	Returns true if added successfully, or false if there's already a path there
-	for the same object
+	Returns true if added successfully, or false if there's already a path 
+	there for the same object
     */
     bool AddPath(LocatableObject* o, std::vector<glm::vec2>* path);
 
