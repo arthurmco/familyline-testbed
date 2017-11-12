@@ -122,10 +122,10 @@ else()
 	target_link_libraries(tribalia-tests ${GLM_LIBRARIES})
   endif(DO_TESTS)
 
-  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    message("clang detected, linking with libc++")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-  endif()
+  # if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  #  message("clang detected, linking with libc++")
+  #  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+  #endif()
 
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SDL2_CFLAGS_OTHER}")

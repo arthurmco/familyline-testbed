@@ -38,4 +38,4 @@ unit-test:
     - apt update
     - bash ./scripts/install
   script:
-    - ./tribalia-tests 2> ./cerrors.txt
+    - ./tribalia-tests
