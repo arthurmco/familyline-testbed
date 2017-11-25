@@ -55,6 +55,8 @@ googletest*/*
 googletest-src/*
 Testing/*
 CTest*.cmake
+*.pc
 
 # Code::Blocks
 *.cbp
+
