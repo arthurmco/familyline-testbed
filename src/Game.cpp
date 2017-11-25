@@ -1,5 +1,3 @@
-
-
 #include "Game.hpp"
 
 using namespace Tribalia;
@@ -7,6 +5,16 @@ using namespace Tribalia::Logic;
 using namespace Tribalia::Input;
 using namespace Tribalia::Graphics;
 using namespace Tribalia::Graphics::GUI;
+
+class GameActionListenerImpl : public GameActionListener {
+public:
+    GameActionListenerImpl() : GameActionListener("listener-base") {}
+
+    virtual void OnListen(GameAction& a) {
+	printf("received from listener\n");
+    }
+};
+
 
 Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 	   GUIRenderer* gr)
@@ -24,6 +32,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         gctx.om = om;
 
         hp = new HumanPlayer{"Arthur", 0, &gam};
+	gam.AddListener(new GameActionListenerImpl());
 
     	terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
     	terr = terrFile->GetTerrain();
@@ -123,8 +132,8 @@ int Game::RunLoop()
     pnl.SetBackColor(0, 0, 0, 185);
     gr->AddPanel(&pnl);
     
-    GUIActionManager* gam = new GUIActionManager(&pnl);
-    hp->SetActionManager(gam);
+    GUIActionManager* guam = new GUIActionManager(&pnl);
+    hp->SetActionManager(guam);
 
 /*    Button btnExit = Button(0.7, 0.05, 0.2, 0.5, "Exit");
     btnExit.SetOnClickListener([&](GUI::IControl* cc) {
@@ -146,7 +155,11 @@ int Game::RunLoop()
     double maxdelta = 0, mindelta = 99, sumfps = 0;  
     
     do {
+	/*
+	  
+	  Input processing
 
+	 */
         ip->UpdateIntersectedObject();
         ip->UpdateTerrainProjectedPosition();
 
@@ -159,7 +172,13 @@ int Game::RunLoop()
     	hp->ProcessInput();
         if (!hp->Play(&gctx))
             player = false;
-	
+
+	/*
+
+	  Logic & graphical processing
+
+	 */
+	gam.ProcessListeners();
     	terr_rend->Update();
 
         bool objupdate = objrend->Check();
@@ -213,7 +232,13 @@ int Game::RunLoop()
 
         AnimationManager::GetInstance()->Iterate();
     	ObjectPathManager::getInstance()->UpdatePaths();
-	gam->UpdateBasePanel();
+	guam->UpdateBasePanel();
+
+	/*
+	  
+	  Rendering
+
+	 */
 
     	fb3D->SetAsBoth();
     	rndr->SetBoundingBox(hp->renderBBs);

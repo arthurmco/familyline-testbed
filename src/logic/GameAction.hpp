@@ -14,10 +14,10 @@ namespace Tribalia::Logic {
 
 // Action types
 enum GameActionType {
-    GAT_CREATION,  // Object has been created
-    GAT_MOVE,      // Player started moving some object
-    GAT_ATTACK,    // Object has been attacked
-    GAT_DESTROY,
+    GAT_CREATION = 1,  // Object has been created
+    GAT_MOVE = 2,      // Player started moving some object
+    GAT_ATTACK = 4,    // Object has been attacked
+    GAT_DESTROY = 8,
 };
     
 struct GameAction {

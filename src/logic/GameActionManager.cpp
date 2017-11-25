@@ -41,3 +41,18 @@ bool GameActionManager::Pop(GameAction& a)
 
     return true;
 }
+
+void GameActionManager::AddListener(GameActionListener* l)
+{
+    _listeners.push_back(l);
+}
+
+void GameActionManager::ProcessListeners()
+{
+    GameAction a;
+    if (this->Pop(a)) {	
+	for (auto& listener : _listeners) {
+	    listener->OnListen(a);
+	}
+    }
+}

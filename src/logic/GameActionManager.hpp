@@ -8,7 +8,10 @@
 #define GAMEACTIONMANAGER_HPP
 
 #include <queue>
+#include <list>
+
 #include "GameAction.hpp"
+#include "GameActionListener.hpp"
 
 namespace Tribalia::Logic {
 
@@ -25,11 +28,16 @@ namespace Tribalia::Logic {
 class GameActionManager {
 private:
     std::queue<GameAction> _actions;
+    std::list<GameActionListener*> _listeners;
 
+    bool Pop(GameAction& a);
+    
 public:
     void Push(GameAction a);
-    bool Pop(GameAction& a);
 
+    void AddListener(GameActionListener*);
+
+    void ProcessListeners();
 };
 
 }
