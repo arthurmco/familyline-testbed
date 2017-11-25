@@ -13,10 +13,14 @@
 namespace Tribalia::Logic {
 
 /*
- * Abstract class that implements a listener for actions
+ *  Abstract class that implements a listener for actions
  *
- * Useful for systems that take actions based on object creation/removal (like
+ *  Useful for systems that take actions based on object creation/removal (like
  * networking, who need to send actions to the server
+ *
+ *  The player classes get the inputs and send to the game action manager, who
+ * sends them to the game action listeners.
+ *
  */
 
 class GameActionListener {

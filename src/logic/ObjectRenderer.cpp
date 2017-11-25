@@ -4,78 +4,93 @@ using namespace Tribalia::Logic;
 
 
 ObjectRenderer::ObjectRenderer(ObjectManager* om, Tribalia::Graphics::SceneManager* sm)
-    : _om(om), _sm(sm)
+    : GameActionListener("object-renderer-listener"),  _om(om), _sm(sm)
 {
 
+}
+
+void ObjectRenderer::OnListen(GameAction& a) {
+    /* Register the modified item ID here */
+    switch (a.type) {
+    case GAT_CREATION:
+	this->_created_ids[a.creation.object_id] = true; break;
+    case GAT_MOVE:
+	this->_modified_ids[a.move.object_id] = true; break;
+    case GAT_ATTACK:
+	this->_modified_ids[a.attack.attacker_id] = true;
+	this->_modified_ids[a.attack.attackee_id] = true;
+	break;
+    case GAT_DESTROY:
+	this->_deleted_ids[a.destroy.object_id] = true;
+    }
+    
 }
 
 /*	Check for new objects, add them to the list
 	Return true if we have new objects, false if we haven't */
 bool ObjectRenderer::Check()
 {
-    for (auto id_it = _IDs.begin(); id_it != _IDs.end(); ++id_it) {
-	id_it->ok = false;        
-    }
-    
-
     int object_found = 0;
+    int object_deleted = 0;
     for (auto it = _om->_objects.begin(); it != _om->_objects.end(); ++it) {
 
-        bool exists = false;
-        /* Check if ID already exists.
-            If yes, then the object is already added */
-        for (auto& id_it : _IDs) {
-            if (id_it.ID == it->oid) {
-                exists = true;
-                id_it.ok = true;
+	bool exists = false;
 
-                break;
-            }
-        }
+	// Object was created
+	if (_created_ids[it->oid]) {
+	    /* Easy way to check if we have a locatable object
+	     * I don't worry if it's fast, the compiler might optimize.
+	     */
+	    LocatableObject* loc = dynamic_cast<LocatableObject*>(it->obj);
+	    if (loc) {
 
+		/* check if mesh is valid */
+		if (!loc->GetMesh()) continue;
+
+		object_found++;
+		_objects.emplace_back(loc);
+		_sm->AddObject(loc->GetMesh());
+		ObjectRenderData ord;
+		ord.ID = it->oid;
+		ord.m = loc->GetMesh();
+		_IDs.push_back(ord);
+	    }
+	} else {
+	    // Object already exists.
+	    exists = true;
+	}
+	
         if (exists) continue;
 
-        /* easy way to check if we have a locatable object
-            I don't know if is fast */
-        LocatableObject* loc = dynamic_cast<LocatableObject*>(it->obj);
-        if (loc) {
-
-            /* check if mesh is valid */
-            if (!loc->GetMesh()) continue;
-
-            object_found++;
-            _objects.emplace_back(loc);
-            _sm->AddObject(loc->GetMesh());
-            ObjectRenderData ord;
-            ord.ID = it->oid;
-            ord.m = loc->GetMesh();
-            ord.ok = true;
-            _IDs.push_back(ord);
-        }
     }
 
     if (object_found > 0) {
         Log::GetLog()->Write("object-renderer", "updated, %d objects found",
             object_found);
-        return true;
     }
 
-    for (auto id = _IDs.begin(); id != _IDs.end(); ++id) {
-        if (!id->ok) {
+    for (auto id = _IDs.begin(); id != _IDs.end();) {
+	
+        if (_deleted_ids[id->ID]) {
+	    _deleted_ids[id->ID] = false;
+	    object_deleted++;
+	    
             /*  ID is not ok, meaning that it wasn't been updated, meaning
                 that it doesn't exist. Remove it from the scene */
             Log::GetLog()->Write("object-renderer",
 				 "Removed object with id %d", id->ID);
             _sm->RemoveObject(id->m);
-            _IDs.erase(id);
-            return true;
-        }
+            id = _IDs.erase(id);
+        } else {
+	    id++;
+	}
     }
 
-    /* Check for the inverse */
-
-	return false;
-
+    _modified_ids.clear();
+    _created_ids.clear();
+    _deleted_ids.clear();
+    
+    return (object_found > 0) || (object_deleted > 0);
 }
 
 /* Update object meshes */

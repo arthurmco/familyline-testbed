@@ -1,5 +1,6 @@
 #include "GameActionManager.hpp"
 #include <cstdio>
+#include "../Log.hpp"
 
 using namespace Tribalia::Logic;
 
@@ -44,6 +45,8 @@ bool GameActionManager::Pop(GameAction& a)
 
 void GameActionManager::AddListener(GameActionListener* l)
 {
+    Log::GetLog()->Write("game-action-manager", "Add action listener %s",
+			 l->GetName());
     _listeners.push_back(l);
 }
 

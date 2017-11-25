@@ -97,6 +97,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
     objrend = new ObjectRenderer(om, scenemng);
     hp->objr = objrend;
+    gam.AddListener(objrend);
 
     InputManager::GetInstance()->Initialize();
 
