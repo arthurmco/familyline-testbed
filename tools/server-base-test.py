@@ -102,23 +102,36 @@ clientid = -1
 
 while not quit:
     try:
-        servermsg = sock.recv(1024).decode()
-
-        if servermsg == "[TRIBALIA PLAYERINFO?]\n":
-            if clientid < 0:
-                clientid = client_show_playerinfo(sock, testname, testxp)
+        if clientid < 0:
+            servermsg = sock.recv(1024).decode()
+    
+            if servermsg == "[TRIBALIA PLAYERINFO?]\n":
                 if clientid < 0:
-                    print('error: failed to get player info')
-                else:
-                    print('Client ID is %d' % clientid)
-                    sock_str_send(sock, '[TRIBALIA CHAT %d all 5 Hello]' % clientid)
+                    clientid = client_show_playerinfo(sock, testname, testxp)
+                    if clientid < 0:
+                        print('error: failed to get player info')
+                    else:
+                        print('Client ID is %d' % clientid)
+                        sock_str_send(sock, '[TRIBALIA CHAT %d all 5 Hello]\n' % clientid)
                     
-        
     except socket.timeout:
         pass
-
     except KeyboardInterrupt:
         quit = True
+
+    if clientid > 0:
+        chatmsg = ""
+        try:
+            chatmsg = input("chat> ")
+        except EOFError:
+            quit = True
+
+        chatlen = len(chatmsg)
+
+        if chatmsg.strip() == "/ready":
+            sock_str_send(sock, "[TRIBALIA GAME READY]\n")
+        elif chatlen > 2:
+            sock_str_send(sock, "[TRIBALIA CHAT %d all %u %s]\n" % (clientid, chatlen, chatmsg))
 
 print("Closing...")
 sock.close()

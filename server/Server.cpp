@@ -60,13 +60,33 @@ int main(int argc, char const* argv[])
 
 		if (cli->GetStatus() >= CS_CONNECTED) {
 		    char m[2049];
-		
+
+		    // Check if client is ready or not anymore
+		    if (cli->PeekTCP(m, 40)) {
+			if (!strncmp(m, "[TRIBALIA GAME READY]", 21)) {
+			    printf("\033[1mClient %s is ready\033[0m\n",
+				   cli->GetName());
+			    cli->SetReady();
+			    continue;
+			}
+
+			if (!strncmp(m, "[TRIBALIA GAME NOTREADY]", 21)) {
+			    printf("\033[1mClient %s isn't ready anymore\033[0m\n",
+				   cli->GetName());
+			    cli->UnsetReady();
+			    continue;
+			}
+
+		    }
+		    
+		    
+		    // Check for chats
 		    memset(m, 0, 2048);
 		    while (auto cm = chm->CheckMessage(cli)) {
 			printf("[%s] \033[3m%s\033[0m\n", cli->GetName(),
 			       cm->message);
 		    }
-		    
+
 		    if (cli->ReceiveTCP(m, 2048)) {
 		    
 			printf("From %d: "

@@ -104,6 +104,8 @@ namespace Tribalia::Server {
 	
 	bool check_headers = true;
 
+	bool _is_ready = false;
+
 	ConnectionStatus cstatus = CS_DISCONNECTED;
 
 	std::string name;
@@ -161,6 +163,13 @@ namespace Tribalia::Server {
 	void SetName(char* n);
 
 	unsigned int GetID() const;
+
+	/* Set if the client sent the message that it is ready to 
+	   start the game  
+	*/
+	void SetReady() { _is_ready = true; }
+	void UnsetReady() { _is_ready = false; }
+	bool IsReady() const { return _is_ready; }
     };
 
     /* TCP initialization steps.
@@ -204,7 +213,6 @@ namespace Tribalia::Server {
 
 	/* Check if we have clients to be initialized */
 	bool HasClient();
-	
     };
 
 
