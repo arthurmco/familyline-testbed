@@ -33,6 +33,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         hp = new HumanPlayer{"Arthur", 0, &gam};
 	gam.AddListener(new GameActionListenerImpl());
+	pm.AddPlayer(hp);
 
     	terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
     	terr = terrFile->GetTerrain();

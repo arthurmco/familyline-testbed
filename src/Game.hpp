@@ -20,6 +20,7 @@
 #include "logic/TeamCoordinator.hpp"
 #include "logic/BuildQueue.hpp"
 #include "logic/GameActionManager.hpp"
+#include "logic/PlayerManager.hpp"
 
 #include "graphical/Camera.hpp"
 #include "graphical/AssetFile.hpp"
@@ -63,6 +64,7 @@ private:
     
     Logic::GameContext gctx;
     Logic::GameActionManager gam;
+    Logic::PlayerManager pm;
     
     Graphics::Window* win = nullptr;
     Graphics::Renderer* rndr = nullptr;
@@ -82,6 +84,7 @@ private:
 
     Input::InputPicker* ip = nullptr;
     Logic::PathFinder* pathf = nullptr;
+
 
     struct {
 	Graphics::GUI::Panel *p;

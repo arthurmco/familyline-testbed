@@ -1,7 +1,8 @@
+
 /***
     Player base definitions
 
-    Copyright (C) 2016 Arthur M
+    Copyright (C) 2016, 2017 Arthur M
 
 ***/
 #include <vector>
@@ -14,13 +15,12 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
-namespace Tribalia {
-namespace Logic {
+namespace Tribalia::Logic {
 
     class Player {
     protected:
         std::string _name;
-        int _elo, _xp;
+        int _xp;
         City* _city;
 
 	GameActionManager* _gam;
@@ -36,6 +36,7 @@ namespace Logic {
         City* GetCity();
 
         void AddCity(City*);
+	
         /***
             Virtual function called on each iteration.
 
@@ -63,8 +64,6 @@ namespace Logic {
 
 
 }
-}
-
 
 
 #endif /* end of include guard: PLAYER_HPP */
