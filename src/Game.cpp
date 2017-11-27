@@ -33,7 +33,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         hp = new HumanPlayer{"Arthur", 0, &gam};
 	gam.AddListener(new GameActionListenerImpl());
-	pm.AddPlayer(hp);
+	pm.AddPlayer(hp, PlayerFlags::PlayerIsHuman);
 
     	terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
     	terr = terrFile->GetTerrain();
@@ -171,8 +171,8 @@ int Game::RunLoop()
 
     	InputEvent ev;
     	gr->ProcessInput(ev);
-    	hp->ProcessInput();
-        if (!hp->Play(&gctx))
+	pm.ProcessInputs();
+        if (!pm.PlayAll(&gctx))
             player = false;
 
 	/*
