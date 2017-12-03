@@ -8,33 +8,17 @@
 
 #include <queue>
 #include <algorithm> // for std::min
-
-/* For network comm */
-#include <sys/types.h>
-
-#ifndef _WIN32
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-typedef int socket_t;
-
-/* for fd access (read(), close(), write()) */
-#include <unistd.h>
-#else
-#include <Windows.h>
-typedef SOCKET socket_t;
-#endif
+#include "ClientMessageQueue.hpp"
 
 #include <fcntl.h>
+#include <string>
 
 #include <errno.h>
-#include <cstring>
-#include <string>
+
 
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-#define MAX_CLIENT_BUFFER 8192
 namespace Tribalia::Server {
 
     /* Define the connection status, obviously */
@@ -58,51 +42,11 @@ namespace Tribalia::Server {
 	CS_INGAME
     };
 
-    /* UDP message header layout, little endian */
-    struct UDPMessageHeader {
-	/* The magic 'number', "TRMP" */
-	uint32_t magic;
-
-	/* Packet ID. 
-	   Here, will be chosen sequentially by the server manager, but do not
-	   need to be 
-	*/
-	uint32_t packet_id; 
-
-	/* The 64 bit unix timestamp of the message */
-	uint64_t packet_timestamp;
-
-	/* Packet checksum. 
-	   32-bit sum of all bytes of the packet, */
-	uint32_t checksum;
-
-        uint16_t type;
-	uint16_t flags;
-	uint16_t size;
-    } __attribute__((packed));
-
-    struct UDPMessage {
-	UDPMessageHeader hdr;
-	char* content;
-    };
 
     class Client {
     protected:
-	socket_t sockfd;
-	struct in_addr addr;
-
-	struct sockaddr_in udp_addr;
-	bool udp_init = false;
-	socket_t udp_socket;
-
-	size_t buffer_ptr_send = 0, buffer_ptr_recv = 0;
-	char buffer[MAX_CLIENT_BUFFER];
-
-	std::queue<UDPMessage> udp_buffer_send, udp_buffer_recv;
-
 	bool closed = true;
-	
-	bool check_headers = true;
+	ClientMessageQueue* _cmq;
 
 	bool _is_ready = false;
 
@@ -111,39 +55,9 @@ namespace Tribalia::Server {
 	std::string name;
     public:
 	Client(int sockfd, struct in_addr addr);
-	
-	void SendTCP(const char* m);
-	
-        /* 'Peek' a message, i.e read but not remove it from the queue 
-           Return message length or 0 if no message received */	
-	size_t PeekTCP(char* m, size_t len);
-	
-        /* Returns false if no message received,
- 	 * or true if message received, and outputs the message on m */
-        size_t ReceiveTCP(char* m, size_t len);
-	/* Injects message in the client
-	   Only meant to be called from the server */
-	void InjectMessageTCP(char* m, size_t len);
-
-	/* Initialize the "UDP part" of the client */
-	bool InitUDP(struct in_addr udp_addr, int port);
-	bool CheckUDP() const;
-	
-	void SendUDP(UDPMessage m);
-	bool PeekUDP(UDPMessage& m);
-	bool ReceiveUDP(UDPMessage& m);
-
-	/* Injects UDP messages
-	   Needs to have the checksum checked */
-	void InjectMessageUDP(UDPMessage m);
-	bool RetrieveSendUDP(UDPMessage& m);
 
 	void Close();
 	bool IsClosed() const;
-
-	socket_t GetSocket() const;
-	socket_t GetUDPSocket() const;
-	struct in_addr GetAddress() const;
 
 	/* Set/get if the server manager will check the headers of this message
 	   (i.e, if it starts with '[TRIBALIA') */
@@ -170,6 +84,9 @@ namespace Tribalia::Server {
 	void SetReady() { _is_ready = true; }
 	void UnsetReady() { _is_ready = false; }
 	bool IsReady() const { return _is_ready; }
+
+	/* Gets the message queue of this client */
+	ClientMessageQueue* GetQueue();
     };
 
     /* TCP initialization steps.

@@ -62,7 +62,7 @@ int main(int argc, char const* argv[])
 		    char m[2049];
 
 		    // Check if client is ready or not anymore
-		    if (cli->PeekTCP(m, 40)) {
+		    if (cli->GetQueue()->PeekTCP(m, 40)) {
 			if (!strncmp(m, "[TRIBALIA GAME READY]", 21)) {
 			    printf("\033[1mClient %s is ready\033[0m\n",
 				   cli->GetName());
@@ -87,11 +87,11 @@ int main(int argc, char const* argv[])
 			       cm->message);
 		    }
 
-		    if (cli->ReceiveTCP(m, 2048)) {
+		    if (cli->GetQueue()->ReceiveTCP(m, 2048)) {
 		    
 			printf("From %d: "
 			       "\033[3;37m\n%s\033[0m\n",
-			       cli->GetSocket(), m);
+			       cli->GetQueue()->GetSocket(), m);
 		    }
 		}
 		    

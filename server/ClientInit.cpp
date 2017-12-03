@@ -38,7 +38,7 @@ void TCPConnectionInitiator::Process()
 	tinit.iters++;	   
 	switch (tinit.step) {
 	case InitConnect:
-	    if (!tinit.cli->ReceiveTCP(recvbuffer, 128)) {
+	    if (!tinit.cli->GetQueue()->ReceiveTCP(recvbuffer, 128)) {
 		continue;
 	    }
 	    
@@ -48,11 +48,11 @@ void TCPConnectionInitiator::Process()
 	    
 	    break;
 	case VersionQuery:
-	    tinit.cli->SendTCP("[TRIBALIA VERSION?]\n");
+	    tinit.cli->GetQueue()->SendTCP("[TRIBALIA VERSION?]\n");
 	    tinit.step = TCPInitStep::VersionQueried;
 	    break;
 	case VersionQueried:
-	    if (!tinit.cli->ReceiveTCP(recvbuffer, 128)) {
+	    if (!tinit.cli->GetQueue()->ReceiveTCP(recvbuffer, 128)) {
 		continue;
 	    }
 	    
@@ -74,7 +74,7 @@ void TCPConnectionInitiator::Process()
 		if (vmaj != 0 || vmin != 1) {
 		    fprintf(stderr, "Client %s has unsupported version (%u.%u)",
 			    tinit.cli->GetName(), vmaj, vmin);
-		    tinit.cli->SendTCP("[TRIBALIA ERROR 001 Unsupported version]");
+		    tinit.cli->GetQueue()->SendTCP("[TRIBALIA ERROR 001 Unsupported version]");
 		    tinit.cli->Close();
 		    continue;	    
 		}
@@ -83,11 +83,11 @@ void TCPConnectionInitiator::Process()
 	    }
 	    break;
 	case CapabilityQuery:
-	    tinit.cli->SendTCP("[TRIBALIA CAPS?]\n");
+	    tinit.cli->GetQueue()->SendTCP("[TRIBALIA CAPS?]\n");
 	    tinit.step = TCPInitStep::CapabilityQueried;
 	    break;
 	case CapabilityQueried:
-	    if (!tinit.cli->ReceiveTCP(recvbuffer, 128)) {
+	    if (!tinit.cli->GetQueue()->ReceiveTCP(recvbuffer, 128)) {
 		continue;
 	    }
 
@@ -106,18 +106,18 @@ void TCPConnectionInitiator::Process()
 		}
 
 		// Send ours
-		tinit.cli->SendTCP("[TRIBALIA CAPS ]\n");
+		tinit.cli->GetQueue()->SendTCP("[TRIBALIA CAPS ]\n");
 
 		tinit.step = TCPInitStep::PlayerInfoRetrieve;			
 	    }
 	    break;
 	case PlayerInfoRetrieve:
 	    // Ask for the client name?
-	    tinit.cli->SendTCP("[TRIBALIA PLAYERINFO?]\n");
+	    tinit.cli->GetQueue()->SendTCP("[TRIBALIA PLAYERINFO?]\n");
 	    tinit.step = TCPInitStep::PlayerInfoRetrieved;
 	    break;
 	case PlayerInfoRetrieved:
-	    if (!tinit.cli->ReceiveTCP(recvbuffer, 192)) {
+	    if (!tinit.cli->GetQueue()->ReceiveTCP(recvbuffer, 192)) {
 		continue;
 	    }
 	 
@@ -140,7 +140,7 @@ void TCPConnectionInitiator::Process()
 		char ssendmsg[96];
 		sprintf(ssendmsg, "[TRIBALIA PLAYERINFO %u]\n",
 			tinit.cli->GetID());
-		tinit.cli->SendTCP(ssendmsg);
+		tinit.cli->GetQueue()->SendTCP(ssendmsg);
 	    }
 	    
 	    printf("%s is connected (%d loops, %d).\n", tinit.cli->GetName(),

@@ -206,7 +206,7 @@ void ServerManager::RetrieveTCPMessages() {
     size_t client_poll_qt = 0;
     for (size_t i = 0; i < client_qt; i++) {
 	if (clients[i]) {
-	    pfds[i].fd = clients[i]->GetSocket();
+	    pfds[i].fd = clients[i]->GetQueue()->GetSocket();
 	    pfds[i].events = POLLIN | POLLHUP;  // poll for read and conn end
 	    client_poll_qt++;
 	}
@@ -223,10 +223,10 @@ void ServerManager::RetrieveTCPMessages() {
 		if (pfds[i].revents & POLLIN) {
 		    auto& cli = clients[i];
 
-		    auto readnum = read(cli->GetSocket(), (void*)readbuf, 1535);
+		    auto readnum = read(cli->GetQueue()->GetSocket(), (void*)readbuf, 1535);
 		    if (readnum == 0) {
 			/* Return 0 in reads means remote disconnection  */
-			printf(" %d (disconnected)", cli->GetSocket());
+			printf(" %d (disconnected)", cli->GetQueue()->GetSocket());
 			cli->Close();
 			continue;
 
@@ -234,18 +234,18 @@ void ServerManager::RetrieveTCPMessages() {
 		    
 		    if (cli->CheckHeaders() &&
 			strncmp(readbuf, "[TRIBALIA", 9) != 0) {
-			printf("error: bad header from %d\n", cli->GetSocket());
+			printf("error: bad header from %d\n", cli->GetQueue()->GetSocket());
 			cli->Close();
 			continue;
 		    }
 		    
-		    cli->InjectMessageTCP(readbuf, size_t(readnum));
+		    cli->GetQueue()->InjectMessageTCP(readbuf, size_t(readnum));
 		    memset(readbuf, 0, readnum);
 		}
 
 		if (pfds[i].revents & POLLHUP) {
 		    auto& cli = clients[i];
-		    printf(" %d (disconnected)", cli->GetSocket());
+		    printf(" %d (disconnected)", cli->GetQueue()->GetSocket());
 		    cli->Close();
 		}
 

@@ -10,7 +10,7 @@ void  ChatManager::Send(Client* c, const char* message)
 
     sprintf(msg, "[TRIBALIA CHAT 0 player:%u %zu %s]\n",
 	    c->GetID(), mlen, message);
-    c->SendTCP(msg);
+    c->GetQueue()->SendTCP(msg);
     
     delete[] msg;
 }
@@ -25,7 +25,7 @@ void ChatManager::SendAll(Client* c, const char* message)
 
     sprintf(msg, "[TRIBALIA CHAT 0 all %zu %s]\n",
 	    mlen, message);
-    c->SendTCP(msg);
+    c->GetQueue()->SendTCP(msg);
     
     delete[] msg;
 }
@@ -37,12 +37,12 @@ ChatMessage* ChatManager::CheckMessage(Client* c)
     char expect[64];
     sprintf(expect, "[TRIBALIA CHAT %u", c->GetID());
 
-    if (!c->PeekTCP(expect, strlen(expect))) {
+    if (!c->GetQueue()->PeekTCP(expect, strlen(expect))) {
 	return nullptr;
     }
 
     char msg[385];
-    c->ReceiveTCP(msg, 384);
+    c->GetQueue()->ReceiveTCP(msg, 384);
 
     char sname[32], schat[8], sdestiny[24], smessage[255];
     size_t mlen;
