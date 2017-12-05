@@ -8,6 +8,9 @@
 
 #include "ServerManager.hpp"
 #include "ChatManager.hpp"
+#include "ClientInit.hpp"
+#include "ServerPlayerManager.hpp"
+
 #include <list>
 
 #include <signal.h>
@@ -34,9 +37,11 @@ int main(int argc, char const* argv[])
 
     ServerManager* sm = nullptr;
     ChatManager* chm = nullptr;
+    PlayerManager pm;
+    
     std::list<Client*> clis;
 
-    TCPConnectionInitiator tci;
+    TCPConnectionInitiator tci(&pm);
 	
     try {
 	sm = new ServerManager{};
@@ -53,6 +58,8 @@ int main(int argc, char const* argv[])
 	    if (tci.HasClient())
 		tci.Process();
 
+	    pm.Process();
+
 	    for (auto& cli : clis) {
 		if (cli->IsClosed()) {
 		    continue;
@@ -60,6 +67,7 @@ int main(int argc, char const* argv[])
 
 		if (cli->GetStatus() >= CS_CONNECTED) {
 		    char m[2049];
+		    
 
 		    // Check if client is ready or not anymore
 		    if (cli->GetQueue()->PeekTCP(m, 40)) {
@@ -78,7 +86,6 @@ int main(int argc, char const* argv[])
 			}
 
 		    }
-		    
 		    
 		    // Check for chats
 		    memset(m, 0, 2048);

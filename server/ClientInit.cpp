@@ -2,7 +2,7 @@
    Copyright (C) 2017 Arthur M
 */
 
-#include "Client.hpp"
+#include "ClientInit.hpp"
 #include <cstdio>
 
 using namespace Tribalia::Server;
@@ -12,6 +12,10 @@ TCPInit::TCPInit(Client* c)
     this->step = TCPInitStep::InitConnect;
     this->cli = c;
 }
+
+TCPConnectionInitiator::TCPConnectionInitiator(PlayerManager* pm)
+    : _pm(pm)
+{}
 
 /* Add a client to the TCP client initialization. */
 void TCPConnectionInitiator::AddClient(Client* c)
@@ -146,8 +150,10 @@ void TCPConnectionInitiator::Process()
 	    printf("%s is connected (%d loops, %d).\n", tinit.cli->GetName(),
 		   tinit.iters, tinit.cli->GetStatus());
 	    tinit.step = TCPInitStep::ClientReady;
-	    if (tinit.cli->GetStatus() == CS_CONNECTING)
+	    if (tinit.cli->GetStatus() == CS_CONNECTING) {
 		tinit.cli->AdvanceStatus();
+		_pm->RegisterClient(tinit.cli);
+	    }
 	    break;
 	}
     

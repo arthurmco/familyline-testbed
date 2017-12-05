@@ -1,7 +1,7 @@
 /***
  	Representation of a client computer in Tribalia
 
-	Copyright (C) 2016 Arthur M
+	Copyright (C) 2016, 2017 Arthur M
 ***/
 
 #include <cstddef> // strict byte size
@@ -87,49 +87,6 @@ namespace Tribalia::Server {
 
 	/* Gets the message queue of this client */
 	ClientMessageQueue* GetQueue();
-    };
-
-    /* TCP initialization steps.
-       They are sequencial and pratically autodescriptive */
-    enum TCPInitStep {
-	InitConnect,
-	VersionQuery,
-	VersionQueried,
-	CapabilityQuery,
-	CapabilityQueried,
-	PlayerInfoRetrieve,
-	PlayerInfoRetrieved,
-	ClientReady,
-    };
-
-    /* Structure for keep track of client initialization steps */
-    struct TCPInit {
-	int step;
-	Client* cli;
-	int iters = 0;
-
-	TCPInit(Client*);
-    };
-
-    /* Manages client initialization on TCP site, such as capability 
-       querying, and something like that.
-       
-       Clients will be auto-removed when they reach the "Connected" state.
-    */
-    class TCPConnectionInitiator {
-    private:
-	// Clients that are being initiated
-	std::vector<TCPInit> _initClients;
-
-    public:
-	/* Add a client to the TCP client initialization. */
-	void AddClient(Client*);
-
-	/* Process each step of client initialization */
-	void Process();
-
-	/* Check if we have clients to be initialized */
-	bool HasClient();
     };
 
 
