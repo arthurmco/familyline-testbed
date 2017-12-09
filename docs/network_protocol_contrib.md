@@ -31,12 +31,12 @@ _Note: All messages starts with `[TRIBALIA` and ends with `]` and a newline
   TODO: Check how this affect gameplay through the internet
  
  - C: `[TRIBALIA CONNECT OK]`
- - S: `[TRIBALIA VERSION]`
+ - S: `[TRIBALIA VERSION?]`
  - C: `[TRIBALIA VERSION 0.1]`
  
  Here the client replies with the version. The actual version is 0.1
  
- - C: `[TRIBALIA CAPS]`
+ - C: `[TRIBALIA CAPS? ]`
  
  Here the client asks for the server capabilities. These two messages in
  sequence is done on purpose to break those shitty servers who don't split
@@ -130,16 +130,19 @@ Some primitive form of chat is supported
 TODO: Consider using XMPP as the chat protocol. Might add an official
 capability.
 
-- C: `[TRIBALIA CHAT <<sender_id>> all|team|player:<<player_id>>
+C: `[TRIBALIA CHAT <<sender_id>> all|team|player:<<player_id>>
   <<message-string-in-bytes>> <<message-string>> ]`
   
   * sender_id: The client ID of the sender.
   
   * all, team, player: Only one can exist. If...
-   - all exists, it means that the message is for everyone in the game
-   - team exists, it means that the message is for everyone in the sender's team
-   - player:`<<player_id>>` exists, it means that is for the player with ID equals
-     to `<<player_id>>`
+  
+	  - all exists, it means that the message is for everyone in the game
+   
+	  - team exists, it means that the message is for everyone in the sender's team
+   
+	  - player:`<<player_id>>` exists, it means that is for the player with 
+  ID equals to `<<player_id>>`
 	 
   * message-string-in-bytes: The message size **in bytes**, not in chars!
   
