@@ -20,14 +20,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-typedef int socket_t;
 
 /* for fd access (read(), close(), write()) */
 #include <unistd.h>
-#else
-#include <Windows.h>
-typedef SOCKET socket_t;
 #endif
+
+#include "../src/net/socket.h"
 
 #define MAX_CLIENT_BUFFER 8192
 

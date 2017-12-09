@@ -1,3 +1,4 @@
+
 #include "Game.hpp"
 
 using namespace Tribalia;
@@ -17,8 +18,8 @@ public:
 
 
 Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
-	   GUIRenderer* gr)
-    : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr)
+	   GUIRenderer* gr, PlayerManager* pm)
+    : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm)
 {
     int winW, winH;
     w->GetSize(winW, winH);
@@ -33,7 +34,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         hp = new HumanPlayer{"Arthur", 0, &gam};
 	gam.AddListener(new GameActionListenerImpl());
-	pm.AddPlayer(hp, PlayerFlags::PlayerIsHuman);
+	pm->AddPlayer(hp, PlayerFlags::PlayerIsHuman);
 
     	terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
     	terr = terrFile->GetTerrain();
@@ -171,8 +172,8 @@ int Game::RunLoop()
 
     	InputEvent ev;
     	gr->ProcessInput(ev);
-	pm.ProcessInputs();
-        if (!pm.PlayAll(&gctx))
+	pm->ProcessInputs();
+        if (!pm->PlayAll(&gctx))
             player = false;
 
 	/*

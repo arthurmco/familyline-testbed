@@ -33,6 +33,8 @@
 #include "graphical/Framebuffer.hpp"
 #include "graphical/AnimationManager.hpp"
 
+#include "net/NetServer.hpp"
+
 #include "graphical/gui/Panel.hpp"
 #include "graphical/gui/Label.hpp"
 #include "graphical/gui/Button.hpp"
@@ -74,10 +76,10 @@ static int get_arg_index(const char* name, int argc, char const* argv[])
 
 static void show_version()
 {
-	printf("Tribalia " VERSION "\n");
-	printf("Compiled in " __DATE__ "\n");
-	printf("Commit hash " COMMIT "\n");
-	printf("\n");
+    printf("Tribalia " VERSION "\n");
+    printf("Compiled in " __DATE__ "\n");
+    printf("Commit hash " COMMIT "\n");
+    printf("\n");
 }
 
 static void show_help()
@@ -147,6 +149,9 @@ static int check_size(int i, int argc, char const* argv[])
     
 }
 
+Net::Server* nserver = nullptr;
+PlayerManager* pm = nullptr;
+
 int main(int argc, char const *argv[])
 {
     //int winW = 640, winH = 480;
@@ -167,7 +172,30 @@ int main(int argc, char const *argv[])
 	return EXIT_SUCCESS;
     }
 
+    auto connectpos = get_arg_index("--connect", argc, argv);
+    if (connectpos > 0) {
+	if (connectpos >= argc-1) {
+	    fprintf(stderr, "--connect requires an argument: "
+		    "the server address\n\n");
+	    return EXIT_FAILURE;
+	}
 
+	const char* serveraddr = argv[connectpos+1];
+	printf(" Connecting to %s...\n", serveraddr);
+
+	try {
+	    nserver = new Net::Server(serveraddr);
+	    nserver->InitCommunications();
+	    pm = nserver->GetPlayer();
+	} catch (Net::ServerException& e) {
+	    fprintf(stderr, "Error while connecting to the server: %s\n",
+		    e.what());
+	    delete nserver;
+	    return EXIT_FAILURE;
+	}
+
+    }
+    
     FILE* fLog = nullptr;
     
     i = get_arg_index("--log", argc, argv);
@@ -421,7 +449,10 @@ int main(int argc, char const *argv[])
 	    guir->RemovePanel(&ilogo);
 	    
 	    printf("New Game\n");
-	    auto g = Game(w, fb3D, fbGUI, guir);
+	    if (!pm)
+		pm = new PlayerManager();
+	    
+	    auto g = Game(w, fb3D, fbGUI, guir, pm);
 	    exit(g.RunLoop());
 	});
 

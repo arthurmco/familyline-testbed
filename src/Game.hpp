@@ -60,11 +60,11 @@ private:
     HumanPlayer* hp = nullptr;
     Logic::Terrain* terr = nullptr;
     Logic::TeamCoordinator* tc = nullptr;
+    Logic::PlayerManager* pm = nullptr;
     Logic::TerrainFile* terrFile;
     
     Logic::GameContext gctx;
     Logic::GameActionManager gam;
-    Logic::PlayerManager pm;
     
     Graphics::Window* win = nullptr;
     Graphics::Renderer* rndr = nullptr;
@@ -96,7 +96,8 @@ private:
     
 public:
     Game(Graphics::Window* w, Graphics::Framebuffer* fb3D,
-	 Graphics::Framebuffer* fbGUI, Graphics::GUIRenderer* gr);
+	 Graphics::Framebuffer* fbGUI, Graphics::GUIRenderer* gr,
+	 Logic::PlayerManager* pm);
 
     int RunLoop();
 
