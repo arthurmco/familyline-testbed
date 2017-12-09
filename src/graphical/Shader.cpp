@@ -84,7 +84,7 @@ bool Shader::Compile()
             this->_path.c_str(), logdata);
 		throw shader_exception(logdata, 0, this->_path.c_str(), this->_type);
 
-		delete logdata;
+		delete[] logdata;
     }
 
     return (res == GL_TRUE);
