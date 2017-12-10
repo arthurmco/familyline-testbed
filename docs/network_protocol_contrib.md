@@ -82,9 +82,11 @@ After these information were requested, the server might show the client as
 "Connected" and the client might show a list of connected players and a list of
 maps to choose or vote.
 
+The next message after that **must** be the 'send player info'
+
 ### Send player info
 
- - S: `[TRIBALIA PLAYERINFO? ]`
+ - S: `[TRIBALIA PLAYERINFO?]`
  
  The player information retrieval is triggered when the client asks the question
  above.

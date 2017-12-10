@@ -87,7 +87,6 @@ void TCPConnectionInitiator::Process()
 	    }
 	    break;
 	case CapabilityQuery:
-	    tinit.cli->GetQueue()->SendTCP("[TRIBALIA CAPS?]\n");
 	    tinit.step = TCPInitStep::CapabilityQueried;
 	    break;
 	case CapabilityQueried:
@@ -105,13 +104,16 @@ void TCPConnectionInitiator::Process()
 		}
 
 		if (strcmp(sname, "TRIBALIA") ||
-		    strcmp(scap, "CAPS")) {
+		    strcmp(scap, "CAPS?]")) {
 		    continue;
 		}
 
 		// Send ours
 		tinit.cli->GetQueue()->SendTCP("[TRIBALIA CAPS ]\n");
 
+		// Retrieve the client. Doesn't matter for now.
+		tinit.cli->GetQueue()->ReceiveTCP(recvbuffer, 128);
+		
 		tinit.step = TCPInitStep::PlayerInfoRetrieve;			
 	    }
 	    break;
