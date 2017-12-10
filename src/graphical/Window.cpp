@@ -199,6 +199,11 @@ void Window::ShowMessageBox(const char* message,
 			    MessageBoxInfo info)
 {
 
+    /* Minimize the window, so you can see it, even if it's
+       fullscreen 
+    */
+    SDL_MinimizeWindow(_win);
+    
     int flags = 0;
     switch (info) {
     case MessageBoxInfo::Error:
@@ -210,5 +215,6 @@ void Window::ShowMessageBox(const char* message,
     }
     
     SDL_ShowSimpleMessageBox(flags, title, message, _win);
+    SDL_RestoreWindow(_win);
     
 }
