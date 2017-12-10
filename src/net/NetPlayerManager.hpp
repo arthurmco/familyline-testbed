@@ -16,9 +16,9 @@ namespace Tribalia::Net {
 
     class NetPlayerManager : public Logic::PlayerManager {
     public:
-	explicit NetPlayerManager() : PlayerManager() {}
+	
+	explicit NetPlayerManager(const char* player_name, int player_id);
 	   
-
 	/* Add a player, receive its ID */
 	int AddPlayer(Logic::Player* p, int flags = 0);
 

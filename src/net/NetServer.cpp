@@ -25,20 +25,23 @@ Server::Server(const char* ipaddr, int port)
 	sprintf(err, "error while attempting connection: %s", s_strerror);
 	throw ServerException(err);
     }    
-	
+
+    cmq = new Tribalia::Server::ClientMessageQueue(_serversock,
+						   _serveraddr.sin_addr);
 }
 
 /* Receive a message */
-const char* Server::Receive()
+const char* Server::Receive(size_t maxlen)
 {
     // Maximum recv loops before closing all
-    constexpr int max_recv = 8;
+    const int max_recv = 1+(maxlen/128);
 
-    char ret[1024];
+    char ret[maxlen];
     ssize_t slen = 0;
 
     for (int i = 0; i < max_recv; i++) {
-	slen = recv(_serversock, &ret[i*128], 128, 0);
+	slen = recv(_serversock, &ret[i*128],
+		    (maxlen < 128) ? maxlen : 128, 0);
 	if (slen == 0) {
 	    Log::GetLog()->Warning("net-server",
 				   "Server was shut down unexpectedly");
@@ -59,8 +62,12 @@ const char* Server::Receive()
 	    if (ret[(i*128)+slen-1] == '\n' &&
 		ret[(i*128)+slen-2] == ']') {
 		
-		ret[(i*128)+slen] = '\0';
-		return strdup(ret);
+	        cmq->InjectMessageTCP(ret, slen);
+
+		char* strrecv = new char[slen+1];
+		cmq->ReceiveTCP(strrecv, slen);
+		
+		return strrecv;
 	    }
 	}
 	
@@ -102,16 +109,18 @@ void Server::InitCommunications()
 	printf("real msg: %s\n", recv1);
 	throw ServerException("Unexpected message: step2");
     }
-    free((void*)recv1);
-
     write(_serversock, "[TRIBALIA VERSION 0.1]\n", 24);
-    usleep(10);
     write(_serversock, "[TRIBALIA CAPS?]\n", 19);
 
-    
-    recv1 = this->Receive();
-    if (strncmp(recv1, "[TRIBALIA CAPS", 14)) {
-	throw ServerException("Unexpected message: step3");
+    bool recv_caps = false;
+
+    while (!recv_caps) {
+	free((void*)recv1);
+	
+	recv1 = this->Receive();
+	if (!strncmp(recv1, "[TRIBALIA CAPS ", 15)) {
+	    recv_caps = true;
+	}
     }
 
     // Parse capabilities.
@@ -126,6 +135,11 @@ void Server::InitCommunications()
     std::vector<char*> capslist, requiredcapslist;
     char* cap = strtok(caps, " ");
     while (cap) {
+	if (strlen(cap) <= 2) {
+	    cap = strtok(nullptr, " ");
+	    continue;
+	}
+	
 	if (cap[0] == '(')
 	    requiredcapslist.push_back(cap);
 	else
@@ -144,6 +158,11 @@ void Server::InitCommunications()
 	    "don't support");
     }
 
+    Log::GetLog()->InfoWrite("net-server",
+			     "server has %d optional capabilities and %d "
+			     "required ones",
+			     capslist.size(), requiredcapslist.size());
+
     write(_serversock, "[TRIBALIA CAPS ]", 18);
 }
 
@@ -156,9 +175,33 @@ void Server::ProcessClients()
 }
 
 /* Retrieve a network player */
-NetPlayerManager* Server::GetPlayer()
+NetPlayerManager* Server::GetPlayer(const char* playername)
 {
-    return new NetPlayerManager();
+    const char* msg = this->Receive();
+    if (strncmp(msg, "[TRIBALIA PLAYERINFO?]", 22)) {
+	printf("'%s'", msg);
+	throw ServerException("Invalid playerinfo message");
+    }
+    free((void*) msg);
+
+    char* plname_msg = new char[strlen(playername)+32];
+    sprintf(plname_msg, "[TRIBALIA PLAYERINFO %s 1]\n", playername);
+    write(_serversock, plname_msg, strlen(plname_msg));
+    delete[] plname_msg;
+
+    msg = this->Receive();
+    if (strncmp(msg, "[TRIBALIA PLAYERINFO", 20)) {
+	throw ServerException("Invalid player ID message");
+    }
+    int playerid = -1;
+    sscanf(&msg[21], "%d", &playerid);
+
+    Log::GetLog()->InfoWrite("net-server",
+			     "received id %d for player %s",
+			     playerid, playername);
+
+    free((void*) msg);
+    return new NetPlayerManager(playername, playerid);
 }
 
 /* Destroy the connection */
@@ -169,4 +212,7 @@ Server::~Server()
 	close(_serversock);
 	_serversock = -1;
     }
+
+    if (cmq)
+        delete cmq;
 }

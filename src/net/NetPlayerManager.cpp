@@ -3,6 +3,12 @@
 using namespace Tribalia::Net;
 using namespace Tribalia::Logic;
 
+NetPlayerManager::NetPlayerManager(const char* player_name, int player_id)
+    : PlayerManager()
+{
+    
+}
+
 /* Add a player, receive its ID */
 int NetPlayerManager::AddPlayer(Player* p, int flags)
 {

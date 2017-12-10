@@ -41,7 +41,7 @@ file(GLOB_RECURSE SRC_SERVER "${CMAKE_SOURCE_DIR}/server/*.cpp")
 
 #Compilation data
 
-add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT} ${SRC_NET} ${SRC_OBJECTS})
+add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT} ${SRC_NET} ${SRC_OBJECTS} "${CMAKE_SOURCE_DIR}/server/ClientMessageQueue.cpp")
 add_executable(tribalia-server ${SRC_SERVER})
 
 # Add test suites

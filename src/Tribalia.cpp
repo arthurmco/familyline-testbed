@@ -85,9 +85,10 @@ static void show_version()
 static void show_help()
 {
 	printf("Tribalia help:\n");
-	printf("--version:\tPrint version and, if compiled inside a Git repo, commit hash\n");
-	printf("--help:\t\tPrint this help information\n");
-	printf("--size <W>x<H>: Changes the game resolution to <W>x<H> pixels\n");
+	printf("--version:\t\tPrint version and, if compiled inside a Git repo, commit hash\n");
+	printf("--help:\t\t\tPrint this help information\n");
+	printf("--size <W>x<H>:\t\tChanges the game resolution to <W>x<H> pixels\n");
+	printf("--connect <ipaddr>:\tConnects to a game server whose IP is ipaddr\n");
 	printf("--log [<filename>|screen]: Logs to filename 'filename', or screen to log to screen, or wherever stderr is bound to\n");
 }
 
@@ -186,7 +187,13 @@ int main(int argc, char const *argv[])
 	try {
 	    nserver = new Net::Server(serveraddr);
 	    nserver->InitCommunications();
-	    pm = nserver->GetPlayer();
+
+	    printf("Type the player's name: ");
+	    char pname[128];
+	    fgets(pname, 127, stdin);
+	    pname[strlen(pname)-1] = '\0';
+	    
+	    pm = nserver->GetPlayer(pname);
 	} catch (Net::ServerException& e) {
 	    fprintf(stderr, "Error while connecting to the server: %s\n",
 		    e.what());

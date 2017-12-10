@@ -13,6 +13,8 @@
 #include "../Log.hpp"
 #include "NetPlayerManager.hpp"
 
+#include "../../server/ClientMessageQueue.hpp"
+
 #include <cstring>
 #include <cstdlib>
 #include <sys/types.h>
@@ -44,7 +46,9 @@ namespace Tribalia::Net {
 	struct sockaddr_in _serveraddr;
 
 	/* Receive a message */
-	const char* Receive();
+	Tribalia::Server::ClientMessageQueue* cmq = nullptr;
+	
+	const char* Receive(size_t maxlen = 1024);
 
     public:
 	Server(const char* ipaddr, int port = 12000);
@@ -59,7 +63,7 @@ namespace Tribalia::Net {
 	void ProcessClients();
 
 	/* Retrieve a network player */
-	NetPlayerManager* GetPlayer();
+	NetPlayerManager* GetPlayer(const char* playername);
 
 	/* Destroy the connection */
 	~Server();
