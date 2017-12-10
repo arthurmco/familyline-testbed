@@ -22,6 +22,12 @@ namespace Graphics {
     enum WindowOptions {
 	WIN_DEBUG_CONTEXT = 0x1, // Enable OpenGL debugging extensions (aka ARB_debug_output)
     };
+
+    enum MessageBoxInfo {
+	Error,
+	Warning,
+	Information
+    };
     
     class Window {
     private:
@@ -48,6 +54,11 @@ namespace Graphics {
 	void SetGUIFramebuffer(Framebuffer* f);
 
 	void GetSize(int& w, int& h);
+
+	/* Show a message box */
+	void ShowMessageBox(const char* message,
+			    const char* title,
+			    MessageBoxInfo info);
     };
 
 

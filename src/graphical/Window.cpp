@@ -192,3 +192,23 @@ void Window::SetGUIFramebuffer(Framebuffer* f)
 {
 	_fGUI = f;
 }
+
+/* Show a message box */
+void Window::ShowMessageBox(const char* message,
+			    const char* title,
+			    MessageBoxInfo info)
+{
+
+    int flags = 0;
+    switch (info) {
+    case MessageBoxInfo::Error:
+	flags = SDL_MESSAGEBOX_ERROR; break;
+    case MessageBoxInfo::Warning:
+	flags = SDL_MESSAGEBOX_WARNING; break;
+    case MessageBoxInfo::Information:
+	flags = SDL_MESSAGEBOX_INFORMATION; break;
+    }
+    
+    SDL_ShowSimpleMessageBox(flags, title, message, _win);
+    
+}
