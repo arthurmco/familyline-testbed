@@ -62,31 +62,96 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
     } catch (renderer_exception& re) {
         Log::GetLog()->Fatal("game", "Rendering error: %s [%d]",
             re.what(), re.code);
+
+	char err[192+strlen(re.what())];
+	sprintf(err,
+		"Tribalia found an error in rendering\n"
+		"\n"
+		"Error: %s\n", re.what());
+	win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
+	
         exit(EXIT_FAILURE);
     }  catch (mesh_exception& se) {
         Log::GetLog()->Fatal("game", "Mesh error: %s", se.what());
         Log::GetLog()->Fatal("game", "Mesh file: %s", se.file.c_str());
+
+        char err[512+strlen(se.what())];
+	sprintf(err,
+		"Tribalia found an error in a mesh\n"
+		"\n"
+		"Mesh file: %s, error: %s\n",
+		se.file.c_str(), se.what());
+	win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
+	
         exit(EXIT_FAILURE);
     }  catch (material_exception& se) {
         Log::GetLog()->Fatal("game", "Material error: %s ", se.what());
         Log::GetLog()->Fatal("game", "Material file: %s", se.file.c_str());
+
+	char err[512+strlen(se.what())];
+	sprintf(err,
+		"Tribalia found an error in a material\n"
+		"\n"
+		"Mesh file: %s, error: %s\n",
+		se.file.c_str(), se.what());
+	win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
+	
         exit(EXIT_FAILURE);
     } catch (shader_exception& se) {
         Log::GetLog()->Fatal("game", "Shader error: %s [%d]", se.what(), se.code);
         Log::GetLog()->Fatal("game", "Shader file: %s, type %d", se.file.c_str(), se.type);
+
+	char err[512+strlen(se.what())];
+	sprintf(err,
+		"Tribalia found an error in a shader\n"
+		"\n"
+		"Error: %s\n"
+		"File: %s, type: %d, code: %d",
+		se.what(), se.file.c_str(), se.type, se.code);
+	win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
+	
         exit(EXIT_FAILURE);
     } catch (asset_exception& ae) {
         Log::GetLog()->Fatal("game", "Asset file error: %s", ae.what());
+	char err[768+strlen(ae.what())];
+	
         if (ae.assetptr) {
             AssetFileItem* a = (AssetFileItem*)ae.assetptr;
             Log::GetLog()->Fatal("game", "Asset %s, file: %s", a->name.c_str(), a->path.c_str());
+
+	    sprintf(err,
+		    "Tribalia found an error in an asset\n"
+		    "\n"
+		    "Asset named %s, file: %s\n"
+		    "Error: %s\n",
+		    a->name.c_str(), a->path.c_str(), ae.what());
         }
+
+	sprintf(err,
+		"Tribalia found an error in an asset\n"
+		"\n"
+		"Error: %s\n",
+	        ae.what());
+
+	win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
+	
         exit(EXIT_FAILURE);
     } catch (terrain_file_exception& te) {
     	Log::GetLog()->Fatal("game", "Terrain file error: %s on file %s", te.what(), te.file.c_str());
     	if (te.code != 0) {
     	    Log::GetLog()->Fatal("game", "Error code: %d (%s)", te.code, strerror(te.code));
     	}
+
+	char err[512+strlen(te.what())];
+	sprintf(err,
+		"Tribalia found an error in a terrain\n"
+		"\n"
+		"File: %s\n"
+		"error: %s (%s)\n",
+		te.file.c_str(), te.what(), strerror(te.code));
+	win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
+	
+	
     	exit(EXIT_FAILURE);
     }
    

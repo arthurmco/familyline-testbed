@@ -3,7 +3,7 @@
 /***
     Tribalia main file
 
-    Copyright 2016 Arthur M.
+    Copyright 2016, 2017 Arthur M.
 
 ***/
 
@@ -408,12 +408,28 @@ int main(int argc, char const *argv[])
 
     } catch (window_exception& we) {
 	Log::GetLog()->Fatal("init", "Window creation error: %s (%d)", we.what(), we.code);
+	fprintf(stderr, "Error while creating the window: %s\n", we.what());
+	
 	exit(EXIT_FAILURE);
     } catch (shader_exception &se) {
 	Log::GetLog()->Fatal("init", "Shader error: %s [%d]", se.what(), se.code);
 	Log::GetLog()->Fatal("init", "Shader file: %s, type %d", se.file.c_str(), se.type);
+
+	if (w) {
+	    char err[512+strlen(se.what())];
+	    sprintf(err,
+		    "Tribalia found an error in a shader\n"
+		    "\n"
+		    "Error: %s\n"
+		    "File: %s, type: %d, code: %d",
+		    se.what(), se.file.c_str(), se.type, se.code);
+	    w->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
+	}
+	
 	exit(EXIT_FAILURE);
     }
+
+    
 
     /* Render the menu */
     bool r = true;
