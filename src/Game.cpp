@@ -53,9 +53,41 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         rndr->SetSceneManager(scenemng);
 
         if (!am->ReadFromFile(ASSET_FILE_DIR "assets.taif")) {
-            throw asset_exception(nullptr, "Invalid asset file!");
+	    throw asset_exception(nullptr, "Invalid asset file!");
         }
 
+	Light* l = new Light{ "mainLight", glm::vec3(16, 30, 16), 0xff, 0xff, 0xff, 10 };
+	scenemng->AddObject(l);
+
+	terr_rend = new TerrainRenderer{rndr};
+	terr_rend->SetTerrain(terr);
+	terr_rend->SetCamera(cam);
+
+	objrend = new ObjectRenderer(om, scenemng);
+	hp->objr = objrend;
+	gam.AddListener(objrend);
+
+	InputManager::GetInstance()->Initialize();
+
+	ip = new InputPicker{ terr_rend, win, scenemng, cam, om};
+	hp->SetPicker(ip);
+
+	pathf = new PathFinder(om);
+	pathf->InitPathmap(terr->GetWidth(), terr->GetHeight());
+	pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
+	hp->SetPathfinder(pathf);
+
+	widgets.lblVersion = new Label(10, 10, "Tribalia " VERSION " commit " COMMIT);
+	widgets.lblVersion->SetForeColor(255, 255, 255, 255);
+
+	gr->AddPanel(widgets.lblVersion);
+
+	/* Adds the objects to the factory */
+	ObjectFactory::GetInstance()->AddObject(new WatchTower);
+	ObjectFactory::GetInstance()->AddObject(new Tent);
+
+	ObjectPathManager::getInstance()->SetTerrain(terr);
+	
     } catch (window_exception& we) {
     	Log::GetLog()->Fatal("game", "Window creation error: %s (%d)", we.what(), we.code);
     	exit(EXIT_FAILURE);
@@ -154,39 +186,6 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 	
     	exit(EXIT_FAILURE);
     }
-   
-    Light* l = new Light{ "mainLight", glm::vec3(16, 30, 16), 0xff, 0xff, 0xff, 10 };
-    scenemng->AddObject(l);
-
-    terr_rend = new TerrainRenderer{rndr};
-    terr_rend->SetTerrain(terr);
-    terr_rend->SetCamera(cam);
-
-    objrend = new ObjectRenderer(om, scenemng);
-    hp->objr = objrend;
-    gam.AddListener(objrend);
-
-    InputManager::GetInstance()->Initialize();
-
-    ip = new InputPicker{ terr_rend, win, scenemng, cam, om};
-    hp->SetPicker(ip);
-
-    pathf = new PathFinder(om);
-    pathf->InitPathmap(terr->GetWidth(), terr->GetHeight());
-    pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
-    hp->SetPathfinder(pathf);
-
-    widgets.lblVersion = new Label(10, 10, "Tribalia " VERSION " commit " COMMIT);
-    widgets.lblVersion->SetForeColor(255, 255, 255, 255);
-
-    gr->AddPanel(widgets.lblVersion);
-
-    /* Adds the objects to the factory */
-    ObjectFactory::GetInstance()->AddObject(new WatchTower);
-    ObjectFactory::GetInstance()->AddObject(new Tent);
-
-    ObjectPathManager::getInstance()->SetTerrain(terr);
-
 }
 
 int Game::RunLoop()

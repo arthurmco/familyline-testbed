@@ -45,9 +45,10 @@ AssetFile::AssetFile(const char* path)
 {
     _fAsset = fopen(path, "r");
     if (!_fAsset) {
-        char* msg = new char[strlen(path)+48];
-        sprintf(msg, "Failure to open %s: %d", path, errno);
-        throw new asset_exception(this, msg);
+        char* msg = new char[strlen(path)+256];
+        sprintf(msg, "Failure to open %s: %d (%s)", path, errno,
+		strerror(errno));
+        throw asset_exception(this, msg);
     }
 
     _path = std::string(path);
