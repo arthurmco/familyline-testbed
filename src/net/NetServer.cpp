@@ -174,8 +174,8 @@ void Server::ProcessClients()
     
 }
 
-/* Retrieve a network player */
-NetPlayerManager* Server::GetPlayer(const char* playername)
+/* Retrieve a player manager */
+NetPlayerManager* Server::GetPlayerManager(const char* playername)
 {
     const char* msg = this->Receive();
     if (strncmp(msg, "[TRIBALIA PLAYERINFO?]", 22)) {

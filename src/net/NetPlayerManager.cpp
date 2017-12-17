@@ -6,12 +6,17 @@ using namespace Tribalia::Logic;
 NetPlayerManager::NetPlayerManager(const char* player_name, int player_id)
     : PlayerManager()
 {
-    
+    this->humandata = {.p = new HumanPlayer(player_name, 0),
+		       .ID = player_id,
+		       .flags = PlayerFlags::PlayerIsHuman};
 }
 
 /* Add a player, receive its ID */
 int NetPlayerManager::AddPlayer(Player* p, int flags)
 {
+    if (p == this->humandata.p)
+	return this->humandata.ID;
+    
     return PlayerManager::AddPlayer(p, flags);
 }
 
@@ -24,6 +29,12 @@ const Player* NetPlayerManager::GetbyID(int ID) const
 const Player* NetPlayerManager::GetbyName(const char* name) const
 {
     return PlayerManager::GetbyName(name);
+}
+
+/* Get the human player that represents this client */
+HumanPlayer* NetPlayerManager::GetHumanPlayer()
+{
+    return dynamic_cast<HumanPlayer*>(humandata.p);
 }
 
 

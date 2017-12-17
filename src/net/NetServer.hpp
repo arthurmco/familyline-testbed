@@ -62,8 +62,8 @@ namespace Tribalia::Net {
 	   one */
 	void ProcessClients();
 
-	/* Retrieve a network player */
-	NetPlayerManager* GetPlayer(const char* playername);
+	/* Retrieve a network player manager */
+	NetPlayerManager* GetPlayerManager(const char* playername);
 
 	/* Destroy the connection */
 	~Server();

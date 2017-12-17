@@ -11,12 +11,20 @@
 
 #include "../logic/PlayerManager.hpp"
 #include "../Log.hpp"
+#include "../HumanPlayer.hpp"
 
 namespace Tribalia::Net {
 
     class NetPlayerManager : public Logic::PlayerManager {
-    public:
+    private:
+	Logic::PlayerData humandata;
 	
+    public:
+
+	/* Build a network player manager.
+	   The player_name and player_id are the name and ID of the human
+	   player from this client
+	*/
 	explicit NetPlayerManager(const char* player_name, int player_id);
 	   
 	/* Add a player, receive its ID */
@@ -26,6 +34,9 @@ namespace Tribalia::Net {
 	const Logic::Player* GetbyID(int ID) const;
 	const Logic::Player* GetbyName(const char* name) const;
 
+	/* Get the human player that represents this client */
+	HumanPlayer* GetHumanPlayer();
+	
 	/* Process inputs of all players 
 	 * Returns true if any input was received
 	 */
