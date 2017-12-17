@@ -30,7 +30,7 @@
 
         Tribalia::Logic::LocatableObject* _selected_obj = nullptr;
         Tribalia::Logic::PathFinder* _pf = nullptr;
-	Tribalia::Graphics::GUIActionManager* _gam = nullptr;
+	Tribalia::Graphics::GUIActionManager* _guam = nullptr;
 	
         bool _updated = false;
 
@@ -65,7 +65,8 @@
 	void SetPicker(Tribalia::Input::InputPicker* ip);
         void SetInputManager(Tribalia::Input::InputManager*);
         void SetPathfinder(Tribalia::Logic::PathFinder*);
-	void SetActionManager(Tribalia::Graphics::GUIActionManager* );
+	void SetGUIActionManager(Tribalia::Graphics::GUIActionManager* );
+	void SetGameActionManager(Tribalia::Logic::GameActionManager* );
 
         virtual bool HasUpdatedObject();
 

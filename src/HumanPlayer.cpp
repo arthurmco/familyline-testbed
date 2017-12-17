@@ -25,9 +25,14 @@ void HumanPlayer::SetPathfinder(Tribalia::Logic::PathFinder* p) { _pf = p; }
 
 bool build_tent = false, build_tower = false;
 
-void HumanPlayer::SetActionManager(Tribalia::Graphics::GUIActionManager* gam)
+void HumanPlayer::SetGameActionManager(Tribalia::Logic::GameActionManager* gam)
 {
-    _gam = gam;
+    this->_gam = gam;
+}
+
+void HumanPlayer::SetGUIActionManager(Tribalia::Graphics::GUIActionManager* gam)
+{
+    _guam = gam;
 
     Action tent = Action("tent-build", "icons/tent.png");
     tent.handler = [&](...) {
@@ -43,9 +48,9 @@ void HumanPlayer::SetActionManager(Tribalia::Graphics::GUIActionManager* gam)
 	return true;
     };
     
-    _gam->AddAction(tent);
-    _gam->AddAction(tower);
-    _gam->SetVisibleActions({"tent-build", "tower-build"});
+    _guam->AddAction(tent);
+    _guam->AddAction(tower);
+    _guam->SetVisibleActions({"tent-build", "tower-build"});
 }
 
 /***
@@ -379,7 +384,6 @@ bool HumanPlayer::Play(GameContext* gctx)
 	_cam->SetZoomLevel(z);
     }
 
-    
     
     return true;
 

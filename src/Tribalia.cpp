@@ -1,5 +1,3 @@
-
-
 /***
     Tribalia main file
 
@@ -34,7 +32,6 @@
 #include "graphical/AnimationManager.hpp"
 
 #include "net/NetServer.hpp"
-
 #include "graphical/gui/Panel.hpp"
 #include "graphical/gui/Label.hpp"
 #include "graphical/gui/Button.hpp"
@@ -152,6 +149,7 @@ static int check_size(int i, int argc, char const* argv[])
 
 Net::Server* nserver = nullptr;
 PlayerManager* pm = nullptr;
+HumanPlayer* hp = nullptr;
 
 int main(int argc, char const *argv[])
 {
@@ -233,8 +231,12 @@ int main(int argc, char const *argv[])
 	    char pname[128];
 	    fgets(pname, 127, stdin);
 	    pname[strlen(pname)-1] = '\0';
+
+	    // a npm that is good. (j/k :P)
+	    auto npm = nserver->GetPlayerManager(pname);
+	    hp = npm->GetHumanPlayer();
+	    pm = (PlayerManager*)npm;
 	    
-	    pm = nserver->GetPlayer(pname);
 	} catch (Net::ServerException& e) {
 	    fprintf(stderr, "Error while connecting to the server: %s\n",
 		    e.what());
@@ -476,8 +478,12 @@ int main(int argc, char const *argv[])
 	    printf("New Game\n");
 	    if (!pm)
 		pm = new PlayerManager();
-	    
-	    auto g = Game(w, fb3D, fbGUI, guir, pm);
+
+	    if (!hp)
+		hp = new HumanPlayer{"Arthur", 0};
+		
+		
+	    auto g = Game(w, fb3D, fbGUI, guir, pm, hp);
 	    exit(g.RunLoop());
 	});
 

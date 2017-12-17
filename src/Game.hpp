@@ -97,7 +97,7 @@ private:
 public:
     Game(Graphics::Window* w, Graphics::Framebuffer* fb3D,
 	 Graphics::Framebuffer* fbGUI, Graphics::GUIRenderer* gr,
-	 Logic::PlayerManager* pm);
+	 Logic::PlayerManager* pm, HumanPlayer* hp);
 
     int RunLoop();
 

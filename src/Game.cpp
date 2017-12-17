@@ -18,8 +18,8 @@ public:
 
 
 Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
-	   GUIRenderer* gr, PlayerManager* pm)
-    : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm)
+	   GUIRenderer* gr, PlayerManager* pm, HumanPlayer* hp)
+    : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm), hp(hp)
 {
     int winW, winH;
     w->GetSize(winW, winH);
@@ -32,8 +32,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         gctx.om = om;
 
-        hp = new HumanPlayer{"Arthur", 0, &gam};
 	gam.AddListener(new GameActionListenerImpl());
+	hp->SetGameActionManager(&gam);
 	pm->AddPlayer(hp, PlayerFlags::PlayerIsHuman);
 
     	terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
@@ -200,7 +200,7 @@ int Game::RunLoop()
     gr->AddPanel(&pnl);
     
     GUIActionManager* guam = new GUIActionManager(&pnl);
-    hp->SetActionManager(guam);
+    hp->SetGUIActionManager(guam);
 
 /*    Button btnExit = Button(0.7, 0.05, 0.2, 0.5, "Exit");
     btnExit.SetOnClickListener([&](GUI::IControl* cc) {
