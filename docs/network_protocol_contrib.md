@@ -104,8 +104,63 @@ The next message after that **must** be the 'send player info'
  **player-id**
  
  
- TODO: Add the other things
+### Send other players to the client ###
+
+It all starts with a question to the client;
+
+ - C: `[TRIBALIA PLAYERS?]`
  
+ - S: `[TRIBALIA PLAYERS <<qt_players>> | <<id[0]>> <<name[0]>> <<exp[0]>> | 
+	 <<id[1]>> <<name[1]>> <<exp[1]>> | ... | <<id[n]>> <<name[n]>> <<exp[n]>> ]`
+ 
+ id is the player ID, name is the player name and exp is the player experience
+ 
+ From this moment, the player can receive client status update
+ 
+### Send map list to the client ###
+
+ - C: `[TRIBALIA MAPS?]`
+ 
+ - S: `[TRIBALIA MAPS <<qt_maps>> | <<map-tag[0]>> <<map-name[0]>> <<checksum[0]>> | 
+	 <<map-tag[1]>> <<map-name[1]>> <<checksum[1]>> | ... | <<map-tag[n]>> <<map-name[n]>> <<checksum[n]>> ]`
+	 
+ map-tag is a unique string that identifies the map, map-name is the map name, as it would 
+ appear in the game and checksum is a SHA-1 checksum of the whole map file.
+ 
+ id is the player ID, name is the player name and exp is the player experience
+ 
+#### Downloading maps ####
+
+In some cases, the client will not have the map in the computer it is running
+
+When this happens, the client needs to send the following message:
+
+ - C: `[TRIBALIA MAP REQUIRE <<map-tag>> ?]`
+ 
+ - S: `[TRIBALIA MAP REQUIRE <<map-tag>> <<map-size>>]`
+ 
+ map-tag is the tag of the map you want to download, and map-size is the map size in bytes.
+	 
+ - C: `[TRIBALIA MAP REQUIRE <<map-tag>> START]`
+  
+ When the client send the message above, the download starts.
+ 
+ The server will send to the client the map divided in 1kb blocks. Each of these blocks will 
+ go in its own message. The message itself is like this:
+ 
+ - S: `[TRIBALIA MAP REQUIRE <<map-tag>> <<block-num>> <<block-count> {{<<block-data>>}} ]`
+ 
+ map-tag is the map tag, block_num is the number of the block who is being transferred, block count is the
+ block count (the size in kilobytes rounded up) and the block data is the block binary data, circunded by
+ two curly brackets.
+ 
+ After all blocks get transferred, the conversation will continue like:
+ 
+ - C: `[TRIBALIA MAP REQUIRE <<map-tag>> END <<map-checksum>>]`
+ 
+ map-tag is the tag, map-checksum is the SHA-1 of receiving map.
+
+
 ## Game start.
  
 All clients, when ready, should send a message called `[TRIBALIA GAME
