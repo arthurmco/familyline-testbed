@@ -1,7 +1,7 @@
 /*  Window management class
     Also works on joining the GUI with the general game renderer.
 
-    Copyright (C) 2016 Arthur M
+    Copyright (C) 2016, 2017 Arthur M
 */
 
 #include <GL/glew.h>
@@ -11,6 +11,7 @@
 #include "ShaderProgram.hpp"
 #include "GFXExceptions.hpp"
 #include "Framebuffer.hpp"
+#include "Device.hpp"
 
 #ifndef WINDOW_HPP
 #define WINDOW_HPP
@@ -59,6 +60,9 @@ namespace Graphics {
 	void ShowMessageBox(const char* message,
 			    const char* title,
 			    MessageBoxInfo info);
+
+	/* Get the device used in that window */
+	DeviceInfo* GetDevice();
     };
 
 

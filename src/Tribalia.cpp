@@ -89,45 +89,6 @@ static void show_help()
 	printf("--log [<filename>|screen]: Logs to filename 'filename', or screen to log to screen, or wherever stderr is bound to\n");
 }
 
-/* Retrieves video RAM size
-   Not much useful for game, but great for statistics and graphic configuration
-   prediction */
-static int get_video_ram_size() {
-    int vram = -1;
-
-    if (GLEW_NVX_gpu_memory_info) {
-	//NVIDIA
-	Log::GetLog()->Write("init", "GL_NVX_gpu_memory_info is supported. Probably running in a Nvidia GPU");
-	glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &vram);
-	vram /= 1024;
-	
-    } else if (GLEW_ATI_meminfo) {
-	// ATI/AMD
-	Log::GetLog()->Write("init", "GL_ATI_meminfo is supported. Probably running in a AMD GPU");
-	Log::GetLog()->Warning("get-video-ram", "GL_ATI_meminfo only allows getting avaliable memory, the vram count might be incorrect");
-	
-	int freevbo[4], freetex[4], freerb[4];
-	glGetIntegerv(GL_VBO_FREE_MEMORY_ATI, freevbo);
-	glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, freetex);
-	glGetIntegerv(GL_RENDERBUFFER_FREE_MEMORY_ATI, freerb);
-
-	vram = (freevbo[0] + freetex[0] + freerb[0]) / 1024;
-    } 
-#ifdef __linux__
-	else if (GLXEW_MESA_query_renderer) {
-	// Generic: MESA
-	Log::GetLog()->Write("init", "GLX_MESA_query_renderer is supported");
-
-	unsigned int uvram;
-	glXQueryCurrentRendererIntegerMESA(GLX_RENDERER_VIDEO_MEMORY_MESA,
-					   &uvram);
-
-	vram = (int) uvram;
-    }
-#endif
-    return vram;
-}
-
 static int winW = 640, winH = 480;
 
 static int check_size(int i, int argc, char const* argv[])
@@ -387,17 +348,6 @@ int main(int argc, char const *argv[])
 	    Log::GetLog()->Warning("init", "ARB_debug_output not supported");
 	}
 
-	Log::GetLog()->Write("", "Rendering Device Vendor: %s", glGetString(GL_VENDOR));
-	Log::GetLog()->Write("", "Rendering Device Name: %s", glGetString(GL_RENDERER));
-
-	auto maxtex = Texture::GetMaximumSize();
-	Log::GetLog()->Write("", "Maximum texture size: %dx%d", maxtex, maxtex);
-
-	auto vram = get_video_ram_size();
-	if (vram > 0) {
-	    Log::GetLog()->Write("", "Video RAM size: %d MB", vram);
-	}
-	
 	InputManager::GetInstance()->Initialize();
 
 	fbGUI = new Framebuffer{ winW, winH, GL_UNSIGNED_BYTE };

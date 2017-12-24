@@ -218,3 +218,10 @@ void Window::ShowMessageBox(const char* message,
     SDL_RestoreWindow(_win);
     
 }
+
+/* Get the device used in that window */
+DeviceInfo* Window::GetDevice()
+{
+    static auto device = DeviceManager::GetMainDevice();
+    return &device;
+}
