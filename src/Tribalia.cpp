@@ -381,6 +381,15 @@ int main(int argc, char const *argv[])
 	exit(EXIT_FAILURE);
     }
 
+    /* If we have a networked game ready, don't even show the main menu. */
+    if (nserver) {
+	Log::GetLog()->Write("init", "Network game detected, going direct "
+			     "to it");
+	
+	guir->InitInput();
+	auto g = Game(w, fb3D, fbGUI, guir, pm, hp);
+	exit(g.RunLoop());
+    }
     
 
     /* Render the menu */
