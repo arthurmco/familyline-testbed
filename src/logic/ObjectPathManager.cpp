@@ -1,7 +1,17 @@
 #include "ObjectPathManager.hpp"
+#include "DebugPlot.hpp"
 
 int maxpathID = 0;
 using namespace Tribalia::Logic;
+
+static std::vector<glm::vec3> ConvertTo3DPath(std::vector<glm::vec2>* path)
+{
+    std::vector<glm::vec3> v3;
+    for (const auto v : *path) {
+	v3.push_back(glm::vec3(v.x, 512, v.y));
+    }
+    return v3;
+}
 
 
 /* 	Adds a path from object 'o' to the path manager 
@@ -25,9 +35,12 @@ bool ObjectPathManager::AddPath(LocatableObject* o,
 
 	std::remove_if(_pathrefs.begin(), _pathrefs.end(), [](ObjectPathRef& r)
 		       { return r.interrupted; });
-			   
-	_pathrefs.emplace_back(maxpathID++, o, 
-			       new std::vector<glm::vec2>(*path));	
+
+
+	auto p3dpath = ConvertTo3DPath(path);
+	auto dbg_plot = DebugPlotter::interface->AddPath(p3dpath, glm::vec3(0, 0, 1));
+	_pathrefs.emplace_back(maxpathID++, o, new std::vector<glm::vec2>(*path),
+			       dbg_plot);	
 	return true;
 }
 
@@ -37,8 +50,9 @@ bool ObjectPathManager::RemovePath(long oid)
 {
 	for (auto it = _pathrefs.begin(); it != _pathrefs.end(); it++) {
 		if (it->lc->GetObjectID() == oid) {
-			_pathrefs.erase(it);
-			return true;
+		    DebugPlotter::interface->RemovePath(it->dbg_path_plot);
+		    _pathrefs.erase(it);
+		    return true;
 		}
 	}
 
@@ -73,7 +87,8 @@ void ObjectPathManager::UpdatePaths()
 
 	/* Delete the reserved iterators */
 	for (auto& it : compl_its) {
-		_pathrefs.erase(it);
+	    DebugPlotter::interface->RemovePath(it->dbg_path_plot);
+	    _pathrefs.erase(it);
 	}
 }
 

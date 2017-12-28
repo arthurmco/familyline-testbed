@@ -457,16 +457,19 @@ void Renderer::RemoveVertexData(GLuint vaoid)
     VertexRenderInfo vri;
     for (auto it = _vertices.begin(); it != _vertices.end(); it++){
         if (it->vao == vaoid) {
-			if (it->vao_bbox) {
-				RemoveBoundingBox(it->vao_bbox);
-			}
+	    if (it->vao_bbox) {
+		RemoveBoundingBox(it->vao_bbox);
+	    }
 
             glDeleteVertexArrays(1, &vaoid);
             glDeleteBuffers(1, &it->vbo_pos);
-			glDeleteBuffers(1, &it->vbo_norm);
-			glDeleteBuffers(1, &it->vbo_tex);
+	    glDeleteBuffers(1, &it->vbo_norm);
+
+	    if (it->vd->TexCoords.size() > 0)
+		glDeleteBuffers(1, &it->vbo_tex);
+	    
             _vertices.erase(it);
-			break;
+	    break;
         }
     }
 }

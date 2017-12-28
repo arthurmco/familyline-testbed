@@ -26,16 +26,14 @@ struct ObjectPathRef {
     glm::vec2 path_point;
     unsigned int path_ptr = 0;
     bool interrupted = false;
+    int dbg_path_plot;
     
     ObjectPathRef(int pathid, LocatableObject* lc, 
-		  std::vector<glm::vec2>* path)
-	{
-	    this->pathid = pathid;
-	    this->lc = lc;
-	    this->path = path;
-	    this->path_point = (*path)[0];
-	    this->path_ptr = 0;
-	}
+		  std::vector<glm::vec2>* path,
+		  int dbg_path_plot)
+	: pathid(pathid), lc(lc), path(path), path_point((*path)[0]),
+	  path_ptr(0), dbg_path_plot(dbg_path_plot)
+	{}
 };
 
 class ObjectPathManager {
