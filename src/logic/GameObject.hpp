@@ -52,6 +52,7 @@ namespace Tribalia {
         int _tid;            /* Type ID */
         std::string _name;   /* Object name */
 
+
 	/* Position and size information
 	   Might not seem, but every object needs this */
         int _xPos, _yPos, _zPos;

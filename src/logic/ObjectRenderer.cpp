@@ -49,10 +49,10 @@ bool ObjectRenderer::Check()
 
 		object_found++;
 		_objects.emplace_back(loc);
-		_sm->AddObject(loc->GetMesh());
+		_sm->AddObject((Graphics::Mesh*)loc->GetMesh());
 		ObjectRenderData ord;
 		ord.ID = it->oid;
-		ord.m = loc->GetMesh();
+		ord.m = (Graphics::Mesh*)loc->GetMesh();
 		_IDs.push_back(ord);
 	    }
 	} else {
@@ -102,8 +102,10 @@ void ObjectRenderer::Update()
         y = (*it)->GetY(); 
         z = (*it)->GetZ();
 
-        (*it)->GetMesh()->SetPosition(Graphics::TerrainRenderer::GameToGraphicalSpace(glm::vec3(x,y,z)));
-        (*it)->GetMesh()->ApplyTransformations();
+	Graphics::Mesh* mm = (Graphics::Mesh*) (*it)->GetMesh();
+	
+        mm->SetPosition(Graphics::TerrainRenderer::GameToGraphicalSpace(glm::vec3(x,y,z)));
+        mm->ApplyTransformations();
 
         /*
         printf("\tobject %s id %d is at %.3f %.3f %.3f\n",

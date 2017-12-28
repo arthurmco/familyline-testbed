@@ -140,67 +140,69 @@ void InputPicker::UpdateIntersectedObject()
 		LocatableObject* loc = dynamic_cast<LocatableObject*>(it->obj);
 
 		if (loc) {
-			BoundingBox bb = loc->GetMesh()->GetBoundingBox();
-			glm::vec4 vmin = glm::vec4(bb.minX, bb.minY, bb.minZ, 1);
-			glm::vec4 vmax = glm::vec4(bb.maxX, bb.maxY, bb.maxZ, 1);
+		    Graphics::Mesh* mm = (Graphics::Mesh*)loc->GetMesh();
+		    
+		    BoundingBox bb = mm->GetBoundingBox();
+		    glm::vec4 vmin = glm::vec4(bb.minX, bb.minY, bb.minZ, 1);
+		    glm::vec4 vmax = glm::vec4(bb.maxX, bb.maxY, bb.maxZ, 1);
+		    
+		    vmin = mm->GetModelMatrix() * vmin;
+		    vmax = mm->GetModelMatrix() * vmax;
+		    
+		    glm::min(vmin.y, 0.0f);
+		    glm::max(vmax.y, 0.0f);
 
-			vmin = loc->GetMesh()->GetModelMatrix() * vmin;
-			vmax = loc->GetMesh()->GetModelMatrix() * vmax;
+		    glm::vec3 planePosX, planePosY, planePosZ;
 
-			glm::min(vmin.y, 0.0f);
-			glm::max(vmax.y, 0.0f);
+		    float tmin = -100000;
+		    float tmax = 100000;
 
-			glm::vec3 planePosX, planePosY, planePosZ;
+		    float dxmin, dxMax;
+		    //printf("\n%s\n", loc->GetName());
+		    if (direction.x != 0) {
+			dxmin = (vmin.x - origin.x) / direction.x;
+			dxMax = (vmax.x - origin.x) / direction.x;
 
-			float tmin = -100000;
-			float tmax = 100000;
+			tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+			tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+			//printf("x: %.4f %.4f \t", dxmin, dxMax);
+			if (tmax < tmin) continue;
+		    }
 
-			float dxmin, dxMax;
-			//printf("\n%s\n", loc->GetName());
-			if (direction.x != 0) {
-				dxmin = (vmin.x - origin.x) / direction.x;
-				dxMax = (vmax.x - origin.x) / direction.x;
+		    if (direction.y != 0) {
+			dxmin = (vmin.y - origin.y) / direction.y;
+			dxMax = (vmax.y - origin.y) / direction.y;
 
-				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
-				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
-				//printf("x: %.4f %.4f \t", dxmin, dxMax);
-				if (tmax < tmin) continue;
-			}
+			tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+			tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+			//printf("y: %.4f %.4f \t", dxmin, dxMax);
+			if (tmax < tmin) continue;
 
-			if (direction.y != 0) {
-				dxmin = (vmin.y - origin.y) / direction.y;
-				dxMax = (vmax.y - origin.y) / direction.y;
+		    }
 
-				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
-				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
-				//printf("y: %.4f %.4f \t", dxmin, dxMax);
-				if (tmax < tmin) continue;
+		    if (direction.z != 0) {
+			dxmin = (vmin.z - origin.z) / direction.z;
+			dxMax = (vmax.z - origin.z) / direction.z;
 
-			}
+			tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+			tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+			//printf("z: %.4f %.4f \t", dxmin, dxMax);
+			if (tmax < tmin) continue;
 
-			if (direction.z != 0) {
-				dxmin = (vmin.z - origin.z) / direction.z;
-				dxMax = (vmax.z - origin.z) / direction.z;
+		    }
 
-				tmin = fmaxf(tmin, fminf(dxmin, dxMax));
-				tmax = fminf(tmax, fmaxf(dxmin, dxMax));
-				//printf("z: %.4f %.4f \t", dxmin, dxMax);
-				if (tmax < tmin) continue;
+		    //printf("total: %.4f %.4f\n", tmin, tmax);
 
-			}
+		    /* Ray misses */
+		    if (tmin < 0) {
+			continue;
+		    }
 
-			//printf("total: %.4f %.4f\n", tmin, tmax);
-
-			/* Ray misses */
-			if (tmin < 0) {
-				continue;
-			}
-
-			/* Collided with both 3 axis! */
-			if (tmax >= tmin) {
-				_locatableObject = loc;
-				return;
-			}
+		    /* Collided with both 3 axis! */
+		    if (tmax >= tmin) {
+			_locatableObject = loc;
+			return;
+		    }
 
 		}
 	}

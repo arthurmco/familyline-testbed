@@ -11,6 +11,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "../logic/IMesh.hpp"
+
 #include "VertexData.hpp"
 #include "SceneObject.hpp"
 
@@ -20,7 +22,7 @@
 namespace Tribalia {
 namespace Graphics {
 
-    class Mesh : public SceneObject
+    class Mesh : public SceneObject, public Logic::IMesh
     {
     private:
         glm::mat4 _rotMatrix;
@@ -40,7 +42,7 @@ namespace Graphics {
     public:
         Mesh(VertexData* vd);
 
-        void SetPosition(glm::vec3);
+        virtual void SetPosition(glm::vec3);
         void AddPosition(glm::vec3);
 
         void SetRotation(float x, float y, float z);
@@ -57,6 +59,8 @@ namespace Graphics {
 
 	/* Sets material for whole mesh */
 	void SetMaterial(void* m);
+
+	virtual ~Mesh() {}
     };
 
 

@@ -7,7 +7,6 @@ LocatableObject::LocatableObject(int oid, int tid, const char* name,
     GameObject(oid, tid, name, xPos, yPos, zPos)
     {
         DEF_PROPERTY("rotation",-1);
-        DEF_PROPERTY("mesh", (Tribalia::Graphics::Mesh*)nullptr);
     }
 
 float LocatableObject::GetRotation() { return GET_PROPERTY(float, "rotation"); }
@@ -15,7 +14,7 @@ float LocatableObject::GetRotation() { return GET_PROPERTY(float, "rotation"); }
 /* Get radius from mesh data. */
 float LocatableObject::GetRadius()
 {
-    Tribalia::Graphics::Mesh* m = GET_PROPERTY(Tribalia::Graphics::Mesh*, "mesh");
+    Tribalia::Graphics::Mesh* m = ((Tribalia::Graphics::Mesh*)_mesh.get());
     if (m) {
 
 	if (_radius < 0.0f) {
@@ -34,12 +33,12 @@ float LocatableObject::GetRadius()
     return (_radius < 0.0f) ? 0.0f : _radius;
 }
 
-void LocatableObject::SetMesh(Tribalia::Graphics::Mesh* m)
+void LocatableObject::SetMesh(IMesh* m)
 {
-    SET_PROPERTY("mesh", m);
+    _mesh = std::shared_ptr<IMesh>(m);
     _radius = -1.0f; //force radius recalculation
 }
-Tribalia::Graphics::Mesh* LocatableObject::GetMesh()
+IMesh* LocatableObject::GetMesh()
 {
-    return GET_PROPERTY(Tribalia::Graphics::Mesh*, "mesh");
+    return _mesh.get();
 }

@@ -239,8 +239,10 @@ int main(int argc, char const *argv[])
 		unsigned lastsec = 0;
 	    };
 	    
-		auto gl_debug_callback = [](GLuint source, GLuint type, unsigned int id, GLuint severity,
-					    int length, const char* msg, const void* userparam) {
+		auto gl_debug_callback = [](GLuint source, GLuint type,
+					    unsigned int id, GLuint severity,
+					    int length, const char* msg,
+					    const void* userparam) {
    		    (void)userparam;
 
 		    /* Handle log suppressing */
