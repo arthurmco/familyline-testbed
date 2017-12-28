@@ -16,6 +16,12 @@
 namespace Tribalia {
 namespace Graphics {
 
+    enum VertexRenderStyle {
+	Triangles,
+	Lines,
+	PlotLines,
+    };
+    
 struct VertexData
 {
     std::vector<glm::vec3> Positions;
@@ -24,6 +30,7 @@ struct VertexData
     std::vector<int> MaterialIDs;
     AnimationData* animationData = nullptr;
     uintptr_t meshptr;
+    VertexRenderStyle render_format = VertexRenderStyle::Triangles;
     int vbo_pos;
 };
 

@@ -249,12 +249,22 @@ bool Renderer::Render()
     /* Render registered VAOs */
     for (auto it = _vertices.begin(); it != _vertices.end(); ++it) {
         mModel = *it->worldMat;
-        sForward->SetUniform("mvp", mProj * mView * mModel);
-        sForward->SetUniform("mModel", mModel);
+	if (it->vd->render_format == VertexRenderStyle::PlotLines) {
+	    sLines->Use();
+	    sLines->SetUniform("mvp",
+			       _scenemng->GetCamera()->GetProjectionMatrix() *
+			       _scenemng->GetCamera()->GetViewMatrix() *
+			       *it->worldMat);
+	} else {
+	    sForward->Use();
+	    sForward->SetUniform("mvp", mProj * mView * mModel);
+	    sForward->SetUniform("mModel", mModel);
+	}
 
 
 	if (it->vd->animationData) {
-	    this->UpdateVertexData(it->vd->vbo_pos, it->vd->animationData->GetVertexRawData(),
+	    this->UpdateVertexData(it->vd->vbo_pos,
+				   it->vd->animationData->GetVertexRawData(),
 				   it->vd->Positions.size());
 	}
 		
@@ -288,35 +298,54 @@ bool Renderer::Render()
            (void*)0            // array buffer offset
         );
 
-	glEnableVertexAttribArray(2);
-	glBindBuffer(GL_ARRAY_BUFFER, it->vbo_tex);
-	glVertexAttribPointer(
-	    2,					// attribute 2 (texcoords)
-	    2,					// size
-	    GL_FLOAT, GL_FALSE, 0, (void*)0);
+	if (it->vd->TexCoords.size() > 0) {
+	    glEnableVertexAttribArray(2);
+	    glBindBuffer(GL_ARRAY_BUFFER, it->vbo_tex);
+	    glVertexAttribPointer(
+		2,					// attribute 2 (texcoords)
+		2,					// size
+		GL_FLOAT, GL_FALSE, 0, (void*)0);
+	}
 
-        /* Draw the triangles */
-        for (int matidx = 0; matidx < 9; matidx++) {
-            int start = it->material_offsets[matidx];
-            int end = it->material_offsets[matidx+1];
+	auto drawstyle = (it->vd->render_format == VertexRenderStyle::Triangles) ?
+	    GL_TRIANGLES : GL_LINE_STRIP;
 
-            if (!it->vd->MaterialIDs.empty())
-                material = it->vd->MaterialIDs[start];
-            SetMaterial(material);
+	if (it->vd->render_format == VertexRenderStyle::PlotLines) {
+	    glGetError();
 	    
-            if (end < 0) {
-                end = it->vd->Positions.size();
-                matidx = 0xff; //force exit
-            }
+	    glDrawArrays(drawstyle, 0, it->vd->Positions.size());
 
-            glGetError();
-            glDrawArrays(GL_TRIANGLES, start, end-start);
+	    GLenum err = glGetError();
+	    if (err != GL_NO_ERROR) {
+		Log::GetLog()->Fatal("renderer", "rendering plot: OpenGL error %#x", err);
+	    }
+	} else {
+	    /* Draw the triangles */
+	    for (int matidx = 0; matidx < 9; matidx++) {
+		int start = it->material_offsets[matidx];
+		int end = it->material_offsets[matidx+1];
 
-            GLenum err = glGetError();
-            if (err != GL_NO_ERROR) {
-                Log::GetLog()->Fatal("renderer", "OpenGL error %#x", err);
-            }
-        }
+		if (!it->vd->MaterialIDs.empty())
+		    material = it->vd->MaterialIDs[start];
+		SetMaterial(material);
+	    
+		if (end < 0) {
+		    end = it->vd->Positions.size();
+		    matidx = 0xff; //force exit
+		}
+
+		glGetError();
+		glDrawArrays(drawstyle, start, end-start);
+
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR) {
+		    Log::GetLog()->Fatal("renderer", "rendering mesh: OpenGL error %#x", err);
+		}
+	    }
+	}
+	    
+	
+       
 	glBindTexture(GL_TEXTURE_2D, 0);
         glDisableVertexAttribArray(0);
     }
@@ -381,13 +410,15 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
 		 v->Normals.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(1);
-    
-    glGenBuffers(1, &vri.vbo_tex);
-    glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_tex);
-    glBufferData(GL_ARRAY_BUFFER, v->TexCoords.size() * sizeof(glm::vec2),
-		 v->TexCoords.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(2);
+
+    if (v->TexCoords.size() > 0) {
+	glGenBuffers(1, &vri.vbo_tex);
+	glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_tex);
+	glBufferData(GL_ARRAY_BUFFER, v->TexCoords.size() * sizeof(glm::vec2),
+		     v->TexCoords.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(2);
+    }
 
     glBindVertexArray(0);
 

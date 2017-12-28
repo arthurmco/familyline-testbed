@@ -34,8 +34,6 @@ void GameObject::CopyObject(GameObject* dst, GameObject& src)
     dst->_yPos = src._yPos;
     dst->_zPos = src._zPos;
     dst->_radius = src._radius;
-//    dst->_properties = new std::map<std::string, void*>();
-//    dst->_sizemap = new std::map<std::string, size_t>();
 
     for (auto it : src._properties) {
 

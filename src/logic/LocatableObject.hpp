@@ -33,7 +33,7 @@ namespace Tribalia {
 
         public:
             LocatableObject(int oid, int tid, const char* name,
-                float xPos = -1, float yPos = -1, float zPos = -1);
+	       float xPos = -1, float yPos = -1, float zPos = -1);
 
             /* Get radius */
             float GetRadius();

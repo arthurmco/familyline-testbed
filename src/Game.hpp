@@ -21,6 +21,7 @@
 #include "logic/BuildQueue.hpp"
 #include "logic/GameActionManager.hpp"
 #include "logic/PlayerManager.hpp"
+#include "logic/DebugPlot.hpp"
 
 #include "graphical/Camera.hpp"
 #include "graphical/AssetFile.hpp"
@@ -37,6 +38,7 @@
 #include "graphical/AnimationManager.hpp"
 #include "graphical/Renderer.hpp"
 #include "graphical/GUIRenderer.hpp"
+#include "graphical/GraphicalPlotInterface.hpp"
 
 #include "graphical/gui/Panel.hpp"
 #include "graphical/gui/Label.hpp"

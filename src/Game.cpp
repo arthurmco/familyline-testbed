@@ -21,6 +21,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 	   GUIRenderer* gr, PlayerManager* pm, HumanPlayer* hp)
     : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm), hp(hp)
 {
+    DebugPlotter::Init();
+    
     int winW, winH;
     w->GetSize(winW, winH);
     
@@ -29,6 +31,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         om = new ObjectManager{};
         
         rndr = new Renderer{};
+	DebugPlotter::interface = std::unique_ptr<DebugPlotInterface>
+	    (new GraphicalPlotInterface(rndr));
 
         gctx.om = om;
 
@@ -57,6 +61,12 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         }
 
 	Light* l = new Light{ "mainLight", glm::vec3(16, 30, 16), 0xff, 0xff, 0xff, 10 };
+	std::vector<glm::vec3> p = {
+	    glm::vec3(0, terr->GetHeightFromPoint(0, 0)+16, 0),
+	    glm::vec3(10, terr->GetHeightFromPoint(10, 10)+16, 10),
+	    glm::vec3(10, terr->GetHeightFromPoint(10, 0)+16, 0)
+	};
+	DebugPlotter::interface->AddPath(p, glm::vec3(1, 0, 0));
 	scenemng->AddObject(l);
 
 	terr_rend = new TerrainRenderer{rndr};
