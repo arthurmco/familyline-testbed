@@ -116,7 +116,8 @@ void Terrain::SetData(TerrainSlot* slot) {
 	    }
 	    
 	}	
-	
+
+	delete[] slot;
 }
 
 

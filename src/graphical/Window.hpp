@@ -34,7 +34,7 @@ namespace Graphics {
     private:
         int _width, _height;
         SDL_Window* _win;
-        SDL_GLContext _glctxt;
+        SDL_GLContext _glctxt = nullptr;
 
 	ShaderProgram* winShader = nullptr;
 
@@ -60,6 +60,8 @@ namespace Graphics {
 	void ShowMessageBox(const char* message,
 			    const char* title,
 			    MessageBoxInfo info);
+
+	~Window();
 
 	/* Get the device used in that window */
 	DeviceInfo* GetDevice();

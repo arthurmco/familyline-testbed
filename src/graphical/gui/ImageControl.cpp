@@ -121,5 +121,8 @@ int ImageControl::GetDataHeight() const
     return _height;
 }
 
-
+ImageControl::~ImageControl()
+{
+    cairo_surface_destroy(_image);
+}
 

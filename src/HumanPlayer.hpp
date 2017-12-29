@@ -71,7 +71,7 @@
         virtual bool HasUpdatedObject();
 
         Tribalia::Logic::LocatableObject* GetSelectedObject();
-        ~HumanPlayer();
+        virtual ~HumanPlayer();
     };
 
 #endif /* end of include guard: HUMAN_PLAYER */

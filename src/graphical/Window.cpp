@@ -225,3 +225,12 @@ DeviceInfo* Window::GetDevice()
     static auto device = DeviceManager::GetMainDevice();
     return &device;
 }
+
+Window::~Window()
+{
+    if (_glctxt)
+	SDL_GL_DeleteContext(_glctxt);
+
+    if (_win)
+	SDL_DestroyWindow(_win);
+}

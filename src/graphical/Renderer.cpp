@@ -34,6 +34,7 @@ void Renderer::InitializeLibraries()
 
 void Renderer::InitializeShaders()
 {
+
     Shader *sFrag, *sVert;
     Shader *fLines, *vLines;
 

@@ -390,7 +390,11 @@ int main(int argc, char const *argv[])
 	
 	guir->InitInput();
 	auto g = Game(w, fb3D, fbGUI, guir, pm, hp);
-	exit(g.RunLoop());
+	auto ret = g.RunLoop();
+	delete pm;
+	delete hp;
+	delete w;
+	exit(ret);
     }
     
 
@@ -445,7 +449,11 @@ int main(int argc, char const *argv[])
 		
 		
 	    auto g = Game(w, fb3D, fbGUI, guir, pm, hp);
-	    exit(g.RunLoop());
+	    auto ret = g.RunLoop();
+	    delete pm;
+	    delete hp;
+	    delete w;
+	    exit(ret);
 	});
 
     guir->AddPanel(&l);
@@ -486,7 +494,7 @@ int main(int argc, char const *argv[])
     }
 
     
-    
+    delete w;
     printf("\nExited. (%d frames)\n", frames);
 
     return 0;

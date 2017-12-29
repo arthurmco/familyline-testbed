@@ -50,6 +50,8 @@ public:
 
     int GetDataWidth() const override; 
     int GetDataHeight() const override;
+
+    virtual ~ImageControl();
 };
 
 }
