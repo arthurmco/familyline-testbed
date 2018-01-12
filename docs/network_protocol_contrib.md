@@ -96,7 +96,8 @@ The next message after that **must** be the 'send player info'
  The client sends its player name and experience.
  
  TODO: Add experience validation (in a master server?)
- 
+
+
  - S: `[TRIBALIA PLAYERINFO <<id>>]`
  
  The server returns an ID to the player. This ID will be used in the UDP-based
@@ -115,7 +116,9 @@ It all starts with a question to the client;
  
  id is the player ID, name is the player name and exp is the player experience
  
- From this moment, the player can receive client status update
+ From this moment, the player can receive client status update.
+ 
+ This message includes the sending client own information too.
  
 ### Send map list to the client ###
 

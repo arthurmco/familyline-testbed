@@ -16,9 +16,15 @@ def client_show_playerinfo(sock, name, xp):
     sock_str_send(sock, pinfomsg)
 
     pexpect = "[TRIBALIA PLAYERINFO"
-    serverresp = sock.recv(128).decode()
-    if not serverresp.startswith(pexpect):
+
+    try:
+        serverresp = sock.recv(128).decode()
+        if not serverresp.startswith(pexpect):
+            return -1
+    except socket.timeout:
+        print('error: client_show_playerinfo: timeout')
         return -1
+            
 
     lastbrkt = serverresp.index(']')
     val = 0
@@ -96,9 +102,10 @@ sock_str_send(sock, '[TRIBALIA CAPS ]\n')
 
 print('Connected to server!')
 
-sock.settimeout(0.01)
+sock.settimeout(1)
 quit = False
 clientid = -1
+player_sent = False
 
 while not quit:
     try:
@@ -113,16 +120,41 @@ while not quit:
                     else:
                         print('Client ID is %d' % clientid)
                         sock_str_send(sock, '[TRIBALIA CHAT %d all 5 Hello]\n' % clientid)
-                    
-    except socket.timeout:
-        pass
+                               
+    except socket.timeout as e:
+        print("Socket timed out: %s" % e)
     except KeyboardInterrupt:
         quit = True
 
     if clientid > 0:
+        if not player_sent:
+            print('Connected. Requesting player info...')
+            sock_str_send(sock, '[TRIBALIA PLAYERS?]\n')
+
+            playerstr = sock.recv(1024).decode()
+            playersarr = playerstr.split('|')
+            print("Found %d players" % int(playersarr[0].split(' ')[2]))
+
+            for player in playersarr[1:]:
+                playerinfo = player.strip().split(' ')
+                plid = int(playerinfo[0])
+
+                if playerinfo[-1].strip() == ']':
+                    plexp = int(playerinfo[-2])
+                    plname = ' '.join(playerinfo[1:-2])
+                else:
+                    plexp = int(playerinfo[-1])
+                    plname = ' '.join(playerinfo[1:-1])
+
+                print(" -> Discovered player id %d, name %s, xp %d" % (plid, plname, plexp))
+
+            player_sent = True
+
         chatmsg = ""
         try:
             chatmsg = input("chat> ")
+        except KeyboardInterrupt:
+            quit = True
         except EOFError:
             quit = True
 
