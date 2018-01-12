@@ -228,14 +228,15 @@ void ServerManager::RetrieveTCPMessages() {
 			/* Return 0 in reads means remote disconnection  */
 			printf(" %d (disconnected)", cli->GetQueue()->GetSocket());
 			cli->Close();
+			clients.erase(clients.begin()+i);
 			continue;
-
 		    }
 		    
 		    if (cli->CheckHeaders() &&
 			strncmp(readbuf, "[TRIBALIA", 9) != 0) {
 			printf("error: bad header from %d\n", cli->GetQueue()->GetSocket());
 			cli->Close();
+			//TODO: count number of errors before closing
 			continue;
 		    }
 		    
@@ -245,8 +246,9 @@ void ServerManager::RetrieveTCPMessages() {
 
 		if (pfds[i].revents & POLLHUP) {
 		    auto& cli = clients[i];
-		    printf(" %d (disconnected)", cli->GetQueue()->GetSocket());
+		    printf(" %d (disconnected - hangup)", cli->GetQueue()->GetSocket());
 		    cli->Close();
+		    clients.erase(clients.begin()+i);
 		}
 
 

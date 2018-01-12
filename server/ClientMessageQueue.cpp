@@ -77,7 +77,7 @@ size_t ClientMessageQueue::PeekTCP(char* m, size_t len) {
 	tokpos = ++ntok;
 	
     } while (!token_found);
-    
+
     return len;
 }
 

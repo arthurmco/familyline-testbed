@@ -86,6 +86,8 @@ namespace Tribalia::Server {
 
 	/* Gets the message queue of this client */
 	ClientMessageQueue* GetQueue();
+
+	~Client();
     };
 
 

@@ -20,9 +20,6 @@ Client::Client(int sockfd, struct in_addr addr)
 
 void Client::Close()
 {
-    if (_cmq)
-	delete _cmq;
-
     this->closed = true;
 }
 
@@ -53,4 +50,11 @@ unsigned int Client::GetID() const {
 ClientMessageQueue* Client::GetQueue()
 {
     return _cmq;
+}
+
+Client::~Client() {
+    if (_cmq) {
+	printf("i am a diva");
+	delete _cmq;
+    }
 }

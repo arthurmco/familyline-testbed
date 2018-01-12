@@ -42,7 +42,7 @@ ChatMessage* ChatManager::CheckMessage(Client* c)
     }
 
     char msg[385];
-    c->GetQueue()->ReceiveTCP(msg, 384);
+    c->GetQueue()->PeekTCP(msg, 384);
 
     char sname[32], schat[8], sdestiny[24], smessage[255];
     size_t mlen;
@@ -52,10 +52,11 @@ ChatMessage* ChatManager::CheckMessage(Client* c)
     int ret = sscanf(msg, "[%s %s %d %s %zu%n",
 		     sname, schat, &senderid, sdestiny, &mlen, &msgpos);
     if (ret < 5) {
-	fprintf(stderr, "received garbage chat message from %s\n",
-		c->GetName());
+	fprintf(stderr, "received garbage chat message from %s (%s)\n",
+		c->GetName(), msg);
 	return nullptr;
     }
+    c->GetQueue()->ReceiveTCP(msg, 384);
 
     strncpy(smessage, &msg[msgpos+1], std::min(mlen, size_t(255)));
     int did = 0;

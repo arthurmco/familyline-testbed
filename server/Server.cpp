@@ -37,11 +37,11 @@ int main(int argc, char const* argv[])
 
     ServerManager* sm = nullptr;
     ChatManager* chm = nullptr;
-    PlayerManager pm;
+    PlayerManager* pm = new PlayerManager();
     
     std::list<Client*> clis;
 
-    TCPConnectionInitiator tci(&pm);
+    TCPConnectionInitiator tci(pm);
 	
     try {
 	sm = new ServerManager{};
@@ -58,7 +58,7 @@ int main(int argc, char const* argv[])
 	    if (tci.HasClient())
 		tci.Process();
 
-	    pm.Process();
+	    pm->Process();
 
 	    for (auto& cli : clis) {
 		if (cli->IsClosed()) {
@@ -67,7 +67,6 @@ int main(int argc, char const* argv[])
 
 		if (cli->GetStatus() >= CS_CONNECTED) {
 		    char m[2049];
-		    
 
 		    // Check if client is ready or not anymore
 		    if (cli->GetQueue()->PeekTCP(m, 40)) {
@@ -94,15 +93,15 @@ int main(int argc, char const* argv[])
 			       cm->message);
 		    }
 
-		    if (cli->GetQueue()->ReceiveTCP(m, 2048)) {
-		    
-			printf("From %d: "
-			       "\033[3;37m\n%s\033[0m\n",
-			       cli->GetQueue()->GetSocket(), m);
-		    }
 		}
 		    
 	    }
+	    
+
+	    clis.remove_if(
+		[](Client* c){ return c->IsClosed() ||
+			c->GetStatus() == CS_DISCONNECTED;
+		});
 	    
 	    
 	}
