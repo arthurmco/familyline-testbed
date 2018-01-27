@@ -180,8 +180,7 @@ receiving the message, the client should alert the user that the game is
 starting. The not ready message is still respected and will abort the countdown.
 
 After the wait, the server should send the `[TRIBALIA GAME STARTED]` message to
-all clients. Clients, then, should connect in the UDP port.
- 
+all clients. Clients, then, should connect in the UDP port. 
 
 ## Client chatting
 
@@ -209,5 +208,77 @@ C: `[TRIBALIA CHAT <<sender_id>> all|team|player:<<player_id>>
   * message-strings: An UTF-8 formatted string message.
  
  
- 
- 
+# UDP port
+
+After the client notifies it is ready to the server (as told on [here](#game-start),
+you should connect to the UDP port. The port has the same number of the TCP one.
+
+The first step is sending a START-CONNECTION message, then waiting until a SYNC message is sent.
+
+## How does it work?
+
+In Tribalia, UDP messages sends commands from the client to the
+server, or vice-versa, in binary format. 
+
+The client waits for a certain amount of time (called a turn, 16ms by default) 
+and then sends it to the server. The server waits for everyone to send their messages
+in that turn and then waits for the next one.
+
+>> <i>TODO: Make turn time customizable?</i>
+
+If one of the clients send a message with a turn that is less than the 
+current one ... 
+<span style="color:red">__(I don't know, maybe increase the turn time?)__</span>
+
+If one of the clients send a message with a turn that is more than the
+current one, than that client is disconnected.
+
+<span style="color:red">**REALLY** needed? </span>
+At the end of each turn, the server will inquiry the status of the
+client by sending a query for the position of an object, and waiting
+for a response. The client position needs to be equal of the server,
+or the client will be disconnected with an "Object Position Mismatch"
+error.
+
+## Message Header
+
+Every UDP message has the following header. Remember that all numbers
+are in little endian format here.
+
+offset | bytes | name     | desc
+------:|------:|----------|:-----
+	0h |     4 | magic    | The magic number of the message <br/> (0x4d4254 == TBM)
+	4h |     4 | turn     | The turn number.
+	8h |     2 | cmdcount | The number of commands in this message.
+	Ah |     2 | length   | The size of the message, in bytes
+    Ch |     4 | checksum | The message checksum
+   10h |   ... | commands | The commands
+   
+The magic number is for identificating the package as a Tribalia
+Message package (hence the TBM).
+
+The turn number is the turn number for that package. If the gameplay
+has not started (prior to the `SYNC` command), then the turn
+is 0. Turn numbers start at 1.
+
+The checksum is a 4-byte unsigned number (`u32` or `uint32_t`)
+calculated by summing all the bytes of the message (aka convert the
+whole message to an array of `uint8_t`s and sum them all), with the
+checksum field filled with zeroes. If the sum overflows, then consider
+only the least significant 4 bytes.
+
+After the message header, we get to the command header.
+
+## Command Header
+
+Remember that the offset is relative to **the header**
+
+offset | bytes | name     | desc
+------:|------:|----------|:-----
+    0h |     2 | cmdtype  | The command type
+	2h |     2 | cmdlen   | The command size (in bytes)
+	4h |   ... | cmddata  | The command data
+
+We have a lot of commands
+
+<span style="color:red">TODO: list them here</span>
