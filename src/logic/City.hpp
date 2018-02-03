@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "AttackableObject.hpp"
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #ifndef CITY_HPP
 #define CITY_HPP

@@ -9,7 +9,7 @@
 #include <string>
 #include <cstring> //strcmp()
 #include "Texture.hpp"
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #ifndef TEXTUREMANAGER_HPP
 #define TEXTUREMANAGER_HPP

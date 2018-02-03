@@ -38,14 +38,15 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
   file( GLOB SRC_TEST_FILES "${CMAKE_SOURCE_DIR}/test/*.cpp" )
 
   # Remove Server.cpp (the one with main) from being compiled with the tests
-  set(SRC_SERVER_TEST ${SRC_SERVER})
+  set(SRC_SERVER_TEST "${SRC_SERVER}")
   list(REMOVE_ITEM SRC_SERVER_TEST "${CMAKE_SOURCE_DIR}/server/Server.cpp")
 
   add_executable(tribalia-tests ${SRC_TEST_FILES} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT} ${SRC_SERVER_TEST}
-	  "${CMAKE_SOURCE_DIR}/src/Log.cpp" "${CMAKE_SOURCE_DIR}/src/Timer.cpp") 
+	  ${SRC_COMMON}  "${CMAKE_SOURCE_DIR}/src/Timer.cpp") 
 
   include_directories("${CMAKE_SOURCE_DIR}/src")
   include_directories("${CMAKE_SOURCE_DIR}/server")
+  include_directories("${CMAKE_SOURCE_DIR}/common")
   
   option(DO_CHECK_ASAN "Enable address sanitizer" OFF)
 

@@ -5,7 +5,7 @@
 */
 
 #include "AnimationData.hpp"
-#include "../Log.hpp"
+#include "Log.hpp"
 #include "../Timer.hpp"
 
 

@@ -9,7 +9,7 @@
 #include <cmath>
 #include <cstdlib> //memcpy()
 
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #ifndef TERRAIN_HPP
 #define TERRAIN_HPP

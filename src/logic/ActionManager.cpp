@@ -1,5 +1,5 @@
 #include "ActionManager.hpp"
-#include "../Log.hpp"
+#include "Log.hpp"
 #include <cstdio>
 
 using namespace Tribalia::Logic;

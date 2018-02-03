@@ -12,7 +12,7 @@
 #include <cstdio>
 
 #include "Texture.hpp"
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #ifndef TEXTUREOPENER_HPP
 #define TEXTUREOPENER_HPP

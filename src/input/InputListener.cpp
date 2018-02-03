@@ -1,5 +1,5 @@
 #include "InputListener.hpp"
-#include "../Log.hpp"
+#include "Log.hpp"
 
 using namespace Tribalia::Input;
 

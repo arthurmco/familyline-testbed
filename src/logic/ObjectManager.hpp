@@ -10,7 +10,7 @@
 #include <vector>
 #include "GameObject.hpp"
 
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #ifndef OBJECTMANAGER_HPP
 #define OBJECTMANAGER_HPP

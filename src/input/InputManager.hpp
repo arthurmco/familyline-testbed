@@ -15,7 +15,7 @@
 #include "InputEvent.hpp"
 #include "InputListener.hpp"
 
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #ifndef INPUTMANAGER_HPP
 #define INPUTMANAGER_HPP

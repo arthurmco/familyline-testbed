@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstring> //strcmp()
 #include "Material.hpp"
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #ifndef MATERIALMANAGER_HPP
 #define MATERIALMANAGER_HPP

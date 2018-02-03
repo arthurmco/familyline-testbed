@@ -10,7 +10,7 @@
 #define NETPLAYERMANAGER_HPP
 
 #include "../logic/PlayerManager.hpp"
-#include "../Log.hpp"
+#include "Log.hpp"
 #include "../HumanPlayer.hpp"
 
 namespace Tribalia::Net {

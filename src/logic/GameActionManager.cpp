@@ -1,6 +1,6 @@
 #include "GameActionManager.hpp"
 #include <cstdio>
-#include "../Log.hpp"
+#include "Log.hpp"
 
 using namespace Tribalia::Logic;
 

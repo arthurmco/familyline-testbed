@@ -12,7 +12,7 @@
 #include "SceneObject.hpp"
 #include "Camera.hpp"
 
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #ifndef SCENEMANAGER_HPP
 #define SCENEMANAGER_HPP

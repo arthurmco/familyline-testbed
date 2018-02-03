@@ -46,7 +46,7 @@ because it's what the program itself uses...
 
 ## Caveats
 
- - Your compiler needs to support C++17.
+ - Your compiler needs to support C++17, because of that namespace thing
 
  - On Windows, you will might need to use the environment variable `TRIBALIA_FIND_PKG` to tell cmake where some dependencies can be found.
  

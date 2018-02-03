@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <list>
 
-#include "../Log.hpp"
+#include "Log.hpp"
 
 namespace Tribalia::Graphics {
 

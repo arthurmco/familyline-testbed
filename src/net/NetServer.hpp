@@ -10,7 +10,7 @@
 #include <vector>
 #include <stdexcept>
 #include "socket.h"
-#include "../Log.hpp"
+#include "Log.hpp"
 #include "NetPlayerManager.hpp"
 
 #include "../../server/ClientMessageQueue.hpp"

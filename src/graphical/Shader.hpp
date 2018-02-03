@@ -22,7 +22,7 @@
 #include <unistd.h>
 #endif
 
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #include "GFXExceptions.hpp"
 

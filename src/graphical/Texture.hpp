@@ -5,7 +5,7 @@
 
 ***/
 #include <string>
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #include <glm/glm.hpp>
 #include <SDL2/SDL_opengl.h>

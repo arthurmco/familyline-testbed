@@ -7,7 +7,7 @@
 
 #include "../Mesh.hpp"
 #include "../GFXExceptions.hpp"
-#include "../../Log.hpp"
+#include "Log.hpp"
 
 #ifndef MESHOPENER_HPP
 #define MESHOPENER_HPP

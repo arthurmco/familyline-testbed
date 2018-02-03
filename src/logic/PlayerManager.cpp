@@ -1,5 +1,5 @@
 #include "PlayerManager.hpp"
-#include "../Log.hpp"
+#include "Log.hpp"
 
 using namespace Tribalia::Logic;
 

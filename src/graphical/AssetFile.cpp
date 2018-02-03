@@ -1,5 +1,5 @@
 #include "AssetFile.hpp"
-#include "../Log.hpp"
+#include "Log.hpp"
 #include "../config.h"
 
 using namespace Tribalia::Graphics;

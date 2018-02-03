@@ -12,7 +12,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <cmath>
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #ifndef CAMERA_HPP
 #define CAMERA_HPP

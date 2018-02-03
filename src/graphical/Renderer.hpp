@@ -20,7 +20,7 @@
 #include "Mesh.hpp"
 #include "Light.hpp"
 #include "MaterialManager.hpp"
-#include "../Log.hpp"
+#include "Log.hpp"
 
 #ifndef RENDERER_HPP
 #define RENDERER_HPP
