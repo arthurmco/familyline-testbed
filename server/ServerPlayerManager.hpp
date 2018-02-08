@@ -37,6 +37,13 @@ namespace Tribalia::Server {
 	void Process();
 	
 
+	/*
+	  Get the available players
+	*/
+	const std::list<NetPlayer>& GetPlayers() const {
+	    return this->_players;
+	}
+	
     };
     
 }

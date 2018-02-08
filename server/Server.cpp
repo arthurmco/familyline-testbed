@@ -43,7 +43,7 @@ int main(int argc, char const* argv[])
     ServerManager* sm = nullptr;
     ChatManager* chm = nullptr;
     PlayerManager* pm = new PlayerManager();
-    AdminCommandParser acp(nullptr);
+    AdminCommandParser acp(pm);
     
     std::list<Client*> clis;
 

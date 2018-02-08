@@ -1,4 +1,5 @@
 #include "ServerManager.hpp"
+#include <Log.hpp>
 
 using namespace Tribalia;
 using namespace Tribalia::Server;
@@ -89,7 +90,7 @@ Client* ServerManager::RetrieveClient(bool blocks)
 	if (flags < 0) {
 	    return nullptr;
 	}
-	flags = blocks ? (flags &= O_NONBLOCK) : (flags |= O_NONBLOCK);
+	flags = (blocks ? (flags & O_NONBLOCK) : (flags | O_NONBLOCK));
 	fcntl(this->sockfd, F_SETFL, flags);
     }
 
@@ -168,7 +169,9 @@ do_retrieve_client:
 		
 	    std::shared_ptr<Client> c =
 		std::make_shared<Client>(clisockfd, cliaddr.sin_addr);
-	    printf("Client added (fd %d), address %s\n", clisockfd, ipstr);    
+	    Log::GetLog()->InfoWrite("server-manager",
+				     "Client added (fd %d), address %s\n",
+				     clisockfd, ipstr);    
 	    clients.push_back(c);
 	    return c.get();
 	}
@@ -208,7 +211,7 @@ void ServerManager::RetrieveTCPMessages() {
     for (size_t i = 0; i < client_qt; i++) {
 	if (clients[i]) {
 	    pfds[i].fd = clients[i]->GetQueue()->GetSocket();
-	    pfds[i].events = POLLIN | POLLHUP;  // poll for read and conn end
+	    pfds[i].events = POLLIN;  // poll for read and conn end
 	    client_poll_qt++;
 	}
     }
@@ -227,7 +230,10 @@ void ServerManager::RetrieveTCPMessages() {
 		    auto readnum = read(cli->GetQueue()->GetSocket(), (void*)readbuf, 1535);
 		    if (readnum == 0) {
 			/* Return 0 in reads means remote disconnection  */
-			printf(" %d (disconnected)", cli->GetQueue()->GetSocket());
+			Log::GetLog()->Write("server-manager",
+					     "Client %d (%s) disconnected",
+					     cli->GetID(), cli->GetName());
+			
 			cli->Close();
 			clients.erase(clients.begin()+i);
 			continue;
@@ -247,7 +253,10 @@ void ServerManager::RetrieveTCPMessages() {
 
 		if (pfds[i].revents & POLLHUP) {
 		    auto& cli = clients[i];
-		    printf(" %d (disconnected - hangup)", cli->GetQueue()->GetSocket());
+		    Log::GetLog()->Write("server-manager",
+					     "Client %d (%s) disconnected (POLLHUP)",
+					     cli->GetID(), cli->GetName());
+
 		    cli->Close();
 		    clients.erase(clients.begin()+i);
 		}

@@ -67,8 +67,20 @@ bool AdminCommandParser::ProcessPlayerListRequest(socket_t clisocket)
 	return false; // Not the same message
 
     s = recv(clisocket, msg, s, 0); // remove message from queue
+
+    char smsg[2048];
+    sprintf(smsg, "[TRIBALIA RESPONSE PLAYERS %d ",
+	    this->_spm->GetPlayers().size());
+    for (const auto& pl : this->_spm->GetPlayers()) {
+	char pmsg[128];
+	snprintf(pmsg, 128, "%d %s %d %s %s ",
+		 pl.cli->GetID(), pl.cli->GetName(), 0,
+		 (pl.cli->GetStatus() >= CS_CONNECTED) ? "connected" : "connecting",
+		 "192.168.0.1");
+	strcat(smsg, pmsg);
+    }
+    strcat(smsg, "]\n");
     
-    const char smsg[] = "[TRIBALIA RESPONSE PLAYERS 1 80 Joãozinho 1660 connecting 192.168.0.1 ]\n";  
     send(clisocket, smsg, strlen(smsg), 0);
     return true;
 }
