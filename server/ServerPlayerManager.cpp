@@ -1,4 +1,5 @@
 #include "ServerPlayerManager.hpp"
+#include <Log.hpp>
 
 using namespace Tribalia::Server;
 
@@ -67,8 +68,9 @@ void PlayerManager::Process()
 
 void PlayerManager::NotifyPlayerAddition(Client* c)
 {
-    printf("... client %s with id %d added, notifying others\n",
-	   c->GetName(), c->GetID());
+    Log::GetLog()->Write("player-manager",
+			 "client %s with id %d added, notifying others\n",
+			 c->GetName(), c->GetID());
 }
 
 void PlayerManager::SendPlayerList(Client* c)

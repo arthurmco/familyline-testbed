@@ -1,5 +1,6 @@
 #include "ServerManager.hpp"
 
+using namespace Tribalia;
 using namespace Tribalia::Server;
 
 /* Starts a server manager in the specified port */

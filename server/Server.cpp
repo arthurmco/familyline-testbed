@@ -12,18 +12,22 @@
 #include "ServerPlayerManager.hpp"
 
 #include <list>
+#include <Log.hpp>
 
 #include <signal.h>
 #include <ctime>
 #include <string>
 #include <cstdio>
 
+using namespace Tribalia;
 using namespace Tribalia::Server;
 
 volatile bool continue_main = true;
 
 int main(int argc, char const* argv[]) 
 {
+    Log::GetLog()->SetFile(stderr);
+    
     struct sigaction oact;
     oact.sa_handler = [](int sig){ (void)sig; continue_main = false; };
     sigemptyset(&oact.sa_mask);
@@ -108,7 +112,7 @@ int main(int argc, char const* argv[])
 	
 	delete sm;	    
     } catch (ServerManagerError& e) {
-	fprintf(stderr, "Error: %s\n", e.what());
+	Log::GetLog()->Fatal("main", "Error: %s", e.what());
 	return 1;
     }
 
