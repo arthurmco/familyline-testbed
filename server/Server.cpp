@@ -10,6 +10,7 @@
 #include "ChatManager.hpp"
 #include "ClientInit.hpp"
 #include "ServerPlayerManager.hpp"
+#include "AdminCommandParser.hpp"
 
 #include <list>
 #include <Log.hpp>
@@ -42,6 +43,7 @@ int main(int argc, char const* argv[])
     ServerManager* sm = nullptr;
     ChatManager* chm = nullptr;
     PlayerManager* pm = new PlayerManager();
+    AdminCommandParser acp(nullptr);
     
     std::list<Client*> clis;
 
@@ -50,9 +52,13 @@ int main(int argc, char const* argv[])
     try {
 	sm = new ServerManager{};
 	chm = new ChatManager{};
+	if (!acp.Listen())
+	    throw ServerManagerError("Error while listen()ing to the admin command parser");
 	
 	while (continue_main) {
 	    sm->RetrieveTCPMessages();
+	    acp.ProcessRequests();
+	    
 	    Client* c = sm->RetrieveClient(false);
 	    if (c) {
 		clis.push_back(c);

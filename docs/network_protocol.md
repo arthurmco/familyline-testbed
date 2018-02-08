@@ -224,7 +224,7 @@ The client waits for a certain amount of time (called a turn, 16ms by default)
 and then sends it to the server. The server waits for everyone to send their messages
 in that turn and then waits for the next one.
 
->> <i>TODO: Make turn time customizable?</i>
+> TODO: Make turn time customizable?
 
 If one of the clients send a message with a turn that is less than the 
 current one ... 
@@ -279,6 +279,6 @@ offset | bytes | name     | desc
 	2h |     2 | cmdlen   | The command size (in bytes)
 	4h |   ... | cmddata  | The command data
 
-We have a lot of commands
+We have a lot of commands:
 
-<span style="color:red">TODO: list them here</span>
+
