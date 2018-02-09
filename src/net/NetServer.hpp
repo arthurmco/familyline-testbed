@@ -13,7 +13,7 @@
 #include "Log.hpp"
 #include "NetPlayerManager.hpp"
 
-#include "../../server/ClientMessageQueue.hpp"
+#include <ClientMessageQueue.hpp>
 
 #include <cstring>
 #include <cstdlib>

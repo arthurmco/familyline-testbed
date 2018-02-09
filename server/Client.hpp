@@ -8,7 +8,7 @@
 
 #include <queue>
 #include <algorithm> // for std::min
-#include "ClientMessageQueue.hpp"
+#include <ClientMessageQueue.hpp>
 
 #include <fcntl.h>
 #include <string>
