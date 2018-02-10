@@ -58,6 +58,7 @@ const char* Server::Receive(size_t maxlen)
 	}
 
 	if (slen <= 128) {
+	    
 	    // Validate the message end
 	    if (ret[(i*128)+slen-1] == '\n' &&
 		ret[(i*128)+slen-2] == ']') {

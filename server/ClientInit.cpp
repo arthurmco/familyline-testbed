@@ -46,7 +46,7 @@ void TCPConnectionInitiator::Process()
 		continue;
 	    }
 	    
-	    if (!strcmp(recvbuffer, "[TRIBALIA CONNECT OK]")) {
+	    if (!strncmp(recvbuffer, "[TRIBALIA CONNECT OK]\n", 21)) {
 		tinit.step = TCPInitStep::VersionQuery;
 	    }
 	    
