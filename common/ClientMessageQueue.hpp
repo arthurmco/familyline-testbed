@@ -2,7 +2,7 @@
 /***
     Message queue controlling class for the client
 
-    Copyright (C) 2017 Arthur M
+    Copyright (C) 2017,2018 Arthur M
 ***/
 
 #ifndef CLIENTMESSAGEQUEUE_HPP
@@ -20,6 +20,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <ClientUDPMessage.hpp>
 
 /* for fd access (read(), close(), write()) */
 #include <unistd.h>
@@ -31,33 +32,6 @@
 
 namespace Tribalia::Server {
 
-    /* UDP message header layout, little endian */
-    struct UDPMessageHeader {
-	/* The magic 'number', "TRMP" */
-	uint32_t magic;
-
-	/* Packet ID. 
-	   Here, will be chosen sequentially by the server manager, but do not
-	   need to be 
-	*/
-	uint32_t packet_id; 
-
-	/* The 64 bit unix timestamp of the message */
-	uint64_t packet_timestamp;
-
-	/* Packet checksum. 
-	   32-bit sum of all bytes of the packet, */
-	uint32_t checksum;
-
-        uint16_t type;
-	uint16_t flags;
-	uint16_t size;
-    } __attribute__((packed));
-
-    struct UDPMessage {
-	UDPMessageHeader hdr;
-	char* content;
-    };
     
 /*
   Manages the messages and connection of the client
