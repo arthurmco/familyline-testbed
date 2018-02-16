@@ -6,12 +6,13 @@
 
 #include <cstdio>
 #include <cstdlib> //exit()
-#include <cstring> //memset()
+#include <cstring> //memset(), strncpy()
 #include <errno.h> //perror()
 #include <unistd.h> //close()
 #include <poll.h> //poll()
 
 #include <list>
+#include <algorithm> //std::min()
 
 using namespace Tribalia::Server;
 
@@ -69,7 +70,7 @@ bool AdminCommandParser::ProcessPlayerListRequest(socket_t clisocket)
     s = recv(clisocket, msg, s, 0); // remove message from queue
 
     char smsg[2048];
-    sprintf(smsg, "[TRIBALIA RESPONSE PLAYERS %d ",
+    sprintf(smsg, "[TRIBALIA RESPONSE PLAYERS %zu ",
 	    this->_spm->GetPlayers().size());
     for (const auto& pl : this->_spm->GetPlayers()) {
 	char pmsg[128];
@@ -82,6 +83,47 @@ bool AdminCommandParser::ProcessPlayerListRequest(socket_t clisocket)
     strcat(smsg, "]\n");
     
     send(clisocket, smsg, strlen(smsg), 0);
+    return true;
+}
+
+/**
+ * Send a chat message from the interface
+ * Receive it from the admin socket and send it to the clients
+ */
+bool AdminCommandParser::SendChat(socket_t clisocket)
+{
+    char msg[512];
+    auto s = recv(clisocket, msg, 32, MSG_PEEK);
+    if (s <= 0) {
+	// Error or disconnect
+	return false;
+    }
+
+    msg[s] = '\0';
+    if (strncmp(msg, "[TRIBALIA SEND-CHAT", 19))
+	return false; // Not the same message
+
+    s = recv(clisocket, msg, 511, 0);
+    msg[s] = '\0';
+
+    char mtr[10], mse[10], desttype[16];
+    int msgsize = 0;
+    int msgoffset = 0;
+
+    sscanf(msg, "%s %s %s %d %n", mtr, mse, desttype, &msgsize,
+	&msgoffset);
+
+    // prevents overflows with wrong sizes
+    msgsize = std::min(unsigned(strlen(msg) - msgoffset), unsigned(msgsize));
+
+    char* msgcontent = new char[msgsize];
+
+    strncpy(msgcontent, &msg[msgoffset], msgsize);
+    msgcontent[msgsize] = '\0';
+
+    Log::GetLog()->InfoWrite("admin-command", "Received message: %s",
+			     msgcontent);
+
     return true;
 }
 
@@ -167,6 +209,10 @@ void AdminCommandParser::ProcessRequests()
 
 	    if (this->ProcessPlayerListRequest(fds[i].fd))
 		continue;
+
+	    if (this->SendChat(fds[i].fd))
+		continue;
+		
 	    
 	    fprintf(stderr, "Data received on interface %d\n",
 		    siface);

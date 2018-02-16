@@ -43,7 +43,7 @@ int main(int argc, char const* argv[])
     ServerManager* sm = nullptr;
     ChatManager* chm = nullptr;
     PlayerManager* pm = new PlayerManager();
-    AdminCommandParser acp(pm);
+
     
     std::list<Client*> clis;
 
@@ -52,6 +52,7 @@ int main(int argc, char const* argv[])
     try {
 	sm = new ServerManager{};
 	chm = new ChatManager{};
+	AdminCommandParser acp(pm, chm);
 	if (!acp.Listen())
 	    throw ServerManagerError("Error while listen()ing to the admin command parser");
 	
