@@ -13,10 +13,12 @@
 
 #include <list>
 #include <algorithm> //std::min()
+#include <chrono>
 
 using namespace Tribalia::Server;
 
 #include <Log.hpp>
+#include "ChatManager.hpp"
 
 /**
  * Start listening for connections from the interface
@@ -121,9 +123,15 @@ bool AdminCommandParser::SendChat(socket_t clisocket)
     strncpy(msgcontent, &msg[msgoffset], msgsize);
     msgcontent[msgsize] = '\0';
 
-    Log::GetLog()->InfoWrite("admin-command", "Received message: %s",
-			     msgcontent);
+    // TODO: set message destiny correctly
+    ChatMessage* m = new ChatMessage();
+    m->message = msgcontent;
+    m->destiny = ChatDestiny::ToAll;
+    m->time = std::chrono::duration_cast<std::chrono::seconds>
+	(std::chrono::system_clock::now().time_since_epoch());
+    m->sender = nullptr;
 
+    _lm->Push(m);
     return true;
 }
 

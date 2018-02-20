@@ -1,6 +1,7 @@
 #include "ChatManager.hpp"
 
 using namespace Tribalia::Server;
+using namespace std::chrono;
 
 /* Send a chat message to the specified client */
 void  ChatManager::Send(Client* c, const char* message)
@@ -85,6 +86,10 @@ ChatMessage* ChatManager::CheckMessage(Client* c)
     cm->destiny = d;
     cm->destiny_id = did;
     cm->message = smessage;
+    cm->time = std::chrono::duration_cast<std::chrono::seconds>
+	(std::chrono::system_clock::now().time_since_epoch());
+    cm->sender = c;
+    
     return cm;
       
 }

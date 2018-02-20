@@ -43,7 +43,7 @@ int main(int argc, char const* argv[])
     ServerManager* sm = nullptr;
     ChatManager* chm = nullptr;
     PlayerManager* pm = new PlayerManager();
-
+    ChatLogger cl;
     
     std::list<Client*> clis;
 
@@ -52,7 +52,7 @@ int main(int argc, char const* argv[])
     try {
 	sm = new ServerManager{};
 	chm = new ChatManager{};
-	AdminCommandParser acp(pm, chm);
+	AdminCommandParser acp(pm, &cl);
 	if (!acp.Listen())
 	    throw ServerManagerError("Error while listen()ing to the admin command parser");
 	
@@ -102,6 +102,7 @@ int main(int argc, char const* argv[])
 		    while (auto cm = chm->CheckMessage(cli)) {
 			printf("[%s] \033[3m%s\033[0m\n", cli->GetName(),
 			       cm->message);
+			cl.Push(cm);
 		    }
 
 		}

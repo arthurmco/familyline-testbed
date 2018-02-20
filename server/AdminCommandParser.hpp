@@ -9,7 +9,7 @@
 #ifndef ADMINCOMMANDPARSER_HPP
 #define ADMINCOMMANDPARSER_HPP
 
-#include "ChatManager.hpp"
+#include "ChatLogger.hpp"
 #include <ServerPlayerManager.hpp>
 
 namespace Tribalia::Server {
@@ -38,7 +38,7 @@ private:
     std::list<ServerInterface> interface_lists;
     
     PlayerManager* _spm;
-    ChatManager* _cm;
+    ChatLogger* _lm;
 
     /**
      * Process the 'player list' request
@@ -60,8 +60,8 @@ private:
     bool SendChat(socket_t clisocket);
     
 public:
-    AdminCommandParser(PlayerManager* spm, ChatManager* cm)
-	: _spm(spm), _cm{cm}
+    AdminCommandParser(PlayerManager* spm, ChatLogger* lm)
+	: _spm(spm), _lm{lm}
 	{}
 
     /**

@@ -6,6 +6,9 @@
 
 #include <cstdio>
 #include <algorithm>
+
+#include <chrono>
+
 #include "Client.hpp"
 
 #ifndef CHATMANAGER_HPP
@@ -20,10 +23,13 @@ namespace Tribalia::Server {
 	ToInvalid
     };
 
+    /* Basic structure of the chat message */
     struct ChatMessage {
+	std::chrono::seconds time; // unix timestamp of the message arrival
 	ChatDestiny destiny;
-	int destiny_id;
+	int destiny_id; // the ID of the destination, depends on the 'destiny' val
 	char* message;
+	Client* sender; // the sender, null if the server send it.
     };
     
     class ChatManager {
@@ -42,8 +48,8 @@ namespace Tribalia::Server {
 	   Returns nullptr if no message, otherwise return the message */
 	ChatMessage* CheckMessage(Client* c);
 	
-};
-
+    };
+    
 }
 
 #endif /* CHATMANAGER_HPP */
