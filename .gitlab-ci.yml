@@ -10,6 +10,7 @@ build:
   before_script: 
     - apt update && apt -y install make cmake gcc g++
     - bash ./scripts/install --devel
+    - git submodule init && git submodule update
   script: 
     - cmake .
     - make -j4
