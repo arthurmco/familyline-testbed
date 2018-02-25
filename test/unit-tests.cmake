@@ -49,6 +49,17 @@ add_subdirectory(${CMAKE_BINARY_DIR}/test/googletest
   include_directories("${CMAKE_SOURCE_DIR}/common")
   
   option(DO_CHECK_ASAN "Enable address sanitizer" OFF)
+  option(SET_COVERAGE "Enable coverage testing" OFF)
+
+  if (SET_COVERAGE)
+    target_compile_options(tribalia-tests PUBLIC "-fprofile-arcs")
+    target_compile_options(tribalia-tests PUBLIC "-ftest-coverage")
+    target_compile_options(tribalia-tests PUBLIC "-O0")
+    target_link_libraries(tribalia-tests "-fprofile-arcs")
+    target_link_libraries(tribalia-tests "-ftest-coverage")
+    target_link_libraries(tribalia-tests "gcov")
+    target_link_libraries(tribalia-tests "--coverage")
+  endif()
 
   if (DO_CHECK_ASAN)
     target_compile_options(tribalia-tests PUBLIC "-fsanitize=address")

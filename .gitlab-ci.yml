@@ -8,12 +8,14 @@ image: gcc
 build:
   stage: build
   before_script: 
-    - apt update && apt -y install make cmake gcc g++
+    - apt update && apt -y install make cmake gcc g++ gcovr
     - bash ./scripts/install --devel
     - git submodule init && git submodule update
   script: 
-    - cmake .
-    - make -j4
+    - cmake -DUSE_RELATIVE_PATH=on -DCMAKE_CXX_COMPILER=g++ -DDO_TESTS=on -DCMAKE_BUILD_TYPE=Debug -DSET_COVERAGE=true
+    - make -j4 tribalia-tests
+    - cmake -DUSE_RELATIVE_PATH=on -DCMAKE_CXX_COMPILER=g++ -DDO_TESTS=on -DCMAKE_BUILD_TYPE=Debug -DSET_COVERAGE=false
+    - make -j4 tribalia
   artifacts:
     paths:
     - ./tribalia # The executable
@@ -40,3 +42,4 @@ unit-test:
     - bash ./scripts/install
   script:
     - ./tribalia-tests
+    - gcovr -r .
