@@ -26,7 +26,7 @@ public:
     /**
      * Get messages that have been received only after a certain timestamp
      */
-    std::list<ChatMessage*>&& GetMessagesNewerThan(unsigned long long epoch) const;
+    std::list<ChatMessage*> GetMessagesNewerThan(unsigned long long epoch) const;
     
 };
 

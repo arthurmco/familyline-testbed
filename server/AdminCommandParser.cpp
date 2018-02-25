@@ -89,6 +89,57 @@ bool AdminCommandParser::ProcessPlayerListRequest(socket_t clisocket)
 }
 
 /**
+ * Process the 'chat list' request
+ * @param timestamp The starting timestamp to download the messages, only
+ *                  messages newer than the timestamp will be sent to the
+ *                  interface
+ */
+bool AdminCommandParser::ProcessChatListRequest(socket_t clisocket)
+{
+    char msg[128];
+    
+    auto s = recv(clisocket, msg, 32, MSG_PEEK);
+    if (s <= 0) {
+	// Error or disconnect
+	return false;
+    }
+
+    msg[s] = '\0';
+    if (strncmp(msg, "[TRIBALIA REQUEST CHAT", 22))
+	return false; // Not the same message
+
+    s = recv(clisocket, msg, 127, 0);
+
+    unsigned long long since_epoch = 0;
+    char mtr[16], r[16], ch[16];
+    sscanf(msg, "%s %s %s %lld", mtr, r, ch, &since_epoch);
+
+    Log::GetLog()->Write("admin-command-parser", "Requested messages since epoch %lld", since_epoch);
+    
+    auto messages = this->_lm->GetMessagesNewerThan(since_epoch);
+    Log::GetLog()->Write("admin-command-parser", "%zu messages returned", messages.size());
+    
+    if (messages.size() == 0) {
+	const char* mchat = "[TRIBALIA CHAT NULL]";
+	send(clisocket, mchat, strlen(mchat), 0);
+	return true;
+    }
+
+    for (auto m : messages) {
+	char mchat[strlen(m->message) + 128];
+	sprintf(mchat, "[TRIBALIA CHAT %ld %d %s %s %zu %s ]",
+		m->time.count(),
+		(m->sender) ? m->sender->GetID() : 0,
+		(m->sender) ? m->sender->GetName() : "admin",
+		"all", strlen(m->message), m->message);
+	
+	send(clisocket, mchat, strlen(mchat), 0);
+    }
+
+    return true;
+}
+
+/**
  * Send a chat message from the interface
  * Receive it from the admin socket and send it to the clients
  */
@@ -216,6 +267,9 @@ void AdminCommandParser::ProcessRequests()
 	    auto siface = fnGetInterfaceID(i);
 
 	    if (this->ProcessPlayerListRequest(fds[i].fd))
+		continue;
+
+	    if (this->ProcessChatListRequest(fds[i].fd))
 		continue;
 
 	    if (this->SendChat(fds[i].fd))

@@ -51,7 +51,7 @@ private:
      *                  messages newer than the timestamp will be sent to the
      *                  interface
      */
-    bool ProcessChatListRequest(socket_t clisocket, unsigned long timestamp);
+    bool ProcessChatListRequest(socket_t clisocket);
 
     /**
      * Send a chat message from the interface

@@ -45,8 +45,9 @@ ChatMessage* ChatManager::CheckMessage(Client* c)
     char msg[385];
     c->GetQueue()->PeekTCP(msg, 384);
 
-    char sname[32], schat[8], sdestiny[24], smessage[255];
-    size_t mlen;
+    char sname[32], schat[8], sdestiny[24];
+
+    size_t mlen = 0;
     int senderid;
 
     int msgpos = 0;
@@ -59,6 +60,7 @@ ChatMessage* ChatManager::CheckMessage(Client* c)
     }
     c->GetQueue()->ReceiveTCP(msg, 384);
 
+    char* smessage = new char[mlen+1];
     strncpy(smessage, &msg[msgpos+1], std::min(mlen, size_t(255)));
     int did = 0;
 

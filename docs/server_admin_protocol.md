@@ -70,9 +70,12 @@ The **players** requisition gets the player connection status and basic informat
   * last-message-date is the starting unix timestamp of the message who 
   you want to see, the most older message you want to get.
  
- - S: `[TRIBALIA CHAT <<sender_id>> <<sender_name>> 
- all|team|player:<<player_id>> <<message-string-in-bytes>> 
- <<message-string>> ]`
+ - S: `[TRIBALIA CHAT <<message-timestamp>> <<sender_id>>
+  <<sender_name>>  all|team|player:<<player_id>>
+  <<message-string-in-bytes>>  <<message-string>> ]`
+  
+  * message-timestamp: The UNIX 64-bit timestamp of the message
+    receival in the server
   
   * sender_id: The client ID of the sender.
   
