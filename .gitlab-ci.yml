@@ -16,6 +16,8 @@ build:
     - make -j4 tribalia-tests
     - cmake -DUSE_RELATIVE_PATH=on -DCMAKE_CXX_COMPILER=g++ -DDO_TESTS=on -DCMAKE_BUILD_TYPE=Debug -DSET_COVERAGE=false
     - make -j4 tribalia
+    - ./tribalia-tests
+    - gcovr -r .
   artifacts:
     paths:
     - ./tribalia # The executable
