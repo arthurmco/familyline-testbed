@@ -1,5 +1,10 @@
 # Tribalia
 
+<img src="icons/tribalia-logo.png" height="128px" width="128px" />
+
+[![pipeline status](https://gitlab.com/arthurmco/Tribalia/badges/master/pipeline.svg)](https://gitlab.com/arthurmco/Tribalia/commits/master)
+[![coverage report](https://gitlab.com/arthurmco/Tribalia/badges/master/coverage.svg)](https://gitlab.com/arthurmco/Tribalia/commits/master)
+
 Tribalia is a real-time strategy game focused on Ancient Era, from since the
 neolythic period (~ 10.000 AD) to the death of Christ (~ 30 BD).
 
@@ -7,7 +12,6 @@ In it, you will guide a family, that goes from the end of neolythic until its ki
 inclusion to the Roman Empire. You will trade with other people, war, mount strategies
 and (if the money begin to appear) do a *lot* of quests.
 
-<img src="icons/tribalia-logo.png" height="256px" width="256px" />
 
 ## Supported OSs
 
