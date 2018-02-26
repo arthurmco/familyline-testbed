@@ -91,3 +91,80 @@ TEST_F(ObjectTest, CheckObjectAttack){
     delete atk;
 }
 
+#include "logic/CombatManager.hpp"
+
+TEST_F(ObjectTest, CheckObjectAttackManagerSuspended){
+    TestObject* atk = new TestObject(-1, 20, 1, 20);
+    TestObject* def = new TestObject(-1, 20, 1, 10);
+
+    _om->RegisterObject(atk);
+    _om->RegisterObject(def);
+
+    CombatManager::GetInstance()->AddAttack(atk, def);
+	
+    EXPECT_FALSE(atk->CheckAttackRange(def)) << "Attack is in range when it shouldn't";
+
+    /* Check radius and attack range */
+    EXPECT_EQ(2.0, atk->GetRadius()) << "Wrong radius";
+    
+    atk->SetZ(13); //TestObject has radius = 2
+    EXPECT_TRUE(atk->CheckAttackRange(def)) << "Attack isn't in range when it should";
+    bool death_called = false;
+
+    CombatManager::GetInstance()->SetOnDeath([&](AttackableObject* o) { death_called = true; });
+
+    for (int i = 0; i < 200; i++) { //due to randomness. TODO: better value
+	CombatManager::GetInstance()->DoAttacks(0.1);
+
+	if (i == 10) {
+	    CombatManager::GetInstance()->SuspendAttack(atk);
+	}
+    }
+
+    ASSERT_FALSE(death_called); // Test the callback
+
+    ASSERT_LT(0.0, def->GetHP()) << "How is he dead?";
+    EXPECT_NE(AST_DEAD, def->GetStatus()) << "He's dead. He shouldn't be";
+
+    _om->UnregisterObject(def);
+    _om->UnregisterObject(atk);
+
+    delete def;
+    delete atk;
+}
+
+TEST_F(ObjectTest, CheckObjectAttackEvenOnManager){
+    TestObject* atk = new TestObject(-1, 20, 1, 20);
+    TestObject* def = new TestObject(-1, 20, 1, 10);
+
+    _om->RegisterObject(atk);
+    _om->RegisterObject(def);
+
+    CombatManager::GetInstance()->AddAttack(atk, def);
+	
+    EXPECT_FALSE(atk->CheckAttackRange(def)) << "Attack is in range when it shouldn't";
+
+    /* Check radius and attack range */
+    EXPECT_EQ(2.0, atk->GetRadius()) << "Wrong radius";
+    
+    atk->SetZ(13); //TestObject has radius = 2
+    EXPECT_TRUE(atk->CheckAttackRange(def)) << "Attack isn't in range when it should";
+    bool death_called = false;
+
+    CombatManager::GetInstance()->SetOnDeath([&](AttackableObject* o) { death_called = true; });
+
+    for (int i = 0; i < 200; i++) { //due to randomness. TODO: better value
+	CombatManager::GetInstance()->DoAttacks(0.1);
+    }
+
+    ASSERT_TRUE(death_called); // Test the callback
+
+    ASSERT_FLOAT_EQ(0.0, def->GetHP()) << "How is he still alive?";
+    EXPECT_EQ(AST_DEAD, def->GetStatus()) << "0 life, but not dead";
+
+    _om->UnregisterObject(def);
+    _om->UnregisterObject(atk);
+
+    delete def;
+    delete atk;
+}
