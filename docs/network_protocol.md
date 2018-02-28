@@ -213,11 +213,13 @@ C: `[TRIBALIA CHAT <<sender_id>> all|team|player:<<player_id>>
 After the client notifies it is ready to the server (as told on [here](#game-start),
 you should connect to the UDP port. The port has the same number of the TCP one.
 
-The first step is sending a START-CONNECTION message, then waiting until a SYNC message is sent.
+The first step is sending a [START-CONNECTION](#START\_CONNECTION)
+message, then do the conversation until the [START_SYNC](#START\_SYNC) message is sent, for
+everyone. Then you can start the game loop
 
 ## How does it work?
 
-In Tribalia, UDP messages sends commands from the client to the
+	In Tribalia, UDP messages sends commands from the client to the
 server, or vice-versa, in binary format. 
 
 The client waits for a certain amount of time (called a turn, 16ms by default) 
@@ -245,20 +247,20 @@ error.
 Every UDP message has the following header. Remember that all numbers
 are in little endian format here.
 
-offset | bytes | name     | desc
-------:|------:|----------|:-----
-	0h |     4 | magic    | The magic number of the message <br/> (0x4d4254 == TBM)
-	4h |     4 | turn     | The turn number.
-	8h |     2 | cmdcount | The number of commands in this message.
-	Ah |     2 | length   | The size of the message, in bytes
-    Ch |     4 | checksum | The message checksum
-   10h |   ... | commands | The commands
+| offset | bytes | name     | desc                                                   |
+|-------:|------:|----------|:-------------------------------------------------------|
+|     0h |     4 | magic    | The magic number of the message <br/>(0x4d4254 == TBM) |
+|     4h |     4 | turn     | The turn number.                                       |
+|     8h |     2 | cmdcount | The number of commands in this message.                |
+|     Ah |     2 | length   | The size of the message, in bytes                      |
+|     Ch |     4 | checksum | The message checksum                                   |
+|    10h |   ... | commands | The commands                                           |
    
 The magic number is for identificating the package as a Tribalia
 Message package (hence the TBM).
 
 The turn number is the turn number for that package. If the gameplay
-has not started (prior to the `SYNC` command), then the turn
+has not started (prior to the `START_SYNC` command), then the turn
 is 0. Turn numbers start at 1.
 
 The checksum is a 4-byte unsigned number (`u32` or `uint32_t`)
@@ -273,12 +275,134 @@ After the message header, we get to the command header.
 
 Remember that the offset is relative to **the header**
 
-offset | bytes | name     | desc
-------:|------:|----------|:-----
-    0h |     2 | cmdtype  | The command type
-	2h |     2 | cmdlen   | The command size (in bytes)
-	4h |   ... | cmddata  | The command data
+| offset | bytes | name    | desc                        |
+|-------:|------:|---------|:----------------------------|
+|     0h |     2 | cmdtype | The command type            |
+|     2h |     2 | cmdlen  | The command size (in bytes) |
+|     4h |   ... | cmddata | The command data            |
 
 We have a lot of commands:
+
+### START\_CONNECTION ###
+
+**Type:** Server->Client  
+**Type ID:** 0x1  
+Indicates the connection start. 
+
+| offset | bytes | name     | desc                     |
+|-------:|------:|----------|:-------------------------|
+|     0h |     4 | cmdhdr   | The command header       |
+|     4h |     2 | turntime | The time per turn, in ms\* |
+
+\* The default turn period is 16ms (~60Hz)
+
+After the client receives the message above, it needs to send the START\_CONECTION\_ACK
+
+### START\_CONNECTION\_ACK ###
+
+**Type:** Client->Server  
+**Type ID:** 0x2  
+Indicates that the client received the START\_CONNECTION message above
+and is ready to start switching messages via UDP port
+
+| offset | bytes | name     | desc                                          |
+|-------:|------:|----------|:----------------------------------------------|
+|     0h |     4 | cmdhdr   | The command header                            |
+|     4h |     2 | turntime | The time per turn, in ms¹                     |
+|     6h |     2 | rsvd0    | Reserved                                      |
+|     8h |     4 | clientid | The client ID for this client                 |
+|     Ch |     4 | maxping  | Maximum ICMP ping time from server to client² |
+|        |       |          |                                               |
+
+¹ As received from the server  
+² This field isn't required (you can put '0' in it), but might help
+the server.
+
+Talking about ping, the following commands will determine the 'in game'
+ping (the value you see in the 'Ping' menu)
+
+### PING
+
+**Type:** Client->Server  
+**Type ID:** 0x3  
+Indicates a ping message that the client sends to the server to
+determine its ping
+
+| offset | bytes | name          | desc                                        |
+|-------:|------:|---------------|:--------------------------------------------|
+|     0h |     4 | cmdhdr        | Command header                              |
+|     4h |     4 | clientid      | Client id of the sender                     |
+|     8h |     8 | sendtimestamp | UNIX timestamp of when you sent the message |
+
+Using the `sendtimestamp` value, the server can determine the ping
+value (just to `time() - sendtimestamp`)
+
+### SEND_OBJECT
+**Type:** Server->Client  
+**Type ID:** 0x4  
+Sends an object, from server to client.
+
+| offset | bytes | name       | desc                                     |
+|-------:|------:|------------|:-----------------------------------------|
+|     0h |     4 | cmdhdr     | Command header                           |
+|     4h |     4 | otypeid    | Type ID of the new object                |
+|     8h |     4 | oobjid     | Object ID of the new object              |
+|     Ch |     4 | onamestart | First 4 bytes of the object string name¹ |
+|    10h |     4 | xPos       | A `float32` of the object X position     |
+|    14h |     4 | yPos       | A `float32` of the object Y position     |
+|    18h |     4 | zPos       | A `float32` of the object Z position     |
+
+¹ Useful for conference (TODO: Send the _whole_ name?)
+
+> TODO: Send all parameters.
+
+### START_SYNC
+**Type:** Client<->Server  
+**Type ID:** 0x5  
+The client send when it finished processing the initial objects from
+the server. After the server receives this message from the last
+client, it sends a `START_SYNC` message with the `clientid` zeroed,
+and the game starts running.
+
+| offset | bytes | name     | desc                    |
+|-------:|------:|----------|:------------------------|
+|     0h |     4 | cmdhdr   | Command header          |
+|     4h |     4 | clientid | Client id of the sender |
+|        |       |          |                         |
+
+
+### PING_REQUEST ###
+
+**Type:** Client->Server    
+**Type ID:** 0x83    
+Requires the last ping values.
+
+| offset | bytes | name          | desc                                        |
+|-------:|------:|---------------|:--------------------------------------------|
+|     0h |     4 | cmdhdr        | Command header                              |
+|     4h |     4 | clientid      | Client id of the sender                     |
+
+### PING_RESPONSE ###
+
+**Type:** Server->Client  
+**Type ID:** 0x84  
+Receives the last ping values
+
+| offset | bytes | name          | desc                              |
+|-------:|------:|---------------|:----------------------------------|
+|     0h |     4 | cmdhdr        | Command header                    |
+|     4h |     4 | clientid      | Client id of the receiver         |
+|     8h |     4 | pingcount     | Count of the clients              |
+|     Ch |     4 | pingclient[0] | Client ID of the first ping value |
+|    10h |     4 | pingvalue[0]  | The ping of the first client      |
+|    14h |     4 | pingclient[1] | Client ID of the first ping value |
+|    18h |     4 | pingvalue[1]  | The ping of the first client      |
+|    ... |    .. | ...           | ...                               |
+|    -8h |     4 | pingclient[n] | Client ID of the 'n' ping value   |
+|    -4h |     4 | pingvalue[n]  | Ping of the first client          |
+
+
+
+
 
 
