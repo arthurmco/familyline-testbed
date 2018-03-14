@@ -3,8 +3,11 @@
 using namespace Tribalia::Net;
 using namespace Tribalia::Logic;
 
-NetPlayerManager::NetPlayerManager(const char* player_name, int player_id)
-    : PlayerManager()
+NetPlayerManager::NetPlayerManager(const char* player_name, int player_id,
+				   Server::ClientMessageQueue* server_mq)
+    :  PlayerManager(),
+       npf(new NetPlayerFilter(server_mq))
+     
 {
     this->humandata = {.p = new HumanPlayer(player_name, 0),
 		       .ID = player_id,
@@ -43,9 +46,15 @@ HumanPlayer* NetPlayerManager::GetHumanPlayer()
  */
 bool NetPlayerManager::ProcessInputs()
 {
+    
     return PlayerManager::ProcessInputs();
 }
 
+/* Gets the player message type name(args) const;ilter */
+NetPlayerFilter* NetPlayerManager::GetMessageFilter()
+{
+    return this->npf;
+}
 
 /* Play for all users.
    Return false only if the human player returns false.
@@ -56,3 +65,7 @@ bool NetPlayerManager::PlayAll(GameContext* gct)
     return PlayerManager::PlayAll(gct);
 }
 
+NetPlayerManager::~NetPlayerManager()
+{
+    delete npf;
+}

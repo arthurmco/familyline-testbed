@@ -57,7 +57,8 @@ namespace Tribalia::Logic {
 	   This usually mean that the human wants to stop the game.
 	*/
 	bool PlayAll(GameContext* gct);
-	
+
+	virtual ~PlayerManager() {}
     };
     
 }

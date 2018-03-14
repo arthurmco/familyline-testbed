@@ -202,7 +202,7 @@ NetPlayerManager* Server::GetPlayerManager(const char* playername)
 			     playerid, playername);
 
     free((void*) msg);
-    return new NetPlayerManager(playername, playerid);
+    return new NetPlayerManager(playername, playerid, this->cmq);
 }
 
 /* Destroy the connection */

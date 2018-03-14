@@ -210,3 +210,8 @@ socket_t ClientMessageQueue::GetSocket() const
 {
     return this->sockfd;
 }
+
+struct in_addr ClientMessageQueue::GetAddress() const
+{
+    return this->addr;
+}

@@ -173,6 +173,25 @@ int main(int argc, char const *argv[])
 	return EXIT_SUCCESS;
     }
 
+    
+    Log::GetLog()->Write("", "Tribalia " VERSION);
+    Log::GetLog()->Write("", "built on " __DATE__ " by " USERNAME);
+#if defined(COMMIT)
+    Log::GetLog()->Write("", "git commit is " COMMIT);
+#endif
+
+    char timestr[32];
+
+    auto tm = time(NULL);
+    auto tminfo = localtime(&tm);
+    strftime(timestr, 32, "%F %T", tminfo);
+    Log::GetLog()->Write("", "Actual date is %s", timestr);
+   
+    Log::GetLog()->InfoWrite("", "Default model directory is " MODELS_DIR);
+    Log::GetLog()->InfoWrite("", "Default texture directory is " TEXTURES_DIR);
+    Log::GetLog()->InfoWrite("", "Default material directory is " MATERIALS_DIR);
+
+    
     auto connectpos = get_arg_index("--connect", argc, argv);
     if (connectpos > 0) {
 	if (connectpos >= argc-1) {
@@ -206,23 +225,6 @@ int main(int argc, char const *argv[])
 	}
 
     }
-
-    Log::GetLog()->Write("", "Tribalia " VERSION);
-    Log::GetLog()->Write("", "built on " __DATE__ " by " USERNAME);
-#if defined(COMMIT)
-    Log::GetLog()->Write("", "git commit is " COMMIT);
-#endif
-
-    char timestr[32];
-
-    auto tm = time(NULL);
-    auto tminfo = localtime(&tm);
-    strftime(timestr, 32, "%F %T", tminfo);
-    Log::GetLog()->Write("", "Actual date is %s", timestr);
-   
-    Log::GetLog()->InfoWrite("", "Default model directory is " MODELS_DIR);
-    Log::GetLog()->InfoWrite("", "Default texture directory is " TEXTURES_DIR);
-    Log::GetLog()->InfoWrite("", "Default material directory is " MATERIALS_DIR);
 
     Framebuffer* fbGUI = nullptr;
     Framebuffer* fb3D = nullptr;
@@ -391,7 +393,8 @@ int main(int argc, char const *argv[])
 	guir->InitInput();
 	auto g = Game(w, fb3D, fbGUI, guir, pm, hp);
 	auto ret = g.RunLoop();
-	delete pm;
+	if (pm)
+	    delete pm;
 	delete hp;
 	delete w;
 	exit(ret);
