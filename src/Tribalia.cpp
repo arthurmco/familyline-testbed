@@ -215,6 +215,7 @@ int main(int argc, char const *argv[])
 	    // a npm that is good. (j/k :P)
 	    auto npm = nserver->GetPlayerManager(pname);
 	    hp = npm->GetHumanPlayer();
+	    npm->GetMessageFilter()->SetServer(nserver);
 	    pm = (PlayerManager*)npm;
 	    
 	} catch (Net::ServerException& e) {

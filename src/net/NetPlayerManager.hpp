@@ -46,7 +46,7 @@ namespace Tribalia::Net {
 	/* Process inputs of all players 
 	 * Returns true if any input was received
 	 */
-	bool ProcessInputs();
+	virtual bool ProcessInputs();
 
 	/* Play for all users.
 	   Return false only if the human player returns false.

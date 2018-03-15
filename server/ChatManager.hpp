@@ -37,12 +37,12 @@ namespace Tribalia::Server {
 	
     public:
 	/* Send a chat message to the specified client */
-	void Send(Client* c, const char* message);
+	void Send(Client* c, Client* sender, const char* message);
 	
 	/* Send a message made for a clients connected.
 	   This receives only a client because these functions only operate in
 	   a client a time */
-	void SendAll(Client* c, const char* message);
+	void SendAll(Client* c, Client* sender, const char* message);
 	
 	/* Checks if a message arrived from client 'c'.
 	   Returns nullptr if no message, otherwise return the message */

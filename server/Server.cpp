@@ -72,7 +72,7 @@ int main(int argc, char const* argv[])
 
 	    pm->Process();
 
-	    for (auto& cli : clis) {
+	    for (auto cli : clis) {
 		if (cli->IsClosed()) {
 		    continue;
 		}	
@@ -102,6 +102,10 @@ int main(int argc, char const* argv[])
 		    memset(m, 0, 2048);
 		    while (auto cm = chm->CheckMessage(cli)) {
 			cl.Push(cm);
+			for (auto ccli : clis) {
+			    if (ccli->GetID() != cli->GetID())
+				chm->SendAll(ccli, cli, cm->message);
+			}
 		    }
 
 		}

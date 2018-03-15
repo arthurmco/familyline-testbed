@@ -10,7 +10,7 @@
 #include <vector>
 #include <stdexcept>
 #include "socket.h"
-#include "Log.hpp"
+#include <Log.hpp>
 #include "NetPlayerManager.hpp"
 
 #include <ClientMessageQueue.hpp>
@@ -58,9 +58,8 @@ namespace Tribalia::Net {
 	*/
 	void InitCommunications();
 
-	/* Process all client messages and put them in the corresponding
-	   one */
-	void ProcessClients();
+	/* Receive messages and put them in the client message queue */
+	void GetMessages();
 
 	/* Retrieve a network player manager */
 	NetPlayerManager* GetPlayerManager(const char* playername);
@@ -72,3 +71,4 @@ namespace Tribalia::Net {
 }
 
 #endif /* NETSERVER_HPP */
+

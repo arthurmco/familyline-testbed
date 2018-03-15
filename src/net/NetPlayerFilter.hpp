@@ -12,18 +12,20 @@
 #include <map>
 
 namespace Tribalia::Net {
+    
     class NetPlayerFilter
     {
     private:
 	Server::ClientMessageQueue* _server_mq = nullptr;
 
 	std::map<unsigned /*clientid*/, Server::ClientMessageQueue*> _cli_queues;
+	void* _nserver = nullptr;
     
     public:
 	NetPlayerFilter(Server::ClientMessageQueue* server_mq)
 	    : _server_mq(server_mq)
 	    {}
-	    
+
 	virtual ~NetPlayerFilter();
 
 	/**
@@ -32,6 +34,12 @@ namespace Tribalia::Net {
 	 */
 	Server::ClientMessageQueue* GetPlayerQueue(unsigned client_id);
 
+	/**
+	 * Sets the netserver, the owner of 'server_mq'
+	 */
+	void SetServer(void* nse);
+	
+	
 	/**
 	 * Filter the messages
 	 */

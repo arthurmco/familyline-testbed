@@ -168,12 +168,46 @@ void Server::InitCommunications()
     write(_serversock, "[TRIBALIA CAPS ]", 18);
 }
 
-/* Process all client messages and put them in the corresponding
-   one */
-void Server::ProcessClients()
-{
+/* Receive messages and put them in the client message queue */
+void Server::GetMessages()
+{    
+    char ret[512];
     
+    bool do_receive = true;
     
+    while (do_receive == true){
+	// Do not block recv
+	auto slen = recv(_serversock, ret, 512, MSG_DONTWAIT);
+	if (slen == 0) {
+	    Log::GetLog()->Warning("net-server",
+				   "Server was shut down unexpectedly while filling the message queue");
+	    throw ServerException("Server was shut down unexpectedly while filling the messahe queue");
+	}
+
+	if (slen < 0) {
+	    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+		do_receive = false;
+		break;
+	    }
+	    
+	    char* s_strerror = strerror(errno);
+	    char err[256 + strlen(s_strerror)];
+	    sprintf(err, "Error while filliing message queue: %s", s_strerror);
+	    Log::GetLog()->Fatal("net-server", err);
+	    throw ServerException(err);
+	}
+
+	// Validate the message end
+	if (ret[slen-1] == '\n' &&
+	    ret[slen-2] == ']') {
+
+	    cmq->InjectMessageTCP(ret, slen);
+
+	}
+	
+	
+    }
+
 }
 
 /* Retrieve a player manager */

@@ -94,12 +94,10 @@ void TCPConnectionInitiator::Process()
 	    [[fallthrough]];
 	case CapabilityQueried:
 	    if (!tinit.cli->GetQueue()->ReceiveTCP(recvbuffer, 128)) {
-		printf(" :< %s\n", recvbuffer);
 		continue;
 	    }
 
 	    {
-		printf(" :> %s\n", recvbuffer);
 		char sname[32], scap[32];
 		// We don't support any capability now, so we're going to ignore.
 		int ret = sscanf(recvbuffer, "[%s %s",

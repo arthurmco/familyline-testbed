@@ -4,13 +4,13 @@ using namespace Tribalia::Server;
 using namespace std::chrono;
 
 /* Send a chat message to the specified client */
-void  ChatManager::Send(Client* c, const char* message)
+void  ChatManager::Send(Client* c, Client* sender, const char* message)
 {
     size_t mlen = strlen(message);
     char* msg = new char[mlen + 64];
 
-    sprintf(msg, "[TRIBALIA CHAT 0 player:%u %zu %s]\n",
-	    c->GetID(), mlen, message);
+    sprintf(msg, "[TRIBALIA CHAT %d player:%u %zu %s]\n",
+	    sender->GetID(), c->GetID(), mlen, message);
     c->GetQueue()->SendTCP(msg);
     
     delete[] msg;
@@ -19,13 +19,13 @@ void  ChatManager::Send(Client* c, const char* message)
 /* Send a message made for a clients connected.
    This receives only a client because these functions only operate in
    a client a time */
-void ChatManager::SendAll(Client* c, const char* message)
+void ChatManager::SendAll(Client* c, Client* sender, const char* message)
 {
     size_t mlen = strlen(message);
     char* msg = new char[mlen + 64];
 
-    sprintf(msg, "[TRIBALIA CHAT 0 all %zu %s]\n",
-	    mlen, message);
+    sprintf(msg, "[TRIBALIA CHAT %d all %zu %s]\n",
+	    sender->GetID(), mlen, message);
     c->GetQueue()->SendTCP(msg);
     
     delete[] msg;
