@@ -160,7 +160,7 @@ while not quit:
         except EOFError:
             quit = True
 
-        chatlen = len(chatmsg)
+        chatlen = len(bytes(chatmsg, 'utf-8'))
 
         if chatmsg.strip() == "/ready":
             sock_str_send(sock, "[TRIBALIA GAME READY]\n")
