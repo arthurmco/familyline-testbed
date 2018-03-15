@@ -61,6 +61,7 @@ int main(int argc, char const* argv[])
 	    acp.ProcessRequests();
 	    
 	    Client* c = sm->RetrieveClient(false);
+
 	    if (c) {
 		clis.push_back(c);
 		tci.AddClient(c);
@@ -74,8 +75,8 @@ int main(int argc, char const* argv[])
 	    for (auto& cli : clis) {
 		if (cli->IsClosed()) {
 		    continue;
-		}
-
+		}	
+		
 		if (cli->GetStatus() >= CS_CONNECTED) {
 		    char m[2049];
 
@@ -100,8 +101,6 @@ int main(int argc, char const* argv[])
 		    // Check for chats
 		    memset(m, 0, 2048);
 		    while (auto cm = chm->CheckMessage(cli)) {
-			printf("[%s] \033[3m%s\033[0m\n", cli->GetName(),
-			       cm->message);
 			cl.Push(cm);
 		    }
 

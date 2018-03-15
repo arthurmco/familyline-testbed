@@ -33,18 +33,21 @@ void TCPConnectionInitiator::Process()
 	return;
     
     char recvbuffer[256];
+    memset((char*)recvbuffer, 0, 255);
     
-    for (auto& tinit : _initClients) {
-
+    for (auto&& tinit : _initClients) {
+	
 	if (tinit.cli->GetStatus() >= CS_CONNECTED)
 	    continue;
 
-	tinit.iters++;	   
+	tinit.iters++;
 	switch (tinit.step) {
 	case InitConnect:
 	    if (!tinit.cli->GetQueue()->ReceiveTCP(recvbuffer, 128)) {
+		printf(" :( \n");
 		continue;
 	    }
+	    printf(":) ");
 	    
 	    if (!strncmp(recvbuffer, "[TRIBALIA CONNECT OK]\n", 21)) {
 		tinit.step = TCPInitStep::VersionQuery;
@@ -54,7 +57,7 @@ void TCPConnectionInitiator::Process()
 	case VersionQuery:
 	    tinit.cli->GetQueue()->SendTCP("[TRIBALIA VERSION?]\n");
 	    tinit.step = TCPInitStep::VersionQueried;
-	    break;
+	    [[fallthrough]];
 	case VersionQueried:
 	    if (!tinit.cli->GetQueue()->ReceiveTCP(recvbuffer, 128)) {
 		continue;
@@ -88,13 +91,15 @@ void TCPConnectionInitiator::Process()
 	    break;
 	case CapabilityQuery:
 	    tinit.step = TCPInitStep::CapabilityQueried;
-	    break;
+	    [[fallthrough]];
 	case CapabilityQueried:
 	    if (!tinit.cli->GetQueue()->ReceiveTCP(recvbuffer, 128)) {
+		printf(" :< %s\n", recvbuffer);
 		continue;
 	    }
 
 	    {
+		printf(" :> %s\n", recvbuffer);
 		char sname[32], scap[32];
 		// We don't support any capability now, so we're going to ignore.
 		int ret = sscanf(recvbuffer, "[%s %s",
@@ -121,7 +126,7 @@ void TCPConnectionInitiator::Process()
 	    // Ask for the client name?
 	    tinit.cli->GetQueue()->SendTCP("[TRIBALIA PLAYERINFO?]\n");
 	    tinit.step = TCPInitStep::PlayerInfoRetrieved;
-	    break;
+	    [[fallthrough]];
 	case PlayerInfoRetrieved:
 	    if (!tinit.cli->GetQueue()->ReceiveTCP(recvbuffer, 192)) {
 		continue;
@@ -162,11 +167,13 @@ void TCPConnectionInitiator::Process()
     }
 
     /* Remove closed or completed clients */
-    std::remove_if(_initClients.begin(), _initClients.end(),
-		   [](TCPInit c) {
-		       return c.cli->IsClosed() ||
-			   c.step == TCPInitStep::ClientReady ||
-			   c.cli->GetStatus() >= CS_CONNECTED; });
+    _initClients.erase(std::remove_if(
+			   _initClients.begin(), _initClients.end(),
+			   [](TCPInit c) {
+			       return c.cli->IsClosed() ||
+				   c.step == TCPInitStep::ClientReady ||
+				   c.cli->GetStatus() >= CS_CONNECTED; }),
+		       _initClients.end());
 }
 
 /* Check if we have clients to be initialized */

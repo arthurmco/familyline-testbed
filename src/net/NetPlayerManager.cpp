@@ -46,7 +46,7 @@ HumanPlayer* NetPlayerManager::GetHumanPlayer()
  */
 bool NetPlayerManager::ProcessInputs()
 {
-    
+    this->npf->Filter();
     return PlayerManager::ProcessInputs();
 }
 

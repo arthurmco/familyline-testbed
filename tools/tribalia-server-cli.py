@@ -124,7 +124,7 @@ class Server:
         self.socket.send("[TRIBALIA REQUEST CHAT {} ]\n".format(
             self.lastChatDownload).encode('utf-8'))
         self.lastChatDownload = int(time.time())
-        time.sleep(0.1) 
+        time.sleep(0.01) 
         resp = self.socket.recv(32768).decode()
         ret = []
         print(resp)

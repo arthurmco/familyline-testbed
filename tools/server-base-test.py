@@ -41,6 +41,7 @@ port=12000
 import socket
 import sys
 import os
+import time # time.sleep
 
 if len(sys.argv) < 2:
     print('%s: tests Tribalia server app\n' % sys.argv[0])
@@ -63,6 +64,7 @@ sock.connect(addr)
 
 ## Connect init
 sock_str_send(sock, '[TRIBALIA CONNECT]\n')
+time.sleep(1)
 serverresp = sock.recv(64).decode()
 if not serverresp.startswith('[TRIBALIA CONNECT'):
     print('\nUnexpected answer (1) %s', serverresp)
@@ -74,7 +76,7 @@ lastbrkt = serverresp.index(']')
 serverip = serverresp[17:lastbrkt].strip()
 print('Server IP: %s' % serverip)
 sock_str_send(sock, '[TRIBALIA CONNECT OK]\n')
-
+time.sleep(1)
 ## Version
 serverresp = sock.recv(64).decode()
 if not serverresp == "[TRIBALIA VERSION?]\n":

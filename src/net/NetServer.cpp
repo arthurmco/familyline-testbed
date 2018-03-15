@@ -111,6 +111,7 @@ void Server::InitCommunications()
 	throw ServerException("Unexpected message: step2");
     }
     write(_serversock, "[TRIBALIA VERSION 0.1]\n", 24);
+    usleep(100);
     write(_serversock, "[TRIBALIA CAPS?]\n", 19);
 
     bool recv_caps = false;

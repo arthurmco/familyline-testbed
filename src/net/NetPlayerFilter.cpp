@@ -47,6 +47,7 @@ void NetPlayerFilter::Filter()
 					 "Added client with ID %d", clientid);
 		}
 
+		this->_server_mq->ReceiveTCP(m, 512);
 		pq->InjectMessageTCP(m, mlen+1);
 	    }
 	}

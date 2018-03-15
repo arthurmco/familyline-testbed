@@ -55,6 +55,9 @@ namespace Tribalia::Server {
     public:
 	Client(int sockfd, struct in_addr addr);
 
+	Client (const Client&) = delete;
+	Client& operator= (const Client&) = delete;
+	
 	void Close();
 	bool IsClosed() const;
 
