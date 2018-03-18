@@ -1,25 +1,25 @@
-#include "ClientMessageQueue.hpp"
+#include "NetMessageQueue.hpp"
 
 using namespace Tribalia::Server;
 
-ClientMessageQueue::ClientMessageQueue(socket_t sock, struct in_addr addr)
+NetMessageQueue::NetMessageQueue(socket_t sock, struct in_addr addr)
     : sockfd(sock), addr(addr)
 {}
 
 
-void ClientMessageQueue::SendTCP(const char* m)
+void NetMessageQueue::SendTCP(const char* m)
 {
     write(this->sockfd, m, strlen(m));
 }
 
 /* Set/get if the server manager will check the headers of this message
    (i.e, if it starts with '[TRIBALIA') */
-bool ClientMessageQueue::CheckHeaders() const
+bool NetMessageQueue::CheckHeaders() const
 {
     return check_headers;
 }
 
-void ClientMessageQueue::SetCheckHeaders(bool val)
+void NetMessageQueue::SetCheckHeaders(bool val)
 {
     check_headers = val;
 }
@@ -28,7 +28,7 @@ void ClientMessageQueue::SetCheckHeaders(bool val)
 /* 'Peek' a message, i.e read but not remove it from the queue 
    Return message length or 0 if no message received
 */
-size_t ClientMessageQueue::PeekTCP(char* m, size_t len) {
+size_t NetMessageQueue::PeekTCP(char* m, size_t len) {
     if (buffer_ptr_send <= buffer_ptr_recv) {
 	buffer_ptr_send = buffer_ptr_recv = 0;
 	return 0;
@@ -83,7 +83,7 @@ size_t ClientMessageQueue::PeekTCP(char* m, size_t len) {
 
 /* Returns 0 if no message received,
  * or strlen(message) if message received, and outputs the message on m */
-size_t ClientMessageQueue::ReceiveTCP(char* m, size_t len)
+size_t NetMessageQueue::ReceiveTCP(char* m, size_t len)
 {
     auto peek = this->PeekTCP(m, len);
     
@@ -100,7 +100,7 @@ size_t ClientMessageQueue::ReceiveTCP(char* m, size_t len)
 
 /* Injects message in the client
    Only meant to be called from the server */
-void ClientMessageQueue::InjectMessageTCP(const char* m, size_t len)
+void NetMessageQueue::InjectMessageTCP(const char* m, size_t len)
 {
     if (buffer_ptr_send <= buffer_ptr_recv) {
 	buffer_ptr_send = buffer_ptr_recv = 0;
@@ -119,7 +119,7 @@ void ClientMessageQueue::InjectMessageTCP(const char* m, size_t len)
 
 
 
-ClientMessageQueue::~ClientMessageQueue()
+NetMessageQueue::~NetMessageQueue()
 {
     shutdown(this->sockfd, 2);
     close(this->sockfd);
@@ -132,12 +132,12 @@ ClientMessageQueue::~ClientMessageQueue()
 
 }
 
-void ClientMessageQueue::SendUDP(UDPMessage m)
+void NetMessageQueue::SendUDP(UDPMessage m)
 {
     udp_buffer_send.push(m);
 }
 
-bool ClientMessageQueue::PeekUDP(UDPMessage& m)
+bool NetMessageQueue::PeekUDP(UDPMessage& m)
 {
     if (udp_buffer_recv.size() == 0 || !udp_init)
 	return false;
@@ -147,7 +147,7 @@ bool ClientMessageQueue::PeekUDP(UDPMessage& m)
     return true;
 }
 
-bool ClientMessageQueue::ReceiveUDP(UDPMessage& m)
+bool NetMessageQueue::ReceiveUDP(UDPMessage& m)
 {
     auto r = this->PeekUDP(m);
     if (!r)
@@ -159,12 +159,12 @@ bool ClientMessageQueue::ReceiveUDP(UDPMessage& m)
 
 /* Injects UDP messages
    Needs to have the checksum checked */
-void ClientMessageQueue::InjectMessageUDP(UDPMessage m)
+void NetMessageQueue::InjectMessageUDP(UDPMessage m)
 {
     udp_buffer_recv.push(m);
 }
 
-bool ClientMessageQueue::RetrieveSendUDP(UDPMessage& m)
+bool NetMessageQueue::RetrieveSendUDP(UDPMessage& m)
 {
     if (udp_buffer_send.size() == 0 || !udp_init)
 	return false;
@@ -176,7 +176,7 @@ bool ClientMessageQueue::RetrieveSendUDP(UDPMessage& m)
 }
 
 /* Initialize the "UDP part" of the client */
-bool ClientMessageQueue::InitUDP(struct in_addr udp_addr, int port)
+bool NetMessageQueue::InitUDP(struct in_addr udp_addr, int port)
 {
     memset((void*)&this->udp_addr, 0, sizeof(this->udp_addr));
     this->udp_addr.sin_family = AF_INET;
@@ -196,22 +196,22 @@ bool ClientMessageQueue::InitUDP(struct in_addr udp_addr, int port)
     return true;
 }
 
-bool ClientMessageQueue::CheckUDP() const
+bool NetMessageQueue::CheckUDP() const
 {
     return this->udp_init;
 }
 
-socket_t ClientMessageQueue::GetUDPSocket() const
+socket_t NetMessageQueue::GetUDPSocket() const
 {
     return this->udp_socket;
 }
 
-socket_t ClientMessageQueue::GetSocket() const
+socket_t NetMessageQueue::GetSocket() const
 {
     return this->sockfd;
 }
 
-struct in_addr ClientMessageQueue::GetAddress() const
+struct in_addr NetMessageQueue::GetAddress() const
 {
     return this->addr;
 }

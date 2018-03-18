@@ -8,7 +8,7 @@
 
 #include <queue>
 #include <algorithm> // for std::min
-#include <ClientMessageQueue.hpp>
+#include <NetMessageQueue.hpp>
 
 #include <fcntl.h>
 #include <string>
@@ -45,7 +45,7 @@ namespace Tribalia::Server {
     class Client {
     protected:
 	bool closed = true;
-	ClientMessageQueue* _cmq;
+	NetMessageQueue* _cmq;
 
 	bool _is_ready = false;
 
@@ -88,7 +88,7 @@ namespace Tribalia::Server {
 	bool IsReady() const { return _is_ready; }
 
 	/* Gets the message queue of this client */
-	ClientMessageQueue* GetQueue();
+	NetMessageQueue* GetQueue();
 
 	~Client();
     };

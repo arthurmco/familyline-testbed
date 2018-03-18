@@ -4,7 +4,7 @@ using namespace Tribalia::Server;
 
 Client::Client(int sockfd, struct in_addr addr)
 {
-    _cmq = new ClientMessageQueue(sockfd, addr);
+    _cmq = new NetMessageQueue(sockfd, addr);
 
     /* Set client name as its IP */
     char ipstr[INET_ADDRSTRLEN];
@@ -43,7 +43,7 @@ unsigned int Client::GetID() const {
 }
 
 /* Gets the message queue of this client */
-ClientMessageQueue* Client::GetQueue()
+NetMessageQueue* Client::GetQueue()
 {
     return _cmq;
 }

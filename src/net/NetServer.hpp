@@ -13,7 +13,7 @@
 #include <Log.hpp>
 #include "NetPlayerManager.hpp"
 
-#include <ClientMessageQueue.hpp>
+#include <NetMessageQueue.hpp>
 
 #include <cstring>
 #include <cstdlib>
@@ -46,12 +46,12 @@ namespace Tribalia::Net {
 	struct sockaddr_in _serveraddr;
 
 	/* Receive a message */
-	Tribalia::Server::ClientMessageQueue* cmq = nullptr;
+	Tribalia::Server::NetMessageQueue* cmq = nullptr;
 	
     public:
 	const char* Receive(size_t maxlen = 1024);
 
-	Tribalia::Server::ClientMessageQueue* GetQueue() { return this->cmq; }
+	Tribalia::Server::NetMessageQueue* GetQueue() { return this->cmq; }
 	
 	Server(const char* ipaddr, int port = 12000);
 

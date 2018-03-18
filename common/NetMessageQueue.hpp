@@ -36,7 +36,7 @@ namespace Tribalia::Server {
 /*
   Manages the messages and connection of the client
 */
-    class ClientMessageQueue {
+    class NetMessageQueue {
     private:
 	socket_t sockfd;
 	struct in_addr addr;
@@ -53,7 +53,7 @@ namespace Tribalia::Server {
 	bool check_headers = true;
 	
     public:
-	ClientMessageQueue(socket_t, struct in_addr);
+	NetMessageQueue(socket_t, struct in_addr);
 
 	/* Set/get if the server manager will check the headers of this message
 	   (i.e, if it starts with '[TRIBALIA') */
@@ -90,7 +90,7 @@ namespace Tribalia::Server {
 	socket_t GetUDPSocket() const;
 	struct in_addr GetAddress() const;
 
-        ~ClientMessageQueue();
+        ~NetMessageQueue();
 
     };
 

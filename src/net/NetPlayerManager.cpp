@@ -12,7 +12,7 @@ using namespace Tribalia::Logic;
  * @param server_mq The server message queue, to send/receive messages
  */
 NetPlayerManager::NetPlayerManager(const char* player_name, int player_id,
-				   Tribalia::Server::ClientMessageQueue* server_mq)
+				   Tribalia::Server::NetMessageQueue* server_mq)
     :  PlayerManager(),
        smq(server_mq)
      

@@ -26,7 +26,7 @@ Server::Server(const char* ipaddr, int port)
 	throw ServerException(err);
     }
 
-    cmq = new Tribalia::Server::ClientMessageQueue(_serversock,
+    cmq = new Tribalia::Server::NetMessageQueue(_serversock,
 						   _serveraddr.sin_addr);
 }
 

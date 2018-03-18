@@ -23,7 +23,7 @@ namespace Tribalia::Net {
     private:
 	Logic::PlayerData humandata;
 	NetPlayerFilter* npf = nullptr;
-	Tribalia::Server::ClientMessageQueue* smq;
+	Tribalia::Server::NetMessageQueue* smq;
 	
     public:
 
@@ -35,7 +35,7 @@ namespace Tribalia::Net {
 	 * @param server_mq The server message queue, to send/receive messages
 	 */
 	explicit NetPlayerManager(const char* player_name, int player_id,
-				  Tribalia::Server::ClientMessageQueue* server_mq);
+				  Tribalia::Server::NetMessageQueue* server_mq);
 	   
 	/* Add a player, receive its ID */
 	int AddPlayer(Logic::Player* p, int flags = 0);

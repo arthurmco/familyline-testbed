@@ -8,7 +8,7 @@
 #ifndef NETPLAYERFILTER_HPP
 #define NETPLAYERFILTER_HPP
 
-#include <ClientMessageQueue.hpp>
+#include <NetMessageQueue.hpp>
 #include <map>
 
 namespace Tribalia::Net {
@@ -16,13 +16,13 @@ namespace Tribalia::Net {
     class NetPlayerFilter
     {
     private:
-	Server::ClientMessageQueue* _server_mq = nullptr;
+	Server::NetMessageQueue* _server_mq = nullptr;
 
-	std::map<unsigned /*clientid*/, Server::ClientMessageQueue*> _cli_queues;
+	std::map<unsigned /*clientid*/, Server::NetMessageQueue*> _cli_queues;
 	void* _nserver = nullptr;
     
     public:
-	NetPlayerFilter(Server::ClientMessageQueue* server_mq)
+	NetPlayerFilter(Server::NetMessageQueue* server_mq)
 	    : _server_mq(server_mq)
 	    {}
 
@@ -32,7 +32,7 @@ namespace Tribalia::Net {
 	 * Get the corresponding message queue from the client 
 	 * 'client_id'
 	 */
-	Server::ClientMessageQueue* GetPlayerQueue(unsigned client_id);
+	Server::NetMessageQueue* GetPlayerQueue(unsigned client_id);
 
 	/**
 	 * Sets the netserver, the owner of 'server_mq'

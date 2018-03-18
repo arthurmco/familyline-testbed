@@ -10,7 +10,7 @@ using namespace Tribalia::Server;
  * Get the corresponding message queue from the client 
  * 'client_id'
  */
-ClientMessageQueue* NetPlayerFilter::GetPlayerQueue(unsigned client_id)
+NetMessageQueue* NetPlayerFilter::GetPlayerQueue(unsigned client_id)
 {
     try {
 	return this->_cli_queues.at(client_id);
@@ -46,7 +46,7 @@ void NetPlayerFilter::Filter()
 		auto pq = this->GetPlayerQueue(clientid);
 		
 		if (!pq) {
-		    pq = new ClientMessageQueue(this->_server_mq->GetSocket(),
+		    pq = new NetMessageQueue(this->_server_mq->GetSocket(),
 						this->_server_mq->GetAddress());
 		    this->_cli_queues[clientid] = pq;
 		    Log::GetLog()->Write("net-player-filter",
