@@ -27,6 +27,9 @@ volatile bool continue_main = true;
 
 int main(int argc, char const* argv[]) 
 {
+    (void)argc;
+    (void)argv;
+    
     Log::GetLog()->SetFile(stderr);
     
     struct sigaction oact;

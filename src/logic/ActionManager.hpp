@@ -2,9 +2,9 @@
   Action manager
 
   Manages actions.
-  Mostly treat with action interaction
+  Mostly treat with interface action interaction
 
-  Copyright 2017 Arthur M
+  Copyright (C) 2017,2018 Arthur M
 */
 
 #include "Action.hpp"
@@ -31,7 +31,7 @@ namespace Tribalia::Logic {
 	
 	virtual void RunAction(const char* name) = 0;
 
-	void SetVisibleActions(std::vector<char*> actions);
+	void SetVisibleActions(std::vector<const char*> actions);
 	void GetVisibleActions(std::vector<Action*>& actions) const;
 
 	virtual ~ActionManager() {}

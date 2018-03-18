@@ -72,8 +72,8 @@ private:
     Graphics::Renderer* rndr = nullptr;
     Graphics::SceneManager* scenemng = nullptr;
 
-    Graphics::Framebuffer *fbGUI, *fb3D;
-    Graphics::GUIRenderer* gr;
+    Graphics::Framebuffer *fbGUI = nullptr, *fb3D = nullptr;
+    Graphics::GUIRenderer* gr = nullptr;
     
     bool player = false;
 

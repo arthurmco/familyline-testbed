@@ -40,13 +40,13 @@ void ActionManager::RemoveAction(const char* name)
     
 }
         
-void ActionManager::SetVisibleActions(std::vector<char*> actions)
+void ActionManager::SetVisibleActions(std::vector<const char*> actions)
 {
     _visible_actions.empty();
     _visible_actions.resize(actions.size());
     
     std::transform(actions.begin(), actions.end(), _visible_actions.begin(),
-		   [&](char* stract) -> Action* {
+		   [&](const char* stract) -> Action* {
 		       try {
 			   return &_actions.at(stract);			   
 		       } catch (std::out_of_range& e) {

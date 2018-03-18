@@ -57,6 +57,9 @@ TEST_F(ActionManagerTest, TestIfActionRemoves) {
     bool did_ran = false;
     tac.handler = [&](Action* ac, ActionData acdata)
 	{
+	    (void)ac;
+	    (void)acdata;
+	    
 	    did_ran = true;
 	    return true;
 	};
@@ -74,7 +77,13 @@ TEST_F(ActionManagerTest, TestIfActionRemoves) {
 }
 
 TEST_F(ActionManagerTest, TestIfActionVisible) {
-    auto bare_handler = [](Action* ac, ActionData acdata) { return true; };
+    auto bare_handler = [](Action* ac, ActionData acdata)
+	{
+	    (void)ac;
+	    (void)acdata;
+	    
+	    return true;
+	};
     
     Action tacnv1("test-action-1", "test-asset-1");
     tacnv1.handler = bare_handler;
@@ -93,7 +102,7 @@ TEST_F(ActionManagerTest, TestIfActionVisible) {
     am->AddAction(tacnv2);
     am->AddAction(tac2);
 
-    am->SetVisibleActions(std::vector<char*>({"test-action-visible-1", "test-action-visible-2"}));
+    am->SetVisibleActions(std::vector<const char*>({"test-action-visible-1", "test-action-visible-2"}));
 
     std::vector<Action*> vact;
     am->GetVisibleActions(vact);

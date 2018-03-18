@@ -15,9 +15,9 @@ public:
 	: Player(name, 0)
 	{}
 
-    virtual bool Play(GameContext*) {this->_xp++; }
-    virtual bool ProcessInput() {}
-    virtual bool HasUpdatedObject() {}
+    virtual bool Play(GameContext*) {this->_xp++; return true; }
+    virtual bool ProcessInput() { return true;}
+    virtual bool HasUpdatedObject() { return true; }
 
 };
 

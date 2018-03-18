@@ -71,7 +71,7 @@ namespace Tribalia::Server {
 	size_t ReceiveTCP(char* m, size_t len);
 	/* Injects message in the client
 	   Only meant to be called from the server */
-	void InjectMessageTCP(char* m, size_t len);
+	void InjectMessageTCP(const char* m, size_t len);
 
 	/* Initialize the "UDP part" of the client */
 	bool InitUDP(struct in_addr udp_addr, int port);

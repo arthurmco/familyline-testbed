@@ -89,8 +89,6 @@ void Camera::CalculateVectors()
 void Camera::AddRotation(glm::vec3 axis, float angle)
 {
     (void) axis;
-
-    glm::vec3 l = this->_lookAt;
     
     _rotation += angle;
     const float max_angle = glm::radians(360.0f);
@@ -106,7 +104,7 @@ void Camera::AddRotation(glm::vec3 axis, float angle)
     float vx = sin(_rotation)*dist;
     float vz = cos(_rotation)*dist;
 
-    _lookAt = glm::vec3(_pos.x-vx, _lookAtOriginal.y, _pos.z-vz);
+    this->_lookAt = glm::vec3(_pos.x-vx, _lookAtOriginal.y, _pos.z-vz);
 
     _lookdelta = dist;
     this->_isViewChanged = true;

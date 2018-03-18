@@ -128,9 +128,13 @@ Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
 	    /* This is a workaround for supporting textured but material-less files. */
 	    switch (ac->asset_type) {
 	    case ASSET_MATERIAL:
-		if (ac->asset.material) child_mat = ac->asset.material; break;
+		if (ac->asset.material)
+		    child_mat = ac->asset.material;
+		break;
 	    case ASSET_TEXTURE:
-		if (ac->asset.texture)  child_t = ac->asset.texture;    break;	    
+		if (ac->asset.texture)
+		    child_t = ac->asset.texture;
+		break;
 	    }
 	
 	

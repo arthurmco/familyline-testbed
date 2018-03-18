@@ -147,7 +147,7 @@ void Panel::OnLostFocus() {
 /* Remove the panel */
 void Panel::RemovePanel(IPanel* p)
 {
-
+    
 }
 
 void Panel::ClearChildren() {

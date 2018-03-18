@@ -12,6 +12,7 @@ public:
     GameActionListenerImpl() : GameActionListener("listener-base") {}
 
     virtual void OnListen(GameAction& a) {
+	(void)a;
 	printf("received from listener\n");
     }
 };

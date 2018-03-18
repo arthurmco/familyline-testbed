@@ -100,7 +100,7 @@ size_t ClientMessageQueue::ReceiveTCP(char* m, size_t len)
 
 /* Injects message in the client
    Only meant to be called from the server */
-void ClientMessageQueue::InjectMessageTCP(char* m, size_t len)
+void ClientMessageQueue::InjectMessageTCP(const char* m, size_t len)
 {
     if (buffer_ptr_send <= buffer_ptr_recv) {
 	buffer_ptr_send = buffer_ptr_recv = 0;

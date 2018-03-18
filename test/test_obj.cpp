@@ -111,7 +111,11 @@ TEST_F(ObjectTest, CheckObjectAttackManagerSuspended){
     EXPECT_TRUE(atk->CheckAttackRange(def)) << "Attack isn't in range when it should";
     bool death_called = false;
 
-    CombatManager::GetInstance()->SetOnDeath([&](AttackableObject* o) { death_called = true; });
+    CombatManager::GetInstance()->SetOnDeath([&](AttackableObject* o) {
+	    (void)o;
+	    
+	    death_called = true;
+	});
 
     for (int i = 0; i < 200; i++) { //due to randomness. TODO: better value
 	CombatManager::GetInstance()->DoAttacks(0.1);

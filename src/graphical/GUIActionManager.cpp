@@ -60,7 +60,7 @@ void GUIActionManager::SetActionVisible(Action* a)
     is_dirty = true;
 }
 
-void GUIActionManager::SetVisibleActions(std::vector<char*> actions)
+void GUIActionManager::SetVisibleActions(std::vector<const char*> actions)
 {
     ClearVisibleActions();
     ActionManager::SetVisibleActions(actions);

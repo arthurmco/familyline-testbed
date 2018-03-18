@@ -13,7 +13,7 @@ void ClientTest::TearDown()
 
 TEST_F(ClientTest, TestMessagePushSimple) {
 
-    struct in_addr a;
+    struct in_addr a = {};
     Client* c = new Client(0, a);
 
     c->GetQueue()->InjectMessageTCP("Hello ", 6);
@@ -38,7 +38,7 @@ TEST_F(ClientTest, TestMessagePushSimple) {
 
 TEST_F(ClientTest, TestMessagePushComplex) {
 
-    struct in_addr a;
+    struct in_addr a = {};
     Client* c = new Client(0, a);
 
     c->GetQueue()->InjectMessageTCP("Hello ", 6);

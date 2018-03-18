@@ -1,8 +1,10 @@
 /*
   GUI action manager
 
-  Helps binding actions to graphical interfaces
+  Helps binding interface actions to something graphical, something the user
+  can click and see.
 
+  Copyright (C) 2017, 2018 Arthur M
 */
 
 #include "../logic/ActionManager.hpp"
@@ -45,7 +47,7 @@ namespace Tribalia::Graphics {
 	/* Add/replace action, and make it visible */
 	void AddVisibleAction(Logic::Action);
 
-	void SetVisibleActions(std::vector<char*> actions);
+	void SetVisibleActions(std::vector<const char*> actions);
 	void RemoveAction(const char* name);
 
 
