@@ -44,10 +44,8 @@ void TCPConnectionInitiator::Process()
 	switch (tinit.step) {
 	case InitConnect:
 	    if (!tinit.cli->GetQueue()->ReceiveTCP(recvbuffer, 128)) {
-		printf(" :( \n");
 		continue;
 	    }
-	    printf(":) ");
 	    
 	    if (!strncmp(recvbuffer, "[TRIBALIA CONNECT OK]\n", 21)) {
 		tinit.step = TCPInitStep::VersionQuery;

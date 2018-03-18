@@ -51,13 +51,15 @@ int main(int argc, char const* argv[])
     std::list<Client*> clis;
 
     TCPConnectionInitiator tci(pm);
-	
+
     try {
 	sm = new ServerManager{};
 	chm = new ChatManager{};
 	AdminCommandParser acp(pm, &cl);
 	if (!acp.Listen())
 	    throw ServerManagerError("Error while listen()ing to the admin command parser");
+
+	bool game_starting = false;
 	
 	while (continue_main) {
 	    sm->RetrieveTCPMessages();
@@ -85,21 +87,58 @@ int main(int argc, char const* argv[])
 
 		    // Check if client is ready or not anymore
 		    if (cli->GetQueue()->PeekTCP(m, 40)) {
-			if (!strncmp(m, "[TRIBALIA GAME READY]", 21)) {
+			if (!strncmp(m, "[TRIBALIA GAME READY]", 21) &&
+			    !cli->IsReady()) {
+
+			    cli->GetQueue()->ReceiveTCP(m, 40);
 			    printf("\033[1mClient %s is ready\033[0m\n",
 				   cli->GetName());
 			    cli->SetReady();
 			    continue;
 			}
 
-			if (!strncmp(m, "[TRIBALIA GAME NOTREADY]", 21)) {
+			if ((!strncmp(m, "[TRIBALIA GAME READY]", 21) &&
+			     cli->IsReady()) ||
+			    (!strncmp(m, "[TRIBALIA GAME NOTREADY]", 21) &&
+			     !cli->IsReady())) {
+
+			    cli->GetQueue()->ReceiveTCP(m, 40);
+			    Log::GetLog()->Warning("server", "%s set ready status more than one time -- possible flooding?", cli->GetName());
+			    continue;
+			}
+
+			if (!strncmp(m, "[TRIBALIA GAME NOTREADY]", 21) && cli->IsReady()) {
+			    cli->GetQueue()->ReceiveTCP(m, 40);
 			    printf("\033[1mClient %s isn't ready anymore\033[0m\n",
 				   cli->GetName());
 			    cli->UnsetReady();
 			    continue;
 			}
-
 		    }
+
+		    // Check if all clients are ready
+		    bool cli_ready = true;
+		    for (const auto ccli : clis) {
+			if (!ccli->IsReady()) {
+			    cli_ready = false;
+			    break;
+			}
+		    }
+
+		    // Everybody is ready, send the message
+		    if (clis.size() > 0 && cli_ready && !game_starting) {
+			game_starting = true;
+			for (auto ccli : clis) {
+			    ccli->GetQueue()->SendTCP("[TRIBALIA GAME STARTING]\n");
+			    // TODO: wait before start the game
+			    // TODO: docs: send a message when some user unready.
+			}
+		    } else {
+			if (!cli_ready)
+			    game_starting = false;
+		    }
+
+		    
 		    
 		    // Check for chats
 		    memset(m, 0, 2048);

@@ -48,9 +48,11 @@ namespace Tribalia::Net {
 	/* Receive a message */
 	Tribalia::Server::ClientMessageQueue* cmq = nullptr;
 	
+    public:
 	const char* Receive(size_t maxlen = 1024);
 
-    public:
+	Tribalia::Server::ClientMessageQueue* GetQueue() { return this->cmq; }
+	
 	Server(const char* ipaddr, int port = 12000);
 
 	/* Do the initial communications with the server
@@ -64,6 +66,20 @@ namespace Tribalia::Net {
 	/* Retrieve a network player manager */
 	NetPlayerManager* GetPlayerManager(const char* playername);
 
+	/**
+	 * Notify to the server that you're ready, or not
+	 * If 'v' is true, the ready status is set, else it's cleared
+	 */
+	void SetReady(bool v);
+
+	/**
+	 * Check if the server will start the game.
+	 *
+	 * If this returns true, that means all clients are ready, if returns
+	 * false, some client isn't, and it won't start the game
+	 */
+	bool IsGameStarting() const;
+		
 	/* Destroy the connection */
 	~Server();
     };

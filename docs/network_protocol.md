@@ -180,7 +180,8 @@ receiving the message, the client should alert the user that the game is
 starting. The not ready message is still respected and will abort the countdown.
 
 After the wait, the server should send the `[TRIBALIA GAME STARTED]` message to
-all clients. Clients, then, should connect in the UDP port. 
+all clients. Clients, then, should connect in the UDP port. The NOT
+READY message will be ignored
 
 ## Client chatting
 

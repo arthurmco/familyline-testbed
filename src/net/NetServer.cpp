@@ -24,7 +24,7 @@ Server::Server(const char* ipaddr, int port)
 	char err[256 + strlen(s_strerror)];
 	sprintf(err, "error while attempting connection: %s", s_strerror);
 	throw ServerException(err);
-    }    
+    }
 
     cmq = new Tribalia::Server::ClientMessageQueue(_serversock,
 						   _serveraddr.sin_addr);
@@ -58,20 +58,20 @@ const char* Server::Receive(size_t maxlen)
 	}
 
 	if (slen <= 128) {
-	    
+
 	    // Validate the message end
 	    if (ret[(i*128)+slen-1] == '\n' &&
 		ret[(i*128)+slen-2] == ']') {
-		
+
 	        cmq->InjectMessageTCP(ret, slen);
 
 		char* strrecv = new char[slen+1];
 		cmq->ReceiveTCP(strrecv, slen);
-		
+
 		return strrecv;
 	    }
 	}
-	
+
     }
 
     Log::GetLog()->Warning("net-server",
@@ -99,7 +99,7 @@ void Server::InitCommunications()
     if (scanv < 4) {
 	throw ServerException("server: Unexpected IP address");
     }
-    
+
     printf("Server IP is %d.%d.%d.%d\n",
 	   ipelems[0], ipelems[1], ipelems[2], ipelems[3]);
     write(_serversock, "[TRIBALIA CONNECT OK]\n", 23);
@@ -118,7 +118,7 @@ void Server::InitCommunications()
 
     while (!recv_caps) {
 	free((void*)recv1);
-	
+
 	recv1 = this->Receive();
 	if (!strncmp(recv1, "[TRIBALIA CAPS ", 15)) {
 	    recv_caps = true;
@@ -141,12 +141,12 @@ void Server::InitCommunications()
 	    cap = strtok(nullptr, " ");
 	    continue;
 	}
-	
+
 	if (cap[0] == '(')
 	    requiredcapslist.push_back(cap);
 	else
 	    capslist.push_back(cap);
-	
+
 	cap = strtok(nullptr, " ");
     }
 
@@ -155,7 +155,7 @@ void Server::InitCommunications()
 	    Log::GetLog()->Fatal("net-server",
 				 "Unsupported capability: %s", cap);
 	}
-	
+
 	throw ServerException("Server required for some capabilities we "
 	    "don't support");
     }
@@ -170,11 +170,11 @@ void Server::InitCommunications()
 
 /* Receive messages and put them in the client message queue */
 void Server::GetMessages()
-{    
+{
     char ret[512];
-    
+
     bool do_receive = true;
-    
+
     while (do_receive == true){
 	// Do not block recv
 	auto slen = recv(_serversock, ret, 512, MSG_DONTWAIT);
@@ -189,7 +189,7 @@ void Server::GetMessages()
 		do_receive = false;
 		break;
 	    }
-	    
+
 	    char* s_strerror = strerror(errno);
 	    char err[256 + strlen(s_strerror)];
 	    sprintf(err, "Error while filliing message queue: %s", s_strerror);
@@ -204,8 +204,8 @@ void Server::GetMessages()
 	    cmq->InjectMessageTCP(ret, slen);
 
 	}
-	
-	
+
+
     }
 
 }
@@ -236,8 +236,49 @@ NetPlayerManager* Server::GetPlayerManager(const char* playername)
 			     "received id %d for player %s",
 			     playerid, playername);
 
-    free((void*) msg);
+    delete[] msg;
     return new NetPlayerManager(playername, playerid, this->cmq);
+}
+
+/**
+ * Notify to the server that you're ready, or not
+ * If 'v' is true, the ready status is set, else it's cleared
+ */
+void Server::SetReady(bool v)
+{
+    // TODO: Set send() with the proper cmq->Send()
+
+    const char* smsg;
+    if (v) {
+	smsg = "[TRIBALIA GAME READY]\n";
+    } else {
+	smsg = "[TRIBALIA GAME NOTREADY]\n";
+    }
+    send(this->_serversock, smsg, strlen(smsg), 0);
+}
+
+
+/**
+ * Check if the server will start the game.
+ *
+ * If this returns true, that means all clients are ready, if returns
+ * false, some client isn't, and it won't start the game
+ */
+bool Server::IsGameStarting() const
+{
+    char omsg[32];
+    auto s = this->cmq->PeekTCP(omsg, 32);
+    if (s == 0)
+	return false; //No new messages
+
+    printf("<<%s>>", omsg);
+    if (!strncmp("[TRIBALIA GAME STARTING]\n", omsg, 24)) {
+	this->cmq->ReceiveTCP(omsg, 32);
+	return true;
+    }
+
+    return false;
+    
 }
 
 /* Destroy the connection */

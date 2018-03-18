@@ -211,13 +211,61 @@ int main(int argc, char const *argv[])
 	    char pname[128];
 	    fgets(pname, 127, stdin);
 	    pname[strlen(pname)-1] = '\0';
-
+	    
 	    // a npm that is good. (j/k :P)
 	    auto npm = nserver->GetPlayerManager(pname);
 	    hp = npm->GetHumanPlayer();
+
+	    
+	    printf("\n\tPress \033[1mENTER\033[0m to tell the server that you are \033[1mready\033[0m\n");
+
+	    char tmp[32];
+	    fgets(tmp, 31, stdin);
+	    nserver->SetReady(true);
+
+	    printf("\n");
+	    char spwheel[] = {'\\', '|', '/', '-'};
+	    int i = 0;
+
+	    while (!nserver->IsGameStarting()) {
+		nserver->GetMessages();
+		usleep(250000);
+		printf("\r\tWaiting for other clients to be ready... "
+		       "\033[37;1m%c\033[0m  ", spwheel[i%4]);
+		fflush(stdout);
+
+		// Receive chats
+		char mmsg[256];
+		auto l = nserver->GetQueue()->PeekTCP(mmsg, 256);
+		if (l > 0) {
+		    char tr[10];
+		    char ch[5];
+		    int cid;
+		    char cdest[16];
+		    int mlen = 0;
+		    char mcont[128];
+
+		    if (sscanf(mmsg, "%s %s %d %s %d %s",
+			       tr, ch, &cid, cdest, &mlen, mcont) == 6) {
+			if (!strcmp(tr, "[TRIBALIA") &&
+			    !strcmp(ch, "CHAT")) {
+			    nserver->GetQueue()->ReceiveTCP(mmsg, 256);
+			    mcont[mlen] = 0;
+
+			    printf("[ID %d] %s\n", cid, mcont);
+			    
+			}
+		    }
+		    
+		    
+		}		
+		
+		i++;
+	    }
+	    
 	    npm->GetMessageFilter()->SetServer(nserver);
 	    pm = (PlayerManager*)npm;
-	    
+
 	} catch (Net::ServerException& e) {
 	    fprintf(stderr, "Error while connecting to the server: %s\n",
 		    e.what());
