@@ -15,20 +15,27 @@
 #include "NetPlayerFilter.hpp"
 
 namespace Tribalia::Net {
+    
+    // The net server declaration
+    class Server;
 
     class NetPlayerManager : public Logic::PlayerManager {
     private:
 	Logic::PlayerData humandata;
 	NetPlayerFilter* npf = nullptr;
+	Tribalia::Server::ClientMessageQueue* smq;
 	
     public:
 
-	/* Build a network player manager.
-	   The player_name and player_id are the name and ID of the human
-	   player from this client
-	*/
+	/**
+	 * Build a network player manager.
+	 *
+	 * @param player_name The local/human player name
+	 * @param player_id The local/human player id
+	 * @param server_mq The server message queue, to send/receive messages
+	 */
 	explicit NetPlayerManager(const char* player_name, int player_id,
-				  Server::ClientMessageQueue* server_mq);
+				  Tribalia::Server::ClientMessageQueue* server_mq);
 	   
 	/* Add a player, receive its ID */
 	int AddPlayer(Logic::Player* p, int flags = 0);
@@ -36,6 +43,11 @@ namespace Tribalia::Net {
 	/* Get a player by some information (ID or name) */
 	const Logic::Player* GetbyID(int ID) const;
 	const Logic::Player* GetbyName(const char* name) const;
+
+	/**
+	 * Gets information about the remote players
+	 */
+	void GetRemotePlayers(Server* ns);
 
 	/* Get the human player that represents this client */
 	HumanPlayer* GetHumanPlayer();

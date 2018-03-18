@@ -210,7 +210,16 @@ void Server::GetMessages()
 
 }
 
-/* Retrieve a player manager */
+// /**
+//  * @brief Retrieves a player manager based on the player information
+//  *
+//  * Gets the player ID from the server. With this ID, it can know
+//  * what messages come from the server and what ones come from the
+//  * client. 
+//  * Then, with this ID, it constructs the player manager
+//  * 
+//  * @param playername The local player name
+//  */
 NetPlayerManager* Server::GetPlayerManager(const char* playername)
 {
     const char* msg = this->Receive();

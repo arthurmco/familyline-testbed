@@ -1,7 +1,7 @@
 /*
   Represents a server in the client Tribalia 
 
-  Copyright (C) 2017 Arthur M
+  Copyright (C) 2017, 2018 Arthur M
 */
 
 #ifndef NETSERVER_HPP
@@ -63,7 +63,16 @@ namespace Tribalia::Net {
 	/* Receive messages and put them in the client message queue */
 	void GetMessages();
 
-	/* Retrieve a network player manager */
+	/**
+	 * @brief Retrieves a player manager based on the player information
+	 *
+	 * Gets the player ID from the server. With this ID, it can know
+	 * what messages come from the server and what ones come from the
+	 * client. 
+	 * Then, with this ID, it constructs the player manager
+	 * 
+	 * @param playername The local player name
+	 */
 	NetPlayerManager* GetPlayerManager(const char* playername);
 
 	/**

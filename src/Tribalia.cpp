@@ -215,6 +215,7 @@ int main(int argc, char const *argv[])
 	    // a npm that is good. (j/k :P)
 	    auto npm = nserver->GetPlayerManager(pname);
 	    hp = npm->GetHumanPlayer();
+	    npm->GetRemotePlayers(nserver);
 
 	    
 	    printf("\n\tPress \033[1mENTER\033[0m to tell the server that you are \033[1mready\033[0m\n");
