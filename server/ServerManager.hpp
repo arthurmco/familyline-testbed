@@ -23,6 +23,7 @@
 #include <poll.h>
 
 #else
+#define NOMINMAX //prevents Windows from redefining std::min
 #include <Windows.h>
 
 #endif

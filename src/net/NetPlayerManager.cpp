@@ -6,9 +6,8 @@ using namespace Tribalia::Logic;
 NetPlayerManager::NetPlayerManager(const char* player_name, int player_id)
     : PlayerManager()
 {
-    this->humandata = {.p = new HumanPlayer(player_name, 0),
-		       .ID = player_id,
-		       .flags = PlayerFlags::PlayerIsHuman};
+    this->humandata = {new HumanPlayer(player_name, 0),
+		       player_id, PlayerFlags::PlayerIsHuman};
 }
 
 /* Add a player, receive its ID */

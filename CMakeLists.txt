@@ -60,11 +60,6 @@ include_directories(AFTER "${CMAKE_SOURCE_DIR}/common")
 
 if (MSVC)
 
-  # Add packages natively supported by cmake
-  find_package(GLEW REQUIRED HINTS $ENV{TRIBALIA_FIND_PKG})
-  find_package(DevIL REQUIRED HINTS $ENV{TRIBALIA_FIND_PKG})
-
-  
   # Set include directories
   SET(SDL_INCLUDE "." CACHE PATH "SDL2 include directory")
   SET(GLM_INCLUDE "." CACHE PATH "GLM include directory")
@@ -87,6 +82,7 @@ if (MSVC)
   target_link_libraries(tribalia ${IL_LIBRARIES})
   target_link_libraries(tribalia ${ILU_LIBRARIES})
   target_link_libraries(tribalia ${CAIRO_LIB})
+  target_link_libraries(tribalia wsock32 ws2_32)
 
   if (DO_TESTS)
   	target_link_libraries(tribalia-tests ${SDL_LIB})
@@ -95,6 +91,7 @@ if (MSVC)
   	target_link_libraries(tribalia-tests ${DEVIL_LIB})
   	target_link_libraries(tribalia-tests ${DEVIL_ILU_LIB})
   	target_link_libraries(tribalia-tests ${CAIRO_LIB})
+	target_link_libraries(tribalia-tests wsock32 ws2_32)
   endif(DO_TESTS)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /GR /W4 /std:c++latest")
@@ -117,7 +114,7 @@ else()
   target_link_libraries(tribalia ${ILU_LIBRARIES})
   target_link_libraries(tribalia ${CAIRO_LIBRARIES})
   target_link_libraries(tribalia ${GLM_LIBRARIES})
-
+  
   if(DO_TESTS)
   	target_link_libraries(tribalia-tests ${SDL2_LIBRARIES})
   	target_link_libraries(tribalia-tests "GL")
@@ -162,7 +159,7 @@ else()
 	set(ASSET_FILE_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/\"")
 endif(WIN32 OR USE_RELATIVE_PATH)
 
-configure_file("src/config.h.in" "src/config.h")
+configure_file("${CMAKE_SOURCE_DIR}/src/config.h.in" "${CMAKE_SOURCE_DIR}/src/config.h")
 
 # Install locations
 install(TARGETS tribalia DESTINATION bin)

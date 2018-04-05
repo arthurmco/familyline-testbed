@@ -1,7 +1,7 @@
 /*
   Represents a server in the client Tribalia 
 
-  Copyright (C) 2017 Arthur M
+  Copyright (C) 2017, 2018 Arthur M
 */
 
 #ifndef NETSERVER_HPP
@@ -18,10 +18,18 @@
 #include <cstring>
 #include <cstdlib>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
 
+#ifdef _WIN32
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+
+#define SHUT_RDWR SD_BOTH // I think Microsoft does these things on purpose...
+
+#else
+#include <sys/socket.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#endif
 
 namespace Tribalia::Net {
 
