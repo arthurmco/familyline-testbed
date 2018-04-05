@@ -20,12 +20,19 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <ClientUDPMessage.hpp>
+
 
 /* for fd access (read(), close(), write()) */
 #include <unistd.h>
+
+#else
+
+#include <io.h>
+
 #endif
 
+
+#include <ClientUDPMessage.hpp>
 #include "../src/net/socket.h"
 
 #define MAX_CLIENT_BUFFER 8192

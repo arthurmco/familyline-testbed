@@ -20,20 +20,20 @@ Mesh::Mesh(VertexData* vd)
 void Mesh::Translate(glm::vec3 pos)
 {
     _isModelChanged = true;
-    _translMatrix *= glm::translate(pos);
+    _translMatrix = glm::translate(_translMatrix, pos);
 }
 
 void Mesh::Scale(glm::vec3 scalef)
 {
     _isModelChanged = true;
-    _scaleMatrix = glm::scale(scalef);
+    _scaleMatrix = glm::scale(_scaleMatrix, scalef);
 }
 
 /* warning: rotate angle should be in radians */
 void Mesh::Rotate(glm::vec3 axis, float angle)
 {
     _isModelChanged = true;
-    _rotMatrix *= glm::rotate(angle, axis);
+    _rotMatrix = glm::rotate(_rotMatrix, angle, axis);
 }
 
 void Mesh::ApplyTransformations()

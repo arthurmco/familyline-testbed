@@ -61,3 +61,6 @@ CTest*.cmake
 # Code::Blocks
 *.cbp
 
+/.vs/slnx.sqlite
+/.vs/VSWorkspaceState.json
+/.vs

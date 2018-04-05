@@ -1,7 +1,7 @@
 /***
     Representation of a mesh
 
-    Copyright (C) 2016 Arthur M.
+    Copyright (C) 2016, 2018 Arthur M.
 
 ***/
 #define GLM_FORCE_RADIANS
@@ -9,9 +9,9 @@
 #include <algorithm> //min(), max()
 
 #include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
 
 #include "../logic/IMesh.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "VertexData.hpp"
 #include "SceneObject.hpp"
