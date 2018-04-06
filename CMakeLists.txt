@@ -141,6 +141,14 @@ else()
 
 endif(MSVC)
 
+if (WIN32)
+
+  # Copy the DLLs to the release directory, so the software can be run and packaged.
+  file(GLOB WIN32_DEPS "${CMAKE_SOURCE_DIR}/distribute/win32/*.dll")
+  file(COPY ${WIN32_DEPS} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
+endif (WIN32)
+
+
 option(USE_RELATIVE_PATH "Set if you want the path to the game resources to be local" OFF)
 
 if (WIN32 OR USE_RELATIVE_PATH)
@@ -160,6 +168,8 @@ else()
 endif(WIN32 OR USE_RELATIVE_PATH)
 
 configure_file("${CMAKE_SOURCE_DIR}/src/config.h.in" "${CMAKE_SOURCE_DIR}/src/config.h")
+
+
 
 # Install locations
 install(TARGETS tribalia DESTINATION bin)

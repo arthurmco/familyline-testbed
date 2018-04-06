@@ -6,10 +6,10 @@ tribalia-tests
 *.swp
 *.pch
 *.dir-locals.el
-*.dll
 *.exe
-distribute/
-!setup.nsi
+
+*.dll
+!distribute/win32/*.dll
 
 compile*.json
 
