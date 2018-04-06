@@ -289,7 +289,7 @@ void GUIRenderer::Redraw(cairo_t* ctxt)
 	
     }
     glBindVertexArray(0);
-    glDisableVertexAttribArray(0);
+    //glDisableVertexAttribArray(0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }

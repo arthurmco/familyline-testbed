@@ -79,6 +79,7 @@ static size_t GetDeviceVRAM() {
 			&uvram);
 
 		return (size_t)uvram;
+	}
 #endif
 
 	else {
