@@ -13,6 +13,15 @@
 
 #endif
 
+#ifdef _WIN32
+
+#define _WINSOCKAPI_
+#define _WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#define usleep(x) Sleep(x/1000);
+
+#endif
+
 #include "EnviroDefs.h"
 #include "config.h"
 

@@ -1,9 +1,9 @@
 /***
-    Debugging lineplotter 
+	Debugging lineplotter
 
-    Draws all of those fun lines you see
+	Draws all of those fun lines you see
 
-    Copyright (C) 2017 Arthur M
+	Copyright (C) 2017, 2018 Arthur M
 ***/
 
 #ifndef DEBUGPLOT_HPP
@@ -15,45 +15,45 @@
 
 namespace Tribalia::Logic {
 
-    typedef int PathHandle;
-    
-    /* Abstract interface for line plotting */
-    class DebugPlotInterface {
-    public:
+	typedef int PathHandle;
 
-	/* Adds a vector of points to form a path.
-	   Return a path handle */
-	virtual PathHandle AddPath(std::vector<glm::vec3>& path,
-				   glm::vec3 color) = 0;
+	/* Abstract interface for line plotting */
+	class DebugPlotInterface {
+	public:
 
-	/* Removes a path using its path handle */
-	virtual void RemovePath(PathHandle pathhandle) = 0;
+		/* Adds a vector of points to form a path.
+		   Return a path handle */
+		virtual PathHandle AddPath(std::vector<glm::vec3>& path,
+			glm::vec3 color) = 0;
 
-	virtual ~DebugPlotInterface() {} 
-    };
+		/* Removes a path using its path handle */
+		virtual void RemovePath(PathHandle pathhandle) = 0;
 
-    /* Null interface for line plotting */
-    class NullPlotInterface : public DebugPlotInterface {
-    public:
+		virtual ~DebugPlotInterface() {}
+	};
 
-	/* Adds a vector of points to form a path.
-	   Return a path handle */
-	virtual PathHandle AddPath(std::vector<glm::vec3>& path,
-				   glm::vec3 color);
+	/* Null interface for line plotting */
+	class NullPlotInterface : public DebugPlotInterface {
+	public:
 
-	/* Removes a path using its path handle */
-	virtual void RemovePath(PathHandle pathhandle);
+		/* Adds a vector of points to form a path.
+		   Return a path handle */
+		virtual PathHandle AddPath(std::vector<glm::vec3>& path,
+			glm::vec3 color);
 
-	virtual ~NullPlotInterface() {} 
-    };
-    
-    class DebugPlotter {
-    public:
-	static std::unique_ptr<DebugPlotInterface> interface;
+		/* Removes a path using its path handle */
+		virtual void RemovePath(PathHandle pathhandle);
 
-	static void Init();
-    };
-    
+		virtual ~NullPlotInterface() {}
+	};
+
+	class DebugPlotter {
+	public:
+		static std::unique_ptr<DebugPlotInterface> pinterface;
+		
+		static void Init();
+	};
+
 };
 
 

@@ -2,6 +2,15 @@
 
 using namespace Tribalia::Net;
 
+
+#ifdef _WIN32
+
+#define _WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#define usleep(x) Sleep(x/1000)
+
+#endif
+
 /* Build the server socket */
 Server::Server(const char* ipaddr, int port)
 {
@@ -213,6 +222,15 @@ void Server::GetMessages()
 
 	bool do_receive = true;
 
+#ifdef _WIN32
+	/*	Since MSG_DONTWAIT isn`t supported on Windows, we need to set the socket
+		to non blocking anyway 
+	*/
+	u_long iMode = 1;
+	ioctlsocket(_serversock, FIONBIO, &iMode);
+	#define MSG_DONTWAIT 0
+#endif
+
 	while (do_receive == true) {
 		// Do not block recv
 		auto slen = recv(_serversock, ret, 512, MSG_DONTWAIT);
@@ -229,10 +247,12 @@ void Server::GetMessages()
 			}
 
 			char* s_strerror = strerror(errno);
-			char err[256 + strlen(s_strerror)];
+			char* err = new char[256 + strlen(s_strerror)];
 			sprintf(err, "Error while filliing message queue: %s", s_strerror);
 			Log::GetLog()->Fatal("net-server", err);
+
 			throw ServerException(err);
+			delete[] err;
 		}
 
 		// Validate the message end

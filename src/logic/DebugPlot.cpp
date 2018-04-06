@@ -18,10 +18,10 @@ void NullPlotInterface::RemovePath(PathHandle pathhandle)
     (void)pathhandle;
 }
 
-std::unique_ptr<DebugPlotInterface> DebugPlotter::interface;
+std::unique_ptr<DebugPlotInterface> DebugPlotter::pinterface;
 
 void DebugPlotter::Init()
 {
-    interface = std::unique_ptr<DebugPlotInterface>(
+    pinterface = std::unique_ptr<DebugPlotInterface>(
 	(DebugPlotInterface*) new NullPlotInterface);
 }

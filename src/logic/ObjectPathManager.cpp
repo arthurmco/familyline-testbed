@@ -38,7 +38,7 @@ bool ObjectPathManager::AddPath(LocatableObject* o,
 
 
 	auto p3dpath = ConvertTo3DPath(path);
-	auto dbg_plot = DebugPlotter::interface->AddPath(p3dpath, glm::vec3(0, 0, 1));
+	auto dbg_plot = DebugPlotter::pinterface->AddPath(p3dpath, glm::vec3(0, 0, 1));
 	_pathrefs.emplace_back(maxpathID++, o, new std::vector<glm::vec2>(*path),
 			       dbg_plot);	
 	return true;
@@ -50,7 +50,7 @@ bool ObjectPathManager::RemovePath(long oid)
 {
 	for (auto it = _pathrefs.begin(); it != _pathrefs.end(); it++) {
 		if (it->lc->GetObjectID() == oid) {
-		    DebugPlotter::interface->RemovePath(it->dbg_path_plot);
+		    DebugPlotter::pinterface->RemovePath(it->dbg_path_plot);
 		    _pathrefs.erase(it);
 		    return true;
 		}
@@ -87,7 +87,7 @@ void ObjectPathManager::UpdatePaths()
 
 	/* Delete the reserved iterators */
 	for (auto& it : compl_its) {
-	    DebugPlotter::interface->RemovePath(it->dbg_path_plot);
+	    DebugPlotter::pinterface->RemovePath(it->dbg_path_plot);
 	    _pathrefs.erase(it);
 	}
 }
