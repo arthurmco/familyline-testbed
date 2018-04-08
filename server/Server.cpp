@@ -15,7 +15,10 @@
 #include <list>
 #include <Log.hpp>
 
+#ifdef __linux__
 #include <signal.h>
+#endif
+
 #include <ctime>
 #include <string>
 #include <cstdio>
@@ -31,13 +34,38 @@ int main(int argc, char const* argv[])
     (void)argv;
     
     Log::GetLog()->SetFile(stderr);
-    
-    struct sigaction oact;
+#ifdef _WIN32
+	// Set output mode to handle virtual terminal sequences, so the
+	// color escape sequences can work on Windows
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hOut == INVALID_HANDLE_VALUE)
+	{
+		return GetLastError();
+	}
+
+	DWORD dwMode = 0;
+	if (!GetConsoleMode(hOut, &dwMode))
+	{
+		return GetLastError();
+	}
+
+	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	if (!SetConsoleMode(hOut, dwMode))
+	{
+		return GetLastError();
+	}
+#endif
+
+#ifdef __linux__
+	/* Set a signal handler for SIGINT so it ends when you press Ctrl-C */
+	
+	struct sigaction oact;
     oact.sa_handler = [](int sig){ (void)sig; continue_main = false; };
     sigemptyset(&oact.sa_mask);
     oact.sa_flags = SA_RESTART;
     sigaction(SIGINT, &oact, nullptr);  
-    
+#endif
+
     printf("Tribalia Server " VERSION "\n");
     printf("Copyright (C) 2017 Arthur M\n");
     printf("Listening on port 12000\n");

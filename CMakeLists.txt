@@ -84,6 +84,8 @@ if (MSVC)
   target_link_libraries(tribalia ${CAIRO_LIB})
   target_link_libraries(tribalia wsock32 ws2_32)
 
+  target_link_libraries(tribalia-server wsock32 ws2_32)
+
   if (DO_TESTS)
   	target_link_libraries(tribalia-tests ${SDL_LIB})
   	target_link_libraries(tribalia-tests "opengl32.lib")

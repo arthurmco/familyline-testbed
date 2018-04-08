@@ -8,7 +8,7 @@ using namespace Tribalia::Server;
    Call this function right after the client received its ID */
 void PlayerManager::RegisterClient(Client* c)
 {
-    _players.push_back(NetPlayer{.cli = c});
+    _players.push_back(NetPlayer{c});
     this->NotifyPlayerAddition(c);
 }
 

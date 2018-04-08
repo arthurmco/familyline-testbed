@@ -26,9 +26,15 @@
 #include <unistd.h>
 
 #else
+#define NOMINMAX //prevents Windows from redefining std::min
 
 #include <io.h>
+#include <WinSock2.h>
+#include <WS2tcpip.h>
 
+#define SHUT_RDWR SD_BOTH // I think Microsoft does these things on purpose...
+
+#define usleep(x) Sleep(x/1000);
 #endif
 
 

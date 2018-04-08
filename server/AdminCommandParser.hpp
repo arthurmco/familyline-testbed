@@ -12,6 +12,11 @@
 #include "ChatLogger.hpp"
 #include <ServerPlayerManager.hpp>
 
+#ifdef _WIN32
+#include "win_poll.h"
+
+#endif
+
 namespace Tribalia::Server {
     constexpr int SERVER_PORT = 12100;
 
