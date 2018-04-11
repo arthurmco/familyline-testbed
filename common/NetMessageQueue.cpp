@@ -122,7 +122,11 @@ void NetMessageQueue::InjectMessageTCP(const char* m, size_t len)
 NetMessageQueue::~NetMessageQueue()
 {
 	shutdown(this->sockfd, 2);
+
+#ifndef _WIN32
+	/* Windows usually crash here */
 	close(this->sockfd);
+#endif
 
 	if (this->udp_init) {
 		shutdown(this->udp_socket, 2);

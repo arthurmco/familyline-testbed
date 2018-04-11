@@ -229,7 +229,7 @@ DeviceInfo* Window::GetDevice()
 Window::~Window()
 {
     if (_glctxt)
-	SDL_GL_DeleteContext(_glctxt);
+		SDL_GL_DeleteContext(_glctxt);
 
     if (_win)
 	SDL_DestroyWindow(_win);
