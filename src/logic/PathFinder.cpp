@@ -195,6 +195,7 @@ std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end) {
 }
 
 
+
 std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* o, glm::vec2 destination)
 {
 	std::vector<glm::vec2> vec;
@@ -202,14 +203,33 @@ std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* o, glm::vec2 dest
 
 	float r = o->GetRadius();
 
-
-	bool only_y_up = false;
-	bool only_x_up = false;
-
 	glm::vec2 from(o->GetX(), o->GetZ());
 
 	/* Unmap our object */
 	this->ClearPathmap(r * 2, r * 2, from.x - r, from.y - r);
+
+	/* If we have an obstruction in the destiny, we change the destiny
+	 *
+	 * Change the direction to be more closer to the start
+	 */
+	while (this->_pathing_slots[size_t(destination.x) + size_t(destination.y * this->_mapWidth)] == 0xff) {
+		auto directionx = (from.x - destination.x);
+		auto directiony = (from.y - destination.y);
+
+		if (directionx < 0) {
+			destination.x--;
+		}
+		else if (directionx > 0) {
+			destination.x++;
+		}
+
+		if (directiony < 0) {
+			destination.y--;
+		}
+		else if (directiony > 0) {
+			destination.y++;
+		}
+	}
 
 	if (this->node_list)
 		delete this->node_list;

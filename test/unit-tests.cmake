@@ -49,6 +49,9 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/test/googletest
   include_directories("${CMAKE_SOURCE_DIR}/server")
   include_directories("${CMAKE_SOURCE_DIR}/common")
   
+  file(COPY "${CMAKE_SOURCE_DIR}/test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
+ 
+
   option(DO_CHECK_ASAN "Enable address sanitizer" OFF)
   option(SET_COVERAGE "Enable coverage testing" OFF)
 
