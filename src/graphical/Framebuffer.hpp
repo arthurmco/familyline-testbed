@@ -4,14 +4,15 @@
     Copyright (C) 2016,2017 Arthur M
 ***/
 
+#ifndef FRAMEBUFFER_HPP
+#define FRAMEBUFFER_HPP
+
 #include <GL/glew.h>
+
 #include <SDL2/SDL_opengl.h>
 
 #include "Log.hpp"
 #include "GFXExceptions.hpp"
-
-#ifndef FRAMEBUFFER_HPP
-#define FRAMEBUFFER_HPP
 
 namespace Tribalia {
 namespace Graphics {

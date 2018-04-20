@@ -4,14 +4,15 @@
     Copyright (C) 2016,2017 Arthur M
 
 ***/
+#ifndef TEXTURE_HPP
+#define TEXTURE_HPP
+
 #include <string>
 #include "Log.hpp"
 
 #include <glm/glm.hpp>
+#include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
-
-#ifndef TEXTURE_HPP
-#define TEXTURE_HPP
 
 namespace Tribalia {
 namespace Graphics {

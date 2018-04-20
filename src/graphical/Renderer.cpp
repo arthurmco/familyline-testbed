@@ -53,7 +53,7 @@ void Renderer::InitializeShaders()
             sVert->GetPath(), sVert->GetType());
     }
 
-    sForward = new ShaderProgram{sVert, sFrag};
+    sForward = new ShaderProgram{"forward", sVert, sFrag};
     if (!sForward->Link()) {
         char shnum[6];
         sprintf(shnum, "%d", sForward->GetID());
@@ -71,7 +71,7 @@ void Renderer::InitializeShaders()
 			vLines->GetPath(), vLines->GetType());
 	}
 
-	sLines = new ShaderProgram{ vLines, fLines };
+	sLines = new ShaderProgram{"lines", vLines, fLines };
 	if (!sLines->Link()) {
 		char shnum[6];
 		sprintf(shnum, "%d", sLines->GetID());
@@ -262,13 +262,13 @@ bool Renderer::Render()
 	    sForward->SetUniform("mModel", mModel);
 	}
 
-
+	/*
 	if (it->vd->animationData) {
 	    this->UpdateVertexData(it->vd->vbo_pos,
 				   it->vd->animationData->GetVertexRawData(),
 				   it->vd->Positions.size());
 	}
-		
+		*/
 
         if (!it->vd->MaterialIDs.empty())
             material = it->vd->MaterialIDs[0];
@@ -361,12 +361,12 @@ bool Renderer::Render()
 void Renderer::UpdateFrames()
 {
     for (auto v : _vertices) {
-	if (v.vd->animationData) {
+	/*if (v.vd->animator) {
 	    /* Has animation things */
-	    UpdateVertexData(v.vbo_pos, v.vd->animationData->GetVertexRawData(),
-			     v.vd->Positions.size());
+	  //  UpdateVertexData(v.vbo_pos, v.vd->animationData->GetVertexRawData(),
+		//	     v.vd->Positions.size());
 	    //printf("Updated mesh %d to frame %d", v.vao, v.vd->animationData->GetActualFrame());
-	}
+	//}
     }
 }
 
@@ -399,9 +399,8 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
 
     glGenBuffers(1, &vri.vbo_pos);
     glBindBuffer(GL_ARRAY_BUFFER, vri.vbo_pos);
-    glBufferData(GL_ARRAY_BUFFER, v->Positions.size() * sizeof(glm::vec3),
-		 v->animationData ? v->animationData->GetVertexRawData() : v->Positions.data(),
-		 v->animationData ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, v->Positions.size() * sizeof(glm::vec3),
+		v->animator->getVertices(0).data(), (v->animator->getFrameCount() > 1 ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 

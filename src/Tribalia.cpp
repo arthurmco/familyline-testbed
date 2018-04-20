@@ -6,6 +6,8 @@
 ***/
 
 #define GLM_FORCE_RADIANS
+#include <GL/glew.h>
+
 
 #ifdef __linux__
 #include <GL/glxew.h>
@@ -38,7 +40,6 @@
 #include "graphical/ShaderProgram.hpp"
 #include "graphical/Window.hpp"
 #include "graphical/Framebuffer.hpp"
-#include "graphical/AnimationManager.hpp"
 
 #include "net/NetServer.hpp"
 #include "graphical/gui/Panel.hpp"

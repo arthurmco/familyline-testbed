@@ -94,7 +94,7 @@ void Window::Show()
 		sv->Compile();
 		sf->Compile();
 	
-		winShader = new ShaderProgram{ sv, sf };
+		winShader = new ShaderProgram{"window", sv, sf };
 		winShader->Link();
 	
     }

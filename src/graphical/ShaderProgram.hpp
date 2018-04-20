@@ -1,17 +1,17 @@
 /***
     Shader program abstraction
 
-    Copyright (C) 2016 Arthur M
+    Copyright (C) 2016, 2018 Arthur M
 
 ***/
+
+#ifndef SHADERPROGRAM_HPP
+#define SHADERPROGRAM_HPP
 
 #include "Shader.hpp"
 #include <glm/glm.hpp>
 
 #include <map>
-
-#ifndef SHADERPROGRAM_HPP
-#define SHADERPROGRAM_HPP
 
 namespace Tribalia {
 namespace Graphics {
@@ -30,7 +30,7 @@ namespace Graphics {
 			First, it query the cache, then it asks for OpenGL*/
 		GLint GetUniformLocation(const char* name);
     public:
-        ShaderProgram(Shader* vert, Shader* pixel);
+        ShaderProgram(const char* name, Shader* vert, Shader* pixel);
         bool Link();
         void Use();
 

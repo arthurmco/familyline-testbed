@@ -5,7 +5,14 @@
 
 ***/
 
+#ifndef HUMAN_PLAYER
+#define HUMAN_PLAYER
+
+
+#ifndef __gl_h_
 #include <GL/glew.h>
+#endif
+
 #include "logic/Player.hpp"
 #include "logic/PathFinder.hpp"
 #include "logic/ObjectFactory.hpp"
@@ -18,9 +25,6 @@
 #include "logic/CombatManager.hpp"
 #include "input/InputPicker.hpp"
 #include "input/InputManager.hpp"
-
-#ifndef HUMAN_PLAYER
-#define HUMAN_PLAYER
 
     class HumanPlayer : public Tribalia::Logic::Player
     {

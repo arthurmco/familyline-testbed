@@ -1,40 +1,69 @@
 /***
     Raw vertex data
 
-    Copyright (C) 2016 Arthur M.
+    Copyright (C) 2016, 2018 Arthur M.
 
 ***/
-
-#include <vector>
-#include <glm/glm.hpp>
-#include "AnimationData.hpp"
-
 
 #ifndef VERTEXDATA_HPP
 #define VERTEXDATA_HPP
 
-namespace Tribalia {
-namespace Graphics {
+#include <vector>
+#include <glm/glm.hpp>
+#include <memory>
 
-    enum VertexRenderStyle {
-	Triangles,
-	Lines,
-	PlotLines,
-    };
-    
-struct VertexData
-{
-    std::vector<glm::vec3> Positions;
-    std::vector<glm::vec3> Normals;
-    std::vector<glm::vec2> TexCoords;
-    std::vector<int> MaterialIDs;
-    AnimationData* animationData = nullptr;
-    uintptr_t meshptr;
-    VertexRenderStyle render_format = VertexRenderStyle::Triangles;
-    int vbo_pos;
-};
+#include "ShaderProgram.hpp"
 
-}
+namespace Tribalia::Graphics {
+
+	struct VertexData;
+
+	/* Base animator class */
+	class BaseAnimator {
+	protected:
+		VertexData* vdata;
+	public:
+		BaseAnimator(VertexData* v)
+			: vdata(v)
+		{}
+
+		/* Load a vertex */
+		virtual const std::vector<glm::vec3>& getVertices(unsigned frameno);
+		virtual const size_t getFrameCount() const { return 1; }
+
+		virtual ~BaseAnimator() {}
+	};
+	
+	enum VertexRenderStyle {
+		Triangles,
+
+		PlotLines
+	};
+
+
+	/* Basic vertex information */
+	struct VertexData {
+		std::vector<glm::vec3> Positions;
+		std::vector<glm::vec3> Normals;
+		std::vector<glm::vec2> TexCoords;
+		std::vector<int> MaterialIDs;
+
+		VertexRenderStyle render_format = VertexRenderStyle::Triangles;
+
+		// The shader used
+		ShaderProgram* shader;
+		std::unique_ptr<BaseAnimator> animator;
+		int vbo_pos;
+
+		// Pointer to the owning mesh, so we can draw the bounding boxes
+		uintptr_t meshptr;
+
+		VertexData();
+		VertexData(VertexData& vd);
+		VertexData(BaseAnimator* a);
+
+	};
+
 }
 
 #endif /* end of include guard: VERTEXDATA_HPP */

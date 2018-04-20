@@ -73,7 +73,7 @@ GUIRenderer::GUIRenderer(Window* w)
             sVert->GetPath(), sVert->GetType());
     }
 
-    sGUI = new ShaderProgram{sVert, sFrag};
+    sGUI = new ShaderProgram{"gui", sVert, sFrag};
     if (!sGUI->Link()) {
         char shnum[6];
         sprintf(shnum, "%d", sGUI->GetID());

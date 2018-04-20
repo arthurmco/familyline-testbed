@@ -35,7 +35,6 @@
 #include "graphical/AssetManager.hpp"
 #include "graphical/Window.hpp"
 #include "graphical/Framebuffer.hpp"
-#include "graphical/AnimationManager.hpp"
 #include "graphical/Renderer.hpp"
 #include "graphical/GUIRenderer.hpp"
 #include "graphical/GraphicalPlotInterface.hpp"
@@ -52,7 +51,6 @@
 #include "HumanPlayer.hpp"
 #include "objects/WatchTower.hpp"
 #include "objects/Tent.hpp"
-
 
 namespace Tribalia {
     

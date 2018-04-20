@@ -1,16 +1,17 @@
 /***
     Shader abstraction
 
-    Copyright (C) 2016 Arthur M
+    Copyright (C) 2016, 2018 Arthur M
 
 ***/
+
+#ifndef SHADER_HPP
+#define SHADER_HPP
 
 #include <string>
 #include <cstring> //strcat
 
-#ifndef __gl_h__
 #include <GL/glew.h>
-#endif
 
 #include <cstdio>
 
@@ -26,8 +27,6 @@
 
 #include "GFXExceptions.hpp"
 
-#ifndef SHADER_HPP
-#define SHADER_HPP
 
 namespace Tribalia {
 namespace Graphics {

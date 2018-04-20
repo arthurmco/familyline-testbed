@@ -1,4 +1,4 @@
-
+#include <GL/glew.h>
 #include "Game.hpp"
 
 using namespace Tribalia;
@@ -12,8 +12,8 @@ public:
 	GameActionListenerImpl() : GameActionListener("listener-base") {}
 
     virtual void OnListen(GameAction& a) {
-	(void)a;
-	printf("received from listener\n");
+		(void)a;
+		Log::GetLog()->InfoWrite("bogus-listener", "received from listener");
     }
 };
 
@@ -318,7 +318,6 @@ int Game::RunLoop()
 		glm::vec3 p = ip->GetTerrainProjectedPosition();
 		glm::vec2 q = ip->GetGameProjectedPosition();
 
-		AnimationManager::GetInstance()->Iterate();
 		ObjectPathManager::getInstance()->UpdatePaths();
 		guam->UpdateBasePanel();
 

@@ -2,7 +2,6 @@
     Class that contains all graphical exceptions
 
     Copyright (C) 2016 Arthur M
-
 ***/
 
 #include <stdexcept>

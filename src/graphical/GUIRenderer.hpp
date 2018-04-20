@@ -3,8 +3,11 @@
     Copyright (C) 2016, 2017 Arthur M
 */
 
-#include <cairo/cairo.h>
+#ifndef GUIRENDERER_HPP
+#define GUIRENDERER_HPP
+
 #include <GL/glew.h>
+#include <cairo/cairo.h>
 
 #include <cstdarg>
 #include <vector>
@@ -17,8 +20,6 @@
 #include "../input/InputListener.hpp"
 #include "../input/InputManager.hpp"
 
-#ifndef GUIRENDERER_HPP
-#define GUIRENDERER_HPP
 
 namespace Tribalia::Graphics {
 

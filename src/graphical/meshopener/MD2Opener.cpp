@@ -1,4 +1,5 @@
 #include "MD2Opener.hpp"
+#include "../DeformAnimator.hpp"
 
 using namespace Tribalia::Graphics;
 
@@ -163,8 +164,8 @@ Mesh* MD2Opener::Open(const char* file)
 
         /* Read the remaining of frame information */
         printf("Reading frame data - %d frames detected\n", hdr.num_frames);
-        AnimationData* ad = new AnimationData(hdr.num_frames, 0, &vd->Positions);
-        ad->InsertFrame(0, vd->Positions.data());
+		DeformAnimator* ad = new DeformAnimator(vd, hdr.num_frames);
+        ad->AddFrame(0, vd->Positions);
 
         // Go to the second frame
         fseek(fMD2, frame2coords, SEEK_SET);
@@ -205,14 +206,16 @@ Mesh* MD2Opener::Open(const char* file)
 
             }
 
-            ad->InsertFrame(f, vlist);
+			std::vector<glm::vec3> veclist;
+			veclist.assign(vlist, vlist + vd->Positions.size());
+            ad->AddFrame(f, veclist);
 
         }
 
         /* The list get copied, so we can delete it */
         delete[] vlist;
         delete[] avlist;
-        vd->animationData = ad;
+		vd->animator = std::unique_ptr<BaseAnimator>(ad);
 
     }
     Mesh* m = new Mesh{vd};

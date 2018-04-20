@@ -1,9 +1,12 @@
 /***
     Tribalia 3D renderer
 
-    Copyright (C) 2016 Arthur M.
+    Copyright (C) 2016, 2018 Arthur M.
 
 ***/
+
+#ifndef RENDERER_HPP
+#define RENDERER_HPP
 
 #include <GL/glew.h>
 
@@ -22,8 +25,6 @@
 #include "MaterialManager.hpp"
 #include "Log.hpp"
 
-#ifndef RENDERER_HPP
-#define RENDERER_HPP
 
 namespace Tribalia {
 namespace Graphics {

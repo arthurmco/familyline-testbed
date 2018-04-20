@@ -1,8 +1,9 @@
 #include "ShaderProgram.hpp"
+#include "ShaderManager.hpp"
 
 using namespace Tribalia::Graphics;
 
-ShaderProgram::ShaderProgram(Shader* vert, Shader* pixel)
+ShaderProgram::ShaderProgram(const char* name, Shader* vert, Shader* pixel)
 {
     this->_id = glCreateProgram();
 
@@ -12,10 +13,12 @@ ShaderProgram::ShaderProgram(Shader* vert, Shader* pixel)
     glAttachShader(this->_id, vert->GetID());
     glAttachShader(this->_id, pixel->GetID());
 
-    Log::GetLog()->Write("shader-program", "Shader program with id %d created",
-			 this->_id);
+	Log::GetLog()->Write("shader-program", "Shader program %s (id %d) created",
+			 name, this->_id);
     Log::GetLog()->Write("shader-program", "Shader program %d contains shaders %s and %s",
         this->_id, vert->GetPath(), pixel->GetPath());
+
+	ShaderManager::Add(name, this);
 }
 bool ShaderProgram::Link()
 {
