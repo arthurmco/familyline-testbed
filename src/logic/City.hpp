@@ -1,7 +1,7 @@
 /***
-    City definitions
+	City definitions
 
-    Copyright (C) 2016 Arthur M
+	Copyright (C) 2016 Arthur M
 
 ***/
 
@@ -13,56 +13,55 @@
 #ifndef CITY_HPP
 #define CITY_HPP
 
-namespace Tribalia {
-namespace Logic {
+namespace Tribalia::Logic {
 
-    struct Team {
-        int id;
-        std::string name;
-        char* flag; //pointer to a raw bitmap.
-	void* tinfo = nullptr; //pointer to a TeamCities structure
-	int cref = 0;
+	struct Team {
+		int id;
+		std::string name;
+		char* flag; //pointer to a raw bitmap.
+		void* tinfo = nullptr; //pointer to a TeamCities structure
+		int cref = 0;
 
-	Team();
-	Team(int id, const char* name);
+		Team();
+		Team(int id, const char* name);
 
-	inline bool operator==(const Team& other) { return this->id == other.id; }
-    };
+		inline bool operator==(const Team& other) { return this->id == other.id; }
+	};
 
-    class City {
-    private:
-        std::vector<AttackableObject*> _objects;
+	class City {
+	private:
+		std::vector<AttackableObject*> _objects;
 
-        int _men, _women;
-        int _boys, _girls;
+		int _men, _women;
+		int _boys, _girls;
 
-        std::string _name;
-        Team* _team;
+		std::string _name;
+		Team* _team;
 
-    public:
-        City(const char* name, Team* team);
+	public:
+		City(const char* name, Team* team);
 
-        /* Get an object by its ID */
-        AttackableObject* GetObject(int ID);
+		/* Get an object by its ID */
+		AttackableObject* GetObject(int ID);
 
-        /* Add object into city. Return ID */
-        int AddObject(AttackableObject*);
+		/* Add object into city. Return ID */
+		int AddObject(AttackableObject*);
 
-        /* Remove object from city.
-            Returns true if object exists, false otherwise */
-        bool RemoveObject(AttackableObject*);
+		/* Remove object from city.
+			Returns true if object exists, false otherwise */
+		bool RemoveObject(AttackableObject*);
 
-        int CountObjects();
+		int CountObjects();
 
-        const char* GetName() const;
+		const char* GetName() const;
 
-	Team* GetTeam() const;
-	void SetTeam(Team* t);
-	
-    };
+		Team* GetTeam() const;
+		void SetTeam(Team* t);
+
+	};
 
 
-}
+
 }
 
 

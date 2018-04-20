@@ -4,15 +4,16 @@
     Copyright (C) 2017 Arthur M
 
 ***/
+#ifndef TEAM_HPP
+#define TEAM_HPP
 
 #include <vector>
 #include <algorithm>
 #include <cstdint>
 
 #include "City.hpp"
+#include <list>
 
-#ifndef TEAM_HPP
-#define TEAM_HPP
 
 namespace Tribalia {
 namespace Logic {
