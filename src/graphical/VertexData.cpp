@@ -17,6 +17,8 @@ VertexData::VertexData(VertexData& vd)
 	this->render_format = vd.render_format;
 	this->shader = vd.shader;
 	this->MaterialIDs = vd.MaterialIDs;
+	this->shader = ShaderManager::Get("default");
+	this->animator = std::unique_ptr<BaseAnimator>(new BaseAnimator(this));
 }
 
 VertexData::VertexData(BaseAnimator* a)

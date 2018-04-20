@@ -17,6 +17,7 @@
 namespace Tribalia::Graphics {
 
 	struct VertexData;
+	class Mesh;
 
 	/* Base animator class */
 	class BaseAnimator {
@@ -56,7 +57,7 @@ namespace Tribalia::Graphics {
 		int vbo_pos;
 
 		// Pointer to the owning mesh, so we can draw the bounding boxes
-		uintptr_t meshptr;
+		Mesh* meshptr;
 
 		VertexData();
 		VertexData(VertexData& vd);

@@ -13,7 +13,7 @@ Mesh::Mesh(VertexData* vd)
     _modelMatrix = glm::mat4(1.0);
 
     this->_vdata = new VertexData(*vd);
-    this->_vdata->meshptr = ((uintptr_t)this);
+    this->_vdata->meshptr = this;
     this->_type = SCENE_MESH;
 }
 

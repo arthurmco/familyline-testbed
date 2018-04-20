@@ -524,7 +524,7 @@ int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
 
 	/* Find the original mesh in our list */
 	for (auto& vv : _vertices) {
-		if (vv.vd->meshptr == (uintptr_t)m) {
+		if (vv.vd->meshptr == m) {
 			vri_mesh = &vv;
 			break;
 		}
