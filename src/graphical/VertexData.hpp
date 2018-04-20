@@ -30,7 +30,7 @@ namespace Tribalia::Graphics {
 
 		/* Load a vertex */
 		virtual const std::vector<glm::vec3>& getVertices(unsigned frameno);
-		virtual const size_t getFrameCount() const { return 1; }
+		virtual size_t getFrameCount() const { return 1; }
 
 		virtual ~BaseAnimator() {}
 	};

@@ -12,7 +12,7 @@ const std::vector<glm::vec3>& DeformAnimator::getVertices(unsigned frameno)
 	return this->_frames[frameno];
 }
 
-const size_t DeformAnimator::getFrameCount() const
+size_t DeformAnimator::getFrameCount() const
 {
 	return this->_framecount;
 }

@@ -33,7 +33,7 @@ namespace Tribalia::Graphics {
 		void AddFrame(unsigned frameno, std::vector<glm::vec3> vertices);
 
 		virtual const std::vector<glm::vec3>& getVertices(unsigned frameno);
-		virtual const size_t getFrameCount() const;
+		virtual size_t getFrameCount() const;
 	};
 
 }

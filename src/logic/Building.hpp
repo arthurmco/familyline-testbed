@@ -6,11 +6,12 @@
 
 ***/
 
-#include "AttackableObject.hpp"
-#include "Unit.hpp"
-
 #ifndef BUILDING_H
 #define BUILDING_H
+
+#include "AttackableObject.hpp"
+#include "Unit.hpp"
+#include <list>
 
 namespace Tribalia {
 namespace Logic {
