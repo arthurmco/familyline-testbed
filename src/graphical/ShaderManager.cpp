@@ -3,6 +3,7 @@
 using namespace Tribalia::Graphics;
 
 std::unordered_map<std::string, ShaderProgram*> ShaderManager::_shaders;
+const char* ShaderManager::DefaultShader = "forward";
 
 void ShaderManager::Add(const char* name, ShaderProgram* shader)
 {

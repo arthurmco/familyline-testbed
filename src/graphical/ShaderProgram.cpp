@@ -4,11 +4,9 @@
 using namespace Tribalia::Graphics;
 
 ShaderProgram::ShaderProgram(const char* name, Shader* vert, Shader* pixel)
+	: name(name), _vertex(vert), _pixel(pixel)
 {
     this->_id = glCreateProgram();
-
-    this->_vertex = vert;
-    this->_pixel = pixel;
 
     glAttachShader(this->_id, vert->GetID());
     glAttachShader(this->_id, pixel->GetID());

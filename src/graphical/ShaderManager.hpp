@@ -19,6 +19,7 @@ namespace Tribalia::Graphics
 		static std::unordered_map<std::string, ShaderProgram*> _shaders;
 
 	public:
+		static const char* DefaultShader;
 		static void Add(const char* name, ShaderProgram* shader);
 
 		/**
