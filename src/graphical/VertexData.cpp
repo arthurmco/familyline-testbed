@@ -17,23 +17,25 @@ VertexData::VertexData()
 void VertexData::SetShader(ShaderProgram* s) {
 	this->shader = s;
 
-	if (!strcmp(s->name, "forward")) {
-		this->fnShaderSetup = [](ShaderProgram* s, glm::mat4 m, glm::mat4 v,
-			glm::mat4 p, Camera* c) {
-			(void)c;
-			s->SetUniform("mvp", p * v * m);
-			s->SetUniform("mModel", m);
-		};
-	}
+	if (s) {
+		if (!strcmp(s->name, "forward")) {
+			this->fnShaderSetup = [](ShaderProgram* s, glm::mat4 m, glm::mat4 v,
+				glm::mat4 p, Camera* c) {
+				(void)c;
+				s->SetUniform("mvp", p * v * m);
+				s->SetUniform("mModel", m);
+			};
+		}
 
-	if (!strcmp(s->name, "lines")) {
-		this->fnShaderSetup = [](ShaderProgram* s, glm::mat4 m, glm::mat4 v,
-			glm::mat4 p, Camera* c) {
-			
-			s->SetUniform("mvp", 
-				c->GetProjectionMatrix() * c->GetViewMatrix() *	m);
+		if (!strcmp(s->name, "lines")) {
+			this->fnShaderSetup = [](ShaderProgram* s, glm::mat4 m, glm::mat4 v,
+				glm::mat4 p, Camera* c) {
+				
+				s->SetUniform("mvp", 
+					c->GetProjectionMatrix() * c->GetViewMatrix() *	m);
 
-		};
+			};
+		}
 	}
 
 }

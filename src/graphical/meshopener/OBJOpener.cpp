@@ -218,6 +218,7 @@ Mesh* OBJOpener::Open(const char* file)
         mName, verts.size(), realVerts.size(),
         normals.size(), realNormals.size(), texcoords.size(), file);
 
+
     VertexData* vd = new VertexData;
     vd->Positions = realVerts;
     vd->Normals = realNormals;
