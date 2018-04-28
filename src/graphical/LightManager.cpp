@@ -1,5 +1,6 @@
 #include "LightManager.hpp"
 #include <algorithm>
+#include <cstring>
 
 using namespace Tribalia::Graphics;
 
