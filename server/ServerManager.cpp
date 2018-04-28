@@ -253,7 +253,7 @@ void ServerManager::RetrieveTCPMessages() {
 
 	/* Build the pollfds */
 	struct pollfd* pfds = new pollfd[client_qt];
-	memset(pfds, 0, sizeof(pfds));
+	memset(pfds, 0, sizeof(*pfds) * client_qt);
 
 	const struct timespec timeout = { 0, 30000000 }; // 30 ms timeout
 	sigset_t sigset;
