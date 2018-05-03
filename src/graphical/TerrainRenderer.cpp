@@ -21,7 +21,7 @@ TerrainRenderer::TerrainRenderer(Renderer* r)
     MaterialManager::GetInstance()->AddMaterial(&m);
 
     Material* t0 = new Material("grass",
-	MaterialData(glm::vec3(0.3, 0.3, 0.3),
+	MaterialData(glm::vec3(0.6, 0.6, 0.6),
 		     glm::vec3(0.4, 1.0, 0.4),
 		     glm::vec3(0.02)));
     t0->SetTexture(TextureOpener::OpenTexture("textures/terrain/grass.png"));

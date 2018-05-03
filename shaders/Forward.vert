@@ -10,6 +10,7 @@ uniform mat4 mModel, mView;
 out vec3 norm_out;
 out vec2 tex_coords;
 
+out vec3 norm_Model;
 out vec3 norm_Camera;
 
 uniform int lightCount;
@@ -31,6 +32,7 @@ void main() {
       lightDirections[i] = lightDir_Camera.xyz;
   }*/
 
+  norm_Model = (mModel * vec4(normal, 0.0)).xyz;
   vec3 normal_Camera = (mView * mModel * vec4(normal, 0.0)).xyz;
 
   norm_Camera = normal_Camera;

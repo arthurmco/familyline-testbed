@@ -2,6 +2,7 @@
 
 uniform vec3 color;
 
+in vec3 norm_Model;
 in vec3 norm_Camera;
 in vec2 tex_coords;
 
@@ -23,10 +24,10 @@ void main() {
   vcolor = mix(diffuse_color, texel, tex_amount);
   
   vec3 lightDirection = vec3(80, 200, 80);
-  float lightPower = 2;
+  float lightPower = 1;
 
   //Cosine of angle between normal and light direction
-  vec3 n = normalize(norm_Camera);
+  vec3 n = normalize(norm_Model);
 
   vec3 l = normalize(lightDirection);
   float cosTheta = clamp(dot(n, l), 0, 1);

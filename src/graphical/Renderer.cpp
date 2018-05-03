@@ -143,16 +143,6 @@ void Renderer::UpdateObjects()
 						break;
 					}
 				}
-				break;
-				/* Check for inserted lights*/
-			case SCENE_LIGHT:
-				for (int i = 0; i < lri.lightCount; i++) {
-					if (lri.lightIDs[i] == (*itScene)->GetID()) {
-						objExists = true;
-						break;
-					}
-				}
-				break;
 			}
 
 
@@ -173,27 +163,7 @@ void Renderer::UpdateObjects()
 				sidc.vao = vaon;
 				sidc.bbvao = this->AddBoundingBox(mes, glm::vec3(1, 0, 0));
 				_last_IDs.push_back(sidc);
-			}
-			else if ((*itScene)->GetType() == SCENE_LIGHT) {
-
-				/*** TODO: Sort lights by strength and send only the most strong ones ***/
-				if (lri.lightCount > 4) {
-					Log::GetLog()->Warning("renderer", "Maximum number of lights per render exceeded.");
-					continue;
-				}
-
-				Light* light = (Light*)(*itScene);
-				Log::GetLog()->Write("renderer", "Renderer added light %s", light->GetName());
-				int lR, lG, lB;
-				light->GetColor(lR, lG, lB);
-				lri.lightColors[lri.lightCount] = glm::vec3(lR / 255.0f, lG / 255.0f, lB / 255.0f);
-				lri.lightPositions[lri.lightCount] = light->GetPosition();
-				lri.lightStrengths[lri.lightCount] = light->GetStrength();
-				lri.lightIDs[lri.lightCount] = light->GetID();
-				lri.lightCount++;
-
-			}
-			else {
+			} else {
 				Log::GetLog()->Warning("renderer", "Unsupported scene object! Skipping...");
 				continue;
 			}
@@ -239,10 +209,10 @@ bool Renderer::Render()
 	sForward->Use();
 	sForward->SetUniform("mView", mView);
 
-	sForward->SetUniform("lightCount", lri.lightCount);
-	sForward->SetUniformArray("lightStrenghts", 4, lri.lightStrengths);
-	sForward->SetUniformArray("lightPositions", 4, lri.lightPositions);
-	sForward->SetUniformArray("lightColors", 4, lri.lightColors);
+	 //sForward->SetUniform("lightCount", lri.lightCount);
+	 //sForward->SetUniformArray("lightStrenghts", 4, lri.lightStrengths);
+	 //sForward->SetUniformArray("lightPositions", 4, lri.lightPositions);
+	 //sForward->SetUniformArray("lightColors", 4, lri.lightColors);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
