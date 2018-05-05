@@ -18,6 +18,7 @@ ShaderProgram::ShaderProgram(const char* name, Shader* vert, Shader* pixel)
 
 	ShaderManager::Add(name, this);
 }
+
 bool ShaderProgram::Link()
 {
     glLinkProgram(this->_id);
@@ -147,6 +148,35 @@ bool ShaderProgram::SetUniformArray(const char* name, int count, glm::vec3* valu
 	return (unif_id > 0);
 }
 
+/* Easy way to set an uniform that is an array of structures*/
+bool ShaderProgram::SetUniformStructArray(const char* base, const int idx, const char* field,
+	glm::vec3 value)
+{
+	auto varnamelen = strlen(base) + 8 + strlen(field);
+	char* varname = new char[varnamelen];
+	snprintf(varname, varnamelen, "%s[%d].%s", base, idx, field);
+
+	auto r = this->SetUniform(varname, value);
+
+	delete[] varname;
+	return r;
+}
+
+/* Easy way to set an uniform that is an array of structures, in the format
+ * base[idx].field = value
+ */
+bool ShaderProgram::SetUniformStructArray(const char* base, const int idx, const char* field,
+	float value)
+{
+	auto varnamelen = strlen(base) + 8 + strlen(field);
+	char* varname = new char[varnamelen];
+	snprintf(varname, varnamelen, "%s[%d].%s", base, idx, field);
+
+	auto r = this->SetUniform(varname, value);
+
+	delete[] varname;
+	return r;
+}
 
 /* Gets the location of a shader input attribute */
 int ShaderProgram::GetAttributeLocation(const char* name)

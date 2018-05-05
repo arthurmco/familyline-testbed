@@ -43,6 +43,14 @@ namespace Tribalia::Graphics {
 		bool SetUniformArray(const char* name, int count, float* value);
 		bool SetUniformArray(const char* name, int count, glm::vec3* value);
 
+		/* Easy way to set an uniform that is an array of structures, in the format
+		 * base[idx].field = value	
+		 */
+		bool SetUniformStructArray(const char* base, const int idx, const char* field,
+			glm::vec3 value);
+		bool SetUniformStructArray(const char* base, const int idx, const char* field,
+			float value);
+
 		/* Gets the location of a shader input attribute */
 		int GetAttributeLocation(const char* name);
 
