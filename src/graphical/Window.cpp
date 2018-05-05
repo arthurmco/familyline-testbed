@@ -36,7 +36,7 @@ Window::Window(int w, int h, unsigned win_opts)
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, fflags);
-    _win = SDL_CreateWindow("Tribalia",
+    _win = SDL_CreateWindow("Familyline / Tribalia",
 			    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h,
 			    SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
 

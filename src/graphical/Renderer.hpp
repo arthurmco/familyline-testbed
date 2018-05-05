@@ -1,7 +1,7 @@
 /***
     Tribalia 3D renderer
 
-    Copyright (C) 2016, 2018 Arthur M.
+    Copyright (C) 2016-2018 Arthur M.
 
 ***/
 
@@ -39,12 +39,11 @@ namespace Graphics {
 		ShaderProgram* sp;
     };
 
+#define MAX_RENDERER_LIGHTS 4
 	struct LightRenderInfo {
-		int lightCount = 0;
-		glm::vec3 lightPositions[4];
-		glm::vec3 lightColors[4];
-		float lightStrengths[4];
-		int lightIDs[4];
+		glm::vec3 lightPosition;
+		glm::vec3 lightColor;
+		float lightStrength;
 	};
 
 
@@ -57,6 +56,9 @@ namespace Graphics {
 
 		ShaderProgram *sForward, *sLines;
 		Texture* fake_tex;
+
+		unsigned int lightCount = 0;
+		LightRenderInfo lri[MAX_RENDERER_LIGHTS];
 
 		/* Custom properties */
 		bool renderBBs = false;

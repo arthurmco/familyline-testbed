@@ -1,4 +1,5 @@
 #include "SceneManager.hpp"
+#include "LightManager.hpp"
 
 using namespace Tribalia::Graphics;
 
@@ -103,6 +104,9 @@ bool SceneManager::UpdateValidObjects()
     for (auto it = _objects.begin(); it != _objects.end(); it++) {
         this->_valid_objects.push_back(*it);
     }
+
+	auto lights = LightManager::GetBestLights(_cam->GetPosition(), 128, 3);
+	this->_valid_objects.insert(this->_valid_objects.end(), lights.begin(), lights.end());
     
     _listModified = false;
      return true;

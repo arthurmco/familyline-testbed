@@ -120,7 +120,6 @@ struct SceneIDCache {
 int lastCheck = 0;
 std::vector<SceneIDCache> _last_IDs;
 
-LightRenderInfo lri;
 
 void Renderer::UpdateObjects()
 {
@@ -130,25 +129,25 @@ void Renderer::UpdateObjects()
 	/* Check updates from SceneManager*/
 	if (_scenemng->UpdateValidObjects()) {
 
+		auto lightIdx = 0;
+		lightCount = 0;
+
 		/* Check for inserted objects */
 		for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
 			bool objExists = false;
 			/* Check for inserted meshes */
 			switch ((*itScene)->GetType()) {
 			case SCENE_MESH:
+			{
 				for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); it2++) {
 					if ((*itScene)->GetID() == it2->ID && (*itScene)->GetType() == SCENE_MESH) {
 						it2->lastcheck = lastCheck;
 						objExists = true;
+
 						break;
 					}
 				}
-			}
-
-
-			if (objExists) continue;
-			/* Draw the added object */
-			if ((*itScene)->GetType() == SCENE_MESH) {
+				
 
 				/* Draw the added object */
 				Mesh* mes = (Mesh*)(*itScene);
@@ -163,10 +162,26 @@ void Renderer::UpdateObjects()
 				sidc.vao = vaon;
 				sidc.bbvao = this->AddBoundingBox(mes, glm::vec3(1, 0, 0));
 				_last_IDs.push_back(sidc);
-			} else {
-				Log::GetLog()->Warning("renderer", "Unsupported scene object! Skipping...");
-				continue;
 			}
+			break;
+
+			case SCENE_LIGHT:
+			{
+				Light* l = (Light*)(*itScene);
+				lri[lightIdx].lightPosition = l->GetPosition();
+				int cr, cg, cb;
+				l->GetColor(cr, cg, cb);
+				lri[lightIdx].lightColor = glm::vec3(cr / 255.0, cg / 255.0, cb / 255.0);
+				lri[lightIdx].lightStrength = l->GetStrength();
+				lightCount = ++lightIdx;
+			}
+			break;
+
+			default:
+				Log::GetLog()->Warning("renderer", "Unsupported scene object! Skipping...");
+				break;
+			}
+
 		}
 
 
@@ -209,11 +224,13 @@ bool Renderer::Render()
 	sForward->Use();
 	sForward->SetUniform("mView", mView);
 
-	 //sForward->SetUniform("lightCount", lri.lightCount);
-	 //sForward->SetUniformArray("lightStrenghts", 4, lri.lightStrengths);
-	 //sForward->SetUniformArray("lightPositions", 4, lri.lightPositions);
-	 //sForward->SetUniformArray("lightColors", 4, lri.lightColors);
-
+	for (int i = 0; i < lightCount; i++) {
+		sForward->SetUniformStructArray("lights", i, "position", lri[i].lightPosition);
+		sForward->SetUniformStructArray("lights", i, "color", lri[i].lightColor);
+		sForward->SetUniformStructArray("lights", i, "strength", lri[i].lightStrength);
+	}
+	sForward->SetUniform("lightCount", (int)lightCount);
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	int material = 0;

@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include "Game.hpp"
+#include "graphical/LightManager.hpp"
 
 using namespace Tribalia;
 using namespace Tribalia::Logic;
@@ -62,14 +63,15 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 			throw asset_exception(nullptr, "Invalid asset file!");
 		}
 
-		Light* l = new Light{ "mainLight", glm::vec3(16, 30, 16), 0xff, 0xff, 0xff, 10 };
+		Light* l = new Light{"mainLight", glm::vec3(16, 16, 16), 0x0, 0x0, 0xff, 200 };
 		std::vector<glm::vec3> p = {
 			glm::vec3(0, terr->GetHeightFromPoint(0, 0) + 16, 0),
 			glm::vec3(10, terr->GetHeightFromPoint(10, 10) + 16, 10),
 			glm::vec3(10, terr->GetHeightFromPoint(10, 0) + 16, 0)
 		};
+
 		DebugPlotter::pinterface->AddPath(p, glm::vec3(1, 0, 0));
-		scenemng->AddObject(l);
+		LightManager::AddLight(l);
 
 		terr_rend = new TerrainRenderer{ rndr };
 		terr_rend->SetTerrain(terr);
