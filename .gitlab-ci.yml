@@ -3,7 +3,7 @@
 # Copyright (C) 2017 Arthur M
 
 # see https://hub.docker.com/_/gcc/
-image: gcc
+image: gcc:7
 
 build:
   stage: build
