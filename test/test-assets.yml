@@ -1,0 +1,28 @@
+
+# Asset manager list
+
+assets:
+  - name: soldier.mesh
+    type: mesh
+    path: meshes/soldier.obj
+    mesh.texture: soldier.texture
+    mesh.rotation: 0
+    mesh.scale: 1
+
+  - name: soldier.texture
+    type: texture
+    path: textures/soldier.png
+
+  - name: tower.mesh
+    type: mesh
+    path: meshes/tower.obj
+    mesh.texture: tower.texture
+    mesh.rotation: 0
+    mesh.scale: 1
+      
+  - name: tower.texture
+    type: texture
+    path: textures/tower.png
+
+    
+    

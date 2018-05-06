@@ -2,317 +2,237 @@
 #include "Log.hpp"
 #include "../config.h"
 
+#include <yaml.h>
+#include <algorithm>
+
 using namespace Tribalia::Graphics;
 
-static std::string Trim(std::string str)
+void AssetFile::LoadFile(const char* file)
 {
-    size_t endpos = str.find_last_not_of(" \t");
-    if (endpos != std::string::npos)
-    {
-        str = str.substr(0, endpos+1);
+    FILE* fAsset = fopen(file, "r");
+    if (!fAsset) {
+	throw std::runtime_error("Failed to open file");
     }
 
-    size_t startpos = str.find_first_not_of(" \t");
-    if (startpos != std::string::npos)
-    {
-        str = str.substr(startpos);
+    yaml_parser_t parser;
+    if (!yaml_parser_initialize(&parser)) {
+	throw std::runtime_error("Failed to initialize parser");
     }
 
-    return str;
+    yaml_parser_set_input_file(&parser, fAsset);
 
-}
+    auto assets = std::move(this->ParseFile(&parser));
+    Log::GetLog()->Write("asset-file-loader",
+			 "loaded %zu assets", assets.size());
 
-#define SEPARATOR '/'
-#define STR_SEPARATOR "/"
-#if defined(_WIN32)
-    #define SEPARATOR '\\'
-    #define STR_SEPARATOR "\\"
-#endif
-
-
-std::string AssetFile::GetAbsolutePath(std::string rel)
-{
-    printf("rel: %s\n", rel.c_str());
-    if (rel[0] == SEPARATOR)
-	return rel;
+    this->assets = std::move(this->ProcessDependencies(std::move(assets)));
     
-    std::string dir = _path.substr(0, _path.find_last_of(SEPARATOR)+1);
-    dir.append(rel);
-    return dir;    
+    yaml_parser_delete(&parser);
+    fclose(fAsset);
+
 }
 
-AssetFile::AssetFile(const char* path)
+std::list<std::shared_ptr<AssetItem>> AssetFile::ParseFile(yaml_parser_t* parser)
 {
-    _fAsset = fopen(path, "r");
-    if (!_fAsset) {
-        char* msg = new char[strlen(path)+256];
-        sprintf(msg, "Failure to open %s: %d (%s)", path, errno,
-		strerror(errno));
-        throw asset_exception(this, msg);
-    }
+    std::list<std::shared_ptr<AssetItem>> alist;
 
-    _path = std::string(path);
-}
+    bool asset_str = false;
+    bool asset_list = false;
+    
+    yaml_event_t event;
 
-/*  Represents a material item that wasn't found, but specified to be
-    loaded late */
-struct DeferredLink {
-    AssetFileItem* afi;
-    std::string asset;
-};
+    // Try to find the 'assets' list
+    do {
+	if (!yaml_parser_parse(parser, &event)) {
+	    char* s;
+	    asprintf(&s, "Asset file parsing error: %d",
+		     parser->error);
+	    throw std::runtime_error(s);
+	}
 
-/* Build the file item dependency tree */
-void AssetFile::BuildFileItemTree()
-{
-    bool isInAsset = false;
+	if (event.type == YAML_SCALAR_EVENT) {
+	    if (!strcmp((const char*)event.data.scalar.value, "assets")) {
+		asset_str = true;
 
-    // General options
-    std::string name, path, type;
-
-    // Mesh-specific
-    std::string material_asset, texture_asset;
-
-    std::vector<DeferredLink> deferred_material_assets;
-    std::vector<DeferredLink> deferred_texture_assets;
-
-    rewind(_fAsset);
-    unsigned lineno = 0;
-    while (!feof(_fAsset)) {
-	lineno++;
-        // Get char and take out \n and \r
-        char line[256];
-        fgets(line, 255, _fAsset);
-        char* n = strrchr(line, '\n');
-        if (n)  *n = 0;
-        n = strrchr(line, '\r');
-        if (n)  *n = 0;
-
-        std::string l = Trim(std::string(line));
-
-        /* Take out comments */
-        if (l[0] == '#') {
-            continue;
-        }
-
-        size_t comment = l.find_first_of('#');
-        if (comment != std::string::npos) {
-            if (l[comment-1] != '\\') {
-                l = l.substr(0,comment);
-            }
-        }
-
-	 /* Find the '{' corresponding to a new asset */
-        size_t brktpos = l.find_last_of('{');
-        if (brktpos != std::string::npos) {
-	    if (isInAsset) {
-		// We didn't ended the last asset
-		Log::GetLog()->Fatal(
-		    "asset-file",
-		    "Parsing error: Declaring new asset inside asset %s on line %d (did you forgot a '}')?", name.c_str(), lineno);
 	    }
-            name = Trim(l.substr(0, brktpos-1));	    
-            isInAsset = true;
-        }
-
-        if (isInAsset) {
-            size_t i;
-
-            i = l.find("type:");
-            if (i != std::string::npos) {
-                type = Trim(l.substr(i+5));
-                continue;
-            }
-
-            i = l.find("path:");
-            if (i != std::string::npos) {
-		/* Process special 'variables' in path */
-		size_t p = std::string::npos;
-		path = Trim(l.substr(i+5));
-		p = path.find("$(MODELS_DIR)/");
-		if (p != std::string::npos) {
-		    path.replace(p, 14, std::string(MODELS_DIR));
-		}
-
-		p = path.find("$(TEXTURES_DIR)/");
-		if (p != std::string::npos) {
-		    path.replace(p, 16, std::string(TEXTURES_DIR));
-		}
-
-		p = path.find("$(MATERIALS_DIR)/");
-		if (p != std::string::npos) {
-		    path.replace(p, 17, std::string(MATERIALS_DIR));
-		}
-
-                path = GetAbsolutePath(path);
-                continue;
-            }
-
-            if (type == "mesh") {
-                i = l.find("material_asset:"); 
-                if (i != std::string::npos) {
-                    material_asset = Trim(l.substr(i+15));
-                    continue;
-                }
-
-                i = l.find("texture_asset:"); 
-                if (i != std::string::npos) {
-                    texture_asset = Trim(l.substr(i+14));
-                    continue;
-                }
-                
-            }
-
-            i = l.find("}");
-            if (i != std::string::npos) {
-                AssetFileItem* afi = new AssetFileItem;
-                afi->name = name;
-
-		printf("%s\n", path.c_str());
-	        afi->path = path;
-	        afi->type = type;
-/*                printf("\t new asset found: %s, %s, %s\n", name.c_str(), type.c_str(), path.c_str());*/
-                /* Check if our material asset has been loaded */
-                if (type == "mesh") {
-                    bool mfound = false;
-                    if (material_asset != "") {
-                        for (auto& afs : _file_items) {
-                            if (afs->name == material_asset) {
-                                mfound = true;
-                                afi->depends.push_back(afs);
-                                break;
-                            }
-                        }
-
-                        if (!mfound) {
-                            DeferredLink dl;
-                            dl.afi = afi;
-                            dl.asset = material_asset;
-                            deferred_material_assets.push_back(dl);
-                        }
-                        
-                    }
-
-                    mfound = false;
-                    if (texture_asset != "") {
-                        for (auto& afs : _file_items) {
-                            if (afs->name == texture_asset) {
-                                mfound = true;
-                                afi->depends.push_back(afs);
-			        break;
-                            }
-                        }
-
-                        if (!mfound) {
-                            DeferredLink dl;
-                            dl.afi = afi;
-                            dl.asset = texture_asset;
-
-                            deferred_texture_assets.push_back(dl);
-                        }
-                        
-                    }
-                } else if (type == "material") {
-                    /* Check if our deferred material is here */
-		    while (true) {
-			bool breaks = true;
-			for (auto it = deferred_material_assets.begin();
-			     it != deferred_material_assets.end();
-			     it++) {
-			    if (it->asset == name) {
-				it->afi->depends.push_back(afi);
-				deferred_material_assets.erase(it);
-				breaks = false;
-				break;
-			    }
-			}
-
-			if (breaks) {
-			    break;
-			}
-		    }
-		    
-                    
-                } else if (type == "texture") {
-                    /* Check if our texture material is here */
-		    bool breaks = true;
-
-		    while (true) {
-			breaks = true;
-			for (auto it = deferred_texture_assets.begin();
-			     it != deferred_texture_assets.end();
-			     it++) {
-			    if (it->asset == name) {
-				it->afi->depends.push_back(afi);
-				deferred_texture_assets.erase(it);
-				breaks = false;
-				break;
-			    }
-			}
-			
-			if (breaks) {
-			    break;
-			}
-		    }
-                    
-                }
-
-
-                name = "";
-                path = "";
-                type = "";
-                        
-                material_asset = "";
-		texture_asset = "";
-
-                isInAsset = false;
-                _file_items.push_back(afi);
-            }
-        }
-
-
-    }
-
-    if (deferred_texture_assets.size() > 0) {
-	std::string texture_str = "";
-	for (auto& unrecog : deferred_texture_assets) {
-	    char ttext[512];
-	    snprintf(ttext, 511, "\n\t\tTexture name: '%s', referenced in '%s'\n",
-		     unrecog.asset.c_str(), unrecog.afi->name.c_str());
-	    texture_str.append(ttext);
+	} else if (asset_str && event.type == YAML_SEQUENCE_START_EVENT) {
+	    
+	    asset_list = true;
+	    break;
+	    
+	} else {
+	    asset_str = false;
+	    asset_list = false;
 	}
 	
-	Log::GetLog()->Warning("asset-file", "Unrecognized textures: %d %s", deferred_texture_assets.size(), texture_str.c_str());
-		
+    } while (event.type != YAML_STREAM_END_EVENT);
+
+    if (!asset_str || !asset_list) {
+	throw std::runtime_error("Could not find the asset list in the file");
     }
 
-    if (deferred_material_assets.size() > 0) {
-	std::string mat_str = "";
-	for (auto& unrecog : deferred_material_assets) {
-	    char tmat[512];
-	    snprintf(tmat, 511, "\n\t\tTexture name: '%s', referenced in '%s'",
-		     unrecog.asset.c_str(),   unrecog.afi->name.c_str());
-	    mat_str.append(tmat);
+    AssetItem current_asset;
+    bool is_key = false, is_val = false;
+    std::string current_key;
+
+    int list_sequences = 1;
+	
+    // Parse the list contents
+    do {
+	if (!yaml_parser_parse(parser, &event)) {
+	    char* s;
+	    asprintf(&s, "Asset list parsing error: %d",
+		     parser->error);
+	    throw std::runtime_error(s);
 	}
+
+	switch (event.type) {
+	    // The sequence start has already been processed before, so let's
+	    // direct into the mapping
+
+	case YAML_MAPPING_START_EVENT:
+	    if (!asset_list) continue;
 	    
-	Log::GetLog()->Warning("asset-file", "Unrecognized materials: %d%s", deferred_material_assets.size(), mat_str.c_str());
+	    current_asset = {};
+	    is_key = true;
+	    break;
+
+	case YAML_SCALAR_EVENT:
+	{
+	    if (!asset_list) continue;
+	    
+	    const char* str = (const char*)event.data.scalar.value;
+
+	    // If is key, then save the key so we can remember later
+	    if (is_key) {
+		current_key = std::string{str};
+	    }
+	    
+	    // If is value, then save the old key+value in the file.
+	    if (is_val) {
+		if (current_key == "name") {
+		    current_asset.name = str;
+		} else if (current_key == "type") {
+		    current_asset.type = str;
+		} else if (current_key == "path") {
+		    current_asset.path = str;
+		} else {
+		    current_asset.items[current_key] = std::string{str};
+		}
+	    }
+	    
+	    is_key = !is_key;
+	    is_val = !is_val;
+	}
+	break;
+
+	case YAML_MAPPING_END_EVENT:
+	    if (!asset_list) continue;
+	    // Save the resulting asset in the alist
+
+	    Log::GetLog()->InfoWrite("asset-file-loader", 
+				     "found asset %s type %s path %s",
+				     current_asset.name.c_str(), current_asset.type.c_str(),
+				     current_asset.path.c_str());
+
+	    alist.push_back(std::shared_ptr<AssetItem>{new AssetItem{current_asset}});
+	    is_key = false;
+	    is_val = false;
+	    break;
+	
+
+	    // Handle unplanned lists correctly
+	case YAML_SEQUENCE_START_EVENT:
+	    list_sequences++;
+	    break;
+	    
+	case YAML_SEQUENCE_END_EVENT:
+	    list_sequences--;
+
+	    if (list_sequences <= 0) {
+		// End of sequence. End of file
+
+		asset_list = false;
+	    }
+	    
+	    break;
+
+	    
+	default:
+	    is_key = false;
+	    is_val = false;
+	    break;
+	    
+	} // switch(...)	    
+	
+    } while (event.type != YAML_STREAM_END_EVENT);
+    yaml_event_delete(&event);
+
+    return alist;
+}
+
+/* Process the assets and discover the dependencies between them */
+std::list<std::shared_ptr<AssetItem>> AssetFile::ProcessDependencies(
+    std::list<std::shared_ptr<AssetItem>>&& assets)
+{
+    /* Callback for mesh dependency.
+     * Return true if the mesh 'asset_name' is a child of mesh.
+     * 
+     * If it's true, we need to load the childs before
+     */
+    auto fnMeshDep = [](const char* asset_name, AssetItem* const mesh) {
+	auto meshtext = mesh->items.find("mesh.texture");
+
+	if (meshtext != mesh->items.end()) {
+	    if (!strcmp(asset_name, meshtext->second.c_str()))
+		return true;
+	}
+	
+	return false;
+    };
+
+    // TODO: Texture dependency. 
+    
+    for (auto asset : assets) {
+	
+	auto fnDependency = [fnMeshDep, asset](std::shared_ptr<AssetItem> dependent) {
+	    if (asset->type == "mesh")
+		return fnMeshDep(dependent->name.c_str(), asset.get());
+	    else
+		return false;
+	};
+
+	asset->dependencies.resize(assets.size());
+	auto it_dep = std::copy_if(assets.begin(), assets.end(),
+				   asset->dependencies.begin(),
+				   fnDependency);
+
+	asset->dependencies.erase(it_dep, asset->dependencies.end());
+	Log::GetLog()->InfoWrite("asset-file-loader",
+				 "asset %s has %zu dependencies", asset->name.c_str(),
+				 asset->dependencies.size());
+	
+	for (auto dep : asset->dependencies) {
+	    Log::GetLog()->InfoWrite("asset-file-loader",
+				     "\t%s", dep->name.c_str());
+	}
+	
+	
     }
 
-    for (auto& it : _file_items) {
-    	printf("%s\n", it->name.c_str());
+    return assets;
+}
+    
 
-    	for (auto& dep_it : it->depends) {
-    	    printf(" |-> %s\n", dep_it->name.c_str());
-    	}
+/* Get an asset */
+AssetItem* AssetFile::GetAsset(const char* name) const
+{
+    for (const auto asset : this->assets) {
+	if (!strcmp(asset->name.c_str(), name)) {
+	    return asset.get();
+	}
     }
+
+    return nullptr;
 }
 
-AssetFile::~AssetFile()
-{
-    fclose(_fAsset);
-}
-
-/* Get the tree you built */
-std::vector<AssetFileItem*>* AssetFile::GetFileItemTree() 
-{
-    return &_file_items;
-}

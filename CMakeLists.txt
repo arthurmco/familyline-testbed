@@ -52,7 +52,7 @@ include("test/unit-tests.cmake")
 find_package(GLEW REQUIRED)
 find_package(DevIL REQUIRED)
 
-include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR})
+include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
 
 # Include the common directory
 include_directories(AFTER "${CMAKE_SOURCE_DIR}/common")
@@ -106,7 +106,8 @@ else()
   pkg_search_module(SDL2 REQUIRED sdl2) # finds sdl
   pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
   pkg_search_module(GLM REQUIRED glm) # finds glm
-
+  
+  
   
   target_link_libraries(tribalia ${SDL2_LIBRARIES})
   target_link_libraries(tribalia "GL")
@@ -115,6 +116,8 @@ else()
   target_link_libraries(tribalia ${ILU_LIBRARIES})
   target_link_libraries(tribalia ${CAIRO_LIBRARIES})
   target_link_libraries(tribalia ${GLM_LIBRARIES})
+  target_link_libraries(tribalia "yaml")
+
   
   if(DO_TESTS)
   	target_link_libraries(tribalia-tests ${SDL2_LIBRARIES})
@@ -124,6 +127,7 @@ else()
   	target_link_libraries(tribalia-tests ${ILU_LIBRARIES})
   	target_link_libraries(tribalia-tests ${CAIRO_LIBRARIES})
 	target_link_libraries(tribalia-tests ${GLM_LIBRARIES})
+	target_link_libraries(tribalia-tests "yaml")
   endif(DO_TESTS)
 
   # if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")

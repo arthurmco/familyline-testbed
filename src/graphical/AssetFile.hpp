@@ -1,7 +1,7 @@
 /*  
-    Represents an asset file
+    The asset file plus its loader
 
-    Copyright (C) 2016 Arthur M
+    Copyright (C) 2016, 2018 Arthur M
 */
 
 #include <string>
@@ -11,51 +11,50 @@
 
 #include "GFXExceptions.hpp"
 
+#include <unordered_map>
+#include <list>
+#include <memory>
+
 #ifndef ASSETFILE_HPP
 #define ASSETFILE_HPP
 
+#include <yaml.h>
 
-namespace Tribalia {
-namespace Graphics {
+namespace Tribalia::Graphics {
 
-struct AssetFileItem {
-    std::string name;
-    std::string path;
-    std::string type;
+    /* The asset itself, as a file, not an object */
+    struct AssetItem {
+	std::string name, type, path;
+	std::unordered_map<std::string /* key */, std::string> items;
 
-    /* The items who this file item depends */
-    std::vector<AssetFileItem*> depends;
+	std::list<std::shared_ptr<AssetItem>> dependencies;
 
-    /* The childs of this item */
-    std::vector<AssetFileItem*> childs;
+	bool isLoaded = false;
+    };
 
-    /* Is the asset fully added? */
-    bool isProcessed = false;
-};
+    class AssetFile {
+    private:
+	/* The list of assets
+	 *
+	 * The dependencies will be evaluated only after all assets are loaded
+	 */
+	std::list<std::shared_ptr<AssetItem>> assets;
 
-class AssetFile {
-private:
-    FILE* _fAsset;
-    std::string _path;
-    std::vector<AssetFileItem*> _file_items;
+	std::list<std::shared_ptr<AssetItem>> ParseFile(yaml_parser_t* parser);
 
-    std::string GetAbsolutePath(std::string rel);
+	/* Process the assets and discover the dependencies between them */
+	std::list<std::shared_ptr<AssetItem>> ProcessDependencies(
+	    std::list<std::shared_ptr<AssetItem>>&& assets);
     
 
-public:
-    AssetFile(const char* path);
+    public:
+	void LoadFile(const char* file);
 
-    /* Build the file item dependency tree */
-    void BuildFileItemTree();
+	/* Get an asset */
+	AssetItem* GetAsset(const char* name) const;
+    };
 
-    /* Get the tree you built */
-    std::vector<AssetFileItem*>* GetFileItemTree();
 
-    ~AssetFile();
-
-};
-
-}
 }
 
 

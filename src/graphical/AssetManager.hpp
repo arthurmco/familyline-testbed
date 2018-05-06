@@ -52,7 +52,7 @@ private:
     std::vector<AssetGroup*> _groups;
 
 	bool LoadAsset(Asset* a);
-    Asset* RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi);
+    Asset* RetrieveAsset(AssetGroup* grp, AssetItem*& afi);
 
 public:
     AssetGroup* AddAssetGroup(const char* path, const char* tag);

@@ -92,7 +92,7 @@ bool CheckIfExists(const char* path)
 
 }
 
-Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
+Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetItem*& afi)
 {
 	std::string extension = afi->path.substr(afi->path.find_last_of('.')+1);
 	Asset* a = new Asset();
@@ -111,34 +111,35 @@ Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
 	Texture* child_t = nullptr;
 
 	/** Treat dependencies */
-	for (auto& dep : afi->depends) {
 
-	    Asset* ac = nullptr;
+	// for (auto& dep : afi->depends) {
+
+	//     Asset* ac = nullptr;
 	    
-	    if (!dep->isProcessed) {
-		ac = RetrieveAsset(grp, dep);
-		AddAsset(grp, ac);
-	    } else {
-		ac = this->GetAsset(dep->name.c_str());
-	    }
+	//     if (!dep->isProcessed) {
+	// 	ac = RetrieveAsset(grp, dep);
+	// 	AddAsset(grp, ac);
+	//     } else {
+	// 	ac = this->GetAsset(dep->name.c_str());
+	//     }
 
 	    
-	    fflush(stdout);
-	    if (!ac) continue;
-	    /* This is a workaround for supporting textured but material-less files. */
-	    switch (ac->asset_type) {
-	    case ASSET_MATERIAL:
-		if (ac->asset.material)
-		    child_mat = ac->asset.material;
-		break;
-	    case ASSET_TEXTURE:
-		if (ac->asset.texture)
-		    child_t = ac->asset.texture;
-		break;
-	    }
+	//     fflush(stdout);
+	//     if (!ac) continue;
+	//     /* This is a workaround for supporting textured but material-less files. */
+	//     switch (ac->asset_type) {
+	//     case ASSET_MATERIAL:
+	// 	if (ac->asset.material)
+	// 	    child_mat = ac->asset.material;
+	// 	break;
+	//     case ASSET_TEXTURE:
+	// 	if (ac->asset.texture)
+	// 	    child_t = ac->asset.texture;
+	// 	break;
+	//     }
 	
 	
-	}
+	// }
 	
 	if (child_t) {
 	    /* If no material but textured, then we create a ghost material for it
@@ -155,7 +156,7 @@ Asset* AssetManager::RetrieveAsset(AssetGroup* grp, AssetFileItem*& afi)
 
 	}
 	
-	afi->isProcessed = true;
+//	afi->isProcessed = true;
 	if (a->asset_type != ASSET_MESH) {
 		if (!LoadAsset(a)) {
 			throw asset_exception(afi, "Error loading asset");
@@ -176,14 +177,14 @@ bool AssetManager::ReadFromFile(const char* file)
 {
 	AssetGroup* grp = this->AddAssetGroup(file, file);
 	
-	AssetFile* af = new AssetFile(file);
-	af->BuildFileItemTree();
+//	AssetFile* af = new AssetFile(file);
+//	af->BuildFileItemTree();
 
-	for (auto& afi : *af->GetFileItemTree()) {
-		if (!afi->isProcessed) {
-			AddAsset(grp, RetrieveAsset(grp, afi));
-		}
-	}
+	// for (auto& afi : *af->GetFileItemTree()) {
+	// 	if (!afi->isProcessed) {
+	// 		AddAsset(grp, RetrieveAsset(grp, afi));
+	// 	}
+	// }
 
 	return true;
 }
