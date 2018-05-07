@@ -5,6 +5,7 @@
 using namespace Tribalia;
 using namespace Tribalia::Logic;
 using namespace Tribalia::Input;
+
 using namespace Tribalia::Graphics;
 using namespace Tribalia::Graphics::GUI;
 
@@ -168,7 +169,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		err = new char[768 + strlen(ae.what())];
 
 		if (ae.assetptr) {
-			AssetFileItem* a = (AssetFileItem*)ae.assetptr;
+			AssetItem* a = (AssetItem*)ae.assetptr;
 			Log::GetLog()->Fatal("game", "Asset %s, file: %s", a->name.c_str(), a->path.c_str());
 
 			sprintf(err,
