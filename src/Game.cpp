@@ -60,9 +60,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 		rndr->SetSceneManager(scenemng);
 
-		if (!am->ReadFromFile(ASSET_FILE_DIR "assets.taif")) {
-			throw asset_exception(nullptr, "Invalid asset file!");
-		}
+		am->Create();
 
 		Light* l = new Light{"mainLight", glm::vec3(16, 16, 16), 0x0, 0x0, 0xff, 200 };
 		std::vector<glm::vec3> p = {
