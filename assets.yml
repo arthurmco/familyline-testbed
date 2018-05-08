@@ -1,0 +1,20 @@
+# Tribalia asset file
+
+assets:
+  - name: Tent.obj
+    path: ${MODELS_DIR}/Tent.obj
+    type: mesh
+    mesh.texture: test.bmp
+
+  - name: test.bmp
+    path: ${TEXTURES_DIR}/test.bmp
+    type: texture
+
+  - name: WatchTower.obj
+    path: ${MODELS_DIR}/WatchTower.obj
+    type: mesh
+    mesh.material: WatchTower.mtl 
+
+  - name: WatchTower.mtl
+    type: material
+    path: ${MATERIALS_DIR}/WatchTower.mtl
