@@ -192,6 +192,11 @@ std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end) {
 			}
 		}
 	}
+
+	/* Always have an exit */
+	auto b = this->BuildPath(frontier.top());
+	node_list->nodes.clear();
+	return b;
 }
 
 
