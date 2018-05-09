@@ -14,13 +14,14 @@ void AssetManager::Create() {
 
 AssetObject AssetManager::GetAsset(const char* name)
 {
-    auto ap = assetlist.find(name);
+    Log::GetLog()->InfoWrite("asset-manager", "retrieving asset '%s'", name);
+    auto ap = assetlist.find(std::string{name});
     if (ap != assetlist.end()) {
 
 	if (ap->second.object)
 	    return ap->second.object.value_or(create_asset_from_null());
     }
-
+    
     // If not found or no value, request the value again
     AssetItem* ai = af.GetAsset(name);
     if (!ai) {
@@ -38,6 +39,51 @@ AssetObject AssetManager::GetAsset(const char* name)
 	type = AssetType::ATexture;
     }
 
+    /* Load the dependencies first! */
+    Texture* t = nullptr;
+    for (auto d : ai->dependencies) {
+	
+	/* Check for child materials and textures */
+	if (type == AMesh) {
+	    auto mmaterial = ai->GetItemOr("mesh.material", "");
+	    if (mmaterial != "") {
+		auto mtl = this->GetAsset(mmaterial.c_str());
+		if (!mtl.materialvec) {
+		    /* TODO: Subchildren in meshes/materials 
+		     *
+		     * Now, the own mesh loader gets the material from the mesh
+		     * This is bullshit. Load them here!
+		     */
+		
+		    char* e;
+		    asprintf(&e, "Could not load material %s for mesh %s (%s)", mmaterial.c_str(),
+			     ai->name.c_str(), ai->path.c_str());
+		    throw asset_exception(nullptr, e);
+		}
+
+		//auto material = mtl.materialvec->at(0);
+		//assetobj.mesh->SetMaterial(material);
+	    }
+	
+	    auto mtexture = ai->GetItemOr("mesh.texture", "");
+	    if (mtexture != "") {
+		auto tex = this->GetAsset(mtexture.c_str());
+		if (!tex.texture) {
+		    /* TODO: Subchildren in meshes/textures */ 
+
+		    char* e;
+		    asprintf(&e, "Could not load texture %s for mesh %s (%s)", mtexture.c_str(),
+			     ai->name.c_str(), ai->path.c_str());
+		    throw asset_exception(nullptr, e);
+		}
+
+		t = tex.texture;
+		
+	    }
+	}
+
+    }
+    
     auto assetobj = this->LoadAsset(type, ai->path.c_str());
 
     AssetPointer aap;
@@ -47,6 +93,16 @@ AssetObject AssetManager::GetAsset(const char* name)
     if (assetobj.mesh)
 	aap.object = make_optional(assetobj);
 
+    if (t) {
+	char* texname;
+	asprintf(&texname, "tex_%s", ai->GetItemOr("mesh.texture", "nulltex").c_str());
+	
+	Material* mattex = new Material(texname, MaterialData(0.8, 1.0, 0.1));
+	mattex->SetTexture(t);
+	MaterialManager::GetInstance()->AddMaterial(mattex);
+	assetobj.mesh->SetMaterial(mattex);
+    }
+    
     this->assetlist[ai->path] = aap;
 
     Log::GetLog()->InfoWrite("asset-manager", "found asset %s at '%s'",
@@ -107,9 +163,10 @@ AssetObject AssetManager::LoadAsset(AssetType type, const char* path)
 	
 	auto mesh = o->Open(path);
 
-	if (mesh)
+	if (mesh) {
+
 	    return create_asset_from_mesh(mesh);
-	
+	}
     } break;
     }
 

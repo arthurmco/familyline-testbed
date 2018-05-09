@@ -10,7 +10,7 @@
 #include "AssetFile.hpp"
 
 #if __has_include(<optional>)
-
+/* Things to make it compile in Debian 8's GCC compiler */
 #include <optional>
 #define s_optional std::optional
 #define make_optional std::make_optional

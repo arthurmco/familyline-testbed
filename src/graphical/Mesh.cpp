@@ -135,9 +135,8 @@ void Mesh::GenerateBoundingBox()
 
 
 /* Sets material for whole mesh */
-void Mesh::SetMaterial(void* m)
+void Mesh::SetMaterial(Material* mt)
 {
-    Material* mt = (Material*)m;
     _vdata->MaterialIDs.clear();
 
     for (size_t i = 0; i < _vdata->Positions.size(); i++) {

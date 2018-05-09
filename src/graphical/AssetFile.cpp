@@ -4,10 +4,22 @@
 
 #include <yaml.h>
 #include <algorithm>
+#include <string>
+
+#include "GFXExceptions.hpp"
 
 using namespace Tribalia::Graphics;
 
-#include "GFXExceptions.hpp"
+
+
+std::string AssetItem::GetItemOr(const char* key, const char* defaultval)
+{
+    auto it = this->items.find(std::string{key});
+    if (it == this->items.end())
+	return std::string{defaultval};
+
+    return it->second;
+}
 
 void AssetFile::LoadFile(const char* file)
 {

@@ -70,11 +70,6 @@ bool ShaderProgram::SetUniform(const char* name, glm::mat4 value)
 {
     GLint unif_id = GetUniformLocation(name);
 
-    if (unif_id < 0) {
-        Log::GetLog()->Write("shader-program",
-			     "Uniform %s not found on shader %d", name, _id);
-    }
-
     glUniformMatrix4fv(unif_id, 1, GL_FALSE, (const GLfloat*)&value[0][0]);
     //Log::GetLog()->Write("Setted uniform %s (id %d) on shader %d",
     //        name, unif_id, _id);

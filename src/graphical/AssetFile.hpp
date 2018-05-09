@@ -4,7 +4,9 @@
     Copyright (C) 2016, 2018 Arthur M
 */
 
-#include <string>
+#ifndef ASSETFILE_HPP
+#define ASSETFILE_HPP
+
 #include <vector>
 #include <cstdio>
 #include <cstring>
@@ -15,10 +17,8 @@
 #include <list>
 #include <memory>
 
-#ifndef ASSETFILE_HPP
-#define ASSETFILE_HPP
-
 #include <yaml.h>
+#include <string>
 
 namespace Tribalia::Graphics {
 
@@ -30,6 +30,8 @@ namespace Tribalia::Graphics {
 	std::list<std::shared_ptr<AssetItem>> dependencies;
 
 	bool isLoaded = false;
+
+	std::string GetItemOr(const char* key, const char* defaultval);
     };
 
     class AssetFile {

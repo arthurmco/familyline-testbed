@@ -22,6 +22,8 @@
 namespace Tribalia {
 namespace Graphics {
 
+    class Material;
+    
     class Mesh : public SceneObject, public Logic::IMesh
     {
     private:
@@ -58,7 +60,7 @@ namespace Graphics {
         void GenerateBoundingBox();
 
 	/* Sets material for whole mesh */
-	void SetMaterial(void* m);
+	void SetMaterial(Material* m);
 
 	virtual ~Mesh() {}
     };
