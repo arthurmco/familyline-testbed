@@ -48,9 +48,12 @@ add_executable(tribalia-server ${SRC_SERVER} ${SRC_COMMON})
 
 include("test/unit-tests.cmake")
 
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" )
+
 # Add packages natively supported by cmake
 find_package(GLEW REQUIRED)
 find_package(DevIL REQUIRED)
+find_package(Yaml REQUIRED)
 
 include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
 
@@ -81,6 +84,7 @@ if (MSVC)
   target_link_libraries(tribalia ${IL_LIBRARIES})
   target_link_libraries(tribalia ${ILU_LIBRARIES})
   target_link_libraries(tribalia ${CAIRO_LIB})
+  target_link_libraries(tribalia ${YAML_LIBRARIES})
   target_link_libraries(tribalia wsock32 ws2_32)
 
   target_link_libraries(tribalia-server wsock32 ws2_32)
@@ -93,6 +97,7 @@ if (MSVC)
   	target_link_libraries(tribalia-tests ${ILU_LIBRARIES})
   	target_link_libraries(tribalia-tests ${CAIRO_LIB})
 	target_link_libraries(tribalia-tests wsock32 ws2_32)
+	target_link_libraries(tribalia-tests ${YAML_LIBRARIES})
   #endif(DO_TESTS)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /GR /W4 /std:c++latest")
@@ -116,8 +121,7 @@ else()
   target_link_libraries(tribalia ${ILU_LIBRARIES})
   target_link_libraries(tribalia ${CAIRO_LIBRARIES})
   target_link_libraries(tribalia ${GLM_LIBRARIES})
-  target_link_libraries(tribalia "yaml")
-
+  target_link_libraries(tribalia ${YAML_LIBRARIES})
   
   if(DO_TESTS)
   	target_link_libraries(tribalia-tests ${SDL2_LIBRARIES})
@@ -127,7 +131,7 @@ else()
   	target_link_libraries(tribalia-tests ${ILU_LIBRARIES})
   	target_link_libraries(tribalia-tests ${CAIRO_LIBRARIES})
 	target_link_libraries(tribalia-tests ${GLM_LIBRARIES})
-	target_link_libraries(tribalia-tests "yaml")
+	target_link_libraries(tribalia-tests ${YAML_LIBRARIES})
   endif(DO_TESTS)
 
   # if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -138,7 +142,7 @@ else()
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SDL2_CFLAGS_OTHER}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall -Wextra")
-  include_directories(AFTER ${SDL2_INCLUDE_DIRS} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS})
+  include_directories(AFTER ${SDL2_INCLUDE_DIRS} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
 
   if (IS_DEBUG)
 	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
