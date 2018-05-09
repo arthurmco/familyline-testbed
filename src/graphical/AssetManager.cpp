@@ -15,7 +15,10 @@ void AssetManager::Create() {
 AssetObject AssetManager::GetAsset(const char* name)
 {
     Log::GetLog()->InfoWrite("asset-manager", "retrieving asset '%s'", name);
-    auto ap = assetlist.find(std::string{name});
+
+    std::string aname{name};
+    auto ap = assetlist.find(aname);
+
     if (ap != assetlist.end()) {
 
 	if (ap->second.object)
@@ -101,9 +104,10 @@ AssetObject AssetManager::GetAsset(const char* name)
 	mattex->SetTexture(t);
 	MaterialManager::GetInstance()->AddMaterial(mattex);
 	assetobj.mesh->SetMaterial(mattex);
+	
     }
     
-    this->assetlist[ai->path] = aap;
+    this->assetlist[ai->name] = aap;
 
     Log::GetLog()->InfoWrite("asset-manager", "found asset %s at '%s'",
 			     name, ai->path.c_str());
