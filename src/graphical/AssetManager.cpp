@@ -1,5 +1,6 @@
 #include "AssetManager.hpp"
 
+#include "../config.h"
 #include "meshopener/OBJOpener.hpp"
 #include "meshopener/MD2Opener.hpp"
 #include "materialopener/MTLOpener.hpp"
@@ -8,7 +9,7 @@ using namespace Tribalia::Graphics;
 
 
 void AssetManager::Create() {
-    this->af.LoadFile("assets.yml");
+    this->af.LoadFile( ASSET_FILE_DIR "assets.yml");
 }
 
 

@@ -193,6 +193,6 @@ install(DIRECTORY textures DESTINATION share/tribalia)
 install(DIRECTORY icons DESTINATION share/tribalia)
 install(DIRECTORY materials DESTINATION share/tribalia)
 install(DIRECTORY models DESTINATION share/tribalia)
-install(FILES assets.taif DESTINATION share/tribalia)
+install(FILES assets.yml DESTINATION share/tribalia)
 install(FILES terrain_test.trtb DESTINATION share/tribalia)
 
