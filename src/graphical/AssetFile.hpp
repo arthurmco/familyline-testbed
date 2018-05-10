@@ -17,7 +17,10 @@
 #include <list>
 #include <memory>
 
-#include <yaml.h>
+extern "C" {
+	#include <yaml.h>
+}
+
 #include <string>
 
 namespace Tribalia::Graphics {

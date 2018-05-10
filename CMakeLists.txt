@@ -67,7 +67,7 @@ if (MSVC)
   SET(GLM_INCLUDE "." CACHE PATH "GLM include directory")
   SET(CAIRO_INCLUDE "." CACHE PATH "Cairo include directory")
 
-  include_directories(AFTER ${SDL_INCLUDE} ${GLM_INCLUDE} ${CAIRO_INCLUDE})
+  include_directories(AFTER ${SDL_INCLUDE} ${GLM_INCLUDE} ${CAIRO_INCLUDE}  ${YAML_INCLUDE_DIR})
 
   #Set library directories
   SET(SDL_LIB_FOLDER "." CACHE PATH "SDL2 library directory")
@@ -84,7 +84,7 @@ if (MSVC)
   target_link_libraries(tribalia ${IL_LIBRARIES})
   target_link_libraries(tribalia ${ILU_LIBRARIES})
   target_link_libraries(tribalia ${CAIRO_LIB})
-  target_link_libraries(tribalia ${YAML_LIBRARIES})
+  target_link_libraries(tribalia ${YAML_LIBRARIES}) # You need to build YAML as a dll (use -DBUILD_SHARED_LIBS)
   target_link_libraries(tribalia wsock32 ws2_32)
 
   target_link_libraries(tribalia-server wsock32 ws2_32)
@@ -163,7 +163,7 @@ if (WIN32)
   file(COPY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
   file(COPY "${CMAKE_SOURCE_DIR}/textures" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
   file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.trtb" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
-  file(COPY "${CMAKE_SOURCE_DIR}/assets.taif" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
+  file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
 
 endif (WIN32)
 

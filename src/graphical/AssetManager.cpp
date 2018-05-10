@@ -59,10 +59,11 @@ AssetObject AssetManager::GetAsset(const char* name)
 		     * This is bullshit. Load them here!
 		     */
 		
-		    char* e;
-		    asprintf(&e, "Could not load material %s for mesh %s (%s)", mmaterial.c_str(),
+		    char* e = new char[128 + mmaterial.size() + ai->name.size() + ai->path.size()];
+		    sprintf(e, "Could not load material %s for mesh %s (%s)", mmaterial.c_str(),
 			     ai->name.c_str(), ai->path.c_str());
 		    throw asset_exception(nullptr, e);
+			delete e;
 		}
 
 		//auto material = mtl.materialvec->at(0);
@@ -75,8 +76,8 @@ AssetObject AssetManager::GetAsset(const char* name)
 		if (!tex.texture) {
 		    /* TODO: Subchildren in meshes/textures */ 
 
-		    char* e;
-		    asprintf(&e, "Could not load texture %s for mesh %s (%s)", mtexture.c_str(),
+		    char* e = new char[128 + mtexture.size() + ai->name.size() + ai->path.size()];
+		    sprintf(e, "Could not load texture %s for mesh %s (%s)", mtexture.c_str(),
 			     ai->name.c_str(), ai->path.c_str());
 		    throw asset_exception(nullptr, e);
 		}
@@ -97,17 +98,19 @@ AssetObject AssetManager::GetAsset(const char* name)
     if (assetobj.mesh)
 	aap.object = make_optional(assetobj);
 
-    if (t) {
-	char* texname;
-	asprintf(&texname, "tex_%s", ai->GetItemOr("mesh.texture", "nulltex").c_str());
-	
-	Material* mattex = new Material(texname, MaterialData(0.8, 1.0, 0.1));
-	mattex->SetTexture(t);
-	MaterialManager::GetInstance()->AddMaterial(mattex);
-	assetobj.mesh->SetMaterial(mattex);
-	
-    }
-    
+	if (t) {
+		auto strtex = ai->GetItemOr("mesh.texture", "nulltex");
+		char* texname = new char[strtex.size() + 6];
+		sprintf(texname, "tex_%s", strtex.c_str());
+
+		Material* mattex = new Material(texname, MaterialData(0.8, 1.0, 0.1));
+		mattex->SetTexture(t);
+		MaterialManager::GetInstance()->AddMaterial(mattex);
+		assetobj.mesh->SetMaterial(mattex);
+
+		delete texname;
+	}
+
     this->assetlist[ai->name] = aap;
 
     Log::GetLog()->InfoWrite("asset-manager", "found asset %s at '%s'",
