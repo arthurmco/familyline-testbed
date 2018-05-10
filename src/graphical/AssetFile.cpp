@@ -2,7 +2,6 @@
 #include "Log.hpp"
 #include "../config.h"
 
-#include <yaml.h>
 #include <algorithm>
 #include <string>
 
@@ -21,11 +20,21 @@ std::string AssetItem::GetItemOr(const char* key, const char* defaultval)
 	return it->second;
 }
 
-void AssetFile::LoadFile(const char* file)
+void AssetFile::LoadFile(const char* ofile)
 {
+#ifdef _WIN32
+	std::string sfile{ ofile };
+		
+	// Replace slashes
+	std::replace(sfile.begin(), sfile.end(), '/', '\\');
+	const char* file = sfile.c_str();
+#else
+	const char* file = ofile;
+#endif
+
 	FILE* fAsset = fopen(file, "r");
 	if (!fAsset) {
-		char e[256+_MAX_PATH];
+		char e[256+256];
 		sprintf(e, "Failed to open asset file list %s", file);
 		throw asset_exception(nullptr, e);
 	}
@@ -36,13 +45,13 @@ void AssetFile::LoadFile(const char* file)
 	}
 
 	yaml_parser_set_input_file(&parser, fAsset);
-
+	
 	Log::GetLog()->Write("asset-file-loader", "loaded file %s", file);
-	auto assets = std::move(this->ParseFile(&parser));
+	auto lassets = std::move(this->ParseFile(&parser));
 	Log::GetLog()->Write("asset-file-loader",
-		"loaded %zu assets", assets.size());
+		"loaded %zu assets", lassets.size());
 
-	this->assets = std::move(this->ProcessDependencies(std::move(assets)));
+	this->assets = std::move(this->ProcessDependencies(std::move(lassets)));
 
 	yaml_parser_delete(&parser);
 	fclose(fAsset);

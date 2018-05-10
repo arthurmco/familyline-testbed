@@ -103,7 +103,7 @@ AssetObject AssetManager::GetAsset(const char* name)
 		char* texname = new char[strtex.size() + 6];
 		sprintf(texname, "tex_%s", strtex.c_str());
 
-		Material* mattex = new Material(texname, MaterialData(0.8, 1.0, 0.1));
+		Material* mattex = new Material(texname, MaterialData(0.8f, 1.0f, 0.1f));
 		mattex->SetTexture(t);
 		MaterialManager::GetInstance()->AddMaterial(mattex);
 		assetobj.mesh->SetMaterial(mattex);

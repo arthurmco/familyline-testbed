@@ -39,7 +39,7 @@
         },
         {
           "name": "YAML_LIBRARIES",
-          "value": "C:\\Users\\arthu\\Downloads\\libs\\libyaml\\release\\yaml.lib"
+          "value": "C:\\Users\\arthu\\Downloads\\libs\\libyaml\\debug\\yaml.lib"
 
         }
       ]

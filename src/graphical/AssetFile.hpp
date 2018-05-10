@@ -17,7 +17,7 @@
 #include <list>
 #include <memory>
 
-extern "C" {
+extern "C" {	
 	#include <yaml.h>
 }
 
