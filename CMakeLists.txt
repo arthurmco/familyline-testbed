@@ -157,6 +157,7 @@ if (WIN32)
   # Copy the DLLs to the release directory, so the software can be run and packaged.
   file(GLOB WIN32_DEPS "${CMAKE_SOURCE_DIR}/distribute/win32/*.dll")
   file(COPY ${WIN32_DEPS} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
+  file(COPY ${WIN32_DEPS} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
 
   # Copy the asset folders to the Debug folder
   file(COPY "${CMAKE_SOURCE_DIR}/shaders" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
@@ -166,6 +167,15 @@ if (WIN32)
   file(COPY "${CMAKE_SOURCE_DIR}/textures" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
   file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.trtb" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
   file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
+
+  # and to the Release folder
+  file(COPY "${CMAKE_SOURCE_DIR}/shaders" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
+  file(COPY "${CMAKE_SOURCE_DIR}/icons" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
+  file(COPY "${CMAKE_SOURCE_DIR}/materials" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
+  file(COPY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
+  file(COPY "${CMAKE_SOURCE_DIR}/textures" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
+  file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.trtb" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
+  file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
 
 endif (WIN32)
 
