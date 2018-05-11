@@ -1,6 +1,6 @@
 #include "Shader.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 Shader::Shader(const char* path, int type)
 {

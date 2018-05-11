@@ -8,7 +8,7 @@
 #define IMESH_HPP
 
 
-namespace Tribalia::Logic {
+namespace Familyline::Logic {
 
     /* A logic representation of a mesh, with only the sufficient for the
        abstract part of the game (the files in the 'logic' folder) to work
@@ -24,7 +24,7 @@ namespace Tribalia::Logic {
     };
     
 
-}  // Tribalia::Logic
+}  // Familyline::Logic
 
 
 

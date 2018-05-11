@@ -1,4 +1,4 @@
-; Windows installer script for Tribalia
+; Windows installer script for Familyline
 ; Copyright (C) 2017 Arthur M
 ;
 ;
@@ -6,9 +6,9 @@
 
 !include x64.nsh
 
-Name "Tribalia"
-OutFile "TribaliaInstall.exe"
-InstallDir "$PROGRAMFILES\Tribalia"
+Name "Familyline"
+OutFile "FamilylineInstall.exe"
+InstallDir "$PROGRAMFILES\Familyline"
 
 
 RequestExecutionLevel admin 
@@ -84,10 +84,10 @@ Section ""
 	WriteUninstaller "uninstall.exe"
 SectionEnd
 Section "Create links"
-	CreateDirectory "$SMPROGRAMS\Tribalia"
-	CreateShortcut "$SMPROGRAMS\Tribalia\Tribalia.lnk" "$INSTDIR\tribalia.exe"
-	CreateShortcut "$SMPROGRAMS\Tribalia\Uninstall Tribalia.lnk" "$INSTDIR\uninstall.exe"
-	CreateShortcut "$DESKTOP\Tribalia.lnk" "$INSTDIR\tribalia.exe"
+	CreateDirectory "$SMPROGRAMS\Familyline"
+	CreateShortcut "$SMPROGRAMS\Familyline\Familyline.lnk" "$INSTDIR\tribalia.exe"
+	CreateShortcut "$SMPROGRAMS\Familyline\Uninstall Familyline.lnk" "$INSTDIR\uninstall.exe"
+	CreateShortcut "$DESKTOP\Familyline.lnk" "$INSTDIR\tribalia.exe"
 
 
 SectionEnd
@@ -109,9 +109,9 @@ Section "Uninstall"
 	Delete "$INSTDIR\assets.taif"
 	Delete "$INSTDIR\terrain_test.trtb"
 
-	Delete "$SMPROGRAMS\Tribalia\Tribalia.lnk"
-	Delete "$SMPROGRAMS\Tribalia\Uninstall Tribalia.lnk"
-	Delete "$DESKTOP\Tribalia.lnk"
+	Delete "$SMPROGRAMS\Familyline\Familyline.lnk"
+	Delete "$SMPROGRAMS\Familyline\Uninstall Familyline.lnk"
+	Delete "$DESKTOP\Familyline.lnk"
 
 	Delete "$INSTDIR\uninstall.exe"
 	
@@ -122,5 +122,5 @@ Section "Uninstall"
 	RMDIR /r "$INSTDIR\textures"
 	
 	RMDir "$INSTDIR"
-	RMDIR "$SMPROGRAMS\Tribalia"
+	RMDIR "$SMPROGRAMS\Familyline"
 SectionEnd

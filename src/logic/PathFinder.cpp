@@ -1,7 +1,7 @@
 #include "PathFinder.hpp"
 #include <cstring> //memset()
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 PathFinder::PathFinder(ObjectManager* om)
 	: _om(om)

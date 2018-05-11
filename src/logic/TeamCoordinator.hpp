@@ -14,7 +14,7 @@
 #ifndef TEAMCOORDINATOR_HPP
 #define TEAMCOORDINATOR_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Logic {
 
 /***

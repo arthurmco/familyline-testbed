@@ -13,7 +13,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-namespace Tribalia::Logic {
+namespace Familyline::Logic {
 
 	typedef int PathHandle;
 

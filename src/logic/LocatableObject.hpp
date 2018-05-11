@@ -16,7 +16,7 @@
 #ifndef LOCATABLEOBJECT_HPP
 #define LOCATABLEOBJECT_HPP
 
-namespace Tribalia {
+namespace Familyline {
     namespace Logic {
 
         /* A locatable object is a object that have a space position

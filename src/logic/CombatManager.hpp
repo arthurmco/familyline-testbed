@@ -14,7 +14,7 @@
 #ifndef COMBAT_MANAGER
 #define COMBAT_MANAGER
 
-namespace Tribalia {
+namespace Familyline {
 namespace Logic {
 
     struct Combat {

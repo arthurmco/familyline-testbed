@@ -11,7 +11,7 @@
 #ifndef TEST_ACTIONMANAGER
 #define TEST_ACTIONMANAGER
 
-class TestActionManager : public Tribalia::Logic::ActionManager
+class TestActionManager : public Familyline::Logic::ActionManager
 {
 private:
     TestObject* tobj = new TestObject(2, 10, 1, 10);

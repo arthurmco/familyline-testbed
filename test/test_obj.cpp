@@ -1,6 +1,6 @@
 #include "test_obj.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 void ObjectTest::SetUp()
 {

@@ -1,5 +1,5 @@
 /***
-    Logging functions for Tribalia
+    Logging functions for Familyline
 
     Copyright (C) 2016, 2017 Arthur M.
 
@@ -13,7 +13,7 @@
 #ifndef LOG_HPP
 #define LOG_HPP
 
-namespace Tribalia {
+namespace Familyline {
 
     class Log {
     private:

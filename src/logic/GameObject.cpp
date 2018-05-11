@@ -7,7 +7,7 @@
 ***/
 #include "GameObject.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 GameObject::GameObject(int oid, int tid, const char* name) :
     GameObject(oid, tid, name, 0, 0, 0) {}

@@ -10,7 +10,7 @@
 #include <string>
 #include "GameAction.hpp"
 
-namespace Tribalia::Logic {
+namespace Familyline::Logic {
 
 /*
  *  Abstract class that implements a listener for actions

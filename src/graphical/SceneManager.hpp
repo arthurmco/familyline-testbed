@@ -17,7 +17,7 @@
 #ifndef SCENEMANAGER_HPP
 #define SCENEMANAGER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     /* Scene quadrant size, in OpenGL coordinates */

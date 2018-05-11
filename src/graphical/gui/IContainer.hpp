@@ -9,7 +9,7 @@
 #ifndef _GUI_ICONTAINER_HPP
 #define _GUI_ICONTAINER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 namespace GUI {
 

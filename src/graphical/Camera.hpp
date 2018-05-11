@@ -20,7 +20,7 @@
 #define M_PI 3.1415
 #endif
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     class Camera

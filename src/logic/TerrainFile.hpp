@@ -15,7 +15,7 @@
 #ifndef TERRAINFILE_HPP
 #define TERRAINFILE_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Logic {
 
 /* Magic word for the terrain

@@ -12,7 +12,7 @@
 #ifndef GAMECONTEXT_HPP
 #define GAMECONTEXT_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Logic {
 
     struct GameContext {

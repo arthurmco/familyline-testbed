@@ -13,7 +13,7 @@
 #ifndef CITY_HPP
 #define CITY_HPP
 
-namespace Tribalia::Logic {
+namespace Familyline::Logic {
 
 	struct Team {
 		int id;

@@ -2,10 +2,10 @@
 #include "graphical/meshopener/OBJOpener.hpp"
 
 
-using namespace Tribalia;
-using namespace Tribalia::Graphics;
-using namespace Tribalia::Logic;
-using namespace Tribalia::Input;
+using namespace Familyline;
+using namespace Familyline::Graphics;
+using namespace Familyline::Logic;
+using namespace Familyline::Input;
 
 HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
     : Player(name, xp, gam)
@@ -19,18 +19,18 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
     }
 
 
-void HumanPlayer::SetCamera(Tribalia::Graphics::Camera* c) { _cam = c;}
-void HumanPlayer::SetPicker(Tribalia::Input::InputPicker* ip) { _ip = ip; }
-void HumanPlayer::SetPathfinder(Tribalia::Logic::PathFinder* p) { _pf = p; }
+void HumanPlayer::SetCamera(Familyline::Graphics::Camera* c) { _cam = c;}
+void HumanPlayer::SetPicker(Familyline::Input::InputPicker* ip) { _ip = ip; }
+void HumanPlayer::SetPathfinder(Familyline::Logic::PathFinder* p) { _pf = p; }
 
 bool build_tent = false, build_tower = false;
 
-void HumanPlayer::SetGameActionManager(Tribalia::Logic::GameActionManager* gam)
+void HumanPlayer::SetGameActionManager(Familyline::Logic::GameActionManager* gam)
 {
     this->_gam = gam;
 }
 
-void HumanPlayer::SetGUIActionManager(Tribalia::Graphics::GUIActionManager* gam)
+void HumanPlayer::SetGUIActionManager(Familyline::Graphics::GUIActionManager* gam)
 {
     _guam = gam;
 

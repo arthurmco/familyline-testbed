@@ -1,6 +1,6 @@
 #include "TerrainRenderer.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 TerrainMaterial::TerrainMaterial()
     : m(nullptr), pshader(nullptr), vshader(nullptr)

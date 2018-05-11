@@ -1,6 +1,6 @@
 #include "TerrainFile.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 terrain_file_exception::terrain_file_exception(std::string msg, 
 	std::string file, int code)

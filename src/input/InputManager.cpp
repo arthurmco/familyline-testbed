@@ -1,6 +1,6 @@
 #include "InputManager.hpp"
 
-using namespace Tribalia::Input;
+using namespace Familyline::Input;
 
 InputManager* InputManager::im = nullptr;
 

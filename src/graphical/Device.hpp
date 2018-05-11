@@ -12,7 +12,7 @@
 
 #include "Log.hpp"
 
-namespace Tribalia::Graphics {
+namespace Familyline::Graphics {
 
 /* Graphical device information
 

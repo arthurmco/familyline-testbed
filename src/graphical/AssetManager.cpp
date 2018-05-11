@@ -5,7 +5,7 @@
 #include "meshopener/MD2Opener.hpp"
 #include "materialopener/MTLOpener.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 
 void AssetManager::Create() {

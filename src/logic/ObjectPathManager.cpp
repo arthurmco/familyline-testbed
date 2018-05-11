@@ -2,7 +2,7 @@
 #include "DebugPlot.hpp"
 
 int maxpathID = 0;
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 static std::vector<glm::vec3> ConvertTo3DPath(std::vector<glm::vec2>* path)
 {

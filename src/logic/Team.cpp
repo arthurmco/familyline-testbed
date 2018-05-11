@@ -1,6 +1,6 @@
 #include "Team.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 TeamCities::TeamCities(Team* team) {
     this->team = team;

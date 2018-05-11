@@ -9,7 +9,7 @@
 
 class AssetFileTest : public ::testing::Test {
 protected:
-    Tribalia::Graphics::AssetFile* af;
+    Familyline::Graphics::AssetFile* af;
     
 public:
     void SetUp();

@@ -15,7 +15,7 @@
 #include <list>
 
 
-namespace Tribalia {
+namespace Familyline {
 namespace Logic {
 
 struct TeamCities {

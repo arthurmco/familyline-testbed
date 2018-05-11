@@ -1,6 +1,6 @@
 #include "Cursor.hpp"
 
-using namespace Tribalia::Input;
+using namespace Familyline::Input;
 
 Cursor* Cursor::cursor = nullptr;
 

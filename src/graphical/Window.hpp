@@ -17,7 +17,7 @@
 #include "Framebuffer.hpp"
 #include "Device.hpp"
 
-namespace Tribalia {
+namespace Familyline {
 	namespace Graphics {
 
 		/* A list of options to be passed when creating the window  or gl context */
@@ -70,7 +70,7 @@ namespace Tribalia {
 
 
 	} /* Graphics */
-} /* Tribalia */
+} /* Familyline */
 
 
 #endif /* end of include guard: WINDOW_HPP */

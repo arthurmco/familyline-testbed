@@ -1,6 +1,6 @@
 #include "DeformAnimator.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 void DeformAnimator::AddFrame(unsigned frameno, std::vector<glm::vec3> vertices)
 {

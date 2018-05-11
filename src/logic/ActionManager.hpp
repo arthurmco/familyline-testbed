@@ -14,7 +14,7 @@
 #ifndef ACTIONMANAGER_HPP
 #define ACTIONMANAGER_HPP
 
-namespace Tribalia::Logic {
+namespace Familyline::Logic {
 
     class ActionManager {
     private:

@@ -1,6 +1,6 @@
 #include "MTLOpener.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 std::vector<Material*> MTLOpener::Open(const char* file)
 {

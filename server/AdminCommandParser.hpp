@@ -17,7 +17,7 @@
 
 #endif
 
-namespace Tribalia::Server {
+namespace Familyline::Server {
     constexpr int SERVER_PORT = 12100;
 
 /**
@@ -29,7 +29,7 @@ struct ServerInterface {
 };
 
 /**
- * The server is controlled via the Tribalia Server Admin Protocol
+ * The server is controlled via the Familyline Server Admin Protocol
  * (No abbreviations to avoid lawsuits from strong software german companies)
  *
  * This class manages this command parsing and interpretation

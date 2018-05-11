@@ -15,7 +15,7 @@
 #ifndef OBJOPENER_HPP
 #define OBJOPENER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
 class OBJOpener : public MeshOpener

@@ -11,7 +11,7 @@
 #ifndef UNIT_H
 #define UNIT_H
 
-namespace Tribalia {
+namespace Familyline {
 namespace Logic {
 
     class Unit : public AttackableObject

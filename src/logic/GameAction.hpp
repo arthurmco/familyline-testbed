@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace Tribalia::Logic {
+namespace Familyline::Logic {
 
 // Action types
 enum GameActionType {

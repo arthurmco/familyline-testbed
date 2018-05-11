@@ -1,6 +1,6 @@
 #include "Material.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 int lastID = 0;
 Material::Material(int ID, const char* name, MaterialData data)

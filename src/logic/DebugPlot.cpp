@@ -1,6 +1,6 @@
 #include "DebugPlot.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 
 /* Adds a vector of points to form a path.

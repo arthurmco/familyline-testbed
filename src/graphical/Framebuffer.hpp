@@ -14,7 +14,7 @@
 #include "Log.hpp"
 #include "GFXExceptions.hpp"
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     class Framebuffer {
@@ -53,6 +53,6 @@ namespace Graphics {
 
 
 } /* Graphics */
-} /* Tribalia */
+} /* Familyline */
 
 #endif /* end of include guard: FRAMEBUFFER_HPP */

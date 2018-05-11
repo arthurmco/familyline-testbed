@@ -1,5 +1,5 @@
 ;;;
-;;; Tribalia terrain editing mode for Emacs, because vim is crap
+;;; Familyline terrain editing mode for Emacs, because vim is crap
 ;;; Copyright(C) 2017 Arthur M
 ;;;
 ;;; Licensed under MIT License. Suck my balls, Stallman
@@ -69,15 +69,15 @@ the OFFSET arg."
 	    vret))))
 
 (defun tribalia-terrain-info ()
-  "Show information about Tribalia terrains."
+  "Show information about Familyline terrains."
   (interactive)
   (let (thdr)
     (setq thdr (tribalia-terrain/return-thdr-offset))
     (let (thdr-info)
       (setq thdr-info (tribalia-terrain/get-thdr-info thdr))
-      (generate-new-buffer "Tribalia terrain")
-      (display-buffer "Tribalia terrain")
-      (with-current-buffer "Tribalia terrain"
+      (generate-new-buffer "Familyline terrain")
+      (display-buffer "Familyline terrain")
+      (with-current-buffer "Familyline terrain"
 	(read-only-mode -1)
 	(erase-buffer)
 	(insert "Terrain Information:\n\n")

@@ -12,7 +12,7 @@
 #ifndef IMAGECONTROL_HPP
 #define IMAGECONTROL_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 namespace GUI {
 

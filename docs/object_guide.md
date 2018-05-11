@@ -1,6 +1,6 @@
 # Object Guide
 
-This is a guide made for you that wishes to create a new object for Tribalia to render.
+This is a guide made for you that wishes to create a new object for Familyline to render.
 
 Please note that, for now, you'll have to patch the code for do it, but in the future, you will be able to do everything on this guide without it.
 
@@ -9,7 +9,7 @@ You'll need all development packages on [README](../README.md) and g++.
 ## Object creation
 
 The object needs to have these things:
-1. *Be in a cpp and hpp file.* It can be in any folder inside Tribalia source, but we recommend that it lies on the objects folder.
+1. *Be in a cpp and hpp file.* It can be in any folder inside Familyline source, but we recommend that it lies on the objects folder.
 2. *Inherit from `Logic::Building` or `Logic::Unit`* This depends of the object type.
 3. *Have a mesh*. 
 	Please check [the model guidelines](model_contrib.md) for how to create meshes. You need to add it to the assets file, but the format is straightforward. 
@@ -26,7 +26,7 @@ The header (.hpp) needs to be like this:
 
 #pragma once
 
-namespace Tribalia {
+namespace Familyline {
 
 class <OBJECT_CLASS_NAME> : public Logic::Building {
 private:
@@ -59,8 +59,8 @@ The source (.cpp) needs to be like this
 ```c++
 #include "<HEADER_FILE>"
 
-using namespace Tribalia;
-using namespace Tribalia::Logic;
+using namespace Familyline;
+using namespace Familyline::Logic;
 
 /*  250 HP, no baseAtk, 1.0 baseArmor, 1.0 building material, 0.95 bulding
     strength, 2 units of garrison capacity */
@@ -81,7 +81,7 @@ bool <OBJECT_CLASS_NAME>::DoAction(void) {return true; }
 - These numbers (HP, baseAtk...) don't make much sense now, but they will. I will document the meaning here when it happens.
 
 ### Patching
-To definitely insert your object into the game, open src/Tribalia.cpp and find the lines that start with `ObjectFactory::GetInstance()->AddObject`. Put your object in place or below the already added objects, using `new <OBJECT_CLASS_NAME>
+To definitely insert your object into the game, open src/Familyline.cpp and find the lines that start with `ObjectFactory::GetInstance()->AddObject`. Put your object in place or below the already added objects, using `new <OBJECT_CLASS_NAME>
 
 
 If you are a C++ programmer, you can make these things differently, but it needs to be compatible.

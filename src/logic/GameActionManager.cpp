@@ -2,7 +2,7 @@
 #include <cstdio>
 #include "Log.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 void GameActionManager::Push(GameAction a)
 {

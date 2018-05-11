@@ -1,7 +1,7 @@
 #include "ObjectManager.hpp"
 
-using namespace Tribalia;
-using namespace Tribalia::Logic;
+using namespace Familyline;
+using namespace Familyline::Logic;
 
 int ObjectManager::AssignID()
 {

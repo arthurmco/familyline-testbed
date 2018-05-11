@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cstring>
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 std::list<Light*> LightManager::_lights;
 

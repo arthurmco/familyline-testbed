@@ -1,5 +1,5 @@
 /***
-    Tent building for Tribalia
+    Tent building for Familyline
 
     Copyright (C) 2016 Arthur M
 ***/
@@ -10,7 +10,7 @@
 #ifndef WATCHTOWER_H
 #define WATCHTOWER_H
 
-namespace Tribalia {
+namespace Familyline {
 
 /*  A watch tower is a basic watch building */
 class WatchTower : public Logic::Building {

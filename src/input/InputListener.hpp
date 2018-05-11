@@ -10,7 +10,7 @@
 #ifndef INPUTLISTENER_HPP
 #define INPUTLISTENER_HPP
 
-namespace Tribalia::Input {
+namespace Familyline::Input {
 
 class InputListener {
 private:

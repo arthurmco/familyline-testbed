@@ -1,6 +1,6 @@
 #include "TestObject.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 TestObject::TestObject() : Building(0, TID, "TestObject",
 				    0, 0, 0, 250, -1,  3, 1.0, 1.0, 0.95, 2) {}

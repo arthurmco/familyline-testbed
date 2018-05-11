@@ -1,7 +1,7 @@
 #include "SceneManager.hpp"
 #include "LightManager.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 
 /* Init the scene manager with terrain coordinates, in OpenGL units */

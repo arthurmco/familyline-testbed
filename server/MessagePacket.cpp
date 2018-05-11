@@ -1,6 +1,6 @@
 #include "MessagePacket.hpp"
 
-using namespace Tribalia::Server;
+using namespace Familyline::Server;
 
 MessagePacket::MessagePacket()
 {

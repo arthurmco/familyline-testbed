@@ -2,7 +2,7 @@
 #include "ShaderManager.hpp"
 #include "Camera.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 VertexData::VertexData()
 {

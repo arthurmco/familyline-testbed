@@ -14,7 +14,7 @@
 #ifndef TEXTUREMANAGER_HPP
 #define TEXTUREMANAGER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     class TextureManager

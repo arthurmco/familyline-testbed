@@ -1,6 +1,6 @@
 #include "test_server_client.hpp"
 
-using namespace Tribalia::Server;
+using namespace Familyline::Server;
 
 void ClientTest::SetUp()
 {

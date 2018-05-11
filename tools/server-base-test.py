@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-# Tests the Tribalia server application
+# Tests the Familyline server application
 # Copyright (C) 2017 Arthur M
 
 # Parameters: server-base-test SERVER_IP
@@ -44,7 +44,7 @@ import os
 import time # time.sleep
 
 if len(sys.argv) < 2:
-    print('%s: tests Tribalia server app\n' % sys.argv[0])
+    print('%s: tests Familyline server app\n' % sys.argv[0])
     print('\n\tUsage: %s SERVER_IP\n' % sys.argv[0])
     sys.exit(1)
 

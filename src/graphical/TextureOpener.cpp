@@ -1,7 +1,7 @@
 #include "TextureOpener.hpp"
 #include <cstring>
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 static bool isDevilOn = false;
 

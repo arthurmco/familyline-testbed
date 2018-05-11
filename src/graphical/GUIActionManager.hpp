@@ -17,7 +17,7 @@
 
 #include <list>
 
-namespace Tribalia::Graphics {
+namespace Familyline::Graphics {
 
 	struct GUIAction {
 		Logic::Action* action;

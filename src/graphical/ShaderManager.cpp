@@ -1,6 +1,6 @@
 #include "ShaderManager.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 std::unordered_map<std::string, ShaderProgram*> ShaderManager::_shaders;
 const char* ShaderManager::DefaultShader = "forward";

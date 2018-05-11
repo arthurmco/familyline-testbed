@@ -1,6 +1,6 @@
 #include "Building.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 
 

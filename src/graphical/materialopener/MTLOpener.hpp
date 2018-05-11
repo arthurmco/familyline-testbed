@@ -12,7 +12,7 @@
 #ifndef MTLOPENER_HPP
 #define MTLOPENER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     class MTLOpener : public MaterialOpener

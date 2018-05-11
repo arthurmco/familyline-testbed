@@ -10,7 +10,7 @@
 #ifndef CURSOR_HPP
 #define CURSOR_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Input {
 
     class Cursor {

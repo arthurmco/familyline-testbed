@@ -1,8 +1,8 @@
 #include "InputPicker.hpp"
 
-using namespace Tribalia::Input;
-using namespace Tribalia::Graphics;
-using namespace Tribalia::Logic;
+using namespace Familyline::Input;
+using namespace Familyline::Graphics;
+using namespace Familyline::Logic;
 
 InputPicker::InputPicker(TerrainRenderer* terrain, Window* win, SceneManager* sm, Camera* cam,
 	ObjectManager* om)

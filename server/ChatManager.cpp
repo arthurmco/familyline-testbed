@@ -1,6 +1,6 @@
 #include "ChatManager.hpp"
 
-using namespace Tribalia::Server;
+using namespace Familyline::Server;
 using namespace std::chrono;
 
 /* Send a chat message to the specified client */

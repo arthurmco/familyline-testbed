@@ -5,7 +5,7 @@
 #include "ClientInit.hpp"
 #include <cstdio>
 
-using namespace Tribalia::Server;
+using namespace Familyline::Server;
 
 TCPInit::TCPInit(Client* c)
 {

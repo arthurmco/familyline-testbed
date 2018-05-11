@@ -11,7 +11,7 @@ import sys, os, stat, struct
 from PIL import Image
 
 if len(sys.argv) < 3:
-    print('%s: converts an image (as a heightmap) to a Tribalia terrain' %
+    print('%s: converts an image (as a heightmap) to a Familyline terrain' %
     sys.argv[0])
     print(' see docs/terrain_contrib.md for more info')
     print('Usage: %s IMG_SOURCE DESTINY\n' % sys.argv[0])

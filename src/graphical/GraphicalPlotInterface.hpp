@@ -10,7 +10,7 @@
 #include "Renderer.hpp"
 #include "../logic/DebugPlot.hpp"
 
-namespace Tribalia::Graphics {
+namespace Familyline::Graphics {
 
     class GraphicalPlotInterface : public Logic::DebugPlotInterface {
     private:
@@ -29,7 +29,7 @@ namespace Tribalia::Graphics {
 
     };
 
-}  // Tribalia::Graphics
+}  // Familyline::Graphics
 
 
 

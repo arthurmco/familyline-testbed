@@ -23,7 +23,7 @@ extern "C" {
 
 #include <string>
 
-namespace Tribalia::Graphics {
+namespace Familyline::Graphics {
 
     /* The asset itself, as a file, not an object */
     struct AssetItem {

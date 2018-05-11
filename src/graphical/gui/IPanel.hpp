@@ -10,7 +10,7 @@
 #ifndef _GUI_IPANEL
 #define _GUI_IPANEL
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 namespace GUI {
 

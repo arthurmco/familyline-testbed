@@ -5,8 +5,8 @@
 
 #include <algorithm>
 
-using namespace Tribalia::Graphics;
-using namespace Tribalia;
+using namespace Familyline::Graphics;
+using namespace Familyline;
 
 /* Game window width and height */
 int win_w, win_h;

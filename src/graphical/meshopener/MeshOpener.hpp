@@ -12,7 +12,7 @@
 #ifndef MESHOPENER_HPP
 #define MESHOPENER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
 class MeshOpener

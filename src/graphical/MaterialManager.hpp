@@ -13,7 +13,7 @@
 #ifndef MATERIALMANAGER_HPP
 #define MATERIALMANAGER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     class MaterialManager

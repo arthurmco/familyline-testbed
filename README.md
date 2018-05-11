@@ -1,11 +1,11 @@
-# Tribalia
+# Familyline
 
 <img src="icons/tribalia-logo.png" height="128px" width="128px" />
 
-[![pipeline status](https://gitlab.com/arthurmco/Tribalia/badges/master/pipeline.svg)](https://gitlab.com/arthurmco/Tribalia/commits/master)
-[![coverage report](https://gitlab.com/arthurmco/Tribalia/badges/master/coverage.svg)](https://gitlab.com/arthurmco/Tribalia/commits/master)
+[![pipeline status](https://gitlab.com/arthurmco/Familyline/badges/master/pipeline.svg)](https://gitlab.com/arthurmco/Familyline/commits/master)
+[![coverage report](https://gitlab.com/arthurmco/Familyline/badges/master/coverage.svg)](https://gitlab.com/arthurmco/Familyline/commits/master)
 
-Tribalia is a real-time strategy game focused on Ancient Era, from since the
+Familyline is a real-time strategy game focused on Ancient Era, from since the
 neolythic period (~ 10.000 AD) to the death of Christ (~ 30 BD).
 
 In it, you will guide a family, that goes from the end of neolythic until its kingdom 

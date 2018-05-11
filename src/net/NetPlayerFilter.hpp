@@ -11,7 +11,7 @@
 #include <NetMessageQueue.hpp>
 #include <map>
 
-namespace Tribalia::Net {
+namespace Familyline::Net {
     
     class NetPlayerFilter
     {
@@ -50,7 +50,7 @@ namespace Tribalia::Net {
     };
 
 
-}  // Tribalia::Net
+}  // Familyline::Net
 
 
 #endif /* NETPLAYERFILTER_HPP */

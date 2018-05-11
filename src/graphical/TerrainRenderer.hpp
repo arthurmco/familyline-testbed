@@ -21,12 +21,12 @@
 /* What each unit of height means in OpenGL units */
 #define SEC_HEIGHT 0.01
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
 
     struct TerrainDataInfo {
-        Tribalia::Logic::TerrainData* data;
+        Familyline::Logic::TerrainData* data;
         GLint vao;
     };
 
@@ -43,7 +43,7 @@ namespace Graphics {
     class TerrainRenderer {
     private:
         TerrainDataInfo* _tdata = nullptr;
-        Tribalia::Logic::Terrain* _t;
+        Familyline::Logic::Terrain* _t;
         Camera* _cam  = nullptr;
         Renderer* _rend;
         glm::mat4 _wmatrix = glm::mat4(1.0f);
@@ -54,8 +54,8 @@ namespace Graphics {
     public:
         TerrainRenderer(Renderer*);
 
-        void SetTerrain(Tribalia::Logic::Terrain*);
-        Tribalia::Logic::Terrain* GetTerrain();
+        void SetTerrain(Familyline::Logic::Terrain*);
+        Familyline::Logic::Terrain* GetTerrain();
 
         void SetCamera(Camera*);
         Camera* GetCamera();

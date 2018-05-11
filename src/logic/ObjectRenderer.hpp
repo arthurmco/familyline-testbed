@@ -20,12 +20,12 @@
 #ifndef OBJECTRENDERER_HPP
 #define OBJECTRENDERER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 	namespace Logic {
 
 		struct ObjectRenderData {
 			int ID;
-			Tribalia::Graphics::Mesh* m;
+			Familyline::Graphics::Mesh* m;
 		};
 
 		/*
@@ -41,7 +41,7 @@ namespace Tribalia {
 		{
 		private:
 			ObjectManager * _om;
-			Tribalia::Graphics::SceneManager* _sm;
+			Familyline::Graphics::SceneManager* _sm;
 
 			std::list<LocatableObject*> _objects;
 			std::vector<ObjectRenderData> _IDs;
@@ -51,7 +51,7 @@ namespace Tribalia {
 			std::map<int, bool> _deleted_ids;
 
 		public:
-			ObjectRenderer(ObjectManager*, Tribalia::Graphics::SceneManager*);
+			ObjectRenderer(ObjectManager*, Familyline::Graphics::SceneManager*);
 
 			virtual void OnListen(GameAction& a);
 
@@ -67,7 +67,7 @@ namespace Tribalia {
 		};
 
 	}
-} /* Tribalia */
+} /* Familyline */
 
 
 #endif /* end of include guard: OBJECTRENDERER_HPP */

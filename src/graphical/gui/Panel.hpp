@@ -11,7 +11,7 @@
 #ifndef _GUI_PANEL
 #define _GUI_PANEL
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 namespace GUI {
 
@@ -24,7 +24,7 @@ namespace GUI {
     };
     
 /*
-    A panel is the most basic window structore for Tribalia's GUI
+    A panel is the most basic window structore for Familyline's GUI
 */
 class Panel : public IContainer {
 private:

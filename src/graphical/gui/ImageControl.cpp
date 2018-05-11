@@ -1,7 +1,7 @@
 #include "ImageControl.hpp"
 
-using namespace Tribalia::Graphics;
-using namespace Tribalia::Graphics::GUI;
+using namespace Familyline::Graphics;
+using namespace Familyline::Graphics::GUI;
 
 /* Load the image from a filename.
    Because it uses Cairo file loading functions directly, it only 

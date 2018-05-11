@@ -10,7 +10,7 @@
 #ifndef BOUNDINGBOX_HPP
 #define BOUNDINGBOX_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     enum BoundingBoxPoints
@@ -62,7 +62,7 @@ namespace Graphics {
 
 
 } /* Graphics */
-} /* Tribalia */
+} /* Familyline */
 
 
 #endif /* end of include guard: BOUNDINGBOX_HPP */

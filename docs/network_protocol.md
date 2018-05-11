@@ -1,6 +1,6 @@
-# Tribalia gameplay network protocol
+# Familyline gameplay network protocol
 
-The Tribalia protocol is used by connecting clients to the game server, allowing for 
+The Familyline protocol is used by connecting clients to the game server, allowing for 
 some sort of good gameplay.
 
 You might be able to use different games, if they're compatible with the same 
@@ -220,7 +220,7 @@ everyone. Then you can start the game loop
 
 ## How does it work?
 
-	In Tribalia, UDP messages sends commands from the client to the
+	In Familyline, UDP messages sends commands from the client to the
 server, or vice-versa, in binary format. 
 
 The client waits for a certain amount of time (called a turn, 16ms by default) 
@@ -257,7 +257,7 @@ are in little endian format here.
 |     Ch |     4 | checksum | The message checksum                                   |
 |    10h |   ... | commands | The commands                                           |
    
-The magic number is for identificating the package as a Tribalia
+The magic number is for identificating the package as a Familyline
 Message package (hence the TBM).
 
 The turn number is the turn number for that package. If the gameplay

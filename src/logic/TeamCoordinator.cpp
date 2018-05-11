@@ -1,6 +1,6 @@
 #include "TeamCoordinator.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 TeamCoordinator::TeamCoordinator()
 {

@@ -12,8 +12,8 @@
 
 class TeamRelationTest : public ::testing::Test {
 protected:
-    Tribalia::Logic::TeamCoordinator tc;
-    Tribalia::Logic::City *c11, *c12, *c21, *c22;
+    Familyline::Logic::TeamCoordinator tc;
+    Familyline::Logic::City *c11, *c12, *c21, *c22;
     
 public:
     void SetUp();

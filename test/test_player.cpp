@@ -2,7 +2,7 @@
 #include "logic/Player.hpp"
 #include "logic/PlayerManager.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 /* This is a test player for this test suite
    In each play loop, it increases the XP by 1

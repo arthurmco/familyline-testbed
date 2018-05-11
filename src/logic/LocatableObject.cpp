@@ -1,6 +1,6 @@
 #include "LocatableObject.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 LocatableObject::LocatableObject(int oid, int tid, const char* name,
     float xPos, float yPos, float zPos) :
@@ -14,7 +14,7 @@ float LocatableObject::GetRotation() { return GET_PROPERTY(float, "rotation"); }
 /* Get radius from mesh data. */
 float LocatableObject::GetRadius()
 {
-    Tribalia::Graphics::Mesh* m = ((Tribalia::Graphics::Mesh*)_mesh.get());
+    Familyline::Graphics::Mesh* m = ((Familyline::Graphics::Mesh*)_mesh.get());
     if (m) {
 
 	if (_radius < 0.0f) {

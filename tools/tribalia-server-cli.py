@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-#   Tribalia CLI communication with the server
+#   Familyline CLI communication with the server
 #
 #   Copyright (C) 2018 Arthur M
 #
@@ -222,7 +222,7 @@ import curses
 import sys #.exit
 
 print("""
- Tribalia Server command line client
+ Familyline Server command line client
  Copyright (C) 2018 Arthur M.
  Licensed under MIT license
 """)

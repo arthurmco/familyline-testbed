@@ -9,7 +9,7 @@
 #ifndef MESSAGEPACKET_HPP
 #define MESSAGEPACKET_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Server {
 
 /* The action values */

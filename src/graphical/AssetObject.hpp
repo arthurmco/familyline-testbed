@@ -17,7 +17,7 @@
 #include "Material.hpp"
 #include <vector>
 
-namespace Tribalia::Graphics {
+namespace Familyline::Graphics {
 
     union AssetObject {
 	Mesh* mesh;

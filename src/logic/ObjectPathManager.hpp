@@ -15,7 +15,7 @@
 #ifndef OBJECTPATHMANAGER_HPP
 #define OBJECTPATHMANAGER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Logic {
 
 /* The object path unit */

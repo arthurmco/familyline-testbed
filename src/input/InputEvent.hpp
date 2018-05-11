@@ -7,7 +7,7 @@
 #ifndef INPUTEVENT_HPP
 #define INPUTEVENT_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Input {
 
 enum EventType {

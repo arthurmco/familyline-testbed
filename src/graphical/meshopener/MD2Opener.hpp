@@ -15,7 +15,7 @@
 #ifndef MD2OPENER_HPP
 #define MD2OPENER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
 

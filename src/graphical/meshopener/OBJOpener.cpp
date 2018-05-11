@@ -1,6 +1,6 @@
 #include "OBJOpener.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 #define FGETS_OR_THROW(s, size, stream) \
     if (!fgets(s, size, stream)) {				      \

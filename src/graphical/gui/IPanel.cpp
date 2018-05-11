@@ -1,6 +1,6 @@
 #include "IPanel.hpp"
 
-using namespace Tribalia::Graphics::GUI;
+using namespace Familyline::Graphics::GUI;
 
 IPanel::IPanel(){_bgColor = glm::vec4(255, 255, 255, 0);}
 

@@ -21,7 +21,7 @@
 #include "../input/InputManager.hpp"
 
 
-namespace Tribalia::Graphics {
+namespace Familyline::Graphics {
 
 /* Stores everything needed to render a panel, including panel data itself */
 struct PanelRenderObject {
@@ -78,7 +78,7 @@ public:
     /* Send input to other controls 
      * Return true if we processed the event, false if not
      */
-    virtual bool ProcessInput(Tribalia::Input::InputEvent& ev) override;
+    virtual bool ProcessInput(Familyline::Input::InputEvent& ev) override;
     
     /* Render the GUI view */
     bool Render();
@@ -105,7 +105,7 @@ public:
     ~GUIRenderer();
 };
 
-} /* Tribalia::Graphics */
+} /* Familyline::Graphics */
 
 
 #endif /* end of include guard: GUIRENDERER_HPP */

@@ -1,5 +1,5 @@
 /***
-	Tribalia main file
+	Familyline main file
 
 	Copyright 2016, 2017 Arthur Mendes.
 
@@ -53,11 +53,11 @@
 
 #include <glm/gtc/matrix_transform.hpp> //glm::lookAt()
 
-using namespace Tribalia;
-using namespace Tribalia::Logic;
-using namespace Tribalia::Graphics;
-using namespace Tribalia::Graphics::GUI;
-using namespace Tribalia::Input;
+using namespace Familyline;
+using namespace Familyline::Logic;
+using namespace Familyline::Graphics;
+using namespace Familyline::Graphics::GUI;
+using namespace Familyline::Input;
 
 #ifdef WIN32
 #include <io.h>
@@ -83,7 +83,7 @@ static int get_arg_index(const char* name, int argc, char const* argv[])
 
 static void show_version()
 {
-	printf("Tribalia " VERSION "\n");
+	printf("Familyline " VERSION "\n");
 	printf("Compiled in " __DATE__ "\n");
 	printf("Commit hash " COMMIT "\n");
 	printf("\n");
@@ -91,7 +91,7 @@ static void show_version()
 
 static void show_help()
 {
-	printf("Tribalia help:\n");
+	printf("Familyline help:\n");
 	printf("--version:\t\tPrint version and, if compiled inside a Git repo, commit hash\n");
 	printf("--help:\t\t\tPrint this help information\n");
 	printf("--size <W>x<H>:\t\tChanges the game resolution to <W>x<H> pixels\n");
@@ -210,7 +210,7 @@ int main(int argc, char const *argv[])
 	}
 
 
-	Log::GetLog()->Write("", "Tribalia " VERSION);
+	Log::GetLog()->Write("", "Familyline " VERSION);
 	Log::GetLog()->Write("", "built on " __DATE__ " by " USERNAME);
 #if defined(COMMIT)
 	Log::GetLog()->Write("", "git commit is " COMMIT);
@@ -466,7 +466,7 @@ int main(int argc, char const *argv[])
 		if (w) {
 			char* err = new char[512 + strlen(se.what())];
 			sprintf(err,
-				"Tribalia found an error in a shader\n"
+				"Familyline found an error in a shader\n"
 				"\n"
 				"Error: %s\n"
 				"File: %s, type: %d, code: %d",

@@ -7,7 +7,7 @@
 
 #include "GFXExceptions.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 
 

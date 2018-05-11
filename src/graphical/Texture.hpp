@@ -14,7 +14,7 @@
 #include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     /* Texture coordinate areas, in relative/clamped coordinates */
@@ -62,6 +62,6 @@ public:
 };
 
 } /* Graphics */
-} /* Tribalia */
+} /* Familyline */
 
 #endif /* end of include guard: TEXTURE_HPP */

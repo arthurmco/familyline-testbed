@@ -15,7 +15,7 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
-namespace Tribalia::Logic {
+namespace Familyline::Logic {
 
     class Player {
     protected:

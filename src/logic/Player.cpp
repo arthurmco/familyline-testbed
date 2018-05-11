@@ -1,8 +1,8 @@
 #include "Player.hpp"
 #include <chrono>
 
-using namespace Tribalia;
-using namespace Tribalia::Logic;
+using namespace Familyline;
+using namespace Familyline::Logic;
 
 Player::Player(const char* name, int xp, GameActionManager* gam)
     : _name{name},  _xp(xp), _gam(gam)

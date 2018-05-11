@@ -11,7 +11,7 @@
 
 class ObjectTest : public ::testing::Test {
 protected:
-    Tribalia::Logic::ObjectManager* _om;
+    Familyline::Logic::ObjectManager* _om;
     
 public:
     void SetUp();

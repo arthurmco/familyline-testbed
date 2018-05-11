@@ -1,5 +1,5 @@
 /***
- 	Representation of a client computer in Tribalia
+ 	Representation of a client computer in Familyline
 
 	Copyright (C) 2016, 2017 Arthur M
 ***/
@@ -18,7 +18,7 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-namespace Tribalia::Server {
+namespace Familyline::Server {
 
     /* Define the connection status, obviously */
     enum ConnectionStatus {

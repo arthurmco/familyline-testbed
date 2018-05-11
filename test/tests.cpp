@@ -1,5 +1,5 @@
 /*
- * 	Unit test routines for Tribalia
+ * 	Unit test routines for Familyline
  *
  *  Copyright (C) 2017 Arthur M
  *
@@ -11,7 +11,7 @@ class PathFindingTest : public ::testing::Test {
 
 #include "graphical/meshopener/OBJOpener.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 TEST(MeshTest, OBJOpenTest) {
     OBJOpener om;
     Mesh* m = om.Open("test/test.obj");

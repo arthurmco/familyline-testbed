@@ -13,7 +13,7 @@
 
 #include <map>
 
-namespace Tribalia::Graphics {
+namespace Familyline::Graphics {
 
 	class ShaderProgram
 	{

@@ -14,7 +14,7 @@
 #ifndef TERRAIN_HPP
 #define TERRAIN_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Logic {
 
     /*  A terrain is divided into sections.

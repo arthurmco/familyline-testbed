@@ -1,7 +1,7 @@
 #include "Mesh.hpp"
 #include "Material.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 Mesh::Mesh(VertexData* vd)
     : SceneObject("Mesh", glm::vec3(0,0,0), 0, 0, 0)

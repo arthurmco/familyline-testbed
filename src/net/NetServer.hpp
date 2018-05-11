@@ -1,5 +1,5 @@
 /*
-  Represents a server in the client Tribalia 
+  Represents a server in the client Familyline 
 
   Copyright (C) 2017, 2018 Arthur M
 */
@@ -32,7 +32,7 @@
 #include <arpa/inet.h>
 #endif
 
-namespace Tribalia::Net {
+namespace Familyline::Net {
 
     /* Any error that can occur on the server */
     class ServerException : public std::runtime_error {
@@ -55,12 +55,12 @@ namespace Tribalia::Net {
 	struct sockaddr_in _serveraddr;
 
 	/* Receive a message */
-	Tribalia::Server::NetMessageQueue* cmq = nullptr;
+	Familyline::Server::NetMessageQueue* cmq = nullptr;
 	
     public:
 	const char* Receive(size_t maxlen = 1024);
 
-	Tribalia::Server::NetMessageQueue* GetQueue() { return this->cmq; }
+	Familyline::Server::NetMessageQueue* GetQueue() { return this->cmq; }
 	
 	Server(const char* ipaddr, int port = 12000);
 

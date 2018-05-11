@@ -13,7 +13,7 @@
 #include "Unit.hpp"
 #include <list>
 
-namespace Tribalia {
+namespace Familyline {
 	namespace Logic {
 
 		class Building : public AttackableObject

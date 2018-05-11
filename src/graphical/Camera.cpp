@@ -1,6 +1,6 @@
 #include "Camera.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 Camera::Camera(glm::vec3 pos, float aspectRatio, glm::vec3 lookAt)
 {

@@ -18,7 +18,7 @@
 #define TEXTUREOPENER_HPP
 
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
 class TextureFile
@@ -59,6 +59,6 @@ public:
 };
 
 } /* Graphics */
-} /* Tribalia */
+} /* Familyline */
 
 #endif /* end of include guard: TEXTUREOPENER_HPP */

@@ -1,6 +1,6 @@
 #include "test_assetfile.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 
 void AssetFileTest::SetUp()

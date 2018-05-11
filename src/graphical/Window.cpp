@@ -1,7 +1,7 @@
 #include "Window.hpp"
 #include "../config.h"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 Window::Window(int w, int h, unsigned win_opts)
 {
@@ -36,7 +36,7 @@ Window::Window(int w, int h, unsigned win_opts)
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, fflags);
-    _win = SDL_CreateWindow("Familyline / Tribalia",
+    _win = SDL_CreateWindow("Familyline / Familyline",
 			    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h,
 			    SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
 

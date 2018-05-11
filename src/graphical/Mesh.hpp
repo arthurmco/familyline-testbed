@@ -19,7 +19,7 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     class Material;
@@ -68,7 +68,7 @@ namespace Graphics {
 
 
 } /* Graphics */
-} /* Tribalia */
+} /* Familyline */
 
 
 

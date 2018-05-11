@@ -1,6 +1,6 @@
 #include "Client.hpp"
 #include <cstdio>
-using namespace Tribalia::Server;
+using namespace Familyline::Server;
 
 Client::Client(int sockfd, struct in_addr addr)
 {

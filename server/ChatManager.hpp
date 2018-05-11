@@ -1,5 +1,5 @@
 /***
-	Chat management (send and retrieval) in Tribalia
+	Chat management (send and retrieval) in Familyline
 
 	Copyright (C) 2017, 2018 Arthur M
 ***/
@@ -14,7 +14,7 @@
 #ifndef CHATMANAGER_HPP
 #define CHATMANAGER_HPP
 
-namespace Tribalia::Server {
+namespace Familyline::Server {
 
 	enum ChatDestiny {
 		ToClient,

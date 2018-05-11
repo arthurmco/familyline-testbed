@@ -15,7 +15,7 @@
 #ifndef MATERIALOPENER_HPP
 #define MATERIALOPENER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
 class MaterialOpener

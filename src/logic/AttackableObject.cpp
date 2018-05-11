@@ -1,7 +1,7 @@
 #include "AttackableObject.hpp"
 #include "TeamCoordinator.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 int attack_seed = 0;
 

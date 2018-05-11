@@ -26,7 +26,7 @@
 #include <algorithm> //std::min()
 #include <chrono>
 
-using namespace Tribalia::Server;
+using namespace Familyline::Server;
 
 #include <Log.hpp>
 #include "ChatManager.hpp"

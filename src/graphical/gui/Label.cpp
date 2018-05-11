@@ -1,7 +1,7 @@
 #include "Label.hpp"
 
-using namespace Tribalia::Graphics::GUI;
-using namespace Tribalia;
+using namespace Familyline::Graphics::GUI;
+using namespace Familyline;
 
 Label::Label(int x, int y, const char* text)
 {

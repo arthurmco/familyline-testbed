@@ -18,7 +18,7 @@
 #ifndef PATHFINDER_HPP
 #define PATHFINDER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 	namespace Logic {
 		class PathFinder;
 

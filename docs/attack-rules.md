@@ -1,6 +1,6 @@
 # Attack rules
 
-These are the object attack-defend rules in Tribalia
+These are the object attack-defend rules in Familyline
 
 They are not implemented in the game yet.
 

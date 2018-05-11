@@ -2,12 +2,12 @@
 #include "Game.hpp"
 #include "graphical/LightManager.hpp"
 
-using namespace Tribalia;
-using namespace Tribalia::Logic;
-using namespace Tribalia::Input;
+using namespace Familyline;
+using namespace Familyline::Logic;
+using namespace Familyline::Input;
 
-using namespace Tribalia::Graphics;
-using namespace Tribalia::Graphics::GUI;
+using namespace Familyline::Graphics;
+using namespace Familyline::Graphics::GUI;
 
 class GameActionListenerImpl : public GameActionListener {
 public:
@@ -90,7 +90,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
 		hp->SetPathfinder(pathf);
 
-		widgets.lblVersion = new Label(10, 10, "Tribalia " VERSION " commit " COMMIT);
+		widgets.lblVersion = new Label(10, 10, "Familyline " VERSION " commit " COMMIT);
 		widgets.lblVersion->SetForeColor(255, 255, 255, 255);
 
 		gr->AddPanel(widgets.lblVersion);
@@ -112,7 +112,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 		err = new char[192 + strlen(re.what())];
 		sprintf(err,
-			"Tribalia found an error in rendering\n"
+			"Familyline found an error in rendering\n"
 			"\n"
 			"Error: %s\n", re.what());
 		win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
@@ -125,7 +125,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 		err = new char[512 + strlen(se.what())];
 		sprintf(err,
-			"Tribalia found an error in a mesh\n"
+			"Familyline found an error in a mesh\n"
 			"\n"
 			"Mesh file: %s, error: %s\n",
 			se.file.c_str(), se.what());
@@ -139,7 +139,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 		err = new char[512 + strlen(se.what())];
 		sprintf(err,
-			"Tribalia found an error in a material\n"
+			"Familyline found an error in a material\n"
 			"\n"
 			"Mesh file: %s, error: %s\n",
 			se.file.c_str(), se.what());
@@ -153,7 +153,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 		err = new char[512 + strlen(se.what())];
 		sprintf(err,
-			"Tribalia found an error in a shader\n"
+			"Familyline found an error in a shader\n"
 			"\n"
 			"Error: %s\n"
 			"File: %s, type: %d, code: %d",
@@ -171,7 +171,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 			Log::GetLog()->Fatal("game", "Asset %s, file: %s", a->name.c_str(), a->path.c_str());
 
 			sprintf(err,
-				"Tribalia found an error in an asset\n"
+				"Familyline found an error in an asset\n"
 				"\n"
 				"Asset named %s, file: %s\n"
 				"Error: %s\n",
@@ -179,7 +179,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		}
 
 		sprintf(err,
-			"Tribalia found an error in an asset\n"
+			"Familyline found an error in an asset\n"
 			"\n"
 			"Error: %s\n",
 			ae.what());
@@ -196,7 +196,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 		err = new char[512 + strlen(te.what())];
 		sprintf(err,
-			"Tribalia found an error in a terrain\n"
+			"Familyline found an error in a terrain\n"
 			"\n"
 			"File: %s\n"
 			"error: %s (%s)\n",

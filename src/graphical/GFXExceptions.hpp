@@ -9,7 +9,7 @@
 #ifndef GFXEXCEPTIONS_HPP
 #define GFXEXCEPTIONS_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     class window_exception : public std::runtime_error
@@ -64,7 +64,7 @@ namespace Graphics {
 
 
 } /* Graphics */
-} /* Tribalia */
+} /* Familyline */
 
 
 

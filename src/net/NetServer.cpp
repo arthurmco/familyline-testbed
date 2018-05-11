@@ -1,6 +1,6 @@
 #include "NetServer.hpp"
 
-using namespace Tribalia::Net;
+using namespace Familyline::Net;
 
 
 #ifdef _WIN32
@@ -39,7 +39,7 @@ Server::Server(const char* ipaddr, int port)
 		delete[] err;
 	}
 
-	cmq = new Tribalia::Server::NetMessageQueue(_serversock,
+	cmq = new Familyline::Server::NetMessageQueue(_serversock,
 		_serveraddr.sin_addr);
 }
 

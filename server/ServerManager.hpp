@@ -1,7 +1,7 @@
 
 /***
 
-   Tribalia server manager
+   Familyline server manager
 
    Copyright (C) 2017 Arthur M
 
@@ -46,7 +46,7 @@
 #ifndef SERVERMANAGER_HPP
 #define SERVERMANAGER_HPP
 
-namespace Tribalia::Server {
+namespace Familyline::Server {
 
 	class ServerManager {
 	private:

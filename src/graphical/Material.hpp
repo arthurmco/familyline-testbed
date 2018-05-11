@@ -13,7 +13,7 @@
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     struct MaterialData {

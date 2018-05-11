@@ -1,7 +1,7 @@
 #include "TextureOpener.hpp"
 #include <IL/ilu.h>
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 TextureFile::TextureFile(ILuint handle, GLenum format)
     : _handle(handle), _format(format)

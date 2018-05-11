@@ -16,7 +16,7 @@
 #ifndef BUILDQUEUE_HPP
 #define BUILDQUEUE_HPP
 
-namespace Tribalia::Logic {
+namespace Familyline::Logic {
     class BuildQueue {
     private:
 	std::queue<LocatableObject*> _objects;

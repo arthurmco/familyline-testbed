@@ -1,6 +1,6 @@
 #include "Framebuffer.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 /*	Create the framebuffer, its texture (for getting the image) and its
 	renderbuffer (to correctly render depth) */

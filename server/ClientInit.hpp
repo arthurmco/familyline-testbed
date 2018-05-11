@@ -11,7 +11,7 @@
 #include "Client.hpp"
 #include "ServerPlayerManager.hpp"
 
-namespace Tribalia::Server {
+namespace Familyline::Server {
 
 
     /* TCP initialization steps.

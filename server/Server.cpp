@@ -1,5 +1,5 @@
 /***
- 	Tribalia server entry point	
+ 	Familyline server entry point	
 
 	Copyright (C) 2016, 2017 Arthur M
 ***/
@@ -23,8 +23,8 @@
 #include <string>
 #include <cstdio>
 
-using namespace Tribalia;
-using namespace Tribalia::Server;
+using namespace Familyline;
+using namespace Familyline::Server;
 
 volatile bool continue_main = true;
 
@@ -66,7 +66,7 @@ int main(int argc, char const* argv[])
     sigaction(SIGINT, &oact, nullptr);  
 #endif
 
-    printf("Tribalia Server " VERSION "\n");
+    printf("Familyline Server " VERSION "\n");
     printf("Copyright (C) 2017 Arthur M\n");
     printf("Listening on port 12000\n");
     puts("\n");

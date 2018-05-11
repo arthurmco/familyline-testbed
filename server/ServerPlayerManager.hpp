@@ -9,7 +9,7 @@
 #include <list>
 #include "Client.hpp"
 
-namespace Tribalia::Server {
+namespace Familyline::Server {
 
     struct NetPlayer {
 	Client* cli;

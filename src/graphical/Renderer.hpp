@@ -1,5 +1,5 @@
 /***
-    Tribalia 3D renderer
+    Familyline 3D renderer
 
     Copyright (C) 2016-2018 Arthur Mendes.
 
@@ -26,7 +26,7 @@
 #include "Log.hpp"
 
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     struct VertexRenderInfo {

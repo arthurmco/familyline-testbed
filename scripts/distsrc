@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Pack Tribalia to source distribution
+# Pack Familyline to source distribution
 # Copyright (C) 2016 Arthur M
 
 # Make clean and make again

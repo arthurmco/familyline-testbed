@@ -1,7 +1,7 @@
 #include "Renderer.hpp"
 #include "../config.h"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 GLuint vao_tri = 0, vbo_tri = 0;
 

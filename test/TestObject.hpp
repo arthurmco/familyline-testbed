@@ -1,5 +1,5 @@
 /***
-    Test object for Tribalia
+    Test object for Familyline
 
     Copyright (C) 2016, 2017 Arthur M
 ***/
@@ -11,7 +11,7 @@
 #define TEST_OBJECT_H
 
 /*  A tent is a basic people storage building */
-class TestObject : public Tribalia::Logic::Building {
+class TestObject : public Familyline::Logic::Building {
 private:
     
 public:

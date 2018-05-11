@@ -11,7 +11,7 @@
 #ifndef LABEL_HPP
 #define LABEL_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 namespace GUI {
 

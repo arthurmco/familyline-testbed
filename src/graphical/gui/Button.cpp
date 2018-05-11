@@ -1,8 +1,8 @@
 #include "Button.hpp"
 #include "Label.hpp"
 
-using namespace Tribalia::Graphics::GUI;
-using namespace Tribalia;
+using namespace Familyline::Graphics::GUI;
+using namespace Familyline;
 
 Button::Button(int x, int y, int w, int h, const char* text)
     : Button(x, y, w, h, new Label(0, 0, text)) {}

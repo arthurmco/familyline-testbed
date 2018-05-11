@@ -1,12 +1,12 @@
 ####
-# Tribalia makelist
+# Familyline makelist
 #
 # Copyright (C) 2016 Arthur M
 ####
 
 cmake_minimum_required(VERSION 3.1)
 
-project(Tribalia)
+project(Familyline)
 
 SET(GEN_HEADER "${CMAKE_SOURCE_DIR}/src/EnviroDefs.h")
 configure_file("${CMAKE_SOURCE_DIR}/src/EnviroDefs.h.in" "${CMAKE_SOURCE_DIR}/src/EnviroDefs.h" @ONLY)
@@ -27,7 +27,7 @@ execute_process(COMMAND whoami OUTPUT_VARIABLE USERNAME
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 file(APPEND "${GEN_HEADER}" "#define USERNAME \"${USERNAME}\"\n")
 
-#Tribalia game data
+#Familyline game data
 file(GLOB_RECURSE SRC_LOGIC "${CMAKE_SOURCE_DIR}/src/logic/*.cpp")
 file(GLOB_RECURSE SRC_GFX "${CMAKE_SOURCE_DIR}/src/graphical/*.cpp")
 file(GLOB_RECURSE SRC_GUI "${CMAKE_SOURCE_DIR}/src/graphical/gui/*.cpp")
@@ -36,15 +36,15 @@ file(GLOB_RECURSE SRC_NET "${CMAKE_SOURCE_DIR}/src/net/*.cpp")
 file(GLOB_RECURSE SRC_OBJECTS "${CMAKE_SOURCE_DIR}/src/objects/*.cpp")
 file(GLOB SRC_BASE "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
-# Tribalia common files
+# Familyline common files
 file(GLOB SRC_COMMON "${CMAKE_SOURCE_DIR}/common/*.cpp")
 
-# Tribalia server data
+# Familyline server data
 file(GLOB_RECURSE SRC_SERVER "${CMAKE_SOURCE_DIR}/server/*.cpp")
 
 #Compilation data
-add_executable(tribalia ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT} ${SRC_NET} ${SRC_OBJECTS} ${SRC_COMMON})
-add_executable(tribalia-server ${SRC_SERVER} ${SRC_COMMON})
+add_executable(familyline ${SRC_BASE} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT} ${SRC_NET} ${SRC_OBJECTS} ${SRC_COMMON})
+add_executable(familyline-server ${SRC_SERVER} ${SRC_COMMON})
 
 include("test/unit-tests.cmake")
 
@@ -79,26 +79,26 @@ if (MSVC)
 
   link_directories(${SDL_LIB} ${GLEW_LIB})
   
-  target_link_libraries(tribalia ${SDL_LIB})
-  target_link_libraries(tribalia ${OPENGL_gl_LIBRARY})
-  target_link_libraries(tribalia ${GLEW_LIBRARY})
-  target_link_libraries(tribalia ${IL_LIBRARIES})
-  target_link_libraries(tribalia ${ILU_LIBRARIES})
-  target_link_libraries(tribalia ${CAIRO_LIB})
-  target_link_libraries(tribalia ${YAML_LIBRARIES}) # You need to build YAML as a dll (use -DBUILD_SHARED_LIBS)
-  target_link_libraries(tribalia wsock32 ws2_32)
+  target_link_libraries(familyline ${SDL_LIB})
+  target_link_libraries(familyline ${OPENGL_gl_LIBRARY})
+  target_link_libraries(familyline ${GLEW_LIBRARY})
+  target_link_libraries(familyline ${IL_LIBRARIES})
+  target_link_libraries(familyline ${ILU_LIBRARIES})
+  target_link_libraries(familyline ${CAIRO_LIB})
+  target_link_libraries(familyline ${YAML_LIBRARIES}) # You need to build YAML as a dll (use -DBUILD_SHARED_LIBS)
+  target_link_libraries(familyline wsock32 ws2_32)
 
-  target_link_libraries(tribalia-server wsock32 ws2_32)
+  target_link_libraries(familyline-server wsock32 ws2_32)
 
   #if (DO_TESTS)
-  	target_link_libraries(tribalia-tests ${SDL_LIB})
-  	target_link_libraries(tribalia-tests ${OPENGL_gl_LIBRARY})
-  	target_link_libraries(tribalia-tests ${GLEW_LIBRARY})
-  	target_link_libraries(tribalia-tests ${IL_LIBRARIES})
-  	target_link_libraries(tribalia-tests ${ILU_LIBRARIES})
-  	target_link_libraries(tribalia-tests ${CAIRO_LIB})
-	target_link_libraries(tribalia-tests wsock32 ws2_32)
-	target_link_libraries(tribalia-tests ${YAML_LIBRARIES})
+  	target_link_libraries(familyline-tests ${SDL_LIB})
+  	target_link_libraries(familyline-tests ${OPENGL_gl_LIBRARY})
+  	target_link_libraries(familyline-tests ${GLEW_LIBRARY})
+  	target_link_libraries(familyline-tests ${IL_LIBRARIES})
+  	target_link_libraries(familyline-tests ${ILU_LIBRARIES})
+  	target_link_libraries(familyline-tests ${CAIRO_LIB})
+	target_link_libraries(familyline-tests wsock32 ws2_32)
+	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
   #endif(DO_TESTS)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /GR /W4 /std:c++latest")
@@ -115,24 +115,24 @@ else()
   
   
   
-  target_link_libraries(tribalia ${SDL2_LIBRARIES})
-  target_link_libraries(tribalia ${OPENGL_gl_LIBRARY})
-  target_link_libraries(tribalia ${GLEW_LIBRARY})
-  target_link_libraries(tribalia ${IL_LIBRARIES})
-  target_link_libraries(tribalia ${ILU_LIBRARIES})
-  target_link_libraries(tribalia ${CAIRO_LIBRARIES})
-  target_link_libraries(tribalia ${GLM_LIBRARIES})
-  target_link_libraries(tribalia ${YAML_LIBRARIES})
+  target_link_libraries(familyline ${SDL2_LIBRARIES})
+  target_link_libraries(familyline ${OPENGL_gl_LIBRARY})
+  target_link_libraries(familyline ${GLEW_LIBRARY})
+  target_link_libraries(familyline ${IL_LIBRARIES})
+  target_link_libraries(familyline ${ILU_LIBRARIES})
+  target_link_libraries(familyline ${CAIRO_LIBRARIES})
+  target_link_libraries(familyline ${GLM_LIBRARIES})
+  target_link_libraries(familyline ${YAML_LIBRARIES})
   
   if(DO_TESTS)
-  	target_link_libraries(tribalia-tests ${SDL2_LIBRARIES})
-  	target_link_libraries(tribalia-tests ${OPENGL_gl_LIBRARY})
-  	target_link_libraries(tribalia-tests ${GLEW_LIBRARY})
-  	target_link_libraries(tribalia-tests ${IL_LIBRARIES})
-  	target_link_libraries(tribalia-tests ${ILU_LIBRARIES})
-  	target_link_libraries(tribalia-tests ${CAIRO_LIBRARIES})
-	target_link_libraries(tribalia-tests ${GLM_LIBRARIES})
-	target_link_libraries(tribalia-tests ${YAML_LIBRARIES})
+  	target_link_libraries(familyline-tests ${SDL2_LIBRARIES})
+  	target_link_libraries(familyline-tests ${OPENGL_gl_LIBRARY})
+  	target_link_libraries(familyline-tests ${GLEW_LIBRARY})
+  	target_link_libraries(familyline-tests ${IL_LIBRARIES})
+  	target_link_libraries(familyline-tests ${ILU_LIBRARIES})
+  	target_link_libraries(familyline-tests ${CAIRO_LIBRARIES})
+	target_link_libraries(familyline-tests ${GLM_LIBRARIES})
+	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
   endif(DO_TESTS)
 
   # if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -179,12 +179,12 @@ if (WIN32 OR USE_RELATIVE_PATH)
 	set(TEXTURES_DIR "\"./textures/\"")
 	set(ASSET_FILE_DIR "\"./\"")
 else()
-	set(SHADERS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/shaders/\"")
-	set(ICONS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/icons/\"")
-	set(MATERIALS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/materials/\"")
-	set(MODELS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/models/\"")
-	set(TEXTURES_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/textures/\"")
-	set(ASSET_FILE_DIR "\"${CMAKE_INSTALL_PREFIX}/share/tribalia/\"")
+	set(SHADERS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/shaders/\"")
+	set(ICONS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/icons/\"")
+	set(MATERIALS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/materials/\"")
+	set(MODELS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/models/\"")
+	set(TEXTURES_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/textures/\"")
+	set(ASSET_FILE_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/\"")
 endif(WIN32 OR USE_RELATIVE_PATH)
 
 configure_file("${CMAKE_SOURCE_DIR}/src/config.h.in" "${CMAKE_SOURCE_DIR}/src/config.h")
@@ -192,12 +192,12 @@ configure_file("${CMAKE_SOURCE_DIR}/src/config.h.in" "${CMAKE_SOURCE_DIR}/src/co
 
 
 # Install locations
-install(TARGETS tribalia DESTINATION bin)
-install(DIRECTORY shaders DESTINATION share/tribalia)
-install(DIRECTORY textures DESTINATION share/tribalia)
-install(DIRECTORY icons DESTINATION share/tribalia)
-install(DIRECTORY materials DESTINATION share/tribalia)
-install(DIRECTORY models DESTINATION share/tribalia)
-install(FILES assets.yml DESTINATION share/tribalia)
-install(FILES terrain_test.trtb DESTINATION share/tribalia)
+install(TARGETS familyline DESTINATION bin)
+install(DIRECTORY shaders DESTINATION share/familyline)
+install(DIRECTORY textures DESTINATION share/familyline)
+install(DIRECTORY icons DESTINATION share/familyline)
+install(DIRECTORY materials DESTINATION share/familyline)
+install(DIRECTORY models DESTINATION share/familyline)
+install(FILES assets.yml DESTINATION share/familyline)
+install(FILES terrain_test.trtb DESTINATION share/familyline)
 

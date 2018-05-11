@@ -1,7 +1,7 @@
 #
 # Mock GTest project
 ##
-#  This file makes cmake download Google Test, to be compiled alongside Tribalia,
+#  This file makes cmake download Google Test, to be compiled alongside Familyline,
 # for this is the recommended way
 #
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)

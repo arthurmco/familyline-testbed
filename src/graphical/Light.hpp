@@ -12,7 +12,7 @@
 #ifndef LIGHT_HPP
 #define LIGHT_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     class Light : public SceneObject {
@@ -35,7 +35,7 @@ namespace Graphics {
     };
 
 } /* Graphics */
-} /* Tribalia */
+} /* Familyline */
 
 
 

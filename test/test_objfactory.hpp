@@ -12,7 +12,7 @@
 
 class ObjectFactoryTest : public ::testing::Test {
 protected:
-    Tribalia::Logic::ObjectFactory* _of;
+    Familyline::Logic::ObjectFactory* _of;
 
     TestObject* CreateObject();
     

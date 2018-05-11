@@ -16,7 +16,7 @@
 #include "ShaderProgram.hpp"
 
 
-namespace Tribalia::Graphics {
+namespace Familyline::Graphics {
 
 	struct VertexData;
 	class Mesh;

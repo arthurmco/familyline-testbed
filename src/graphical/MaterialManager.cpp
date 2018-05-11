@@ -1,6 +1,6 @@
 #include "MaterialManager.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 MaterialManager* MaterialManager::_mm = nullptr;
 

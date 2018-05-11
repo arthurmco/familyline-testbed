@@ -1,5 +1,5 @@
 #include "Timer.hpp"
-using namespace Tribalia;
+using namespace Familyline;
 
 Timer::Timer()
 {

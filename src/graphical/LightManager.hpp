@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 #include <list>
 
-namespace Tribalia::Graphics {
+namespace Familyline::Graphics {
 
 	class LightManager {
 	private:

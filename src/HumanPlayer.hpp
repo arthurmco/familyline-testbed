@@ -26,25 +26,25 @@
 #include "input/InputPicker.hpp"
 #include "input/InputManager.hpp"
 
-    class HumanPlayer : public Tribalia::Logic::Player
+    class HumanPlayer : public Familyline::Logic::Player
     {
     private:
-        Tribalia::Graphics::Camera* _cam;
-	Tribalia::Input::InputPicker* _ip;
+        Familyline::Graphics::Camera* _cam;
+	Familyline::Input::InputPicker* _ip;
 
-        Tribalia::Logic::LocatableObject* _selected_obj = nullptr;
-        Tribalia::Logic::PathFinder* _pf = nullptr;
-	Tribalia::Graphics::GUIActionManager* _guam = nullptr;
+        Familyline::Logic::LocatableObject* _selected_obj = nullptr;
+        Familyline::Logic::PathFinder* _pf = nullptr;
+	Familyline::Graphics::GUIActionManager* _guam = nullptr;
 	
         bool _updated = false;
 
     public:
 	bool renderBBs = false;
 
-        Tribalia::Logic::ObjectRenderer* objr;
+        Familyline::Logic::ObjectRenderer* objr;
 
         HumanPlayer(const char* name, int xp=0,
-		    Tribalia::Logic::GameActionManager* gam = nullptr);
+		    Familyline::Logic::GameActionManager* gam = nullptr);
 
 
         /***
@@ -55,7 +55,7 @@
 
             Returns true to continue its loop, false otherwise.
         ***/
-        virtual bool Play(Tribalia::Logic::GameContext*);
+        virtual bool Play(Familyline::Logic::GameContext*);
 
 	
 	/***
@@ -65,16 +65,16 @@
 	virtual bool ProcessInput();
 	
 	
-        void SetCamera(Tribalia::Graphics::Camera*);
-	void SetPicker(Tribalia::Input::InputPicker* ip);
-        void SetInputManager(Tribalia::Input::InputManager*);
-        void SetPathfinder(Tribalia::Logic::PathFinder*);
-	void SetGUIActionManager(Tribalia::Graphics::GUIActionManager* );
-	void SetGameActionManager(Tribalia::Logic::GameActionManager* );
+        void SetCamera(Familyline::Graphics::Camera*);
+	void SetPicker(Familyline::Input::InputPicker* ip);
+        void SetInputManager(Familyline::Input::InputManager*);
+        void SetPathfinder(Familyline::Logic::PathFinder*);
+	void SetGUIActionManager(Familyline::Graphics::GUIActionManager* );
+	void SetGameActionManager(Familyline::Logic::GameActionManager* );
 
         virtual bool HasUpdatedObject();
 
-        Tribalia::Logic::LocatableObject* GetSelectedObject();
+        Familyline::Logic::LocatableObject* GetSelectedObject();
         virtual ~HumanPlayer();
     };
 

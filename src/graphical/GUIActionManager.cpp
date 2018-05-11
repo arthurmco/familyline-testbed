@@ -1,7 +1,7 @@
 #include "GUIActionManager.hpp"
 
-using namespace Tribalia::Logic;
-using namespace Tribalia::Graphics;
+using namespace Familyline::Logic;
+using namespace Familyline::Graphics;
 
 GUIActionManager::GUIActionManager(GUI::Panel* base_panel)
     : _base_panel(base_panel)

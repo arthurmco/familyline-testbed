@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <Log.hpp>
 
-using namespace Tribalia::Server;
+using namespace Familyline::Server;
 
 /**
  * Store message in the logger

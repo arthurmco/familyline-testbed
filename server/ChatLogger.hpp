@@ -9,7 +9,7 @@
 #ifndef CHATLOGGER_HPP
 #define CHATLOGGER_HPP
 
-namespace Tribalia::Server {
+namespace Familyline::Server {
 
 struct ChatMessage;
 
@@ -32,7 +32,7 @@ public:
 
 
 
-}  // Tribalia::Server
+}  // Familyline::Server
 
 
 

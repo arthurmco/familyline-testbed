@@ -16,30 +16,30 @@
 #include "../graphical/SceneManager.hpp"
 #include "../logic/ObjectManager.hpp"
 #include "../logic/LocatableObject.hpp"
-namespace Tribalia {
+namespace Familyline {
 namespace Input {
 #define MAX_PICK_ITERATIONS 16
 
 class InputPicker {
 private:
-    Tribalia::Graphics::TerrainRenderer* _terrain;
-		Tribalia::Graphics::Window* _win;
-		Tribalia::Graphics::SceneManager* _sm;
-		Tribalia::Graphics::Camera* _cam;
-		Tribalia::Logic::ObjectManager* _om;
+    Familyline::Graphics::TerrainRenderer* _terrain;
+		Familyline::Graphics::Window* _win;
+		Familyline::Graphics::SceneManager* _sm;
+		Familyline::Graphics::Camera* _cam;
+		Familyline::Logic::ObjectManager* _om;
 
     glm::vec3 _intersectedPosition;
-    Tribalia::Logic::LocatableObject* _locatableObject = nullptr;
+    Familyline::Logic::LocatableObject* _locatableObject = nullptr;
 
 		bool CheckIfTerrainIntersect(glm::vec3 ray, float start, float end);
 
 public:
 
-    InputPicker(Tribalia::Graphics::TerrainRenderer* terrain,
-		Tribalia::Graphics::Window* win,
-		Tribalia::Graphics::SceneManager* sm,
-		Tribalia::Graphics::Camera* cam,
-		Tribalia::Logic::ObjectManager* om);
+    InputPicker(Familyline::Graphics::TerrainRenderer* terrain,
+		Familyline::Graphics::Window* win,
+		Familyline::Graphics::SceneManager* sm,
+		Familyline::Graphics::Camera* cam,
+		Familyline::Logic::ObjectManager* om);
 
     /* Get cursor ray in screen space */
     glm::vec4 GetCursorScreenRay();
@@ -62,11 +62,11 @@ public:
     glm::vec2 GetGameProjectedPosition();
 
 		/*	Get the object that were intersected by the cursor ray */
-		Tribalia::Logic::LocatableObject* GetIntersectedObject();
+		Familyline::Logic::LocatableObject* GetIntersectedObject();
 
     };
 
 } /* Input */
-} /* Tribalia */
+} /* Familyline */
 
 #endif /* end of include guard: INPUTPICKER_HPP */

@@ -1,6 +1,6 @@
 #include "TextureManager.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 TextureManager* TextureManager::_tm = nullptr;
 

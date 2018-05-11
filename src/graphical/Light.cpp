@@ -1,6 +1,6 @@
 #include "Light.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 void Light::SetColor(int r, int g, int b)
 {

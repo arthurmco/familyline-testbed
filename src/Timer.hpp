@@ -1,5 +1,5 @@
 /***
-    Timer control functions for Tribalia
+    Timer control functions for Familyline
 
     Copyright (C) 2016 Arthur Mendes.
 
@@ -14,7 +14,7 @@
 #ifndef TIMER_HPP
 #define TIMER_HPP
 
-namespace Tribalia {
+namespace Familyline {
 
 /* The function pointer for a timer event
     - opt_inst is the optional instance argument, automatically used for C++

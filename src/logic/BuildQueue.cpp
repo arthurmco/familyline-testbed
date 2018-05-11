@@ -1,6 +1,6 @@
 #include "BuildQueue.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 void BuildQueue::Add(LocatableObject* o)
 {

@@ -1,8 +1,8 @@
 #include "TerrainRenderer.hpp"
 #include "TextureOpener.hpp"
 
-using namespace Tribalia::Graphics;
-using namespace Tribalia::Logic;
+using namespace Familyline::Graphics;
+using namespace Familyline::Logic;
 
 static Material m = Material("terrain", MaterialData(0.8f, 0.95f, 0.2f));
 

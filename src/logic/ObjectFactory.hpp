@@ -10,7 +10,7 @@
 #ifndef OBJECTFACTORY_HPP
 #define OBJECTFACTORY_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Logic {
 	
 class ObjectFactory {

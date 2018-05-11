@@ -42,7 +42,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/test/googletest
   list(REMOVE_ITEM SRC_SERVER_TEST "${CMAKE_SOURCE_DIR}/server/Server.cpp" "${CMAKE_SOURCE_DIR}/server/server.cpp")
    message("${SRC_SERVER_TEST}")
  
-  add_executable(tribalia-tests ${SRC_TEST_FILES} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT} ${SRC_SERVER_TEST}
+  add_executable(familyline-tests ${SRC_TEST_FILES} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT} ${SRC_SERVER_TEST}
 	  ${SRC_COMMON}  "${CMAKE_SOURCE_DIR}/src/Timer.cpp") 
 
   include_directories("${CMAKE_SOURCE_DIR}/src")
@@ -56,25 +56,25 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/test/googletest
   option(SET_COVERAGE "Enable coverage testing" OFF)
 
   if (SET_COVERAGE)
-    target_compile_options(tribalia-tests PUBLIC "-fprofile-arcs")
-    target_compile_options(tribalia-tests PUBLIC "-ftest-coverage")
-    target_compile_options(tribalia-tests PUBLIC "-O0")
-    target_link_libraries(tribalia-tests "-fprofile-arcs")
-    target_link_libraries(tribalia-tests "-ftest-coverage")
-    target_link_libraries(tribalia-tests "gcov")
-    target_link_libraries(tribalia-tests "--coverage")
+    target_compile_options(familyline-tests PUBLIC "-fprofile-arcs")
+    target_compile_options(familyline-tests PUBLIC "-ftest-coverage")
+    target_compile_options(familyline-tests PUBLIC "-O0")
+    target_link_libraries(familyline-tests "-fprofile-arcs")
+    target_link_libraries(familyline-tests "-ftest-coverage")
+    target_link_libraries(familyline-tests "gcov")
+    target_link_libraries(familyline-tests "--coverage")
   endif()
 
   if (DO_CHECK_ASAN)
-    target_compile_options(tribalia-tests PUBLIC "-fsanitize=address")
-    target_link_libraries( tribalia-tests
+    target_compile_options(familyline-tests PUBLIC "-fsanitize=address")
+    target_link_libraries( familyline-tests
 	    gtest gtest_main "-fsanitize=address")
   else()
-    target_link_libraries( tribalia-tests
+    target_link_libraries( familyline-tests
       gtest gtest_main)
   endif()
 
-  add_test(NAME general-test COMMAND tribalia-tests)
+  add_test(NAME general-test COMMAND familyline-tests)
 endif(DO_TESTS)
 
 

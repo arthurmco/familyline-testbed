@@ -5,8 +5,8 @@
 #include <GL/glxew.h>
 #endif
 
-using Tribalia::Log;
-using namespace Tribalia::Graphics;
+using Familyline::Log;
+using namespace Familyline::Graphics;
 
 DeviceInfo::DeviceInfo(int device_id, const char* name,
 	const char* vendor, size_t vram)

@@ -16,8 +16,8 @@ typedef int flags_t;
 #endif
 
 
-using namespace Tribalia;
-using namespace Tribalia::Server;
+using namespace Familyline;
+using namespace Familyline::Server;
 
 ServerManagerError::ServerManagerError(const char* what) : std::runtime_error(what)
 {}

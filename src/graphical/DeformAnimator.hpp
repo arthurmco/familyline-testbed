@@ -14,7 +14,7 @@
 #include <vector>
 #include "VertexData.hpp"
 
-namespace Tribalia::Graphics {
+namespace Familyline::Graphics {
 
 	class DeformAnimator : public BaseAnimator {
 	

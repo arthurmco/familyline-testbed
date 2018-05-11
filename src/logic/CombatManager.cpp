@@ -1,6 +1,6 @@
 #include "CombatManager.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 void CombatManager::DoAttacks(double tick)
 {

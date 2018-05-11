@@ -1,9 +1,9 @@
 #include "ObjectRenderer.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 
-ObjectRenderer::ObjectRenderer(ObjectManager* om, Tribalia::Graphics::SceneManager* sm)
+ObjectRenderer::ObjectRenderer(ObjectManager* om, Familyline::Graphics::SceneManager* sm)
 	: GameActionListener("object-renderer-listener"), _om(om), _sm(sm)
 {
 

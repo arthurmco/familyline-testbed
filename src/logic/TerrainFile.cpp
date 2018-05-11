@@ -1,6 +1,6 @@
 #include "TerrainFile.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 
 /* 	Opens the terrain file. 

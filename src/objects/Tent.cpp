@@ -1,7 +1,7 @@
 #include "Tent.hpp"
 
-using namespace Tribalia;
-using namespace Tribalia::Logic;
+using namespace Familyline;
+using namespace Familyline::Logic;
 
 Tent::Tent() : Building(0, TID, "Tent",
 			0, 0, 0, 250, -1, 0.1, 1.0, 1.0, 0.95, 2){};

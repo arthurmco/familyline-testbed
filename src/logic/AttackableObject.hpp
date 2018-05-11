@@ -16,7 +16,7 @@
 #ifndef ATTACKABLEOBJECT_HPP
 #define ATTACKABLEOBJECT_HPP
 
-namespace Tribalia {
+namespace Familyline {
     namespace Logic {
 
 	/* The status of attacked or attackable objects */

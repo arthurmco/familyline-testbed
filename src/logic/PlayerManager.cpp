@@ -1,7 +1,7 @@
 #include "PlayerManager.hpp"
 #include "Log.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 static int last_player_id = 0;
 

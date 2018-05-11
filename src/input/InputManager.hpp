@@ -20,7 +20,7 @@
 #ifndef INPUTMANAGER_HPP
 #define INPUTMANAGER_HPP
 
-namespace Tribalia::Input {
+namespace Familyline::Input {
 
     /*  Maximum events for each iteration. */
     #define MAX_INPUT_QUEUE 128
@@ -67,7 +67,7 @@ namespace Tribalia::Input {
 	unsigned int last_motion_timestamp = 0;
 
 	/* Convert the SDL event in the event queue to 
-	   Tribalia events */
+	   Familyline events */
 	void ConvertEvents();
 	
     public:
@@ -99,6 +99,6 @@ namespace Tribalia::Input {
         }
     };
 
-} /* Tribalia::Input */
+} /* Familyline::Input */
 
 #endif /* end of include guard: INPUTMANAGER_HPP */

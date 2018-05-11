@@ -14,7 +14,7 @@
 #ifndef PLAYERMANAGER_HPP
 #define PLAYERMANAGER_HPP
 
-namespace Tribalia::Logic {
+namespace Familyline::Logic {
 
     enum PlayerFlags {
 	/* Player is a human */

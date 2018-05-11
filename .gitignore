@@ -1,6 +1,6 @@
-tribalia
-tribalia-server
-tribalia-tests
+familyline
+familyline-server
+familyline-tests
 
 *.o
 *.swp
@@ -30,8 +30,8 @@ install_manifest.txt
 *.VC*
 Debug/*
 Release/*
-tribalia.dir/*
-tribalia-server.dir/*
+familyline.dir/*
+familyline-server.dir/*
 Win32/*
 .vscode/*
 

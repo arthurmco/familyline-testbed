@@ -1,10 +1,10 @@
 #include "test_objfactory.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 void ObjectFactoryTest::SetUp()
 {
-    _of = Tribalia::Logic::ObjectFactory::GetInstance();
+    _of = Familyline::Logic::ObjectFactory::GetInstance();
     _of->AddObject(new TestObject());
 }
 

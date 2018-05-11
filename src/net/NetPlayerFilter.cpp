@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include "NetServer.hpp"
 
-using namespace Tribalia::Net;
-using namespace Tribalia::Server;
+using namespace Familyline::Net;
+using namespace Familyline::Server;
 /**
  * Get the corresponding message queue from the client 
  * 'client_id'

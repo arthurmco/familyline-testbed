@@ -1,7 +1,7 @@
 #include "InputListener.hpp"
 #include "Log.hpp"
 
-using namespace Tribalia::Input;
+using namespace Familyline::Input;
 
 InputListener::InputListener(const char* name)
 {

@@ -11,8 +11,8 @@
 
 class PathfinderTest : public ::testing::Test {
 protected:
-    Tribalia::Logic::ObjectManager* _om;
-    Tribalia::Logic::PathFinder* _pf;
+    Familyline::Logic::ObjectManager* _om;
+    Familyline::Logic::PathFinder* _pf;
     TestObject* o;
     
 public:

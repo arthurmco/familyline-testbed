@@ -1,6 +1,6 @@
 #include "SceneObject.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 
 SceneObject::SceneObject(const char* name, glm::vec3 pos,

@@ -1,5 +1,5 @@
 /****
- * Tribalia UDP message header and layout
+ * Familyline UDP message header and layout
  *
  * Copyright (C) 2018 Arthur M
  ****/
@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace Tribalia::Server {
+namespace Familyline::Server {
 
 	/**
 	 *  UDP message header layout, little endian

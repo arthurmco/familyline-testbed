@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Install dependencies and copies Tribalia to its specified folders
+# Install dependencies and copies Familyline to its specified folders
 # Copyright (C) 2016 Arthur M
 
-# TODO: copy Tribalia to Unix standard directories
+# TODO: copy Familyline to Unix standard directories
 # TODO: --prefix command
 # TODO: --installdir command (it's different from prefix)
 # TODO: support RPM based distros
@@ -38,6 +38,6 @@ echo -e "\033[1;32mok! \033[0m"
 echo -ne "\033[1m -> TODO: copy the directories and folders to the right places \033[0m"
 
 echo "..."
-echo -n "You can run Tribalia now by typing ./tribalia in your shell, or double-clicking its file name in the "
+echo -n "You can run Familyline now by typing ./tribalia in your shell, or double-clicking its file name in the "
 echo "file browser."
 

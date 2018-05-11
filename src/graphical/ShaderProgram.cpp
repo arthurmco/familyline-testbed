@@ -1,7 +1,7 @@
 #include "ShaderProgram.hpp"
 #include "ShaderManager.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 ShaderProgram::ShaderProgram(const char* name, Shader* vert, Shader* pixel)
 	: name(name), _vertex(vert), _pixel(pixel)

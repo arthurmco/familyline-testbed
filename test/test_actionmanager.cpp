@@ -1,9 +1,9 @@
 #include "test_actionmanager.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 void TestActionManager::RunAction(const char* name) {
-    Tribalia::Logic::ActionData d;
+    Familyline::Logic::ActionData d;
     d.xPos = 50;
     d.yPos = 50;
     d.actionOrigin = tobj;

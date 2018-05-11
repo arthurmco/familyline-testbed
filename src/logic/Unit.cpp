@@ -1,6 +1,6 @@
 #include "Unit.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 Unit::Unit(int oid, int tid, const char* name,
 	   float x, float y, float z, int maxHP, float HP,

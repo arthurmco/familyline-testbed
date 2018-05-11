@@ -52,7 +52,7 @@
 #include "objects/WatchTower.hpp"
 #include "objects/Tent.hpp"
 
-namespace Tribalia {
+namespace Familyline {
     
 class Game {
 private:

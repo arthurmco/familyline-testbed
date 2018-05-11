@@ -1,6 +1,6 @@
 #include "NetMessageQueue.hpp"
 
-using namespace Tribalia::Server;
+using namespace Familyline::Server;
 
 NetMessageQueue::NetMessageQueue(socket_t sock, struct in_addr addr)
     : sockfd(sock), addr(addr)

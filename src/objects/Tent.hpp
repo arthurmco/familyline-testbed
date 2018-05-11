@@ -1,5 +1,5 @@
 /***
-    Tent building for Tribalia
+    Tent building for Familyline
 
     Copyright (C) 2016 Arthur M
 ***/
@@ -10,7 +10,7 @@
 #ifndef TENT_H
 #define TENT_H
 
-namespace Tribalia {
+namespace Familyline {
 
 /*  A tent is a basic people storage building */
 class Tent : public Logic::Building {

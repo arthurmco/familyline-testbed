@@ -1,6 +1,6 @@
 #include "ObjectFactory.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 /* Gets an instance of object with type 'typeID', or
  * nullptr if given object wasn't added to the factory

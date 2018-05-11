@@ -14,7 +14,7 @@
 #ifndef GAMEOBJECT_HPP
 #define GAMEOBJECT_HPP
 
-namespace Tribalia {
+namespace Familyline {
     namespace Logic {
 
 

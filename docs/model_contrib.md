@@ -1,13 +1,13 @@
 # Model contribution
 
-Tribalia supports, for now, two types of model formats: Wavefront OBJ and MD2, without animation 
+Familyline supports, for now, two types of model formats: Wavefront OBJ and MD2, without animation 
 (MD2 animation support is partially working on _graphical_ branch
 
 Please note that the 'model unit 1' is equal to 1 meter, and the camera is +24m high, so take note of
-the size of your model to it not appear so big on Tribalia than you expected (most md2 models I saw
+the size of your model to it not appear so big on Familyline than you expected (most md2 models I saw
 are ~40m high). For comparison, the default cube on Blender, and probably on other modeling software, is 1m^3
 
-But there are some guidelines you'll have to follow if you want Tribalia to correctly load your model. 
+But there are some guidelines you'll have to follow if you want Familyline to correctly load your model. 
 They are made specifically for Blender3D, 'cause it is what I use, but you can adapt it for other modelling 
 software if you're smart.
 
@@ -30,7 +30,7 @@ will be discouraged in the future.
 * Before exporting, please rotate the model so the Y axis (the green arrow) points to the model up direction, and
 the Z direction (the blue arrow) points to the back of your model.
 
-* You need to specify the texture in the code. Tribalia doesn't support texture loading from MD2 and MD2 format
+* You need to specify the texture in the code. Familyline doesn't support texture loading from MD2 and MD2 format
 doesn't specify material names. But the UV coordinates are read correcly.
 
 * MD2 animations are supported on graphical branch, but without respecting framerate (it will run at game framerate)

@@ -1,6 +1,6 @@
 #include "test_lights.hpp"
 
-using namespace Tribalia::Graphics;
+using namespace Familyline::Graphics;
 
 void LightTest::SetUp()
 {

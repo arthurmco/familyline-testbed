@@ -1,7 +1,7 @@
 #include "WatchTower.hpp"
 
-using namespace Tribalia;
-using namespace Tribalia::Logic;
+using namespace Familyline;
+using namespace Familyline::Logic;
 
 WatchTower::WatchTower()
     : Building(0, TID, "WatchTower", 0, 0, 0, 1000, -1,

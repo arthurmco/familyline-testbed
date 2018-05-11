@@ -1,5 +1,5 @@
 
-* Tribalia TODO list
+* Familyline TODO list
 
 ** 0.1.x 
 
@@ -39,7 +39,7 @@
     Refer to [[../docs/terrain_contrib.md][the terrain documentation]] for more information
 
     :IDEAS:
-    - *MAKE IT IN ELISP*: Create a major mode in Emacs for editing Tribalia
+    - *MAKE IT IN ELISP*: Create a major mode in Emacs for editing Familyline
       maps. 
 
 *** TODO Launch 0.2.0

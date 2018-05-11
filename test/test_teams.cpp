@@ -1,6 +1,6 @@
 #include "test_teams.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 void TeamRelationTest::SetUp()
 {

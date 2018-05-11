@@ -1,6 +1,6 @@
-# Tribalia server admin protocol
+# Familyline server admin protocol
 
-This file documents the Tribalia server administration protocol. It is mainly used to communication between the main server application and its interface.
+This file documents the Familyline server administration protocol. It is mainly used to communication between the main server application and its interface.
 
 The communication happens in port TCP 12100 and is entirely textual (no binaries involved).
 

@@ -1,6 +1,6 @@
 #include "test_pathfind.hpp"
 
-using namespace Tribalia::Logic;
+using namespace Familyline::Logic;
 
 void PathfinderTest::SetUp()
 {

@@ -15,7 +15,7 @@
 #ifndef OBJECTMANAGER_HPP
 #define OBJECTMANAGER_HPP
 
-namespace Tribalia {
+namespace Familyline {
     namespace Logic {
 
         struct ObjectRegisterInfo {

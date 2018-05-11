@@ -1,7 +1,7 @@
 #include "Panel.hpp"
 
-using namespace Tribalia::Graphics::GUI;
-using namespace Tribalia;
+using namespace Familyline::Graphics::GUI;
+using namespace Familyline;
 
 Panel::Panel()
 {

@@ -12,7 +12,7 @@
 #include <string>
 #include "ShaderProgram.hpp"
 
-namespace Tribalia::Graphics
+namespace Familyline::Graphics
 {
 	class ShaderManager {
 	private:

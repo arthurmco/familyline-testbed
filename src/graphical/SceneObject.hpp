@@ -13,7 +13,7 @@
 #ifndef SCENEOBJECT_HPP
 #define SCENEOBJECT_HPP
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     enum SceneObjectType {

@@ -10,12 +10,12 @@
 #ifndef _GUI_CONTROLUPDATER
 #define _GUI_CONTROLUPDATER
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 namespace GUI {
 
 /*
-    A panel is the most basic window structore for Tribalia's GUI
+    A panel is the most basic window structore for Familyline's GUI
 */
 class IControl {
 protected:

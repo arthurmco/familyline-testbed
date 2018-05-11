@@ -1,7 +1,7 @@
 #include "City.hpp"
 
-using namespace Tribalia;
-using namespace Tribalia::Logic;
+using namespace Familyline;
+using namespace Familyline::Logic;
 
 #include "Team.hpp"
 

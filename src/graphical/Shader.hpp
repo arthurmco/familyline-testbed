@@ -28,7 +28,7 @@
 #include "GFXExceptions.hpp"
 
 
-namespace Tribalia {
+namespace Familyline {
 namespace Graphics {
 
     enum ShaderType

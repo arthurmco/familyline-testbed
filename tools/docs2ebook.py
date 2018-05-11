@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Converts Tribalia documentation into a ebook format
+# Converts Familyline documentation into a ebook format
 # You need to run it in the docs/ folder
 #
 # Copyright (C) 2018 Arthur M
@@ -64,7 +64,7 @@ contentopf.write("""<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="2.0" unique-identifier="bookid">
 <metadata>
     <dc:identifier xmlns:dc="http://purl_org/dc/elements/1_1/" id="bookid">book.tribalia_repo_doc_code</dc:identifier>
-    <dc:title xmlns:dc="http://purl.org/dc/elements/1.1/">Tribalia Repo Documentation</dc:title>
+    <dc:title xmlns:dc="http://purl.org/dc/elements/1.1/">Familyline Repo Documentation</dc:title>
     <dc:date xmlns:dc="http://purl.org/dc/elements/1.1/">2018-01-14</dc:date>
     <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf" opf:file-as="Mendes, Arthur">Arthur Mendes</dc:creator>
     <dc:rights xmlns:dc="http://purl.org/dc/elements/1.1/">Copyright © 2016-2018 </dc:rights>
@@ -80,7 +80,7 @@ tocncx.write("""<?xml version="1.0" encoding="utf-8" standalone="no"?>
     <meta name="dtb:uid" content="_book.tribalia_repo_doc_code"/>
 </head>
 <docTitle>
-    <text>Tribalia Repo Documentation</text>
+    <text>Familyline Repo Documentation</text>
 </docTitle>
 <navMap>
 """)
