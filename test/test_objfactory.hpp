@@ -1,6 +1,6 @@
 /*  Unit test fixture for object factory
  *
- *  Copyright (C) 2017 Arthur M.
+ *  Copyright (C) 2017 Arthur Mendes.
  */
 
 #include <gtest/gtest.h>

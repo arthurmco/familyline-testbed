@@ -1,7 +1,7 @@
 /***
     Raw vertex data
 
-    Copyright (C) 2016, 2018 Arthur M.
+    Copyright (C) 2016, 2018 Arthur Mendes.
 
 ***/
 

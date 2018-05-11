@@ -1,6 +1,6 @@
 /*  Unit test fixture for the asset file loader
  *
- *  Copyright (C) 2017 Arthur M.
+ *  Copyright (C) 2017 Arthur Mendes.
  */
 
 #include <gtest/gtest.h>

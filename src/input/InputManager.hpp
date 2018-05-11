@@ -2,7 +2,7 @@
 /***
     Input management class
 
-    Copyright 2016 Arthur M.
+    Copyright 2016 Arthur Mendes.
 
 ***/
 

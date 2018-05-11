@@ -2,7 +2,7 @@
 /***
     Game object class definition
 
-    Copyright 2016 Arthur M.
+    Copyright 2016 Arthur Mendes.
 
 ***/
 #include "GameObject.hpp"

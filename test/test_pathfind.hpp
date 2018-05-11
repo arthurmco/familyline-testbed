@@ -1,6 +1,6 @@
 /*  Unit test fixture for pathfinding
  *
- *  Copyright (C) 2017 Arthur M.
+ *  Copyright (C) 2017 Arthur Mendes.
  */
 
 #include <gtest/gtest.h>

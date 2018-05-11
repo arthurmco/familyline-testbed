@@ -1,7 +1,7 @@
 /***
     Representation of a mesh
 
-    Copyright (C) 2016, 2018 Arthur M.
+    Copyright (C) 2016, 2018 Arthur Mendes.
 
 ***/
 #define GLM_FORCE_RADIANS

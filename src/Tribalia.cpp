@@ -1,7 +1,7 @@
 /***
 	Tribalia main file
 
-	Copyright 2016, 2017 Arthur M.
+	Copyright 2016, 2017 Arthur Mendes.
 
 ***/
 
