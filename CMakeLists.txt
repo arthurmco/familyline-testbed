@@ -60,6 +60,7 @@ include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_D
 
 # Include the common directory
 include_directories(AFTER "${CMAKE_SOURCE_DIR}/common")
+include_directories("${CMAKE_SOURCE_DIR}/server")
 
 if (MSVC)
 
@@ -188,6 +189,20 @@ else()
 endif(WIN32 OR USE_RELATIVE_PATH)
 
 configure_file("${CMAKE_SOURCE_DIR}/src/config.h.in" "${CMAKE_SOURCE_DIR}/src/config.h")
+
+# CPack configuration
+
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "crappy but fun RTS game, where you guide a family in its fantastic adventures through the Ancient Era")
+SET(CPACK_PACKAGE_VENDOR "Arthur Mendes")
+SET(CPACK_PACKAGE_CONTACT "Arthur Mendes <arthurmco@gmail.com>")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+SET(CPACK_PACKAGE_VERSION_MAJOR "0")
+SET(CPACK_PACKAGE_VERSION_MINOR "1")
+SET(CPACK_PACKAGE_VERSION_PATCH "92")
+SET(CPACK_SOURCE_IGNORE_FILES "googletest-*/*;test/*.*;test/googletest/*")
+SET(CPACK_GENERATOR "DEB")
+INCLUDE(CPack)
 
 
 

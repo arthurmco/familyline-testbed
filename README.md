@@ -72,6 +72,21 @@ because it's what the program itself uses...
    deduction, supported in gcc7 and in libstdc++  but not in clang5). 
    (I might be wrong, however. I only tried once)
 
+## Packaging
+
+To generate a package, simply run these two commands:
+
+```
+cmake -DCMAKE_BUILD_TYPE=Release -DUSE_RELATIVE_PATH=off -DDO_TESTS=off .
+make package
+```
+
+The first will generate a makefile that don't compile the tests and don't use
+relative path builds (they are useful while debugging). The last one installs
+the package. 
+
+By default, it generates only a DEB file. To generate a RPM one, you need `rpmbuild`, and
+to add a `-DCPACK_GENERATOR=RPM` before the dot, in the first command
 
 ## Rewrite in Rust!
 
