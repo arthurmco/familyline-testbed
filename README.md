@@ -22,7 +22,10 @@ fun, to play and develop. Expect it to have a lot of humor!
    game, this is quite a bit new)
  
  - Windows: full  
-   You will have to download the libraries (the `.lib` files) and the headers separately.
+   You will have to download the libraries (the `.lib` files) and the
+   headers separately. I created a zip and put them
+   [here](https://drive.google.com/open?id=1gDIS9CkskJ25cwmuw7jCXTgVxZ08VCdA). (SHA1
+   is 695fee4fa4f59e6831509d00b7684bf2dc20b2f4 )
  
  - FreeBSD: The last time I tried (+/- half a year), it complained about template things 
    (it was the FreeBSD 11.0-CURRENT version). I need to check support. It would be 
@@ -57,7 +60,7 @@ because it's what the program itself uses...
 
 ## Caveats
 
- - Your compiler needs to support C++17, because of that namespace thing
+ - Your compiler needs to support C++17, because that's the future
 
  - On Windows, you will might need to use the environment variable
    `TRIBALIA_FIND_PKG` to tell cmake where some dependencies can be
@@ -85,8 +88,7 @@ The first will generate a makefile that don't compile the tests and don't use
 relative path builds (they are useful while debugging). The last one installs
 the package. 
 
-By default, it generates only a DEB file. To generate a RPM one, you need `rpmbuild`, and
-to add a `-DCPACK_GENERATOR=RPM` before the dot, in the first command
+By default, it generates a DEB and a RPM file.
 
 Note that, unless you customize the `CMAKE_INSTALL_PREFIX`, it will
 install in the `/usr/local` directory
