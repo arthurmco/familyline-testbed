@@ -45,7 +45,7 @@ If you are building on Linux, type the following command. This will
 install the dependencies.
 
 `# apt-get install libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev
-libcairo2 libcairo2-dev`
+libcairo2 libcairo2-dev libyaml libyaml-dev`
 
 ## Documentation
 
