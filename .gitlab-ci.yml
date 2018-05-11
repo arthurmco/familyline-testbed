@@ -13,15 +13,15 @@ build:
     - git submodule init && git submodule update
   script: 
     - cmake -DUSE_RELATIVE_PATH=on -DCMAKE_CXX_COMPILER=g++ -DDO_TESTS=on -DCMAKE_BUILD_TYPE=Debug -DSET_COVERAGE=true
-    - make -j4 tribalia-tests
+    - make -j4 familyline-tests
     - cmake -DUSE_RELATIVE_PATH=on -DCMAKE_CXX_COMPILER=g++ -DDO_TESTS=on -DCMAKE_BUILD_TYPE=Debug -DSET_COVERAGE=false
-    - make -j4 tribalia
-    - ./tribalia-tests
+    - make -j4 familyline
+    - ./familyline-tests
     - gcovr -r .
   artifacts:
     paths:
-    - ./tribalia # The executable
-    - ./tribalia-tests # The tests 
+    - ./familyline # The executable
+    - ./familyline-tests # The tests 
 
 # No caching. A full build is better to catch bugs
 
@@ -35,7 +35,7 @@ compile-test:
   script:
     - apt update
     - bash ./scripts/install
-    - ./tribalia --version
+    - ./familyline --version
 
 unit-test:
   stage: test
@@ -44,5 +44,5 @@ unit-test:
     - bash ./scripts/install
     - apt -y install gcovr
   script:
-    - ./tribalia-tests
+    - ./familyline-tests
     - gcovr -r .
