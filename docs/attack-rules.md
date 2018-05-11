@@ -2,6 +2,8 @@
 
 These are the object attack-defend rules in Tribalia
 
+They are not implemented in the game yet.
+
 Every object has some properties regarding object attack and defense. Those
 are:
 
