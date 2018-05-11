@@ -520,7 +520,7 @@ int main(int argc, char const *argv[])
 	bquit.SetForeColor(255, 0, 0, 255);
 
 	ImageControl ilogo = ImageControl(0.2, 0.1, 0.6, 0.9,
-		"icons/tribalia-logo.png");
+		ICONS_DIR "/tribalia-logo.png");
 	ilogo.SetZIndex(0.9);
 	ilogo.SetOpacity(0.5);
 

@@ -88,6 +88,9 @@ the package.
 By default, it generates only a DEB file. To generate a RPM one, you need `rpmbuild`, and
 to add a `-DCPACK_GENERATOR=RPM` before the dot, in the first command
 
+Note that, unless you customize the `CMAKE_INSTALL_PREFIX`, it will
+install in the `/usr/local` directory
+
 ## Rewrite in Rust!
 
 Now it's opensource. This means **YOU CAN REWRITE, DAWG**

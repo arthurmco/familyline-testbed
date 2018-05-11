@@ -1,5 +1,6 @@
 #include "TerrainRenderer.hpp"
 #include "TextureOpener.hpp"
+#include "../config.h"
 
 using namespace Familyline::Graphics;
 using namespace Familyline::Logic;
@@ -24,7 +25,7 @@ TerrainRenderer::TerrainRenderer(Renderer* r)
 	MaterialData(glm::vec3(0.6, 0.6, 0.6),
 		     glm::vec3(0.4, 1.0, 0.4),
 		     glm::vec3(0.02)));
-    t0->SetTexture(TextureOpener::OpenTexture("textures/terrain/grass.png"));
+    t0->SetTexture(TextureOpener::OpenTexture(TEXTURES_DIR "/terrain/grass.png"));
     MaterialManager::GetInstance()->AddMaterial(t0);
     
     this->AddMaterial(0, t0);
