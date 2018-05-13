@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include <Log.hpp>
+#include "../MaterialManager.hpp"
 
 #include <glm/glm.hpp>
 
@@ -20,7 +21,7 @@ struct FaceIndex {
  */
 struct UniqueVertex {
     unsigned idx;
-
+    
     int idxVertex, idxNormal, idxTexcoord;
 
     bool inline operator==(const UniqueVertex& b) {
@@ -266,6 +267,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 			     vg.name, vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
 			     (vg.hasTexture ? "true" : "false"));
 
+	std::vector<VertexData*> vdlist;
 	unsigned idx = 0;
 	for (const auto& vl : vg.vertices) {
 	    if (vl.indices.size() == 0) continue; // Remove null vertex lists
@@ -295,7 +297,8 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 		    iuv.idxVertex = idx.idxVertex[fi]-1;
 		    iuv.idxNormal = idx.idxNormal[fi]-1;
 		    iuv.idxTexcoord = idx.idxTex[fi]-1;
-
+		    
+		    
 		    auto founduv = std::find_if(uvs.begin(), uvs.end(),
 					   [&iuv](const UniqueVertex& fuv) {
 					       return iuv == fuv;
@@ -339,17 +342,22 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
 		if (vg.hasTexture)
 		    vdata->TexCoords.push_back(texcoords[uvt]);
-		else
-		    vdata->MaterialIDs.push_back(2);
+
+		if (vl.mtlname) {
+		    auto mtl = MaterialManager::GetInstance()->GetMaterial(vl.mtlname);
+		    vdata->materialID = mtl->GetID();
+		}
 
 	    }
 
-	    auto mesh = new Mesh{vdata};
-	    mesh->SetName(vg.name);
-
-	    mesh_ret.push_back(mesh);
+	    vdlist.push_back(vdata);
 	    idx++;
 	}
+
+	auto mesh = new Mesh{vdlist};
+	mesh->SetName(vg.name);
+
+	mesh_ret.push_back(mesh);
     }
 
     fflush(stdout);

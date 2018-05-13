@@ -86,7 +86,6 @@ void Renderer::SetMaterial(int ID)
 {
 	Material* m = MaterialManager::GetInstance()->GetMaterial(ID);
 	if (!m) {
-		printf("Cannot found mat id %d\n", ID);
 		return;
 	}
 
@@ -128,21 +127,20 @@ void Renderer::UpdateObjects()
 
 	/* Check updates from SceneManager*/
 	if (_scenemng->UpdateValidObjects()) {
-
+	    
 		auto lightIdx = 0;
 		lightCount = 0;
 
 		/* Check for inserted objects */
 		for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
-			bool objExists = false;
-			/* Check for inserted meshes */
+
+		    /* Check for inserted meshes */
 			switch ((*itScene)->GetType()) {
 			case SCENE_MESH:
 			{
 				for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); it2++) {
 					if ((*itScene)->GetID() == it2->ID && (*itScene)->GetType() == SCENE_MESH) {
 						it2->lastcheck = lastCheck;
-						objExists = true;
 
 						break;
 					}
@@ -153,15 +151,18 @@ void Renderer::UpdateObjects()
 				Mesh* mes = (Mesh*)(*itScene);
 				mes->ApplyTransformations();
 
-				int vaon = this->AddVertexData(mes->GetVertexData(),
-					mes->GetModelMatrixPointer());
+				auto& vdlist = mes->GetVertexData();
 
-				SceneIDCache sidc;
-				sidc.ID = (*itScene)->GetID();
-				sidc.lastcheck = lastCheck;
-				sidc.vao = vaon;
-				sidc.bbvao = this->AddBoundingBox(mes, glm::vec3(1, 0, 0));
-				_last_IDs.push_back(sidc);
+				for (auto& vd : vdlist) {
+				    int vaon = this->AddVertexData(vd, mes->GetModelMatrixPointer());
+
+				    SceneIDCache sidc;
+				    sidc.ID = (*itScene)->GetID();
+				    sidc.lastcheck = lastCheck;
+				    sidc.vao = vaon;
+				    sidc.bbvao = this->AddBoundingBox(mes, glm::vec3(1, 0, 0));
+				    _last_IDs.push_back(sidc);
+				}
 			}
 			break;
 
@@ -178,17 +179,17 @@ void Renderer::UpdateObjects()
 			break;
 
 			default:
-				Log::GetLog()->Warning("renderer", "Unsupported scene object! Skipping...");
+				Log::GetLog()->Warning("renderer",
+						       "Unsupported scene object! Skipping...");
 				break;
 			}
 
 		}
 
-
-
 		/* Check for deleted objects */
-		for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); ++it2) {
+		for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); ) {
 			bool isDeleted = true;
+			
 			for (auto itScene = objList->begin(); itScene != objList->end(); itScene++) {
 
 				if (it2->ID == (*itScene)->GetID()) {
@@ -203,8 +204,10 @@ void Renderer::UpdateObjects()
 					it2->ID);
 				this->RemoveVertexData(it2->vao);
 				this->RemoveBoundingBox(it2->bbvao);
-				_last_IDs.erase(it2);
-				break;
+				it2 = _last_IDs.erase(it2);
+				//break;
+			} else {
+			    ++it2;
 			}
 
 		}
@@ -224,7 +227,7 @@ bool Renderer::Render()
 	sForward->Use();
 	sForward->SetUniform("mView", mView);
 
-	for (int i = 0; i < lightCount; i++) {
+	for (unsigned int i = 0; i < lightCount; i++) {
 		sForward->SetUniformStructArray("lights", i, "position", lri[i].lightPosition);
 		sForward->SetUniformStructArray("lights", i, "color", lri[i].lightColor);
 		sForward->SetUniformStructArray("lights", i, "strength", lri[i].lightStrength);
@@ -250,8 +253,7 @@ bool Renderer::Render()
 		}
 			*/
 
-		if (!it->vd->MaterialIDs.empty())
-			material = it->vd->MaterialIDs[0];
+		material = it->vd->materialID;
 
 
 		glBindVertexArray(it->vao);
@@ -300,35 +302,17 @@ bool Renderer::Render()
 			if (err != GL_NO_ERROR) {
 				Log::GetLog()->Fatal("renderer", "rendering plot: OpenGL error %#x", err);
 			}
+		} else {
+		    SetMaterial(material);
+
+		    glGetError();
+		    glDrawArrays(drawstyle, 0, it->vd->Positions.size());
+		    
+		    GLenum err = glGetError();
+		    if (err != GL_NO_ERROR) {
+			Log::GetLog()->Fatal("renderer", "rendering mesh: OpenGL error %#x", err);
+		    }
 		}
-		else {
-			/* Draw the triangles
-			  TODO: Redo this
-			*/
-			for (int matidx = 0; matidx < 9; matidx++) {
-				int start = it->material_offsets[matidx];
-				int end = it->material_offsets[matidx + 1];
-
-				if (!it->vd->MaterialIDs.empty())
-					material = it->vd->MaterialIDs[start];
-				SetMaterial(material);
-
-				if (end < 0) {
-					end = it->vd->Positions.size();
-					matidx = 0xff; //force exit
-				}
-
-				glGetError();
-				glDrawArrays(drawstyle, start, end - start);
-
-				GLenum err = glGetError();
-				if (err != GL_NO_ERROR) {
-					Log::GetLog()->Fatal("renderer", "rendering mesh: OpenGL error %#x", err);
-				}
-			}
-		}
-
-
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glDisableVertexAttribArray(0);
@@ -343,14 +327,14 @@ bool Renderer::Render()
 
 void Renderer::UpdateFrames()
 {
-	for (auto v : _vertices) {
-		/*if (v.vd->animator) {
+    //for (auto v : _vertices) {
+    //if (v.vd->animator) {
 			/* Has animation things */
 			//  UpdateVertexData(v.vbo_pos, v.vd->animationData->GetVertexRawData(),
 			  //	     v.vd->Positions.size());
 			  //printf("Updated mesh %d to frame %d", v.vao, v.vd->animationData->GetActualFrame());
 		  //}
-	}
+//	}
 }
 
 SceneManager* Renderer::GetSceneManager() const
@@ -405,24 +389,11 @@ GLint Renderer::AddVertexData(VertexData* v, glm::mat4* worldMatrix)
 
 	glBindVertexArray(0);
 
+	
+	
 	/* Log::GetLog()->Write("Added vertices with VAO %d (VBO %d)", vri.vao,
 		vri.vbo_pos); */
 
-		/* Store material vertex starts */
-	int matidx = 0;
-	int actualidx = -1;
-	int i = 0;
-	for (auto matit = v->MaterialIDs.begin();
-		matit != v->MaterialIDs.end();
-		matit++) {
-		if (*matit != actualidx) {
-			actualidx = *matit;
-			vri.material_offsets[matidx++] = i;
-		}
-		i++;
-	}
-
-	vri.material_offsets[matidx] = -1;
 	v->vbo_pos = vri.vbo_pos;
 
 	_vertices.push_back(vri);

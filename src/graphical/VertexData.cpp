@@ -48,7 +48,7 @@ VertexData::VertexData(VertexData& vd)
 	this->TexCoords = vd.TexCoords;
 	this->render_format = vd.render_format;
 	this->SetShader(vd.shader);
-	this->MaterialIDs = vd.MaterialIDs;
+	this->materialID = vd.materialID;
 	this->shader = ShaderManager::Get(ShaderManager::DefaultShader);
 	this->animator = std::unique_ptr<BaseAnimator>(new BaseAnimator(this));
 }

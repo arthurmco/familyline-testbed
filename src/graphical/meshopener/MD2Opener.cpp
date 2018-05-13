@@ -158,7 +158,7 @@ Mesh* MD2Opener::Open(const char* file)
     vd->Positions = *verts;
     vd->TexCoords = *textures;
     vd->Normals = *normals;
-    vd->MaterialIDs = *matids;
+//    vd->MaterialIDs = *matids;
 
     if (hdr.num_frames > 1) {
 

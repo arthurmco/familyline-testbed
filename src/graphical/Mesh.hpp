@@ -12,6 +12,7 @@
 
 #include "../logic/IMesh.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
 
 #include "VertexData.hpp"
 #include "SceneObject.hpp"
@@ -40,10 +41,11 @@ namespace Graphics {
         /* warning: rotate angle should be in radians */
         void Rotate(glm::vec3 axis, float angle);
 
-        VertexData* _vdata;
+	std::vector<VertexData*> _vdata;
     public:
         Mesh(VertexData* vd);
-
+	Mesh(std::vector<VertexData*> vd);
+	
         virtual void SetPosition(glm::vec3);
         void AddPosition(glm::vec3);
 
@@ -55,7 +57,7 @@ namespace Graphics {
         glm::mat4 GetModelMatrix() const;
         glm::mat4* GetModelMatrixPointer();
 
-        VertexData* GetVertexData();
+        std::vector<VertexData*>& GetVertexData();
 
         void GenerateBoundingBox();
 

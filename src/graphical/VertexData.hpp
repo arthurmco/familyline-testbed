@@ -58,35 +58,41 @@ namespace Familyline::Graphics {
 	typedef std::function<void(ShaderProgram*, glm::mat4, glm::mat4, 
 		glm::mat4, Camera*)> ShaderSetupFunction;
 	
-	/* Basic vertex information */
-	struct VertexData {
-		std::vector<glm::vec3> Positions;
-		std::vector<glm::vec3> Normals;
-		std::vector<glm::vec2> TexCoords;
-		std::vector<int> MaterialIDs;
+    /* Basic vertex information */
+    struct VertexData {
+	std::vector<glm::vec3> Positions;
+	std::vector<glm::vec3> Normals;
+	std::vector<glm::vec2> TexCoords;
 
-		VertexRenderStyle render_format = VertexRenderStyle::Triangles;
+	// The material ID for this vertex list
+	// -1 means 'no material'
+	int materialID = -1;
+	
+	VertexRenderStyle render_format = VertexRenderStyle::Triangles;
 
-		// The shader used
-		ShaderProgram* shader;
-		std::unique_ptr<BaseAnimator> animator;
-		int vbo_pos;
+	// The shader used
+	ShaderProgram* shader;
 
-		// Pointer to the owning mesh, so we can draw the bounding boxes
-		Mesh* meshptr;
+	// TODO: Move this to the mesh?
+	std::unique_ptr<BaseAnimator> animator;
 
-		// Shader setup function
-		ShaderSetupFunction fnShaderSetup;
+	int vbo_pos;
 
-		VertexData();
-		VertexData(VertexData& vd);
-		VertexData(BaseAnimator* a);
+	// Pointer to the owning mesh, so we can draw the bounding boxes
+	Mesh* meshptr;
 
-		/* Sets the shader and the shader setup function together, so we
-		 * don't fuck up something 
-		 */
-		void SetShader(ShaderProgram* s);
-	};
+	// Shader setup function
+	ShaderSetupFunction fnShaderSetup;
+
+	VertexData();
+	VertexData(VertexData& vd);
+	VertexData(BaseAnimator* a);
+
+	/* Sets the shader and the shader setup function together, so we
+	 * don't fuck up something 
+	 */
+	void SetShader(ShaderProgram* s);
+    };
 
 }
 

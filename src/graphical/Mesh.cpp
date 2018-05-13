@@ -12,10 +12,29 @@ Mesh::Mesh(VertexData* vd)
 
     _modelMatrix = glm::mat4(1.0);
 
-    this->_vdata = new VertexData(*vd);
-    this->_vdata->meshptr = this;
+    this->_vdata.push_back(new VertexData(*vd));
+    this->_vdata.at(0)->meshptr = this;
     this->_type = SCENE_MESH;
 }
+
+
+Mesh::Mesh(std::vector<VertexData*> vd)
+    : SceneObject("", glm::vec3(0), 0, 0, 0)
+{
+    _translMatrix = glm::mat4(1.0);
+    _scaleMatrix = glm::mat4(1.0);
+    _rotMatrix = glm::mat4(1.0);
+
+    _modelMatrix = glm::mat4(1.0);
+
+    this->_vdata = vd;
+
+    for (auto& v : this->_vdata)
+	v->meshptr = this;
+
+    this->_type = SCENE_MESH;
+}
+
 
 void Mesh::Translate(glm::vec3 pos)
 {
@@ -82,7 +101,7 @@ void Mesh::AddRotation(float x, float y, float z)
     this->ApplyTransformations();
 }
 
-VertexData* Mesh::GetVertexData()
+std::vector<VertexData*>& Mesh::GetVertexData()
 {
     return this->_vdata;
 }
@@ -98,22 +117,24 @@ void Mesh::GenerateBoundingBox()
     float minz = 10E6, maxz = 10E-6;
     float miny = 10E6, maxy = 10E-6;
     float minx = 10E6, maxx = 10E-6;
-    for (auto it = _vdata->Positions.begin();
-        it != _vdata->Positions.end(); ++it) {
-        minz = std::min(it->z, minz);
-        miny = std::min(it->y, miny);
-        minx = std::min(it->x, minx);
-
-        maxz = std::max(it->z, maxz);
-        maxy = std::max(it->y, maxy);
-        maxx = std::max(it->x, maxx);
 
 
+    for (const auto& vd : this->_vdata) {
+	for (auto it = vd->Positions.begin();
+	     it != vd->Positions.end(); ++it) {
+	    minz = std::min(it->z, minz);
+	    miny = std::min(it->y, miny);
+	    minx = std::min(it->x, minx);
+
+	    maxz = std::max(it->z, maxz);
+	    maxy = std::max(it->y, maxy);
+	    maxx = std::max(it->x, maxx);
+	}
     }
 /*
-    printf("m: %s\n", this->_name.c_str());
-    printf(" minx miny minz: %.2f %.2f %.2f\n", minx, miny, minz);
-    printf(" maxx maxy maxz: %.2f %.2f %.2f\n", maxx, maxy, maxz);
+  printf("m: %s\n", this->_name.c_str());
+  printf(" minx miny minz: %.2f %.2f %.2f\n", minx, miny, minz);
+  printf(" maxx maxy maxz: %.2f %.2f %.2f\n", maxx, maxy, maxz);
 */
     this->_box.minX = minx;
     this->_box.minY = miny;
@@ -137,12 +158,7 @@ void Mesh::GenerateBoundingBox()
 /* Sets material for whole mesh */
 void Mesh::SetMaterial(Material* mt)
 {
-    _vdata->MaterialIDs.clear();
-
-    for (size_t i = 0; i < _vdata->Positions.size(); i++) {
-	_vdata->MaterialIDs.push_back(mt->GetID());
-    }
-
-    
-    
+    for (auto& vd : this->_vdata)
+	vd->materialID = mt->GetID();
+       
 }

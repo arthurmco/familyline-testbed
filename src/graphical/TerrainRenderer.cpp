@@ -90,7 +90,7 @@ void TerrainRenderer::Update()
                 vd->Positions.reserve(SECTION_SIDE*SECTION_SIDE);
                 vd->Normals.reserve(SECTION_SIDE*SECTION_SIDE);
 				vd->TexCoords.reserve(SECTION_SIDE*SECTION_SIDE);
-                vd->MaterialIDs.reserve(SECTION_SIDE*SECTION_SIDE);
+                // vd->MaterialIDs.reserve(SECTION_SIDE*SECTION_SIDE);
 
                 /* Compute maximum points */
                 int exMax = SECTION_SIDE, eyMax = SECTION_SIDE;
@@ -142,9 +142,9 @@ void TerrainRenderer::Update()
 			vd->TexCoords.push_back(glm::vec2(0,1));
 			vd->TexCoords.push_back(glm::vec2(1,0));
 
-			vd->MaterialIDs.push_back(MATERIAL_GET(mid));
-			vd->MaterialIDs.push_back(MATERIAL_GET(midx));
-			vd->MaterialIDs.push_back(MATERIAL_GET(midy));
+			vd->materialID = MATERIAL_GET(mid);
+			//vd->MaterialIDs.push_back(MATERIAL_GET(midx));
+			//vd->MaterialIDs.push_back(MATERIAL_GET(midy));
 
 			glm::vec3 t2x, t2y;
 			t2y = glm::vec3(offsetX+px+SEC_SIZE, hxy * SEC_HEIGHT, offsetY+py+SEC_SIZE);
@@ -158,9 +158,9 @@ void TerrainRenderer::Update()
 			vd->TexCoords.push_back(glm::vec2(1,1));
 			vd->TexCoords.push_back(glm::vec2(1,0));
 
-			vd->MaterialIDs.push_back(MATERIAL_GET(mid));
-			vd->MaterialIDs.push_back(MATERIAL_GET(midxy));
-			vd->MaterialIDs.push_back(MATERIAL_GET(midx));
+			// vd->MaterialIDs.push_back(MATERIAL_GET(mid));
+			// vd->MaterialIDs.push_back(MATERIAL_GET(midxy));
+			// vd->MaterialIDs.push_back(MATERIAL_GET(midx));
 
 			
 			// Make the normals
