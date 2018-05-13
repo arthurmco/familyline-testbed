@@ -19,12 +19,9 @@ void CombatManager::DoAttacks(double tick)
 	}
 	
 	float f = it->attacker->Hit(it->defender, tick);
-	printf("%s dealt %.3f dmg on %s\n", it->attacker->GetName(), f,
-			   it->defender->GetName());
 
 	if (it->defender->GetStatus() == AST_DEAD) {
 	    it_removals.push_back(it);
-	    printf("%s is dead", it->defender->GetName());
 	}	
     }
 

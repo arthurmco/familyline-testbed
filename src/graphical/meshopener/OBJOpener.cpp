@@ -1,232 +1,307 @@
 #include "OBJOpener.hpp"
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+
+#include <glm/glm.hpp>
 
 using namespace Familyline::Graphics;
 
-#define FGETS_OR_THROW(s, size, stream) \
-    if (!fgets(s, size, stream)) {				      \
-	if (!feof(stream)) {					      \
-	    throw mesh_exception("Unexpected EOF while reading mesh", \
-				 EIO, file);			      \
-	}							      \
+struct FaceIndex {
+    unsigned idxVertex[3], idxNormal[3], idxTex[3];
+};
+
+/*
+ * The unique vertex object
+ * Each vertex here will be unique, and will be referenced by the index idx
+ *
+ */
+struct UniqueVertex {
+    unsigned idx;
+
+    unsigned idxVertex, idxNormal, idxTexcoord;
+
+    bool inline operator==(const UniqueVertex& b) {
+	return (this->idxVertex == b.idxVertex &&
+		this->idxNormal == b.idxNormal &&
+		this->idxTexcoord == b.idxTexcoord);
     }
+};
 
 
-Mesh* OBJOpener::Open(const char* file)
+// The vertex list
+// Represented by the mesh object (the 'o' marker)
+struct VertexList {
+
+    // The indices used for building each one of the faces
+    // Each element in the face index is a 3-element array
+    std::vector<FaceIndex> indices;
+
+    
+};
+
+
+// The vertex group, aka the mesh
+// Represents a mesh group in the file (thie 'g' marker)
+struct VertexGroup {
+    // The vertex list name
+    const char* name;
+    bool complete = false;
+
+    bool hasTexture = false, hasNormal = false;
+    std::vector<VertexList> vertices;
+
+    VertexGroup(const char* name) {
+	this->name = name;
+    }
+};
+
+std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 {
-    FILE* fOBJ = fopen(file, "r");
-
-    if (!fOBJ) {
-        throw mesh_exception("Failure to open mesh", errno, file);
-    }
-
-    char line[256];
-
-    std::vector<glm::vec3> verts, normals;
+    
+    /* The vertices, normals and texcoords of the file
+     * 
+     * The OBJ file indexes the vertices globally, not per mesh
+     * (ex: the vertex index 400 is the 400th vertex of the file, not the mesh )
+     */
+    std::vector<glm::vec3> vertices;
+    std::vector<glm::vec3> normals;
     std::vector<glm::vec2> texcoords;
 
-    // Face indices
-    std::vector<int> indVerts, indNormals, indTex;
-
-    // Full vertices, temporary until we start using indexing
-    std::vector<glm::vec3> realVerts, realNormals;
-    std::vector<glm::vec2> realTex;
-    std::vector<int> indMaterials;
-
-    int materialID = 0;
-
-    char mName[255] = "Unnamed";
-
-    while (!feof(fOBJ)) {
-        char* fline = &line[0];
-        memset(fline, 0, 256);
-        FGETS_OR_THROW(fline, 256, fOBJ);
-
-        int cind = 0;
-        while (isspace(fline[cind])) {
-            cind++;
-        }
-
-        if (cind > 255) {
-            continue; //avoid buffer overflows.
-        }
-
-        fline = &fline[cind];
-
-        switch (fline[0]) {
-        case '#': continue; //Comment
-        case 'o': {
-            // Mesh name.
-            cind = 0;
-            while (isspace(fline[cind])) {
-                cind++;
-            }
-
-            fline = &fline[cind+2];
-            strncpy(mName, fline, 255);
-
-            /* Trim the mesh name */
-            for (int i = strlen(mName)-1; i > 0; i--) {
-                if (isspace(mName[i]) || mName[i] == '\n') {
-                    mName[i] = 0;
-                } else {
-                    break;
-                }
-            }
-
-
-            break;
-        }
-        case 'v': {
-            //Vertex info
-            if (isspace(fline[1])) {
-                /* Position data (v) */
-                fline = &fline[1];
-                glm::vec3 vec = glm::vec3(0.0, 0.0, 1.0);
-                sscanf(fline, "%f %f %f", &vec.x, &vec.y, &vec.z);
-                verts.push_back(vec);
-                continue;
-            } else {
-                switch (fline[1]) {
-                    /* Texture data (vt) */
-                    case 't': {
-                        fline = &fline[2];
-                        glm::vec2 vec = glm::vec2(0.0);
-                        sscanf(fline, "%f %f", &vec.x, &vec.y);
-                        texcoords.push_back(vec);
-                        continue;
-                    }
-                    break;
-
-                    /* Normal data (vn) */
-                    case 'n': {
-                        fline = &fline[2];
-                        glm::vec3 vec = glm::vec3(0.0, 0.0, 1.0);
-                        sscanf(fline, "%f %f %f", &vec.x, &vec.y, &vec.z);
-                        vec = glm::normalize(vec);
-                        normals.push_back(vec);
-                        continue;
-                    }
-                    break;
-                }
-            }
-	    break;
-        } // End of vertex info
-        case 'f': {
-            fline++;
-            int vertIndex[3], normIndex[3], texIndex[3];
-
-            // Face data
-			if (sscanf(fline, "%d/%d/%d %d/%d/%d %d/%d/%d",
-				&vertIndex[0], &texIndex[0], &normIndex[0],
-				&vertIndex[1], &texIndex[1], &normIndex[1],
-				&vertIndex[2], &texIndex[2], &normIndex[2]) > 7) {
-
-				for (int i = 0; i < 3; i++) {
-                    indVerts.push_back(vertIndex[i]);
-                    indNormals.push_back(normIndex[i]);
-					indTex.push_back(texIndex[i]);
-                    indMaterials.push_back(materialID);
-                }
-
-			} else if (sscanf(fline, "%d//%d %d//%d %d//%d",
-            //Normal + position
-                &vertIndex[0], &normIndex[0],
-                &vertIndex[1], &normIndex[1],
-                &vertIndex[2], &normIndex[2]) > 2) {
-
-                for (int i = 0; i < 3; i++) {
-                    indVerts.push_back(vertIndex[i]);
-                    indNormals.push_back(normIndex[i]);
-                    indMaterials.push_back(materialID);
-                }
-
-            } else if (sscanf(fline, "%d %d %d",
-                &vertIndex[0], &vertIndex[1], &vertIndex[2]) > 0) {
-                //Position
-                indVerts.push_back(vertIndex[0]);
-                indVerts.push_back(vertIndex[1]);
-                indVerts.push_back(vertIndex[2]);
-
-            }
-            continue;
-
-        } // End of face
-        case 'u':
-        {
-            // Use material
-            char matname[256];
-            if (sscanf(fline, "usemtl %s", matname) > 0) {
-				Material* m = MaterialManager::GetInstance()->GetMaterial(matname);
-                if (m) {
-				    materialID = m->GetID();
-                }
-                continue;
-            }
-
-        } // End of material
-
-        }
-
+    
+    FILE* fObj = fopen(file, "r");
+    if (!fObj) {
+	throw std::runtime_error{"File not found"};
     }
+    
+    // TODO: Support meshes with more than 3 vertices per face
 
-    realVerts.reserve(verts.size() * 3);
-    for (size_t i = 0; i < indVerts.size(); i++) {
-        int index = indVerts[i]-1;
+    // Setup the vertex group and list lists
+    std::vector<VertexGroup> verts;
+    verts.push_back(VertexGroup{"default"});
+    VertexGroup* current_group = &verts.back();
 
-        //Treat negative indices
-        if (index < 0) {
-            index = indVerts.size() - index;
-        }
-        realVerts.push_back(verts[index]);
-    }
+    current_group->vertices.push_back(VertexList{});
+    VertexList* current_vert = &current_group->vertices.back();
 
-    realNormals.reserve(normals.size() * 3);
-    for (size_t i = 0; i < indNormals.size(); i++) {
-        int index = indNormals[i]-1;
-
-        //Treat negative indices
-        if (index < 0) {
-            index = indNormals.size() - index;
-        }
-        realNormals.push_back(normals[index]);
-    }
-
-	realTex.reserve(texcoords.size() * 2);
-	if (indTex.size() > 0) {
-		for (size_t i = 0; i < indTex.size(); i++) {
-        	int index = indTex[i]-1;
-
-        	//Treat negative indices
-        	if (index < 0) {
-        	    index = indTex.size() - index;
-        	}
-
-			realTex.push_back(texcoords[index]);
-    	}
-
-	} else {
-		/* 	If no textures, fill a (1.0, 1.0) texture coordinate, so
-			our shader doesn't break */
-		for (size_t i = 0; i < indVerts.size(); i++) {
-			realTex.push_back(glm::vec2(1.0, 1.0));
-		}
+    char* line = new char[256];
+    while (!feof(fObj)) {
+	auto l = fgets(line, 255, fObj);
+	if (!l) {
+	    if (feof(fObj))
+		break;
+	    
+	    throw std::runtime_error{"Error while reading the file"};
 	}
 
-	Log::GetLog()->Write("mesh-obj-opener", "Opened mesh \"%s\": "
-			     "(OBJ format) %d (%d) vertices, "
-			     "%d (%d) normals, %d texcoords, file is '%s'",
-        mName, verts.size(), realVerts.size(),
-        normals.size(), realNormals.size(), texcoords.size(), file);
+	// Remove whitespace
+	while (l[0] == ' ') l++;
+
+	// Empty line
+	if (l[0] == '\0') continue;
+
+	if (l[0] == '#') // Comment
+	    continue;
+
+	// Remove the newline
+	l[strlen(l)-1] = '\0';
+	
+	// Vertex
+	if (l[0] == 'v' && l[1] == ' ') {
+	    glm::vec3 v3;
+	    char vs;
+	    auto i = sscanf(l, "%c %f %f %f", &vs, &v3.x, &v3.y, &v3.z);
+
+	    if (i < 4) // Not enough parameters for the vertex.
+		continue;
+
+	    // Since OBJ files indexes vertices by appearance order, no problem in pushing them
+	    vertices.push_back(std::move(v3));
+	    continue;
+	}
+
+	// Normal
+	if (l[0] == 'v' && l[1] == 'n' && l[2] == ' ') {
+	    glm::vec3 v3;
+	    char vs[8];
+	    auto i = sscanf(l, "%s %f %f %f", vs, &v3.x, &v3.y, &v3.z);
+
+	    if (i < 4) // Not enough parameters for the vertex.
+		continue;
+
+	    v3 = glm::normalize(v3);
+	    
+	    normals.push_back(std::move(v3));
+	    current_group->hasNormal = true;
+	    continue;
+	}
+
+	// Texture
+	if (l[0] == 'v' && l[1] == 't' && l[2] == ' ') {
+	    glm::vec2 v2;
+	    char vs[8];
+	    auto i = sscanf(l, "%s %f %f", vs, &v2.x, &v2.y);
+
+	    if (i < 3) // Not enough parameters for the vertex.
+		continue;
+
+	    texcoords.push_back(std::move(v2));
+	    current_group->hasTexture = true;
+	    continue;
+	}
+
+	// TODO: Support line elements?
+	// They might be a mesh with a line shader
+
+	// Vertex list changed
+	if (l[0] == 'o') {
+	    
+	    current_group->vertices.push_back(VertexList{});
+	    current_vert = &current_group->vertices.back();
+	    continue;
+	}
+
+	// TODO: Switch vertex list on material change
+	
+	// Vertex group changed
+	if (l[0] == 'g') {
+	    char gs;
+	    char* gname = new char[ strlen(l) ];
+	    
+	    auto i = sscanf(l, "%c %s", &gs, gname);
+	    if (i < 2)
+		continue;
+
+	    verts.push_back(VertexGroup{gname});
+	    current_group = &verts.back();
+
+	    // Add a default vertex list, for when the software only adds vertex groups
+	    current_group->vertices.push_back(VertexList{});
+	    current_vert = &current_group->vertices.back();
+
+	    fprintf(stderr, "\tfound group %s\n", gname);
+	    
+	    continue;
+	}
+
+	// Face assembling
+	if (l[0] == 'f') {
+	    FaceIndex fi;
+	    char fs;
+	    
+	    if (current_group->hasNormal && !current_group->hasTexture) {
+		auto i = sscanf(l, "%c %u//%u %u//%u %u//%u", &fs,
+				&fi.idxVertex[0], &fi.idxNormal[0],
+				&fi.idxVertex[1], &fi.idxNormal[1],
+				&fi.idxVertex[2], &fi.idxNormal[2]);
+
+		if (i < (2*3)+1)
+		    continue;
+		
+	    } else if (!current_group->hasNormal && current_group->hasTexture) {
+		auto i = sscanf(l, "%c %u/%u %u/%u %u/%u", &fs,
+				&fi.idxVertex[0], &fi.idxTex[0],
+				&fi.idxVertex[1], &fi.idxTex[1],
+				&fi.idxVertex[2], &fi.idxTex[2]);
+
+		if (i < (2*3)+1)
+		    continue;
+
+		
+	    } else if (current_group->hasNormal && current_group->hasTexture) {
+		auto i = sscanf(l, "%c %u/%u/%u %u/%u/%u %u/%u/%u", &fs,
+				&fi.idxVertex[0], &fi.idxTex[0], &fi.idxNormal[0],
+				&fi.idxVertex[1], &fi.idxTex[1], &fi.idxNormal[1],
+				&fi.idxVertex[2], &fi.idxTex[2], &fi.idxNormal[2]);
+
+		if (i < (3*3)+1)
+		    continue;
+
+	    } else {
+		fprintf(stderr, "error: unsupported face configuration (%s)\n", l);
+		continue;
+	    } 
+
+	    current_vert->indices.push_back(fi);
+	    continue;
+	}
+	
+    }
+
+    // File parsing ended. We can close the file
+    fclose(fObj);
+
+    // TODO: Read the mtl file, just to put a light object on each  emitter?
+    //       or maybe emission can be a property of the material?
+    
+    // Convert those vertex groups in meshes and vertex data objects
+    // Ensure that every index references an unique combination of vertex, normal and texcoords
 
 
-    VertexData* vd = new VertexData;
-    vd->Positions = realVerts;
-    vd->Normals = realNormals;
-	vd->TexCoords = realTex;
-    vd->MaterialIDs = indMaterials;
+    for (const auto& vg : verts) {
+	if (!vg.hasNormal && !vg.hasTexture) continue; // No normal and no texture? Unsupported
+	
+	printf(" mesh %s, %zu vertex lists, normals=%s, textures=%s\n",
+	       vg.name, vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
+	       (vg.hasTexture ? "true" : "false"));
 
-    Mesh* m = new Mesh(vd);
-    m->SetName(mName);
+	unsigned idx = 0;
+	for (const auto& vl : vg.vertices) {
+	    if (vl.indices.size() == 0) continue; // Remove null vertex lists
 
-    return m;
+	    std::vector<UniqueVertex> uvs;             // The unique combinations of n+v+t
+	    std::vector<unsigned int> index_list;      
+	    
+	    uvs.reserve(vl.indices.size());
+	    index_list.reserve(vl.indices.size());
+	    
+	    unsigned uvidx = 0;
+	    printf("\t vertex list %u, %zu edges\n", idx, vl.indices.size());
+
+	    /* The obj file creates a index unique for each normal, vertex or texcoords.
+	     *
+	     * The videocard reads a index unique for the three component
+	     * This means that, if one of the three is different, it's a different vertex to the
+	     * videocard
+	     *
+	     * We need to transforme the index unique to each parameter to the index
+	     * unique for the combination of the three
+	     */
+	    for (const auto& idx : vl.indices) {
+
+		for (auto fi = 0; fi < 3; fi++) {
+		    UniqueVertex iuv;
+		    iuv.idxVertex = idx.idxVertex[fi]-1;
+		    iuv.idxNormal = idx.idxNormal[fi]-1;
+		    iuv.idxTexcoord = idx.idxTex[fi]-1;
+
+		    auto founduv = std::find_if(uvs.begin(), uvs.end(),
+					   [&iuv](const UniqueVertex& fuv) {
+					       return iuv == fuv;
+					   });
+		    if (founduv == std::end(uvs)) {
+			iuv.idx = uvidx++;
+			index_list.push_back(iuv.idx);
+			
+			fprintf(stderr, "\t\t vidx %u vertex %u normal %u texcoord %u\n",
+			    iuv.idx, iuv.idxVertex, iuv.idxNormal, iuv.idxTexcoord);
+			uvs.push_back(std::move(iuv));
+		    } else {
+			index_list.push_back(founduv->idx);
+		    }
+		}
+	    }
+
+	    fprintf(stderr, "\t %zu unique vert/texcoord/normal combinations detected, %zu indices\n",
+		    uvs.size(), index_list.size());
+	    
+	    idx++;
+	}
+    }
+
+    fflush(stdout);
+    
+    
+    
+    return std::vector<Mesh*>{};
 }

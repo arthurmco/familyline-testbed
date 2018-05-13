@@ -98,18 +98,18 @@ AssetObject AssetManager::GetAsset(const char* name)
     if (assetobj.mesh)
 	aap.object = make_optional(assetobj);
 
-	if (t) {
-		auto strtex = ai->GetItemOr("mesh.texture", "nulltex");
-		char* texname = new char[strtex.size() + 6];
-		sprintf(texname, "tex_%s", strtex.c_str());
+    if (t) {
+	auto strtex = ai->GetItemOr("mesh.texture", "nulltex");
+	char* texname = new char[strtex.size() + 6];
+	sprintf(texname, "tex_%s", strtex.c_str());
 
-		Material* mattex = new Material(texname, MaterialData(0.8f, 1.0f, 0.1f));
-		mattex->SetTexture(t);
-		MaterialManager::GetInstance()->AddMaterial(mattex);
-		assetobj.mesh->SetMaterial(mattex);
+	Material* mattex = new Material(texname, MaterialData(0.8f, 1.0f, 0.1f));
+	mattex->SetTexture(t);
+	MaterialManager::GetInstance()->AddMaterial(mattex);
+	assetobj.mesh->SetMaterial(mattex);
 
-		delete texname;
-	}
+	delete texname;
+    }
 
     this->assetlist[ai->name] = aap;
 
@@ -169,11 +169,11 @@ AssetObject AssetManager::LoadAsset(AssetType type, const char* path)
 	    break;
 	}
 	
-	auto mesh = o->Open(path);
+	auto meshlist = o->Open(path);
 
-	if (mesh) {
-
-	    return create_asset_from_mesh(mesh);
+	// TODO: Support more than one mesh per file! The opener now supports that
+	if (meshlist.size() > 0) {
+	    return create_asset_from_mesh(meshlist.at(0));
 	}
     } break;
     }

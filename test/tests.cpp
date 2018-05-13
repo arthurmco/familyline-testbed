@@ -14,7 +14,7 @@ class PathFindingTest : public ::testing::Test {
 using namespace Familyline::Graphics;
 TEST(MeshTest, OBJOpenTest) {
     OBJOpener om;
-    Mesh* m = om.Open("test/test.obj");
+    Mesh* m = om.Open("test/test.obj").at(0);
     ASSERT_STREQ("TestCube_Cube", m->GetName());
     ASSERT_EQ(36, m->GetVertexData()->Positions.size());
     delete m;
@@ -22,7 +22,7 @@ TEST(MeshTest, OBJOpenTest) {
 
 TEST(MeshTest, DISABLED_MD2OpenTest) {
     OBJOpener om;
-    Mesh* m = om.Open("test/test.md2");
+    Mesh* m = om.Open("test/test.md2").at(0);
     ASSERT_EQ(36, m->GetVertexData()->Positions.size());
     delete m;
 }
