@@ -37,7 +37,7 @@ struct VertexList {
     // Each element in the face index is a 3-element array
     std::vector<FaceIndex> indices;
 
-    
+
 };
 
 
@@ -58,9 +58,9 @@ struct VertexGroup {
 
 std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 {
-    
+
     /* The vertices, normals and texcoords of the file
-     * 
+     *
      * The OBJ file indexes the vertices globally, not per mesh
      * (ex: the vertex index 400 is the 400th vertex of the file, not the mesh )
      */
@@ -68,12 +68,12 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> texcoords;
 
-    
+
     FILE* fObj = fopen(file, "r");
     if (!fObj) {
 	throw std::runtime_error{"File not found"};
     }
-    
+
     // TODO: Support meshes with more than 3 vertices per face
 
     // Setup the vertex group and list lists
@@ -90,7 +90,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 	if (!l) {
 	    if (feof(fObj))
 		break;
-	    
+
 	    throw std::runtime_error{"Error while reading the file"};
 	}
 
@@ -105,7 +105,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
 	// Remove the newline
 	l[strlen(l)-1] = '\0';
-	
+
 	// Vertex
 	if (l[0] == 'v' && l[1] == ' ') {
 	    glm::vec3 v3;
@@ -130,7 +130,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 		continue;
 
 	    v3 = glm::normalize(v3);
-	    
+
 	    normals.push_back(std::move(v3));
 	    current_group->hasNormal = true;
 	    continue;
@@ -155,19 +155,19 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
 	// Vertex list changed
 	if (l[0] == 'o') {
-	    
+
 	    current_group->vertices.push_back(VertexList{});
 	    current_vert = &current_group->vertices.back();
 	    continue;
 	}
 
 	// TODO: Switch vertex list on material change
-	
+
 	// Vertex group changed
 	if (l[0] == 'g') {
 	    char gs;
 	    char* gname = new char[ strlen(l) ];
-	    
+
 	    auto i = sscanf(l, "%c %s", &gs, gname);
 	    if (i < 2)
 		continue;
@@ -180,7 +180,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 	    current_vert = &current_group->vertices.back();
 
 	    fprintf(stderr, "\tfound group %s\n", gname);
-	    
+
 	    continue;
 	}
 
@@ -188,7 +188,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 	if (l[0] == 'f') {
 	    FaceIndex fi;
 	    char fs;
-	    
+
 	    if (current_group->hasNormal && !current_group->hasTexture) {
 		auto i = sscanf(l, "%c %u//%u %u//%u %u//%u", &fs,
 				&fi.idxVertex[0], &fi.idxNormal[0],
@@ -197,7 +197,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
 		if (i < (2*3)+1)
 		    continue;
-		
+
 	    } else if (!current_group->hasNormal && current_group->hasTexture) {
 		auto i = sscanf(l, "%c %u/%u %u/%u %u/%u", &fs,
 				&fi.idxVertex[0], &fi.idxTex[0],
@@ -207,7 +207,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 		if (i < (2*3)+1)
 		    continue;
 
-		
+
 	    } else if (current_group->hasNormal && current_group->hasTexture) {
 		auto i = sscanf(l, "%c %u/%u/%u %u/%u/%u %u/%u/%u", &fs,
 				&fi.idxVertex[0], &fi.idxTex[0], &fi.idxNormal[0],
@@ -220,12 +220,12 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 	    } else {
 		fprintf(stderr, "error: unsupported face configuration (%s)\n", l);
 		continue;
-	    } 
+	    }
 
 	    current_vert->indices.push_back(fi);
 	    continue;
 	}
-	
+
     }
 
     // File parsing ended. We can close the file
@@ -233,14 +233,14 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
     // TODO: Read the mtl file, just to put a light object on each  emitter?
     //       or maybe emission can be a property of the material?
-    
+
+    auto mesh_ret = std::vector<Mesh*>{};
+
     // Convert those vertex groups in meshes and vertex data objects
     // Ensure that every index references an unique combination of vertex, normal and texcoords
-
-
     for (const auto& vg : verts) {
 	if (!vg.hasNormal && !vg.hasTexture) continue; // No normal and no texture? Unsupported
-	
+
 	printf(" mesh %s, %zu vertex lists, normals=%s, textures=%s\n",
 	       vg.name, vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
 	       (vg.hasTexture ? "true" : "false"));
@@ -250,11 +250,11 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 	    if (vl.indices.size() == 0) continue; // Remove null vertex lists
 
 	    std::vector<UniqueVertex> uvs;             // The unique combinations of n+v+t
-	    std::vector<unsigned int> index_list;      
-	    
+	    std::vector<unsigned int> index_list;
+
 	    uvs.reserve(vl.indices.size());
 	    index_list.reserve(vl.indices.size());
-	    
+
 	    unsigned uvidx = 0;
 	    printf("\t vertex list %u, %zu edges\n", idx, vl.indices.size());
 
@@ -282,7 +282,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 		    if (founduv == std::end(uvs)) {
 			iuv.idx = uvidx++;
 			index_list.push_back(iuv.idx);
-			
+
 			fprintf(stderr, "\t\t vidx %u vertex %u normal %u texcoord %u\n",
 			    iuv.idx, iuv.idxVertex, iuv.idxNormal, iuv.idxTexcoord);
 			uvs.push_back(std::move(iuv));
@@ -294,14 +294,35 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
 	    fprintf(stderr, "\t %zu unique vert/texcoord/normal combinations detected, %zu indices\n",
 		    uvs.size(), index_list.size());
-	    
+
+	    // Build the vertex data
+	    VertexData* vdata = new VertexData{};
+
+	    // Make groups of 3 vertices, so the vga knows this is a triangle
+	    // TODO: Support vertex indices, and modify this loop
+	    for (const auto& idxitem : index_list) {
+		auto uv = uvs[idxitem];
+
+		vdata->Positions.push_back(vertices[uv.idxVertex]);
+
+		if (vg.hasNormal)
+		    vdata->Normals.push_back(normals[uv.idxNormal]);
+
+		if (vg.hasTexture)
+		    vdata->TexCoords.push_back(texcoords[uv.idxTexcoord]);
+		
+
+	    }
+
+	    auto mesh = new Mesh{vdata};
+	    mesh->SetName(vg.name);
+
+	    mesh_ret.push_back(mesh);
 	    idx++;
 	}
     }
 
     fflush(stdout);
-    
-    
-    
-    return std::vector<Mesh*>{};
+
+    return mesh_ret;
 }
