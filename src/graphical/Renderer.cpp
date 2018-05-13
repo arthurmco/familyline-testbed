@@ -138,10 +138,11 @@ void Renderer::UpdateObjects()
 			switch ((*itScene)->GetType()) {
 			case SCENE_MESH:
 			{
+			    auto meshIsNew = true;
 				for (auto it2 = _last_IDs.begin(); it2 != _last_IDs.end(); it2++) {
 					if ((*itScene)->GetID() == it2->ID && (*itScene)->GetType() == SCENE_MESH) {
 						it2->lastcheck = lastCheck;
-
+						meshIsNew = false;
 						break;
 					}
 				}
@@ -153,16 +154,19 @@ void Renderer::UpdateObjects()
 
 				auto& vdlist = mes->GetVertexData();
 
-				for (auto& vd : vdlist) {
-				    int vaon = this->AddVertexData(vd, mes->GetModelMatrixPointer());
+				if (meshIsNew) {
+				    for (auto& vd : vdlist) {
+					int vaon = this->AddVertexData(vd, mes->GetModelMatrixPointer());
 
-				    SceneIDCache sidc;
-				    sidc.ID = (*itScene)->GetID();
-				    sidc.lastcheck = lastCheck;
-				    sidc.vao = vaon;
-				    sidc.bbvao = this->AddBoundingBox(mes, glm::vec3(1, 0, 0));
-				    _last_IDs.push_back(sidc);
+					SceneIDCache sidc;
+					sidc.ID = (*itScene)->GetID();
+					sidc.lastcheck = lastCheck;
+					sidc.vao = vaon;
+					sidc.bbvao = this->AddBoundingBox(mes, glm::vec3(1, 0, 0));
+					_last_IDs.push_back(sidc);
+				    }
 				}
+				
 			}
 			break;
 
