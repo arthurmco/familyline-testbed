@@ -3,6 +3,8 @@
 #include <cstring>
 #include <algorithm>
 
+#include <Log.hpp>
+
 #include <glm/glm.hpp>
 
 using namespace Familyline::Graphics;
@@ -19,7 +21,7 @@ struct FaceIndex {
 struct UniqueVertex {
     unsigned idx;
 
-    unsigned idxVertex, idxNormal, idxTexcoord;
+    int idxVertex, idxNormal, idxTexcoord;
 
     bool inline operator==(const UniqueVertex& b) {
 	return (this->idxVertex == b.idxVertex &&
@@ -37,7 +39,7 @@ struct VertexList {
     // Each element in the face index is a 3-element array
     std::vector<FaceIndex> indices;
 
-
+    char* mtlname = nullptr;
 };
 
 
@@ -149,7 +151,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 	    current_group->hasTexture = true;
 	    continue;
 	}
-
+	
 	// TODO: Support line elements?
 	// They might be a mesh with a line shader
 
@@ -179,18 +181,37 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 	    current_group->vertices.push_back(VertexList{});
 	    current_vert = &current_group->vertices.back();
 
-	    fprintf(stderr, "\tfound group %s\n", gname);
+	    Log::GetLog()->InfoWrite("obj-opener", "found group '%s'", gname);
 
 	    continue;
 	}
 
+	// Material
+	if (l[0] == 'u' && l[1] == 's' && l[2] == 'e') {
+	    
+	    if (!strncmp(l, "usemtl", 6)) {
+		char* mtlname = strdup(&l[7]);
+		
+		Log::GetLog()->InfoWrite("obj-opener", "group %s: found material '%s'",
+					 current_group->name, mtlname);
+
+		// switch vertex list
+		current_vert->mtlname = mtlname;
+		
+		current_group->vertices.push_back(VertexList{});
+		current_vert = &current_group->vertices.back();
+		
+		continue;
+	    }
+	}
+	
 	// Face assembling
 	if (l[0] == 'f') {
 	    FaceIndex fi;
 	    char fs;
 
 	    if (current_group->hasNormal && !current_group->hasTexture) {
-		auto i = sscanf(l, "%c %u//%u %u//%u %u//%u", &fs,
+		auto i = sscanf(l, "%c %d//%d %d//%d %d//%d", &fs,
 				&fi.idxVertex[0], &fi.idxNormal[0],
 				&fi.idxVertex[1], &fi.idxNormal[1],
 				&fi.idxVertex[2], &fi.idxNormal[2]);
@@ -199,7 +220,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 		    continue;
 
 	    } else if (!current_group->hasNormal && current_group->hasTexture) {
-		auto i = sscanf(l, "%c %u/%u %u/%u %u/%u", &fs,
+		auto i = sscanf(l, "%c %d/%d %d/%d %d/%d", &fs,
 				&fi.idxVertex[0], &fi.idxTex[0],
 				&fi.idxVertex[1], &fi.idxTex[1],
 				&fi.idxVertex[2], &fi.idxTex[2]);
@@ -209,7 +230,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
 
 	    } else if (current_group->hasNormal && current_group->hasTexture) {
-		auto i = sscanf(l, "%c %u/%u/%u %u/%u/%u %u/%u/%u", &fs,
+		auto i = sscanf(l, "%c %d/%d/%d %d/%d/%d %d/%d/%d", &fs,
 				&fi.idxVertex[0], &fi.idxTex[0], &fi.idxNormal[0],
 				&fi.idxVertex[1], &fi.idxTex[1], &fi.idxNormal[1],
 				&fi.idxVertex[2], &fi.idxTex[2], &fi.idxNormal[2]);
@@ -241,9 +262,9 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
     for (const auto& vg : verts) {
 	if (!vg.hasNormal && !vg.hasTexture) continue; // No normal and no texture? Unsupported
 
-	printf(" mesh %s, %zu vertex lists, normals=%s, textures=%s\n",
-	       vg.name, vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
-	       (vg.hasTexture ? "true" : "false"));
+	Log::GetLog()->Write("obj-opener", "mesh %s, %zu vertex lists, normals=%s, textures=%s",
+			     vg.name, vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
+			     (vg.hasTexture ? "true" : "false"));
 
 	unsigned idx = 0;
 	for (const auto& vl : vg.vertices) {
@@ -256,7 +277,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 	    index_list.reserve(vl.indices.size());
 
 	    unsigned uvidx = 0;
-	    printf("\t vertex list %u, %zu edges\n", idx, vl.indices.size());
+	    Log::GetLog()->Write("obj-opener", "\tvertex list %u, %zu edges", idx, vl.indices.size());
 
 	    /* The obj file creates a index unique for each normal, vertex or texcoords.
 	     *
@@ -283,7 +304,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 			iuv.idx = uvidx++;
 			index_list.push_back(iuv.idx);
 
-			fprintf(stderr, "\t\t vidx %u vertex %u normal %u texcoord %u\n",
+			fprintf(stderr, "\t\t vidx %d vertex %d normal %d texcoord %d\n",
 			    iuv.idx, iuv.idxVertex, iuv.idxNormal, iuv.idxTexcoord);
 			uvs.push_back(std::move(iuv));
 		    } else {
@@ -303,14 +324,23 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 	    for (const auto& idxitem : index_list) {
 		auto uv = uvs[idxitem];
 
-		vdata->Positions.push_back(vertices[uv.idxVertex]);
+		const auto uvv = (uv.idxVertex < 0) ? (vertices.size() + uv.idxVertex) :
+		    uv.idxVertex;
+		const auto uvn = (uv.idxNormal < 0) ? (normals.size() + uv.idxNormal) :
+		    uv.idxNormal;
+		const auto uvt = (uv.idxTexcoord < 0) ? (texcoords.size() + uv.idxTexcoord) :
+		    uv.idxTexcoord;
+		
+		    
+		vdata->Positions.push_back(vertices[uvv]);
 
 		if (vg.hasNormal)
-		    vdata->Normals.push_back(normals[uv.idxNormal]);
+		    vdata->Normals.push_back(normals[uvn]);
 
 		if (vg.hasTexture)
-		    vdata->TexCoords.push_back(texcoords[uv.idxTexcoord]);
-		
+		    vdata->TexCoords.push_back(texcoords[uvt]);
+		else
+		    vdata->MaterialIDs.push_back(2);
 
 	    }
 

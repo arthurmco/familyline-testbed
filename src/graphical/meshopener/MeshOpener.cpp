@@ -1,4 +1,5 @@
 #include "MeshOpener.hpp"
+#include <Log.hpp>
 
 using namespace Familyline::Graphics;
 
@@ -12,7 +13,8 @@ std::unordered_map<std::string /* extension */,
 void MeshOpener::RegisterExtension(const char* extension, MeshOpener* opener)
 {
     MeshOpener::openers[std::string{extension}] = std::unique_ptr<MeshOpener>{opener};
-    fprintf(stderr, "registered mesh opener for the .%s extension\n", extension);
+    Log::GetLog()->Write("meshopener", "registered mesh opener for the .%s extension",
+			 extension);
 }
 
 
