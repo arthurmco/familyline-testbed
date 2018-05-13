@@ -195,13 +195,11 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 		
 		Log::GetLog()->InfoWrite("obj-opener", "group %s: found material '%s'",
 					 current_group->name, mtlname);
-
-		// switch vertex list
-		current_vert->mtlname = mtlname;
-		
+		// switch vertex list		
 		current_group->vertices.push_back(VertexList{});
 		current_vert = &current_group->vertices.back();
-		
+		current_vert->mtlname = mtlname;
+
 		continue;
 	    }
 	}
