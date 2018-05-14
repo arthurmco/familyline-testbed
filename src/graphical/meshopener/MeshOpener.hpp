@@ -34,17 +34,21 @@ namespace Familyline::Graphics {
 #define OPENER_REGISTER(extension)		\
     this->RegisterExtension(extension, this)
 
+    class MeshOpener;
+    
+    struct MeshOpenerRef {
+	int ref = 0;
+	MeshOpener* m;
+    };
+    
     class MeshOpener {
     private:
 
 	/* We maintain a list of mesh openers, so we can use this class itself to open it, 
 	 * independent of extension
-	 * 
-	 * Since we don't need more than one instance of the mesh opener class, we enforce it
-	 * by using a unique_ptr
 	 */
 	static std::unordered_map<std::string /* extension */,
-				  std::unique_ptr<MeshOpener> /*opener*/> openers;
+				  MeshOpenerRef /*opener*/> openers;
 
     protected:
 	/* Register the extension into the main class.
@@ -52,6 +56,8 @@ namespace Familyline::Graphics {
 	 */
 	void RegisterExtension(const char* extension, MeshOpener* opener);
 
+        /* Unregister the extension into the main class */
+	void UnregisterExtension(const char* extension);
     public:
 	/* Open any file */
 	static std::vector<Mesh*> Open(const char* file);
@@ -61,7 +67,7 @@ namespace Familyline::Graphics {
 	 */
 	virtual std::vector<Mesh*> OpenSpecialized(const char* file);
 
-	virtual ~MeshOpener() {}
+	virtual ~MeshOpener() {};
 
 	/* Remove the other constructors. They are not needed, this class will be instanciated only once */
 	MeshOpener& operator=(const MeshOpener &other) = delete;

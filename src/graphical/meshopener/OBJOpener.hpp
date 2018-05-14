@@ -32,7 +32,7 @@ namespace Familyline::Graphics {
 	 */
 	virtual std::vector<Mesh*> OpenSpecialized(const char* file);
 
-//    virtual ~OBJOpener() {}
+	virtual ~OBJOpener() { this->UnregisterExtension("obj"); };
 
     };
 }

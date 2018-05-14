@@ -6,16 +6,31 @@ using namespace Familyline::Graphics;
 #include <cstring>
 
 std::unordered_map<std::string /* extension */,
-		   std::unique_ptr<MeshOpener> /*opener*/> MeshOpener::openers;
+		   MeshOpenerRef /*opener*/> MeshOpener::openers;
 
 
 /* Register the extension into the main class */
 void MeshOpener::RegisterExtension(const char* extension, MeshOpener* opener)
 {
-    MeshOpener::openers[std::string{extension}] = std::unique_ptr<MeshOpener>{opener};
+    if (MeshOpener::openers[std::string{extension}].ref == 0) {
+	MeshOpener::openers[std::string{extension}].m = opener;
+    }
+    
+    MeshOpener::openers[std::string{extension}].ref++;
     Log::GetLog()->Write("meshopener", "registered mesh opener for the .%s extension",
 			 extension);
 }
+
+
+/* Unregister the extension into the main class */
+void MeshOpener::UnregisterExtension(const char* extension)
+{
+    MeshOpener::openers[std::string{extension}].ref--;
+
+    if (MeshOpener::openers[std::string{extension}].ref == 0)
+	MeshOpener::openers.erase(std::string{extension});
+}
+
 
 
 /* Open any file */
@@ -39,7 +54,7 @@ std::vector<Mesh*> MeshOpener::Open(const char* file)
 	delete[] s;
     }
 
-    return meshit->second->OpenSpecialized(file);
+    return meshit->second.m->OpenSpecialized(file);
 }
 
 /* Open only the file for that extension
