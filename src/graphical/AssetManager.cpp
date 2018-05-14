@@ -10,6 +10,9 @@ using namespace Familyline::Graphics;
 
 void AssetManager::Create() {
     this->af.LoadFile( ASSET_FILE_DIR "assets.yml");
+
+    // Create the loaders
+    new OBJOpener();
 }
 
 
@@ -88,10 +91,21 @@ AssetObject AssetManager::GetAsset(const char* name)
 	}
 
     }
-    
-    auto assetobj = this->LoadAsset(type, ai->path.c_str());
+
+    const char* subname;
+    switch (type) {
+    case AMesh:
+	subname = ai->GetItemOr("mesh.name", "default").c_str(); break;
+    default:
+	subname = nullptr;
+	
+    }
+
+    /* Then load the asset */
+    auto assetobj = this->LoadAsset(type, ai->path.c_str(), subname);
 
     AssetPointer aap;
+    
     aap.item = ai;
     aap.type = type;
 
@@ -118,7 +132,7 @@ AssetObject AssetManager::GetAsset(const char* name)
     return aap.object.value_or(create_asset_from_null());
 }
 
-AssetObject AssetManager::LoadAsset(AssetType type, const char* path)
+AssetObject AssetManager::LoadAsset(AssetType type, const char* path, const char* subname)
 {
 
     switch (type) {
@@ -157,23 +171,20 @@ AssetObject AssetManager::LoadAsset(AssetType type, const char* path)
 	
 	std::string ext{ path };
 	ext = ext.substr(ext.find_last_of('.') + 1);
-	MeshOpener* o;
-	
-	if (ext == "obj") {
-	    o = new OBJOpener{};
-	} else if (ext == "md2") {
-	    o = new MD2Opener{};
-	} else {
-	    Log::GetLog()->Warning("asset-manager",
-				   "%s uses an unsupported extension", path);
-	    break;
-	}
-	
-	auto meshlist = o->Open(path);
+       	
+	auto meshlist = MeshOpener::Open(path);
 
-	// TODO: Support more than one mesh per file! The opener now supports that
+	// Find the appropriate mesh by its name
 	if (meshlist.size() > 0) {
-	    return create_asset_from_mesh(meshlist.at(0));
+	    for (auto ml : meshlist) {
+		if (!subname) subname = "";
+		fprintf(stderr, "%s |", subname);
+		fprintf(stderr, "%s \n", ml->GetName());
+		if (!strcmp(ml->GetName(), subname)) {
+		    return create_asset_from_mesh(ml);
+		}
+	    }
+	    
 	}
     } break;
     }

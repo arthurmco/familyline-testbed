@@ -4,6 +4,7 @@ assets:
   - name: Tent.obj
     path: ${MODELS_DIR}/Tent.obj
     type: mesh
+    mesh.name: default
     mesh.texture: test.bmp
 
   - name: test.bmp

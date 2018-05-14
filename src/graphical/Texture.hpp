@@ -8,7 +8,7 @@
 #define TEXTURE_HPP
 
 #include <string>
-#include "Log.hpp"
+#include <Log.hpp>
 
 #include <glm/glm.hpp>
 #include <GL/glew.h>

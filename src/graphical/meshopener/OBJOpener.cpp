@@ -20,9 +20,9 @@ struct FaceIndex {
  *
  */
 struct UniqueVertex {
-    unsigned idx;
+    unsigned idx = -1;
     
-    int idxVertex, idxNormal, idxTexcoord;
+    int idxVertex = -1, idxNormal = -1, idxTexcoord = -1;
 
     bool inline operator==(const UniqueVertex& b) {
 	return (this->idxVertex == b.idxVertex &&
@@ -305,8 +305,6 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 			iuv.idx = uvidx++;
 			index_list.push_back(iuv.idx);
 
-			fprintf(stderr, "\t\t vidx %d vertex %d normal %d texcoord %d\n",
-			    iuv.idx, iuv.idxVertex, iuv.idxNormal, iuv.idxTexcoord);
 			uvs.push_back(std::move(iuv));
 		    } else {
 			index_list.push_back(founduv->idx);
@@ -314,7 +312,9 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 		}
 	    }
 
-	    fprintf(stderr, "\t %zu unique vert/texcoord/normal combinations detected, %zu indices\n",
+	    Log::GetLog()->InfoWrite("obj-opener",
+				     "%zu unique vert/texcoord/normal combinations detected, "
+				     "%zu indices\n",
 		    uvs.size(), index_list.size());
 
 	    // Build the vertex data
@@ -343,7 +343,12 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
 		if (vl.mtlname) {
 		    auto mtl = MaterialManager::GetInstance()->GetMaterial(vl.mtlname);
-		    vdata->materialID = mtl->GetID();
+
+		    if (mtl)
+			vdata->materialID = mtl->GetID();
+		    else
+			Log::GetLog()->Warning("obj-opener", "cannot load material %s for %s",
+					       vl.mtlname, vg.name);
 		}
 
 	    }

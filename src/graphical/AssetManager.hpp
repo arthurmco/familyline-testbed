@@ -53,7 +53,7 @@ namespace Familyline::Graphics {
 	AssetFile af;
 
 	std::unordered_map<std::string, AssetPointer> assetlist; 
-	AssetObject LoadAsset(AssetType type, const char* path);
+	AssetObject LoadAsset(AssetType type, const char* path, const char* subname);
     public:
 	
 	void Create();
@@ -65,7 +65,6 @@ namespace Familyline::Graphics {
 	    if (!am)    am = new AssetManager;
 	    return am;
 	}
-
 
     };
 
