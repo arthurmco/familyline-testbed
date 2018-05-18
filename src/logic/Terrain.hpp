@@ -1,7 +1,7 @@
 /***
     Basic terrain representation
 
-    Copyright (C) 2016 Arthur Mendes.
+    Copyright (C) 2016, 2018 Arthur Mendes.
 
 ***/
 

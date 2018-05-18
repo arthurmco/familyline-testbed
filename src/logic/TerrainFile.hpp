@@ -1,6 +1,6 @@
 /* 	Terrain file parsing and opening
  	
-	Copyright (C) 2017 Arthur M
+	Copyright (C) 2017, 2018 Arthur M
 */
  
 #include <cstdio>
