@@ -290,7 +290,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 
     if (mouse_click && build_something) {
 	if (BuildQueue::GetInstance()->GetNext()) {
-	    glm::vec3 p = TerrainRenderer::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
+	    glm::vec3 p = ::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
 
 	    auto* build = BuildQueue::GetInstance()->BuildNext(p);
 	    AttackableObject* c = dynamic_cast<AttackableObject*>(build);

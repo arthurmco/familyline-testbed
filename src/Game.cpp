@@ -72,7 +72,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		DebugPlotter::pinterface->AddPath(p, glm::vec3(1, 0, 0));
 		LightManager::AddLight(l);
 
-		terr_rend = new TerrainRenderer{ rndr };
+		terr_rend = new TerrainRenderer{ };
 		terr_rend->SetTerrain(terr);
 		terr_rend->SetCamera(cam);
 

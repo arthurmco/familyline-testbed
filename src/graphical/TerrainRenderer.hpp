@@ -1,9 +1,16 @@
 /***
     Terrain rendering system
 
+    Renders the terrain using a custom shader
+
+
+
     Copyright (C) 2016 Arthur Mendes.
 
 ***/
+#ifndef TERRAINRENDERER_HPP
+#define TERRAINRENDERER_HPP
+
 
 #include <map>
 
@@ -12,8 +19,7 @@
 #include "Camera.hpp"
 #include "VertexData.hpp"
 
-#ifndef TERRAINRENDERER_HPP
-#define TERRAINRENDERER_HPP
+#include <glm/glm.hpp>
 
 /* Size of each slot, in OpenGL units */
 #define SEC_SIZE 0.50
@@ -21,38 +27,45 @@
 /* What each unit of height means in OpenGL units */
 #define SEC_HEIGHT 0.01
 
-namespace Familyline {
-namespace Graphics {
+namespace Familyline::Graphics {
 
+    /* A stripped-down version of a vertex data.
+     * 
+     * We have only the vertex and normals.
+     * We do not have material info here, only the terrain types, because the terrain material
+     * can be guessed by the ID
+     */
+    struct TerrainVertexData {
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> normals;
 
-    struct TerrainDataInfo {
-        Familyline::Logic::TerrainData* data;
-        GLint vao;
+	std::vector<unsigned int> indices;
+	std::vector<unsigned int> terrain_ids;
     };
 
-    struct TerrainMaterial {
-	Material* m;
-	Shader* pshader;
-	Shader* vshader;
-
-	TerrainMaterial();
-	TerrainMaterial(Material* m);
-	TerrainMaterial(Material* m, Shader* ps, Shader* vs);
-    };    
+    struct TerrainDataInfo {
+	unsigned int secidx;
+	size_t vcount;
+	GLuint vao;
+    };
 
     class TerrainRenderer {
     private:
-        TerrainDataInfo* _tdata = nullptr;
-        Familyline::Logic::Terrain* _t;
-        Camera* _cam  = nullptr;
-        Renderer* _rend;
+	std::vector<TerrainDataInfo> _tdata;
+
+	Familyline::Logic::Terrain* _t;
+
+	Camera* _cam  = nullptr;
         glm::mat4 _wmatrix = glm::mat4(1.0f);
 
-	// Maps texture IDs into real textures
-	std::map<unsigned int, TerrainMaterial> _texturemap;
+        /* Create a terrain vertex data with the data from a specific terrain */
+	TerrainVertexData GetTerrainVerticesFromSection(unsigned int section);
+
+	GLuint CreateVAOFromTerrainData(TerrainVertexData& tvd);
 	
+	bool needs_update = true;
     public:
-        TerrainRenderer(Renderer*);
+        TerrainRenderer();
 
         void SetTerrain(Familyline::Logic::Terrain*);
         Familyline::Logic::Terrain* GetTerrain();
@@ -60,22 +73,21 @@ namespace Graphics {
         void SetCamera(Camera*);
         Camera* GetCamera();
 
-	void AddMaterial(unsigned int id, Material* m);
-
-        /* Convert a terrain point from graphical to game space */
-        static glm::vec3 GraphicalToGameSpace(glm::vec3 graphical);
-
-	/* Convert a terrain point from game to graphical space*/
-	static glm::vec3 GameToGraphicalSpace(glm::vec3 game);
-
-        /*  Check the terrains that needs to be rendered and
-            send them to the renderer.
-            Will also cache terrain textures too */
+	/* Update the terrain VAO with the current rendering information */
         void Update();
+
+	/* Render the terrain */
+	void Render();
 
     };
 
-}
+
+    /* Convert a terrain point from graphical to game space */
+    glm::vec3 GraphicalToGameSpace(glm::vec3 graphical);
+
+    /* Convert a terrain point from game to graphical space*/
+    glm::vec3 GameToGraphicalSpace(glm::vec3 game);
+
 }
 
 

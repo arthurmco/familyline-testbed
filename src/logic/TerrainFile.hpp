@@ -63,9 +63,9 @@ class terrain_file_exception : public std::runtime_error
     {
     public:
         explicit terrain_file_exception(std::string msg, 
-						std::string file, int code);
-
-		std::string file;
+					std::string file, int code);
+	
+	std::string file;
         int code;
     };
 

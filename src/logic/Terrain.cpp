@@ -57,7 +57,6 @@ int Terrain::GetHeightFromPoint(unsigned x, unsigned y)
     unsigned siX = x % SECTION_SIDE;
     unsigned siY = y % SECTION_SIDE;
 
-    printf("%d %d %d|", index, siY, siX);
     return _data[index]->data[siY*SECTION_SIDE+siX].elevation;
 }
 

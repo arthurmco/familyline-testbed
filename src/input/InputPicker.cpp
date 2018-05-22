@@ -106,7 +106,7 @@ void InputPicker::UpdateTerrainProjectedPosition()
 
 	}
 
-	glm::vec3 collide = _terrain->GraphicalToGameSpace(pHalf);
+	glm::vec3 collide = GraphicalToGameSpace(pHalf);
 
 	/* Clamp collide to the terrain area */
 	if (collide.x >= _terrain->GetTerrain()->GetWidth())
@@ -215,7 +215,7 @@ void InputPicker::UpdateIntersectedObject()
 terrain, in render coordinates */
 glm::vec3 InputPicker::GetTerrainProjectedPosition()
 {
-    return _terrain->GameToGraphicalSpace(_intersectedPosition);
+    return GameToGraphicalSpace(_intersectedPosition);
 }
 
 /*	Get position where the cursor collides with the

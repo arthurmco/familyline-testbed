@@ -22,7 +22,7 @@ PathHandle GraphicalPlotInterface::AddPath(std::vector<glm::vec3>& path,
     
     std::transform(path.begin(), path.end(), glpos.begin(),
 		   [](glm::vec3 point) {
-		       return TerrainRenderer::GameToGraphicalSpace(point);
+		       return GameToGraphicalSpace(point);
 		   });
 
     std::generate(glcolor.begin(), glcolor.end(), [&color](){

@@ -106,7 +106,7 @@ void ObjectRenderer::Update()
 
 		Graphics::Mesh* mm = (Graphics::Mesh*) (*it)->GetMesh();
 
-		mm->SetPosition(Graphics::TerrainRenderer::GameToGraphicalSpace(glm::vec3(x, y, z)));
+		mm->SetPosition(Graphics::GameToGraphicalSpace(glm::vec3(x, y, z)));
 		mm->ApplyTransformations();
 
 		/*

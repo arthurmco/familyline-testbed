@@ -45,7 +45,7 @@ std::list<Light*> LightManager::GetBestLights(glm::vec3 center,
 
 	auto lights = LightManager::_lights;
 
-	for (unsigned i = 0; i < max_lights; i++) {
+	for (auto i = 0; i < max_lights; i++) {
 		auto minScore = 0;
 		auto it_minLight = lights.end();
 
