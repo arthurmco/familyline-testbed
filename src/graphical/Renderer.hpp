@@ -18,6 +18,7 @@
 #include "GFXExceptions.hpp"
 
 #include "VertexData.hpp"
+#include "TerrainRenderer.hpp"
 #include "ShaderProgram.hpp"
 #include "SceneManager.hpp"
 #include "Mesh.hpp"
@@ -84,7 +85,7 @@ namespace Graphics {
 		void UpdateObjects();
         /* Returns true if rendered successfully */
 
-        bool Render();
+        bool Render(TerrainRenderer*);
 
         /* Add vertex data structure. Returns its VAO ID */
         GLint AddVertexData(VertexData*, glm::mat4* worldMatrix);

@@ -8,6 +8,7 @@ const char* ShaderManager::DefaultShader = "forward";
 void ShaderManager::Add(const char* name, ShaderProgram* shader)
 {
 	ShaderManager::_shaders[std::string{ name }] = shader;
+	Log::GetLog()->Write("shader-manager", "Added shader %s", name);
 }
 
 /**

@@ -7,13 +7,6 @@
 using namespace Familyline::Graphics;
 using namespace Familyline::Logic;
 
-static Material m = Material("terrain", MaterialData(0.8f, 0.95f, 0.2f));
-
-/* Return a valid material, or the above material 'm' */
-#define MATERIAL_GET(id) \
-    ((_texturemap[id].m != nullptr) ? _texturemap[id].m->GetID() : m.GetID())
-
-
 /***
 Renderer
 
@@ -68,19 +61,19 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
 
 	    // Send the actual vertex
 	    tvd.vertices.push_back(glm::vec3(x * SEC_SIZE, height, y * SEC_SIZE));
-
+	    
 	    // Draw the triangle
 	    // We can only send the complete box of the terrain if we are not in the borders
 	    // Note that the vertices will still be sent, and the border vertices will be referenced
 	    // in the previous indices sent.
 	    if (y+1 < SECTION_SIDE && x+1 < SECTION_SIDE) {
+		tvd.indices.push_back(idx+1);
 		tvd.indices.push_back(idx);
 		tvd.indices.push_back(idx+SECTION_SIDE);
-		tvd.indices.push_back(idx+SECTION_SIDE+1);
 
-		tvd.indices.push_back(idx);
-		tvd.indices.push_back(idx+1);
+		tvd.indices.push_back(idx+SECTION_SIDE);
 		tvd.indices.push_back(idx+SECTION_SIDE+1);
+		tvd.indices.push_back(idx+1);
 	    }
 
 	    // Send a placeholder normal
@@ -110,11 +103,11 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
 	    auto fnCalculateTriNormals = [](glm::vec3 e1, glm::vec3 e2, glm::vec3 e3) {
 		auto u = e2 - e1;
 		auto v = e3 - e1;
-
+		
 		return glm::cross(u, v);
 	    };
 
-	    auto& verts = tvd.vertices;
+	    const auto& verts = tvd.vertices;
 	    glm::vec3 norms[4];
 	    int q = 0;
 
@@ -133,8 +126,7 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
 		}
 	    }
 
-
-	    if (y < SECTION_SIDE) {
+	    if (y < SECTION_SIDE-1) {
 		const auto bottomidx = (y+1) * SECTION_SIDE + x;
 		if (x > 0) {
 		    const auto leftidx = y * SECTION_SIDE + x-1;
@@ -150,7 +142,7 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
 	    }
 
 	    auto vnormal = norms[0];
-	    for (auto i = 1; i < q; i++) vnormal += norms[i];
+	    for (auto i = 1; i < q; i++) { vnormal += norms[i]; }
 
 	    tvd.normals[idx] = glm::normalize(vnormal);
 	}
@@ -161,22 +153,23 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
 
 GLuint TerrainRenderer::CreateVAOFromTerrainData(TerrainVertexData& tvd)
 {
-
+    auto err = glGetError();
+    
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     
     GLuint vboVertices, vboNormals, vboElement;
     glGenBuffers(1, &vboVertices);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboVertices);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, tvd.vertices.size() * sizeof(glm::vec3),
+    glBindBuffer(GL_ARRAY_BUFFER, vboVertices);
+    glBufferData(GL_ARRAY_BUFFER, tvd.vertices.size() * sizeof(glm::vec3),
 		 tvd.vertices.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
     glGenBuffers(1, &vboNormals);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboNormals);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, tvd.normals.size() * sizeof(glm::vec3),
+    glBindBuffer(GL_ARRAY_BUFFER, vboNormals);
+    glBufferData(GL_ARRAY_BUFFER, tvd.normals.size() * sizeof(glm::vec3),
 		 tvd.normals.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(1);
@@ -186,6 +179,11 @@ GLuint TerrainRenderer::CreateVAOFromTerrainData(TerrainVertexData& tvd)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, tvd.indices.size() * sizeof(unsigned int),
 		 tvd.indices.data(), GL_STATIC_DRAW);
 
+    err = glGetError();
+    if (err != GL_NO_ERROR) {
+	Log::GetLog()->Warning("terrain-renderer", "GL error %#x", err);
+    }
+    
     return vao;
 }
 
@@ -201,7 +199,7 @@ void TerrainRenderer::Update()
     auto vao = this->CreateVAOFromTerrainData(tvd);
 
     TerrainDataInfo tdi;
-    tdi.vcount = tvd.vertices.size();
+    tdi.vcount = tvd.indices.size();
     tdi.vao = vao;
     tdi.secidx = 0;
 
@@ -211,10 +209,21 @@ void TerrainRenderer::Update()
 
 void TerrainRenderer::Render()
 {
+    auto err = glGetError();
+
+    glm::mat4 mvpmatrix = _cam->GetProjectionMatrix() * _cam->GetViewMatrix() * glm::mat4(1.0);
+    
+    ShaderManager::Get("forward")->SetUniform("mvp", mvpmatrix);
+    ShaderManager::Get("forward")->SetUniform("model", glm::mat4(1.0));
     ShaderManager::Get("forward")->Use();
     for (const auto& tdi : this->_tdata) {
 	glBindVertexArray(tdi.vao);
 	glDrawElements(GL_TRIANGLES, tdi.vcount, GL_UNSIGNED_INT, 0);
+    }
+    
+    err = glGetError();
+    if (err != GL_NO_ERROR) {
+	Log::GetLog()->Warning("terrain-renderer", "GL error %#x", err);
     }
 }
 

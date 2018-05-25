@@ -15,7 +15,6 @@
 #include <map>
 
 #include "../logic/Terrain.hpp"
-#include "Renderer.hpp"
 #include "Camera.hpp"
 #include "VertexData.hpp"
 

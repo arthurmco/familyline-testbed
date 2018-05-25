@@ -221,7 +221,7 @@ void Renderer::UpdateObjects()
 }
 
 
-bool Renderer::Render()
+bool Renderer::Render(TerrainRenderer* terr_rend)
 {
 
 	glm::mat4 mModel, mView, mProj;
@@ -239,7 +239,9 @@ bool Renderer::Render()
 	sForward->SetUniform("lightCount", (int)lightCount);
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	terr_rend->Render();
+		
+	
 	int material = 0;
 
 	/* Render registered VAOs */

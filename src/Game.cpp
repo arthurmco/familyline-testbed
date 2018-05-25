@@ -332,8 +332,8 @@ int Game::RunLoop()
 		rndr->SetBoundingBox(hp->renderBBs);
 		if (objupdate) rndr->UpdateObjects();
 		rndr->UpdateFrames();
-		rndr->Render();
-
+		rndr->Render(terr_rend);
+		
 		gr->DebugWrite(10, 140, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f)",
 			p.x, p.y, p.z, q.x, q.y);
 		gr->DebugWrite(10, 180, "Camera rotation: %.1fº",
