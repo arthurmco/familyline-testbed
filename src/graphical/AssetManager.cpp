@@ -66,7 +66,7 @@ AssetObject AssetManager::GetAsset(const char* name)
 		    sprintf(e, "Could not load material %s for mesh %s (%s)", mmaterial.c_str(),
 			     ai->name.c_str(), ai->path.c_str());
 		    throw asset_exception(nullptr, e);
-			delete e;
+			delete[] e;
 		}
 
 		//auto material = mtl.materialvec->at(0);
@@ -83,6 +83,7 @@ AssetObject AssetManager::GetAsset(const char* name)
 		    sprintf(e, "Could not load texture %s for mesh %s (%s)", mtexture.c_str(),
 			     ai->name.c_str(), ai->path.c_str());
 		    throw asset_exception(nullptr, e);
+			delete[] e;
 		}
 
 		t = tex.texture;
@@ -95,11 +96,14 @@ AssetObject AssetManager::GetAsset(const char* name)
     const char* subname;
     switch (type) {
     case AMesh:
-	subname = ai->GetItemOr("mesh.name", "default").c_str(); break;
+		subname = ai->GetItemOr("mesh.name", "default").c_str(); break;
     default:
-	subname = nullptr;
+		subname = nullptr;
 	
     }
+
+	if (subname && subname[0] == '\0')
+		subname = nullptr;
 
     /* Then load the asset */
     auto assetobj = this->LoadAsset(type, ai->path.c_str(), subname);
@@ -110,19 +114,19 @@ AssetObject AssetManager::GetAsset(const char* name)
     aap.type = type;
 
     if (assetobj.mesh)
-	aap.object = make_optional(assetobj);
+		aap.object = make_optional(assetobj);
 
     if (t) {
-	auto strtex = ai->GetItemOr("mesh.texture", "nulltex");
-	char* texname = new char[strtex.size() + 6];
-	sprintf(texname, "tex_%s", strtex.c_str());
+		auto strtex = ai->GetItemOr("mesh.texture", "nulltex");
+		char* texname = new char[strtex.size() + 6];
+		sprintf(texname, "tex_%s", strtex.c_str());
 
-	Material* mattex = new Material(texname, MaterialData(0.8f, 1.0f, 0.1f));
-	mattex->SetTexture(t);
-	MaterialManager::GetInstance()->AddMaterial(mattex);
-	assetobj.mesh->SetMaterial(mattex);
+		Material* mattex = new Material(texname, MaterialData(0.8f, 1.0f, 0.1f));
+		mattex->SetTexture(t);
+		MaterialManager::GetInstance()->AddMaterial(mattex);
+		assetobj.mesh->SetMaterial(mattex);
 
-	delete texname;
+		delete[] texname;
     }
 
     this->assetlist[ai->name] = aap;
@@ -177,15 +181,15 @@ AssetObject AssetManager::LoadAsset(AssetType type, const char* path, const char
 	// Find the appropriate mesh by its name
 	if (meshlist.size() > 0) {
 	    for (auto ml : meshlist) {
-		if (!subname) subname = "";
-		fprintf(stderr, "%s |", subname);
-		fprintf(stderr, "%s \n", ml->GetName());
-		if (!strcmp(ml->GetName(), subname)) {
-		    return create_asset_from_mesh(ml);
-		}
-	    }
+			if (!subname) subname = "default";
+			fprintf(stderr, "%s |", subname);
+			fprintf(stderr, "%s \n", ml->GetName());
+			if (!strcmp(ml->GetName(), subname)) {
+			    return create_asset_from_mesh(ml);
+			}
+		    }
 	    
-	}
+		}
     } break;
     }
 

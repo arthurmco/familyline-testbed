@@ -76,15 +76,15 @@ bool NodeList::isObstacle(glm::vec2 pos) {
 	(score, etc) for the same paths
 */
 PathNode* NodeList::getNode(glm::vec2 pos) {
-	auto p = std::find_if(nodes.begin(), nodes.end(), [pos](PathNode* p) {
+	auto pi = std::find_if(nodes.begin(), nodes.end(), [pos](PathNode* p) {
 		return (p->pos == pos);
 	});
 
-	if (p == nodes.end()) {
+	if (pi == nodes.end()) {
 		return (this->isObstacle(pos)) ? nullptr : new PathNode(this->pf, pos);
 	}
 	else {
-		return *p;
+		return *pi;
 	}
 
 }
