@@ -37,7 +37,8 @@ namespace Familyline::Graphics {
     struct TerrainVertexData {
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
-
+	std::vector<glm::vec2> texcoords; //Just for texture mapping
+		
 	std::vector<unsigned int> indices;
 	std::vector<unsigned int> terrain_ids;
     };
