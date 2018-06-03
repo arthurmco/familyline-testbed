@@ -37,7 +37,9 @@ public:
     /* Get a texture from a cut in the loaded image */
     Texture* GetTextureCut(int x = 0, int y = 0, int w = 0, int h = 0);
 
-    /* Get texture raw data from a cut */
+    /* Get texture raw data from a cut 
+       If you pass w < 0 it will use the image default width. Same for the height
+    */
     unsigned char* GetTextureRaw(int x = 0, int y = 0, int w = 0, int h = 0);
     
     ~TextureFile();
