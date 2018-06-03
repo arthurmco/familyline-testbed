@@ -17,6 +17,7 @@
 #include "../logic/Terrain.hpp"
 #include "Camera.hpp"
 #include "VertexData.hpp"
+#include "Texture.hpp"
 
 #include <glm/glm.hpp>
 
@@ -29,7 +30,7 @@
 namespace Familyline::Graphics {
 
     /* A stripped-down version of a vertex data.
-     * 
+     *
      * We have only the vertex and normals.
      * We do not have material info here, only the terrain types, because the terrain material
      * can be guessed by the ID
@@ -38,9 +39,13 @@ namespace Familyline::Graphics {
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> texcoords; //Just for texture mapping
-		
+
 	std::vector<unsigned int> indices;
 	std::vector<unsigned int> terrain_ids;
+    };
+
+    struct TerrainTexture {
+	Texture* diffuse;
     };
 
     struct TerrainDataInfo {
@@ -51,6 +56,8 @@ namespace Familyline::Graphics {
 
     class TerrainRenderer {
     private:
+	std::map<unsigned int /* terrain-code */, TerrainTexture> texture_map;
+	
 	std::vector<TerrainDataInfo> _tdata;
 
 	Familyline::Logic::Terrain* _t;
@@ -62,6 +69,8 @@ namespace Familyline::Graphics {
 	TerrainVertexData GetTerrainVerticesFromSection(unsigned int section);
 
 	GLuint CreateVAOFromTerrainData(TerrainVertexData& tvd);
+
+	Texture* terrain_tex = nullptr;
 	
 	bool needs_update = true;
     public:

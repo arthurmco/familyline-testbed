@@ -227,7 +227,6 @@ int main(int argc, char const *argv[])
 	Log::GetLog()->InfoWrite("", "Default texture directory is " TEXTURES_DIR);
 	Log::GetLog()->InfoWrite("", "Default material directory is " MATERIALS_DIR);
 
-
 	auto connectpos = get_arg_index("--connect", argc, argv);
 	if (connectpos > 0) {
 		if (connectpos >= argc - 1) {
@@ -493,6 +492,9 @@ int main(int argc, char const *argv[])
 		exit(ret);
 	}
 
+	Log::GetLog()->InfoWrite("texture", "maximum tex size: %zu x %zu", Texture::GetMaximumSize(),
+				 Texture::GetMaximumSize());
+	
 
 	/* Render the menu */
 	bool r = true;

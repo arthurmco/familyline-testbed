@@ -27,13 +27,13 @@ Renderer
 
 TerrainRenderer::TerrainRenderer()
 {
-
+    terrain_tex = TextureOpener::OpenTexture("textures/terrain/grass.png");
 }
 
 void TerrainRenderer::SetTerrain(Terrain* t)
 {
     _t = t;
- 
+
     Log::GetLog()->Write("terrain-renderer", "Added terrain with %d sections",
 	 t->GetSectionCount());
 
@@ -65,8 +65,8 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
 	    /* Use x = 0 when x is even, x = 1 when x is odd
 	       This will make the texture repeat across the terrain
 	    */
-	    tvd.texcoords.push_back(glm::vec2(x % 2, y % 2));
-	    
+	    tvd.texcoords.push_back(glm::vec2(float(x) / SECTION_SIDE, float(y) / SECTION_SIDE));
+
 	    // Draw the triangle
 	    // We can only send the complete box of the terrain if we are not in the borders
 	    // Note that the vertices will still be sent, and the border vertices will be referenced
@@ -81,7 +81,7 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
 		tvd.indices.push_back(idx+1);
 
 	    }
-
+	    
 	    // Send a placeholder normal
 	    tvd.normals.push_back(glm::vec3(0, 1, 0));
 
@@ -109,7 +109,7 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
 	    auto fnCalculateTriNormals = [](glm::vec3 e1, glm::vec3 e2, glm::vec3 e3) {
 		auto u = e2 - e1;
 		auto v = e3 - e1;
-		
+
 		return glm::cross(u, v);
 	    };
 
@@ -160,11 +160,11 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
 GLuint TerrainRenderer::CreateVAOFromTerrainData(TerrainVertexData& tvd)
 {
     auto err = glGetError();
-    
+
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
-    
+
     GLuint vboVertices, vboNormals, vboTextures, vboElement;
     glGenBuffers(1, &vboVertices);
     glBindBuffer(GL_ARRAY_BUFFER, vboVertices);
@@ -186,7 +186,7 @@ GLuint TerrainRenderer::CreateVAOFromTerrainData(TerrainVertexData& tvd)
 		 tvd.texcoords.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(2);
-    
+
     glGenBuffers(1, &vboElement);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboElement);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, tvd.indices.size() * sizeof(unsigned int),
@@ -194,9 +194,9 @@ GLuint TerrainRenderer::CreateVAOFromTerrainData(TerrainVertexData& tvd)
 
     err = glGetError();
     if (err != GL_NO_ERROR) {
-	Log::GetLog()->Warning("terrain-renderer", "GL error %#x", err);
+	Log::GetLog()->Warning("terrain-renderer", "GL error %#x while creating VAO", err);
     }
-    
+
     return vao;
 }
 
@@ -224,20 +224,25 @@ void TerrainRenderer::Render()
 {
     auto err = glGetError();
 
-    glm::mat4 mvpmatrix = _cam->GetProjectionMatrix() * _cam->GetViewMatrix() * glm::mat4(1.0);
-    
-    ShaderManager::Get("forward")->SetUniform("mvp", mvpmatrix);
+    glm::mat4 wvpmatrix = _cam->GetProjectionMatrix() * _cam->GetViewMatrix() * glm::mat4(1.0);
+
+    ShaderManager::Get("forward")->SetUniform("mvp", wvpmatrix);
     ShaderManager::Get("forward")->SetUniform("mModel", glm::mat4(1.0));
     ShaderManager::Get("forward")->SetUniform("mView", _cam->GetViewMatrix());
     ShaderManager::Get("forward")->SetUniform("diffuse_color", glm::vec3(0.5, 0.5, 0.5));
     ShaderManager::Get("forward")->SetUniform("ambient_color", glm::vec3(0.1, 0.1, 0.1));
-    ShaderManager::Get("forward")->SetUniform("tex_amount", 0.0f);
+    
+    glBindTexture(GL_TEXTURE_2D, terrain_tex->GetHandle());
+    ShaderManager::Get("forward")->SetUniform("tex_amount", 1.0f);
+
     ShaderManager::Get("forward")->Use();
     for (const auto& tdi : this->_tdata) {
 	glBindVertexArray(tdi.vao);
 	glDrawElements(GL_TRIANGLES, tdi.vcount, GL_UNSIGNED_INT, 0);
     }
-    
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     err = glGetError();
     if (err != GL_NO_ERROR) {
 	Log::GetLog()->Warning("terrain-renderer", "GL error %#x", err);
