@@ -128,7 +128,7 @@ TerrainBitmap TerrainRenderer::GetTerrainTexture(unsigned int type_id)
 Texture* TerrainRenderer::GenerateTerrainSlotTexture(Familyline::Logic::TerrainData* data)
 {
     TerrainSlotTexture terrain_surface;
-    terrain_surface.reserve(ImageWidth*SlotSide*ImageHeight*SlotSide);
+    terrain_surface.resize(ImageWidth*SlotSide*ImageHeight*SlotSide);
     
     for (unsigned sy = 0; sy < SlotSide-1; sy++) {
 	for (unsigned sx = 0; sx < SlotSide-1; sx++) {
