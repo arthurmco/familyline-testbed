@@ -14,7 +14,6 @@
 #include "ObjectManager.hpp"
 #include "GameActionListener.hpp"
 
-#include "../graphical/TerrainRenderer.hpp"
 #include "../graphical/SceneManager.hpp"
 
 #ifndef OBJECTRENDERER_HPP

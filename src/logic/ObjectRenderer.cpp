@@ -1,4 +1,5 @@
 #include "ObjectRenderer.hpp"
+#include "../graphical/TerrainRenderer.hpp"
 
 using namespace Familyline::Logic;
 

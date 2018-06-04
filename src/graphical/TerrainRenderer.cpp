@@ -27,7 +27,6 @@ Renderer
 
 TerrainRenderer::TerrainRenderer()
 {
-    terrain_tex = TextureOpener::OpenTexture("textures/terrain/grass.png");
 }
 
 void TerrainRenderer::SetTerrain(Terrain* t)
@@ -215,7 +214,11 @@ void TerrainRenderer::Update()
     tdi.vcount = tvd.indices.size();
     tdi.vao = vao;
     tdi.secidx = 0;
-
+    
+    Log::GetLog()->Write("terrain-renderer", "Starting terrain texture generation for section 0");
+    tdi.texture = this->GenerateTerrainSlotTexture(_t->GetSection(0));
+    Log::GetLog()->Write("terrain-renderer", "Terrain texture for section 0 created");
+    
     this->_tdata.push_back(tdi);
 }
 
@@ -232,11 +235,11 @@ void TerrainRenderer::Render()
     ShaderManager::Get("forward")->SetUniform("diffuse_color", glm::vec3(0.5, 0.5, 0.5));
     ShaderManager::Get("forward")->SetUniform("ambient_color", glm::vec3(0.1, 0.1, 0.1));
     
-    glBindTexture(GL_TEXTURE_2D, terrain_tex->GetHandle());
     ShaderManager::Get("forward")->SetUniform("tex_amount", 1.0f);
 
     ShaderManager::Get("forward")->Use();
     for (const auto& tdi : this->_tdata) {
+	glBindTexture(GL_TEXTURE_2D, tdi.texture->GetHandle());
 	glBindVertexArray(tdi.vao);
 	glDrawElements(GL_TRIANGLES, tdi.vcount, GL_UNSIGNED_INT, 0);
     }

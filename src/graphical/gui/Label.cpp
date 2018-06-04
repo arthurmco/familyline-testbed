@@ -81,7 +81,6 @@ void Label::Redraw(cairo_t* ctxt)
 
 bool Label::ProcessInput(Input::InputEvent& ev)
 {
-    printf("Label hovered at relpos %dx%d\n", ev.mousex, ev.mousey);
     return true;
 }
 

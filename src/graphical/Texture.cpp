@@ -36,10 +36,8 @@ Texture::Texture(int width, int height, GLenum format, void* data)
 			       glerr, tex_handle);
     }
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-		    GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-		    GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     Log::GetLog()->Write("texture", "Created texture with %dx%d, format %#x, with id %d",
 			 width, height, format, tex_handle);
 

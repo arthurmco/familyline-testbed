@@ -44,19 +44,20 @@ namespace Familyline::Graphics {
 	std::vector<unsigned int> terrain_ids;
     };
 
-    struct TerrainTexture {
-	Texture* diffuse;
-    };
-
     struct TerrainDataInfo {
 	unsigned int secidx;
 	size_t vcount;
 	GLuint vao;
+	Texture* texture;
     };
+
+    /* Width and height of the terrain individual textures
+       aka the size of a texture "square", 1x1 */
+    constexpr int ImageHeight = 16;
+    constexpr int ImageWidth = 16;
 
     class TerrainRenderer {
     private:
-	std::map<unsigned int /* terrain-code */, TerrainTexture> texture_map;
 	
 	std::vector<TerrainDataInfo> _tdata;
 
@@ -73,6 +74,12 @@ namespace Familyline::Graphics {
 	Texture* terrain_tex = nullptr;
 	
 	bool needs_update = true;
+
+	std::array<unsigned int, ImageWidth*ImageHeight> GetTerrainTexture(unsigned int type_id);
+
+	/* Generate terrain texture from a certain terrain data */
+	Texture* GenerateTerrainSlotTexture(Familyline::Logic::TerrainData* data);
+	
     public:
         TerrainRenderer();
 
