@@ -62,7 +62,7 @@ bool ObjectPathManager::RemovePath(long oid)
 /* Update the paths
  * Also, removes the completed paths
  * */
-void ObjectPathManager::UpdatePaths()
+void ObjectPathManager::UpdatePaths(unsigned ms_frame)
 {
 	/* Store a vector of 'completed path' iterators.
 	 * Nuke them in iteration end */
@@ -77,12 +77,27 @@ void ObjectPathManager::UpdatePaths()
 		auto px = it->path_point.x;
 		auto pz = it->path_point.y;
 
+		it->current_time += ms_frame;
+		
 		it->lc->SetX(px);
 		it->lc->SetY(_terr->GetHeightFromPoint(px, pz));
 		it->lc->SetZ(pz);
 
-		if (it->path_ptr < it->path->size()-1)
-			it->path_point = (*it->path)[++(it->path_ptr)];
+		// 1 step = 0.1 second
+		if (it->path_ptr < it->path->size()-1 &&
+		    (it->current_time - it->last_step_time) >= 100) {
+		    const unsigned timedelta = it->current_time - it->last_step_time;
+
+		    unsigned cptr = it->path_ptr;
+		    for (unsigned i = 0; i < timedelta; i += 100) {
+			if ((cptr+1) < it->path->size())
+			    cptr++;
+		    }
+
+		    it->path_ptr = cptr;
+		    it->path_point = (*it->path)[cptr];
+		    it->last_step_time = it->current_time;
+		}
 	}
 
 	/* Delete the reserved iterators */

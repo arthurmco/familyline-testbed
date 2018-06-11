@@ -27,6 +27,13 @@ struct ObjectPathRef {
     unsigned int path_ptr = 0;
     bool interrupted = false;
     int dbg_path_plot;
+
+    unsigned current_time = 0; // The current time (in ms) of this path
+    unsigned last_step_time = 0;    // The last time of that path last movement
+
+    /* The path only advances in a certain time. The last_step variable records
+       that time
+    */ 
     
     ObjectPathRef(int pathid, LocatableObject* lc, 
 		  std::vector<glm::vec2>* path,
@@ -55,7 +62,7 @@ public:
     /* Update the paths
      * Also, removes the completed paths
      * */
-    void UpdatePaths();
+    void UpdatePaths(unsigned ms_frame);
 
     void SetTerrain(Terrain*);
     

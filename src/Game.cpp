@@ -240,7 +240,7 @@ int Game::RunLoop()
 	double pms = 0.0;
 
 	double maxdelta = 0, mindelta = 99, sumfps = 0;
-
+	
 	do {
 		/*
 
@@ -252,6 +252,7 @@ int Game::RunLoop()
 
 		gr->DebugWrite(10, 40, "Press C to create an object at mouse cursor, and R to remove it.");
 		player = true;
+		
 		gctx.elapsed_seconds = delta / 1000.0;
 
 		InputEvent ev;
@@ -319,7 +320,7 @@ int Game::RunLoop()
 		glm::vec3 p = ip->GetTerrainProjectedPosition();
 		glm::vec2 q = ip->GetGameProjectedPosition();
 
-		ObjectPathManager::getInstance()->UpdatePaths();
+		ObjectPathManager::getInstance()->UpdatePaths(delta);
 		guam->UpdateBasePanel();
 
 		/*
