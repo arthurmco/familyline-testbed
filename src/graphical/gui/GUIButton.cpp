@@ -11,7 +11,7 @@ GUIButton::GUIButton(float x, float y, float w, float h, const char* text)
 
     // add a dummy handler
     this->onClickHandler = [](GUIControl* c){(void)c;};
-	    
+
     this->label = new GUILabel(x+(w*0.4), y+(h*0.2), text);
 }
 
@@ -28,8 +28,7 @@ bool GUIButton::processSignal(GUISignal s) {
 
 void GUIButton::doRender(int absw, int absh) const {
     label->doRender(absw, absh);
-    
-	
+
 }
 
 GUIButton::~GUIButton() {

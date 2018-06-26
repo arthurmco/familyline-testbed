@@ -33,8 +33,6 @@ namespace Familyline::Graphics::GUI {
 
 	GUISignal receiveSignal();
 
-	bool hasSignal();
-
 	/* The function that does the real render
 	   It needs to be pure.
 	   If you want to do impure things, override the render function,
@@ -51,14 +49,16 @@ namespace Familyline::Graphics::GUI {
 	 * Try to handle the signals. Returns true if handled
 	 */
 	virtual bool processSignal(GUISignal s);
-
+	
+	bool hasSignal();
+	
 	virtual void update();
 
 	/* Start the rendering process.
 	   Just calls doRender() and set the dirty status to false.
 	   This function only exists so we can call render() inside tests.
 	*/
-	void render(int absw, int absh);
+	virtual void render(int absw, int absh);
 
 	virtual ~GUIControl() {}
 

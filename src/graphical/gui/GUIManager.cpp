@@ -46,7 +46,7 @@ bool GUIManager::processSignal(GUISignal s)
 
 	for (auto* control : controls) {
 	    if (s.xPos >= control->x && s.xPos <= (control->x + control->width) &&
-		s.yPos >= control->y && s.xPos <= (control->y + control->height) ) {
+		s.yPos >= control->y && s.yPos <= (control->y + control->height) ) {
 		ns.to = control;
 		// Pass relative positions
 		// TODO: Pass absolute positions somehow.
@@ -74,11 +74,14 @@ void GUIManager::update()
     
 void GUIManager::doRender(int absw, int absh) const
 {
+    (void)absw;
+    (void)absh;
+    
     for (auto* control : controls) {
 	if (control->isDirty() || this->force_redraw)
 	    control->render(this->width, this->height);
 
-	printf("%s", control->getGUICanvas());
+//	printf("%s", control->getGUICanvas());
     }
 }
     

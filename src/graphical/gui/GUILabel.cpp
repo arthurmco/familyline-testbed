@@ -20,7 +20,7 @@ bool GUILabel::processSignal(GUISignal s)
 	// TODO: move this to processsignal
 	if (this->width < 0) {
 	    this->width = float(text.size()) / s.absw;
-	    this->height = 2.0 / s.absh; // todo: autodiscover height size
+	    this->height = 2.0 / s.absh;
 	}
 
 	return true;

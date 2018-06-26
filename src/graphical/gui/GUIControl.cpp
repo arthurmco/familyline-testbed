@@ -6,12 +6,12 @@ GUISignal GUIControl::receiveSignal()
 {
     auto s = signals.front();
     signals.pop();
-    Log::GetLog()->InfoWrite("gui-control",
-			     "Received signal %#x from %s (%p) to %s (%p), %.2f x %.2f\n",
-			     s.signal, typeid(*s.from).name(), s.from, typeid(*s.to).name(), s.to,
-			     s.xPos, s.yPos);
+    Log::GetLog()->InfoWrite("gui-control", "Received signal %#x from %s (%p) to %s (%p), %.2f x %.2f\n",
+			     s.signal, (s.from ? typeid(*s.from).name() : "(null)"),
+			     s.from, typeid(*s.to).name(), s.to, s.xPos, s.yPos);
 
-    return s;
+
+    return GUISignal(s);
 }
 
 bool GUIControl::hasSignal() { return !signals.empty(); }
@@ -21,7 +21,6 @@ bool GUIControl::hasSignal() { return !signals.empty(); }
  */
 bool GUIControl::processSignal(GUISignal s)
 {
-
     //Only natively process the redraw signal */
     if (s.signal == SignalType::Redraw) {
 	this->dirty = true;
@@ -33,8 +32,10 @@ bool GUIControl::processSignal(GUISignal s)
 
 void GUIControl::update()
 {
-    while (this->hasSignal())
-	this->processSignal(this->receiveSignal());
+    while (this->hasSignal()) {
+	auto s = this->receiveSignal();
+	this->processSignal(s);
+    }
 }
 
 /* Start the rendering process.
@@ -44,7 +45,7 @@ void GUIControl::update()
 void GUIControl::render(int absw, int absh)
 {
     this->doRender(absw, absh);
-    this->dirty = true;
+    this->dirty = false;
 }
 
 bool GUIControl::isDirty() const { return this->dirty; }
