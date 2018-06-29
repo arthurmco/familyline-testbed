@@ -18,6 +18,8 @@ public:
 	(void)absh;
 	
 	this->nCalls++;
+	this->setContext(absw, absh);
+	this->doRender(absw, absh);
 	this->dirty = false;
     }
 

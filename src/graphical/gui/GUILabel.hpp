@@ -16,7 +16,11 @@ namespace Familyline::Graphics::GUI {
     class GUILabel : public GUIControl {
     private:
 	std::string text;
-    
+
+
+	// Set the label size according to the text
+	void autoResize(GUISignal s);
+	
     public:
 
 	GUILabel(float x, float y, const char* text);
@@ -25,7 +29,7 @@ namespace Familyline::Graphics::GUI {
 	const char* getText() const;
 	void setText(const char* s);
     
-	virtual void doRender(int absw, int absh) const;
+	virtual GUICanvas doRender(int absw, int absh) const;
 
 	~GUILabel();
     };

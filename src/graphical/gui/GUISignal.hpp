@@ -17,8 +17,6 @@ namespace Familyline::Graphics::GUI {
 	// External events (mouse/keyboard)
 	MouseClick = 1,
 	MouseHover,
-	EnterFocus,
-	LeaveFocus,
     
 	KeyPress,
 
@@ -53,7 +51,14 @@ namespace Familyline::Graphics::GUI {
 	    struct {
 		char* keystr; // Key string representation
 		unsigned keycode;
-	    };
+	    } key;
+	    
+	    struct {
+		unsigned button; // What button? (1 = Left, 2 = Right, 3 = Middle)
+		bool isPressed;
+		
+	    } mouse;
+	    
 
 	    // Group 2: Timer event
 	    struct {
@@ -63,7 +68,7 @@ namespace Familyline::Graphics::GUI {
 		char* tag;
 	    } timer;
 	
-	    // Group 3: Container add
+	    // Group 3: Container add, redraw
 	    struct {
 		// Absolute size, in pixels, of the screen
 		unsigned absw, absh;

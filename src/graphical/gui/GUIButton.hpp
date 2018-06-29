@@ -32,7 +32,7 @@ namespace Familyline::Graphics::GUI {
 	GUIButton(float x, float y, float w, float h, const char* text);
 	
 	virtual bool processSignal(GUISignal s);
-	virtual void doRender(int absw, int absh) const;
+	virtual GUICanvas doRender(int absw, int absh) const;
 	
 	~GUIButton();
     };

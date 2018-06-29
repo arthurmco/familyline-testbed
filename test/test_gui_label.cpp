@@ -19,6 +19,7 @@ public:
 TEST_F(GUILabelTest, UnDirtyAfterRender) {
     GUILabel l(0.2, 0.2, "Test01");
     ASSERT_TRUE(l.isDirty());
+    l.setContext(640, 480);
    
     l.render(640, 480);
     ASSERT_FALSE(l.isDirty());
@@ -28,7 +29,8 @@ TEST_F(GUILabelTest, UnDirtyAfterRender) {
 TEST_F(GUILabelTest, SetDirtyAfterTextChange) {
     GUILabel l(0.2, 0.2, "Test01");
     ASSERT_TRUE(l.isDirty());
-   
+    l.setContext(640, 480);
+    
     l.render(640, 480);
     ASSERT_FALSE(l.isDirty());
 

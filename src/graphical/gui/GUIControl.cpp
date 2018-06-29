@@ -16,6 +16,27 @@ GUISignal GUIControl::receiveSignal()
 
 bool GUIControl::hasSignal() { return !signals.empty(); }
 
+/* Update the drawing context.
+ *
+ * This is design under Cairo API. The context (cairo_t) is used for drawing, and
+ * it can only be created by the cairo_create. The cairo_create takes a surface
+ * (the GUICanvas, cairo_surface_t). This means a context is binded to a surface
+ *
+ * absw and absh are the absolute width and height of the whole window, not the control
+ */
+void GUIControl::setContext(unsigned absw, unsigned absh)
+{
+    if (this->ctxt)
+	cairo_destroy(this->ctxt);
+
+    if (this->canvas)
+	cairo_surface_destroy(this->canvas);
+    
+    this->canvas = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, this->width*absw, this->height*absh);
+    this->ctxt = cairo_create(this->canvas);
+}
+
+
 /**
  * Try to handle the signals. Returns true if handled
  */
@@ -24,6 +45,7 @@ bool GUIControl::processSignal(GUISignal s)
     //Only natively process the redraw signal */
     if (s.signal == SignalType::Redraw) {
 	this->dirty = true;
+	this->setContext(s.absw, s.absh);
 	return true;
     }
 
@@ -44,7 +66,7 @@ void GUIControl::update()
 */
 void GUIControl::render(int absw, int absh)
 {
-    this->doRender(absw, absh);
+    this->canvas = this->doRender(absw, absh);
     this->dirty = false;
 }
 

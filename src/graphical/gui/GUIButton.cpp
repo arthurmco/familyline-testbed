@@ -20,14 +20,16 @@ bool GUIButton::processSignal(GUISignal s) {
     case SignalType::MouseClick:
 	this->onClickHandler(this);
 	return true;
+    case SignalType::Redraw:
+	label->setContext(s.absw, s.absh);
     default:
 	return GUIControl::processSignal(s);
-
+	
     }
 }
 
-void GUIButton::doRender(int absw, int absh) const {
-    label->doRender(absw, absh);
+GUICanvas GUIButton::doRender(int absw, int absh) const {
+    return label->doRender(absw, absh);
 
 }
 

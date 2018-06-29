@@ -1,7 +1,12 @@
 /*
  * The one that runs the GUI rendering code
  *
- * Copyright (C) 2018 Arthur M
+ * Copyright (C) 2018 Arthur Mendes
+ *
+ */
+
+/*
+ * TODO: handle resize and resolution changes.
  */
 
 #ifndef GUIMANAGER_H
@@ -10,6 +15,9 @@
 #include <vector>
 
 #include "GUIControl.hpp"
+#include "../../input/InputManager.hpp"
+#include "../../input/InputListener.hpp"
+
 
 namespace Familyline::Graphics::GUI {
 
@@ -18,6 +26,10 @@ namespace Familyline::Graphics::GUI {
 	// Only force redraw on redraw events.
 	bool force_redraw = false;
 
+	/* This listener receives the input events from the game and puts them into the control */
+	Input::InputListener* listener = nullptr;
+
+	
     public:
 	std::vector<GUIControl*> controls;
 
@@ -35,7 +47,7 @@ namespace Familyline::Graphics::GUI {
 	virtual void update();
 
     
-	virtual void doRender(int absw, int absh) const;
+	virtual GUICanvas doRender(int absw, int absh) const;
     
 	virtual void render(int absw, int absh);
 
