@@ -67,8 +67,6 @@ GUICanvas GUILabel::doRender(int absw, int absh) const {
     (void)absw;
     (void)absh;
 
-    unsigned long long stack_bs;
-
     cairo_set_source_rgb (ctxt, 0.0, 0.0, 0.0);
     cairo_set_font_size(ctxt, 16);
     cairo_select_font_face (ctxt, "Arial",
@@ -76,7 +74,7 @@ GUICanvas GUILabel::doRender(int absw, int absh) const {
 
     cairo_text_extents_t te;
     cairo_text_extents (ctxt, this->text.c_str(), &te);
-    cairo_move_to (ctxt, te.width / 2 - te.x_bearing,
+    cairo_move_to (ctxt, te.width / 8 - te.x_bearing,
 		   te.height / 2 - te.y_bearing);
     
     cairo_show_text (ctxt, this->text.c_str());

@@ -29,8 +29,21 @@ bool GUIButton::processSignal(GUISignal s) {
 }
 
 GUICanvas GUIButton::doRender(int absw, int absh) const {
-    return label->doRender(absw, absh);
+    auto canvas_label = label->doRender(absw, absh);
+    
+    cairo_set_source_rgb(ctxt, 1, 1, 1);
+    cairo_paint(ctxt);
+    
+    cairo_set_line_width(ctxt, 5);
+    cairo_set_source_rgb(ctxt, 1, 0, 0);
+    cairo_rectangle(ctxt, 0, 0, width*absw, height*absh);
+    cairo_stroke(ctxt);
 
+    cairo_set_operator(ctxt, CAIRO_OPERATOR_OVER);
+    cairo_set_source_surface(ctxt, canvas_label, 0, 0);
+    cairo_paint(ctxt);
+
+    return this->canvas;
 }
 
 GUIButton::~GUIButton() {
