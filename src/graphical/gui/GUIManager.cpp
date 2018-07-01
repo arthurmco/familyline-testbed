@@ -58,7 +58,6 @@ bool GUIManager::processSignal(GUISignal s)
 	GUISignal ns = s;
 	ns.from = this;
 
-
 	for (auto* control : controls) {
 	    if (s.xPos >= control->x && s.xPos <= (control->x + control->width) &&
 		s.yPos >= control->y && s.yPos <= (control->y + control->height) ) {
@@ -113,6 +112,15 @@ void GUIManager::update()
     }
 }
 
+/* Z-index comparator for the renderer */
+struct ZIndexComparator {
+    /* Returns true if a has a z-index lower than b, i.e,
+     * a would be drawn first, then b would be drawn over a
+     */
+    inline bool operator()(const GUIControl* a, const GUIControl* b) const {
+	return (a->z_index < b->z_index);
+    }
+};
     
 GUICanvas GUIManager::doRender(int absw, int absh) const
 {
@@ -123,8 +131,14 @@ GUICanvas GUIManager::doRender(int absw, int absh) const
     cairo_set_source_rgba(ctxt, 0, 0, 0, 0);
     cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
     cairo_paint(ctxt);
+
     
-    for (auto* control : controls) {
+    std::priority_queue<GUIControl*, std::vector<GUIControl*>, ZIndexComparator> control_render_queue{
+	ZIndexComparator(), this->controls};
+
+    while (!control_render_queue.empty()) {
+	auto* control = control_render_queue.top();
+	
 	if (control->isDirty() || this->force_redraw)
 	    control->render(this->width, this->height);
 
@@ -135,7 +149,8 @@ GUICanvas GUIManager::doRender(int absw, int absh) const
 	cairo_set_operator(ctxt, CAIRO_OPERATOR_OVER);
 	cairo_set_source_surface(ctxt, ccanvas, absx, absy);
 	cairo_paint(ctxt);
-	
+
+	control_render_queue.pop();
     }
 
     return this->canvas;

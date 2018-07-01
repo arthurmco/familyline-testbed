@@ -13,6 +13,7 @@
 #define GUIMANAGER_H
 
 #include <vector>
+#include <priority_queue>
 
 #include "GUIControl.hpp"
 #include "../../input/InputManager.hpp"

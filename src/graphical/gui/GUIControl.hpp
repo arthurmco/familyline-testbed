@@ -50,6 +50,11 @@ namespace Familyline::Graphics::GUI {
 	float width, height;
 	float x, y;
 
+	/* Z-index. Smaller value means less rendering priority
+	 * aka your control will be behind others 
+	 */
+	int z_index = 0;
+	
 	/* Update the drawing context.
 	 *
 	 * This is design under Cairo API. The context (cairo_t) is used for drawing, and
