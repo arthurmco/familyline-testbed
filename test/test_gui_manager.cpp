@@ -5,10 +5,9 @@
 
 #include <gtest/gtest.h>
 
-#include "test_lights.hpp"
-#include "mock_gui_label.hpp"
 #include "../src/graphical/gui/GUIManager.hpp"
-
+#include "mock_gui_label.hpp"
+#include "mock_gui_button.hpp"
 
 using namespace Familyline::Graphics::GUI;
 
@@ -34,6 +33,27 @@ TEST_F(GUIManagerTest, CheckIfContainerAddReceived) {
     ASSERT_NE(gl2.width, -1);
     // TODO: Calculate label width
 }
+
+
+TEST_F(GUIManagerTest, TestZIndex) {
+    GUIManager gm;
+
+    CGUIButton::resetRenderOrder();
+    CGUIButton gl1(0.1, 0.1, 0.3, 0.3, "Test 01");
+    CGUIButton gl2(0.1, 0.1, 0.3, 0.3, "Test 02");
+
+    gl2.z_index = 1000;
+    
+    gm.add(&gl2);
+    gm.add(&gl1);
+    gm.update();
+    
+    gm.render(640, 480);
+    ASSERT_EQ(gl1.getRenderOrder(), 0);
+    ASSERT_EQ(gl2.getRenderOrder(), 1);
+
+}
+
 
 TEST_F(GUIManagerTest, OnlyRenderUndirty) {
     GUIManager gm;

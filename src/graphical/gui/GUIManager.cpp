@@ -114,11 +114,11 @@ void GUIManager::update()
 
 /* Z-index comparator for the renderer */
 struct ZIndexComparator {
-    /* Returns true if a has a z-index lower than b, i.e,
-     * a would be drawn first, then b would be drawn over a
+    /* Returns true if a has a z-index bigger than b, i.e,
+     * b would be drawn first, then a would be drawn over b
      */
     inline bool operator()(const GUIControl* a, const GUIControl* b) const {
-	return (a->z_index < b->z_index);
+	return (a->z_index > b->z_index);
     }
 };
     
