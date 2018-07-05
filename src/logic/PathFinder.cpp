@@ -217,7 +217,8 @@ std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* o, glm::vec2 dest
 	 *
 	 * Change the direction to be more closer to the start
 	 */
-	while (this->_pathing_slots[size_t(destination.x) + size_t(destination.y * this->_mapWidth)] == 0xff) {
+	while (this->_pathing_slots[size_t(destination.x) +
+				    size_t(destination.y * this->_mapWidth)] == 0xff) {
 		auto directionx = (from.x - destination.x);
 		auto directiony = (from.y - destination.y);
 

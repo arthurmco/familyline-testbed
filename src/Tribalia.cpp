@@ -36,16 +36,15 @@
 #include "Game.hpp"
 
 #include "graphical/Renderer.hpp"
-#include "graphical/GUIRenderer.hpp"
 #include "graphical/ShaderProgram.hpp"
 #include "graphical/Window.hpp"
 #include "graphical/Framebuffer.hpp"
 
 #include "net/NetServer.hpp"
-#include "graphical/gui/Panel.hpp"
-#include "graphical/gui/Label.hpp"
-#include "graphical/gui/Button.hpp"
-#include "graphical/gui/ImageControl.hpp"
+#include "graphical/gui/GUIManager.hpp"
+#include "graphical/gui/GUILabel.hpp"
+#include "graphical/gui/GUIButton.hpp"
+//#include "graphical/gui/GUIImageControl.hpp"
 
 #include "input/InputPicker.hpp"
 
@@ -315,11 +314,12 @@ int main(int argc, char const *argv[])
 	Framebuffer* fbGUI = nullptr;
 	Framebuffer* fb3D = nullptr;
 	Graphics::Window* w = nullptr;
-	GUIRenderer* guir = nullptr;
+	GUIManager* guir = nullptr;
 	try {
 		w = new Graphics::Window(winW, winH, WindowOptions::WIN_DEBUG_CONTEXT);
 		Framebuffer::SetDefaultSize(winW, winH);
 		w->Show();
+
 
 		if (GLEW_ARB_debug_output && glDebugMessageCallbackARB) {
 			struct LogTime {
@@ -448,8 +448,8 @@ int main(int argc, char const *argv[])
 		w->SetGUIFramebuffer(fbGUI);
 		w->Set3DFramebuffer(fb3D);
 
-		guir = new GUIRenderer{ w };
-		guir->SetFramebuffer(fbGUI);
+		guir = new GUIManager{};
+		guir->initShaders(w);
 
 	}
 	catch (window_exception& we) {
@@ -482,7 +482,7 @@ int main(int argc, char const *argv[])
 		Log::GetLog()->Write("init", "Network game detected, going direct "
 			"to it");
 
-		guir->InitInput();
+//		guir->InitInput();
 		auto g = Game(w, fb3D, fbGUI, guir, pm, hp);
 		auto ret = g.RunLoop();
 		if (pm)
@@ -503,40 +503,30 @@ int main(int argc, char const *argv[])
 
 	/* Lock frames to 60fps */
 	double b = SDL_GetTicks();
+	
+	GUILabel l = GUILabel(0.37, 0.03, "FAMILYLINE");
+	GUILabel lv = GUILabel(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
 
-	Label l = Label(0.37, 0.03, 0.25, 0.1, "TRIBALIA");
-	l.SetForeColor(230, 240, 235, 255);
-	l.SetBackColor(0, 0, 0, 1);
-	l.SetFontData("Garamond", 32);
+	GUIButton bnew = GUIButton(0.1, 0.2, 0.8, 0.1, "New Game");
+	GUIButton bquit = GUIButton(0.1, 0.31, 0.8, 0.1, "Exit Game");
+	
+	//ImageControl ilogo = ImageControl(0.2, 0.1, 0.6, 0.9,
+	//	ICONS_DIR "/tribalia-logo.png");
+	//ilogo.SetZIndex(0.9);
+	//ilogo.SetOpacity(0.5);
 
-	Label lv = Label(0.32, 0.8, 0.4, 0.05, "Version " VERSION ", commit " COMMIT);
-	lv.SetForeColor(255, 255, 255, 255);
-	lv.SetBackColor(0, 0, 0, 192);
-
-	Button bnew = Button(0.1, 0.2, 0.8, 0.1, "New Game");
-	bnew.SetBackColor(212, 212, 212, 181);
-	bnew.SetForeColor(255, 0, 0, 255);
-
-	Button bquit = Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
-	bquit.SetBackColor(212, 212, 212, 181);
-	bquit.SetForeColor(255, 0, 0, 255);
-
-	ImageControl ilogo = ImageControl(0.2, 0.1, 0.6, 0.9,
-		ICONS_DIR "/tribalia-logo.png");
-	ilogo.SetZIndex(0.9);
-	ilogo.SetOpacity(0.5);
-
-	bquit.SetOnClickListener([&r](GUI::IControl* cc) {
+	bquit.onClickHandler = [&r](GUIControl* cc) {
 		(void)cc;
 		r = false;
-	});
-	bnew.SetOnClickListener([&](GUI::IControl* cc) {
+	};
+	
+	bnew.onClickHandler = [&](GUIControl* cc) {
 		(void)cc;
-		guir->RemovePanel(&l);
-		guir->RemovePanel(&lv);
-		guir->RemovePanel(&bnew);
-		guir->RemovePanel(&bquit);
-		guir->RemovePanel(&ilogo);
+		guir->remove(&l);
+		guir->remove(&lv);
+		guir->remove(&bnew);
+		guir->remove(&bquit);
+//		guir->remove(&ilogo);
 
 		printf("New Game\n");
 		if (!pm)
@@ -552,20 +542,19 @@ int main(int argc, char const *argv[])
 		delete hp;
 		delete w;
 		exit(ret);
-	});
+	};
 
-	guir->AddPanel(&l);
-	guir->AddPanel(&lv);
-	guir->AddPanel(&bnew);
-	guir->AddPanel(&bquit);
-	guir->AddPanel(&ilogo);
-	guir->InitInput();
+	guir->add(&l);
+	guir->add(&lv);
+	guir->add(&bquit);
+	guir->add(&bnew);
+	//guir->add(&ilogo);
 
 	while (r) {
 		// Input
 		InputManager::GetInstance()->Run();
 		InputEvent ev;
-		guir->ProcessInput(ev);
+		guir->update();
 
 		if (deflistener->PopEvent(ev)) {
 			/* Only listen for FINISH events.
@@ -576,8 +565,8 @@ int main(int argc, char const *argv[])
 
 		// Render
 		fbGUI->SetAsBoth();
-		guir->DebugWrite(20, 20, "Test");
-		guir->Render();
+		guir->render(0, 0);
+		guir->renderToScreen();
 		fbGUI->Unset();
 
 		w->Update();

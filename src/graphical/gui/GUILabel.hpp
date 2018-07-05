@@ -31,7 +31,7 @@ namespace Familyline::Graphics::GUI {
     
 	virtual GUICanvas doRender(int absw, int absh) const;
 
-	~GUILabel();
+	virtual ~GUILabel() {}
     };
 
     

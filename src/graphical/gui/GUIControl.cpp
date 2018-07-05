@@ -6,7 +6,7 @@ GUISignal GUIControl::receiveSignal()
 {
     auto s = signals.front();
     signals.pop();
-    Log::GetLog()->InfoWrite("gui-control", "Received signal %#x from %s (%p) to %s (%p), %.2f x %.2f\n",
+    Log::GetLog()->InfoWrite("gui-control", "Received signal %#x from %s (%p) to %s (%p), %.2f x %.2f",
 			     s.signal, (s.from ? typeid(*s.from).name() : "(null)"),
 			     s.from, typeid(*s.to).name(), s.to, s.xPos, s.yPos);
 
@@ -77,4 +77,11 @@ GUICanvas GUIControl::getGUICanvas() const { return this->canvas; }
 void GUIControl::sendSignal(GUISignal s)
 {
     signals.push(s);
+}
+
+GUIControl::~GUIControl()
+{
+   
+    if (this->canvas)
+	cairo_surface_destroy(this->canvas);
 }

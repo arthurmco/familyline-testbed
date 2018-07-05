@@ -57,7 +57,7 @@ namespace Familyline::Graphics::GUI {
 	
 	/* Update the drawing context.
 	 *
-	 * This is design under Cairo API. The context (cairo_t) is used for drawing, and
+	 * This is designed under Cairo API. The context (cairo_t) is used for drawing, and
 	 * it can only be created by the cairo_create. The cairo_create takes a surface
 	 * (the GUICanvas, cairo_surface_t). This means a context is binded to a surface
 	 *
@@ -80,14 +80,14 @@ namespace Familyline::Graphics::GUI {
 	*/
 	virtual void render(int absw, int absh);
 
-	virtual ~GUIControl() {}
-
 	bool isDirty() const;
 
 	GUICanvas getGUICanvas() const;
 
 	void sendSignal(GUISignal s);
 
+	virtual ~GUIControl();
+	
     };
 
 

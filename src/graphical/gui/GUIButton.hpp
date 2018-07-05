@@ -34,7 +34,7 @@ namespace Familyline::Graphics::GUI {
 	virtual bool processSignal(GUISignal s);
 	virtual GUICanvas doRender(int absw, int absh) const;
 	
-	~GUIButton();
+	virtual ~GUIButton();
     };
 
 

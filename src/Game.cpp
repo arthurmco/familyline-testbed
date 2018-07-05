@@ -21,7 +21,7 @@ public:
 
 
 Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
-	GUIRenderer* gr, PlayerManager* pm, HumanPlayer* hp)
+	GUIManager* gr, PlayerManager* pm, HumanPlayer* hp)
 	: win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm), hp(hp)
 {
 	DebugPlotter::Init();
@@ -90,10 +90,10 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
 		hp->SetPathfinder(pathf);
 
-		widgets.lblVersion = new Label(10, 10, "Familyline " VERSION " commit " COMMIT);
-		widgets.lblVersion->SetForeColor(255, 255, 255, 255);
+		widgets.lblVersion = new GUILabel(10, 10, "Familyline " VERSION " commit " COMMIT);
+//		widgets.lblVersion->SetForeColor(255, 255, 255, 255);
 
-		gr->AddPanel(widgets.lblVersion);
+		gr->add(widgets.lblVersion);
 
 		/* Adds the objects to the factory */
 		ObjectFactory::GetInstance()->AddObject(new WatchTower);
@@ -215,12 +215,12 @@ int Game::RunLoop()
 	});
 
 
-	Panel pnl = Panel(0.0, 0.8, 1.0, 0.2, true);
-	pnl.SetBackColor(0, 0, 0, 185);
-	gr->AddPanel(&pnl);
+	// Panel pnl = Panel(0.0, 0.8, 1.0, 0.2, true);
+	// pnl.SetBackColor(0, 0, 0, 185);
+	// gr->AddPanel(&pnl);
 
-	GUIActionManager* guam = new GUIActionManager(&pnl);
-	hp->SetGUIActionManager(guam);
+	// GUIActionManager* guam = new GUIActionManager(&pnl);
+	// hp->SetGUIActionManager(guam);
 
 	/*    Button btnExit = Button(0.7, 0.05, 0.2, 0.5, "Exit");
 		btnExit.SetOnClickListener([&](GUI::IControl* cc) {
@@ -229,9 +229,9 @@ int Game::RunLoop()
 		});
 		pnl.AddPanel(&btnExit); */
 
-	Label lblBuilding = Label(10, 70, 640, 30, "!!!");
-	lblBuilding.SetForeColor(255, 255, 255, 255);
-	gr->AddPanel(&lblBuilding);
+	GUILabel lblBuilding = GUILabel(10, 70, "!!!");
+//	lblBuilding.SetForeColor(255, 255, 255, 255);
+	gr->add(&lblBuilding);
 
 	unsigned int ticks = SDL_GetTicks();
 	unsigned int frame = 0;
@@ -250,14 +250,15 @@ int Game::RunLoop()
 		ip->UpdateIntersectedObject();
 		ip->UpdateTerrainProjectedPosition();
 
-		gr->DebugWrite(10, 40, "Press C to create an object at mouse cursor, and R to remove it.");
+//		gr->DebugWrite(10, 40, "Press C to create an object at mouse cursor, and R to remove it.");
 		player = true;
 		
 		gctx.elapsed_seconds = delta / 1000.0;
 
 		InputEvent ev;
-		gr->ProcessInput(ev);
-		pm->ProcessInputs();
+		gr->update();
+//		gr->ProcessInput(ev);
+//		pm->ProcessInputs();
 		if (!pm->PlayAll(&gctx))
 			player = false;
 
@@ -279,39 +280,41 @@ int Game::RunLoop()
 		LocatableObject* selected = hp->GetSelectedObject();
 
 		if (BuildQueue::GetInstance()->GetNext()) {
-			lblBuilding.SetText("Click to build %s",
-				BuildQueue::GetInstance()->GetNext()->GetName());
+		    char s[256];
+		    sprintf("Click to build %s",
+			    BuildQueue::GetInstance()->GetNext()->GetName());
+		    lblBuilding.setText(s);
 		}
 		else {
-			lblBuilding.SetText("\0");
+		    lblBuilding.setText("\0");
 		}
 
 		auto locc = ip->GetIntersectedObject();
 		if (locc) {
-			gr->DebugWrite(10, 100, "Hovering object '%s'", locc->GetName());
+//			gr->DebugWrite(10, 100, "Hovering object '%s'", locc->GetName());
 
 			if (selected && locc->HasProperty("maxHP")) {
 				AttackableObject* a = (AttackableObject*)locc;
-				gr->DebugWrite(350, 100, a->CheckAttackRange((AttackableObject*)selected) ? "In range" : "Not in range");
+//				gr->DebugWrite(350, 100, a->CheckAttackRange((AttackableObject*)selected) ? "In range" : "Not in range");
 			}
 		}
 
 		{
 			int qx, qy;
 			scenemng->GetCameraQuadrant(qx, qy);
-			gr->DebugWrite(10, 160, "Camera quadrant: %d x %d", qx, qy);
+//			gr->DebugWrite(10, 160, "Camera quadrant: %d x %d", qx, qy);
 		}
 
 		if (selected) {
 			if (selected->HasProperty("maxHP")) {
 				AttackableObject* a = (AttackableObject*)selected;
-				gr->DebugWrite(10, 120, "Selected object: '%s' (%4d/%4d)",
-					a->GetName(), (int)a->GetHP(), a->GetMaxHP());
+//				gr->DebugWrite(10, 120, "Selected object: '%s' (%4d/%4d)",
+//					a->GetName(), (int)a->GetHP(), a->GetMaxHP());
 
 			}
 			else {
-				gr->DebugWrite(10, 120, "Selected object: '%s'",
-					selected->GetName());
+//				gr->DebugWrite(10, 120, "Selected object: '%s'",
+//					selected->GetName());
 
 			}
 		}
@@ -321,7 +324,7 @@ int Game::RunLoop()
 		glm::vec2 q = ip->GetGameProjectedPosition();
 
 		ObjectPathManager::getInstance()->UpdatePaths(delta);
-		guam->UpdateBasePanel();
+//		guam->UpdateBasePanel();
 
 		/*
 
@@ -335,15 +338,16 @@ int Game::RunLoop()
 		rndr->UpdateFrames();
 		rndr->Render(terr_rend);
 		
-		gr->DebugWrite(10, 140, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f)",
-			p.x, p.y, p.z, q.x, q.y);
-		gr->DebugWrite(10, 180, "Camera rotation: %.1fº",
-			cam->GetRotation() * 180 / M_PI);
-		gr->DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
-			"Enabled" : "Disabled");
+		// gr->DebugWrite(10, 140, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f)",
+		// 	p.x, p.y, p.z, q.x, q.y);
+		// gr->DebugWrite(10, 180, "Camera rotation: %.1fº",
+		// 	cam->GetRotation() * 180 / M_PI);
+		// gr->DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
+		// 	"Enabled" : "Disabled");
 
 		fbGUI->SetAsBoth();
-		gr->Render();
+		gr->render(0, 0);
+		gr->renderToScreen();
 		fbGUI->Unset();
 
 		win->Update();
@@ -360,7 +364,7 @@ int Game::RunLoop()
 			pms = delta * 1.0;
 		}
 
-		gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
+//		gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
 #define FPS_LOCK 120.0
 

@@ -18,7 +18,7 @@
 #include "logic/ObjectFactory.hpp"
 #include "graphical/Camera.hpp"
 #include "graphical/TerrainRenderer.hpp"
-#include "graphical/GUIActionManager.hpp"
+//#include "graphical/GUIActionManager.hpp"
 #include "logic/ObjectRenderer.hpp"
 #include "logic/ObjectPathManager.hpp"
 #include "logic/BuildQueue.hpp"
@@ -34,7 +34,6 @@
 
         Familyline::Logic::LocatableObject* _selected_obj = nullptr;
         Familyline::Logic::PathFinder* _pf = nullptr;
-	Familyline::Graphics::GUIActionManager* _guam = nullptr;
 	
         bool _updated = false;
 
@@ -69,7 +68,6 @@
 	void SetPicker(Familyline::Input::InputPicker* ip);
         void SetInputManager(Familyline::Input::InputManager*);
         void SetPathfinder(Familyline::Logic::PathFinder*);
-	void SetGUIActionManager(Familyline::Graphics::GUIActionManager* );
 	void SetGameActionManager(Familyline::Logic::GameActionManager* );
 
         virtual bool HasUpdatedObject();

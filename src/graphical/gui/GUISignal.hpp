@@ -18,7 +18,7 @@ namespace Familyline::Graphics::GUI {
 	MouseClick = 1,
 	MouseHover,
     
-	KeyPress,
+	KeyDown,
 
 	// Internal events
 	Redraw = 0x81,

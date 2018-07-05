@@ -36,13 +36,12 @@
 #include "graphical/Window.hpp"
 #include "graphical/Framebuffer.hpp"
 #include "graphical/Renderer.hpp"
-#include "graphical/GUIRenderer.hpp"
 #include "graphical/GraphicalPlotInterface.hpp"
 
-#include "graphical/gui/Panel.hpp"
-#include "graphical/gui/Label.hpp"
-#include "graphical/gui/Button.hpp"
-#include "graphical/gui/ImageControl.hpp"
+#include "graphical/gui/GUIManager.hpp"
+#include "graphical/gui/GUILabel.hpp"
+#include "graphical/gui/GUIButton.hpp"
+//#include "graphical/gui/ImageControl.hpp"
 
 #include "input/InputPicker.hpp"
 
@@ -71,7 +70,7 @@ private:
     Graphics::SceneManager* scenemng = nullptr;
 
     Graphics::Framebuffer *fbGUI = nullptr, *fb3D = nullptr;
-    Graphics::GUIRenderer* gr = nullptr;
+    Graphics::GUI::GUIManager* gr = nullptr;
     
     bool player = false;
 
@@ -87,16 +86,16 @@ private:
 
 
     struct {
-	Graphics::GUI::Panel *p;
-	Graphics::GUI::Label *lbl;
-	Graphics::GUI::Label *lblVersion;
-	Graphics::GUI::Panel *pnl;
-	Graphics::GUI::Button* btn;
+//	Graphics::GUI::GUIPanel *p;
+	Graphics::GUI::GUILabel *lbl;
+	Graphics::GUI::GUILabel *lblVersion;
+//	Graphics::GUI::GUIPanel *pnl;
+	Graphics::GUI::GUIButton* btn;
     } widgets;
     
 public:
     Game(Graphics::Window* w, Graphics::Framebuffer* fb3D,
-	 Graphics::Framebuffer* fbGUI, Graphics::GUIRenderer* gr,
+	 Graphics::Framebuffer* fbGUI, Graphics::GUI::GUIManager* gr,
 	 Logic::PlayerManager* pm, HumanPlayer* hp);
 
     int RunLoop();

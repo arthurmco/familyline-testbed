@@ -16,12 +16,22 @@ GUIButton::GUIButton(float x, float y, float w, float h, const char* text)
 }
 
 bool GUIButton::processSignal(GUISignal s) {
+
+    Log::GetLog()->InfoWrite("gui-control", "Received signal %#x from %s (%p) to button '%s' "
+			     "(%p), %.2f x %.2f",
+			     s.signal, (s.from ? typeid(*s.from).name() : "(null)"),
+			     s.from, this->label->getText(), s.to, s.xPos, s.yPos);
+
+    
     switch (s.signal) {
     case SignalType::MouseClick:
+	fprintf(stderr, "!");
+	
 	this->onClickHandler(this);
 	return true;
     case SignalType::Redraw:
 	label->setContext(s.absw, s.absh);
+	label->processSignal(s);
     default:
 	return GUIControl::processSignal(s);
 	
@@ -30,6 +40,7 @@ bool GUIButton::processSignal(GUISignal s) {
 
 GUICanvas GUIButton::doRender(int absw, int absh) const {
     auto canvas_label = label->doRender(absw, absh);
+    const auto labelw = this->label->width*absw;
     
     cairo_set_source_rgb(ctxt, 1, 1, 1);
     cairo_paint(ctxt);
@@ -40,9 +51,10 @@ GUICanvas GUIButton::doRender(int absw, int absh) const {
     cairo_stroke(ctxt);
 
     cairo_set_operator(ctxt, CAIRO_OPERATOR_OVER);
-    cairo_set_source_surface(ctxt, canvas_label, 0, 0);
+    cairo_move_to(ctxt, 0, 0);
+    cairo_set_source_surface(ctxt, canvas_label, this->width*absw/2 - labelw/2, this->height/2);
     cairo_paint(ctxt);
-
+    
     return this->canvas;
 }
 

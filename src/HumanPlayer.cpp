@@ -30,28 +30,6 @@ void HumanPlayer::SetGameActionManager(Familyline::Logic::GameActionManager* gam
     this->_gam = gam;
 }
 
-void HumanPlayer::SetGUIActionManager(Familyline::Graphics::GUIActionManager* gam)
-{
-    _guam = gam;
-
-    Action tent = Action("tent-build", "icons/tent.png");
-    tent.handler = [&](...) {
-	printf("Tent built");
-	build_tent = true;
-	return true;
-    };
-
-    Action tower = Action("tower-build", "icons/watchtower.png");
-    tower.handler = [&](...) {
-	printf("Tower built");
-	build_tower = true;
-	return true;
-    };
-    
-    _guam->AddAction(tent);
-    _guam->AddAction(tower);
-    _guam->SetVisibleActions({"tent-build", "tower-build"});
-}
 
 /***
     Virtual function called on each iteration.
