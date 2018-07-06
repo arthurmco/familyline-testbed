@@ -242,11 +242,8 @@ int Game::RunLoop()
 	double maxdelta = 0, mindelta = 99, sumfps = 0;
 	
 	do {
-		/*
-
-		  Input processing
-
-		 */
+		/* Input processing  */
+	    InputManager::GetInstance()->Run();
 		ip->UpdateIntersectedObject();
 		ip->UpdateTerrainProjectedPosition();
 
@@ -258,7 +255,7 @@ int Game::RunLoop()
 		InputEvent ev;
 		gr->update();
 //		gr->ProcessInput(ev);
-//		pm->ProcessInputs();
+		pm->ProcessInputs();
 		if (!pm->PlayAll(&gctx))
 			player = false;
 
@@ -281,7 +278,7 @@ int Game::RunLoop()
 
 		if (BuildQueue::GetInstance()->GetNext()) {
 		    char s[256];
-		    sprintf("Click to build %s",
+		    sprintf(s, "Click to build %s",
 			    BuildQueue::GetInstance()->GetNext()->GetName());
 		    lblBuilding.setText(s);
 		}
