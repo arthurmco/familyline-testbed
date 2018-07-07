@@ -25,7 +25,9 @@ namespace Familyline::Graphics::GUI {
     class GUIButton : public GUIControl {
     private:
 	GUILabel* label = nullptr;
-    
+
+	
+	
     public:
 	OnClickHandler onClickHandler;
 

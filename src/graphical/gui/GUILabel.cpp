@@ -25,7 +25,6 @@ void GUILabel::autoResize(GUISignal s)
 
     this->width = (te.width + te.x_advance) / (s.absw * 1.25);
 
-    printf("%.2f %.2f\n", (te.width + te.x_bearing) / s.absw, te.height / s.absh);
     this->height = (te.height - te.y_bearing) / (s.absh*0.75);
 }
 

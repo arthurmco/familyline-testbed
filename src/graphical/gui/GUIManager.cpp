@@ -137,16 +137,12 @@ void GUIManager::add(GUIControl* c)
 
 /** Remove the control **/
 void GUIManager::remove(GUIControl* c)
-{
-    fprintf(stderr, "%d -> ", this->controls.size());
-    
+{    
     this->controls.erase(
 	std::remove_if(this->controls.begin(), this->controls.end(), [&](GUIControl* control) {
 		return control == c;
 	    }));
     this->dirty = true;
-
-    fprintf(stderr, "%d\n", this->controls.size());   
 }
 
 /**

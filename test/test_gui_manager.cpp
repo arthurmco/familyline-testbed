@@ -73,3 +73,27 @@ TEST_F(GUIManagerTest, OnlyRenderUndirty) {
     ASSERT_EQ(gl2.getCalls(), 1);
  
 }
+
+TEST_F(GUIManagerTest, TestControlRemove) {
+    GUIManager gm;
+
+    CGUILabel gl1(0.1, 0.1, "Test 01");
+    CGUILabel gl2(0.2, 0.2, "Test 02");
+
+    gm.add(&gl1);
+    gm.add(&gl2);
+
+    gm.render(640, 480);
+    ASSERT_EQ(gl1.getCalls(), 1);
+    ASSERT_EQ(gl2.getCalls(), 1);
+
+    GUISignal s;
+    s.signal = SignalType::Redraw;
+    gm.processSignal(s);
+    gm.remove(&gl1);
+    
+    gm.render(640, 480);
+    ASSERT_EQ(gl1.getCalls(), 1);
+    ASSERT_EQ(gl2.getCalls(), 2);
+ 
+}
