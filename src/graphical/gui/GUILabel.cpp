@@ -1,4 +1,5 @@
 #include "GUILabel.hpp"
+#include <cstring> // for strcmp
 
 using namespace Familyline::Graphics::GUI;
 
@@ -25,7 +26,7 @@ void GUILabel::autoResize(GUISignal s)
 
     this->width = (te.width + te.x_advance) / (s.absw * 1.25);
 
-    this->height = (te.height - te.y_bearing) / (s.absh*0.75);
+    this->height = (te.height - te.y_bearing) / (s.absh * 0.75);
 }
 
 
@@ -39,7 +40,7 @@ bool GUILabel::processSignal(GUISignal s)
 	    this->height = 0.1;
 
 	}
-
+	
 	return true;
 
     case Redraw:
@@ -48,6 +49,10 @@ bool GUILabel::processSignal(GUISignal s)
 	this->autoResize(s);
 	GUIControl::processSignal(s);
 
+	this->absw = s.absw;
+	this->absh = s.absh;
+	    
+	
 	return true;
 
     default:
@@ -59,8 +64,24 @@ bool GUILabel::processSignal(GUISignal s)
 const char* GUILabel::getText() const { return text.c_str(); }
 void GUILabel::setText(const char* s)
 {
-    text = std::string{s};
-    this->dirty = true;
+
+    // Only update if text is different
+    if (strncmp(s, text.c_str(), text.size()+1)) {
+	text = std::string{s};
+
+	this->dirty = true;
+	
+	GUISignal sig = {};
+	sig.signal = SignalType::Redraw;
+	sig.absw = this->absw;
+	sig.absh = this->absh;
+
+	this->autoResize(sig);
+	this->setContext(this->absw, this->absh);
+
+	fprintf(stderr, ">>> %s %.2f %.2f %.3f %.3f\n", s, sig.absw, sig.absh, this->width, this->height);
+//    fprintf(stderr, "%.2f %.2f <<<%s>>> %.3f %.3f \n", sig.absw, sig.absh, s, this->width, this->height);
+    }
 }
 
 

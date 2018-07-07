@@ -229,7 +229,7 @@ int Game::RunLoop()
 		});
 		pnl.AddPanel(&btnExit); */
 
-	GUILabel lblBuilding = GUILabel(10, 70, "!!!");
+	GUILabel lblBuilding = GUILabel(0.1, 0.1, "!!!");
 //	lblBuilding.SetForeColor(255, 255, 255, 255);
 	gr->add(&lblBuilding);
 
@@ -283,7 +283,7 @@ int Game::RunLoop()
 		    lblBuilding.setText(s);
 		}
 		else {
-		    lblBuilding.setText("\0");
+		    lblBuilding.setText("");
 		}
 
 		auto locc = ip->GetIntersectedObject();

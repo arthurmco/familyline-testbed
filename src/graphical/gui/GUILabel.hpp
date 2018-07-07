@@ -20,6 +20,8 @@ namespace Familyline::Graphics::GUI {
 
 	// Set the label size according to the text
 	void autoResize(GUISignal s);
+
+	int absw, absh;
 	
     public:
 
