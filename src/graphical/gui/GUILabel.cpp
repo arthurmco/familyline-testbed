@@ -76,11 +76,10 @@ void GUILabel::setText(const char* s)
 	sig.absw = this->absw;
 	sig.absh = this->absh;
 
+	this->autoResize(sig);	
+	this->setContext(this->absw+16, this->absh);
 	this->autoResize(sig);
-	this->setContext(this->absw, this->absh);
 
-	fprintf(stderr, ">>> %s %.2f %.2f %.3f %.3f\n", s, sig.absw, sig.absh, this->width, this->height);
-//    fprintf(stderr, "%.2f %.2f <<<%s>>> %.3f %.3f \n", sig.absw, sig.absh, s, this->width, this->height);
     }
 }
 

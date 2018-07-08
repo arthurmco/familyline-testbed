@@ -230,9 +230,11 @@ int Game::RunLoop()
 		pnl.AddPanel(&btnExit); */
 
 	GUILabel lblBuilding = GUILabel(0.1, 0.1, "!!!");
+	GUILabel lblFPS = GUILabel(0.1, 0.9, "0 fps, 0 ms/frame");
 //	lblBuilding.SetForeColor(255, 255, 255, 255);
 	gr->add(&lblBuilding);
-
+	gr->add(&lblFPS);
+	
 	unsigned int ticks = SDL_GetTicks();
 	unsigned int frame = 0;
 
@@ -361,6 +363,9 @@ int Game::RunLoop()
 			pms = delta * 1.0;
 		}
 
+		char sfps[128];
+		sprintf(sfps, "%.3f fps, %.3f ms/frame", float(1000 / pms), float(pms));
+		lblFPS.setText(sfps);
 //		gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
 #define FPS_LOCK 120.0
