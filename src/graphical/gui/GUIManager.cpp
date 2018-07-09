@@ -1,6 +1,7 @@
 #include "GUIManager.hpp"
 #include "../../config.h" //for SHADERS_DIR
 
+using namespace Familyline::Graphics;
 using namespace Familyline::Graphics::GUI;
 using namespace Familyline::Input;
 

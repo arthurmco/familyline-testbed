@@ -52,7 +52,7 @@ namespace Familyline::Graphics::GUI {
 	GUIManager();
 
 
-	void initShaders(Window* w);
+	void initShaders(Familyline::Graphics::Window* w);
 	
 	
 	/** Add the controller (and send the containeradd event) **/
