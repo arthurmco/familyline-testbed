@@ -27,10 +27,10 @@ bool GUIControl::hasSignal() { return !signals.empty(); }
 void GUIControl::setContext(unsigned absw, unsigned absh)
 {
     if (this->ctxt)
-	cairo_destroy(this->ctxt);
+		cairo_destroy(this->ctxt);
 
     if (this->canvas)
-	cairo_surface_destroy(this->canvas);
+		cairo_surface_destroy(this->canvas);
     
     this->canvas = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, this->width*absw, this->height*absh);
     this->ctxt = cairo_create(this->canvas);

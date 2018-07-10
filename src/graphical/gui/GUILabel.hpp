@@ -13,31 +13,31 @@
 
 namespace Familyline::Graphics::GUI {
 
-    class GUILabel : public GUIControl {
-    private:
-	std::string text;
+	class GUILabel : public GUIControl {
+	private:
+		std::string text;
 
 
-	// Set the label size according to the text
-	void autoResize(GUISignal s);
+		// Set the label size according to the text
+		void autoResize(GUISignal s);
 
-	int absw, absh;
-	
-    public:
+		int absw, absh;
 
-	GUILabel(float x, float y, const char* text);
+	public:
 
-	bool processSignal(GUISignal s);
-	const char* getText() const;
-	void setText(const char* s);
-    
-	virtual GUICanvas doRender(int absw, int absh) const;
+		GUILabel(float x, float y, const char* text);
 
-	virtual ~GUILabel() {}
-    };
+		bool processSignal(GUISignal s);
+		const char* getText() const;
+		void setText(const char* s);
 
-    
-    
+		virtual GUICanvas doRender(int absw, int absh) const;
+
+		virtual ~GUILabel() {}
+	};
+
+
+
 }
 
 

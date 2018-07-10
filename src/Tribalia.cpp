@@ -44,7 +44,7 @@
 #include "graphical/gui/GUIManager.hpp"
 #include "graphical/gui/GUILabel.hpp"
 #include "graphical/gui/GUIButton.hpp"
-//#include "graphical/gui/GUIImageControl.hpp"
+#include "graphical/gui/GUIImageControl.hpp"
 
 #include "input/InputPicker.hpp"
 
@@ -510,8 +510,8 @@ int main(int argc, char const *argv[])
 	GUIButton bnew = GUIButton(0.1, 0.2, 0.8, 0.1, "New Game");
 	GUIButton bquit = GUIButton(0.1, 0.31, 0.8, 0.1, "Exit Game");
 	
-	//ImageControl ilogo = ImageControl(0.2, 0.1, 0.6, 0.9,
-	//	ICONS_DIR "/tribalia-logo.png");
+	GUIImageControl ilogo = GUIImageControl(0.2, 0.1, 0.6, 0.9, 
+		ICONS_DIR "/tribalia-logo.png");
 	//ilogo.SetZIndex(0.9);
 	//ilogo.SetOpacity(0.5);
 
@@ -526,7 +526,7 @@ int main(int argc, char const *argv[])
 		guir->remove(&lv);
 		guir->remove(&bnew);
 		guir->remove(&bquit);
-//		guir->remove(&ilogo);
+		guir->remove(&ilogo);
 
 		printf("New Game\n");
 		if (!pm)
@@ -548,7 +548,7 @@ int main(int argc, char const *argv[])
 	guir->add(&lv);
 	guir->add(&bquit);
 	guir->add(&bnew);
-	//guir->add(&ilogo);
+	guir->add(&ilogo);
 
 	while (r) {
 		// Input
