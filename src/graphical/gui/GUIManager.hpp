@@ -5,9 +5,9 @@
  *
  */
 
-/*
- * TODO: handle resize and resolution changes.
- */
+ /*
+  * TODO: handle resize and resolution changes.
+  */
 
 #ifndef GUIMANAGER_H
 #define GUIMANAGER_H
@@ -23,68 +23,68 @@
 
 namespace Familyline::Graphics::GUI {
 
-    /*
-     * The GUI Manager
-     *
-     * To use it, you need first to run the render() method, to render the GUI contents to the
-     * framebuffer, and then you need to run the renderToScreen() method, to effectively
-     * push it into the screen
-     */
-    class GUIManager : public GUIControl {
-    private:
-	// Only force redraw on redraw events.
-	bool force_redraw = false;
-
-	/* This listener receives the input events from the game and puts them into the control */
-	Input::InputListener* listener = nullptr;
-
-	ShaderProgram* sGUI;
-
-	// OpenGL interface variables
-	GLuint vaoGUI;
-	GLuint attrPos, attrTex;
-	GLuint vboPos, vboTex;
-	GLuint texHandle;
-	
-    public:
-	std::vector<GUIControl*> controls;
-
-	GUIManager();
-
-
-	void initShaders(Familyline::Graphics::Window* w);
-	
-	
-	/** Add the controller (and send the containeradd event) **/
-	void add(GUIControl* c);
-
-	/** Remove the control **/
-	void remove(GUIControl* c);
-	
-	/**
-	 * Try to handle the signal. Returns true if handled
+	/*
+	 * The GUI Manager
+	 *
+	 * To use it, you need first to run the render() method, to render the GUI contents to the
+	 * framebuffer, and then you need to run the renderToScreen() method, to effectively
+	 * push it into the screen
 	 */
-	virtual bool processSignal(GUISignal s);
+	class GUIManager : public GUIControl {
+	private:
+		// Only force redraw on redraw events.
+		bool force_redraw = false;
 
-	// Process signals for all controls
-	virtual void update();
+		/* This listener receives the input events from the game and puts them into the control */
+		Input::InputListener* listener = nullptr;
 
-    
-	virtual GUICanvas doRender(int absw, int absh) const;
+		ShaderProgram* sGUI;
+
+		// OpenGL interface variables
+		GLuint vaoGUI;
+		GLuint attrPos, attrTex;
+		GLuint vboPos, vboTex;
+		GLuint texHandle;
+
+	public:
+		std::vector<GUIControl*> controls;
+
+		GUIManager();
 
 
-	/* Render this into a graphical framebuffer
-	 * Screen, for you
-	 */
-	void renderToScreen();
-	
-	virtual void render(int absw, int absh);
+		void initShaders(Familyline::Graphics::Window* w);
 
-	virtual ~GUIManager() { }
 
-    };
+		/** Add the controller (and send the containeradd event) **/
+		void add(GUIControl* c);
 
-    
+		/** Remove the control **/
+		void remove(GUIControl* c);
+
+		/**
+		 * Try to handle the signal. Returns true if handled
+		 */
+		virtual bool processSignal(GUISignal s);
+
+		// Process signals for all controls
+		virtual void update();
+
+
+		virtual GUICanvas doRender(int absw, int absh) const;
+
+
+		/* Render this into a graphical framebuffer
+		 * Screen, for you
+		 */
+		void renderToScreen();
+
+		virtual void render(int absw, int absh);
+
+		virtual ~GUIManager() { }
+
+	};
+
+
 }
 
 

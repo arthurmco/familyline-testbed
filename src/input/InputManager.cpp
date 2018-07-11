@@ -1,4 +1,5 @@
 #include "InputManager.hpp"
+#include <algorithm>
 
 using namespace Familyline::Input;
 
@@ -287,13 +288,28 @@ void InputManager::AddListener(int types, InputListener* listener, float order)
     Log::GetLog()->Write("input-manager",
 			 "Adding listener order %.3f for event mast %#x",
 			 order, types);
-    _listeners.push_back(ild);
+
+	/* Check if the listener wasn't added before */
+	auto r = std::find_if(std::begin(_listeners), std::end(_listeners),
+		[listener](const InputListenerData& l) {
+			return !strcmp(l.listener->GetName(), listener->GetName());
+		}
+	);
+    
+	if (r != _listeners.end()) {
+		Log::GetLog()->Warning("input-manager",
+			"listener added twice");
+		return;
+	}
+
+	_listeners.push_back(ild);
 
     /* Order by decreasing order number */
-    std::sort(_listeners.begin(), _listeners.end(),
+	std::sort(std::begin(_listeners), std::end(_listeners),
 	      [](const InputListenerData& i1, const InputListenerData& i2) {
-		  return (i1.order >= i2.order);
-	      });
+			  return (i1.order >= i2.order);
+	      }
+	);
     
 
 }

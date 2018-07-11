@@ -8,7 +8,6 @@
 
 #include <queue>
 #include <vector>
-#include <algorithm>
 #include <map>
 #include <SDL2/SDL.h>
 
