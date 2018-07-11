@@ -206,7 +206,10 @@ bool GUIManager::processSignal(GUISignal s)
 				ns.yPos = s.yPos - control->y;
 
 				control->sendSignal(ns);
-				break;
+
+				if (s.signal == SignalType::MouseClick || s.signal == SignalType::MouseHover || 
+					s.signal == SignalType::KeyDown)
+					break;
 			}
 
 			control_update_queue.pop();
