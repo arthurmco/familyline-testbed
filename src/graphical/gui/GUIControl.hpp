@@ -11,7 +11,9 @@
 #include <cairo/cairo.h>
 
 #include "GUISignal.hpp"
-#include <Log.hpp>
+
+// Import glm so we can have an uniform 3-value vector-like structure
+#include <glm/glm.hpp>
 
 namespace Familyline::Graphics::GUI {
 
@@ -20,6 +22,14 @@ namespace Familyline::Graphics::GUI {
 
 	/* THe GUI drawing context, where the used API saves its things */
 	typedef cairo_t* GUIContext;
+
+	/**
+	 * Defines formatting for the controls
+	 */
+	struct GUIFormat {
+		glm::vec4 foreground = glm::vec4(0.7, 0.7, 0.7, 1); // foreground, with alpha
+		glm::vec4 background = glm::vec4(1, 1, 1, 0); // background, with alpha
+	};
 
 	/**
 	 * Base class for GUI controls
@@ -49,6 +59,8 @@ namespace Familyline::Graphics::GUI {
 		// Positional
 		float width, height;
 		float x, y;
+
+		GUIFormat format;
 
 		/* Z-index. Smaller value means less rendering priority
 		 * aka your control will be behind others

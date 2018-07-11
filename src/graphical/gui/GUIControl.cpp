@@ -1,4 +1,5 @@
 #include "GUIControl.hpp"
+#include <Log.hpp>
 
 using namespace Familyline::Graphics::GUI;
 

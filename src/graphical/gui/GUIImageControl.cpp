@@ -73,7 +73,6 @@ bool GUIImageControl::processSignal(GUISignal s)
 	}
 }
 
-
 GUICanvas GUIImageControl::doRender(int absw, int absh) const
 {
 	cairo_save(this->ctxt);

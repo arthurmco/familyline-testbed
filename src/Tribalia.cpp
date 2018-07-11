@@ -505,13 +505,18 @@ int main(int argc, char const *argv[])
 	double b = SDL_GetTicks();
 	
 	GUILabel l = GUILabel(0.37, 0.03, "FAMILYLINE");
+	l.format.foreground = glm::vec4(1, 1, 1, 1);
+
 	GUILabel lv = GUILabel(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
+	lv.format.foreground = glm::vec4(0.2, 0.2, 1, 1);
+	lv.format.background = glm::vec4(1, 1, 1, 0.5);
 
 	GUIButton bnew = GUIButton(0.1, 0.2, 0.8, 0.1, "New Game");
 	GUIButton bquit = GUIButton(0.1, 0.31, 0.8, 0.1, "Exit Game");
 	
 	GUIImageControl ilogo = GUIImageControl(0.2, 0.1, 0.6, 0.9, 
 		ICONS_DIR "/tribalia-logo.png");
+	ilogo.z_index = -100;
 	//ilogo.SetZIndex(0.9);
 	//ilogo.SetOpacity(0.5);
 
