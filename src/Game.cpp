@@ -229,10 +229,13 @@ int Game::RunLoop()
 		});
 		pnl.AddPanel(&btnExit); */
 
-	GUILabel lblBuilding = GUILabel(0.1, 0.1, "!!!");
-	GUILabel lblFPS = GUILabel(0.1, 0.9, "0 fps, 0 ms/frame");
-	GUILabel lblRange = GUILabel(0.1, 0.15, "--");
-	GUILabel lblSelected = GUILabel(0.1, 0.2, "---");
+	GUILabel lblBuilding = GUILabel(0.05, 0.1, "!!!");
+	GUILabel lblFPS = GUILabel(0.05, 0.9, "0 fps, 0 ms/frame");
+	GUILabel lblRange = GUILabel(0.05, 0.15, "--");
+	GUILabel lblSelected = GUILabel(0.05, 0.2, "---");
+	GUILabel lblTerrainPos = GUILabel(0.05, 0.25, "---");
+
+	GUILabel lblKeys = GUILabel(0.05, 0.05, "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
 
 	lblBuilding.format.foreground = glm::vec4(1, 1, 1, 1);
 	lblBuilding.format.background = glm::vec4(0, 0, 0, 0.4);
@@ -246,10 +249,17 @@ int Game::RunLoop()
 	lblSelected.format.foreground = glm::vec4(1, 1, 1, 1);
 	lblSelected.format.background = glm::vec4(0, 0, 0, 0.4);
 
+	lblKeys.format.foreground = glm::vec4(0.9, 0.8, 1, 1);
+	lblKeys.format.background = glm::vec4(0, 0, 0, 0.4);
+
+	lblTerrainPos.format.background = glm::vec4(0, 0, 0, 0.4);
+
 	gr->add(&lblBuilding);
 	gr->add(&lblFPS);
 	gr->add(&lblRange);
 	gr->add(&lblSelected);
+	gr->add(&lblKeys);
+	gr->add(&lblTerrainPos);
 
 	unsigned int ticks = SDL_GetTicks();
 	unsigned int frame = 0;
@@ -357,10 +367,10 @@ int Game::RunLoop()
 		rndr->UpdateFrames();
 		rndr->Render(terr_rend);
 		
-		// gr->DebugWrite(10, 140, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f)",
-		// 	p.x, p.y, p.z, q.x, q.y);
-		// gr->DebugWrite(10, 180, "Camera rotation: %.1fº",
-		// 	cam->GetRotation() * 180 / M_PI);
+		char texs[256];
+		sprintf(texs, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f), rotation %.1f",
+				p.x, p.y, p.z, q.x, q.y, cam->GetRotation() * 180 / M_PI);
+		lblTerrainPos.setText(texs);
 		// gr->DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
 		// 	"Enabled" : "Disabled");
 
