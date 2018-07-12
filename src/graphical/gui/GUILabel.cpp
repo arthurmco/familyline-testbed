@@ -12,6 +12,7 @@ GUILabel::GUILabel(float x, float y, const char* text)
 	this->width = 0.5;
 	this->height = 0.5;
 
+	this->format.fontSize = 14;
 }
 
 
@@ -24,9 +25,9 @@ void GUILabel::autoResize(GUISignal s)
 	cairo_text_extents_t te;
 	cairo_text_extents(ctxt, this->text.c_str(), &te);
 
-	this->width = (te.width + te.x_advance) / (s.absw * 1.25);
+	this->width = (te.width + te.x_advance) / (s.absw * 1.15);
 
-	this->height = (te.height - te.y_bearing) / (s.absh * 0.75);
+	this->height = (te.height - te.y_bearing) / (s.absh * 0.775);
 }
 
 
@@ -91,8 +92,8 @@ GUICanvas GUILabel::doRender(int absw, int absh) const
 	cairo_fill(ctxt);
 
 	cairo_set_source_rgb(ctxt, format.foreground.r, format.foreground.g, format.foreground.b);
-	cairo_set_font_size(ctxt, 16);
-	cairo_select_font_face(ctxt, "Arial",
+	cairo_set_font_size(ctxt, this->format.fontSize);
+	cairo_select_font_face(ctxt, this->format.fontName,
 		CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
 
 	cairo_text_extents_t  te;

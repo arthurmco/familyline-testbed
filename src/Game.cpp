@@ -231,9 +231,9 @@ int Game::RunLoop()
 
 	GUILabel lblBuilding = GUILabel(0.05, 0.1, "!!!");
 	GUILabel lblFPS = GUILabel(0.05, 0.9, "0 fps, 0 ms/frame");
-	GUILabel lblRange = GUILabel(0.05, 0.15, "--");
-	GUILabel lblSelected = GUILabel(0.05, 0.2, "---");
-	GUILabel lblTerrainPos = GUILabel(0.05, 0.25, "---");
+	GUILabel lblRange = GUILabel(0.05, 0.13, "--");
+	GUILabel lblSelected = GUILabel(0.05, 0.17, "---");
+	GUILabel lblTerrainPos = GUILabel(0.05, 0.21, "---");
 
 	GUILabel lblKeys = GUILabel(0.05, 0.05, "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
 

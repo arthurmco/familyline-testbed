@@ -18,6 +18,7 @@ GUIButton::GUIButton(float x, float y, float w, float h, const char* text)
 	this->format.background = glm::vec4(1, 1, 1, 0.4);
 
 	this->label = new GUILabel(x + (w*0.4), y + (h*0.2), text);
+	this->label->format.fontSize = 18;
 }
 
 bool GUIButton::processSignal(GUISignal s) {
