@@ -231,10 +231,26 @@ int Game::RunLoop()
 
 	GUILabel lblBuilding = GUILabel(0.1, 0.1, "!!!");
 	GUILabel lblFPS = GUILabel(0.1, 0.9, "0 fps, 0 ms/frame");
-//	lblBuilding.SetForeColor(255, 255, 255, 255);
+	GUILabel lblRange = GUILabel(0.1, 0.15, "--");
+	GUILabel lblSelected = GUILabel(0.1, 0.2, "---");
+
+	lblBuilding.format.foreground = glm::vec4(1, 1, 1, 1);
+	lblBuilding.format.background = glm::vec4(0, 0, 0, 0.4);
+
+	lblFPS.format.foreground = glm::vec4(1, 1, 1, 1);
+	lblFPS.format.background = glm::vec4(0, 0, 0, 0.4);
+
+	lblRange.format.foreground = glm::vec4(1, 1, 1, 1);
+	lblRange.format.background = glm::vec4(0, 0, 0, 0.4);
+
+	lblSelected.format.foreground = glm::vec4(1, 1, 1, 1);
+	lblSelected.format.background = glm::vec4(0, 0, 0, 0.4);
+
 	gr->add(&lblBuilding);
 	gr->add(&lblFPS);
-	
+	gr->add(&lblRange);
+	gr->add(&lblSelected);
+
 	unsigned int ticks = SDL_GetTicks();
 	unsigned int frame = 0;
 
@@ -256,7 +272,7 @@ int Game::RunLoop()
 
 		InputEvent ev;
 		gr->update();
-//		gr->ProcessInput(ev);
+
 		pm->ProcessInputs();
 		if (!pm->PlayAll(&gctx))
 			player = false;
@@ -294,7 +310,7 @@ int Game::RunLoop()
 
 			if (selected && locc->HasProperty("maxHP")) {
 				AttackableObject* a = (AttackableObject*)locc;
-//				gr->DebugWrite(350, 100, a->CheckAttackRange((AttackableObject*)selected) ? "In range" : "Not in range");
+				lblRange.setText( a->CheckAttackRange((AttackableObject*)selected) ? "In range" : "Not in range");
 			}
 		}
 
@@ -304,18 +320,22 @@ int Game::RunLoop()
 //			gr->DebugWrite(10, 160, "Camera quadrant: %d x %d", qx, qy);
 		}
 
+
+		lblSelected.setText("");
 		if (selected) {
+			char s[150];
 			if (selected->HasProperty("maxHP")) {
 				AttackableObject* a = (AttackableObject*)selected;
-//				gr->DebugWrite(10, 120, "Selected object: '%s' (%4d/%4d)",
-//					a->GetName(), (int)a->GetHP(), a->GetMaxHP());
+				sprintf(s, "Selected object: '%s' (%4d/%4d)",
+						a->GetName(), (int)a->GetHP(), a->GetMaxHP());
 
 			}
 			else {
-//				gr->DebugWrite(10, 120, "Selected object: '%s'",
-//					selected->GetName());
+				sprintf(s, "Selected object: '%s'", selected->GetName());
 
 			}
+
+			lblSelected.setText(s);
 		}
 
 		CombatManager::GetInstance()->DoAttacks(gctx.elapsed_seconds);
