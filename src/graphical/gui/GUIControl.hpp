@@ -31,7 +31,7 @@ namespace Familyline::Graphics::GUI {
 		glm::vec4 background = glm::vec4(1, 1, 1, 0); // background, with alpha
 
 		int fontSize = 16; // Font size
-		const char* fontName = "Consolas";
+		const char* fontName = "monospace";
 	};
 
 	/**
