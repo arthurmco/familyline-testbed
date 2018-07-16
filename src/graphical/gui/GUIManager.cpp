@@ -1,5 +1,6 @@
 #include "GUIManager.hpp"
 #include "../../config.h" //for SHADERS_DIR
+#include <algorithm> // for remove_if
 
 using namespace Familyline::Graphics;
 using namespace Familyline::Graphics::GUI;

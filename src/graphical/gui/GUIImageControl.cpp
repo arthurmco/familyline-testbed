@@ -37,11 +37,10 @@ GUICanvas GUIImageControl::openImageFromFile(const char* filename)
 		Log::GetLog()->Fatal("gui-image-control", "error while reading '%s'",
 			filename);
 		return nullptr;
-
+	default:
+	    return image_surface;
 	}
 
-	
-	return image_surface;
 }
 
 
