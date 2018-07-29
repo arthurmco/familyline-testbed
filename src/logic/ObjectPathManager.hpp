@@ -9,7 +9,7 @@
 #include <vector>
 
 #include <glm/glm.hpp>
-#include "LocatableObject.hpp"
+#include "AttackableObject.hpp"
 #include "Terrain.hpp"
 
 #ifndef OBJECTPATHMANAGER_HPP
@@ -21,7 +21,7 @@ namespace Logic {
 /* The object path unit */
 struct ObjectPathRef {
     int pathid;
-    LocatableObject* lc;
+    AttackableObject* lc;
     std::vector<glm::vec2>* path;
     glm::vec2 path_point;
     unsigned int path_ptr = 0;
@@ -35,7 +35,7 @@ struct ObjectPathRef {
        that time
     */ 
     
-    ObjectPathRef(int pathid, LocatableObject* lc, 
+    ObjectPathRef(int pathid, AttackableObject* lc, 
 		  std::vector<glm::vec2>* path,
 		  int dbg_path_plot)
 	: pathid(pathid), lc(lc), path(path), path_point((*path)[0]),
@@ -53,7 +53,7 @@ public:
 	Returns true if added successfully, or false if there's already a path 
 	there for the same object
     */
-    bool AddPath(LocatableObject* o, std::vector<glm::vec2>* path);
+    bool AddPath(AttackableObject* o, std::vector<glm::vec2>* path);
 
     /* 	Removes a path from object 'oid'. 
 	Returns true if path removed, or false if path didn't exist there */

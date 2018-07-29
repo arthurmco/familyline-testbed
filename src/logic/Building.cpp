@@ -3,7 +3,7 @@
 using namespace Familyline::Logic;
 
 
-
+/*
 Building::Building(int oid, int tid, const char* name,
 		   float x, float y, float z, int maxHP, float HP,
 		   float baseAtk, float baseArmor,
@@ -78,3 +78,4 @@ void Building::Train(Unit* unit)
     unit->SetZ(y);
 }
 
+*/

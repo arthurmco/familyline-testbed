@@ -76,7 +76,7 @@ void GUILabel::setText(const char* s)
 		sig.signal = SignalType::Redraw;
 		sig.absw = this->absw;
 		sig.absh = this->absh;
-
+		
 		this->autoResize(sig);
 		this->setContext(this->absw + 16, this->absh);
 		this->autoResize(sig);

@@ -1,4 +1,5 @@
 #include "InputPicker.hpp"
+#include "../graphical/Mesh.hpp"
 
 using namespace Familyline::Input;
 using namespace Familyline::Graphics;
@@ -136,11 +137,13 @@ void InputPicker::UpdateIntersectedObject()
 
 	glm::vec3 origin = _cam->GetPosition();
 
-	for (auto it = _om->GetObjectList()->begin(); it != _om->GetObjectList()->end(); it++) {
-		LocatableObject* loc = dynamic_cast<LocatableObject*>(it->obj);
+	auto _olist = new std::vector<AttackableObject*>();
+	// !LISTENER
+	for (auto it = _olist->begin(); it != _olist->end(); it++) {
+		AttackableObject* loc = dynamic_cast<AttackableObject*>(*it);
 
 		if (loc) {
-		    Graphics::Mesh* mm = (Graphics::Mesh*)loc->GetMesh();
+		    auto mm = std::dynamic_pointer_cast<Graphics::Mesh>(loc->mesh);
 		    
 		    BoundingBox bb = mm->GetBoundingBox();
 		    glm::vec4 vmin = glm::vec4(bb.minX, bb.minY, bb.minZ, 1);
@@ -229,7 +232,7 @@ glm::vec2 InputPicker::GetGameProjectedPosition()
 
 
 /*	Get the object that were intersected by the cursor ray */
-LocatableObject* InputPicker::GetIntersectedObject()
+AttackableObject* InputPicker::GetIntersectedObject()
 {
     return _locatableObject;
 }

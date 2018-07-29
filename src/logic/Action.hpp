@@ -7,7 +7,7 @@
 #include <functional>
 #include <cstddef>
 #include <cstring>
-#include "LocatableObject.hpp"
+#include "AttackableObject.hpp"
 
 #ifndef ACTION_HPP
 #define ACTION_HPP
@@ -30,7 +30,7 @@ namespace Familyline::Logic {
 	float xPos, yPos;
 
 	/* The object that registered the action */
-	LocatableObject *actionOrigin;
+	AttackableObject *actionOrigin;
     };
     
     /* Represents an action handler

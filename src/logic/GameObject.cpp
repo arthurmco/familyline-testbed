@@ -2,95 +2,68 @@
 /***
     Game object class definition
 
-    Copyright 2016 Arthur Mendes.
+    Copyright 2016, 2018 Arthur Mendes.
 
 ***/
 #include "GameObject.hpp"
+#include "ObjectManager.hpp"
+#include <cstring>
 
 using namespace Familyline::Logic;
 
-GameObject::GameObject(int oid, int tid, const char* name) :
-    GameObject(oid, tid, name, 0, 0, 0) {}
-
-GameObject::GameObject(int oid, int tid, const char* name,
-		       float x, float y, float z) :
-    _oid(oid),
-    _tid(tid),
-    _name(name),
-    _xPos(x), _yPos(y), _zPos(z)
+/**
+ * Clears all references in the reference hashmap
+ *
+ * This is done so we can't have 'stale references', they are cleared in every iteration
+ *
+ * (TODO: maybe clear them in each n iterations
+ */
+void GameObject::clearReferences()
 {
-//    _properties = new std::map<std::string, void*>();
-//    _sizemap = new std::map<std::string, size_t>();
+    references.clear();
 }
 
-/* Copy an object, alongside with its properties, to another
-   object */
-void GameObject::CopyObject(GameObject* dst, GameObject& src)
+/**
+ * Gets an object and stores the gotten object in a place
+ *
+ * This function is good to know what objects are being referenced to this one and what ones
+ * do this one references. So, for example, we can execute the iterate() method in a correct
+ * order, from the more referenced ones to the least referenced.
+ *
+ * You should not use getObject directly while in an object, but getObjectReference instead
+ */
+const GameObject* GameObject::getObjectReference(object_id_t id)
 {
-    dst->_oid = -1;
-    dst->_tid = src._tid;
-    dst->_name = src._name;
-    dst->_xPos = src._xPos;
-    dst->_yPos = src._yPos;
-    dst->_zPos = src._zPos;
-    dst->_radius = src._radius;
-
-    for (auto it : src._properties) {
-
-	/* Do not copy some properties */
-	if (it.first == "mesh")
-	    continue;
-	
-	size_t s = src._sizemap.at(it.first);
-
-	auto dst_find = dst->_properties.find(it.first);
-	if (dst_find != dst->_properties.end()) {
-	    void* prop = it.second;
-	    memcpy(prop, dst_find->second, s);
-	} else {
-	    void* data = malloc(s);
-	    memcpy(data, (void*)it.second, s);
-	    dst->_properties.emplace(it.first, data);
-	}
-	
-	dst->_sizemap.emplace(it.first, s);
-    } 
-
+    auto o = gam->getObject(id);
+    this->references[id] = true;
+    return o;
 }
 
-GameObject::GameObject(GameObject& o)
+/**
+ * Check if the object 'other' collided with the actual object
+ *
+ * Since we have some objects that aren't exactly convex, like a wall or a road, or
+ * objects that has multiple individual locations, like a city, needs to have a custom
+ * collision algorithm
+ *
+ * For the basic objects, we'll use a simple point-to-cube collision detection. The object
+ * will be treated like a cube, with 'radius'*2 size
+ *
+ * If you need, you can subclass this class
+ */
+bool GameObject::hasCollided(GameObject* const other)
 {
-    CopyObject(this, o);
+    (void)other;
+
+    return false;
 }
 
-GameObject::~GameObject()
+/**
+ * Function with code that the object must run on every engine tick
+ *
+ * In it you put actions that the object must do
+ */
+void GameObject::iterate()
 {
-    for (auto it = _properties.begin(); it != _properties.end(); it++) {
-        free(it->second);
-    }
-    
-    this->_properties.clear();
-    
-}
-
-int GameObject::GetObjectID(){ return _oid; }
-int GameObject::GetTypeID(){ return _tid; }
-const char* GameObject::GetName() { return _name.c_str(); }
-void GameObject::SetName(char* name){ _name = std::string{name}; }
-
-void GameObject::SetX(float v) { _xPos = v;  }
-float GameObject::GetX() { return _xPos; }
-
-void GameObject::SetY(float v) { _yPos = v; }
-float GameObject::GetY() { return _yPos; }
-
-void GameObject::SetZ(float v) { _zPos = v; }
-float GameObject::GetZ() { return _zPos; }
-
-/* Returns true if a property exists */
-bool GameObject::HasProperty(const char* name)
-{
-    std::string sname{name};
-
-    return (_properties.find(sname) != _properties.end());
+    this->clearReferences();
 }

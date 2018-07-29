@@ -7,6 +7,7 @@
 #ifndef IMESH_HPP
 #define IMESH_HPP
 
+#include <glm/glm.hpp>
 
 namespace Familyline::Logic {
 

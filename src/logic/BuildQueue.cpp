@@ -2,21 +2,21 @@
 
 using namespace Familyline::Logic;
 
-void BuildQueue::Add(LocatableObject* o)
+void BuildQueue::Add(AttackableObject* o)
 {
     this->_objects.push(o);
 }
      
-LocatableObject* BuildQueue::BuildNext(glm::vec3 pos)
+AttackableObject* BuildQueue::BuildNext(glm::vec3 pos)
 {
     auto* o = this->_objects.front();
-    o->SetX(pos.x);
-    o->SetZ(pos.z);
+    o->position.x = pos.x;
+    o->position.z = pos.z;
     this->_objects.pop();
     return o;
 }
 
-LocatableObject* BuildQueue::GetNext()
+AttackableObject* BuildQueue::GetNext()
 {
     if (this->_objects.empty()) return nullptr;
 	
@@ -28,7 +28,7 @@ void BuildQueue::Clear() {
 	this->_objects.pop();
 }
 
-bool DefaultBuildHandler(Action* ac, ActionData data, LocatableObject* built) {
+bool DefaultBuildHandler(Action* ac, ActionData data, AttackableObject* built) {
     (void)ac;
     
     if (!built) built = data.actionOrigin;

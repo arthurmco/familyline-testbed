@@ -32,7 +32,7 @@
         Familyline::Graphics::Camera* _cam;
 	Familyline::Input::InputPicker* _ip;
 
-        Familyline::Logic::LocatableObject* _selected_obj = nullptr;
+        Familyline::Logic::AttackableObject* _selected_obj = nullptr;
         Familyline::Logic::PathFinder* _pf = nullptr;
 	
         bool _updated = false;
@@ -72,7 +72,7 @@
 
         virtual bool HasUpdatedObject();
 
-        Familyline::Logic::LocatableObject* GetSelectedObject();
+        Familyline::Logic::AttackableObject* GetSelectedObject();
         virtual ~HumanPlayer();
     };
 

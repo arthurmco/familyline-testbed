@@ -2,77 +2,77 @@
 /***
     Object manager class
 
-    Copyright (C) 2016 Arthur M
+    Copyright (C) 2016, 2018 Arthur M
 
 ***/
-
-#include <list>
-#include <vector>
-#include "GameObject.hpp"
-
-#include "Log.hpp"
 
 #ifndef OBJECTMANAGER_HPP
 #define OBJECTMANAGER_HPP
 
-namespace Familyline {
-    namespace Logic {
+#include <list>
+#include <vector>
+#include <map>
 
-        struct ObjectRegisterInfo {
-                /* Object ID */
-                int oid;
+#include "GameObject.hpp"
+#include "Log.hpp"
 
-                /* Last iteration time (in 'amount of object loops' ) */
-                int lastiter;
+namespace Familyline::Logic {
 
-                /* Object */
-                GameObject* obj;
-        };
+    /*
+     * Manages the objects creation and deletion.
+     * Also generates the events for the object event manager
+     */
+    class ObjectManager {
 
-        class ObjectManager {
-            friend class ObjectRenderer;
+    private:
+	/* The map of objects
+	 * We use a map because it do perform faster than lists and vectors
+	 */
+	std::map<object_id_t, std::unique_ptr<GameObject>> objects;
 
-        private:
-            std::list<ObjectRegisterInfo> _objects;
+	/* Fast reference to the last ID used */
+	object_id_t last_id = 0;
 
-            /* List of free IDs to be assigned */
-            std::vector<int> _freeID;
+	static ObjectManager* instance;
+    public:
+	/**
+	 * Add the object 'o' to the object manager and give to it a new ID
+	 *
+	 * Returns a pointer to the object.
+	 * The object manager needs to be the owner of the object, so it
+	 * will store a unique_ptr of it
+	 */
+	GameObject* addObject(GameObject*&& o);
 
-            int AssignID();
+	/**
+	 * Removes the object 'o' from the object manager
+	 *
+	 * We, then, delete it
+	 */
+	void removeObject(const GameObject* o);
 
-        public:
-            /* Register an object. Return its ID
-                If 'overrideID = true', then the Object Manager will assign a
-                new ID.
-            */
-            int RegisterObject(GameObject*, bool overrideID = true);
+	/**
+	 * Gets an object from the list, by ID
+	 *
+	 * Retrieves a weak pointer to the object.
+	 */
+	GameObject* getObject(object_id_t id);
 
-            /* Unregister an object. Return true if the object was there, false
-                if it wasn't.
+	size_t getObjectCount() { return objects.size(); }
 
-                */
-            bool UnregisterObject(GameObject*);
+	static ObjectManager* getDefault() { return ObjectManager::instance; }
+	static void setDefault(ObjectManager* i) { ObjectManager::instance = i; }
 
-            /* Unregister an object. Return true if the object was there, false
-                if it wasn't.
-                */
-            bool UnregisterObject(int id);
 
-            /* Get registered objects */
-            int GetCount();
+	void iterateAll();
 
-            /* Run the DoAction() method in each registered object
-                TODO: Change this for 'on each visible object' (?)  */
-            bool DoActionAll();
+	/**
+	 * Destroy all objects owned by this object manager
+	 */
+	~ObjectManager();
+    };
 
-            /* Retrieve an object */
-            GameObject* GetObject(int id);
-            GameObject* GetObject(float x, float y, float z, float bias);
-			std::list<ObjectRegisterInfo>* GetObjectList();
 
-        };
-
-    }
 }
 
 

@@ -15,7 +15,7 @@
 #include "../graphical/Camera.hpp"
 #include "../graphical/SceneManager.hpp"
 #include "../logic/ObjectManager.hpp"
-#include "../logic/LocatableObject.hpp"
+#include "../logic/AttackableObject.hpp"
 namespace Familyline {
 namespace Input {
 #define MAX_PICK_ITERATIONS 16
@@ -29,7 +29,7 @@ private:
 		Familyline::Logic::ObjectManager* _om;
 
     glm::vec3 _intersectedPosition;
-    Familyline::Logic::LocatableObject* _locatableObject = nullptr;
+    Familyline::Logic::AttackableObject* _locatableObject = nullptr;
 
 		bool CheckIfTerrainIntersect(glm::vec3 ray, float start, float end);
 
@@ -62,7 +62,7 @@ public:
     glm::vec2 GetGameProjectedPosition();
 
 		/*	Get the object that were intersected by the cursor ray */
-		Familyline::Logic::LocatableObject* GetIntersectedObject();
+		Familyline::Logic::AttackableObject* GetIntersectedObject();
 
     };
 

@@ -33,38 +33,39 @@ bool ObjectRenderer::Check()
 {
 	int object_found = 0;
 	int object_deleted = 0;
-	for (auto it = _om->_objects.begin(); it != _om->_objects.end(); ++it) {
+	// !LISTENER
+	// for (auto it = _om->_objects.begin(); it != _om->_objects.end(); ++it) {
 
-		bool exists = false;
+	// 	bool exists = false;
 
-		// Object was created
-		if (_created_ids[it->oid]) {
-			/* Easy way to check if we have a locatable object
-			 * I don't worry if it's fast, the compiler might optimize.
-			 */
-			LocatableObject* loc = dynamic_cast<LocatableObject*>(it->obj);
-			if (loc) {
+	// 	// Object was created
+	// 	if (_created_ids[it->oid]) {
+	// 		/* Easy way to check if we have a locatable object
+	// 		 * I don't worry if it's fast, the compiler might optimize.
+	// 		 */
+	// 		AttackableObject* loc = dynamic_cast<AttackableObject*>(it->obj);
+	// 		if (loc) {
 
-				/* check if mesh is valid */
-				if (!loc->GetMesh()) continue;
+	// 			/* check if mesh is valid */
+	// 		    if (!loc->mesh) continue;
 
-				object_found++;
-				_objects.emplace_back(loc);
-				_sm->AddObject((Graphics::Mesh*)loc->GetMesh());
-				ObjectRenderData ord;
-				ord.ID = it->oid;
-				ord.m = (Graphics::Mesh*)loc->GetMesh();
-				_IDs.push_back(ord);
-			}
-		}
-		else {
-			// Object already exists.
-			exists = true;
-		}
+	// 			object_found++;
+	// 			_objects.emplace_back(loc);
+	// 			_sm->AddObject((Graphics::Mesh*)loc->mesh);
+	// 			ObjectRenderData ord;
+	// 			ord.ID = it->oid;
+	// 			ord.m = (Graphics::Mesh*)loc->mesh;
+	// 			_IDs.push_back(ord);
+	// 		}
+	// 	}
+	// 	else {
+	// 		// Object already exists.
+	// 		exists = true;
+	// 	}
 
-		if (exists) continue;
+	// 	if (exists) continue;
 
-	}
+	// }
 
 	if (object_found > 0) {
 		Log::GetLog()->Write("object-renderer", "updated, %d objects found",
@@ -81,7 +82,7 @@ bool ObjectRenderer::Check()
 				that it doesn't exist. Remove it from the scene */
 			Log::GetLog()->Write("object-renderer",
 				"Removed object with id %d", id->ID);
-			_sm->RemoveObject(id->m);
+			//sm->RemoveObject(id->m);
 			id = _IDs.erase(id);
 		}
 		else {
@@ -101,11 +102,12 @@ void ObjectRenderer::Update()
 {
 	for (auto it = _objects.begin(); it != _objects.end(); it++) {
 		double x, y, z;
-		x = (*it)->GetX();
-		y = (*it)->GetY();
-		z = (*it)->GetZ();
+		x = (*it)->position.x;
+		y = (*it)->position.y;
+		z = (*it)->position.z;
 
-		Graphics::Mesh* mm = (Graphics::Mesh*) (*it)->GetMesh();
+		std::shared_ptr<Graphics::Mesh> mm = std::dynamic_pointer_cast<Graphics::Mesh>(
+		    (*it)->mesh);
 
 		mm->SetPosition(Graphics::GameToGraphicalSpace(glm::vec3(x, y, z)));
 		mm->ApplyTransformations();

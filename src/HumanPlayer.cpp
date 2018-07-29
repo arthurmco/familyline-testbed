@@ -288,7 +288,7 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
     
 
-    LocatableObject* l = _ip->GetIntersectedObject();
+    AttackableObject* l = _ip->GetIntersectedObject();
     if (l) {
         if (mouse_click) {
             _selected_obj = l;
@@ -299,7 +299,7 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
 
     if (build_tent) {
-	BuildQueue::GetInstance()->Add( (LocatableObject*)
+	BuildQueue::GetInstance()->Add( (AttackableObject*)
 	    ObjectFactory::GetInstance()->GetObject(2, 0, 0, 0));
 	
 	build_tent = false;
@@ -307,7 +307,7 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
 
     if (build_tower) {
-	BuildQueue::GetInstance()->Add( (LocatableObject*)
+	BuildQueue::GetInstance()->Add( (AttackableObject*)
 	    ObjectFactory::GetInstance()->GetObject(3, 0, 0, 0));
 
 	build_tower = false;
@@ -315,7 +315,7 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
 
     if (remove_object) {	
-	LocatableObject* l = _ip->GetIntersectedObject();
+	AttackableObject* l = _ip->GetIntersectedObject();
 	if (l) {
 	    printf("Deleting object %s", l->GetName());
 	    this->RegisterDestroy(l);
@@ -369,7 +369,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 
 
 
-LocatableObject* HumanPlayer::GetSelectedObject()
+AttackableObject* HumanPlayer::GetSelectedObject()
 {
     return _selected_obj;
 }

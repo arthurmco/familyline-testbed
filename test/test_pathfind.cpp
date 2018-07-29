@@ -9,9 +9,7 @@ void PathfinderTest::SetUp()
 
 	_pf->InitPathmap(256, 256);
 
-	o = new TestObject(1, 10, 1, 10);
-	_om->RegisterObject(o);
-
+	o = (TestObject*) _om->addObject(new TestObject(1, 10, 1, 10));
 }
 
 void PathfinderTest::TearDown()
@@ -51,8 +49,7 @@ TEST_F(PathfinderTest, TestStraightPathfind) {
 }
 
 TEST_F(PathfinderTest, TestObstaclePathfind) {
-	TestObject* c = new TestObject(1, 21, 1, 21);
-	_om->RegisterObject(c);
+    TestObject* c = (TestObject*) _om->addObject(new TestObject(1, 21, 1, 21));
 
 	_pf->UpdatePathmap(256, 256);
 
@@ -60,9 +57,9 @@ TEST_F(PathfinderTest, TestObstaclePathfind) {
 
 	/* Check if we didn't collided */
 	int i = 0;
-	glm::vec2 colpos = glm::vec2(c->GetX(), c->GetZ());
-	glm::vec2 colposn = glm::vec2(c->GetX() + 1, c->GetZ() + 1);
-	glm::vec2 colposp = glm::vec2(c->GetX() - 1, c->GetZ() - 1);
+	glm::vec2 colpos = glm::vec2(c->position.x, c->position.z);
+	glm::vec2 colposn = glm::vec2(c->position.x + 1, c->position.z + 1);
+	glm::vec2 colposp = glm::vec2(c->position.x - 1, c->position.z - 1);
 	for (auto v : vlist) {
 		EXPECT_NE(v, colposn) << "Collided with object in position (posn)" << i;
 		EXPECT_NE(v, colpos) << "Collided with object in position" << i;
@@ -76,10 +73,8 @@ TEST_F(PathfinderTest, TestObstaclePathfind) {
 }
 
 TEST_F(PathfinderTest, TestTwoObstaclesPathfind) {
-	TestObject* c = new TestObject(1, 21, 1, 21);
-	TestObject* d = new TestObject(1, 26, 1, 26);
-	_om->RegisterObject(c);
-	_om->RegisterObject(d);
+    TestObject* c = (TestObject*) _om->addObject(new TestObject(1, 21, 1, 21));
+    TestObject* d = (TestObject*) _om->addObject(new TestObject(1, 26, 1, 26));
 
 	_pf->UpdatePathmap(256, 256);
 
@@ -87,12 +82,12 @@ TEST_F(PathfinderTest, TestTwoObstaclesPathfind) {
 
 	/* Check if we didn't collided */
 	int i = 0;
-	glm::vec2 ccolpos = glm::vec2(c->GetX(), c->GetZ());
-	glm::vec2 ccolposn = glm::vec2(c->GetX() + 1, c->GetZ() + 1);
-	glm::vec2 ccolposp = glm::vec2(c->GetX() - 1, c->GetZ() - 1);
-	glm::vec2 dcolpos = glm::vec2(d->GetX(), d->GetZ());
-	glm::vec2 dcolposn = glm::vec2(d->GetX() + 1, d->GetZ() + 1);
-	glm::vec2 dcolposp = glm::vec2(d->GetX() - 1, d->GetZ() - 1);
+	glm::vec2 ccolpos = glm::vec2(c->position.x, c->position.z);
+	glm::vec2 ccolposn = glm::vec2(c->position.x + 1, c->position.z + 1);
+	glm::vec2 ccolposp = glm::vec2(c->position.x - 1, c->position.z - 1);
+	glm::vec2 dcolpos = glm::vec2(d->position.x, d->position.z);
+	glm::vec2 dcolposn = glm::vec2(d->position.x + 1, d->position.z + 1);
+	glm::vec2 dcolposp = glm::vec2(d->position.x - 1, d->position.z - 1);
 	for (auto v : vlist) {
 		EXPECT_NE(v, ccolposn) << "Collided with object in position (posn)" << i;
 		EXPECT_NE(v, ccolpos) << "Collided with object in position" << i;
@@ -115,25 +110,25 @@ TEST_F(PathfinderTest, TestIfPathfindingPutObjectInOtherObjectPosition) {
 	 *
 	 * It shouldn't
 	 */
-	TestObject* c = new TestObject(1, 32, 1, 32);
-	_om->RegisterObject(c);
+    TestObject* c = (TestObject*) _om->addObject(new TestObject(1, 32, 1, 32));
 
-	_pf->UpdatePathmap(256, 256);
 
-	auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
+    _pf->UpdatePathmap(256, 256);
 
-	auto vlast = vlist.back();
+    auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
 
-	/* Check if we didn't go to the start or end points */
-	EXPECT_NE(glm::vec2(32, 32), vlast) << "Shouldn't go to obstacle";
-	EXPECT_NE(glm::vec2(10, 10), vlast) << "Shouldn't go back to start";
+    auto vlast = vlist.back();
 
-	EXPECT_LE(28, vlast.x);
-	EXPECT_GE(36, vlast.x);
-	EXPECT_LE(28, vlast.y);
-	EXPECT_GE(36, vlast.y);
+    /* Check if we didn't go to the start or end points */
+    EXPECT_NE(glm::vec2(32, 32), vlast) << "Shouldn't go to obstacle";
+    EXPECT_NE(glm::vec2(10, 10), vlast) << "Shouldn't go back to start";
 
-	_om->UnregisterObject(c);
-	delete c;
+    EXPECT_LE(28, vlast.x);
+    EXPECT_GE(36, vlast.x);
+    EXPECT_LE(28, vlast.y);
+    EXPECT_GE(36, vlast.y);
+
+    _om->removeObject(c);
+    delete c;
 
 }

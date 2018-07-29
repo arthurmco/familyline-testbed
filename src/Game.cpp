@@ -302,7 +302,7 @@ int Game::RunLoop()
 		}
 		objrend->Update();
 
-		LocatableObject* selected = hp->GetSelectedObject();
+		AttackableObject* selected = hp->GetSelectedObject();
 
 		if (BuildQueue::GetInstance()->GetNext()) {
 		    char s[256];

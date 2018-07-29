@@ -43,6 +43,7 @@ GUIManager::GUIManager()
 
 	// Create the cairo context.
 	// It wiil do this->width * 1
+	
 	this->setContext(1, 1);
 }
 
@@ -114,7 +115,6 @@ void GUIManager::initShaders(Window* w)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-
 }
 
 

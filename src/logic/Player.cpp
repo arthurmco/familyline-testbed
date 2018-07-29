@@ -35,9 +35,9 @@ void Player::RegisterCreation(GameObject* go)
     GameAction a;
     a.timestamp = player_get_timestamp();
     a.type = GAT_CREATION;
-    a.creation.object_id = go->GetObjectID();
-    a.creation.x = go->GetX();
-    a.creation.z = go->GetZ();
+    a.creation.object_id = go->getID();
+    a.creation.x = go->position.x;
+    a.creation.z = go->position.z;
 
     _gam->Push(a);
 }
@@ -47,9 +47,9 @@ void Player::RegisterMove(GameObject* go, glm::vec2 position)
     GameAction a;
     a.timestamp = player_get_timestamp();
     a.type = GAT_MOVE;
-    a.move.object_id = go->GetObjectID();
-    a.move.oldx = go->GetX();
-    a.move.oldz = go->GetZ();
+    a.move.object_id = go->getID();
+    a.move.oldx = go->position.x;
+    a.move.oldz = go->position.z;
     a.move.newx = position.x;
     a.move.newz = position.y;
 
@@ -61,12 +61,12 @@ void Player::RegisterAttack(GameObject* attacker, GameObject* attackee)
     GameAction a;
     a.timestamp = player_get_timestamp();
     a.type = GAT_ATTACK;
-    a.attack.attacker_id = attacker->GetObjectID();
-    a.attack.attackerx = attacker->GetX();
-    a.attack.attackerz = attacker->GetZ();
-    a.attack.attackee_id = attackee->GetObjectID();
-    a.attack.attackeex = attackee->GetX();
-    a.attack.attackeez = attackee->GetZ();
+    a.attack.attacker_id = attacker->getID();
+    a.attack.attackerx = attacker->position.x;
+    a.attack.attackerz = attacker->position.z;
+    a.attack.attackee_id = attackee->getID();
+    a.attack.attackeex = attackee->position.x;
+    a.attack.attackeez = attackee->position.z;
     
     _gam->Push(a);
 }
@@ -76,7 +76,7 @@ void Player::RegisterDestroy(GameObject* go)
     GameAction a;
     a.timestamp = player_get_timestamp();
     a.type = GAT_DESTROY;
-    a.destroy.object_id = go->GetObjectID();
+    a.destroy.object_id = go->getID();
 
     _gam->Push(a);
 }

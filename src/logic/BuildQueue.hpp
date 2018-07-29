@@ -9,7 +9,7 @@
 */
 
 #include "Action.hpp"
-#include "LocatableObject.hpp"
+#include "AttackableObject.hpp"
 #include <queue>
 #include <glm/glm.hpp>
 
@@ -19,13 +19,13 @@
 namespace Familyline::Logic {
     class BuildQueue {
     private:
-	std::queue<LocatableObject*> _objects;
+	std::queue<AttackableObject*> _objects;
 
     public:
-	void Add(LocatableObject*);
+	void Add(AttackableObject*);
 
-	LocatableObject* BuildNext(glm::vec3 pos);
-	LocatableObject* GetNext();
+	AttackableObject* BuildNext(glm::vec3 pos);
+	AttackableObject* GetNext();
 	void Clear();
 
 	static BuildQueue* GetInstance() {
@@ -36,7 +36,7 @@ namespace Familyline::Logic {
 	}
     };
 
-    bool DefaultBuildHandler(Action* ac, ActionData data, LocatableObject* built);
+    bool DefaultBuildHandler(Action* ac, ActionData data, AttackableObject* built);
 }
 
 

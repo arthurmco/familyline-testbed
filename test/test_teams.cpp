@@ -33,24 +33,6 @@ TEST_F(TeamRelationTest, TestIfSameTeamWorks){
     EXPECT_EQ(t, c22->GetTeam());
 }
 
-TEST_F(TeamRelationTest, TestIfSameTeamAttacks){
-    TestObject o1(1, 1, 1, 1);
-    TestObject o2(2, 2, 1, 2);    
-
-    c11->AddObject(&o1);
-    c12->AddObject(&o2);
-    
-    Team* t = tc.CreateTeam("Team");
-    tc.AddTeam(t);
-    tc.AddCity(t, c11);
-    tc.AddCity(t, c12);
-    tc.AddCity(t, c21);
-    tc.AddCity(t, c22);
-
-    ASSERT_FALSE(o1.CheckIfAttackable(&o2));
-    ASSERT_FALSE(o2.CheckIfAttackable(&o1));
-}
-
 TEST_F(TeamRelationTest, TestIfDifferentTeamWorks){
     Team* t1 = tc.CreateTeam("Team1");
     Team* t2 = tc.CreateTeam("Team2");
@@ -72,26 +54,6 @@ TEST_F(TeamRelationTest, TestIfDifferentTeamWorks){
     
 }
 
-TEST_F(TeamRelationTest, TestIfDifferentTeamAttacks){
-    TestObject o1(1, 1, 1, 1);
-    TestObject o2(2, 2, 1, 2);    
-
-    c11->AddObject(&o1);
-    c21->AddObject(&o2);
-
-    Team* t1 = tc.CreateTeam("Team1");
-    Team* t2 = tc.CreateTeam("Team2");
-    tc.AddTeam(t1);
-    tc.AddTeam(t2);
-    tc.AddCity(t1, c11);
-    tc.AddCity(t1, c12);
-    tc.AddCity(t2, c21);
-    tc.AddCity(t2, c22);
-    tc.SetDiplomacyFor(t1, DIPLOMACY_FOE, t2);
-
-    ASSERT_TRUE(o1.CheckIfAttackable(&o2));
-    ASSERT_TRUE(o2.CheckIfAttackable(&o1));
-}
 
 TEST_F(TeamRelationTest, TestIfForkingTeamWorks) {
     Team* t1 = tc.CreateTeam("Team1");
@@ -117,68 +79,4 @@ TEST_F(TeamRelationTest, TestIfForkingTeamWorks) {
     EXPECT_NE(t3, c21->GetTeam());
     EXPECT_NE(t2, c22->GetTeam());
     EXPECT_NE(t1, c22->GetTeam());    
-}
-
-TEST_F(TeamRelationTest, TestIfForkingTeamToAllyAttacks) {
-    Team* t1 = tc.CreateTeam("Team1");
-    Team* t2 = tc.CreateTeam("Team2");
-    tc.AddTeam(t1);
-    tc.AddTeam(t2);
-    tc.AddCity(t1, c11);
-    tc.AddCity(t1, c12);
-    tc.AddCity(t2, c21);
-    tc.AddCity(t2, c22);
-
-    /* Forking happens on city removal */
-    tc.RemoveCity(c22);
-    Team* t3 = c22->GetTeam();
-    ASSERT_NE(nullptr, t3);
-    
-    t3->name = std::string("Team3");
-    tc.SetDiplomacyFor(t3, DIPLOMACY_FRIEND, t1);
-    tc.SetDiplomacyFor(t3, DIPLOMACY_FRIEND, t2);
-
-    TestObject o1(1, 1, 1, 1);
-    c11->AddObject(&o1);
-    
-    TestObject o2(2, 2, 1, 2);
-    c21->AddObject(&o2);
-    
-    TestObject o3(3, 3, 1, 2);
-    c22->AddObject(&o3);
-    
-    ASSERT_FALSE(o3.CheckIfAttackable(&o1));
-    ASSERT_FALSE(o3.CheckIfAttackable(&o2));
-}
-
-TEST_F(TeamRelationTest, TestIfForkingTeamToEnemyAttacks) {
-    Team* t1 = tc.CreateTeam("Team1");
-    Team* t2 = tc.CreateTeam("Team2");
-    tc.AddTeam(t1);
-    tc.AddTeam(t2);
-    tc.AddCity(t1, c11);
-    tc.AddCity(t1, c12);
-    tc.AddCity(t2, c21);
-    tc.AddCity(t2, c22);
-
-    /* Forking happens on city removal */
-    tc.RemoveCity(c22);
-    Team* t3 = c22->GetTeam();
-    ASSERT_NE(nullptr, t3);
-    
-    t3->name = std::string("Team3");
-    tc.SetDiplomacyFor(t3, DIPLOMACY_FOE, t1);
-    tc.SetDiplomacyFor(t3, DIPLOMACY_FOE, t2);
-
-    TestObject o1(1, 1, 1, 1);
-    c11->AddObject(&o1);
-     
-    TestObject o2(2, 2, 1, 2);
-    c21->AddObject(&o2);
-    
-    TestObject o3(3, 3, 1, 2);
-    c22->AddObject(&o3);
-    
-    ASSERT_TRUE(o3.CheckIfAttackable(&o1));
-    ASSERT_TRUE(o3.CheckIfAttackable(&o2));
 }

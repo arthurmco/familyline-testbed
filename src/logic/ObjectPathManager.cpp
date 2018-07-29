@@ -1,6 +1,8 @@
 #include "ObjectPathManager.hpp"
 #include "DebugPlot.hpp"
 
+#include <algorithm>
+
 int maxpathID = 0;
 using namespace Familyline::Logic;
 
@@ -18,11 +20,11 @@ static std::vector<glm::vec3> ConvertTo3DPath(std::vector<glm::vec2>* path)
 	Returns true if added successfully, or false if there's already a path 
 	there for the same object
  */
-bool ObjectPathManager::AddPath(LocatableObject* o, 
+bool ObjectPathManager::AddPath(AttackableObject* o, 
 				std::vector<glm::vec2>* path)
 {
 	for (auto& ref : _pathrefs) {
-		if (ref.lc->GetObjectID() == o->GetObjectID()) {
+		if (ref.lc->getID() == o->getID()) {
 		    /* If we had some object following a path and set a new
 		       path for that object, interrupt the path for this one 
 		       and make it follow the new path
@@ -49,7 +51,7 @@ bool ObjectPathManager::AddPath(LocatableObject* o,
 bool ObjectPathManager::RemovePath(long oid)
 {
 	for (auto it = _pathrefs.begin(); it != _pathrefs.end(); it++) {
-		if (it->lc->GetObjectID() == oid) {
+		if (it->lc->getID() == oid) {
 		    DebugPlotter::pinterface->RemovePath(it->dbg_path_plot);
 		    _pathrefs.erase(it);
 		    return true;
@@ -79,9 +81,9 @@ void ObjectPathManager::UpdatePaths(unsigned ms_frame)
 
 		it->current_time += ms_frame;
 		
-		it->lc->SetX(px);
-		it->lc->SetY(_terr->GetHeightFromPoint(px, pz));
-		it->lc->SetZ(pz);
+		it->lc->position.x = (px);
+		it->lc->position.y = (_terr->GetHeightFromPoint(px, pz));
+		it->lc->position.z = (pz);
 
 		// 1 step = 0.1 second
 		if (it->path_ptr < it->path->size()-1 &&

@@ -15,7 +15,6 @@ class TestObject : public Familyline::Logic::Building {
 private:
     
 public:
-    static const int TID = 3;
 	
     TestObject();
 
@@ -24,15 +23,12 @@ public:
 	
     TestObject(int oid, float x, float y, float z);
 
-    /* Called on object initialization */
-    virtual bool Initialize();
-
     /* Called on each engine loop, when an action is performed */
-    virtual bool DoAction(void);
+    virtual void iterate();
 
-    TestObject(const TestObject&);
+    //TestObject(const TestObject&);
     
-    ADD_CLONE_MACRO(TestObject, NULL)
+    //ADD_CLONE_MACRO(TestObject, NULL)
 };
 
 

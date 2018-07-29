@@ -7,7 +7,7 @@
 
 #include "Terrain.hpp"
 #include "ObjectManager.hpp"
-#include "LocatableObject.hpp"
+#include "AttackableObject.hpp"
 
 #include <vector>
 #include <unordered_map>
@@ -93,7 +93,7 @@ namespace Familyline {
 			void ClearPathmap(int w, int h, int x, int y);
 
 
-			std::vector<glm::vec2> CreatePath(LocatableObject* o, glm::vec2 destination);
+			std::vector<glm::vec2> CreatePath(AttackableObject* o, glm::vec2 destination);
 		};
 
 

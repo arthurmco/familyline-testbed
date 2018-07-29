@@ -31,7 +31,7 @@ City::City(const char* name, Team* team)
 AttackableObject* City::GetObject(int ID)
 {
     for (auto it = _objects.begin(); it != _objects.end(); it++){
-	if ((*it)->GetObjectID() == ID){
+	if ((*it)->getID() == ID){
 	    return (*it);
 	}
     }
@@ -44,24 +44,24 @@ AttackableObject* City::GetObject(int ID)
 /* Add object into city. Return ID */
 int City::AddObject(AttackableObject* a){
     _objects.push_back(a);
-    a->SetProperty("city", this);
-    Log::GetLog()->Write("city", "Added %s (%d) to city %s", a->GetName(), a->GetObjectID(),
+//    a->SetProperty("city", this);
+    Log::GetLog()->Write("city", "Added %s (%d) to city %s", a->getName(), a->getID(),
 			 _name.c_str());
-    return a->GetObjectID();
+    return a->getID();
 }
 
 /* Remove object from city.
    Returns true if object exists, false otherwise */
 bool City::RemoveObject(AttackableObject* a){
     for (auto it = _objects.begin(); it != _objects.end(); it++){
-	if ((*it)->GetObjectID() == a->GetObjectID()){
+	if ((*it)->getID() == a->getID()){
 	    _objects.erase(it);
 	    return true;
 	}
     }
 
     Log::GetLog()->Write("city", "Tried to delete object %s (ID %d) but city %s doesn't have it",
-			 a->GetName(), a->GetObjectID(), _name.c_str());
+			 a->getName(), a->getID(), _name.c_str());
     return false;
 }
 

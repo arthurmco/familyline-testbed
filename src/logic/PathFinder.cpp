@@ -1,5 +1,6 @@
 #include "PathFinder.hpp"
 #include <cstring> //memset()
+#include <algorithm>
 
 using namespace Familyline::Logic;
 
@@ -25,15 +26,17 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 {
 	this->ClearPathmap(w, h, x, y);
 
-	auto objList = _om->GetObjectList();
+	// !LISTENER
+//	auto objList = _om->GetObjectList();
+	auto objList = new std::vector<GameObject*>();
 	for (auto& obj : *objList) {
-		LocatableObject* l = dynamic_cast<LocatableObject*>(obj.obj);
+		AttackableObject* l = dynamic_cast<AttackableObject*>(obj);
 		if (!l) {
 			continue; // Not locatable
 		}
 
-		int ox = l->GetX(), oz = l->GetZ();
-		float r = l->GetRadius();
+		int ox = l->position.x, oz = l->position.z;
+		float r = 8;//l->GetRadius();
 
 		for (int y = oz - r; y < oz + r; y++) {
 			for (int x = ox - r; x < ox + r; x++) {
@@ -201,14 +204,14 @@ std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end) {
 
 
 
-std::vector<glm::vec2> PathFinder::CreatePath(LocatableObject* o, glm::vec2 destination)
+std::vector<glm::vec2> PathFinder::CreatePath(AttackableObject* o, glm::vec2 destination)
 {
 	std::vector<glm::vec2> vec;
 	std::list<PathNode*> nodelist;
 
-	float r = o->GetRadius();
+	float r = 8;//o->GetRadius();
 
-	glm::vec2 from(o->GetX(), o->GetZ());
+	glm::vec2 from(o->position.x, o->position.z);
 
 	/* Unmap our object */
 	this->ClearPathmap(r * 2, r * 2, from.x - r, from.y - r);
