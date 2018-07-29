@@ -6,7 +6,7 @@ First of all, thank you for taking your time to help me. Honestly, I
 We don't have a code of conduct, because I think everybody can be a
 nice person. In doubt, think the developers and contributors of this
 software are 2m (approx 6'7" for the imperial system people) black
-belt fighters with a Theo de Raadt-like patience and rumor.
+belt fighters with a Theo de Raadt-like patience and humor.
 
 But, honestly, I want you to feel confortable here. If you're not,
 send-me an email. The address is on my github profile
