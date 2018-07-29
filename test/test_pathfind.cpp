@@ -2,7 +2,7 @@
 
 using namespace Familyline::Logic;
 
-void PathfinderTest::SetUp()
+void DISABLED_PathfinderTest::SetUp()
 {
 	_om = new ObjectManager;
 	_pf = new PathFinder{ _om };
@@ -12,7 +12,7 @@ void PathfinderTest::SetUp()
 	o = (TestObject*) _om->addObject(new TestObject(1, 10, 1, 10));
 }
 
-void PathfinderTest::TearDown()
+void DISABLED_PathfinderTest::TearDown()
 {
 	delete o;
 	delete _pf;
@@ -27,7 +27,7 @@ namespace glm {
 }
 
 
-TEST_F(PathfinderTest, TestStraightPathfind) {
+TEST_F(DISABLED_PathfinderTest, TestStraightPathfind) {
 
 	auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
 	EXPECT_EQ(vlist.size(), 23) << "List size mismatch";
@@ -48,7 +48,7 @@ TEST_F(PathfinderTest, TestStraightPathfind) {
 
 }
 
-TEST_F(PathfinderTest, TestObstaclePathfind) {
+TEST_F(DISABLED_PathfinderTest, TestObstaclePathfind) {
     TestObject* c = (TestObject*) _om->addObject(new TestObject(1, 21, 1, 21));
 
 	_pf->UpdatePathmap(256, 256);
@@ -72,7 +72,7 @@ TEST_F(PathfinderTest, TestObstaclePathfind) {
 	EXPECT_EQ(glm::vec2(32, 32), vlast);
 }
 
-TEST_F(PathfinderTest, TestTwoObstaclesPathfind) {
+TEST_F(DISABLED_PathfinderTest, TestTwoObstaclesPathfind) {
     TestObject* c = (TestObject*) _om->addObject(new TestObject(1, 21, 1, 21));
     TestObject* d = (TestObject*) _om->addObject(new TestObject(1, 26, 1, 26));
 
@@ -104,7 +104,7 @@ TEST_F(PathfinderTest, TestTwoObstaclesPathfind) {
 	EXPECT_EQ(glm::vec2(32, 32), vlast);
 }
 
-TEST_F(PathfinderTest, TestIfPathfindingPutObjectInOtherObjectPosition) {
+TEST_F(DISABLED_PathfinderTest, TestIfPathfindingPutObjectInOtherObjectPosition) {
 	/* Test if the pathfinder puts your object in the final destination even
 	 * if the final destination has another object in there
 	 *
