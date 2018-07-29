@@ -17,6 +17,9 @@ namespace Familyline::Logic {
 
     enum ObjectEventType {
 
+	// A null event
+	None,
+	
 	// An object has been created
 	ObjectCreated,
 
@@ -41,6 +44,10 @@ namespace Familyline::Logic {
 	    };
 	};
 
+	ObjectEvent()
+	    : from(nullptr), to(nullptr), type(ObjectEventType::None)
+	    {}
+	
 	ObjectEvent(const GameObject* from, const GameObject* to, ObjectEventType type)
 	    : from(from), to(to), type(type)
 	    {}

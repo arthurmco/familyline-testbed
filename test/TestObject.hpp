@@ -29,6 +29,8 @@ public:
     //TestObject(const TestObject&);
     
     //ADD_CLONE_MACRO(TestObject, NULL)
+
+    virtual ~TestObject() {}
 };
 
 

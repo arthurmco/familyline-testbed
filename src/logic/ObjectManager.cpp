@@ -45,6 +45,7 @@ void ObjectManager::removeObject(const GameObject* o) {
 
 	// Generate the event
 	ObjectEvent e(o, nullptr, ObjectEventType::ObjectDestroyed);
+	e.oid = o->getID();
 	ObjectEventEmitter::pushMessage(this, e);
 
 	obj->second.reset();

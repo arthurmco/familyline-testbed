@@ -37,6 +37,13 @@ namespace Familyline::Logic {
 
 	static void addListener(ObjectEventListener* l);
 
+	/**
+	 * Clear event queue
+	 */
+	static void clearEvents();
+	
+	static void clearListeners();
+
     };
 
 

@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cstring>
 
+#include <Log.hpp>
+
 using namespace Familyline::Graphics;
 
 std::list<Light*> LightManager::_lights;
@@ -51,7 +53,8 @@ std::list<Light*> LightManager::GetBestLights(glm::vec3 center,
 
 		for (auto light = lights.begin(); light != lights.end(); light++) {
 			const auto score = fnGetScore(*light);
-			printf("%s %.3f", (*light)->GetName(), score);
+			Log::GetLog()->InfoWrite("light-manager", "light %s has score %.3f",
+						 (*light)->GetName(), score);
 
 			if (score > minScore) {
 				minScore = score;

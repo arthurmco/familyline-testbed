@@ -20,8 +20,9 @@ bool ObjectEventListener::popEvent(ObjectEvent& e)
 {
     if (!_events.empty()) {
 	ObjectEvent ev = _events.front();
+	e = ev;
 	_events.pop();
-	ev = e;
+	return true;
     }
     return false;
 }
