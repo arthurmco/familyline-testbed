@@ -1,44 +1,57 @@
 /***
     Team definitions inside a game
 
-    Copyright (C) 2017 Arthur M
+    Copyright (C) 2017, 2018 Arthur M
 
 ***/
 #ifndef TEAM_HPP
 #define TEAM_HPP
 
 #include <vector>
-#include <algorithm>
-#include <cstdint>
 
-#include "City.hpp"
 #include <list>
+#include <memory> //weak_ptr, shared_ptr
+#include <string>
+
+namespace Familyline::Logic {
+
+        /**
+     * A team.
+     *
+     * Just a number, a name, possibly a flag?
+     */
+    struct Team {
+	int number;
+	std::string name;
+
+	Team(int num, const char* name)
+	    : number(num), name(name)
+	    {}
+
+	Team()
+	    : number(-1), name()
+	    {}
+
+	// No copy constructor
+	// Why would you copy a team?
+	Team(const Team& o) = delete;
+
+	//  Allies and enemies.
+	//  Members of a team shouldn't attack ally teams
+	//  Members of a team will attack enemy teams automatically if the units
+	// are on Attack mode
+	//  Other teams will be neutrals. Units should never attack neutrals automatically,
+	// only the player should, manually, initiate the attack
+	std::vector<std::weak_ptr<Team>> allies, enemies;
+    };
+
+    enum PlayerDiplomacy {
+	Neutral,
+	Ally,
+	Enemy,
+    };
 
 
-namespace Familyline {
-namespace Logic {
-
-struct TeamCities {
-    Team* team;
-    std::list<City*> cities;
-
-    /* Friends and foes list. Explicitly defined
-       Every other one is neutral */
-    std::list<Team*> friends;
-    std::list<Team*> foes;
-
-    TeamCities();
-    TeamCities(Team* team);
-};
-
-/* Diplomacy */
-enum TeamDiplomacy {
-    DIPLOMACY_NEUTRAL,
-    DIPLOMACY_FRIEND,
-    DIPLOMACY_FOE,
-};
-    
-}
 }
 
 #endif

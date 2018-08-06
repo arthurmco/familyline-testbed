@@ -2,20 +2,23 @@
 /***
     Player base definitions
 
-    Copyright (C) 2016, 2017 Arthur M
+    Copyright (C) 2016-2018 Arthur M
 
 ***/
-#include <vector>
-#include <cstring> //for strcmp
-
-#include "City.hpp"
-#include "GameContext.hpp"
-#include "GameActionManager.hpp"
 
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
+#include <vector>
+#include <cstring> //for strcmp
+
+#include "GameContext.hpp"
+#include "GameActionManager.hpp"
+
+
 namespace Familyline::Logic {
+
+    class City;
 
     class Player {
     protected:
@@ -33,6 +36,8 @@ namespace Familyline::Logic {
     public:
         Player(const char* name, int xp=0, GameActionManager* gam = nullptr);
 
+	const char* getName() { return this->_name.c_str(); }
+	
         City* GetCity();
 
         void AddCity(City*);

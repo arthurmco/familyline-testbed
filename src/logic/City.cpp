@@ -1,76 +1,36 @@
+#include <algorithm>
+
 #include "City.hpp"
 
 using namespace Familyline;
 using namespace Familyline::Logic;
 
-#include "Team.hpp"
+PlayerDiplomacy City::getDiplomacy(City* c) {
 
-Team::Team(int id, const char* name) {
-    this->id = id;
-    this->name = std::string(name);
-    this->flag = nullptr;
-    this->tinfo = (void*)new TeamCities(this);
+    // If the user is from your own team, he's an ally
+    bool n_own_team = c->team->name == this->team->name;
+
+    auto n_allies = std::count_if(team->allies.begin(), team->allies.end(),
+				  [&](auto& team) {
+				      auto steam = team.lock();
+				      return (c->team->name == steam->name);
+				  });
+    auto n_enemies = std::count_if(team->enemies.begin(), team->enemies.end(),
+				   [&](auto& team) {
+				       auto steam = team.lock();
+				       return (c->team->name == steam->name);
+				   });
+
+    if (n_allies > 0 || n_own_team)
+	return PlayerDiplomacy::Ally;
+    else if (n_enemies > 0)
+	return PlayerDiplomacy::Enemy;
+    else
+	return PlayerDiplomacy::Neutral;
+
 }
 
-Team::Team() {
-    this->id = -1;
-    this->name = "";
-    this->flag = nullptr;
-    this->tinfo = nullptr;
+// Check newly created objects?
+void City::iterate() {
+
 }
-
-
-City::City(const char* name, Team* team)
-    : _name{name}, _team(team)
-{
-    Log::GetLog()->Write("city", "City %s created", name);
-	    
-}
-
-/* Get an object by its ID */
-AttackableObject* City::GetObject(int ID)
-{
-    for (auto it = _objects.begin(); it != _objects.end(); it++){
-	if ((*it)->getID() == ID){
-	    return (*it);
-	}
-    }
-
-    Log::GetLog()->Write("city", "No object with ID %d found on city %s",
-			 ID, _name.c_str());
-    return NULL;
-}
-
-/* Add object into city. Return ID */
-int City::AddObject(AttackableObject* a){
-    _objects.push_back(a);
-//    a->SetProperty("city", this);
-    Log::GetLog()->Write("city", "Added %s (%d) to city %s", a->getName(), a->getID(),
-			 _name.c_str());
-    return a->getID();
-}
-
-/* Remove object from city.
-   Returns true if object exists, false otherwise */
-bool City::RemoveObject(AttackableObject* a){
-    for (auto it = _objects.begin(); it != _objects.end(); it++){
-	if ((*it)->getID() == a->getID()){
-	    _objects.erase(it);
-	    return true;
-	}
-    }
-
-    Log::GetLog()->Write("city", "Tried to delete object %s (ID %d) but city %s doesn't have it",
-			 a->getName(), a->getID(), _name.c_str());
-    return false;
-}
-
-int City::CountObjects(){
-    return _objects.size();
-}
-
-
-const char* City::GetName() const { return _name.c_str(); }
-Team* City::GetTeam() const { return _team; }
-void City::SetTeam(Team* t) { _team = t; }
-

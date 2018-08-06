@@ -1,65 +1,72 @@
 /***
 	City definitions
 
-	Copyright (C) 2016 Arthur M
+	Copyright (C) 2016-2018 Arthur M
 
 ***/
-
-#include <vector>
-
-#include "AttackableObject.hpp"
-#include "Log.hpp"
-
 #ifndef CITY_HPP
 #define CITY_HPP
 
+
+#include <vector>
+
+#include "GameObject.hpp"
+#include "Player.hpp"
+#include "Log.hpp"
+#include "Team.hpp"
+
+#include <memory> //weak_ptr, shared_ptr
+#include <glm/glm.hpp>
+
 namespace Familyline::Logic {
 
-	struct Team {
-		int id;
-		std::string name;
-		char* flag; //pointer to a raw bitmap.
-		void* tinfo = nullptr; //pointer to a TeamCities structure
-		int cref = 0;
 
-		Team();
-		Team(int id, const char* name);
+    /**
+     *! City class
+     *
+     * Defines a city.
+     *
+     * A city is a container for child objects of the game that belongs to the same user.
+     *
+     * A city should only have only one player linked to it (why?)
+     *
+     * Objects of a city should not attack each other, never.
+     * Objects of a city should only attack objects of the other cities if they are
+     * enemies or neutrals. Attacks to enemies might start automatically. Attacks to
+     * neutrals should not
+     *
+     */
+    class City : public GameObject {
+    private:
+	// TODO: Does the city have to own the game object too?
+	// Nooooo. When the object is destroyed, the city should let it go.
+	std::vector<GameObject*> citizens;
 
-		inline bool operator==(const Team& other) { return this->id == other.id; }
-	};
+	// The player that controls the city.
+	Player* player;
 
-	class City {
-	private:
-		std::vector<AttackableObject*> _objects;
+	// A color. This color is a RGB color.
+	// We'll paint some parts of the units and buildings with this color
+	// This color will also identify the user.
+	glm::vec3 player_color;
 
-		int _men, _women;
-		int _boys, _girls;
 
-		std::string _name;
-		Team* _team;
+    public:
+	City(Player* player, glm::vec3 color)
+	    : GameObject(0, "city", player->getName()), player(player), player_color(color)
+	    {}
 
-	public:
-		City(const char* name, Team* team);
+	std::shared_ptr<Team> team;
 
-		/* Get an object by its ID */
-		AttackableObject* GetObject(int ID);
+	PlayerDiplomacy getDiplomacy(City* c);
 
-		/* Add object into city. Return ID */
-		int AddObject(AttackableObject*);
+	const Player* getPlayer() const { return this->player; }
+	const glm::vec3 getColor() const { return this->player_color; }
 
-		/* Remove object from city.
-			Returns true if object exists, false otherwise */
-		bool RemoveObject(AttackableObject*);
+	// Check newly created objects?
+	virtual void iterate();
 
-		int CountObjects();
-
-		const char* GetName() const;
-
-		Team* GetTeam() const;
-		void SetTeam(Team* t);
-
-	};
-
+    };
 
 
 }

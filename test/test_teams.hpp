@@ -5,15 +5,14 @@
 
 #include <gtest/gtest.h>
 
+#include "logic/CityManager.hpp"
 #include "logic/City.hpp"
 #include "logic/Team.hpp"
-#include "logic/TeamCoordinator.hpp"
 #include "TestObject.hpp"
 
 class TeamRelationTest : public ::testing::Test {
 protected:
-    Familyline::Logic::TeamCoordinator tc;
-    Familyline::Logic::City *c11, *c12, *c21, *c22;
+    Familyline::Logic::CityManager* cm = nullptr;;
     
 public:
     void SetUp();
