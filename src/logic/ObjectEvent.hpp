@@ -14,7 +14,8 @@
 namespace Familyline::Logic {
 
     class ObjectManager;
-
+    class City;
+    
     enum ObjectEventType {
 
 	// A null event
@@ -26,6 +27,8 @@ namespace Familyline::Logic {
 	// An object has been destroyed
 	ObjectDestroyed,
 
+	// An object changed its city
+	ObjectCityChanged,
     };
 
 
@@ -42,16 +45,16 @@ namespace Familyline::Logic {
 	    struct {
 		int oid = 0;
 	    };
+
+	    // for ObjectCityChanged
+	    struct {
+		const City* city;
+	    };
 	};
 
-	ObjectEvent()
-	    : from(nullptr), to(nullptr), type(ObjectEventType::None)
-	    {}
-	
-	ObjectEvent(const GameObject* from, const GameObject* to, ObjectEventType type)
-	    : from(from), to(to), type(type)
-	    {}
-
+	ObjectEvent();
+	ObjectEvent(const GameObject* from, const GameObject* to, ObjectEventType type);
+	ObjectEvent(const GameObject* from, City* city);
     };
 
 }

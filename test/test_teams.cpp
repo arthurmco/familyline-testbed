@@ -49,7 +49,7 @@ TEST_F(TeamRelationTest, TestCityCreation){
 	sprintf(cc, "Test Player %d", i);
 	pl[i] = new TestPlayer(cc);
     }
-
+    
     City* cities[4];
     cities[0] = cm->createCity(pl[0], glm::vec3(1.0, 0.3, 0.3), team1);
     cities[1] = cm->createCity(pl[1], glm::vec3(0.0, 1.0, 0.3), team2);
@@ -85,7 +85,7 @@ TEST_F(TeamRelationTest, TestAllies){
     cities[1] = cm->createCity(pl[1], glm::vec3(0.0, 1.0, 0.3), team2);
     cities[2] = cm->createCity(pl[2], glm::vec3(0.2, 0.6, 1.0), team2);
     cities[3] = cm->createCity(pl[3], glm::vec3(0.8, 0.4, 0.9), team1);
-
+    
     ASSERT_EQ(PlayerDiplomacy::Ally, cities[0]->getDiplomacy(cities[3]));
     ASSERT_EQ(PlayerDiplomacy::Ally, cities[1]->getDiplomacy(cities[2]));
     ASSERT_EQ(PlayerDiplomacy::Ally, cities[2]->getDiplomacy(cities[1]));
@@ -154,7 +154,7 @@ TEST_F(TeamRelationTest, TestNeutrals){
     cities[1] = cm->createCity(pl[1], glm::vec3(0.0, 1.0, 0.3), team2);
     cities[2] = cm->createCity(pl[2], glm::vec3(0.2, 0.6, 1.0), team2);
     cities[3] = cm->createCity(pl[3], glm::vec3(0.8, 0.4, 0.9), team1);
-
+    
     ASSERT_EQ(PlayerDiplomacy::Ally, cities[0]->getDiplomacy(cities[3]));
     ASSERT_EQ(PlayerDiplomacy::Ally, cities[1]->getDiplomacy(cities[2]));
     ASSERT_EQ(PlayerDiplomacy::Ally, cities[2]->getDiplomacy(cities[1]));

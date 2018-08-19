@@ -11,16 +11,38 @@
 #include <vector>
 
 #include "GameObject.hpp"
-#include "Player.hpp"
 #include "Log.hpp"
 #include "Team.hpp"
+#include "ObjectEventListener.hpp"
+#include "GameActionListener.hpp"
 
 #include <memory> //weak_ptr, shared_ptr
 #include <glm/glm.hpp>
 
 namespace Familyline::Logic {
 
+    class Player;
 
+    class CityListener : public GameActionListener {
+    private:
+	std::queue<GameObject*> obj_queue;
+	int cityID;
+    
+    public:
+	CityListener(Player* p, const char* name);
+
+	virtual void OnListen(GameAction& ga);
+	
+	/*
+	 * Get next created object, or nullptr if no object is next
+	 */
+	GameObject* getNextObject();
+	
+	virtual ~CityListener() {}
+    
+    };
+
+    
     /**
      *! City class
      *
@@ -45,16 +67,20 @@ namespace Familyline::Logic {
 	// The player that controls the city.
 	Player* player;
 
+	// Listens for objects, only send the set city event if the object is
+	// from its own city
+	ObjectEventListener oel;
+	
 	// A color. This color is a RGB color.
 	// We'll paint some parts of the units and buildings with this color
 	// This color will also identify the user.
 	glm::vec3 player_color;
 
+	// Player listener, to get the newly created objects by the player
+	CityListener* cil;
 
     public:
-	City(Player* player, glm::vec3 color)
-	    : GameObject(0, "city", player->getName()), player(player), player_color(color)
-	    {}
+	City(Player* player, glm::vec3 color);
 
 	std::shared_ptr<Team> team;
 

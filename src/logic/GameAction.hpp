@@ -27,6 +27,7 @@ struct GameAction {
 	struct {
 	    int object_id;
 	    float x, z;
+	    int owner_id; // ID of the owning city
 	} creation;
 	struct {
 	    int object_id;

@@ -1,9 +1,51 @@
 #include <algorithm>
 
 #include "City.hpp"
+#include "ObjectManager.hpp"
+#include "ObjectEventEmitter.hpp"
+#include "Player.hpp"
 
 using namespace Familyline;
 using namespace Familyline::Logic;
+
+CityListener::CityListener(Player* p, const char* name)
+    : GameActionListener(name)
+{
+    p->_gam->AddListener(this);
+}
+
+void CityListener::OnListen(GameAction& ga) {
+    if (ga.type == GAT_CREATION) {
+	auto obj = ObjectManager::getDefault()->getObject(ga.creation.object_id);
+	if (obj)
+	    obj_queue.push(obj);
+    }
+}
+
+/*
+ * Get next created object, or nullptr if no object is next
+ */
+GameObject* CityListener::getNextObject() {
+    if (obj_queue.empty())
+	return nullptr;
+
+    auto obj = obj_queue.front();
+    obj_queue.pop();
+    return obj;
+}
+
+///////////////////////////////////////////////////
+
+City::City(Player* player, glm::vec3 color)
+    : GameObject(0, "city", player->getName()), player(player), player_color(color)
+{
+
+    char s[32];
+    sprintf(s, "city-listener-%s", player->GetName());
+    cil = new CityListener{player, s};
+    
+    ObjectEventEmitter::addListener(&oel);
+}
 
 PlayerDiplomacy City::getDiplomacy(City* c) {
 
@@ -33,4 +75,27 @@ PlayerDiplomacy City::getDiplomacy(City* c) {
 // Check newly created objects?
 void City::iterate() {
 
+    if (!oel.hasEvent())
+	return; // No created object, no work.
+    
+    
+    auto obj = cil->getNextObject();
+    while (obj) {
+
+	ObjectEvent oevent;
+	if (!oel.popEvent(oevent))
+	    break;
+
+	if (oevent.type == ObjectCreated && oevent.oid == obj->getID()) {
+	    // It's our object. Change its city to this
+	    this->citizens.push_back(obj);
+
+	    ObjectEvent cevent(obj, this);
+	    ObjectEventEmitter::pushMessage(nullptr, cevent);
+	    break;
+	}
+	
+	obj = cil->getNextObject();
+    }
+    
 }

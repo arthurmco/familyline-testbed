@@ -39,7 +39,6 @@ void Player::RegisterCreation(GameObject* go)
     a.creation.object_id = go->getID();
     a.creation.x = go->position.x;
     a.creation.z = go->position.z;
-
     _gam->Push(a);
 }
 

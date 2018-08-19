@@ -14,13 +14,13 @@
 
 #include "GameContext.hpp"
 #include "GameActionManager.hpp"
-
+#include "City.hpp"
 
 namespace Familyline::Logic {
 
-    class City;
-
     class Player {
+	friend class CityListener;
+	
     protected:
         std::string _name;
         int _xp;

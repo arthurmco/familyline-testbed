@@ -12,8 +12,10 @@ using namespace Familyline::Logic;
 class TestPlayer : public Player {
 public:
     TestPlayer(const char* name)
-	: Player(name, 0)
-	{}
+	: Player(name, 0, new GameActionManager{})
+	{
+	    
+	}
 
     virtual bool Play(GameContext*) {this->_xp++; return true; }
     virtual bool ProcessInput() { return true;}

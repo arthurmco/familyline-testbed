@@ -7,6 +7,9 @@
 using namespace Familyline;
 using namespace Familyline::Logic;
 
+ObjectManager* ObjectManager::instance;
+
+
 /**
  * Add the object 'o' to the object manager and give to it a new ID
  *
