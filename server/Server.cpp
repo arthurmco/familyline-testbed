@@ -120,7 +120,7 @@ int main(int argc, char const* argv[])
 
 			    cli->GetQueue()->ReceiveTCP(m, 40);
 			    printf("\033[1mClient %s is ready\033[0m\n",
-				   cli->GetName());
+				   cli->getName());
 			    cli->SetReady();
 			    continue;
 			}
@@ -131,14 +131,14 @@ int main(int argc, char const* argv[])
 			     !cli->IsReady())) {
 
 			    cli->GetQueue()->ReceiveTCP(m, 40);
-			    Log::GetLog()->Warning("server", "%s set ready status more than one time -- possible flooding?", cli->GetName());
+			    Log::GetLog()->Warning("server", "%s set ready status more than one time -- possible flooding?", cli->getName());
 			    continue;
 			}
 
 			if (!strncmp(m, "[TRIBALIA GAME NOTREADY]", 21) && cli->IsReady()) {
 			    cli->GetQueue()->ReceiveTCP(m, 40);
 			    printf("\033[1mClient %s isn't ready anymore\033[0m\n",
-				   cli->GetName());
+				   cli->getName());
 			    cli->UnsetReady();
 			    continue;
 			}

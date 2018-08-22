@@ -75,7 +75,7 @@ namespace Familyline::Server {
 
 	void AdvanceStatus();
 
-	const char* GetName() const;
+	const char* getName() const;
 	void SetName(char* n);
 
 	unsigned int GetID() const;

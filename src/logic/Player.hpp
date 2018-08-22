@@ -36,7 +36,8 @@ namespace Familyline::Logic {
     public:
         Player(const char* name, int xp=0, GameActionManager* gam = nullptr);
 
-	const char* getName() { return this->_name.c_str(); }
+	const char* getName() const { return this->_name.c_str(); }
+	int getXP() const { return this->_xp; }
 	
         City* GetCity();
 
@@ -62,8 +63,6 @@ namespace Familyline::Logic {
         virtual bool HasUpdatedObject() = 0;
 
 
-        const char* GetName() const;
-        int GetXP() const;
 
     };
 

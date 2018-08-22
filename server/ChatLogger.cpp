@@ -23,7 +23,7 @@ void ChatLogger::Push(ChatMessage* m)
     }
     
     Log::GetLog()->InfoWrite("chat-logger", "[from %s to %s] %s",
-			     (m->sender) ? m->sender->GetName() : "server",
+			     (m->sender) ? m->sender->getName() : "server",
 			     dest, m->message);
     _messages.push_back(m);
 }

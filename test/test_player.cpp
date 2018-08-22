@@ -1,27 +1,7 @@
 #include "test_player.hpp"
-#include "logic/Player.hpp"
-#include "logic/PlayerManager.hpp"
+#include "TestPlayer.hpp" //this is the class. Do not mistake.
 
 using namespace Familyline::Logic;
-
-/* This is a test player for this test suite
-   In each play loop, it increases the XP by 1
-
-   This spares a variable creation, we can use one already.
-*/
-class TestPlayer : public Player {
-public:
-    TestPlayer(const char* name)
-	: Player(name, 0, new GameActionManager{})
-	{
-	    
-	}
-
-    virtual bool Play(GameContext*) {this->_xp++; return true; }
-    virtual bool ProcessInput() { return true;}
-    virtual bool HasUpdatedObject() { return true; }
-
-};
 
 void PlayerTest::SetUp()
 {
@@ -36,7 +16,7 @@ void PlayerTest::TearDown()
 TEST_F(PlayerTest, TestPlayMethod) {
     TestPlayer p("One Test");
     p.Play(nullptr);
-    ASSERT_EQ(1, p.GetXP());
+    ASSERT_EQ(1, p.getXP());
 }
 
 /* Test if player manager calls successfully the PlayAll() method */
@@ -49,7 +29,7 @@ TEST_F(PlayerTest, TestPlayerManagerPlayAll) {
     for (int i = 0; i < 3; i++)
 	pm.PlayAll(nullptr);
 
-    ASSERT_EQ(3, p.GetXP());
+    ASSERT_EQ(3, p.getXP());
 }
 
 
@@ -63,11 +43,11 @@ TEST_F(PlayerTest, TestPlayerManagerQueries) {
     auto id1 = pm.AddPlayer(&p1);
     auto id2 = pm.AddPlayer(&p2);
 
-    ASSERT_STREQ(p1.GetName(), pm.GetbyID(id1)->GetName());
-    ASSERT_STREQ(p2.GetName(), pm.GetbyID(id2)->GetName());
+    ASSERT_STREQ(p1.getName(), pm.GetbyID(id1)->getName());
+    ASSERT_STREQ(p2.getName(), pm.GetbyID(id2)->getName());
 
-    ASSERT_STREQ(p1.GetName(), pm.GetbyName("One Test")->GetName());
-    ASSERT_STREQ(p2.GetName(), pm.GetbyName("Two Test")->GetName());
+    ASSERT_STREQ(p1.getName(), pm.GetbyName("One Test")->getName());
+    ASSERT_STREQ(p2.getName(), pm.GetbyName("Two Test")->getName());
 
 }
 
@@ -89,7 +69,7 @@ TEST_F(PlayerTest, TestPlayerManagerPlayMulti) {
 	pm.PlayAll(nullptr);
     }
 
-    ASSERT_EQ(10, p2.GetXP());
-    ASSERT_EQ(20, p1.GetXP());
+    ASSERT_EQ(10, p2.getXP());
+    ASSERT_EQ(20, p1.getXP());
 
 }

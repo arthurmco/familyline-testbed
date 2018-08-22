@@ -288,7 +288,7 @@ void ServerManager::RetrieveTCPMessages() {
 						/* Return 0 in reads means remote disconnection  */
 						Log::GetLog()->Write("server-manager",
 							"Client %d (%s) disconnected",
-							cli->GetID(), cli->GetName());
+							cli->GetID(), cli->getName());
 
 						cli->Close();
 						clients.erase(clients.begin() + i);
@@ -311,7 +311,7 @@ void ServerManager::RetrieveTCPMessages() {
 					auto& cli = clients[i];
 					Log::GetLog()->Write("server-manager",
 						"Client %d (%s) disconnected (POLLHUP)",
-						cli->GetID(), cli->GetName());
+						cli->GetID(), cli->getName());
 
 					cli->Close();
 					clients.erase(clients.begin() + i);

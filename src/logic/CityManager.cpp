@@ -14,14 +14,12 @@ City* CityManager::createCity(Player* p, glm::vec3 city_color, std::shared_ptr<T
 }
 
 /**
- * Check for player creation events received by the GameActionListener, crosscheck with
- * the ones created by the ones received by the ObjectEventListener, and set the new
- * objects created by a player to its city.
+ * Update all cities' objects
  */
 void CityManager::updateCities() {
-    // TODO: Add setCity event?
-
-    // YES. An event named SET_CITY would be good.
+    for (auto& c : cities) {
+	c->iterate();
+    }
 }
 
 /**

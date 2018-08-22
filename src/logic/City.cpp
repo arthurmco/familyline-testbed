@@ -41,7 +41,7 @@ City::City(Player* player, glm::vec3 color)
 {
 
     char s[32];
-    sprintf(s, "city-listener-%s", player->GetName());
+    sprintf(s, "city-listener-%s", player->getName());
     cil = new CityListener{player, s};
     
     ObjectEventEmitter::addListener(&oel);
@@ -72,7 +72,11 @@ PlayerDiplomacy City::getDiplomacy(City* c) {
 
 }
 
-// Check newly created objects?
+/**
+ * Check for player creation events received by the GameActionListener, crosscheck with
+ * the ones created by the ones received by the ObjectEventListener, and set the new 
+ * objects created by a player to its city.
+ */
 void City::iterate() {
 
     if (!oel.hasEvent())

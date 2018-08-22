@@ -13,7 +13,7 @@ int PlayerManager::AddPlayer(Player* p, int flags)
 
     Log::GetLog()->Write("player-manager",
 			 "Added player (name: %s, id: %d, flags %04x)",
-			 p->GetName(), last_player_id, flags);
+			 p->getName(), last_player_id, flags);
     return last_player_id;
 }
 
@@ -35,7 +35,7 @@ const Player* PlayerManager::GetbyName(const char* name) const
 {
     auto res = std::find_if(this->_playerdata.begin(), this->_playerdata.end(),
 			    [name](PlayerData pd) {
-				return !strcmp(name, pd.p->GetName());
+				return !strcmp(name, pd.p->getName());
 			    });
 
     return (res != this->_playerdata.end()) ? res->p : nullptr;

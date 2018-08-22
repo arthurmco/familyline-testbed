@@ -47,7 +47,7 @@ void PlayerManager::NotifyPlayerAddition(Client* c)
 {
     Log::GetLog()->Write("player-manager",
 			 "client %s with id %d added, notifying others\n",
-			 c->GetName(), c->GetID());
+			 c->getName(), c->GetID());
 }
 
 void PlayerManager::SendPlayerList(Client* c)
@@ -62,7 +62,7 @@ void PlayerManager::SendPlayerList(Client* c)
     for (const auto& p : _players) {	
 	char playmsg[32];
 	sprintf(playmsg, "| %d '%s' %d ", p.cli->GetID(),
-		p.cli->GetName(), 0);
+		p.cli->getName(), 0);
 	strcat(pfullmsg, playmsg);
     }
 

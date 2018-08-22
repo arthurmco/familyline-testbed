@@ -80,6 +80,3 @@ void Player::RegisterDestroy(GameObject* go)
 
     _gam->Push(a);
 }
-
-const char* Player::GetName() const { return this->_name.c_str(); }
-int Player::GetXP() const { return this->_xp; }

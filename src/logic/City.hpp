@@ -89,7 +89,10 @@ namespace Familyline::Logic {
 	const Player* getPlayer() const { return this->player; }
 	const glm::vec3 getColor() const { return this->player_color; }
 
-	// Check newly created objects?
+
+        /**
+	 * Update all cities' objects
+	 */
 	virtual void iterate();
 
     };

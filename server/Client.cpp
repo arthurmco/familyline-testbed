@@ -35,7 +35,7 @@ void Client::AdvanceStatus() {
 	this->cstatus = ConnectionStatus(int(this->cstatus) + 1);
 }
 
-const char*  Client::GetName() const { return this->name.c_str(); }
+const char*  Client::getName() const { return this->name.c_str(); }
 void  Client::SetName(char* n) { this->name = std::string{n}; }
 
 unsigned int Client::GetID() const {

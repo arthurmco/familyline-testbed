@@ -88,7 +88,7 @@ bool AdminCommandParser::ProcessPlayerListRequest(socket_t clisocket)
 	for (const auto& pl : this->_spm->GetPlayers()) {
 		char pmsg[128];
 		snprintf(pmsg, 128, "%d %s %d %s %s ",
-			pl.cli->GetID(), pl.cli->GetName(), 0,
+			pl.cli->GetID(), pl.cli->getName(), 0,
 			(pl.cli->GetStatus() >= CS_CONNECTED) ? "connected" : "connecting",
 			"192.168.0.1");
 		strcat(smsg, pmsg);
@@ -141,7 +141,7 @@ bool AdminCommandParser::ProcessChatListRequest(socket_t clisocket)
 		sprintf(mchat, "[TRIBALIA CHAT %ld %d %s %s %zu %s ]",
 			m->time.count(),
 			(m->sender) ? m->sender->GetID() : 0,
-			(m->sender) ? m->sender->GetName() : "admin",
+			(m->sender) ? m->sender->getName() : "admin",
 			"all", strlen(m->message), m->message);
 
 		send(clisocket, mchat, strlen(mchat), 0);

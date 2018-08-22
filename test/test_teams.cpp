@@ -1,5 +1,6 @@
 
 #include "test_teams.hpp"
+#include "TestPlayer.hpp"
 #include <vector>
 
 using namespace Familyline::Logic;
@@ -13,24 +14,6 @@ void TeamRelationTest::TearDown()
 {
     delete cm;
 }
-
-/* This is a test player for this test suite
-   In each play loop, it increases the XP by 1
-
-   This spares a variable creation, we can use one already.
-*/
-class TestPlayer : public Player {
-public:
-    TestPlayer(const char* name)
-	: Player(name, 0)
-	{}
-
-    virtual bool Play(GameContext*) {this->_xp++; return true; }
-    virtual bool ProcessInput() { return true;}
-    virtual bool HasUpdatedObject() { return true; }
-
-};
-
 
 TEST_F(TeamRelationTest, TestCityCreation){
     std::vector<std::shared_ptr<Team>> teams;

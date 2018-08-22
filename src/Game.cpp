@@ -307,7 +307,7 @@ int Game::RunLoop()
 		if (BuildQueue::GetInstance()->GetNext()) {
 		    char s[256];
 		    sprintf(s, "Click to build %s",
-			    BuildQueue::GetInstance()->GetNext()->GetName());
+			    BuildQueue::GetInstance()->GetNext()->getName());
 		    lblBuilding.setText(s);
 		}
 		else {
@@ -316,7 +316,7 @@ int Game::RunLoop()
 
 		auto locc = ip->GetIntersectedObject();
 		if (locc) {
-//			gr->DebugWrite(10, 100, "Hovering object '%s'", locc->GetName());
+//			gr->DebugWrite(10, 100, "Hovering object '%s'", locc->getName());
 
 			if (selected && locc->HasProperty("maxHP")) {
 				AttackableObject* a = (AttackableObject*)locc;

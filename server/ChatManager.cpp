@@ -55,7 +55,7 @@ ChatMessage* ChatManager::CheckMessage(Client* c)
 		sname, schat, &senderid, sdestiny, &mlen, &msgpos);
 	if (ret < 5) {
 		fprintf(stderr, "received garbage chat message from %s (%s)\n",
-			c->GetName(), msg);
+			c->getName(), msg);
 		return nullptr;
 	}
 	c->GetQueue()->ReceiveTCP(msg, 384);
@@ -80,7 +80,7 @@ ChatMessage* ChatManager::CheckMessage(Client* c)
 
 	if (d == ChatDestiny::ToInvalid) {
 		fprintf(stderr, "received chat message from %s with invalid destination\n",
-			c->GetName());
+			c->getName());
 		return nullptr;
 	}
 

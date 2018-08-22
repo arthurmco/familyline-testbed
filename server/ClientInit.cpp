@@ -78,7 +78,7 @@ void TCPConnectionInitiator::Process()
 
 		if (vmaj != 0 || vmin != 1) {
 		    fprintf(stderr, "Client %s has unsupported version (%u.%u)",
-			    tinit.cli->GetName(), vmaj, vmin);
+			    tinit.cli->getName(), vmaj, vmin);
 		    tinit.cli->GetQueue()->SendTCP("[TRIBALIA ERROR 001 Unsupported version]");
 		    tinit.cli->Close();
 		    continue;	    
@@ -150,7 +150,7 @@ void TCPConnectionInitiator::Process()
 		tinit.cli->GetQueue()->SendTCP(ssendmsg);
 	    }
 	    
-	    printf("%s is connected (%d loops, %d).\n", tinit.cli->GetName(),
+	    printf("%s is connected (%d loops, %d).\n", tinit.cli->getName(),
 		   tinit.iters, tinit.cli->GetStatus());
 	    tinit.step = TCPInitStep::ClientReady;
 	    if (tinit.cli->GetStatus() == CS_CONNECTING) {
