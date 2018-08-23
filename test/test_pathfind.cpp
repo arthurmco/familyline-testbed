@@ -1,8 +1,9 @@
 #include "test_pathfind.hpp"
+#include "logic/ObjectEventEmitter.hpp"
 
 using namespace Familyline::Logic;
 
-void DISABLED_PathfinderTest::SetUp()
+void PathfinderTest::SetUp()
 {
 	_om = new ObjectManager;
 	_pf = new PathFinder{ _om };
@@ -12,9 +13,9 @@ void DISABLED_PathfinderTest::SetUp()
 	o = (TestObject*) _om->addObject(new TestObject(1, 10, 1, 10));
 }
 
-void DISABLED_PathfinderTest::TearDown()
+void PathfinderTest::TearDown()
 {
-	delete o;
+    ObjectEventEmitter::clearListeners();
 	delete _pf;
 	delete _om;
 }
@@ -27,8 +28,9 @@ namespace glm {
 }
 
 
-TEST_F(DISABLED_PathfinderTest, TestStraightPathfind) {
+TEST_F(PathfinderTest, TestStraightPathfind) {
 
+    ObjectEventEmitter::distributeMessages();
 	auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
 	EXPECT_EQ(vlist.size(), 23) << "List size mismatch";
 
@@ -48,10 +50,11 @@ TEST_F(DISABLED_PathfinderTest, TestStraightPathfind) {
 
 }
 
-TEST_F(DISABLED_PathfinderTest, TestObstaclePathfind) {
+TEST_F(PathfinderTest, TestObstaclePathfind) {
     TestObject* c = (TestObject*) _om->addObject(new TestObject(1, 21, 1, 21));
 
-	_pf->UpdatePathmap(256, 256);
+    ObjectEventEmitter::distributeMessages();
+    _pf->UpdatePathmap(256, 256);
 
 	auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
 
@@ -61,9 +64,9 @@ TEST_F(DISABLED_PathfinderTest, TestObstaclePathfind) {
 	glm::vec2 colposn = glm::vec2(c->position.x + 1, c->position.z + 1);
 	glm::vec2 colposp = glm::vec2(c->position.x - 1, c->position.z - 1);
 	for (auto v : vlist) {
-		EXPECT_NE(v, colposn) << "Collided with object in position (posn)" << i;
-		EXPECT_NE(v, colpos) << "Collided with object in position" << i;
-		EXPECT_NE(v, colposp) << "Collided with object in position (posp)" << i;
+		EXPECT_NE(v, colposn) << "Collided with object in position (posn) " << i;
+		EXPECT_NE(v, colpos) << "Collided with object in position " << i;
+		EXPECT_NE(v, colposp) << "Collided with object in position (posp) " << i;
 
 		i++;
 	}
@@ -72,14 +75,15 @@ TEST_F(DISABLED_PathfinderTest, TestObstaclePathfind) {
 	EXPECT_EQ(glm::vec2(32, 32), vlast);
 }
 
-TEST_F(DISABLED_PathfinderTest, TestTwoObstaclesPathfind) {
+TEST_F(PathfinderTest, TestTwoObstaclesPathfind) {
     TestObject* c = (TestObject*) _om->addObject(new TestObject(1, 21, 1, 21));
     TestObject* d = (TestObject*) _om->addObject(new TestObject(1, 26, 1, 26));
 
-	_pf->UpdatePathmap(256, 256);
+    ObjectEventEmitter::distributeMessages();
+    _pf->UpdatePathmap(256, 256);
 
 	auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
-
+	
 	/* Check if we didn't collided */
 	int i = 0;
 	glm::vec2 ccolpos = glm::vec2(c->position.x, c->position.z);
@@ -88,14 +92,14 @@ TEST_F(DISABLED_PathfinderTest, TestTwoObstaclesPathfind) {
 	glm::vec2 dcolpos = glm::vec2(d->position.x, d->position.z);
 	glm::vec2 dcolposn = glm::vec2(d->position.x + 1, d->position.z + 1);
 	glm::vec2 dcolposp = glm::vec2(d->position.x - 1, d->position.z - 1);
-	for (auto v : vlist) {
-		EXPECT_NE(v, ccolposn) << "Collided with object in position (posn)" << i;
-		EXPECT_NE(v, ccolpos) << "Collided with object in position" << i;
-		EXPECT_NE(v, ccolposp) << "Collided with object in position (posp)" << i;
+	for (const auto& v : vlist) {
+		EXPECT_NE(v, ccolposn) << "Collided with object in position (posn) " << i;
+		EXPECT_NE(v, ccolpos) << "Collided with object in position " << i;
+		EXPECT_NE(v, ccolposp) << "Collided with object in position (posp) " << i;
 
-		EXPECT_NE(v, dcolposn) << "Collided with object in position (posn)" << i;
-		EXPECT_NE(v, dcolpos) << "Collided with object in position" << i;
-		EXPECT_NE(v, dcolposp) << "Collided with object in position (posp)" << i;
+		EXPECT_NE(v, dcolposn) << "Collided with object in position (posn) " << i;
+		EXPECT_NE(v, dcolpos) << "Collided with object in position " << i;
+		EXPECT_NE(v, dcolposp) << "Collided with object in position (posp) " << i;
 
 		i++;
 	}
@@ -104,7 +108,7 @@ TEST_F(DISABLED_PathfinderTest, TestTwoObstaclesPathfind) {
 	EXPECT_EQ(glm::vec2(32, 32), vlast);
 }
 
-TEST_F(DISABLED_PathfinderTest, TestIfPathfindingPutObjectInOtherObjectPosition) {
+TEST_F(PathfinderTest, TestIfPathfindingPutObjectInOtherObjectPosition) {
 	/* Test if the pathfinder puts your object in the final destination even
 	 * if the final destination has another object in there
 	 *
@@ -112,7 +116,7 @@ TEST_F(DISABLED_PathfinderTest, TestIfPathfindingPutObjectInOtherObjectPosition)
 	 */
     TestObject* c = (TestObject*) _om->addObject(new TestObject(1, 32, 1, 32));
 
-
+    ObjectEventEmitter::distributeMessages();
     _pf->UpdatePathmap(256, 256);
 
     auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
@@ -129,6 +133,4 @@ TEST_F(DISABLED_PathfinderTest, TestIfPathfindingPutObjectInOtherObjectPosition)
     EXPECT_GE(36, vlast.y);
 
     _om->removeObject(c);
-    delete c;
-
 }

@@ -35,7 +35,11 @@ namespace Familyline::Logic {
 /* An object event. Haha */
     struct ObjectEvent {
 	const ObjectManager* object_manager;
+
+	// Destroyed: The destroyed object
 	const GameObject* from;
+
+	// Created: The created object
 	const GameObject* to;
 
 	ObjectEventType type;

@@ -2,15 +2,21 @@
 #include <cstring> //memset()
 #include <algorithm>
 
+#include "ObjectEventEmitter.hpp"
+
 using namespace Familyline::Logic;
 
 PathFinder::PathFinder(ObjectManager* om)
 	: _om(om)
-{ }
+{
+    // Start listening for object creation events
+    ObjectEventEmitter::addListener(&this->oel);
+}
 
 PathFinder::~PathFinder()
 {
 	delete[] _pathing_slots;
+	//ObjectEventEmitter::removeListenr(&this->oel);
 }
 
 void PathFinder::InitPathmap(int w, int h)
@@ -26,17 +32,35 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 {
 	this->ClearPathmap(w, h, x, y);
 
-	// !LISTENER
-//	auto objList = _om->GetObjectList();
-	auto objList = new std::vector<GameObject*>();
-	for (auto& obj : *objList) {
-		AttackableObject* l = dynamic_cast<AttackableObject*>(obj);
+	// Update the object list
+	ObjectEvent ev;
+	while (this->oel.popEvent(ev)) {
+	    switch (ev.type) {
+	    case ObjectCreated:
+		this->objList.push_back(ev.to);
+		break;
+
+	    case ObjectDestroyed:
+		std::remove_if(std::begin(this->objList), std::end(this->objList),
+			       [&](const GameObject* go) {
+				   return go->getID() == ev.from->getID();
+			       });
+		break;
+		
+	    default:
+		continue;
+	    }
+	    
+	}
+	
+	for (const auto& obj : this->objList) {
+		const AttackableObject* l = dynamic_cast<const AttackableObject*>(obj);
 		if (!l) {
 			continue; // Not locatable
 		}
 
 		int ox = l->position.x, oz = l->position.z;
-		float r = 8;//l->GetRadius();
+		float r = 2;//l->GetRadius();
 
 		for (int y = oz - r; y < oz + r; y++) {
 			for (int x = ox - r; x < ox + r; x++) {

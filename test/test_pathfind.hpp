@@ -9,7 +9,7 @@
 #include "logic/ObjectManager.hpp"
 #include "TestObject.hpp"
 
-class DISABLED_PathfinderTest : public ::testing::Test {
+class PathfinderTest : public ::testing::Test {
 protected:
     Familyline::Logic::ObjectManager* _om;
     Familyline::Logic::PathFinder* _pf;
