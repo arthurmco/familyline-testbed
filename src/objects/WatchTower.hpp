@@ -28,7 +28,7 @@ public:
     /* Called on each engine loop, when an action is performed */
     virtual bool DoAction(void);
 
-    ADD_CLONE_MACRO(WatchTower, NULL)
+//    ADD_CLONE_MACRO(WatchTower, NULL)
 
     WatchTower(const WatchTower&);
 };

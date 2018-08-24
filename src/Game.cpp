@@ -47,9 +47,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
 		terr = terrFile->GetTerrain();
 
-		tc = new TeamCoordinator();
-		auto tteam = tc->CreateTeam("test");
-		printf("%s -- %#x\n", tteam->name.c_str(), tteam->id);
+		auto tteam = std::make_shared<Team>(1, "Test team");
+		printf("%s -- %#x\n", tteam->name.c_str(), tteam->number);
 
 
 		scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
@@ -211,7 +210,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 int Game::RunLoop()
 {
 	CombatManager::GetInstance()->SetOnDeath([&](Logic::AttackableObject* at) {
-		gctx.om->UnregisterObject(at);
+		gctx.om->removeObject(at);
 	});
 
 
@@ -318,9 +317,9 @@ int Game::RunLoop()
 		if (locc) {
 //			gr->DebugWrite(10, 100, "Hovering object '%s'", locc->getName());
 
-			if (selected && locc->HasProperty("maxHP")) {
-				AttackableObject* a = (AttackableObject*)locc;
-				lblRange.setText( a->CheckAttackRange((AttackableObject*)selected) ? "In range" : "Not in range");
+		    if (selected && locc->getMaxLifePoints()) {
+			AttackableObject* a = (AttackableObject*)locc;
+//			lblRange.setText( a->CheckAttackRange((AttackableObject*)selected) ? "In range" : "Not in range");
 			}
 		}
 
@@ -334,15 +333,14 @@ int Game::RunLoop()
 		lblSelected.setText("");
 		if (selected) {
 			char s[150];
-			if (selected->HasProperty("maxHP")) {
-				AttackableObject* a = (AttackableObject*)selected;
+			AttackableObject* a = dynamic_cast<AttackableObject*>(selected);
+			if (selected) {
 				sprintf(s, "Selected object: '%s' (%4d/%4d)",
-						a->GetName(), (int)a->GetHP(), a->GetMaxHP());
-
-			}
-			else {
-				sprintf(s, "Selected object: '%s'", selected->GetName());
-
+					a->getName(),
+					a->getCurrentLifePoints(),
+					a->getMaxLifePoints());
+			} else {
+				sprintf(s, "Selected object: '%s'", selected->getName());
 			}
 
 			lblSelected.setText(s);

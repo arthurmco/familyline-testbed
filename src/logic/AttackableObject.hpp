@@ -21,6 +21,14 @@ namespace Familyline::Logic {
      */
     struct AttackAttributes {
 	double atkPoints;
+
+	AttackAttributes()
+	    : atkPoints(0.0)
+	    {}
+
+	AttackAttributes(double atkPoints)
+	    : atkPoints(atkPoints)
+	    {}
     };
 
     /**

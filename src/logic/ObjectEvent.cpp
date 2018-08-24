@@ -5,7 +5,7 @@ using namespace Familyline::Logic;
 
 
 ObjectEvent::ObjectEvent()
-    : from(nullptr), to(nullptr), type(ObjectEventType::None)
+    : from(nullptr), to(nullptr), type(ObjectEventType::EventNone)
 {}
 	
 ObjectEvent::ObjectEvent(const GameObject* from, const GameObject* to, ObjectEventType type)

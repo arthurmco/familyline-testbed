@@ -17,7 +17,6 @@
 #include "logic/ObjectPathManager.hpp"
 #include "logic/TerrainFile.hpp"
 #include "logic/Team.hpp"
-#include "logic/TeamCoordinator.hpp"
 #include "logic/BuildQueue.hpp"
 #include "logic/GameActionManager.hpp"
 #include "logic/PlayerManager.hpp"
@@ -58,7 +57,6 @@ private:
     Logic::ObjectManager* om = nullptr;
     HumanPlayer* hp = nullptr;
     Logic::Terrain* terr = nullptr;
-    Logic::TeamCoordinator* tc = nullptr;
     Logic::PlayerManager* pm = nullptr;
     Logic::TerrainFile* terrFile;
     

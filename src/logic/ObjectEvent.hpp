@@ -19,7 +19,7 @@ namespace Familyline::Logic {
     enum ObjectEventType {
 
 	// A null event
-	None,
+	EventNone,
 	
 	// An object has been created
 	ObjectCreated,

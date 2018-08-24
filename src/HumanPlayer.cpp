@@ -11,11 +11,11 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
     : Player(name, xp, gam)
     {
         /* Initialize input subsystems */
-		srand((size_t)name*xp);
+	srand((size_t)name*xp);
 
          /* Create a city for it */
-         City* c = new City{name, nullptr};
-         AddCity(c);
+	City* c = new City{this, glm::vec3(1, 0, 0)};
+	AddCity(c);
     }
 
 
@@ -275,12 +275,14 @@ bool HumanPlayer::Play(GameContext* gctx)
 
 	    if (c) {
 		BuildQueue::GetInstance()->Clear();
-		build->SetY(p.y);
-		this->GetCity()->AddObject(c);
-		printf("Creating %s at %.3f %.3f %.3f\n", c->GetName(), p.x, p.y, p.z);
-		int id = gctx->om->RegisterObject(c);
-		this->RegisterCreation(c);
-		printf("%s has id %d now\n", c->GetName(), id);
+		build->position.y = p.y;
+
+                // the object will be added to the city
+		printf("Creating %s at %.3f %.3f %.3f\n", c->getName(), p.x, p.y, p.z);
+
+		auto cobj = gctx->om->addObject(c);
+		this->RegisterCreation(cobj);
+		printf("%s has id %d now\n", c->getName(), cobj->getID());
 
 	    }
 	    
@@ -317,9 +319,9 @@ bool HumanPlayer::Play(GameContext* gctx)
     if (remove_object) {	
 	AttackableObject* l = _ip->GetIntersectedObject();
 	if (l) {
-	    printf("Deleting object %s", l->GetName());
+	    printf("Deleting object %s", l->getName());
 	    this->RegisterDestroy(l);
-	    gctx->om->UnregisterObject(l);
+	    gctx->om->removeObject(l);
 	}
 	remove_object = false;
     }
