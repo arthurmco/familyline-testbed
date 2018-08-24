@@ -13,9 +13,6 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
         /* Initialize input subsystems */
 	srand((size_t)name*xp);
 
-         /* Create a city for it */
-	City* c = new City{this, glm::vec3(1, 0, 0)};
-	AddCity(c);
     }
 
 
@@ -28,6 +25,10 @@ bool build_tent = false, build_tower = false;
 void HumanPlayer::SetGameActionManager(Familyline::Logic::GameActionManager* gam)
 {
     this->_gam = gam;
+    
+    /* Create a city for it */
+    City* c = new City{this, glm::vec3(1, 0, 0)};
+    AddCity(c);
 }
 
 

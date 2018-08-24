@@ -366,7 +366,8 @@ int Game::RunLoop()
 		rndr->Render(terr_rend);
 		
 		char texs[256];
-		sprintf(texs, "Terrain pos: (OpenGL: %.3f,%.3f,%.3f | Game: %.2f, %.2f), rotation %.1f",
+		sprintf(texs, "Terrain pos: "
+			"(ogl: %.3f,%.3f,%.3f | Game: %.2f, %.2f), rotation %.1f",
 				p.x, p.y, p.z, q.x, q.y, cam->GetRotation() * 180 / M_PI);
 		lblTerrainPos.setText(texs);
 		// gr->DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
