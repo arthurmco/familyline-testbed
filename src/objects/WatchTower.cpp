@@ -6,7 +6,9 @@ using namespace Familyline::Logic;
 WatchTower::WatchTower()
     : Building(0, "watchtower", "Watch Tower", 1000, 1000,
 	       AttackAttributes(1.2))
-{}
+{
+    DEF_MESH("WatchTower.obj");
+}
 
 /*  1000 HP, 1.2 baseAtk, 1.5 baseArmor, 1.8 building material, 1.12 bulding
     strength, 5 units of garrison capacity */
@@ -14,7 +16,7 @@ WatchTower::WatchTower(int oid, float x, float y, float z)
   : Building(oid, "watchtower", "Watch Tower", 1000, 1000,
 	     AttackAttributes(1.2))
 {
-    //      DEF_MESH("WatchTower.obj");
+    DEF_MESH("WatchTower.obj");
     this->position = glm::vec3(x, y, z);
 }
 

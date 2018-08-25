@@ -7,7 +7,7 @@ using namespace Familyline::Logic;
 ObjectRenderer::ObjectRenderer(ObjectManager* om, Familyline::Graphics::SceneManager* sm)
 	: GameActionListener("object-renderer-listener"), _om(om), _sm(sm)
 {
-
+    ObjectEventEmitter::addListener(&this->oel);
 }
 
 void ObjectRenderer::OnListen(GameAction& a) {
@@ -33,6 +33,44 @@ bool ObjectRenderer::Check()
 {
 	int object_found = 0;
 	int object_deleted = 0;
+
+	ObjectEvent e;
+	while (this->oel.popEvent(e)) {
+	    switch (e.type) {
+	    case ObjectCreated:
+		// Object has been created by someone.
+		if (_created_ids[e.oid]) {
+		    const GameObject* go = e.to;
+		    if (!go->mesh)
+			continue;
+
+		    // Object exists and is renderable.
+		    // Add the mesh to the scene manager.
+		    object_found++;
+		    _objects.push_back(go);
+
+		    ObjectRenderData ord;
+		    ord.ID = e.oid;
+		    ord.m = std::dynamic_pointer_cast<Graphics::Mesh>(go->mesh);
+		    _sm->AddObject(ord.m.get());
+
+		    Log::GetLog()->InfoWrite("object-renderer",
+					     "added object id %d", e.oid);
+		    _IDs.push_back(ord);
+		}
+		break;
+	    case ObjectDestroyed:
+		_deleted_ids[e.oid] = true;
+		break;
+
+	    case ObjectCityChanged:
+		// TODO: Make something related.
+		break;
+	    default:
+		continue;
+	    }
+	}
+
 	// !LISTENER
 	// for (auto it = _om->_objects.begin(); it != _om->_objects.end(); ++it) {
 
@@ -121,5 +159,3 @@ void ObjectRenderer::Update()
 		*/
 	}
 }
-
-

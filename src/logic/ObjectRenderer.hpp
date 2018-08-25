@@ -13,10 +13,11 @@
 
 #include "AttackableObject.hpp"
 #include "ObjectManager.hpp"
+#include "ObjectEventListener.hpp"
+#include "ObjectEventEmitter.hpp"
 #include "GameActionListener.hpp"
 
 #include "../graphical/Mesh.hpp"
-
 #include "../graphical/SceneManager.hpp"
 
 #ifndef OBJECTRENDERER_HPP
@@ -43,8 +44,9 @@ namespace Familyline::Logic {
     private:
 	ObjectManager * _om;
 	Familyline::Graphics::SceneManager* _sm;
+	ObjectEventListener oel;
 
-	std::list<AttackableObject*> _objects;
+	std::vector<const GameObject*> _objects;
 	std::vector<ObjectRenderData> _IDs;
 
 	std::map<int /*id*/, bool /*exists*/> _modified_ids;

@@ -4,7 +4,10 @@ using namespace Familyline;
 using namespace Familyline::Logic;
 
 Tent::Tent() : Building(0, "tent", "Tent", 250, 250,
-			AttackAttributes(0.0)){};
+			AttackAttributes(0.0))
+{
+    DEF_MESH("Tent.obj");
+};
 
 /*  250 HP, no baseAtk, 1.0 baseArmor, 1.0 building material, 0.95 bulding
     strength, 2 units of garrison capacity */
@@ -12,7 +15,7 @@ Tent::Tent(int oid, float x, float y, float z)
     : Building(0, "tent", "Tent", 250, 250,
 	       AttackAttributes(0.0))
 {
-//        DEF_MESH("Tent.obj");
+    DEF_MESH("Tent.obj");
     this->position = glm::vec3(x, y, z);
 }
 

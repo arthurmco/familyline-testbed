@@ -37,13 +37,15 @@ void ObjectEventEmitter::distributeMessages()
 	     "ObjectCityChanged"};
 
 	Log::GetLog()->InfoWrite("object-event-emitter",
-				 "event added type %s (%#x) from %p (%s, %d) to %p (%s, %d) ",
+				 "event type %s (%#x) from %p (%s, %d) to %p (%s, %d)"
+				 " -> %zu listeners",
 				 (ev.type > ObjectCityChanged) ? "???" : object_type[ev.type],
 				 ev.type,
 				 ev.from, ev.from ? ev.from->getName() : "null",
 				 ev.from ? ev.from->getID() : 0,
 				 ev.to, ev.to ? ev.to->getName() : "null",
-				 ev.to ? ev.to->getID() : 0);
+				 ev.to ? ev.to->getID() : 0,
+				 ObjectEventEmitter::listeners.size());
 
 
 	for (auto l : ObjectEventEmitter::listeners) {
@@ -55,6 +57,7 @@ void ObjectEventEmitter::distributeMessages()
 
 void ObjectEventEmitter::addListener(ObjectEventListener* l)
 {
+    Log::GetLog()->InfoWrite("object-event-emitter", "added listener");
     ObjectEventEmitter::listeners.push_back(l);
 }
 

@@ -1,18 +1,20 @@
 /***
     Macros for turn your life easier when adding objects
 
-    Copyright (C) 2016 Arthur M
+    Copyright (C) 2016, 2018 Arthur M
 ***/
+#ifndef OBJECTMACROS_H
+#define OBJECTMACROS_H
+
 
 #include "../logic/Building.hpp"
 #include "../logic/Unit.hpp"
 #include "../graphical/AssetManager.hpp"
 
-#ifndef OBJECTMACROS_H
-#define OBJECTMACROS_H
+#include <memory>
 
-#define DEF_MESH(dasset) SetMesh(new Familyline::Graphics::Mesh{\
-	    *Familyline::Graphics::AssetManager::GetInstance()->GetAsset(dasset).mesh})
+#define DEF_MESH(dasset) this->mesh = std::make_shared<Graphics::Mesh>(	\
+	    *Familyline::Graphics::AssetManager::GetInstance()->GetAsset(dasset).mesh)
 
 /*  Build a game object, generically.
     So, your object always needs to have a constructor like (oid, x, y ,z) */
