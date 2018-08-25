@@ -31,6 +31,7 @@ public:
     /* Called on each engine loop, when an action is performed */
     virtual bool DoAction(void);
 
+    CLONE_MACRO_H(Tent)
 //    ADD_CLONE_MACRO(Tent, "Tent")
 
     Tent(const Tent&);

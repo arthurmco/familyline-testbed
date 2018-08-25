@@ -31,6 +31,21 @@ void ObjectEventEmitter::distributeMessages()
 {
     while (!ObjectEventEmitter::events.empty()) {
 	auto ev = ObjectEventEmitter::events.front();
+
+	static const char* object_type[] =
+	    {"EventNone", "ObjectCreated", "ObjectDestroyed",
+	     "ObjectCityChanged"};
+
+	Log::GetLog()->InfoWrite("object-event-emitter",
+				 "event added type %s (%#x) from %p (%s, %d) to %p (%s, %d) ",
+				 (ev.type > ObjectCityChanged) ? "???" : object_type[ev.type],
+				 ev.type,
+				 ev.from, ev.from ? ev.from->getName() : "null",
+				 ev.from ? ev.from->getID() : 0,
+				 ev.to, ev.to ? ev.to->getName() : "null",
+				 ev.to ? ev.to->getID() : 0);
+
+
 	for (auto l : ObjectEventEmitter::listeners) {
 	    l->pushEvent(ev);
 	}

@@ -19,4 +19,17 @@
 #define BUILD_GAME_OBJECT_PTR(object, oid, x, y, z) \
     new ##object (oid, x, y, z)
 
+
+
+#define CLONE_MACRO_H(classname) \
+    virtual GameObject* clone(glm::vec3 position);
+
+
+#define CLONE_MACRO_CPP(classname) \
+    GameObject* classname ::clone(glm::vec3 position) { \
+	auto a = new classname ();				       \
+	a->position = position;					       \
+	return a;						       \
+    }
+
 #endif /* end of include guard: OBJECTMACROS_H */

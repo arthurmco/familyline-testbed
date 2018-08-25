@@ -37,7 +37,7 @@ namespace Familyline::Logic {
      *
      */
     class AttackableObject : public GameObject {
-    private:
+    protected:
 	/**
 	 * Current and maximum life points
 	 */
@@ -59,6 +59,17 @@ namespace Familyline::Logic {
 	AttackableObject(object_id_t id, const char* type, const char* name,
 			 int maxLifePoints, int currLifePoints,
 			 AttackAttributes atkAttributes);
+
+	/* Clone the object at a specified position
+	 * 
+	 * This function needs to be implemented for each object, because it
+	 * will return the same class as the object
+	 *
+	 * This is used in the ObjectFactory, to clone the object
+	 *
+	 * Returns a new object
+	 */
+	virtual GameObject* clone(glm::vec3 position);
 
     };
 

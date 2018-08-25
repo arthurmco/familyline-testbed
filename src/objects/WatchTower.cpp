@@ -25,4 +25,5 @@ bool WatchTower::Initialize() { return true; }
 /* Called on each engine loop, when an action is performed */
 bool WatchTower::DoAction(void) {return true; }
 
+CLONE_MACRO_CPP(WatchTower)
 //ADD_COPY_CTOR(WatchTower)

@@ -73,8 +73,8 @@ namespace Familyline::Logic {
 	 *
 	 * You should not use getObject directly while in an object, but getObjectReference instead
 	 */
-	const GameObject* getObjectReference(object_id_t id);
-
+	const GameObject* getObjectReference(object_id_t id);	
+	
     public:
 	GameObject(object_id_t id, const char* type, const char* name)
 	    : id(id), type(type), name(name)
@@ -116,6 +116,17 @@ namespace Familyline::Logic {
 	 * In it you put actions that the object must do
 	 */
 	virtual void iterate();
+	
+	/* Clone the object at a specified position
+	 * 
+	 * This function needs to be implemented for each object, because it
+	 * will return the same class as the object
+	 *
+	 * This is used in the ObjectFactory, to clone the object
+	 *
+	 * Returns a new object
+	 */
+	virtual GameObject* clone(glm::vec3 position);
 
 
 	virtual ~GameObject() {}

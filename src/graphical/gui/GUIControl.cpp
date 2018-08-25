@@ -7,9 +7,9 @@ GUISignal GUIControl::receiveSignal()
 {
     auto s = signals.front();
     signals.pop();
-    Log::GetLog()->InfoWrite("gui-control", "Received signal %#x from %s (%p) to %s (%p), %.2f x %.2f",
-			     s.signal, (s.from ? typeid(*s.from).name() : "(null)"),
-			     s.from, typeid(*s.to).name(), s.to, s.xPos, s.yPos);
+    // Log::GetLog()->InfoWrite("gui-control", "Received signal %#x from %s (%p) to %s (%p), %.2f x %.2f",
+    // 			     s.signal, (s.from ? typeid(*s.from).name() : "(null)"),
+    // 			     s.from, typeid(*s.to).name(), s.to, s.xPos, s.yPos);
 
 
     return GUISignal(s);

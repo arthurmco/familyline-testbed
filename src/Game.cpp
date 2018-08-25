@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include "Game.hpp"
 #include "graphical/LightManager.hpp"
+#include "logic/ObjectEventEmitter.hpp"
 
 using namespace Familyline;
 using namespace Familyline::Logic;
@@ -33,6 +34,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 	try {
 		/* Initialise things */
 		om = new ObjectManager{};
+		ObjectManager::setDefault(om);
 
 		rndr = new Renderer{};
 		DebugPlotter::pinterface = std::unique_ptr<DebugPlotInterface>
@@ -293,6 +295,8 @@ int Game::RunLoop()
 		 */
 		gam.ProcessListeners();
 		terr_rend->Update();
+		om->iterateAll();
+		ObjectEventEmitter::distributeMessages();
 
 		bool objupdate = objrend->Check();
 		if (objupdate || hp->HasUpdatedObject()) {

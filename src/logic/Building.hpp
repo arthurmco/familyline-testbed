@@ -25,6 +25,17 @@ namespace Familyline::Logic {
 	    {}
 
 
+	/* Clone the object at a specified position
+	 * 
+	 * This function needs to be implemented for each object, because it
+	 * will return the same class as the object
+	 *
+	 * This is used in the ObjectFactory, to clone the object
+	 *
+	 * Returns a new object
+	 */
+	virtual GameObject* clone(glm::vec3 position);
+
 
     };
 }

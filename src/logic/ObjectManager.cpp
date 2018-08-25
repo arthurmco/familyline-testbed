@@ -30,6 +30,7 @@ GameObject* ObjectManager::addObject(GameObject*&& o) {
     e.oid = oid;
     ObjectEventEmitter::pushMessage(this, e);
 
+    printf("created!");
     return obj;
 }
 

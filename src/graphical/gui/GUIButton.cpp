@@ -23,10 +23,10 @@ GUIButton::GUIButton(float x, float y, float w, float h, const char* text)
 
 bool GUIButton::processSignal(GUISignal s) {
 
-	Log::GetLog()->InfoWrite("gui-control", "Received signal %#x from %s (%p) to button '%s' "
-		"(%p), %.2f x %.2f",
-		s.signal, (s.from ? typeid(*s.from).name() : "(null)"),
-		s.from, this->label->getText(), s.to, s.xPos, s.yPos);
+	// Log::GetLog()->InfoWrite("gui-control", "Received signal %#x from %s (%p) to button '%s' "
+	// 	"(%p), %.2f x %.2f",
+	// 	s.signal, (s.from ? typeid(*s.from).name() : "(null)"),
+	// 	s.from, this->label->getText(), s.to, s.xPos, s.yPos);
 
 
 	switch (s.signal) {
@@ -39,6 +39,8 @@ bool GUIButton::processSignal(GUISignal s) {
 		label->format = this->format;
 		label->setContext(s.absw, s.absh);
 		label->processSignal(s);
+		
+		[[fallthrough]];
 	default:
 		return GUIControl::processSignal(s);
 

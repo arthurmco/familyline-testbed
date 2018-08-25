@@ -22,4 +22,6 @@ bool Tent::Initialize() { return true; }
 /* Called on each engine loop, when an action is performed */
 bool Tent::DoAction(void) {return true; }
 
+CLONE_MACRO_CPP(Tent)
+
 //ADD_COPY_CTOR(Tent)

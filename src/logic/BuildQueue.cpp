@@ -1,9 +1,16 @@
 #include "BuildQueue.hpp"
+#include <Log.hpp>
 
 using namespace Familyline::Logic;
 
 void BuildQueue::Add(AttackableObject* o)
 {
+    if (!o) {
+	Log::GetLog()->Warning("build-queue",
+			       "adding a null pointer to the build queue!");
+	return;
+    }
+    
     this->_objects.push(o);
 }
      
@@ -19,7 +26,7 @@ AttackableObject* BuildQueue::BuildNext(glm::vec3 pos)
 AttackableObject* BuildQueue::GetNext()
 {
     if (this->_objects.empty()) return nullptr;
-	
+
     return this->_objects.front();
 }
 

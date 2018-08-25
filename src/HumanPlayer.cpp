@@ -279,7 +279,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 		build->position.y = p.y;
 
                 // the object will be added to the city
-		printf("Creating %s at %.3f %.3f %.3f\n", c->getName(), p.x, p.y, p.z);
+		fprintf(stderr, "Creating %s at %.3f %.3f %.3f\n", c->getName(), p.x, p.y, p.z);
 
 		auto cobj = gctx->om->addObject(c);
 		this->RegisterCreation(cobj);
@@ -303,7 +303,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 
     if (build_tent) {
 	BuildQueue::GetInstance()->Add( (AttackableObject*)
-	    ObjectFactory::GetInstance()->GetObject(2, 0, 0, 0));
+	    ObjectFactory::GetInstance()->GetObject("tent", 0, 0, 0));
 	
 	build_tent = false;
 	build_something = true;
@@ -311,7 +311,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 
     if (build_tower) {
 	BuildQueue::GetInstance()->Add( (AttackableObject*)
-	    ObjectFactory::GetInstance()->GetObject(3, 0, 0, 0));
+	    ObjectFactory::GetInstance()->GetObject("watchtower", 0, 0, 0));
 
 	build_tower = false;
 	build_something = true;
