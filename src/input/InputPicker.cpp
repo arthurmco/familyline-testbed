@@ -1,6 +1,8 @@
 #include "InputPicker.hpp"
 #include "../graphical/Mesh.hpp"
 
+#include "../logic/ObjectEventEmitter.hpp"
+
 using namespace Familyline::Input;
 using namespace Familyline::Graphics;
 using namespace Familyline::Logic;
@@ -11,8 +13,10 @@ InputPicker::InputPicker(TerrainRenderer* terrain, Window* win, SceneManager* sm
     this->_terrain = terrain;
     this->_win = win;
     this->_sm = sm;
-	this->_cam = cam;
-	this->_om = om;
+    this->_cam = cam;
+    this->_om = om;
+
+    ObjectEventEmitter::addListener(&oel);
 }
 
 /* Get cursor ray in screen space */
@@ -80,8 +84,8 @@ void InputPicker::UpdateTerrainProjectedPosition()
 
 	glm::vec3 pHalf;
 
-	/*printf("near: %.3f %.3f %.3f, far: %.3f %.3f %.3f, prolongs: { ",
-		pNear.x, pNear.y, pNear.z, pFar.x, pFar.y, pFar.z);*/
+//	printf("near: %.3f %.3f %.3f, far: %.3f %.3f %.3f, prolongs: { ",
+//	       pNear.x, pNear.y, pNear.z, pFar.x, pFar.y, pFar.z);
 	for (int i = 0; i < MAX_PICK_ITERATIONS; i++) {
 
 
@@ -112,7 +116,7 @@ void InputPicker::UpdateTerrainProjectedPosition()
 	/* Clamp collide to the terrain area */
 	if (collide.x >= _terrain->GetTerrain()->GetWidth())
 	    collide.x = _terrain->GetTerrain()->GetWidth()-1;
-	
+
 	if (collide.z >= _terrain->GetTerrain()->GetHeight())
 	    collide.z = _terrain->GetTerrain()->GetHeight()-1;
 
@@ -121,13 +125,13 @@ void InputPicker::UpdateTerrainProjectedPosition()
 
 	if (collide.z < 0)
 	    collide.z = 0;
-	
+
 	if (collide.x > 0 && collide.z > 0)
 		collide.y = _terrain->GetTerrain()->GetHeightFromPoint(
 					collide.x, collide.z);
 	//printf(" }\nprol: %.2f, pos: %.3f %.3f %.3f, gamespace: %.3f %.3f %.3f\n\n",
 	//	1.0f, pHalf.x, pHalf.y, pHalf.z, collide.x, collide.y, collide.z);
-	
+
 	_intersectedPosition =  collide;
 }
 
@@ -137,21 +141,45 @@ void InputPicker::UpdateIntersectedObject()
 
 	glm::vec3 origin = _cam->GetPosition();
 
-	auto _olist = new std::vector<AttackableObject*>();
-	// !LISTENER
-	for (auto it = _olist->begin(); it != _olist->end(); it++) {
-		AttackableObject* loc = dynamic_cast<AttackableObject*>(*it);
+	// Update the internal object list
+	ObjectEvent e;
+	while (oel.popEvent(e)) {
+	    switch (e.type) {
+	    case ObjectCreated:
+		_olist.push_back(e.to);
+		break;
+
+	    case ObjectDestroyed:
+		fprintf(stderr, "<<%zu>>", _olist.size());
+		_olist.erase(
+		    std::remove_if(_olist.begin(), _olist.end(),
+				   [&](const GameObject* go) {
+				       return go->getID() == e.oid;
+				   })
+		    );
+		
+		fprintf(stderr, "<<%zu>>", _olist.size());
+		break;
+	    default:
+		continue;
+	    }
+
+	}
+
+	// Check the existing objects
+	for (auto it = _olist.begin(); it != _olist.end(); it++) {
+		const GameObject* loc = *it;
 
 		if (loc) {
 		    auto mm = std::dynamic_pointer_cast<Graphics::Mesh>(loc->mesh);
-		    
+
 		    BoundingBox bb = mm->GetBoundingBox();
 		    glm::vec4 vmin = glm::vec4(bb.minX, bb.minY, bb.minZ, 1);
 		    glm::vec4 vmax = glm::vec4(bb.maxX, bb.maxY, bb.maxZ, 1);
-		    
+
 		    vmin = mm->GetModelMatrix() * vmin;
 		    vmax = mm->GetModelMatrix() * vmax;
-		    
+
 		    glm::min(vmin.y, 0.0f);
 		    glm::max(vmax.y, 0.0f);
 
@@ -203,8 +231,10 @@ void InputPicker::UpdateIntersectedObject()
 
 		    /* Collided with both 3 axis! */
 		    if (tmax >= tmin) {
-			_locatableObject = loc;
-			return;
+			_locatableObject = _om->getObject(loc->getID());
+
+			if (_locatableObject)
+			    return;
 		    }
 
 		}
@@ -232,7 +262,10 @@ glm::vec2 InputPicker::GetGameProjectedPosition()
 
 
 /*	Get the object that were intersected by the cursor ray */
-AttackableObject* InputPicker::GetIntersectedObject()
+GameObject* InputPicker::GetIntersectedObject()
 {
-    return _locatableObject;
+    if (!_locatableObject)
+	return nullptr;
+    
+    return _om->getObject(_locatableObject->getID());
 }

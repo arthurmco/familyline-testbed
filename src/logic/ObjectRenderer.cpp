@@ -61,6 +61,14 @@ bool ObjectRenderer::Check()
 		break;
 	    case ObjectDestroyed:
 		_deleted_ids[e.oid] = true;
+		Log::GetLog()->InfoWrite("object-renderer",
+					 "removed object id %d", e.oid);
+		_objects.erase(
+		    std::remove_if(_objects.begin(), _objects.end(),
+				   [&](const GameObject* rgo) {
+				       return rgo->getID() == e.oid;
+				   })
+		    );
 		break;
 
 	    case ObjectCityChanged:
@@ -120,7 +128,7 @@ bool ObjectRenderer::Check()
 				that it doesn't exist. Remove it from the scene */
 			Log::GetLog()->Write("object-renderer",
 				"Removed object with id %d", id->ID);
-			//sm->RemoveObject(id->m);
+			_sm->RemoveObject(id->m.get());
 			id = _IDs.erase(id);
 		}
 		else {

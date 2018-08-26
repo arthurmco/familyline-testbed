@@ -41,10 +41,12 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 		break;
 
 	    case ObjectDestroyed:
-		std::remove_if(std::begin(this->objList), std::end(this->objList),
+		this->objList.erase(
+		    std::remove_if(std::begin(this->objList), std::end(this->objList),
 			       [&](const GameObject* go) {
 				   return go->getID() == ev.from->getID();
-			       });
+			       })
+		    );
 		break;
 		
 	    default:

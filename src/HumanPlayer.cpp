@@ -291,7 +291,7 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
     
 
-    AttackableObject* l = _ip->GetIntersectedObject();
+    AttackableObject* l = dynamic_cast<AttackableObject*>(_ip->GetIntersectedObject());
     if (l) {
         if (mouse_click) {
             _selected_obj = l;
@@ -318,7 +318,7 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
 
     if (remove_object) {	
-	AttackableObject* l = _ip->GetIntersectedObject();
+	AttackableObject* l = dynamic_cast<AttackableObject*>(_ip->GetIntersectedObject());
 	if (l) {
 	    printf("Deleting object %s", l->getName());
 	    this->RegisterDestroy(l);

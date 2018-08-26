@@ -271,12 +271,11 @@ int Game::RunLoop()
 	double maxdelta = 0, mindelta = 99, sumfps = 0;
 	
 	do {
-		/* Input processing  */
+	    /* Input processing  */
 	    InputManager::GetInstance()->Run();
-		ip->UpdateIntersectedObject();
-		ip->UpdateTerrainProjectedPosition();
+	    ip->UpdateIntersectedObject();
+	    ip->UpdateTerrainProjectedPosition();
 
-//		gr->DebugWrite(10, 40, "Press C to create an object at mouse cursor, and R to remove it.");
 		player = true;
 		
 		gctx.elapsed_seconds = delta / 1000.0;
@@ -317,12 +316,12 @@ int Game::RunLoop()
 		    lblBuilding.setText("");
 		}
 
-		auto locc = ip->GetIntersectedObject();
+		auto locc = dynamic_cast<AttackableObject*>(ip->GetIntersectedObject());
 		if (locc) {
 //			gr->DebugWrite(10, 100, "Hovering object '%s'", locc->getName());
-
+		    
 		    if (selected && locc->getMaxLifePoints()) {
-			AttackableObject* a = (AttackableObject*)locc;
+			AttackableObject* a = locc;
 //			lblRange.setText( a->CheckAttackRange((AttackableObject*)selected) ? "In range" : "Not in range");
 			}
 		}
@@ -339,10 +338,10 @@ int Game::RunLoop()
 			char s[150];
 			AttackableObject* a = dynamic_cast<AttackableObject*>(selected);
 			if (selected) {
-				sprintf(s, "Selected object: '%s' (%4d/%4d)",
-					a->getName(),
-					a->getCurrentLifePoints(),
-					a->getMaxLifePoints());
+			    sprintf(s, "Selected object: '%s' (%4d/%4d)",
+				    a->getName(),
+				    a->getCurrentLifePoints(),
+				    a->getMaxLifePoints());
 			} else {
 				sprintf(s, "Selected object: '%s'", selected->getName());
 			}
