@@ -17,7 +17,7 @@ CityListener::CityListener(Player* p, const char* name)
 void CityListener::OnListen(GameAction& ga) {
     if (ga.type == GAT_CREATION) {
 	auto obj = ObjectManager::getDefault()->getObject(ga.creation.object_id);
-	if (obj)
+	if (!obj.expired())
 	    obj_queue.push(obj);
     }
 }
@@ -25,9 +25,9 @@ void CityListener::OnListen(GameAction& ga) {
 /*
  * Get next created object, or nullptr if no object is next
  */
-GameObject* CityListener::getNextObject() {
+std::weak_ptr<GameObject> CityListener::getNextObject() {
     if (obj_queue.empty())
-	return nullptr;
+	return std::weak_ptr<GameObject>();
 
     auto obj = obj_queue.front();
     obj_queue.pop();
@@ -84,15 +84,16 @@ void City::iterate() {
     
     
     auto obj = cil->getNextObject();
-    while (obj) {
+    while (!obj.expired()) {
+	auto sobj = obj.lock();
 
 	ObjectEvent oevent;
 	if (!oel.popEvent(oevent))
 	    break;
 
-	if (oevent.type == ObjectCreated && oevent.oid == obj->getID()) {
+	if (oevent.type == ObjectCreated && oevent.oid == sobj->getID()) {
 	    // It's our object. Change its city to this
-	    this->citizens.push_back(obj);
+	    this->citizens.push_back(sobj.get());
 
 	    ObjectEvent cevent(obj, this);
 	    ObjectEventEmitter::pushMessage(nullptr, cevent);

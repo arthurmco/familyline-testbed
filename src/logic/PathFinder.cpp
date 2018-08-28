@@ -28,6 +28,20 @@ void PathFinder::InitPathmap(int w, int h)
 
 	_pathing_slots = new unsigned char[w*h];
 }
+
+// Object information used by the pathfinder
+struct ObjectPathData {
+    int size;
+    object_id_t ID;
+    std::weak_ptr<AttackableObject> obj;
+
+    ObjectPathData(std::weak_ptr<AttackableObject> obj, int size, object_id_t ID)
+	: obj(obj), size(size), ID(ID)
+	{}
+};
+std::vector<ObjectPathData> opd;
+    
+
 void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 {
 	this->ClearPathmap(w, h, x, y);
@@ -36,16 +50,28 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 	ObjectEvent ev;
 	while (this->oel.popEvent(ev)) {
 	    switch (ev.type) {
-	    case ObjectCreated:
-		this->objList.push_back(ev.to);
-		break;
+	    case ObjectCreated: {
+		fprintf(stderr, ">> created %p %d", ev.to, ev.oid);
 
+		if (ev.to.expired())
+		    continue;
+		
+		auto sto = std::dynamic_pointer_cast<AttackableObject>(ev.to.lock());
+		opd.emplace_back(sto, 2, ev.oid);
+		break;
+	    }
+		
 	    case ObjectDestroyed:
-		this->objList.erase(
-		    std::remove_if(std::begin(this->objList), std::end(this->objList),
-			       [&](const GameObject* go) {
-				   return go->getID() == ev.from->getID();
-			       })
+		
+		fprintf(stderr, ">> destroyed %p %d", ev.from, ev.oid);
+		opd.erase(
+		    std::remove_if(std::begin(opd), std::end(opd),
+				   [&](const ObjectPathData& op) {
+				       if (op.obj.expired())
+					   return false;
+				       
+				       return op.ID == ev.oid;
+				   })
 		    );
 		break;
 		
@@ -55,30 +81,29 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 	    
 	}
 	
-	for (const auto& obj : this->objList) {
-		const AttackableObject* l = dynamic_cast<const AttackableObject*>(obj);
-		if (!l) {
-			continue; // Not locatable
-		}
+	for (const auto& opddata : opd) {
+	    auto sobj = opddata.obj.lock();
+	    if (!sobj)
+		continue;
 
-		int ox = l->position.x, oz = l->position.z;
-		float r = 2;//l->GetRadius();
+	    int ox = sobj->position.x, oz = sobj->position.z;
+	    float r = opddata.size;
 
-		for (int y = oz - r; y < oz + r; y++) {
-			for (int x = ox - r; x < ox + r; x++) {
-				_pathing_slots[y*_mapWidth + x] = 0xff;
-			}
+	    for (int y = oz - r; y < oz + r; y++) {
+		for (int x = ox - r; x < ox + r; x++) {
+		    _pathing_slots[y*_mapWidth + x] = 0xff;
 		}
+	    }
 	}
 
 }
 
 void PathFinder::ClearPathmap(int w, int h, int x, int y) {
-	for (int oy = y; oy < y + h; oy++) {
-		for (int ox = x; ox < x + w; ox++) {
-			_pathing_slots[oy*_mapWidth + ox] = 0;
-		}
+    for (int oy = y; oy < y + h; oy++) {
+	for (int ox = x; ox < x + w; ox++) {
+	    _pathing_slots[oy*_mapWidth + ox] = 0;
 	}
+    }
 }
 
 
@@ -188,7 +213,7 @@ struct PathNodeComparator {
 
 std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end) {
 
-	/* The border of our pathfinder, the nodes here are the most periferical ones */
+    /* The border of our pathfinder, the nodes here are the most periferical ones */
 	std::priority_queue<PathNode*, std::vector<PathNode*>, 
 		PathNodeComparator> frontier;
 
@@ -198,10 +223,10 @@ std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end) {
 	frontier.push(nstart);
 
 	/* Add unvisited neighbors in the frontier */
-	while (!frontier.empty()) {
+	while (!frontier.empty()) {	    
 		auto frontnode = frontier.top();
 		frontier.pop();
-
+	    
 		if (frontnode->pos == end) {
 			auto b = this->BuildPath(frontnode);
 			node_list->nodes.clear();
@@ -209,17 +234,31 @@ std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end) {
 		}
 
 		for (const auto neighbor : frontnode->getNeighbors()) {
-			if (!neighbor->visited) {
-				neighbor->visited = true;
+		    if (!neighbor->visited) {
+			neighbor->visited = true;
 
-				// Remember the previous node, so we can build the path
-				neighbor->prev = frontnode;
-				neighbor->f = neighbor->getHeuristic(end, neighbor->pos) + 
-					neighbor->getHeuristic(neighbor->pos, start);
+			// Remember the previous node, so we can build the path
+			neighbor->prev = frontnode;
+			neighbor->f = neighbor->getHeuristic(end, neighbor->pos) + 
+			    neighbor->getHeuristic(neighbor->pos, start);
 
-				frontier.push(neighbor);
-			}
+			frontier.push(neighbor);
+		    }
 		}
+
+		
+		if (frontier.size() > (size_t)(abs(end.x - start.x) * abs(end.x - start.y))) {
+		    Log::GetLog()->Fatal("pathfinder", "would get caught in an infinite loop!\n"
+					 "\t\tMight be a bug in the pathfinder");
+		    Log::GetLog()->InfoWrite("", "origin:          (%.3f, %.3f)", 
+					     start.x, start.y);
+		    Log::GetLog()->InfoWrite("", "destiny:         (%.3f, %.3f)", 
+					     end.x, end.y);
+		    Log::GetLog()->InfoWrite("", "actual location: (%.3f, %.3f)",
+					     frontier.top()->pos.x, frontier.top()->pos.y);
+		    break;
+		}
+	
 	}
 
 	/* Always have an exit */

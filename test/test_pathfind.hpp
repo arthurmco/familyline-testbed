@@ -13,7 +13,7 @@ class PathfinderTest : public ::testing::Test {
 protected:
     Familyline::Logic::ObjectManager* _om;
     Familyline::Logic::PathFinder* _pf;
-    TestObject* o;
+    std::weak_ptr<Familyline::Logic::GameObject> o;
     
 public:
     void SetUp();

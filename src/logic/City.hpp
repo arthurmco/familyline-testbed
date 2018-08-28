@@ -25,7 +25,7 @@ namespace Familyline::Logic {
 
     class CityListener : public GameActionListener {
     private:
-	std::queue<GameObject*> obj_queue;
+	std::queue<std::weak_ptr<GameObject>> obj_queue;
 	int cityID;
     
     public:
@@ -36,7 +36,7 @@ namespace Familyline::Logic {
 	/*
 	 * Get next created object, or nullptr if no object is next
 	 */
-	GameObject* getNextObject();
+	std::weak_ptr<GameObject> getNextObject();
 	
 	virtual ~CityListener() {}
     

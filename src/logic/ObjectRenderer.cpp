@@ -40,8 +40,12 @@ bool ObjectRenderer::Check()
 	    case ObjectCreated:
 		// Object has been created by someone.
 		if (_created_ids[e.oid]) {
-		    const GameObject* go = e.to;
-		    if (!go->mesh)
+		    auto go = e.to;
+		    if (go.expired())
+			continue;
+
+		    auto sgo = go.lock();
+		    if (!sgo->mesh)
 			continue;
 
 		    // Object exists and is renderable.
@@ -51,7 +55,7 @@ bool ObjectRenderer::Check()
 
 		    ObjectRenderData ord;
 		    ord.ID = e.oid;
-		    ord.m = std::dynamic_pointer_cast<Graphics::Mesh>(go->mesh);
+		    ord.m = std::dynamic_pointer_cast<Graphics::Mesh>(sgo->mesh);
 		    _sm->AddObject(ord.m.get());
 
 		    Log::GetLog()->InfoWrite("object-renderer",
@@ -65,8 +69,11 @@ bool ObjectRenderer::Check()
 					 "removed object id %d", e.oid);
 		_objects.erase(
 		    std::remove_if(_objects.begin(), _objects.end(),
-				   [&](const GameObject* rgo) {
-				       return rgo->getID() == e.oid;
+				   [&](std::weak_ptr<GameObject>& rgo) {
+				       if (rgo.expired())
+					   return false;
+				       
+				       return rgo.lock()->getID() == e.oid;
 				   })
 		    );
 		break;
@@ -146,24 +153,28 @@ bool ObjectRenderer::Check()
 /* Update object meshes */
 void ObjectRenderer::Update()
 {
-	for (auto it = _objects.begin(); it != _objects.end(); it++) {
-		double x, y, z;
-		x = (*it)->position.x;
-		y = (*it)->position.y;
-		z = (*it)->position.z;
+    for (auto& obj : _objects) {
+	auto sobj = obj.lock();
+	if (!sobj)
+	    continue;
+	
+	double x, y, z;
+	x = sobj->position.x;
+	y = sobj->position.y;
+	z = sobj->position.z;
 
-		std::shared_ptr<Graphics::Mesh> mm = std::dynamic_pointer_cast<Graphics::Mesh>(
-		    (*it)->mesh);
+	std::shared_ptr<Graphics::Mesh> mm = std::dynamic_pointer_cast<Graphics::Mesh>(
+	    sobj->mesh);
 
-		mm->SetPosition(Graphics::GameToGraphicalSpace(glm::vec3(x, y, z)));
-		mm->ApplyTransformations();
+	mm->SetPosition(Graphics::GameToGraphicalSpace(glm::vec3(x, y, z)));
+	mm->ApplyTransformations();
 
-		/*
-		printf("\tobject %s id %d is at %.3f %.3f %.3f\n",
-			(*it)->GetName(), (*it)->GetObjectID(),
-			(*it)->GetMesh()->GetPosition().x,
-			(*it)->GetMesh()->GetPosition().y,
-			(*it)->GetMesh()->GetPosition().z);
-		*/
-	}
+	/*
+	  printf("\tobject %s id %d is at %.3f %.3f %.3f\n",
+	  (*it)->GetName(), (*it)->GetObjectID(),
+	  (*it)->GetMesh()->GetPosition().x,
+	  (*it)->GetMesh()->GetPosition().y,
+	  (*it)->GetMesh()->GetPosition().z);
+	*/
+    }
 }

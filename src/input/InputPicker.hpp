@@ -52,7 +52,7 @@ namespace Familyline::Input {
 	Familyline::Logic::ObjectManager* _om;
 
 	glm::vec3 _intersectedPosition;
-	Familyline::Logic::GameObject* _locatableObject = nullptr;
+	std::weak_ptr<Familyline::Logic::GameObject> _locatableObject;
 
 	std::vector<const Familyline::Logic::GameObject*> _olist;
 	Familyline::Logic::ObjectEventListener oel;
@@ -89,7 +89,7 @@ namespace Familyline::Input {
 	glm::vec2 GetGameProjectedPosition();
 
 	/*	Get the object that were intersected by the cursor ray */
-	Familyline::Logic::GameObject* GetIntersectedObject();
+	std::weak_ptr<Familyline::Logic::GameObject> GetIntersectedObject();
 
     };
 

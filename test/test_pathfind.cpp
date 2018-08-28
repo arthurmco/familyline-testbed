@@ -7,10 +7,9 @@ void PathfinderTest::SetUp()
 {
 	_om = new ObjectManager;
 	_pf = new PathFinder{ _om };
-
 	_pf->InitPathmap(256, 256);
-
-	o = (TestObject*) _om->addObject(new TestObject(1, 10, 1, 10));
+	
+	o = _om->addObject(new TestObject(1, 10, 1, 10));
 }
 
 void PathfinderTest::TearDown()
@@ -31,7 +30,7 @@ namespace glm {
 TEST_F(PathfinderTest, TestStraightPathfind) {
 
     ObjectEventEmitter::distributeMessages();
-	auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
+    auto vlist = _pf->CreatePath((AttackableObject*) o.lock().get(), glm::vec2(32, 32));
 	EXPECT_EQ(vlist.size(), 23) << "List size mismatch";
 
 	/* Check if we didn't got off the path too far */
@@ -51,12 +50,12 @@ TEST_F(PathfinderTest, TestStraightPathfind) {
 }
 
 TEST_F(PathfinderTest, TestObstaclePathfind) {
-    TestObject* c = (TestObject*) _om->addObject(new TestObject(1, 21, 1, 21));
+    auto c = _om->addObject(new TestObject(1, 21, 1, 21)).lock();
 
     ObjectEventEmitter::distributeMessages();
     _pf->UpdatePathmap(256, 256);
 
-	auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
+    auto vlist = _pf->CreatePath((AttackableObject*) o.lock().get(), glm::vec2(32, 32));
 
 	/* Check if we didn't collided */
 	int i = 0;
@@ -76,13 +75,13 @@ TEST_F(PathfinderTest, TestObstaclePathfind) {
 }
 
 TEST_F(PathfinderTest, TestTwoObstaclesPathfind) {
-    TestObject* c = (TestObject*) _om->addObject(new TestObject(1, 21, 1, 21));
-    TestObject* d = (TestObject*) _om->addObject(new TestObject(1, 26, 1, 26));
+    auto c = _om->addObject(new TestObject(1, 21, 1, 21)).lock();
+    auto d = _om->addObject(new TestObject(1, 26, 1, 26)).lock();
 
     ObjectEventEmitter::distributeMessages();
     _pf->UpdatePathmap(256, 256);
 
-	auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
+    auto vlist = _pf->CreatePath((AttackableObject*) o.lock().get(), glm::vec2(32, 32));
 	
 	/* Check if we didn't collided */
 	int i = 0;
@@ -114,12 +113,12 @@ TEST_F(PathfinderTest, TestIfPathfindingPutObjectInOtherObjectPosition) {
 	 *
 	 * It shouldn't
 	 */
-    TestObject* c = (TestObject*) _om->addObject(new TestObject(1, 32, 1, 32));
+    auto c = _om->addObject(new TestObject(1, 32, 1, 32)).lock();
 
     ObjectEventEmitter::distributeMessages();
     _pf->UpdatePathmap(256, 256);
 
-    auto vlist = _pf->CreatePath(o, glm::vec2(32, 32));
+    auto vlist = _pf->CreatePath((AttackableObject*) o.lock().get(), glm::vec2(32, 32));
 
     auto vlast = vlist.back();
 

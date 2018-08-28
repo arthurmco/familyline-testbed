@@ -13,20 +13,22 @@ ObjectManager* ObjectManager::instance;
 /**
  * Add the object 'o' to the object manager and give to it a new ID
  *
- * Returns a pointer to the object.
+ * Returns a weak pointer to the object.
  * The object manager needs to be the owner of the object, so it
- * will store a unique_ptr of it
+ * will store the original, shared version of it
+ *
+ * You can lock if if you want to use
  */
-GameObject* ObjectManager::addObject(GameObject*&& o) {
+std::weak_ptr<GameObject> ObjectManager::addObject(GameObject*&& o) {
     auto oid = ++last_id;
     o->id = oid;
     o->gam = this;
 
-    objects[oid] = std::unique_ptr<GameObject>(o);
-    GameObject* obj = this->getObject(oid);
+    objects[oid] = std::shared_ptr<GameObject>(o);
+    auto obj = this->getObject(oid);
 
     // Generate the event
-    ObjectEvent e(nullptr, obj, ObjectEventType::ObjectCreated);
+    ObjectEvent e(std::weak_ptr<GameObject>(), obj, ObjectEventType::ObjectCreated);
     e.oid = oid;
     ObjectEventEmitter::pushMessage(this, e);
 
@@ -34,13 +36,12 @@ GameObject* ObjectManager::addObject(GameObject*&& o) {
     return obj;
 }
 
-
 /**
  * Removes the object 'o' from the object manager
  *
- * We, then, delete it
+ * It will expire after the last reference to it is destroyed
  */
-void ObjectManager::removeObject(const GameObject* o) {
+void ObjectManager::removeObject(std::shared_ptr<GameObject> o) {
 
     auto obj = objects.find(o->getID());
 
@@ -48,7 +49,7 @@ void ObjectManager::removeObject(const GameObject* o) {
 	auto id = obj->second->getID();
 
 	// Generate the event
-	ObjectEvent e(o, nullptr, ObjectEventType::ObjectDestroyed);
+	ObjectEvent e(o, std::weak_ptr<GameObject>(), ObjectEventType::ObjectDestroyed);
 	e.oid = o->getID();
 	ObjectEventEmitter::pushMessage(this, e);
 
@@ -62,13 +63,14 @@ void ObjectManager::removeObject(const GameObject* o) {
  *
  * Retrieves a weak pointer to the object.
  */
-GameObject* ObjectManager::getObject(object_id_t id) {
+std::weak_ptr<GameObject> ObjectManager::getObject(object_id_t id) {
 
     auto obj = objects.find(id);
     if (obj != objects.end()) {
-	return obj->second.get();
+	std::weak_ptr<GameObject> wobj = obj->second;
+	return wobj;
     } else {
-	return nullptr;
+	return std::weak_ptr<GameObject>(); // returns an empty ptr
     }
 }
 

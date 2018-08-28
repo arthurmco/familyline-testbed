@@ -37,10 +37,10 @@ namespace Familyline::Logic {
 	const ObjectManager* object_manager;
 
 	// Destroyed: The destroyed object
-	const GameObject* from;
+	std::weak_ptr<GameObject> from;
 
 	// Created: The created object
-	const GameObject* to;
+	std::weak_ptr<GameObject> to;
 
 	ObjectEventType type;
 
@@ -57,8 +57,8 @@ namespace Familyline::Logic {
 	};
 
 	ObjectEvent();
-	ObjectEvent(const GameObject* from, const GameObject* to, ObjectEventType type);
-	ObjectEvent(const GameObject* from, City* city);
+	ObjectEvent(std::weak_ptr<GameObject> from, std::weak_ptr<GameObject> to, ObjectEventType type);
+	ObjectEvent(std::weak_ptr<GameObject> from, City* city);
     };
 
 }

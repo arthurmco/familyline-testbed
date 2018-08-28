@@ -76,7 +76,7 @@ TEST_F(CityTest, TestCityEventTransmission) {
 
     ASSERT_EQ(true, test_oel.popEvent(e));
     ASSERT_EQ(ObjectEventType::ObjectCityChanged, e.type);
-    ASSERT_STREQ("test-object", e.from->getType());
+    ASSERT_STREQ("test-object", e.from.lock()->getType());
     ASSERT_EQ(&c, e.city);
 
     ObjectEventEmitter::distributeMessages();
@@ -122,7 +122,7 @@ TEST_F(CityTest, TestCityEventTransmissionOnCityManager) {
 
     ASSERT_EQ(true, test_oel.popEvent(e));
     ASSERT_EQ(ObjectEventType::ObjectCityChanged, e.type);
-    ASSERT_STREQ("test-object", e.from->getType());
+    ASSERT_STREQ("test-object", e.from.lock()->getType());
     ASSERT_EQ(c, e.city);
 
     ObjectEventEmitter::distributeMessages();

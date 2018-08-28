@@ -36,15 +36,18 @@ void ObjectEventEmitter::distributeMessages()
 	    {"EventNone", "ObjectCreated", "ObjectDestroyed",
 	     "ObjectCityChanged"};
 
+	auto efrom = ev.from.lock();
+	auto eto = ev.to.lock();
+	
 	Log::GetLog()->InfoWrite("object-event-emitter",
 				 "event type %s (%#x) from %p (%s, %d) to %p (%s, %d)"
 				 " -> %zu listeners",
 				 (ev.type > ObjectCityChanged) ? "???" : object_type[ev.type],
 				 ev.type,
-				 ev.from, ev.from ? ev.from->getName() : "null",
-				 ev.from ? ev.from->getID() : 0,
-				 ev.to, ev.to ? ev.to->getName() : "null",
-				 ev.to ? ev.to->getID() : 0,
+				 ev.from, !ev.from.expired() ? efrom->getName() : "null",
+				 !ev.from.expired() ? efrom->getID() : 0,
+				 ev.to, !ev.to.expired() ? eto->getName() : "null",
+				 !ev.to.expired() ? eto->getID() : 0,
 				 ObjectEventEmitter::listeners.size());
 
 

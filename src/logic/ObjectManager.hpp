@@ -28,7 +28,7 @@ namespace Familyline::Logic {
 	/* The map of objects
 	 * We use a map because it do perform faster than lists and vectors
 	 */
-	std::map<object_id_t, std::unique_ptr<GameObject>> objects;
+	std::map<object_id_t, std::shared_ptr<GameObject>> objects;
 
 	/* Fast reference to the last ID used */
 	object_id_t last_id = 0;
@@ -38,25 +38,27 @@ namespace Familyline::Logic {
 	/**
 	 * Add the object 'o' to the object manager and give to it a new ID
 	 *
-	 * Returns a pointer to the object.
+	 * Returns a weak pointer to the object.
 	 * The object manager needs to be the owner of the object, so it
-	 * will store a unique_ptr of it
+	 * will store the original, shared version of it
+	 *
+	 * You can lock if if you want to use
 	 */
-	GameObject* addObject(GameObject*&& o);
+	std::weak_ptr<GameObject> addObject(GameObject*&& o);
 
 	/**
 	 * Removes the object 'o' from the object manager
 	 *
-	 * We, then, delete it
+	 * It will expire after the last reference to it is destroyed
 	 */
-	void removeObject(const GameObject* o);
+	void removeObject(std::shared_ptr<GameObject> o);
 
 	/**
 	 * Gets an object from the list, by ID
 	 *
 	 * Retrieves a weak pointer to the object.
 	 */
-	GameObject* getObject(object_id_t id);
+	std::weak_ptr<GameObject> getObject(object_id_t id);
 
 	size_t getObjectCount() { return objects.size(); }
 

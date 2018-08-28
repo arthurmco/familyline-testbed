@@ -46,7 +46,7 @@ namespace Familyline::Logic {
 	Familyline::Graphics::SceneManager* _sm;
 	ObjectEventListener oel;
 
-	std::vector<const GameObject*> _objects;
+	std::vector<std::weak_ptr<GameObject>> _objects;
 	std::vector<ObjectRenderData> _IDs;
 
 	std::map<int /*id*/, bool /*exists*/> _modified_ids;

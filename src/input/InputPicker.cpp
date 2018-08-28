@@ -148,8 +148,12 @@ void InputPicker::UpdateIntersectedObject()
 	while (oel.popEvent(e)) {
 	    switch (e.type) {
 	    case ObjectCreated: {
-		auto mm = std::dynamic_pointer_cast<Graphics::Mesh>(e.to->mesh);
-		poi_list.emplace_back(e.to->position, mm, e.oid);
+		if (e.to.expired())
+		    continue;
+
+		auto sto = e.to.lock();
+		auto mm = std::dynamic_pointer_cast<Graphics::Mesh>(sto->mesh);
+		poi_list.emplace_back(sto->position, mm, e.oid);
 		break;
 	    }
 
@@ -230,14 +234,14 @@ void InputPicker::UpdateIntersectedObject()
 	    if (tmax >= tmin) {
 		_locatableObject = _om->getObject(poi.ID);
 
-		if (_locatableObject)
+		if (_locatableObject.expired())
 		    return;
 	    }
 
 	}
 
 
-	_locatableObject = nullptr;
+	_locatableObject = std::weak_ptr<GameObject>();
 }
 
 
@@ -259,10 +263,7 @@ glm::vec2 InputPicker::GetGameProjectedPosition()
 
 
 /*	Get the object that were intersected by the cursor ray */
-GameObject* InputPicker::GetIntersectedObject()
+std::weak_ptr<GameObject> InputPicker::GetIntersectedObject()
 {
-    if (!_locatableObject)
-	return nullptr;
-    
-    return _om->getObject(_locatableObject->getID());
+    return this->_locatableObject;
 }

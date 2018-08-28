@@ -36,7 +36,7 @@ const GameObject* GameObject::getObjectReference(object_id_t id)
 {
     auto o = gam->getObject(id);
     this->references[id] = true;
-    return o;
+    return o.lock().get();
 }
 
 /**
