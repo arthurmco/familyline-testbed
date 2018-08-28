@@ -21,6 +21,28 @@
 namespace Familyline::Input {
 #define MAX_PICK_ITERATIONS 16
 
+    /**
+     * Object information needed by the picker
+     *
+     * This structure is made so we can get from the objects just what we
+     * need when they are created.
+     *
+     * Since the meshes doesn't change, we don't need the object around
+     */
+    struct PickerObjectInfo {
+	glm::vec3 position;
+	std::shared_ptr<Familyline::Graphics::Mesh> mesh;
+	Familyline::Logic::object_id_t ID;
+
+	PickerObjectInfo(glm::vec3 pos,
+			 std::shared_ptr<Familyline::Graphics::Mesh> mesh,
+			 Familyline::Logic::object_id_t ID)
+	    : position(pos), mesh(mesh), ID(ID)
+	    {}
+    
+    };
+
+    
     class InputPicker {
     private:
 	Familyline::Graphics::TerrainRenderer* _terrain;
@@ -37,6 +59,7 @@ namespace Familyline::Input {
     
 	bool CheckIfTerrainIntersect(glm::vec3 ray, float start, float end);
 
+	std::vector<PickerObjectInfo> poi_list;	
     public:
 
 	InputPicker(Familyline::Graphics::TerrainRenderer* terrain,

@@ -135,6 +135,8 @@ void InputPicker::UpdateTerrainProjectedPosition()
 	_intersectedPosition =  collide;
 }
 
+
+
 void InputPicker::UpdateIntersectedObject()
 {
 	glm::vec3 direction = this->GetCursorWorldRay();
@@ -145,20 +147,19 @@ void InputPicker::UpdateIntersectedObject()
 	ObjectEvent e;
 	while (oel.popEvent(e)) {
 	    switch (e.type) {
-	    case ObjectCreated:
-		_olist.push_back(e.to);
+	    case ObjectCreated: {
+		auto mm = std::dynamic_pointer_cast<Graphics::Mesh>(e.to->mesh);
+		poi_list.emplace_back(e.to->position, mm, e.oid);
 		break;
+	    }
 
 	    case ObjectDestroyed:
-		fprintf(stderr, "<<%zu>>", _olist.size());
-		_olist.erase(
-		    std::remove_if(_olist.begin(), _olist.end(),
-				   [&](const GameObject* go) {
-				       return go->getID() == e.oid;
+		poi_list.erase(
+		    std::remove_if(poi_list.begin(), poi_list.end(),
+				   [&](const PickerObjectInfo& poi) {
+				       return poi.ID == e.oid;
 				   })
 		    );
-		
-		fprintf(stderr, "<<%zu>>", _olist.size());
 		break;
 	    default:
 		continue;
@@ -167,78 +168,74 @@ void InputPicker::UpdateIntersectedObject()
 	}
 
 	// Check the existing objects
-	for (auto it = _olist.begin(); it != _olist.end(); it++) {
-		const GameObject* loc = *it;
+	for (const PickerObjectInfo& poi : poi_list) {
 
-		if (loc) {
-		    auto mm = std::dynamic_pointer_cast<Graphics::Mesh>(loc->mesh);
+	    BoundingBox bb = poi.mesh->GetBoundingBox();
+	    glm::vec4 vmin = glm::vec4(bb.minX, bb.minY, bb.minZ, 1);
+	    glm::vec4 vmax = glm::vec4(bb.maxX, bb.maxY, bb.maxZ, 1);
 
-		    BoundingBox bb = mm->GetBoundingBox();
-		    glm::vec4 vmin = glm::vec4(bb.minX, bb.minY, bb.minZ, 1);
-		    glm::vec4 vmax = glm::vec4(bb.maxX, bb.maxY, bb.maxZ, 1);
+	    vmin = poi.mesh->GetModelMatrix() * vmin;
+	    vmax = poi.mesh->GetModelMatrix() * vmax;
 
-		    vmin = mm->GetModelMatrix() * vmin;
-		    vmax = mm->GetModelMatrix() * vmax;
+	    glm::min(vmin.y, 0.0f);
+	    glm::max(vmax.y, 0.0f);
 
-		    glm::min(vmin.y, 0.0f);
-		    glm::max(vmax.y, 0.0f);
+	    glm::vec3 planePosX, planePosY, planePosZ;
 
-		    glm::vec3 planePosX, planePosY, planePosZ;
+	    float tmin = -100000;
+	    float tmax = 100000;
 
-		    float tmin = -100000;
-		    float tmax = 100000;
+	    float dxmin, dxMax;
+	    //printf("\n%s\n", loc->GetName());
+	    if (direction.x != 0) {
+		dxmin = (vmin.x - origin.x) / direction.x;
+		dxMax = (vmax.x - origin.x) / direction.x;
 
-		    float dxmin, dxMax;
-		    //printf("\n%s\n", loc->GetName());
-		    if (direction.x != 0) {
-			dxmin = (vmin.x - origin.x) / direction.x;
-			dxMax = (vmax.x - origin.x) / direction.x;
+		tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+		tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+		//printf("x: %.4f %.4f \t", dxmin, dxMax);
+		if (tmax < tmin) continue;
+	    }
 
-			tmin = fmaxf(tmin, fminf(dxmin, dxMax));
-			tmax = fminf(tmax, fmaxf(dxmin, dxMax));
-			//printf("x: %.4f %.4f \t", dxmin, dxMax);
-			if (tmax < tmin) continue;
-		    }
+	    if (direction.y != 0) {
+		dxmin = (vmin.y - origin.y) / direction.y;
+		dxMax = (vmax.y - origin.y) / direction.y;
 
-		    if (direction.y != 0) {
-			dxmin = (vmin.y - origin.y) / direction.y;
-			dxMax = (vmax.y - origin.y) / direction.y;
+		tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+		tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+		//printf("y: %.4f %.4f \t", dxmin, dxMax);
+		if (tmax < tmin) continue;
 
-			tmin = fmaxf(tmin, fminf(dxmin, dxMax));
-			tmax = fminf(tmax, fmaxf(dxmin, dxMax));
-			//printf("y: %.4f %.4f \t", dxmin, dxMax);
-			if (tmax < tmin) continue;
+	    }
 
-		    }
+	    if (direction.z != 0) {
+		dxmin = (vmin.z - origin.z) / direction.z;
+		dxMax = (vmax.z - origin.z) / direction.z;
 
-		    if (direction.z != 0) {
-			dxmin = (vmin.z - origin.z) / direction.z;
-			dxMax = (vmax.z - origin.z) / direction.z;
+		tmin = fmaxf(tmin, fminf(dxmin, dxMax));
+		tmax = fminf(tmax, fmaxf(dxmin, dxMax));
+		//printf("z: %.4f %.4f \t", dxmin, dxMax);
+		if (tmax < tmin) continue;
 
-			tmin = fmaxf(tmin, fminf(dxmin, dxMax));
-			tmax = fminf(tmax, fmaxf(dxmin, dxMax));
-			//printf("z: %.4f %.4f \t", dxmin, dxMax);
-			if (tmax < tmin) continue;
+	    }
 
-		    }
+	    //printf("total: %.4f %.4f\n", tmin, tmax);
 
-		    //printf("total: %.4f %.4f\n", tmin, tmax);
+	    /* Ray misses */
+	    if (tmin < 0) {
+		continue;
+	    }
 
-		    /* Ray misses */
-		    if (tmin < 0) {
-			continue;
-		    }
+	    /* Collided with both 3 axis! */
+	    if (tmax >= tmin) {
+		_locatableObject = _om->getObject(poi.ID);
 
-		    /* Collided with both 3 axis! */
-		    if (tmax >= tmin) {
-			_locatableObject = _om->getObject(loc->getID());
+		if (_locatableObject)
+		    return;
+	    }
 
-			if (_locatableObject)
-			    return;
-		    }
-
-		}
 	}
+
 
 	_locatableObject = nullptr;
 }
