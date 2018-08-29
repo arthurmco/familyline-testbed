@@ -233,8 +233,7 @@ void InputPicker::UpdateIntersectedObject()
 	    /* Collided with both 3 axis! */
 	    if (tmax >= tmin) {
 		_locatableObject = _om->getObject(poi.ID);
-		fprintf(stderr, ">>> expired: %s", _locatableObject.expired() ? "true" : "false" );
-		
+
 		if (!_locatableObject.expired())
 		    return;
 	    }

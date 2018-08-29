@@ -51,19 +51,17 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 	while (this->oel.popEvent(ev)) {
 	    switch (ev.type) {
 	    case ObjectCreated: {
-		fprintf(stderr, ">> created %p %d", ev.to, ev.oid);
-
 		if (ev.to.expired())
 		    continue;
-		
+
+		fprintf(stderr, ">> created %d at %.2f %.2f", ev.oid);
 		auto sto = std::dynamic_pointer_cast<AttackableObject>(ev.to.lock());
-		opd.emplace_back(sto, 2, ev.oid);
+		opd.emplace_back(sto, 3, ev.oid);
 		break;
 	    }
 		
-	    case ObjectDestroyed:
-		
-		fprintf(stderr, ">> destroyed %p %d", ev.from, ev.oid);
+	    case ObjectDestroyed:		
+		fprintf(stderr, ">> destroyed %d", ev.oid);
 		opd.erase(
 		    std::remove_if(std::begin(opd), std::end(opd),
 				   [&](const ObjectPathData& op) {
@@ -226,7 +224,16 @@ std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end) {
 	while (!frontier.empty()) {	    
 		auto frontnode = frontier.top();
 		frontier.pop();
-	    
+
+		// Compare final position using a bias, so we don't need to
+		// be in an exact integer
+		if (glm::abs(frontnode->pos.x - end.x) < 1.0 &&
+		    glm::abs(frontnode->pos.y - end.y) < 1.0) {
+		    auto b = this->BuildPath(frontnode);
+		    node_list->nodes.clear();
+		    return b;
+		}
+
 		if (frontnode->pos == end) {
 			auto b = this->BuildPath(frontnode);
 			node_list->nodes.clear();
@@ -247,7 +254,7 @@ std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end) {
 		}
 
 		
-		if (frontier.size() > (size_t)(abs(end.x - start.x) * abs(end.x - start.y))) {
+		if (frontier.size() > (size_t)(abs(end.x - start.x) * abs(end.x - start.y) * 10)) {
 		    Log::GetLog()->Fatal("pathfinder", "would get caught in an infinite loop!\n"
 					 "\t\tMight be a bug in the pathfinder");
 		    Log::GetLog()->InfoWrite("", "origin:          (%.3f, %.3f)", 
