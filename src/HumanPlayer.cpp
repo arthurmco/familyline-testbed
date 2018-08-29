@@ -281,8 +281,8 @@ bool HumanPlayer::Play(GameContext* gctx)
                 // the object will be added to the city
 		fprintf(stderr, "Creating %s at %.3f %.3f %.3f\n", c->getName(), p.x, p.y, p.z);
 
-		auto cobj = gctx->om->addObject(c);
-		this->RegisterCreation(cobj);
+		auto cobj = gctx->om->addObject(c).lock();
+		this->RegisterCreation(cobj.get());
 		printf("%s has id %d now\n", c->getName(), cobj->getID());
 
 	    }
@@ -291,10 +291,11 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
     
 
-    AttackableObject* l = dynamic_cast<AttackableObject*>(_ip->GetIntersectedObject());
+    
+    auto l = _ip->GetIntersectedObject().lock();
     if (l) {
         if (mouse_click) {
-            _selected_obj = l;
+            _selected_obj = (AttackableObject*) l.get();
         }
 	//printf("intersected with %s\n", l->GetName());
     } else {
@@ -318,18 +319,19 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
 
     if (remove_object) {	
-	AttackableObject* l = dynamic_cast<AttackableObject*>(_ip->GetIntersectedObject());
+	auto l = _ip->GetIntersectedObject().lock();
 	if (l) {
 	    printf("Deleting object %s", l->getName());
-	    this->RegisterDestroy(l);
+	    this->RegisterDestroy(l.get());
 	    gctx->om->removeObject(l);
 	}
 	remove_object = false;
     }
 
     if (attack_ready) {
-	if (attack_set)
-	    attackee = dynamic_cast<AttackableObject*>(_ip->GetIntersectedObject());
+	auto l = _ip->GetIntersectedObject().lock();
+	if (l && attack_set)
+	    attackee = dynamic_cast<AttackableObject*>(l.get());
 
 	if (attackee) {
 

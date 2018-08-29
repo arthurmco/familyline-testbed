@@ -212,7 +212,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 int Game::RunLoop()
 {
 	CombatManager::GetInstance()->SetOnDeath([&](Logic::AttackableObject* at) {
-		gctx.om->removeObject(at);
+		gctx.om->removeObject(gctx.om->getObject(at->getID()).lock());
 	});
 
 
@@ -316,14 +316,15 @@ int Game::RunLoop()
 		    lblBuilding.setText("");
 		}
 
-		auto locc = dynamic_cast<AttackableObject*>(ip->GetIntersectedObject());
+		auto locc = ip->GetIntersectedObject().lock();
 		if (locc) {
+		    auto alocc = dynamic_cast<AttackableObject*>(locc.get());
 //			gr->DebugWrite(10, 100, "Hovering object '%s'", locc->getName());
 		    
-		    if (selected && locc->getMaxLifePoints()) {
-			AttackableObject* a = locc;
+		    if (alocc && selected && alocc->getMaxLifePoints()) {
+			AttackableObject* a = alocc;
 //			lblRange.setText( a->CheckAttackRange((AttackableObject*)selected) ? "In range" : "Not in range");
-			}
+		    }
 		}
 
 		{
