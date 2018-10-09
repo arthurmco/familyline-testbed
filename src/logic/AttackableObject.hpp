@@ -21,13 +21,31 @@ namespace Familyline::Logic {
      */
     struct AttackAttributes {
 	double atkPoints;
+	double armorPoints;
+
+	/// Attack arc, in radians
+	/// AoE attacks have 2*MATH_PI radius, a circle.
+	/// Direct attacks will have a lower arc
+	double atkArc;
+
+	/// Attack range
+	/// Simply the radius of said arc above
+	double atkRange;
+
+	/// Minor attack 
+	/// Attack points in the external areas of the circle
+	double atkLower;
 
 	AttackAttributes()
-	    : atkPoints(0.0)
+	    : atkPoints(0.0), armorPoints(0.0), atkArc(0.0),
+	      atkRange(0.0), atkLower(0.0)
 	    {}
 
-	AttackAttributes(double atkPoints)
-	    : atkPoints(atkPoints)
+	AttackAttributes(double atkPoints, double armorPoints,
+			 double atkArc, double atkRange,
+			 double atkLower)
+	    : atkPoints(atkPoints), armorPoints(armorPoints),
+	      atkArc(atkArc), atkRange(atkRange), atkLower(atkLower)
 	    {}
     };
 
@@ -56,6 +74,13 @@ namespace Familyline::Logic {
 	int getCurrentLifePoints() const { return this->currLifePoints; }
 	AttackAttributes getAttackAttributes() const { return this->atkAttributes; }
 
+	/*
+	 * Deal damage to this attackable object
+	 *
+	 * Return the health points after the damage
+	 */
+	double doDamage(double dmg);
+	
 	AttackableObject(object_id_t id, const char* type, const char* name,
 			 int maxLifePoints, int currLifePoints,
 			 AttackAttributes atkAttributes);
@@ -71,6 +96,15 @@ namespace Familyline::Logic {
 	 */
 	virtual GameObject* clone(glm::vec3 position);
 
+
+	/*
+	 * Attack other object
+	 *
+	 * Return the damage caused
+	 *
+	 * (Since I'll change the engine to fixed timesteps, the attacks will be on a fixed rate)
+	 */
+	double doAttack(AttackableObject* attacked);
     };
 
 

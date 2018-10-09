@@ -5,7 +5,10 @@ using namespace Familyline::Logic;
 void CombatManager::DoAttacks(double tick)
 {
     if (_combats.size() == 0) return;
-    
+    for (auto& c : _combats) {
+	const auto dmg = c.attacker->doAttack(c.defender);
+	c.defender->doDamage(dmg);
+    }
 
 }
 

@@ -88,8 +88,20 @@ namespace Familyline::Logic {
 	 * The object position.
 	 * For 'positionless' objects, it's (-1, -1, -1)
 	 */
-	glm::vec3 position;
+	glm::vec3 position = glm::vec3(-1, -1, -1);
 
+	/**
+	 * The rotation
+	 *
+	 * The angle said here is the object rotation, the rotation alongsize Y axis
+	 * We'll follow the unit circle, so a building with rotation 0deg will be facing
+	 * +X axis, 90deg will be facing +Z axis, etc (tbe terrain plane Y axis is 3D Z axis)
+	 *
+	 * The rotation is in radians, though. It's easier for math
+	 * Rotationless object should have rotation=0
+	 */
+	double rotation = 0;
+	
 	/**
 	 * Check if the object 'other' collided with the actual object
 	 *
