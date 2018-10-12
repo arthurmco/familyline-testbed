@@ -38,13 +38,16 @@ GameObject* AttackableObject::clone(glm::vec3 position)
  * Attack other object
  *
  * Return the damage caused
+ * If the value doesn't exist, the attacked is out of range.
+ * If the value exists, the damage is inside the optional
+ * 
  * Since the attack area of the component will be always an arc (a sufficiently small
  * one for the straight line attacks, and a 360deg arc for AoE attackers), we'll convert
  * the atk and def coordinates to polar coordinates and do the range calculations there
  *
  * (Since I'll change the engine to fixed timesteps, the attacks will be on a fixed rate)
  */
-double AttackableObject::doAttack(AttackableObject* defender)
+std::optional<double> AttackableObject::doAttack(AttackableObject* defender)
 {
     const double distX = defender->position.x - this->position.x;
     const double distY = defender->position.z - this->position.z;
@@ -74,13 +77,11 @@ double AttackableObject::doAttack(AttackableObject* defender)
 	const double aRange = this->atkAttributes.atkPoints - this->atkAttributes.atkLower;
 
 	const double damage = (this->atkAttributes.atkLower + aRange*factor)
-	    - defender->atkAttributes.armorPoints;
-	printf("<%.2f>", damage);
-	
-	return std::max(0.0, damage);
+	    - defender->atkAttributes.armorPoints;	
+	return std::make_optional(std::max(0.0, damage));
     }
 
-    return 0.0;
+    return std::nullopt;
 }
 
 

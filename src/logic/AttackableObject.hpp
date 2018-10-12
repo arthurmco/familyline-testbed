@@ -8,6 +8,7 @@
 
 #include "GameObject.hpp"
 
+#include <optional>
 #include <cstring>
 #include <cstdlib> //srand(), rand()
 
@@ -100,11 +101,13 @@ namespace Familyline::Logic {
 	/*
 	 * Attack other object
 	 *
-	 * Return the damage caused
+	 * Return the damage caused wrapped around a std::optional.
+	 * If the value doesn't exist, the attacked is out of range.
+	 * If the value exists, the damage is inside the optional
 	 *
 	 * (Since I'll change the engine to fixed timesteps, the attacks will be on a fixed rate)
 	 */
-	double doAttack(AttackableObject* attacked);
+	std::optional<double> doAttack(AttackableObject* attacked);
     };
 
 
