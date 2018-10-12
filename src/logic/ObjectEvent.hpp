@@ -29,6 +29,9 @@ namespace Familyline::Logic {
 
 	// An object changed its city
 	ObjectCityChanged,
+
+	// An object changed state
+	ObjectStateChanged,
     };
 
 
@@ -37,6 +40,7 @@ namespace Familyline::Logic {
 	const ObjectManager* object_manager;
 
 	// Destroyed: The destroyed object
+	// StateChanged: the object that changed state
 	std::weak_ptr<GameObject> from;
 
 	// Created: The created object
@@ -54,11 +58,18 @@ namespace Familyline::Logic {
 	    struct {
 		const City* city;
 	    };
+
+	    // for ObjctStateChanged
+	    struct {
+		ObjectState oldstate;
+		ObjectState newstate;
+	    };
 	};
 
 	ObjectEvent();
 	ObjectEvent(std::weak_ptr<GameObject> from, std::weak_ptr<GameObject> to, ObjectEventType type);
 	ObjectEvent(std::weak_ptr<GameObject> from, City* city);
+	ObjectEvent(std::weak_ptr<GameObject> from, ObjectState oldstate, ObjectState newstate);
     };
 
 }

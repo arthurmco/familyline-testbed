@@ -24,6 +24,30 @@ namespace Familyline::Logic {
     typedef int object_id_t;
 
     /**
+     * Object states
+     */
+    enum ObjectState {
+	/* An object is being created
+	 * The building animation is playing
+	 */
+	Creating,
+
+	/* An object is created. The default state */
+	Created,
+
+	/* An object is being attacked and is losing health */
+	Hurt,
+
+	/* An object has just lost all of its lifepoints,
+	 * The death animation is playing
+	 */
+	Dying,
+
+	/* An object is dead and will be destroyed soon */
+	Dead
+    };
+
+    /**
      * Game object base class
      *
      * Anything into the game that has a name, size and position is inherited from this
@@ -73,7 +97,12 @@ namespace Familyline::Logic {
 	 *
 	 * You should not use getObject directly while in an object, but getObjectReference instead
 	 */
-	const GameObject* getObjectReference(object_id_t id);	
+	const GameObject* getObjectReference(object_id_t id);
+	
+	/**
+	 * The current stage of the object
+	 */
+	ObjectState state = ObjectState::Created;
 	
     public:
 	GameObject(object_id_t id, const char* type, const char* name)
@@ -83,7 +112,15 @@ namespace Familyline::Logic {
 	object_id_t getID() const { return this->id; }
 	const char* getType() const { return this->type; }
 	const char* getName() const { return this->name; }
-
+	ObjectState getState() const { return this->state; }
+	
+	ObjectState setState(ObjectState newstate) {
+	    auto s = this->state;
+	    this->state = newstate;
+	    return s;
+	}
+	
+	
 	/**
 	 * The object position.
 	 * For 'positionless' objects, it's (-1, -1, -1)
@@ -101,7 +138,7 @@ namespace Familyline::Logic {
 	 * Rotationless object should have rotation=0
 	 */
 	double rotation = 0;
-	
+
 	/**
 	 * Check if the object 'other' collided with the actual object
 	 *
@@ -115,7 +152,7 @@ namespace Familyline::Logic {
 	 * If you need, you can subclass this class
 	 */
 	bool hasCollided(GameObject* const other);
-	
+
 
 	/* Shared pointer to a mesh */
 	std::shared_ptr<IMesh> mesh;
@@ -128,9 +165,9 @@ namespace Familyline::Logic {
 	 * In it you put actions that the object must do
 	 */
 	virtual void iterate();
-	
+
 	/* Clone the object at a specified position
-	 * 
+	 *
 	 * This function needs to be implemented for each object, because it
 	 * will return the same class as the object
 	 *

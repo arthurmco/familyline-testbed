@@ -15,7 +15,8 @@ void ObjectEventEmitter::pushMessage(ObjectManager* const manager, ObjectEvent e
     e.object_manager = manager;
 
     static const char* statusstr[] = {
-	"(null)", "ObjectCreated", "ObjectDestroyed"
+	"(null)", "ObjectCreated", "ObjectDestroyed", "ObjectCityChanged",
+	"ObjectStateChanged"
     };
 
     Log::GetLog()->InfoWrite("object-event-emitter",
@@ -34,7 +35,7 @@ void ObjectEventEmitter::distributeMessages()
 
 	static const char* object_type[] =
 	    {"EventNone", "ObjectCreated", "ObjectDestroyed",
-	     "ObjectCityChanged"};
+	     "ObjectCityChanged", "ObjectStateChanged"};
 
 	auto efrom = ev.from.lock();
 	auto eto = ev.to.lock();
@@ -42,7 +43,7 @@ void ObjectEventEmitter::distributeMessages()
 	Log::GetLog()->InfoWrite("object-event-emitter",
 				 "event type %s (%#x) from %p (%s, %d) to %p (%s, %d)"
 				 " -> %zu listeners",
-				 (ev.type > ObjectCityChanged) ? "???" : object_type[ev.type],
+				 (ev.type > ObjectStateChanged) ? "???" : object_type[ev.type],
 				 ev.type,
 				 ev.from, !ev.from.expired() ? efrom->getName() : "null",
 				 !ev.from.expired() ? efrom->getID() : 0,

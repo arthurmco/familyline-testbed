@@ -8,6 +8,7 @@
 
 #include <list>
 #include <functional>
+#include <memory>
 
 #include "AttackableObject.hpp"
 
@@ -18,8 +19,8 @@ namespace Familyline {
 namespace Logic {
 
     struct Combat {
-	AttackableObject* attacker;
-	AttackableObject* defender;
+	std::weak_ptr<AttackableObject> attacker;
+	std::weak_ptr<AttackableObject> defender;
 	
 	bool isSuspended = false;
     };
@@ -29,26 +30,22 @@ namespace Logic {
     class CombatManager {
     private:
 	std::list<Combat> _combats;
-	std::list<AttackableObject*> _deads;
+	std::list<std::weak_ptr<AttackableObject>> _deads;
 
 	OnDeathFunction _deathfunc = nullptr;
 
+	static CombatManager* defaulti;
     public:
 	void DoAttacks(double tick);
 
-	
-	static CombatManager* GetInstance() {
-	    static CombatManager* i = nullptr;
 
-	    if (!i)
-		i = new CombatManager;
+	static CombatManager* getDefault() { return defaulti; }
+	static void setDefault(CombatManager* c) { defaulti = c; }
 
-	    return i;
-	}
+	void AddAttack(std::weak_ptr<AttackableObject> attacker,
+		       std::weak_ptr<AttackableObject> defender);
 
-	void AddAttack(AttackableObject* attacker, AttackableObject* defender);
-
-	void SuspendAttack(AttackableObject* attacker);
+	void SuspendAttack(std::weak_ptr<AttackableObject> attacker);
 
 	/* Set function to be run on the object death */
 	void SetOnDeath(OnDeathFunction f);

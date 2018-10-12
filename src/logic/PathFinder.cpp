@@ -54,14 +54,15 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 		if (ev.to.expired())
 		    continue;
 
-		fprintf(stderr, ">> created %d at %.2f %.2f", ev.oid);
+		Log::GetLog()->InfoWrite("pathfinder", ">> created %d at %.2f %.2f", ev.oid);
 		auto sto = std::dynamic_pointer_cast<AttackableObject>(ev.to.lock());
 		opd.emplace_back(sto, 3, ev.oid);
 		break;
 	    }
 		
 	    case ObjectDestroyed:		
-		fprintf(stderr, ">> destroyed %d", ev.oid);
+		Log::GetLog()->InfoWrite("pathfinder",
+					 ">> destroyed %d", ev.oid);
 		opd.erase(
 		    std::remove_if(std::begin(opd), std::end(opd),
 				   [&](const ObjectPathData& op) {

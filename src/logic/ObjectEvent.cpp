@@ -22,3 +22,10 @@ ObjectEvent::ObjectEvent(std::weak_ptr<GameObject> from, City* city)
       to(std::weak_ptr<GameObject>()),
       type(ObjectCityChanged), city(city)
 {}
+
+
+ObjectEvent::ObjectEvent(std::weak_ptr<GameObject> from, ObjectState oldstate,
+			 ObjectState newstate)
+    : from(from), type(ObjectStateChanged),
+      oldstate(oldstate), newstate(newstate)
+{}
