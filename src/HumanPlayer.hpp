@@ -13,6 +13,8 @@
 #include <GL/glew.h>
 #endif
 
+#include <memory>
+
 #include "logic/Player.hpp"
 #include "logic/PathFinder.hpp"
 #include "logic/ObjectFactory.hpp"
@@ -32,7 +34,7 @@
         Familyline::Graphics::Camera* _cam;
 	Familyline::Input::InputPicker* _ip;
 
-        Familyline::Logic::AttackableObject* _selected_obj = nullptr;
+	std::weak_ptr<Familyline::Logic::AttackableObject> _selected_obj;
         Familyline::Logic::PathFinder* _pf = nullptr;
 	
         bool _updated = false;

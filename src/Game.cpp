@@ -35,7 +35,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		/* Initialise things */
 		om = new ObjectManager{};
 		ObjectManager::setDefault(om);
-
+		CombatManager::setDefault(new CombatManager);
+		
 		rndr = new Renderer{};
 		DebugPlotter::pinterface = std::unique_ptr<DebugPlotInterface>
 			(new GraphicalPlotInterface(rndr));
@@ -211,7 +212,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 int Game::RunLoop()
 {
-	CombatManager::GetInstance()->SetOnDeath([&](Logic::AttackableObject* at) {
+	CombatManager::getDefault()->SetOnDeath([&](Logic::AttackableObject* at) {
 		gctx.om->removeObject(gctx.om->getObject(at->getID()).lock());
 	});
 
@@ -350,7 +351,7 @@ int Game::RunLoop()
 			lblSelected.setText(s);
 		}
 
-		CombatManager::GetInstance()->DoAttacks(gctx.elapsed_seconds);
+		CombatManager::getDefault()->DoAttacks(gctx.elapsed_seconds);
 		glm::vec3 p = ip->GetTerrainProjectedPosition();
 		glm::vec2 q = ip->GetGameProjectedPosition();
 
