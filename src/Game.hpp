@@ -82,7 +82,6 @@ private:
     Input::InputPicker* ip = nullptr;
     Logic::PathFinder* pathf = nullptr;
 
-
     struct {
 //	Graphics::GUI::GUIPanel *p;
 	Graphics::GUI::GUILabel *lbl;
@@ -90,14 +89,27 @@ private:
 //	Graphics::GUI::GUIPanel *pnl;
 	Graphics::GUI::GUIButton* btn;
     } widgets;
+
+
+    /* Run input-related code
+     * Return false if the player asked to exit the game.
+     */
+    bool RunInput();
     
+    void RunLogic();
+    void RunGraphical();
+
+    /* Show on-screen debug info
+     * (aka the words in monospaced font you see in-game)
+     */
+    void ShowDebugInfo();
+
 public:
     Game(Graphics::Window* w, Graphics::Framebuffer* fb3D,
 	 Graphics::Framebuffer* fbGUI, Graphics::GUI::GUIManager* gr,
 	 Logic::PlayerManager* pm, HumanPlayer* hp);
 
     int RunLoop();
-
 };
     
 }

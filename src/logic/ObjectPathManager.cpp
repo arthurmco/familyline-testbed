@@ -86,8 +86,7 @@ void ObjectPathManager::UpdatePaths(unsigned ms_frame)
 		it->lc->position.z = (pz);
 
 		// 1 step = 0.1 second
-		if (it->path_ptr < it->path->size()-1 &&
-		    (it->current_time - it->last_step_time) >= 100) {
+		if (it->path_ptr < it->path->size()-1) {
 		    const unsigned timedelta = it->current_time - it->last_step_time;
 
 		    unsigned cptr = it->path_ptr;

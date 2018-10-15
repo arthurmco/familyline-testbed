@@ -36,7 +36,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		om = new ObjectManager{};
 		ObjectManager::setDefault(om);
 		CombatManager::setDefault(new CombatManager);
-		
+
 		rndr = new Renderer{};
 		DebugPlotter::pinterface = std::unique_ptr<DebugPlotInterface>
 			(new GraphicalPlotInterface(rndr));
@@ -210,6 +210,21 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 	}
 }
 
+GUILabel lblBuilding = GUILabel(0.05, 0.1, "!!!");
+GUILabel lblFPS = GUILabel(0.05, 0.9, "0 fps, 0 ms/frame");
+GUILabel lblRange = GUILabel(0.05, 0.13, "--");
+GUILabel lblSelected = GUILabel(0.05, 0.17, "---");
+GUILabel lblTerrainPos = GUILabel(0.05, 0.21, "---");
+
+GUILabel lblKeys = GUILabel(0.05, 0.05, "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
+
+
+// Run the logic engine at 60 Hz
+#define LOGIC_DELTA 16
+
+// and the input engine at 120 Hz
+#define INPUT_DELTA 8
+
 int Game::RunLoop()
 {
 	CombatManager::getDefault()->SetOnDeath([&](Logic::AttackableObject* at) {
@@ -231,13 +246,6 @@ int Game::RunLoop()
 		});
 		pnl.AddPanel(&btnExit); */
 
-	GUILabel lblBuilding = GUILabel(0.05, 0.1, "!!!");
-	GUILabel lblFPS = GUILabel(0.05, 0.9, "0 fps, 0 ms/frame");
-	GUILabel lblRange = GUILabel(0.05, 0.13, "--");
-	GUILabel lblSelected = GUILabel(0.05, 0.17, "---");
-	GUILabel lblTerrainPos = GUILabel(0.05, 0.21, "---");
-
-	GUILabel lblKeys = GUILabel(0.05, 0.05, "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
 
 	lblBuilding.format.foreground = glm::vec4(1, 1, 1, 1);
 	lblBuilding.format.background = glm::vec4(0, 0, 0, 0.4);
@@ -270,154 +278,74 @@ int Game::RunLoop()
 	double pms = 0.0;
 
 	double maxdelta = 0, mindelta = 99, sumfps = 0;
+
+	int logicTime = LOGIC_DELTA;
+	int inputTime = INPUT_DELTA;
+	int limax = 0;
 	
 	do {
-	    /* Input processing  */
-	    InputManager::GetInstance()->Run();
-	    ip->UpdateIntersectedObject();
-	    ip->UpdateTerrainProjectedPosition();
+	    player = true;
 
-		player = true;
-		
-		gctx.elapsed_seconds = delta / 1000.0;
+	    /* Runs the input code at fixed steps, like the logic one below */
+	    while (inputTime >= INPUT_DELTA) {
+		player = this->RunInput();
+		if (!player)
+		    break;
 
-		InputEvent ev;
-		gr->update();
+		inputTime -= INPUT_DELTA;
+	    }
+	    
+	    /* Run the logic code in steps of fixed blocks
+	     * This is called fixed timestep, and will ensure game consistency 
+	     * on multiplayer games
+	     */
+	    int li = 0;
+	    while (logicTime >= LOGIC_DELTA) {
+		this->RunLogic();
+		logicTime -= LOGIC_DELTA;
+		li++;
+	    }
 
-		pm->ProcessInputs();
-		if (!pm->PlayAll(&gctx))
-			player = false;
+	    if (frame > 1)
+		limax = std::max(li, limax);
+	    
+	    this->ShowDebugInfo();
+	    this->RunGraphical();
 
-		/*
+	    frame++;
 
-		  Logic & graphical processing
+	    unsigned int elapsed = SDL_GetTicks();
+	    delta = elapsed - ticks;
 
-		 */
-		gam.ProcessListeners();
-		terr_rend->Update();
-		om->iterateAll();
-		ObjectEventEmitter::distributeMessages();
+	    ticks = SDL_GetTicks();
+	    Timer::getInstance()->RunTimers(delta);
 
-		bool objupdate = objrend->Check();
-		if (objupdate || hp->HasUpdatedObject()) {
-			objrend->Update();
-			pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
-		}
-		objrend->Update();
+	    if (frame % 15 == 0) {
+		pms = delta * 1.0;
+	    }
 
-		AttackableObject* selected = hp->GetSelectedObject();
-
-		if (BuildQueue::GetInstance()->GetNext()) {
-		    char s[256];
-		    sprintf(s, "Click to build %s",
-			    BuildQueue::GetInstance()->GetNext()->getName());
-		    lblBuilding.setText(s);
-		}
-		else {
-		    lblBuilding.setText("");
-		}
-
-		auto locc = ip->GetIntersectedObject().lock();
-		if (locc) {
-		    auto alocc = dynamic_cast<AttackableObject*>(locc.get());
-//			gr->DebugWrite(10, 100, "Hovering object '%s'", locc->getName());
-		    
-		    if (alocc && selected && alocc->getMaxLifePoints()) {
-			AttackableObject* a = alocc;
-//			lblRange.setText( a->CheckAttackRange((AttackableObject*)selected) ? "In range" : "Not in range");
-		    }
-		}
-
-		{
-			int qx, qy;
-			scenemng->GetCameraQuadrant(qx, qy);
-//			gr->DebugWrite(10, 160, "Camera quadrant: %d x %d", qx, qy);
-		}
-
-
-		lblSelected.setText("");
-		if (selected) {
-			char s[150];
-			AttackableObject* a = dynamic_cast<AttackableObject*>(selected);
-			if (selected) {
-			    sprintf(s, "Selected object: '%s' (%4d/%4d)",
-				    a->getName(),
-				    a->getCurrentLifePoints(),
-				    a->getMaxLifePoints());
-			} else {
-				sprintf(s, "Selected object: '%s'", selected->getName());
-			}
-
-			lblSelected.setText(s);
-		}
-
-		CombatManager::getDefault()->DoAttacks(gctx.elapsed_seconds);
-		glm::vec3 p = ip->GetTerrainProjectedPosition();
-		glm::vec2 q = ip->GetGameProjectedPosition();
-
-		ObjectPathManager::getInstance()->UpdatePaths(delta);
-//		guam->UpdateBasePanel();
-
-		/*
-
-		  Rendering
-
-		 */
-
-		fb3D->SetAsBoth();
-		rndr->SetBoundingBox(hp->renderBBs);
-		if (objupdate) rndr->UpdateObjects();
-		rndr->UpdateFrames();
-		rndr->Render(terr_rend);
-		
-		char texs[256];
-		sprintf(texs, "Terrain pos: "
-			"(ogl: %.3f,%.3f,%.3f | Game: %.2f, %.2f), rotation %.1f",
-				p.x, p.y, p.z, q.x, q.y, cam->GetRotation() * 180 / M_PI);
-		lblTerrainPos.setText(texs);
-		// gr->DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
-		// 	"Enabled" : "Disabled");
-
-		fbGUI->SetAsBoth();
-		gr->render(0, 0);
-		gr->renderToScreen();
-		fbGUI->Unset();
-
-		win->Update();
-
-		frame++;
-
-		unsigned int elapsed = SDL_GetTicks();
-		delta = elapsed - ticks;
-
-		ticks = SDL_GetTicks();
-		Timer::getInstance()->RunTimers(delta);
-
-		if (frame % 15 == 0) {
-			pms = delta * 1.0;
-		}
-
-		char sfps[128];
-		sprintf(sfps, "%.3f fps, %.3f ms/frame", float(1000 / pms), float(pms));
-		lblFPS.setText(sfps);
-//		gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
+	    char sfps[128];
+	    sprintf(sfps, "%.3f fps, %.3f ms/frame", float(1000 / pms), float(pms));
+	    lblFPS.setText(sfps);
+//	    gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
 #define FPS_LOCK 120.0
 
-		//Locked in ~120 fps
-		if (delta < 1000 / FPS_LOCK) {
-			auto sleepdelta = int((1000 / FPS_LOCK) - delta);
-			SDL_Delay(sleepdelta);
-		}
+	    //Locked in ~120 fps
+	    if (delta < 1000 / FPS_LOCK) {
+		auto sleepdelta = int((1000 / FPS_LOCK) - delta);
+		SDL_Delay(sleepdelta);
+	    }
 
-		if (delta < mindelta)
-			mindelta = delta;
+	    if (delta < mindelta)
+		mindelta = delta;
 
-		if (delta > maxdelta)
-			maxdelta = delta;
+	    if (delta > maxdelta)
+		maxdelta = delta;
 
-		sumfps += (1000 / delta);
-
+	    sumfps += (1000 / delta);
+	    logicTime += delta;
+	    inputTime += delta;
 	} while (player);
 
 	double maxfps = 1000 / mindelta;// less delta, more fps
@@ -428,4 +356,131 @@ int Game::RunLoop()
 	Log::GetLog()->Write("game", "Total frames: %d", frame);
 
 	return 0;
+}
+
+
+/* Run input-related code
+ * Return false if the player asked to exit the game.
+ */
+bool Game::RunInput()
+{
+    /* Input processing  */
+    InputManager::GetInstance()->Run();
+    ip->UpdateIntersectedObject();
+    ip->UpdateTerrainProjectedPosition();
+
+    gctx.elapsed_seconds = INPUT_DELTA/1000.0;
+
+    InputEvent ev;
+    gr->update();
+
+    pm->ProcessInputs();
+    return pm->PlayAll(&gctx);
+}
+
+
+void Game::RunLogic()
+{
+    /* Logic & graphical processing */
+    gam.ProcessListeners();
+    terr_rend->Update();
+    om->iterateAll();
+    ObjectEventEmitter::distributeMessages();
+
+    bool objupdate = objrend->Check();
+    if (objupdate || hp->HasUpdatedObject()) {
+	objrend->Update();
+	pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
+    }
+    objrend->Update();
+
+    CombatManager::getDefault()->DoAttacks(LOGIC_DELTA);
+    ObjectPathManager::getInstance()->UpdatePaths(LOGIC_DELTA);
+
+}
+
+void Game::RunGraphical()
+{
+
+    /* Rendering */
+
+    fb3D->SetAsBoth();
+    rndr->SetBoundingBox(hp->renderBBs);
+
+    rndr->UpdateObjects();
+
+    rndr->UpdateFrames();
+    rndr->Render(terr_rend);
+
+    fbGUI->SetAsBoth();
+    gr->render(0, 0);
+    gr->renderToScreen();
+    fbGUI->Unset();
+
+    win->Update();
+}
+
+
+/* Show on-screen debug info
+ * (aka the words in monospaced font you see in-game)
+ */
+void Game::ShowDebugInfo()
+{
+    AttackableObject* selected = hp->GetSelectedObject();
+
+    if (BuildQueue::GetInstance()->GetNext()) {
+	char s[256];
+	sprintf(s, "Click to build %s",
+		BuildQueue::GetInstance()->GetNext()->getName());
+	lblBuilding.setText(s);
+    }
+    else {
+	lblBuilding.setText("");
+    }
+
+    auto locc = ip->GetIntersectedObject().lock();
+    if (locc) {
+	auto alocc = dynamic_cast<AttackableObject*>(locc.get());
+//			gr->DebugWrite(10, 100, "Hovering object '%s'", locc->getName());
+
+	if (alocc && selected && alocc->getMaxLifePoints()) {
+	    AttackableObject* a = alocc;
+	    lblRange.setText(a->doAttack((AttackableObject*)selected) ? "In range" : "Not in range");
+	}
+    }
+
+    {
+	int qx, qy;
+	scenemng->GetCameraQuadrant(qx, qy);
+//			gr->DebugWrite(10, 160, "Camera quadrant: %d x %d", qx, qy);
+    }
+
+
+    lblSelected.setText("");
+    if (selected) {
+	char s[150];
+	AttackableObject* a = dynamic_cast<AttackableObject*>(selected);
+	if (selected) {
+	    sprintf(s, "Selected object: '%s' (%4d/%4d)",
+		    a->getName(),
+		    a->getCurrentLifePoints(),
+		    a->getMaxLifePoints());
+	} else {
+	    sprintf(s, "Selected object: '%s'", selected->getName());
+	}
+
+	lblSelected.setText(s);
+    }
+
+    glm::vec3 p = ip->GetTerrainProjectedPosition();
+    glm::vec2 q = ip->GetGameProjectedPosition();
+
+    char texs[256];
+    sprintf(texs, "Terrain pos: "
+	    "(ogl: %.3f,%.3f,%.3f | Game: %.2f, %.2f), rotation %.1f",
+	    p.x, p.y, p.z, q.x, q.y, cam->GetRotation() * 180 / M_PI);
+    lblTerrainPos.setText(texs);
+    // gr->DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
+    // 	"Enabled" : "Disabled");
+
 }
