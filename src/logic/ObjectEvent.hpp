@@ -51,7 +51,7 @@ namespace Familyline::Logic {
 	union {
 	    // for ObjectCreated and ObjectDestroyed
 	    struct {
-		int oid = 0;
+		int oid;
 	    };
 
 	    // for ObjectCityChanged

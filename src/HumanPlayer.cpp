@@ -283,7 +283,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 		Log::GetLog()->InfoWrite("human-player",
 					 "creating %s at %.3f %.3f %.3f", c->getName(), p.x, p.y, p.z);
 
-		auto cobj = gctx->om->addObject(c).lock();
+		auto cobj = gctx->om->addObject(std::move(dynamic_cast<GameObject*>(c))).lock();
 		this->RegisterCreation(cobj.get());
 		Log::GetLog()->InfoWrite("human-player",
 					 "%s has id %d now", c->getName(), cobj->getID());

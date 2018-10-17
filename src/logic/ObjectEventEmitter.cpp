@@ -21,7 +21,7 @@ void ObjectEventEmitter::pushMessage(ObjectManager* const manager, ObjectEvent e
 
     Log::GetLog()->InfoWrite("object-event-emitter",
 			     "<Message %s (%#x) sent from %p to %p >\n",
-			     statusstr[e.type], e.type, e.from, e.to);
+			     statusstr[e.type], e.type, e.from.lock().get(), e.to.lock().get());
     ObjectEventEmitter::events.push(e);
 }
 
@@ -41,13 +41,13 @@ void ObjectEventEmitter::distributeMessages()
 	auto eto = ev.to.lock();
 	
 	Log::GetLog()->InfoWrite("object-event-emitter",
-				 "event type %s (%#x) from %p (%s, %d) to %p (%s, %d)"
+				 "event type %s (%#x) from (%s, %d) to (%s, %d)"
 				 " -> %zu listeners",
 				 (ev.type > ObjectStateChanged) ? "???" : object_type[ev.type],
 				 ev.type,
-				 ev.from, !ev.from.expired() ? efrom->getName() : "null",
+				 !ev.from.expired() ? efrom->getName() : "null",
 				 !ev.from.expired() ? efrom->getID() : 0,
-				 ev.to, !ev.to.expired() ? eto->getName() : "null",
+				 !ev.to.expired() ? eto->getName() : "null",
 				 !ev.to.expired() ? eto->getID() : 0,
 				 ObjectEventEmitter::listeners.size());
 
