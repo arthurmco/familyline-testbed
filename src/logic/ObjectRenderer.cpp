@@ -71,7 +71,7 @@ bool ObjectRenderer::Check()
 		    std::remove_if(_objects.begin(), _objects.end(),
 				   [&](std::weak_ptr<GameObject>& rgo) {
 				       if (rgo.expired())
-					   return false;
+						   return true;
 				       
 				       return rgo.lock()->getID() == e.oid;
 				   })

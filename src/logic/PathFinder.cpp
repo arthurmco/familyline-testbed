@@ -67,7 +67,7 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 		    std::remove_if(std::begin(opd), std::end(opd),
 				   [&](const ObjectPathData& op) {
 				       if (op.obj.expired())
-					   return false;
+						return true;
 				       
 				       return op.ID == ev.oid;
 				   })
