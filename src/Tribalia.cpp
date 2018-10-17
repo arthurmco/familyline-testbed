@@ -451,6 +451,119 @@ int main(int argc, char const *argv[])
 		guir = new GUIManager{};
 		guir->initShaders(w);
 
+
+		/* If we have a networked game ready, don't even show the main menu. */
+		if (nserver) {
+			Log::GetLog()->Write("init", "Network game detected, going direct "
+				"to it");
+
+			//		guir->InitInput();
+			auto g = Game(w, fb3D, fbGUI, guir, pm, hp);
+			auto ret = g.RunLoop();
+			if (pm)
+				delete pm;
+			delete hp;
+			delete w;
+			exit(ret);
+		}
+
+		Log::GetLog()->InfoWrite("texture", "maximum tex size: %zu x %zu", Texture::GetMaximumSize(),
+			Texture::GetMaximumSize());
+
+
+		/* Render the menu */
+		bool r = true;
+		auto deflistener = InputManager::GetInstance()->GetDefaultListener();
+		int frames = 0;
+
+		/* Lock frames to 60fps */
+		double b = SDL_GetTicks();
+
+		GUILabel l = GUILabel(0.37, 0.03, "FAMILYLINE");
+		l.format.foreground = glm::vec4(1, 1, 1, 1);
+
+		GUILabel lv = GUILabel(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
+		lv.format.foreground = glm::vec4(0.2, 0.2, 1, 1);
+		lv.format.background = glm::vec4(1, 1, 1, 0.5);
+
+		GUIButton bnew = GUIButton(0.1, 0.2, 0.8, 0.1, "New Game");
+		GUIButton bquit = GUIButton(0.1, 0.31, 0.8, 0.1, "Exit Game");
+
+		GUIImageControl ilogo = GUIImageControl(0.2, 0.1, 0.6, 0.9,
+			ICONS_DIR "/tribalia-logo.png");
+		ilogo.z_index = -100;
+		//ilogo.SetZIndex(0.9);
+		//ilogo.SetOpacity(0.5);
+
+		bquit.onClickHandler = [&r](GUIControl* cc) {
+			(void)cc;
+			r = false;
+		};
+
+		bnew.onClickHandler = [&](GUIControl* cc) {
+			(void)cc;
+			guir->remove(&l);
+			guir->remove(&lv);
+			guir->remove(&bnew);
+			guir->remove(&bquit);
+			guir->remove(&ilogo);
+
+			printf("New Game\n");
+			if (!pm)
+				pm = new PlayerManager();
+
+			if (!hp)
+				hp = new HumanPlayer{ "Arthur", 0 };
+
+
+			auto g = Game(w, fb3D, fbGUI, guir, pm, hp);
+			auto ret = g.RunLoop();
+			delete pm;
+			delete hp;
+			delete w;
+			exit(ret);
+		};
+
+		guir->add(&l);
+		guir->add(&lv);
+		guir->add(&bquit);
+		guir->add(&bnew);
+		guir->add(&ilogo);
+
+		while (r) {
+			// Input
+			InputManager::GetInstance()->Run();
+			InputEvent ev;
+			guir->update();
+
+			if (deflistener->PopEvent(ev)) {
+				/* Only listen for FINISH events.
+				The others will be handled by the GUI listener */
+				if (ev.eventType == EVENT_FINISH)
+					r = false;
+			}
+
+			// Render
+			fbGUI->SetAsBoth();
+			guir->render(0, 0);
+			guir->renderToScreen();
+			fbGUI->Unset();
+
+			w->Update();
+			double e = SDL_GetTicks();
+
+			if ((e - b) < 1000 / 60.0)
+				SDL_Delay((unsigned int)(1000 / 60.0 - (e - b)));
+
+			b = SDL_GetTicks();
+
+			frames++;
+		}
+
+
+		delete w;
+		printf("\nExited. (%d frames)\n", frames);
+
 	}
 	catch (window_exception& we) {
 		Log::GetLog()->Fatal("init", "Window creation error: %s (%d)", we.what(), we.code);
@@ -476,118 +589,22 @@ int main(int argc, char const *argv[])
 		
 		exit(EXIT_FAILURE);
 	}
+	catch (std::bad_alloc& be) {
+		Log::GetLog()->Fatal("init", "Allocation error: %s", be.what());
+		Log::GetLog()->Fatal("init", "Probably out of memory");
 
-	/* If we have a networked game ready, don't even show the main menu. */
-	if (nserver) {
-		Log::GetLog()->Write("init", "Network game detected, going direct "
-			"to it");
-
-//		guir->InitInput();
-		auto g = Game(w, fb3D, fbGUI, guir, pm, hp);
-		auto ret = g.RunLoop();
-		if (pm)
-			delete pm;
-		delete hp;
-		delete w;
-		exit(ret);
-	}
-
-	Log::GetLog()->InfoWrite("texture", "maximum tex size: %zu x %zu", Texture::GetMaximumSize(),
-				 Texture::GetMaximumSize());
-	
-
-	/* Render the menu */
-	bool r = true;
-	auto deflistener = InputManager::GetInstance()->GetDefaultListener();
-	int frames = 0;
-
-	/* Lock frames to 60fps */
-	double b = SDL_GetTicks();
-	
-	GUILabel l = GUILabel(0.37, 0.03, "FAMILYLINE");
-	l.format.foreground = glm::vec4(1, 1, 1, 1);
-
-	GUILabel lv = GUILabel(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
-	lv.format.foreground = glm::vec4(0.2, 0.2, 1, 1);
-	lv.format.background = glm::vec4(1, 1, 1, 0.5);
-
-	GUIButton bnew = GUIButton(0.1, 0.2, 0.8, 0.1, "New Game");
-	GUIButton bquit = GUIButton(0.1, 0.31, 0.8, 0.1, "Exit Game");
-	
-	GUIImageControl ilogo = GUIImageControl(0.2, 0.1, 0.6, 0.9, 
-		ICONS_DIR "/tribalia-logo.png");
-	ilogo.z_index = -100;
-	//ilogo.SetZIndex(0.9);
-	//ilogo.SetOpacity(0.5);
-
-	bquit.onClickHandler = [&r](GUIControl* cc) {
-		(void)cc;
-		r = false;
-	};
-	
-	bnew.onClickHandler = [&](GUIControl* cc) {
-		(void)cc;
-		guir->remove(&l);
-		guir->remove(&lv);
-		guir->remove(&bnew);
-		guir->remove(&bquit);
-		guir->remove(&ilogo);
-
-		printf("New Game\n");
-		if (!pm)
-			pm = new PlayerManager();
-
-		if (!hp)
-			hp = new HumanPlayer{ "Arthur", 0 };
-
-
-		auto g = Game(w, fb3D, fbGUI, guir, pm, hp);
-		auto ret = g.RunLoop();
-		delete pm;
-		delete hp;
-		delete w;
-		exit(ret);
-	};
-
-	guir->add(&l);
-	guir->add(&lv);
-	guir->add(&bquit);
-	guir->add(&bnew);
-	guir->add(&ilogo);
-
-	while (r) {
-		// Input
-		InputManager::GetInstance()->Run();
-		InputEvent ev;
-		guir->update();
-
-		if (deflistener->PopEvent(ev)) {
-			/* Only listen for FINISH events.
-			The others will be handled by the GUI listener */
-			if (ev.eventType == EVENT_FINISH)
-				r = false;
+		if (w) {
+			char err[512];
+			sprintf(err,
+				"Insufficient memory\n"
+				"\n"
+				"Error: %s",
+				be.what());
+			w->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
 		}
 
-		// Render
-		fbGUI->SetAsBoth();
-		guir->render(0, 0);
-		guir->renderToScreen();
-		fbGUI->Unset();
-
-		w->Update();
-		double e = SDL_GetTicks();
-
-		if ((e - b) < 1000 / 60.0)
-			SDL_Delay((unsigned int)(1000 / 60.0 - (e - b)));
-
-		b = SDL_GetTicks();
-
-		frames++;
+		exit(EXIT_FAILURE);
 	}
-
-
-	delete w;
-	printf("\nExited. (%d frames)\n", frames);
 
 	return 0;
 }

@@ -1,6 +1,8 @@
 #include "Window.hpp"
 #include "../config.h"
 
+#include <new> // for std::bad_alloc
+
 using namespace Familyline::Graphics;
 
 Window::Window(int w, int h, unsigned win_opts)
@@ -162,7 +164,14 @@ void Window::Update()
     
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
-		printf("GL error %#x\n", err);
+
+		switch (err) {
+		case GL_OUT_OF_MEMORY:
+			throw window_exception("Out of memory while rendering", 1010);
+		default:
+			printf("GL error %#x\n", err);
+		}
+
     }
     
 
