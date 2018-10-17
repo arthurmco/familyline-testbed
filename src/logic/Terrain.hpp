@@ -29,7 +29,7 @@ namespace Logic {
 
     #define SECTION_SIDE 256
     struct TerrainData {
-	TerrainSlot data[SECTION_SIDE*SECTION_SIDE];
+		TerrainSlot data[SECTION_SIDE*SECTION_SIDE];
     };
 
     class Terrain {

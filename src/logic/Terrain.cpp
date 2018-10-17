@@ -94,13 +94,13 @@ void Terrain::SetData(TerrainSlot* slot) {
 	for (int sx = 0; sx < _section_width; sx++) {
 	    int index = sy*_section_width+sx;
 	    for (int y = 0; y < SECTION_SIDE; y++) {
-		if ((sy * SECTION_SIDE + y) > _height) {
+		if ((sy * SECTION_SIDE + y) >= _height) {
 		    /* No more terrain after this */
 		    break;
 		}
 
 		for (int x = 0; x < SECTION_SIDE; x++) {
-		    if ((sx * SECTION_SIDE + x) > _width) {
+		    if ((sx * SECTION_SIDE + x) >= _width) {
 			/* There's no more terrain after this */
 			break;
 		    }
