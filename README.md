@@ -1,6 +1,8 @@
 # Familyline
 
-<img src="icons/tribalia-logo.png" height="128px" width="128px" />
+<span style="text-align: center">
+	<img src="icons/familyiline-logo.png" height="128px" width="128px" />
+</span>
 
 Familyline is a real-time strategy game focused on Ancient Era, from since the
 neolythic period (~ 10.000 AD) to the death of Christ (~ 30 BD).
@@ -12,66 +14,35 @@ and (if the money begin to appear) do a *lot* of quests.
 It's made with a homebrew engine. The major objective of this game is
 fun, to play and develop. Expect it to have a lot of good humor!
 
-## Supported OSs
+## Build and Installation
 
- - Linux: full  
-   Surprisingly, it's the most supported operating system. (For a
-   game, this is quite a bit new)
+The game runs in Linux and Windows. Other platforms need to be tested.
+
+On Linux, you will need the softwares below:
+
+ - *GLM:* for vector mathematics
+ - *GLEW:* for dealing with OpenGL extensions
+ - *SDL:* for dealing with our window. Version 2.0 is required.
+ - *devIL:* for loading our textures.
+ - *cairo:* for drawing the interfaces
+ - *libyaml:* For parsing the `assets.yaml` file, aka the asset list.
+
+On Windows, you'll have to install the .lib files and headers of the
+libraries mentioned above (until I make it work with vcpkg). The dlls
+are in the distribute/ folder.
+
+I created a zip and put them
+[here](https://drive.google.com/open?id=1gDIS9CkskJ25cwmuw7jCXTgVxZ08VCdA). (SHA1
+is 695fee4fa4f59e6831509d00b7684bf2dc20b2f4 ).
+
+To build it, you'll need a C++17 compiler. I build using Visual C++
+2017 and GCC 8, so if you have anything better, you will be able to
+build too.
+
+If you build with VS 2017 and its integrated cmake builder, you
+need to change the `CMakeSettings.json` to where you downloaded the
+libraries and includes.
  
- - Windows: full  
-   You will have to download the libraries (the `.lib` files) and the
-   headers separately. I created a zip and put them
-   [here](https://drive.google.com/open?id=1gDIS9CkskJ25cwmuw7jCXTgVxZ08VCdA). (SHA1
-   is 695fee4fa4f59e6831509d00b7684bf2dc20b2f4 )
- 
- - FreeBSD: The last time I tried (+/- half a year), it complained about template things 
-   (it was the FreeBSD 11.0-CURRENT version). I need to check support. It would be 
-   interesting to support FreeBSD, a lot of games only care about Linux :P
-   
- - OS X: Might work, but I don't have enough $$$ to have an Apple
-
-## Needed Software
-
-* *GLM:* for vector mathematics
-* *GLEW:* for dealing with OpenGL extensions
-* *SDL:* for dealing with our window. Version 2.0 is required.
-* *devIL:* for loading our textures.
-* *cairo:* for drawing the interfaces
-* *libyaml:* For parsing the `assets.yaml` file, aka the asset list.
-
-If you are building under Windows, download the packages in their respective sites.
-
-If you are building on Linux, type the following command. This will
-install the dependencies.
-
-`# apt-get install libglm-dev libglew1.10 libglew-dev libsdl2-2.0.0 libsdl2-dev libdevil1c2 libdevil-dev
-libcairo2 libcairo2-dev libyaml libyaml-dev`
-
-## Documentation
-
-See the docs/ folder. It talks about some things (planned or not), some 
-manuals to the potential contributors, and some guides I wrote for myself.
-
-Or you can read the code. They say the code is the most right documentation,
-because it's what the program itself uses...
-
-## Caveats
-
- - Your compiler needs to support C++17, because that's the future
-
- - On Windows, you will might need to use the environment variable
-   `TRIBALIA_FIND_PKG` to tell cmake where some dependencies can be
-   found.  
-   If you build with VS 2017 and its integrated cmake builder, you
-   need to change the `CMakeSettings.json` to where you downloaded the
-   libraries and includes.
- 
- - On FreeBSD, you need to install pkg-config, it finds some dependencies this way ( use `pkg install pkgconf`)
-
- - Only clang++ > 5 is supported (something to do with template
-   deduction, supported in gcc7 and in libstdc++  but not in clang5). 
-   (I might be wrong, however. I only tried once)
-
 ## Packaging
 
 To generate a package, simply run these two commands:
@@ -90,9 +61,15 @@ By default, it generates a DEB and a RPM file.
 Note that, unless you customize the `CMAKE_INSTALL_PREFIX`, it will
 install in the `/usr/local` directory
 
-## Rewrite in Rust!
+## Things to do
 
-Now it's opensource. This means **YOU CAN REWRITE, DAWG**
+Aside from issues, there are things I would like to do very soon
+
+ - Continuous integration
+ - Increase test coverage
+ - Add support for vcpkg in Windows
+ - Test build in clang
+ - Try to build in a Mac, for those hipsters who use OS x (I kid! :wink:)
 
 ## License
 
