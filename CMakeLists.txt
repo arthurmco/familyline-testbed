@@ -63,41 +63,38 @@ include_directories(AFTER "${CMAKE_SOURCE_DIR}/common")
 include_directories("${CMAKE_SOURCE_DIR}/server")
 
 if (MSVC)
+	
+  include(${CMAKE_TOOLCHAIN_FILE})
 
   # Set include directories
-  SET(SDL_INCLUDE "." CACHE PATH "SDL2 include directory")
-  SET(GLM_INCLUDE "." CACHE PATH "GLM include directory")
-  SET(CAIRO_INCLUDE "." CACHE PATH "Cairo include directory")
+  find_package(SDL2 CONFIG REQUIRED)
+  find_package(GLM CONFIG REQUIRED)
+  find_package(unofficial-cairo CONFIG REQUIRED)
 
-  include_directories(AFTER ${SDL_INCLUDE} ${GLM_INCLUDE} ${CAIRO_INCLUDE}  ${YAML_INCLUDE_DIR})
+  # SDL, GLM and cairo includes will be made available via vcpkg and put in a default path.
+  # We don't really need to put them here'
+  include_directories(AFTER ${YAML_INCLUDE_DIR})
 
-  #Set library directories
-  SET(SDL_LIB_FOLDER "." CACHE PATH "SDL2 library directory")
-  SET(CAIRO_LIB_FOLDER "." CACHE PATH "Cairo library folder")
-  
-  find_library(SDL_LIB "SDL2.lib" ${SDL_LIB_FOLDER})
-  find_library(CAIRO_LIB "cairo.lib" ${CAIRO_LIB_FOLDER})
-
-  link_directories(${SDL_LIB} ${GLEW_LIB})
-  
-  target_link_libraries(familyline ${SDL_LIB})
+  target_link_libraries(familyline SDL2::SDL2 SDL2::SDL2main)
   target_link_libraries(familyline ${OPENGL_gl_LIBRARY})
   target_link_libraries(familyline ${GLEW_LIBRARY})
   target_link_libraries(familyline ${IL_LIBRARIES})
   target_link_libraries(familyline ${ILU_LIBRARIES})
-  target_link_libraries(familyline ${CAIRO_LIB})
+  target_link_libraries(familyline unofficial::cairo::cairo)
+  target_link_libraries(familyline glm)
   target_link_libraries(familyline ${YAML_LIBRARIES}) # You need to build YAML as a dll (use -DBUILD_SHARED_LIBS)
   target_link_libraries(familyline wsock32 ws2_32)
 
   target_link_libraries(familyline-server wsock32 ws2_32)
 
   #if (DO_TESTS)
-  	target_link_libraries(familyline-tests ${SDL_LIB})
+	target_link_libraries(familyline SDL2::SDL2 SDL2::SDL2main)
   	target_link_libraries(familyline-tests ${OPENGL_gl_LIBRARY})
   	target_link_libraries(familyline-tests ${GLEW_LIBRARY})
   	target_link_libraries(familyline-tests ${IL_LIBRARIES})
   	target_link_libraries(familyline-tests ${ILU_LIBRARIES})
-  	target_link_libraries(familyline-tests ${CAIRO_LIB})
+	target_link_libraries(familyline unofficial::cairo::cairo)
+	target_link_libraries(familyline glm)
 	target_link_libraries(familyline-tests wsock32 ws2_32)
 	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
   #endif(DO_TESTS)
@@ -153,11 +150,13 @@ else()
 endif(MSVC)
 
 if (WIN32)
+	
+  get_filename_component(CMAKE_TOOLCHAIN_DIR "${CMAKE_TOOLCHAIN_FILE}" DIRECTORY)
 
-  # Copy the DLLs to the release directory, so the software can be run and packaged.
-  file(GLOB WIN32_DEPS "${CMAKE_SOURCE_DIR}/distribute/win32/*.dll")
-  file(COPY ${WIN32_DEPS} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
-  file(COPY ${WIN32_DEPS} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
+  # Copy a stubborn dependent DLLs to the release directory, so the software can be run and packaged.
+  # See https://github.com/Microsoft/vcpkg/issues/2630
+  file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
+file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
 
   # Copy the asset folders to the Debug folder
   file(COPY "${CMAKE_SOURCE_DIR}/shaders" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")

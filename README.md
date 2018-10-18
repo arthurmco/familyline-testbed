@@ -7,7 +7,7 @@
 Familyline is a real-time strategy game focused on Ancient Era, from since the
 neolythic period (~ 10.000 AD) to the death of Christ (~ 30 BD).
 
-In it, you will guide a family, that goes from the end of neolythic until its kingdom 
+In it, you will guide a family, that goes from the end of neolythic until its kingdom
 inclusion to the Roman Empire. You will trade with other people, war, mount strategies
 and (if the money begin to appear) do a *lot* of quests.
 
@@ -18,6 +18,8 @@ fun, to play and develop. Expect it to have a lot of good humor!
 
 The game runs in Linux and Windows. Other platforms need to be tested.
 
+### Penguins
+
 On Linux, you will need the softwares below:
 
  - *GLM:* for vector mathematics
@@ -27,22 +29,36 @@ On Linux, you will need the softwares below:
  - *cairo:* for drawing the interfaces
  - *libyaml:* For parsing the `assets.yaml` file, aka the asset list.
 
-On Windows, you'll have to install the .lib files and headers of the
-libraries mentioned above (until I make it work with vcpkg). The dlls
-are in the distribute/ folder.
+### Windows
 
-I created a zip and put them
-[here](https://drive.google.com/open?id=1gDIS9CkskJ25cwmuw7jCXTgVxZ08VCdA). (SHA1
-is 695fee4fa4f59e6831509d00b7684bf2dc20b2f4 ).
+On Windows, you can use `vcpkg`. Use [these
+instructions](https://docs.microsoft.com/cpp/vcpkg?view=vs-2017).
+You will need to have vcpkg integrated with Visual Studio.
 
-To build it, you'll need a C++17 compiler. I build using Visual C++
-2017 and GCC 8, so if you have anything better, you will be able to
-build too.
+Execute the following command:
 
-If you build with VS 2017 and its integrated cmake builder, you
-need to change the `CMakeSettings.json` to where you downloaded the
-libraries and includes.
- 
+`> vcpkg install glm glew sdl2 devil cairo libyaml`
+
+Go make a coffee and buy needed things in the market. Order some
+food. This will take some time.
+
+When it finishes, add
+`-DCMAKE_TOOLCHAIN_FILE={VCPKG_PATH}\scripts\buildsystems\vcpkg.cmake`
+to your cmake command line. Replace `{VCPKG_PATH}` to where you
+downloaded vcpkg.
+If you used that Open Folder thing from Visual Studio -- I used --,
+add the following lines into your CMakeSettings.json, inside the
+variables key
+
+```json
+{
+    "name": "CMAKE_TOOLCHAIN_FILE",
+    "value": "{VCPKG_PATH}\\scripts\\buildsystems\\vcpkg.cmake"
+}
+```
+
+Then, cmake it and build everything
+
 ## Packaging
 
 To generate a package, simply run these two commands:
@@ -54,7 +70,7 @@ make package
 
 The first will generate a makefile that don't compile the tests and don't use
 relative path builds (they are useful while debugging). The last one installs
-the package. 
+the package.
 
 By default, it generates a DEB and a RPM file.
 
@@ -77,5 +93,3 @@ Every file in this game is licensed under the MIT license, the best in
 existence.
 
 Copyright (C) 2016-2018 Arthur Mendes.
-
-
