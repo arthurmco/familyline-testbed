@@ -1,8 +1,8 @@
 # Familyline
 
-<span style="text-align: center">
-	<img src="icons/familyiline-logo.png" height="128px" width="128px" />
-</span>
+<p align="center">
+	<img src="icons/familyline-logo.png" height="256px" width="256px" />
+</p>
 
 Familyline is a real-time strategy game focused on Ancient Era, from since the
 neolythic period (~ 10.000 AD) to the death of Christ (~ 30 BD).
@@ -50,7 +50,7 @@ If you used that Open Folder thing from Visual Studio -- I used --,
 add the following lines into your CMakeSettings.json, inside the
 variables key
 
-```json
+```json5
 {
     "name": "CMAKE_TOOLCHAIN_FILE",
     "value": "{VCPKG_PATH}\\scripts\\buildsystems\\vcpkg.cmake"
