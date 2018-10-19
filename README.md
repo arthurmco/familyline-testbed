@@ -1,7 +1,7 @@
 # Familyline
 
 <p align="center">
-	<img src="icons/familyline-logo.png" height="256px" width="256px" />
+	<img src="icons/familyline-logo.png" height="384px" width="384px" />
 </p>
 
 Familyline is a real-time strategy game focused on Ancient Era, from since the
