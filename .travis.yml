@@ -1,6 +1,6 @@
 language: cpp
-dist: xenial
-sudo: true
+dist: trusty
+sudo: required
 compiler:
   - gcc
 
