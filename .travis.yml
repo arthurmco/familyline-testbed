@@ -37,6 +37,7 @@ before_install:
   - sudo dpkg -i libglm-dev_0.9.9~a2-2_all.deb
 
 script:
+  - eval "${MATRIX_EVAL}"
   - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
   - make familyline-tests
   - ./famiyline-tests
