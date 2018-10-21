@@ -40,4 +40,4 @@ script:
   - eval "${MATRIX_EVAL}"
   - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
   - make familyline-tests
-  - ./famiyline-tests
+  - ./familyline-tests
