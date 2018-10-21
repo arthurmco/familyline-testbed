@@ -32,9 +32,11 @@ env:
 # Without that, we don't have a reliable way of finding glm.
 # This is fixed in 18.04. We'll wait until travis support this version
 #
-script:
+before_install:
   - wget -c https://launchpad.net/ubuntu/+archive/primary/+files/libglm-dev_0.9.9~a2-2_all.deb
   - dpkg -i libglm-dev_0.9.9~a2-2_all.deb
+
+script:
   - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
   - make familyline-tests
   - ./famiyline-tests
