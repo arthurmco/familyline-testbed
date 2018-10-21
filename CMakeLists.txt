@@ -107,7 +107,6 @@ else()
   option(IS_DEBUG "Set if you want to output debugging symbols" OFF)
 
   find_package(PkgConfig REQUIRED)
-  find_package(GLM CONFIG REQUIRED)
   pkg_search_module(SDL2 REQUIRED sdl2) # finds sdl
   pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
   pkg_search_module(GLM REQUIRED glm) # finds glm
