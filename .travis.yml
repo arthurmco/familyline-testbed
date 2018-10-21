@@ -1,5 +1,14 @@
 language: cpp
+compiler:
+  - clang
+  - gcc
 
+script:
+  - make clean
+  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
+  - make familyline-tests
+  - ./famiyline-tests
+  
 matrix:
   include:
     os: linux
