@@ -59,6 +59,14 @@ variables key
 
 Then, cmake it and build everything
 
+## Running
+
+Type `make familyline` to compile the game, `make
+familyline-server` to compile the server (that doesn't work yet) or
+`make familyline-tests` to make the tests.
+
+The executables have the same names as the targets. Have fun!
+
 ## Packaging
 
 To generate a package, simply run these two commands:
