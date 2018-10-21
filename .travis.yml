@@ -1,0 +1,62 @@
+language: cpp
+compiler:
+  - clang
+  - gcc
+
+script:
+  - make clean
+  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
+  - make familyline-tests
+  - ./famiyline-tests
+
+matrix:
+  include:
+    os: linux
+    compiler: gcc
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          
+        packages:
+          - g++-7
+          - libglm-dev
+          - libglew1.10
+          - libglew-dev
+          - libsdl2-2.0.0
+          - libsdl2-dev
+          - libdevil1c2
+          - libdevil-dev
+          - libcairo2
+          - libcairo2-dev
+          - libyaml-0-2
+          - libyaml-dev
+
+        env:
+          - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+  
+  include:
+    os: linux
+    compiler: clang
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          
+        packages:
+          - clang-5.0
+          - libglm-dev
+          - libglew1.10
+          - libglew-dev
+          - libsdl2-2.0.0
+          - libsdl2-dev
+          - libdevil1c2
+          - libdevil-dev
+          - libcairo2
+          - libcairo2-dev
+          - libyaml-0-2
+          - libyaml-dev
+
+        env:
+          - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+
