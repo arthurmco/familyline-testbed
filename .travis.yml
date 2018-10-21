@@ -1,5 +1,6 @@
 language: cpp
-dist: beaver
+dist: xenial
+sudo: true
 compiler:
   - gcc
 
@@ -24,8 +25,16 @@ addons:
 
 env:
   - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-  
+
+#
+# We need to download a newer version of glm manually, because travis only support
+# ubuntu until 16.04, and that version ships with a glm without a pkgconfig entry
+# Without that, we don't have a reliable way of finding glm.
+# This is fixed in 18.04. We'll wait until travis support this version
+#
 script:
+  - wget -c https://launchpad.net/ubuntu/+archive/primary/+files/libglm-dev_0.9.9~a2-2_all.deb
+  - dpkg
   - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
   - make familyline-tests
   - ./famiyline-tests
