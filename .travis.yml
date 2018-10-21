@@ -2,12 +2,6 @@ language: cpp
 compiler:
   - clang
   - gcc
-
-script:
-  - make clean
-  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
-  - make familyline-tests
-  - ./famiyline-tests
   
 matrix:
   include:
@@ -60,3 +54,8 @@ matrix:
         env:
           - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
+script:
+  - make clean
+  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
+  - make familyline-tests
+  - ./famiyline-tests
