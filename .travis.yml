@@ -1,7 +1,6 @@
 language: cpp
 dist: trusty
 compiler:
-  - clang
   - gcc
 
 addons:
@@ -23,8 +22,10 @@ addons:
       - libyaml-0-2
       - libyaml-dev
 
+env:
+  - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+  
 script:
-  - make clean
   - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
   - make familyline-tests
   - ./famiyline-tests
