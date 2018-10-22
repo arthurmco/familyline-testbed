@@ -4,6 +4,10 @@
 	<img src="icons/familyline-logo.png" height="384px" width="384px" />
 </p>
 
+<p align="center">
+[![travis badge](https://api.travis-ci.org/arthurmco/familyline.svg?branch=master)](https://travis-ci.org/arthurmco/familyline)
+</p>
+
 Familyline is a real-time strategy game focused on Ancient Era, from since the
 neolythic period (~ 10.000 AD) to the death of Christ (~ 30 BD).
 
