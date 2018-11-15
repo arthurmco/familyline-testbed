@@ -2,7 +2,7 @@
 
 
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 /* Create a texture from an new image */
 Texture::Texture(int width, int height, GLenum format, void* data)

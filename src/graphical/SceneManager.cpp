@@ -1,7 +1,7 @@
 #include "SceneManager.hpp"
 #include "LightManager.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 
 /* Init the scene manager with terrain coordinates, in OpenGL units */

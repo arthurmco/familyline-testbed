@@ -1,7 +1,7 @@
 #include "test_player.hpp"
 #include "TestPlayer.hpp" //this is the class. Do not mistake.
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void PlayerTest::SetUp()
 {

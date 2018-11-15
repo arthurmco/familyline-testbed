@@ -9,7 +9,7 @@
 
 class AssetFileTest : public ::testing::Test {
 protected:
-    Familyline::Graphics::AssetFile* af;
+    familyline::graphics::AssetFile* af;
     
 public:
     void SetUp();

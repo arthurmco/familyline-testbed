@@ -4,7 +4,7 @@
 
 #include <Log.hpp>
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 std::list<Light*> LightManager::_lights;
 

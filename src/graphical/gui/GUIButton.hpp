@@ -13,7 +13,7 @@
 #include "GUIControl.hpp"
 #include "GUILabel.hpp"
 
-namespace Familyline::Graphics::GUI {
+namespace familyline::graphics::gui {
 
 
 	/* This is the default click handler prototype.

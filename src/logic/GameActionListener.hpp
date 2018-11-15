@@ -10,7 +10,7 @@
 #include <string>
 #include "GameAction.hpp"
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
 /*
  *  Abstract class that implements a listener for actions

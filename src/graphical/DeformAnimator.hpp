@@ -14,7 +14,7 @@
 #include <vector>
 #include "VertexData.hpp"
 
-namespace Familyline::Graphics {
+namespace familyline::graphics {
 
 	class DeformAnimator : public BaseAnimator {
 	

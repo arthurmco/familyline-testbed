@@ -3,7 +3,7 @@
 #include "TestPlayer.hpp"
 #include <vector>
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void TeamRelationTest::SetUp()
 {

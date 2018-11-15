@@ -15,7 +15,7 @@
 #ifndef ATTACKABLEOBJECT_HPP
 #define ATTACKABLEOBJECT_HPP
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     /*
      * Some packed attributes for the attack

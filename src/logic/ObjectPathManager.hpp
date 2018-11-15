@@ -15,8 +15,7 @@
 #ifndef OBJECTPATHMANAGER_HPP
 #define OBJECTPATHMANAGER_HPP
 
-namespace Familyline {
-namespace Logic {
+namespace familyline::logic {
 
 /* The object path unit */
 struct ObjectPathRef {
@@ -77,7 +76,6 @@ public:
 
 };
 
-}
 }
 
 #endif

@@ -13,7 +13,7 @@
 //#include "Unit.hpp"
 #include <list>
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     class Building : public AttackableObject {
     public:

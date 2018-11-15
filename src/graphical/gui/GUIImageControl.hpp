@@ -9,7 +9,7 @@
 
 #include "GUIControl.hpp"
 
-namespace Familyline::Graphics::GUI {
+namespace familyline::graphics::gui {
 
 	/**
 	 * This control reads a PNG file and draws it into the game

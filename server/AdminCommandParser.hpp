@@ -17,7 +17,7 @@
 
 #endif
 
-namespace Familyline::Server {
+namespace familyline::Server {
     constexpr int SERVER_PORT = 12100;
 
 /**

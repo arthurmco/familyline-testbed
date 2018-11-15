@@ -17,8 +17,7 @@
 #ifndef SCENEMANAGER_HPP
 #define SCENEMANAGER_HPP
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     /* Scene quadrant size, in OpenGL coordinates */
     #define SCENE_QUADRANT_SIZE 64
@@ -72,7 +71,6 @@ namespace Graphics {
         std::list<SceneObject*>* GetValidObjects();
     };
 
-}
 }
 
 #endif /* end of include guard: SCENEMANAGER_HPP */

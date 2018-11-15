@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
 // Action types
 enum GameActionType {

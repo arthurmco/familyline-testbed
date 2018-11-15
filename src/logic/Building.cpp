@@ -1,6 +1,6 @@
 #include "Building.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 
 /* Clone the object at a specified position

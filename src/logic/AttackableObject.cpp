@@ -3,7 +3,7 @@
 #include <cmath> // used in doAttack() function
 #include <algorithm> // std::min
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 AttackableObject::AttackableObject(object_id_t id, const char* type, const char* name,
 				   int maxLifePoints, int currLifePoints,

@@ -1,7 +1,7 @@
 #include "GUILabel.hpp"
 #include <cstring> // for strcmp
 
-using namespace Familyline::Graphics::GUI;
+using namespace familyline::graphics::gui;
 
 
 GUILabel::GUILabel(float x, float y, const char* text)

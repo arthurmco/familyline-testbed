@@ -18,7 +18,7 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-namespace Familyline::Server {
+namespace familyline::Server {
 
     /* Define the connection status, obviously */
     enum ConnectionStatus {

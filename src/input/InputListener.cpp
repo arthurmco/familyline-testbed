@@ -1,7 +1,7 @@
 #include "InputListener.hpp"
 #include "Log.hpp"
 
-using namespace Familyline::Input;
+using namespace familyline::input;
 
 InputListener::InputListener(const char* name)
 {

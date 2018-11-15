@@ -9,7 +9,7 @@
 #include "mock_gui_label.hpp"
 #include "mock_gui_button.hpp"
 
-using namespace Familyline::Graphics::GUI;
+using namespace familyline::graphics::gui;
 
 
 class GUIManagerTest : public ::testing::Test {

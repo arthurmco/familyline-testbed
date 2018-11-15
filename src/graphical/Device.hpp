@@ -12,7 +12,7 @@
 
 #include "Log.hpp"
 
-namespace Familyline::Graphics {
+namespace familyline::graphics {
 
 /* Graphical device information
 

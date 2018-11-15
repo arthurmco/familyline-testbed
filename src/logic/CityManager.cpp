@@ -1,6 +1,6 @@
 #include "CityManager.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 /**
  * Creates a city and adds it in the city manager

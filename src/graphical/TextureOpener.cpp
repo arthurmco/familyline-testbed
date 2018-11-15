@@ -1,7 +1,7 @@
 #include "TextureOpener.hpp"
 #include <cstring>
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 static bool isDevilOn = false;
 

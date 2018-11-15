@@ -1,6 +1,6 @@
 #include "TextureManager.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 TextureManager* TextureManager::_tm = nullptr;
 

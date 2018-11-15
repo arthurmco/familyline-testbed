@@ -23,8 +23,8 @@
 #include <string>
 #include <cstdio>
 
-using namespace Familyline;
-using namespace Familyline::Server;
+using namespace familyline;
+using namespace familyline::Server;
 
 volatile bool continue_main = true;
 

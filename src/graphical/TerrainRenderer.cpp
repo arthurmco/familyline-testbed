@@ -4,8 +4,8 @@
 
 #include "ShaderManager.hpp"
 
-using namespace Familyline::Graphics;
-using namespace Familyline::Logic;
+using namespace familyline::graphics;
+using namespace familyline::logic;
 
 /***
 Renderer
@@ -253,7 +253,7 @@ void TerrainRenderer::Render()
 }
 
 /* Convert a terrain point from graphical to game space */
-glm::vec3 Familyline::Graphics::GraphicalToGameSpace(glm::vec3 graphical)
+glm::vec3 familyline::graphics::GraphicalToGameSpace(glm::vec3 graphical)
 {
     return glm::vec3(graphical.x / SEC_SIZE,
 		     graphical.y / SEC_HEIGHT, graphical.z / SEC_SIZE);
@@ -263,7 +263,7 @@ glm::vec3 Familyline::Graphics::GraphicalToGameSpace(glm::vec3 graphical)
 
 
 /* Convert a terrain point from game to graphical space*/
-glm::vec3 Familyline::Graphics::GameToGraphicalSpace(glm::vec3 game)
+glm::vec3 familyline::graphics::GameToGraphicalSpace(glm::vec3 game)
 {
     return glm::vec3(game.x * SEC_SIZE,
 		     game.y * SEC_HEIGHT, game.z * SEC_SIZE);

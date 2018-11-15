@@ -5,7 +5,7 @@
 #include "ClientInit.hpp"
 #include <cstdio>
 
-using namespace Familyline::Server;
+using namespace familyline::Server;
 
 TCPInit::TCPInit(Client* c)
 {

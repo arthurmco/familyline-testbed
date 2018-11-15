@@ -20,7 +20,7 @@
 #include "MeshOpener.hpp"
 #include "../Mesh.hpp"
 
-namespace Familyline::Graphics {
+namespace familyline::graphics {
     class OBJOpener : public MeshOpener {
     
     public:

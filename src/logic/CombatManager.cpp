@@ -2,7 +2,7 @@
 #include "ObjectEventEmitter.hpp"
 #include "ObjectManager.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 CombatManager* CombatManager::defaulti;
 

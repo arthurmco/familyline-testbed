@@ -14,8 +14,7 @@
 #include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     /* Texture coordinate areas, in relative/clamped coordinates */
     struct TextureArea {
@@ -61,7 +60,6 @@ public:
     
 };
 
-} /* Graphics */
-} /* Familyline */
+} /* familyline::graphics */
 
 #endif /* end of include guard: TEXTURE_HPP */

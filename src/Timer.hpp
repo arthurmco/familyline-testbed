@@ -14,7 +14,7 @@
 #ifndef TIMER_HPP
 #define TIMER_HPP
 
-namespace Familyline {
+namespace familyline {
 
 /* The function pointer for a timer event
     - opt_inst is the optional instance argument, automatically used for C++

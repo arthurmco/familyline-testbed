@@ -9,7 +9,7 @@
 #ifndef CHATLOGGER_HPP
 #define CHATLOGGER_HPP
 
-namespace Familyline::Server {
+namespace familyline::Server {
 
 struct ChatMessage;
 

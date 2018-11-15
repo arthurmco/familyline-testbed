@@ -1,6 +1,6 @@
 #include "ObjectFactory.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 /* Gets an instance of object with type 'type', or
  * nullptr if given object wasn't added to the factory

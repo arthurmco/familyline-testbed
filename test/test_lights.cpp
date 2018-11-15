@@ -1,6 +1,6 @@
 #include "test_lights.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 void LightTest::SetUp()
 {

@@ -1,7 +1,7 @@
 #include "GUIControl.hpp"
 #include <Log.hpp>
 
-using namespace Familyline::Graphics::GUI;
+using namespace familyline::graphics::gui;
 
 GUISignal GUIControl::receiveSignal()
 {

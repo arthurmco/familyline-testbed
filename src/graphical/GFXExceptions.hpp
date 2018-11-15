@@ -9,8 +9,7 @@
 #ifndef GFXEXCEPTIONS_HPP
 #define GFXEXCEPTIONS_HPP
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     class window_exception : public std::runtime_error
     {
@@ -62,9 +61,7 @@ namespace Graphics {
         void* assetptr;
     };
 
-
-} /* Graphics */
-} /* Familyline */
+} /* familyline::graphics */
 
 
 

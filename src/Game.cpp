@@ -3,12 +3,12 @@
 #include "graphical/LightManager.hpp"
 #include "logic/ObjectEventEmitter.hpp"
 
-using namespace Familyline;
-using namespace Familyline::Logic;
-using namespace Familyline::Input;
+using namespace familyline;
+using namespace familyline::logic;
+using namespace familyline::input;
 
-using namespace Familyline::Graphics;
-using namespace Familyline::Graphics::GUI;
+using namespace familyline::graphics;
+using namespace familyline::graphics::gui;
 
 class GameActionListenerImpl : public GameActionListener {
 public:
@@ -227,7 +227,7 @@ GUILabel lblKeys = GUILabel(0.05, 0.05, "Press C to build Tent, E to build Watch
 
 int Game::RunLoop()
 {
-	CombatManager::getDefault()->SetOnDeath([&](Logic::AttackableObject* at) {
+	CombatManager::getDefault()->SetOnDeath([&](logic::AttackableObject* at) {
 		gctx.om->removeObject(gctx.om->getObject(at->getID()).lock());
 	});
 

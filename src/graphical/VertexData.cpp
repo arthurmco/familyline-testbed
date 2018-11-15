@@ -2,7 +2,7 @@
 #include "ShaderManager.hpp"
 #include "Camera.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 VertexData::VertexData()
 {

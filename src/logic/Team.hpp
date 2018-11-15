@@ -13,7 +13,7 @@
 #include <memory> //weak_ptr, shared_ptr
 #include <string>
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
         /**
      * A team.

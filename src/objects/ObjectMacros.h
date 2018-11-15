@@ -13,8 +13,8 @@
 
 #include <memory>
 
-#define DEF_MESH(dasset) this->mesh = std::make_shared<Graphics::Mesh>(	\
-	    *Familyline::Graphics::AssetManager::GetInstance()->GetAsset(dasset).mesh)
+#define DEF_MESH(dasset) this->mesh = std::make_shared<graphics::Mesh>(	\
+	    *familyline::graphics::AssetManager::GetInstance()->GetAsset(dasset).mesh)
 
 /*  Build a game object, generically.
     So, your object always needs to have a constructor like (oid, x, y ,z) */

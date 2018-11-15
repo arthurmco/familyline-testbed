@@ -14,7 +14,7 @@
 #ifndef CHATMANAGER_HPP
 #define CHATMANAGER_HPP
 
-namespace Familyline::Server {
+namespace familyline::Server {
 
 	enum ChatDestiny {
 		ToClient,

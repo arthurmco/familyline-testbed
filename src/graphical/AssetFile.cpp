@@ -7,7 +7,7 @@
 
 #include "GFXExceptions.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 
 

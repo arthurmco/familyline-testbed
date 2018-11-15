@@ -9,7 +9,7 @@
 #ifndef MESSAGEPACKET_HPP
 #define MESSAGEPACKET_HPP
 
-namespace Familyline {
+namespace familyline {
 namespace Server {
 
 /* The action values */

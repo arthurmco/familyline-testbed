@@ -11,7 +11,7 @@
 #include <NetMessageQueue.hpp>
 #include <map>
 
-namespace Familyline::Net {
+namespace familyline::Net {
     
     class NetPlayerFilter
     {

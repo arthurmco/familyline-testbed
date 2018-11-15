@@ -8,7 +8,7 @@
 #include "test_lights.hpp"
 #include "mock_gui_label.hpp"
 
-using namespace Familyline::Graphics::GUI;
+using namespace familyline::graphics::gui;
 
 
 class GUILabelTest : public ::testing::Test {

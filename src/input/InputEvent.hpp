@@ -7,8 +7,7 @@
 #ifndef INPUTEVENT_HPP
 #define INPUTEVENT_HPP
 
-namespace Familyline {
-namespace Input {
+namespace familyline::input {
 
 enum EventType {
     EVENT_KEYEVENT = 1,     /* Key event */
@@ -58,7 +57,6 @@ struct InputEvent {
     } event;
 };
 
-}
 }
 
 #endif /* end of include guard: INPUTEVENT_HPP */

@@ -1,7 +1,7 @@
 #include "ServerPlayerManager.hpp"
 #include <Log.hpp>
 
-using namespace Familyline::Server;
+using namespace familyline::Server;
 
 
 /* Add a client as a player

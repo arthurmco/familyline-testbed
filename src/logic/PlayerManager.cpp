@@ -1,7 +1,7 @@
 #include "PlayerManager.hpp"
 #include "Log.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 static int last_player_id = 0;
 

@@ -8,7 +8,7 @@
 #include "../src/graphical/gui/GUIManager.hpp"
 #include "../src/graphical/gui/GUIButton.hpp"
 
-using namespace Familyline::Graphics::GUI;
+using namespace familyline::graphics::gui;
 
 class GUIButtonTest : public ::testing::Test {
 protected:

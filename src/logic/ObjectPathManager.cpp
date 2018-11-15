@@ -4,7 +4,7 @@
 #include <algorithm>
 
 int maxpathID = 0;
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 static std::vector<glm::vec3> ConvertTo3DPath(std::vector<glm::vec2>* path)
 {

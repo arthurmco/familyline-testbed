@@ -17,7 +17,7 @@
 #include "City.hpp"
 #include "Player.hpp"
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     /**
      * Manages the current cities
@@ -46,7 +46,7 @@ namespace Familyline::Logic {
 
     };
     
-}  // Familyline::Logic
+}  // familyline::logic
 
 
 #endif /* CITYMANAGER_HPP */

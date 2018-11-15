@@ -11,7 +11,7 @@
 #include "Client.hpp"
 #include "ServerPlayerManager.hpp"
 
-namespace Familyline::Server {
+namespace familyline::Server {
 
 
     /* TCP initialization steps.

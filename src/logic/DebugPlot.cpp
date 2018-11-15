@@ -1,6 +1,6 @@
 #include "DebugPlot.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 
 /* Adds a vector of points to form a path.

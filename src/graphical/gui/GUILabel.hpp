@@ -11,7 +11,7 @@
 
 #include "GUIControl.hpp"
 
-namespace Familyline::Graphics::GUI {
+namespace familyline::graphics::gui {
 
 	class GUILabel : public GUIControl {
 	private:

@@ -14,8 +14,7 @@
 #ifndef TERRAIN_HPP
 #define TERRAIN_HPP
 
-namespace Familyline {
-namespace Logic {
+namespace familyline::logic {
 
     /*  A terrain is divided into sections.
         The sections are stored contiguously in the terrain file (and memory)
@@ -68,8 +67,5 @@ namespace Logic {
     };
 
 }
-}
-
-
 
 #endif /* end of include guard: TERRAIN_HPP */

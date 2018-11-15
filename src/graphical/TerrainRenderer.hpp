@@ -27,7 +27,7 @@
 /* What each unit of height means in OpenGL units */
 #define SEC_HEIGHT 0.01
 
-namespace Familyline::Graphics {
+namespace familyline::graphics {
 
     /* A stripped-down version of a vertex data.
      *
@@ -61,7 +61,7 @@ namespace Familyline::Graphics {
 	
 	std::vector<TerrainDataInfo> _tdata;
 
-	Familyline::Logic::Terrain* _t;
+	familyline::logic::Terrain* _t;
 
 	Camera* _cam  = nullptr;
         glm::mat4 _wmatrix = glm::mat4(1.0f);
@@ -78,13 +78,13 @@ namespace Familyline::Graphics {
 	std::array<unsigned int, ImageWidth*ImageHeight> GetTerrainTexture(unsigned int type_id);
 
 	/* Generate terrain texture from a certain terrain data */
-	Texture* GenerateTerrainSlotTexture(Familyline::Logic::TerrainData* data);
+	Texture* GenerateTerrainSlotTexture(familyline::logic::TerrainData* data);
 	
     public:
         TerrainRenderer();
 
-        void SetTerrain(Familyline::Logic::Terrain*);
-        Familyline::Logic::Terrain* GetTerrain();
+        void SetTerrain(familyline::logic::Terrain*);
+        familyline::logic::Terrain* GetTerrain();
 
         void SetCamera(Camera*);
         Camera* GetCamera();

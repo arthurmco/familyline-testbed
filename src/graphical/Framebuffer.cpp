@@ -1,6 +1,6 @@
 #include "Framebuffer.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 /*	Create the framebuffer, its texture (for getting the image) and its
 	renderbuffer (to correctly render depth) */

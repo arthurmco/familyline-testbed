@@ -1,6 +1,6 @@
 #include "TestObject.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 static AttackAttributes atk(3, 1, glm::radians(180.0), 25, 3);
 

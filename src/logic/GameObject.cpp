@@ -9,7 +9,7 @@
 #include "ObjectManager.hpp"
 #include <cstring>
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 /**
  * Clears all references in the reference hashmap

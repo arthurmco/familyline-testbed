@@ -16,7 +16,7 @@
 #include "ShaderProgram.hpp"
 
 
-namespace Familyline::Graphics {
+namespace familyline::graphics {
 
 	struct VertexData;
 	class Mesh;

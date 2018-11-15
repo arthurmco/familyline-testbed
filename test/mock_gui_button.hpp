@@ -3,7 +3,7 @@
 
 #include "../src/graphical/gui/GUIButton.hpp"
 
-class CGUIButton : public Familyline::Graphics::GUI::GUIButton {
+class CGUIButton : public familyline::graphics::gui::GUIButton {
 private:
     unsigned nCalls = 0;
     static int n_renderOrder;

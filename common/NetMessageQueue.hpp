@@ -43,7 +43,7 @@
 
 #define MAX_CLIENT_BUFFER 8192
 
-namespace Familyline::Server {
+namespace familyline::Server {
 
     
 /*

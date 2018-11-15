@@ -23,7 +23,7 @@ extern "C" {
 
 #include <string>
 
-namespace Familyline::Graphics {
+namespace familyline::graphics {
 
     /* The asset itself, as a file, not an object */
     struct AssetItem {

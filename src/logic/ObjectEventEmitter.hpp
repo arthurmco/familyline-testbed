@@ -12,7 +12,7 @@
 
 #include "ObjectEvent.hpp"
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     class ObjectEventListener;
     class ObjectManager;
@@ -49,7 +49,7 @@ namespace Familyline::Logic {
 
 
 
-}  // Familyline::Logic
+}  // familyline::logic
 
 
 

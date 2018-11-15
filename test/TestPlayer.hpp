@@ -10,17 +10,17 @@
 
    This spares a variable creation, we can use one already.
 */
-class TestPlayer : public Familyline::Logic::Player {
+class TestPlayer : public familyline::logic::Player {
 public:
     TestPlayer(const char* name,
-	       Familyline::Logic::GameActionManager* gam =
-	       new Familyline::Logic::GameActionManager{})
+	       familyline::logic::GameActionManager* gam =
+	       new familyline::logic::GameActionManager{})
 	: Player(name, 0, gam)
 	{
 	    
 	}
 
-    virtual bool Play(Familyline::Logic::GameContext*) {this->_xp++; return true; }
+    virtual bool Play(familyline::logic::GameContext*) {this->_xp++; return true; }
     virtual bool ProcessInput() { return true;}
     virtual bool HasUpdatedObject() { return true; }
 

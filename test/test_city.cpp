@@ -23,7 +23,7 @@ public:
 #include "logic/ObjectEventEmitter.hpp"
 #include "logic/ObjectEvent.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void CityTest::TearDown() {
 

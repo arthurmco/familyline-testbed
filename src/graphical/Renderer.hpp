@@ -27,8 +27,7 @@
 #include "Log.hpp"
 
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     struct VertexRenderInfo {
         VertexData* vd;
@@ -96,7 +95,5 @@ namespace Graphics {
     };
 
 }
-}
-
 
 #endif /* end of include guard: RENDERER_HPP */

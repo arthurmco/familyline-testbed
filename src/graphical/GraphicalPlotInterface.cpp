@@ -2,8 +2,8 @@
 #include "TerrainRenderer.hpp"
 #include <functional>
 
-using namespace Familyline::Graphics;
-using namespace Familyline::Logic;
+using namespace familyline::graphics;
+using namespace familyline::logic;
 
 GraphicalPlotInterface::GraphicalPlotInterface(Renderer* renderer)
     : _renderer(renderer)

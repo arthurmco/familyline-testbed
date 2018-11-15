@@ -14,7 +14,7 @@
 #ifndef ACTIONMANAGER_HPP
 #define ACTIONMANAGER_HPP
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     class ActionManager {
     private:

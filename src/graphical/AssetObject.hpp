@@ -17,7 +17,7 @@
 #include "Material.hpp"
 #include <vector>
 
-namespace Familyline::Graphics {
+namespace familyline::graphics {
 
     union AssetObject {
 	Mesh* mesh;

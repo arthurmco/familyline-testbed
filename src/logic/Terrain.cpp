@@ -1,6 +1,6 @@
 #include "Terrain.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 
 Terrain::Terrain(int w, int h)

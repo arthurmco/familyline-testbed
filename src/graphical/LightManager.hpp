@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 #include <list>
 
-namespace Familyline::Graphics {
+namespace familyline::graphics {
 
 	class LightManager {
 	private:

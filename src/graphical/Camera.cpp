@@ -1,6 +1,6 @@
 #include "Camera.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 Camera::Camera(glm::vec3 pos, float aspectRatio, glm::vec3 lookAt)
 {

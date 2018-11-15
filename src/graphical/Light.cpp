@@ -1,6 +1,6 @@
 #include "Light.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 void Light::SetColor(int r, int g, int b)
 {

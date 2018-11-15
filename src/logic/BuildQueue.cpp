@@ -1,7 +1,7 @@
 #include "BuildQueue.hpp"
 #include <Log.hpp>
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void BuildQueue::Add(AttackableObject* o)
 {

@@ -19,7 +19,7 @@
 #include <memory> //weak_ptr, shared_ptr
 #include <glm/glm.hpp>
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     class Player;
 

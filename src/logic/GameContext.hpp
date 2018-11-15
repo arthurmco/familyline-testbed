@@ -12,8 +12,7 @@
 #ifndef GAMECONTEXT_HPP
 #define GAMECONTEXT_HPP
 
-namespace Familyline {
-namespace Logic {
+namespace familyline::logic {
 
     struct GameContext {
         ObjectManager* om;
@@ -21,7 +20,6 @@ namespace Logic {
     };
 
 
-}
 }
 
 

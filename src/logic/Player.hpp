@@ -16,7 +16,7 @@
 #include "GameActionManager.hpp"
 #include "City.hpp"
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     class Player {
 	friend class CityListener;

@@ -13,8 +13,7 @@
 #ifndef SCENEOBJECT_HPP
 #define SCENEOBJECT_HPP
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     enum SceneObjectType {
         SCENE_GENERIC = 0,
@@ -61,8 +60,5 @@ namespace Graphics {
     };
 
 }
-}
-
-
 
 #endif /* end of include guard: SCENEOBJECT_HPP */

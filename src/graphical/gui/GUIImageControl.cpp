@@ -1,8 +1,8 @@
 #include "GUIImageControl.hpp"
 #include <Log.hpp>
 
-using namespace Familyline;
-using namespace Familyline::Graphics::GUI;
+using namespace familyline;
+using namespace familyline::graphics::gui;
 
 GUIImageControl::GUIImageControl(float xPos, float yPos, float width,
 	float height, const char* filename)

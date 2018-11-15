@@ -11,7 +11,7 @@ class PathFindingTest : public ::testing::Test {
 
 #include "graphical/meshopener/OBJOpener.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 TEST(MeshTest, OBJOpenTest) {
     OBJOpener om;
     Mesh* m = om.Open("test/test.obj").at(0);

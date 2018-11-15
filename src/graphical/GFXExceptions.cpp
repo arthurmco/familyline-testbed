@@ -1,6 +1,6 @@
 #include "GFXExceptions.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 renderer_exception::renderer_exception(std::string msg, int code)
     : std::runtime_error(msg)

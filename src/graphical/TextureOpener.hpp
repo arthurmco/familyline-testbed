@@ -18,8 +18,7 @@
 #define TEXTUREOPENER_HPP
 
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
 class TextureFile
 {
@@ -60,7 +59,6 @@ public:
 
 };
 
-} /* Graphics */
-} /* Familyline */
+} /* familyline::graphics */
 
 #endif /* end of include guard: TEXTUREOPENER_HPP */

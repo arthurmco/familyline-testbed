@@ -9,7 +9,7 @@
 
 #include <glm/glm.hpp>
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     /* A logic representation of a mesh, with only the sufficient for the
        abstract part of the game (the files in the 'logic' folder) to work
@@ -25,7 +25,7 @@ namespace Familyline::Logic {
     };
     
 
-}  // Familyline::Logic
+}  // familyline::logic
 
 
 

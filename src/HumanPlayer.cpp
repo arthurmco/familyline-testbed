@@ -2,10 +2,10 @@
 #include "graphical/meshopener/OBJOpener.hpp"
 
 
-using namespace Familyline;
-using namespace Familyline::Graphics;
-using namespace Familyline::Logic;
-using namespace Familyline::Input;
+using namespace familyline;
+using namespace familyline::graphics;
+using namespace familyline::logic;
+using namespace familyline::input;
 
 HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
     : Player(name, xp, gam)
@@ -16,13 +16,13 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
     }
 
 
-void HumanPlayer::SetCamera(Familyline::Graphics::Camera* c) { _cam = c;}
-void HumanPlayer::SetPicker(Familyline::Input::InputPicker* ip) { _ip = ip; }
-void HumanPlayer::SetPathfinder(Familyline::Logic::PathFinder* p) { _pf = p; }
+void HumanPlayer::SetCamera(familyline::graphics::Camera* c) { _cam = c;}
+void HumanPlayer::SetPicker(familyline::input::InputPicker* ip) { _ip = ip; }
+void HumanPlayer::SetPathfinder(familyline::logic::PathFinder* p) { _pf = p; }
 
 bool build_tent = false, build_tower = false;
 
-void HumanPlayer::SetGameActionManager(Familyline::Logic::GameActionManager* gam)
+void HumanPlayer::SetGameActionManager(familyline::logic::GameActionManager* gam)
 {
     this->_gam = gam;
 

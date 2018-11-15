@@ -1,10 +1,10 @@
 #include "ObjectRenderer.hpp"
 #include "../graphical/TerrainRenderer.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 
-ObjectRenderer::ObjectRenderer(ObjectManager* om, Familyline::Graphics::SceneManager* sm)
+ObjectRenderer::ObjectRenderer(ObjectManager* om, familyline::graphics::SceneManager* sm)
 	: GameActionListener("object-renderer-listener"), _om(om), _sm(sm)
 {
     ObjectEventEmitter::addListener(&this->oel);
@@ -55,7 +55,7 @@ bool ObjectRenderer::Check()
 
 		    ObjectRenderData ord;
 		    ord.ID = e.oid;
-		    ord.m = std::dynamic_pointer_cast<Graphics::Mesh>(sgo->mesh);
+		    ord.m = std::dynamic_pointer_cast<graphics::Mesh>(sgo->mesh);
 		    _sm->AddObject(ord.m.get());
 
 		    Log::GetLog()->InfoWrite("object-renderer",
@@ -104,10 +104,10 @@ bool ObjectRenderer::Check()
 
 	// 			object_found++;
 	// 			_objects.emplace_back(loc);
-	// 			_sm->AddObject((Graphics::Mesh*)loc->mesh);
+	// 			_sm->AddObject((graphics::Mesh*)loc->mesh);
 	// 			ObjectRenderData ord;
 	// 			ord.ID = it->oid;
-	// 			ord.m = (Graphics::Mesh*)loc->mesh;
+	// 			ord.m = (graphics::Mesh*)loc->mesh;
 	// 			_IDs.push_back(ord);
 	// 		}
 	// 	}
@@ -163,10 +163,10 @@ void ObjectRenderer::Update()
 	y = sobj->position.y;
 	z = sobj->position.z;
 
-	std::shared_ptr<Graphics::Mesh> mm = std::dynamic_pointer_cast<Graphics::Mesh>(
+	std::shared_ptr<graphics::Mesh> mm = std::dynamic_pointer_cast<graphics::Mesh>(
 	    sobj->mesh);
 
-	mm->SetPosition(Graphics::GameToGraphicalSpace(glm::vec3(x, y, z)));
+	mm->SetPosition(graphics::GameToGraphicalSpace(glm::vec3(x, y, z)));
 	mm->ApplyTransformations();
 
 	/*

@@ -16,7 +16,7 @@
 #include "GameObject.hpp"
 #include "Log.hpp"
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     /*
      * Manages the objects creation and deletion.

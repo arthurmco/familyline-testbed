@@ -12,7 +12,7 @@
 #include <string>
 #include "ShaderProgram.hpp"
 
-namespace Familyline::Graphics
+namespace familyline::graphics
 {
 	class ShaderManager {
 	private:

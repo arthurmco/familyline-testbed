@@ -1,8 +1,8 @@
 #include "GUIButton.hpp"
 #include <Log.hpp>
 
-using namespace Familyline;
-using namespace Familyline::Graphics::GUI;
+using namespace familyline;
+using namespace familyline::graphics::gui;
 
 GUIButton::GUIButton(float x, float y, float w, float h, const char* text)
 {

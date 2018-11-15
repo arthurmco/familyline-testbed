@@ -26,9 +26,7 @@
 #include <unordered_map>
 #include "AssetObject.hpp"
 
-
-namespace Familyline::Graphics {
-
+namespace familyline::graphics {
     
     enum AssetType {
 	AMesh,

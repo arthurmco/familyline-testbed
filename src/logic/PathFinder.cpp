@@ -4,7 +4,7 @@
 
 #include "ObjectEventEmitter.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 PathFinder::PathFinder(ObjectManager* om)
 	: _om(om)

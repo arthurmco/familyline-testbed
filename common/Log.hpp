@@ -13,7 +13,7 @@
 #ifndef LOG_HPP
 #define LOG_HPP
 
-namespace Familyline {
+namespace familyline {
 
     class Log {
     private:

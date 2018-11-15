@@ -12,7 +12,7 @@
 #ifndef ACTION_HPP
 #define ACTION_HPP
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     /* An action is any predefined command done by an object.
        Examples are: train unit, build construction, repair...

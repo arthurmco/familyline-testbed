@@ -23,11 +23,11 @@
 #ifndef OBJECTRENDERER_HPP
 #define OBJECTRENDERER_HPP
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     struct ObjectRenderData {
 	int ID;
-	std::shared_ptr<Familyline::Graphics::Mesh> m;
+	std::shared_ptr<familyline::graphics::Mesh> m;
     };
 
     /*
@@ -43,7 +43,7 @@ namespace Familyline::Logic {
     {
     private:
 	ObjectManager * _om;
-	Familyline::Graphics::SceneManager* _sm;
+	familyline::graphics::SceneManager* _sm;
 	ObjectEventListener oel;
 
 	std::vector<std::weak_ptr<GameObject>> _objects;
@@ -54,7 +54,7 @@ namespace Familyline::Logic {
 	std::map<int, bool> _deleted_ids;
 
     public:
-	ObjectRenderer(ObjectManager*, Familyline::Graphics::SceneManager*);
+	ObjectRenderer(ObjectManager*, familyline::graphics::SceneManager*);
 
 	virtual void OnListen(GameAction& a);
 

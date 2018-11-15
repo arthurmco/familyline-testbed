@@ -8,7 +8,7 @@
 
 #include <glm/glm.hpp>
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 struct FaceIndex {
     unsigned idxVertex[3], idxNormal[3], idxTex[3];

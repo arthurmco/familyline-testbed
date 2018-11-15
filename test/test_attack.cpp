@@ -19,7 +19,7 @@ public:
     void TearDown(){}
 };
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 TEST_F(AttackTest, TestBasicAttackOnRange) {
 

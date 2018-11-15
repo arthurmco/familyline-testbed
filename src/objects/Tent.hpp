@@ -10,10 +10,10 @@
 #ifndef TENT_H
 #define TENT_H
 
-namespace Familyline {
+namespace familyline {
 
 /*  A tent is a basic people storage building */
-class Tent : public Logic::Building {
+class Tent : public logic::Building {
 private:
     static const int TID = 2;
 public:

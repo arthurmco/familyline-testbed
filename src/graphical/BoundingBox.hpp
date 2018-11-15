@@ -10,8 +10,7 @@
 #ifndef BOUNDINGBOX_HPP
 #define BOUNDINGBOX_HPP
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     enum BoundingBoxPoints
     {
@@ -51,7 +50,7 @@ namespace Graphics {
         int CheckCollisionOnRay(glm::vec3 ray) const;
 
         /* Check if two bounding boxes collide.
-            If true, return the faces that the first bounding box
+	   If true, return the faces that the first bounding box
             (the method owner) collides at 'firstFaces' and the faces that
             it collides on the another bb at 'secondFaces'.
             If false, return false. */
@@ -61,8 +60,7 @@ namespace Graphics {
     };
 
 
-} /* Graphics */
-} /* Familyline */
+} /* familyline::graphics */
 
 
 #endif /* end of include guard: BOUNDINGBOX_HPP */

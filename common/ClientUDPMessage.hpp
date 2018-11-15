@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace Familyline::Server {
+namespace familyline::Server {
 
 	/**
 	 *  UDP message header layout, little endian

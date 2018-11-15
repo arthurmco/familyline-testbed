@@ -1,7 +1,7 @@
 #include "Renderer.hpp"
 #include "../config.h"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 GLuint vao_tri = 0, vbo_tri = 0;
 

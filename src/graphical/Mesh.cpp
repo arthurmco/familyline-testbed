@@ -1,7 +1,7 @@
 #include "Mesh.hpp"
 #include "Material.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 Mesh::Mesh(VertexData* vd)
     : SceneObject("Mesh", glm::vec3(0,0,0), 0, 0, 0)

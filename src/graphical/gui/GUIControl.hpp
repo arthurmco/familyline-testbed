@@ -15,7 +15,7 @@
 // Import glm so we can have an uniform 3-value vector-like structure
 #include <glm/glm.hpp>
 
-namespace Familyline::Graphics::GUI {
+namespace familyline::graphics::gui {
 
 	/* The default type for GUI canvas */
 	typedef cairo_surface_t* GUICanvas;

@@ -12,8 +12,7 @@
 #ifndef LIGHT_HPP
 #define LIGHT_HPP
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     class Light : public SceneObject {
     private:
@@ -34,8 +33,7 @@ namespace Graphics {
             int r, int g, int b, float strength);
     };
 
-} /* Graphics */
-} /* Familyline */
+} /* familyline::graphics */
 
 
 

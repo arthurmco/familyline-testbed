@@ -28,7 +28,7 @@
 
 #include "../Mesh.hpp"
 
-namespace Familyline::Graphics {
+namespace familyline::graphics {
     
 // Call this in the constructor
 #define OPENER_REGISTER(extension)		\

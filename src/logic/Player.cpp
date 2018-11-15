@@ -2,8 +2,8 @@
 #include "City.hpp"
 #include <chrono>
 
-using namespace Familyline;
-using namespace Familyline::Logic;
+using namespace familyline;
+using namespace familyline::logic;
 
 Player::Player(const char* name, int xp, GameActionManager* gam)
     : _name{name},  _xp(xp), _gam(gam)

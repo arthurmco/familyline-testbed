@@ -9,7 +9,7 @@
 #ifndef GUISIGNAL_H
 #define GUISIGNAL_H
 
-namespace Familyline::Graphics::GUI {
+namespace familyline::graphics::gui {
 
     class GUIControl;
     

@@ -3,7 +3,7 @@
 
 #include <new> // for std::bad_alloc
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 Window::Window(int w, int h, unsigned win_opts)
 {

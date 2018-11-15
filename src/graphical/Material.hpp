@@ -13,8 +13,7 @@
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     struct MaterialData {
         glm::vec3 diffuseColor;
@@ -62,8 +61,6 @@ namespace Graphics {
     };
 
 }
-}
-
 
 
 #endif /* end of include guard: MATERIAL_HPP */

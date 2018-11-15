@@ -4,8 +4,8 @@
 #include "ObjectEventEmitter.hpp"
 #include <Log.hpp>
 
-using namespace Familyline;
-using namespace Familyline::Logic;
+using namespace familyline;
+using namespace familyline::logic;
 
 ObjectManager* ObjectManager::instance;
 

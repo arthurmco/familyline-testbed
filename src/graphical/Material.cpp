@@ -1,6 +1,6 @@
 #include "Material.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 int lastID = 0;
 Material::Material(int ID, const char* name, MaterialData data)

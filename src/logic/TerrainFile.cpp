@@ -1,6 +1,6 @@
 #include "TerrainFile.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 
 /* 	Opens the terrain file. 

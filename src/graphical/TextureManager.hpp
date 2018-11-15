@@ -1,7 +1,7 @@
 /***
     Texture manager
 
-    Copyright (C) 2016 Arthur Mendes.
+    Copyright (C) 2016, 2018 Arthur Mendes.
 
 ***/
 
@@ -14,8 +14,7 @@
 #ifndef TEXTUREMANAGER_HPP
 #define TEXTUREMANAGER_HPP
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     class TextureManager
     {
@@ -40,7 +39,6 @@ namespace Graphics {
         }
     };
 
-}
 }
 
 #endif

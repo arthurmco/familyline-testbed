@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include "NetServer.hpp"
 
-using namespace Familyline::Net;
-using namespace Familyline::Server;
+using namespace familyline::Net;
+using namespace familyline::Server;
 /**
  * Get the corresponding message queue from the client 
  * 'client_id'

@@ -21,7 +21,7 @@
 #include "../ShaderProgram.hpp"
 #include "../Window.hpp"
 
-namespace Familyline::Graphics::GUI {
+namespace familyline::graphics::gui {
 
 	/*
 	 * The GUI Manager
@@ -36,7 +36,7 @@ namespace Familyline::Graphics::GUI {
 		bool force_redraw = false;
 
 		/* This listener receives the input events from the game and puts them into the control */
-		Input::InputListener* listener = nullptr;
+		input::InputListener* listener = nullptr;
 
 		ShaderProgram* sGUI;
 
@@ -52,7 +52,7 @@ namespace Familyline::Graphics::GUI {
 		GUIManager();
 
 
-		void initShaders(Familyline::Graphics::Window* w);
+		void initShaders(familyline::graphics::Window* w);
 
 
 		/** Add the controller (and send the containeradd event) **/

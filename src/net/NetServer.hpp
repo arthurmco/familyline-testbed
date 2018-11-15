@@ -32,7 +32,7 @@
 #include <arpa/inet.h>
 #endif
 
-namespace Familyline::Net {
+namespace familyline::Net {
 
     /* Any error that can occur on the server */
     class ServerException : public std::runtime_error {
@@ -55,12 +55,12 @@ namespace Familyline::Net {
 	struct sockaddr_in _serveraddr;
 
 	/* Receive a message */
-	Familyline::Server::NetMessageQueue* cmq = nullptr;
+	familyline::Server::NetMessageQueue* cmq = nullptr;
 	
     public:
 	const char* Receive(size_t maxlen = 1024);
 
-	Familyline::Server::NetMessageQueue* GetQueue() { return this->cmq; }
+	familyline::Server::NetMessageQueue* GetQueue() { return this->cmq; }
 	
 	Server(const char* ipaddr, int port = 12000);
 

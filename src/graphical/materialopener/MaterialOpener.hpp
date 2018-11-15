@@ -15,8 +15,7 @@
 #ifndef MATERIALOPENER_HPP
 #define MATERIALOPENER_HPP
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
 class MaterialOpener
 {
@@ -27,9 +26,5 @@ public:
 };
 
 }
-}
-
-
-
 
 #endif /* end of include guard: MATERIALOPENER_HPP */

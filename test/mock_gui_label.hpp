@@ -4,7 +4,7 @@
 #include "../src/graphical/gui/GUILabel.hpp"
 
 
-class CGUILabel : public Familyline::Graphics::GUI::GUILabel {
+class CGUILabel : public familyline::graphics::gui::GUILabel {
 private:
     unsigned nCalls = 0;
 

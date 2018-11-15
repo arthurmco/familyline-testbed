@@ -1,6 +1,6 @@
 #include "MaterialManager.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 MaterialManager* MaterialManager::_mm = nullptr;
 

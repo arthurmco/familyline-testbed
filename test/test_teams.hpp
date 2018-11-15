@@ -12,7 +12,7 @@
 
 class TeamRelationTest : public ::testing::Test {
 protected:
-    Familyline::Logic::CityManager* cm = nullptr;;
+    familyline::logic::CityManager* cm = nullptr;;
     
 public:
     void SetUp();

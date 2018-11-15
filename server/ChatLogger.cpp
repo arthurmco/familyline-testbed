@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <Log.hpp>
 
-using namespace Familyline::Server;
+using namespace familyline::Server;
 
 /**
  * Store message in the logger

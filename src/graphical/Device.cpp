@@ -5,8 +5,8 @@
 #include <GL/glxew.h>
 #endif
 
-using Familyline::Log;
-using namespace Familyline::Graphics;
+using familyline::Log;
+using namespace familyline::graphics;
 
 DeviceInfo::DeviceInfo(int device_id, const char* name,
 	const char* vendor, size_t vram)

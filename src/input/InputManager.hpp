@@ -19,7 +19,7 @@
 #ifndef INPUTMANAGER_HPP
 #define INPUTMANAGER_HPP
 
-namespace Familyline::Input {
+namespace familyline::input {
 
     /*  Maximum events for each iteration. */
     #define MAX_INPUT_QUEUE 128
@@ -98,6 +98,6 @@ namespace Familyline::Input {
         }
     };
 
-} /* Familyline::Input */
+} /* familyline::input */
 
 #endif /* end of include guard: INPUTMANAGER_HPP */

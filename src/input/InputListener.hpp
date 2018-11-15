@@ -10,7 +10,7 @@
 #ifndef INPUTLISTENER_HPP
 #define INPUTLISTENER_HPP
 
-namespace Familyline::Input {
+namespace familyline::input {
 
 class InputListener {
 private:

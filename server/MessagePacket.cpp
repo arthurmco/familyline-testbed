@@ -1,6 +1,6 @@
 #include "MessagePacket.hpp"
 
-using namespace Familyline::Server;
+using namespace familyline::Server;
 
 MessagePacket::MessagePacket()
 {

@@ -11,7 +11,7 @@
 #include <cstring> // strcmp
 #include <cstdlib> // getenv
 
-using namespace Familyline;
+using namespace familyline;
 using namespace std::chrono;
 
 Log* Log::l = NULL;

@@ -1,7 +1,7 @@
 #include "WatchTower.hpp"
 
-using namespace Familyline;
-using namespace Familyline::Logic;
+using namespace familyline;
+using namespace familyline::logic;
 
 static AttackAttributes atk(1.2, 1.5, glm::radians(180.0), 25, 1.2);
 

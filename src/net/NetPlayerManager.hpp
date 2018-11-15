@@ -14,16 +14,16 @@
 #include "../HumanPlayer.hpp"
 #include "NetPlayerFilter.hpp"
 
-namespace Familyline::Net {
+namespace familyline::Net {
     
     // The net server declaration
     class Server;
 
-    class NetPlayerManager : public Logic::PlayerManager {
+    class NetPlayerManager : public logic::PlayerManager {
     private:
-	Logic::PlayerData humandata;
+	logic::PlayerData humandata;
 	NetPlayerFilter* npf = nullptr;
-	Familyline::Server::NetMessageQueue* smq;
+	familyline::Server::NetMessageQueue* smq;
 	
     public:
 
@@ -35,14 +35,14 @@ namespace Familyline::Net {
 	 * @param server_mq The server message queue, to send/receive messages
 	 */
 	explicit NetPlayerManager(const char* player_name, int player_id,
-				  Familyline::Server::NetMessageQueue* server_mq);
+				  familyline::Server::NetMessageQueue* server_mq);
 	   
 	/* Add a player, receive its ID */
-	int AddPlayer(Logic::Player* p, int flags = 0);
+	int AddPlayer(logic::Player* p, int flags = 0);
 
 	/* Get a player by some information (ID or name) */
-	const Logic::Player* GetbyID(int ID) const;
-	const Logic::Player* GetbyName(const char* name) const;
+	const logic::Player* GetbyID(int ID) const;
+	const logic::Player* GetbyName(const char* name) const;
 
 	/**
 	 * Gets information about the remote players
@@ -64,7 +64,7 @@ namespace Familyline::Net {
 	   Return false only if the human player returns false.
 	   This usually mean that the human wants to stop the game.
 	*/
-	bool PlayAll(Logic::GameContext* gct);
+	bool PlayAll(logic::GameContext* gct);
 
 
 	virtual ~NetPlayerManager();

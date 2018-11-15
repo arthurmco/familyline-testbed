@@ -2,7 +2,7 @@
 #include "Log.hpp"
 #include <cstdio>
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void ActionManager::AddAction(Action a)
 {

@@ -46,7 +46,7 @@
 #ifndef SERVERMANAGER_HPP
 #define SERVERMANAGER_HPP
 
-namespace Familyline::Server {
+namespace familyline::Server {
 
 	class ServerManager {
 	private:

@@ -16,7 +16,7 @@
 #ifndef BUILDQUEUE_HPP
 #define BUILDQUEUE_HPP
 
-namespace Familyline::Logic {
+namespace familyline::logic {
     class BuildQueue {
     private:
 	std::queue<AttackableObject*> _objects;

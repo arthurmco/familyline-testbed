@@ -11,7 +11,7 @@
 
 #include "GameObject.hpp"
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     class ObjectManager;
     class City;

@@ -1,6 +1,6 @@
 #include "ObjectEventListener.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void ObjectEventListener::pushEvent(ObjectEvent e)
 {

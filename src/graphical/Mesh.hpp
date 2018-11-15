@@ -20,12 +20,11 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     class Material;
     
-    class Mesh : public SceneObject, public Logic::IMesh
+    class Mesh : public SceneObject, public logic::IMesh
     {
     private:
         glm::mat4 _rotMatrix;
@@ -69,8 +68,7 @@ namespace Graphics {
 
 
 
-} /* Graphics */
-} /* Familyline */
+} /* familyline::graphics */
 
 
 

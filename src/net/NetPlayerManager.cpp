@@ -10,8 +10,8 @@
 
 #endif
 
-using namespace Familyline::Net;
-using namespace Familyline::Logic;
+using namespace familyline::Net;
+using namespace familyline::logic;
 
 /**
  * Build a network player manager.
@@ -21,7 +21,7 @@ using namespace Familyline::Logic;
  * @param server_mq The server message queue, to send/receive messages
  */
 NetPlayerManager::NetPlayerManager(const char* player_name, int player_id,
-				   Familyline::Server::NetMessageQueue* server_mq)
+				   familyline::Server::NetMessageQueue* server_mq)
     :  PlayerManager(),
        smq(server_mq)
      

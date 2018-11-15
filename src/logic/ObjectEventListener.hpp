@@ -11,7 +11,7 @@
 
 #include "ObjectEvent.hpp"
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     /**
      * An interface that every class that wishes to list for object events must inherit
@@ -35,7 +35,7 @@ namespace Familyline::Logic {
 
     
 
-}  // Familyline::Logic
+}  // familyline::logic
 
 
 #endif /* OBJECTEVENTLISTENER_HPP */

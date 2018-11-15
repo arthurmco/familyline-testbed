@@ -1,6 +1,6 @@
 #include "Unit.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 // Unit::Unit(int oid, int tid, const char* name,
 // 	   float x, float y, float z, int maxHP, float HP,

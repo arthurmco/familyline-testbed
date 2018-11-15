@@ -28,24 +28,24 @@
 #include "input/InputPicker.hpp"
 #include "input/InputManager.hpp"
 
-    class HumanPlayer : public Familyline::Logic::Player
+    class HumanPlayer : public familyline::logic::Player
     {
     private:
-        Familyline::Graphics::Camera* _cam;
-	Familyline::Input::InputPicker* _ip;
+        familyline::graphics::Camera* _cam;
+	familyline::input::InputPicker* _ip;
 
-	std::weak_ptr<Familyline::Logic::AttackableObject> _selected_obj;
-        Familyline::Logic::PathFinder* _pf = nullptr;
+	std::weak_ptr<familyline::logic::AttackableObject> _selected_obj;
+        familyline::logic::PathFinder* _pf = nullptr;
 	
         bool _updated = false;
 
     public:
 	bool renderBBs = false;
 
-        Familyline::Logic::ObjectRenderer* objr;
+        familyline::logic::ObjectRenderer* objr;
 
         HumanPlayer(const char* name, int xp=0,
-		    Familyline::Logic::GameActionManager* gam = nullptr);
+		    familyline::logic::GameActionManager* gam = nullptr);
 
 
         /***
@@ -56,7 +56,7 @@
 
             Returns true to continue its loop, false otherwise.
         ***/
-        virtual bool Play(Familyline::Logic::GameContext*);
+        virtual bool Play(familyline::logic::GameContext*);
 
 	
 	/***
@@ -66,15 +66,15 @@
 	virtual bool ProcessInput();
 	
 	
-        void SetCamera(Familyline::Graphics::Camera*);
-	void SetPicker(Familyline::Input::InputPicker* ip);
-        void SetInputManager(Familyline::Input::InputManager*);
-        void SetPathfinder(Familyline::Logic::PathFinder*);
-	void SetGameActionManager(Familyline::Logic::GameActionManager* );
+        void SetCamera(familyline::graphics::Camera*);
+	void SetPicker(familyline::input::InputPicker* ip);
+        void SetInputManager(familyline::input::InputManager*);
+        void SetPathfinder(familyline::logic::PathFinder*);
+	void SetGameActionManager(familyline::logic::GameActionManager* );
 
         virtual bool HasUpdatedObject();
 
-        Familyline::Logic::AttackableObject* GetSelectedObject();
+        familyline::logic::AttackableObject* GetSelectedObject();
         virtual ~HumanPlayer();
     };
 

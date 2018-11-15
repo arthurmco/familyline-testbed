@@ -52,11 +52,11 @@
 
 #include <glm/gtc/matrix_transform.hpp> //glm::lookAt()
 
-using namespace Familyline;
-using namespace Familyline::Logic;
-using namespace Familyline::Graphics;
-using namespace Familyline::Graphics::GUI;
-using namespace Familyline::Input;
+using namespace familyline;
+using namespace familyline::logic;
+using namespace familyline::graphics;
+using namespace familyline::graphics::gui;
+using namespace familyline::input;
 
 #ifdef WIN32
 #include <io.h>
@@ -313,10 +313,10 @@ int main(int argc, char const *argv[])
 
 	Framebuffer* fbGUI = nullptr;
 	Framebuffer* fb3D = nullptr;
-	Graphics::Window* w = nullptr;
+	graphics::Window* w = nullptr;
 	GUIManager* guir = nullptr;
 	try {
-		w = new Graphics::Window(winW, winH, WindowOptions::WIN_DEBUG_CONTEXT);
+		w = new graphics::Window(winW, winH, WindowOptions::WIN_DEBUG_CONTEXT);
 		Framebuffer::SetDefaultSize(winW, winH);
 		w->Show();
 

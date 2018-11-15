@@ -3,9 +3,9 @@
 
 #include "../logic/ObjectEventEmitter.hpp"
 
-using namespace Familyline::Input;
-using namespace Familyline::Graphics;
-using namespace Familyline::Logic;
+using namespace familyline::input;
+using namespace familyline::graphics;
+using namespace familyline::logic;
 
 InputPicker::InputPicker(TerrainRenderer* terrain, Window* win, SceneManager* sm, Camera* cam,
 	ObjectManager* om)
@@ -152,7 +152,7 @@ void InputPicker::UpdateIntersectedObject()
 		    continue;
 
 		auto sto = e.to.lock();
-		auto mm = std::dynamic_pointer_cast<Graphics::Mesh>(sto->mesh);
+		auto mm = std::dynamic_pointer_cast<graphics::Mesh>(sto->mesh);
 		poi_list.emplace_back(sto->position, mm, e.oid);
 		break;
 	    }

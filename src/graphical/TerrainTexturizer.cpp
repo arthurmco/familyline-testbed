@@ -9,7 +9,7 @@
 #include <array>
 #include <iterator>
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 /* Count of the terrain slot square side to be rendered */
 constexpr int SlotSide = SECTION_SIDE;
@@ -125,7 +125,7 @@ TerrainBitmap TerrainRenderer::GetTerrainTexture(unsigned int type_id)
 
 
 /* Generate terrain texture from the terrain data named 'data' */
-Texture* TerrainRenderer::GenerateTerrainSlotTexture(Familyline::Logic::TerrainData* data)
+Texture* TerrainRenderer::GenerateTerrainSlotTexture(familyline::logic::TerrainData* data)
 {
     TerrainSlotTexture terrain_surface;
     terrain_surface.resize(ImageWidth*SlotSide*ImageHeight*SlotSide);

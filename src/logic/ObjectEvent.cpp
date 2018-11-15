@@ -1,7 +1,7 @@
 #include "ObjectEvent.hpp"
 #include "City.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 
 ObjectEvent::ObjectEvent()

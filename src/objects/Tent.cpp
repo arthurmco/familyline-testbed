@@ -1,7 +1,7 @@
 #include "Tent.hpp"
 
-using namespace Familyline;
-using namespace Familyline::Logic;
+using namespace familyline;
+using namespace familyline::logic;
 
 static AttackAttributes atk(0, 1, glm::radians(0.0), 0, 0);
 

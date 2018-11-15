@@ -26,7 +26,7 @@
 #include <algorithm> //std::min()
 #include <chrono>
 
-using namespace Familyline::Server;
+using namespace familyline::Server;
 
 #include <Log.hpp>
 #include "ChatManager.hpp"

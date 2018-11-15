@@ -12,7 +12,7 @@
 
 class ObjectFactoryTest : public ::testing::Test {
 protected:
-    Familyline::Logic::ObjectFactory* _of;
+    familyline::logic::ObjectFactory* _of;
 
     TestObject* CreateObject();
     

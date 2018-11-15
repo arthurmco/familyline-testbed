@@ -1,10 +1,10 @@
 #include "test_objfactory.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void ObjectFactoryTest::SetUp()
 {
-//    _of = Familyline::Logic::ObjectFactory::GetInstance();
+//    _of = familyline::logic::ObjectFactory::GetInstance();
 //    _of->AddObject(new TestObject());
 }
 

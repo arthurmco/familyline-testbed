@@ -1,6 +1,6 @@
 #include "DeformAnimator.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 void DeformAnimator::AddFrame(unsigned frameno, std::vector<glm::vec3> vertices)
 {

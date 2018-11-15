@@ -2,7 +2,7 @@
 #include <cstdio>
 #include "Log.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void GameActionManager::Push(GameAction a)
 {

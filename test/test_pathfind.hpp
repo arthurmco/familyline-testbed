@@ -11,9 +11,9 @@
 
 class PathfinderTest : public ::testing::Test {
 protected:
-    Familyline::Logic::ObjectManager* _om;
-    Familyline::Logic::PathFinder* _pf;
-    std::weak_ptr<Familyline::Logic::GameObject> o;
+    familyline::logic::ObjectManager* _om;
+    familyline::logic::PathFinder* _pf;
+    std::weak_ptr<familyline::logic::GameObject> o;
     
 public:
     void SetUp();

@@ -1,6 +1,6 @@
 #include "test_terrain.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void TerrainTest::SetUp()
 {

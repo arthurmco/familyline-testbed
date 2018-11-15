@@ -11,15 +11,13 @@
 
 #include "AttackableObject.hpp"
 
-namespace Familyline {
-namespace Logic {
+namespace familyline::logic {
 
     class Unit : public AttackableObject
     {
 
     };
 
-}
 }
 
 

@@ -1,6 +1,6 @@
 #include "Cursor.hpp"
 
-using namespace Familyline::Input;
+using namespace familyline::input;
 
 Cursor* Cursor::cursor = nullptr;
 

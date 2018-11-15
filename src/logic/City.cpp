@@ -5,8 +5,8 @@
 #include "ObjectEventEmitter.hpp"
 #include "Player.hpp"
 
-using namespace Familyline;
-using namespace Familyline::Logic;
+using namespace familyline;
+using namespace familyline::logic;
 
 CityListener::CityListener(Player* p, const char* name)
     : GameActionListener(name)

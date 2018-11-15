@@ -18,7 +18,7 @@
 #include "../logic/AttackableObject.hpp"
 #include "../logic/ObjectEventListener.hpp"
 
-namespace Familyline::Input {
+namespace familyline::input {
 #define MAX_PICK_ITERATIONS 16
 
     /**
@@ -31,12 +31,12 @@ namespace Familyline::Input {
      */
     struct PickerObjectInfo {
 	glm::vec3 position;
-	std::shared_ptr<Familyline::Graphics::Mesh> mesh;
-	Familyline::Logic::object_id_t ID;
+	std::shared_ptr<familyline::graphics::Mesh> mesh;
+	familyline::logic::object_id_t ID;
 
 	PickerObjectInfo(glm::vec3 pos,
-			 std::shared_ptr<Familyline::Graphics::Mesh> mesh,
-			 Familyline::Logic::object_id_t ID)
+			 std::shared_ptr<familyline::graphics::Mesh> mesh,
+			 familyline::logic::object_id_t ID)
 	    : position(pos), mesh(mesh), ID(ID)
 	    {}
     
@@ -45,28 +45,28 @@ namespace Familyline::Input {
     
     class InputPicker {
     private:
-	Familyline::Graphics::TerrainRenderer* _terrain;
-	Familyline::Graphics::Window* _win;
-	Familyline::Graphics::SceneManager* _sm;
-	Familyline::Graphics::Camera* _cam;
-	Familyline::Logic::ObjectManager* _om;
+	familyline::graphics::TerrainRenderer* _terrain;
+	familyline::graphics::Window* _win;
+	familyline::graphics::SceneManager* _sm;
+	familyline::graphics::Camera* _cam;
+	familyline::logic::ObjectManager* _om;
 
 	glm::vec3 _intersectedPosition;
-	std::weak_ptr<Familyline::Logic::GameObject> _locatableObject;
+	std::weak_ptr<familyline::logic::GameObject> _locatableObject;
 
-	std::vector<const Familyline::Logic::GameObject*> _olist;
-	Familyline::Logic::ObjectEventListener oel;
+	std::vector<const familyline::logic::GameObject*> _olist;
+	familyline::logic::ObjectEventListener oel;
     
 	bool CheckIfTerrainIntersect(glm::vec3 ray, float start, float end);
 
 	std::vector<PickerObjectInfo> poi_list;	
     public:
 
-	InputPicker(Familyline::Graphics::TerrainRenderer* terrain,
-		    Familyline::Graphics::Window* win,
-		    Familyline::Graphics::SceneManager* sm,
-		    Familyline::Graphics::Camera* cam,
-		    Familyline::Logic::ObjectManager* om);
+	InputPicker(familyline::graphics::TerrainRenderer* terrain,
+		    familyline::graphics::Window* win,
+		    familyline::graphics::SceneManager* sm,
+		    familyline::graphics::Camera* cam,
+		    familyline::logic::ObjectManager* om);
 
 	/* Get cursor ray in screen space */
 	glm::vec4 GetCursorScreenRay();
@@ -89,7 +89,7 @@ namespace Familyline::Input {
 	glm::vec2 GetGameProjectedPosition();
 
 	/*	Get the object that were intersected by the cursor ray */
-	std::weak_ptr<Familyline::Logic::GameObject> GetIntersectedObject();
+	std::weak_ptr<familyline::logic::GameObject> GetIntersectedObject();
 
     };
 

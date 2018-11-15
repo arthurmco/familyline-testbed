@@ -50,44 +50,44 @@
 #include "objects/WatchTower.hpp"
 #include "objects/Tent.hpp"
 
-namespace Familyline {
+namespace familyline {
     
 class Game {
 private:
-    Logic::ObjectManager* om = nullptr;
+    logic::ObjectManager* om = nullptr;
     HumanPlayer* hp = nullptr;
-    Logic::Terrain* terr = nullptr;
-    Logic::PlayerManager* pm = nullptr;
-    Logic::TerrainFile* terrFile;
+    logic::Terrain* terr = nullptr;
+    logic::PlayerManager* pm = nullptr;
+    logic::TerrainFile* terrFile;
     
-    Logic::GameContext gctx;
-    Logic::GameActionManager gam;
+    logic::GameContext gctx;
+    logic::GameActionManager gam;
     
-    Graphics::Window* win = nullptr;
-    Graphics::Renderer* rndr = nullptr;
-    Graphics::SceneManager* scenemng = nullptr;
+    graphics::Window* win = nullptr;
+    graphics::Renderer* rndr = nullptr;
+    graphics::SceneManager* scenemng = nullptr;
 
-    Graphics::Framebuffer *fbGUI = nullptr, *fb3D = nullptr;
-    Graphics::GUI::GUIManager* gr = nullptr;
+    graphics::Framebuffer *fbGUI = nullptr, *fb3D = nullptr;
+    graphics::gui::GUIManager* gr = nullptr;
     
     bool player = false;
 
-    Graphics::Camera* cam;
+    graphics::Camera* cam;
 
-    Graphics::AssetManager* am = Graphics::AssetManager::GetInstance();
+    graphics::AssetManager* am = graphics::AssetManager::GetInstance();
 
-    Graphics::TerrainRenderer* terr_rend = nullptr;
-    Logic::ObjectRenderer* objrend = nullptr;
+    graphics::TerrainRenderer* terr_rend = nullptr;
+    logic::ObjectRenderer* objrend = nullptr;
 
-    Input::InputPicker* ip = nullptr;
-    Logic::PathFinder* pathf = nullptr;
+    input::InputPicker* ip = nullptr;
+    logic::PathFinder* pathf = nullptr;
 
     struct {
-//	Graphics::GUI::GUIPanel *p;
-	Graphics::GUI::GUILabel *lbl;
-	Graphics::GUI::GUILabel *lblVersion;
-//	Graphics::GUI::GUIPanel *pnl;
-	Graphics::GUI::GUIButton* btn;
+//	graphics::gui::GUIPanel *p;
+	graphics::gui::GUILabel *lbl;
+	graphics::gui::GUILabel *lblVersion;
+//	graphics::gui::GUIPanel *pnl;
+	graphics::gui::GUIButton* btn;
     } widgets;
 
 
@@ -105,9 +105,9 @@ private:
     void ShowDebugInfo();
 
 public:
-    Game(Graphics::Window* w, Graphics::Framebuffer* fb3D,
-	 Graphics::Framebuffer* fbGUI, Graphics::GUI::GUIManager* gr,
-	 Logic::PlayerManager* pm, HumanPlayer* hp);
+    Game(graphics::Window* w, graphics::Framebuffer* fb3D,
+	 graphics::Framebuffer* fbGUI, graphics::gui::GUIManager* gr,
+	 logic::PlayerManager* pm, HumanPlayer* hp);
 
     int RunLoop();
 };

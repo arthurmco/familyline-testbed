@@ -19,7 +19,7 @@
 #ifndef PATHFINDER_HPP
 #define PATHFINDER_HPP
 
-namespace Familyline::Logic {
+namespace familyline::logic {
     class PathFinder;
 
     /*Path node */

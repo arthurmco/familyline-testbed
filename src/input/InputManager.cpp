@@ -1,7 +1,7 @@
 #include "InputManager.hpp"
 #include <algorithm>
 
-using namespace Familyline::Input;
+using namespace familyline::input;
 
 InputManager* InputManager::im = nullptr;
 

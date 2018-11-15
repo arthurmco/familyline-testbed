@@ -5,7 +5,7 @@
 #include "meshopener/MD2Opener.hpp"
 #include "materialopener/MTLOpener.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 
 void AssetManager::Create() {

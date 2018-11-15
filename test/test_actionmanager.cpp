@@ -1,9 +1,9 @@
 #include "test_actionmanager.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void TestActionManager::RunAction(const char* name) {
-    Familyline::Logic::ActionData d;
+    familyline::logic::ActionData d;
     d.xPos = 50;
     d.yPos = 50;
     d.actionOrigin = tobj;

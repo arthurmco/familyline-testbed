@@ -1,6 +1,6 @@
 #include "test_assetfile.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 
 void AssetFileTest::SetUp()

@@ -1,7 +1,7 @@
 /***
     Representation of a camera
 
-    Copyright (C) 2016 Arthur Mendes.
+    Copyright (C) 2016, 2018 Arthur Mendes.
 
 ***/
 
@@ -20,8 +20,7 @@
 #define M_PI 3.1415
 #endif
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     class Camera
     {
@@ -91,8 +90,5 @@ namespace Graphics {
     };
 
 }
-}
-
-
 
 #endif /* end of include guard: CAMERA_HPP */

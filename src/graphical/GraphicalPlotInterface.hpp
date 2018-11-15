@@ -10,9 +10,9 @@
 #include "Renderer.hpp"
 #include "../logic/DebugPlot.hpp"
 
-namespace Familyline::Graphics {
+namespace familyline::graphics {
 
-    class GraphicalPlotInterface : public Logic::DebugPlotInterface {
+    class GraphicalPlotInterface : public logic::DebugPlotInterface {
     private:
 	Renderer* _renderer;
 	
@@ -21,15 +21,15 @@ namespace Familyline::Graphics {
 
 	/* Adds a vector of points to form a path.
 	   Return a path handle */
-	virtual Logic::PathHandle AddPath(std::vector<glm::vec3>& path,
+	virtual logic::PathHandle AddPath(std::vector<glm::vec3>& path,
 					   glm::vec3 color);
 
 	/* Removes a path using its path handle */
-	virtual void RemovePath(Logic::PathHandle pathhandle);
+	virtual void RemovePath(logic::PathHandle pathhandle);
 
     };
 
-}  // Familyline::Graphics
+}  // familyline::graphics
 
 
 

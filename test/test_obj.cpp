@@ -13,14 +13,14 @@
 
 class ObjectTest : public ::testing::Test {
 protected:
-    Familyline::Logic::ObjectManager* _om;
+    familyline::logic::ObjectManager* _om;
 
 public:
     void SetUp();
     void TearDown();
 };
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void ObjectTest::SetUp()
 {

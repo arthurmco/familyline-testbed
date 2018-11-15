@@ -15,8 +15,7 @@
 #ifndef MD2OPENER_HPP
 #define MD2OPENER_HPP
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
 
     /* MD2 header */
@@ -55,7 +54,6 @@ public:
     virtual Mesh* Open(const char* file);
 };
 
-}
 }
 
 #endif /* end of include guard: MD2OPENER_HPP */

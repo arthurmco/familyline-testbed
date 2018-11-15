@@ -1,6 +1,6 @@
 #include "test_server_client.hpp"
 
-using namespace Familyline::Server;
+using namespace familyline::Server;
 
 void ClientTest::SetUp()
 {

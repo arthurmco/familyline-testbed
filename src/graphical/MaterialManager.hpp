@@ -1,7 +1,7 @@
 /***
     Material manager
 
-    Copyright (C) 2016 Arthur Mendes.
+    Copyright (C) 2016, 2018 Arthur Mendes.
 
 ***/
 
@@ -13,8 +13,7 @@
 #ifndef MATERIALMANAGER_HPP
 #define MATERIALMANAGER_HPP
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     class MaterialManager
     {
@@ -44,7 +43,5 @@ namespace Graphics {
 
 
 }
-}
-
 
 #endif /* end of include guard: MATERIALMANAGER_HPP */

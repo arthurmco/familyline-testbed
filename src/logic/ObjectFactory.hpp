@@ -12,7 +12,7 @@
 
 #include "GameObject.hpp"
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 	
 class ObjectFactory {
 private:

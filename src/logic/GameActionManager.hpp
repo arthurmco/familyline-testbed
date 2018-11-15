@@ -13,7 +13,7 @@
 #include "GameAction.hpp"
 #include "GameActionListener.hpp"
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
 /* 
    The game action manager acts like a queue of actions from the game.

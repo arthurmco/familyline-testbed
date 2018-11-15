@@ -16,8 +16,8 @@ typedef int flags_t;
 #endif
 
 
-using namespace Familyline;
-using namespace Familyline::Server;
+using namespace familyline;
+using namespace familyline::Server;
 
 ServerManagerError::ServerManagerError(const char* what) : std::runtime_error(what)
 {}

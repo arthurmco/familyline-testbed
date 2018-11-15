@@ -2,9 +2,9 @@
 #include "../../config.h" //for SHADERS_DIR
 #include <algorithm> // for remove_if
 
-using namespace Familyline::Graphics;
-using namespace Familyline::Graphics::GUI;
-using namespace Familyline::Input;
+using namespace familyline::graphics;
+using namespace familyline::graphics::gui;
+using namespace familyline::input;
 
 /* The panel vertex square coordinates.
    It's a big rectangle, that fills the entire screen  */
@@ -36,9 +36,9 @@ GUIManager::GUIManager()
 	width = float(640);
 	height = float(480);
 
-	this->listener = new Input::InputListener("gui-listener");
-	Input::InputManager::GetInstance()->AddListener(
-		Input::EVENT_KEYEVENT | Input::EVENT_MOUSEMOVE | Input::EVENT_MOUSEEVENT,
+	this->listener = new input::InputListener("gui-listener");
+	input::InputManager::GetInstance()->AddListener(
+		input::EVENT_KEYEVENT | input::EVENT_MOUSEMOVE | input::EVENT_MOUSEEVENT,
 		this->listener, 0.8);
 
 	// Create the cairo context.
@@ -225,7 +225,7 @@ bool GUIManager::processSignal(GUISignal s)
 void GUIManager::update()
 {
 	// Receive the input signals from the input listeners...
-	Input::InputEvent ev;
+	input::InputEvent ev;
 	bool isFocused = false;
 
 	while (this->listener->PopEvent(ev)) {

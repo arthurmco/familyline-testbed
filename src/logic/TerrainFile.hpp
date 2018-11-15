@@ -15,8 +15,7 @@
 #ifndef TERRAINFILE_HPP
 #define TERRAINFILE_HPP
 
-namespace Familyline {
-namespace Logic {
+namespace familyline::logic {
 
 /* Magic word for the terrain
  	Meant to be 'TRTB' in ascii */
@@ -72,8 +71,5 @@ class terrain_file_exception : public std::runtime_error
 
 
 }
-}
-
-
 
 #endif

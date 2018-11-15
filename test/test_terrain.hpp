@@ -10,7 +10,7 @@
 
 class TerrainTest : public ::testing::Test {
 protected:
-    Familyline::Logic::TerrainFile* tf;
+    familyline::logic::TerrainFile* tf;
     
 public:
     void SetUp();

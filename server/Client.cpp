@@ -1,6 +1,6 @@
 #include "Client.hpp"
 #include <cstdio>
-using namespace Familyline::Server;
+using namespace familyline::Server;
 
 Client::Client(int sockfd, struct in_addr addr)
 {

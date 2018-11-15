@@ -14,7 +14,7 @@
 
 #include "IMesh.hpp"
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     class ObjectManager;
 

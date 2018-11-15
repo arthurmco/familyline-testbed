@@ -1,7 +1,7 @@
 #include "test_pathfind.hpp"
 #include "logic/ObjectEventEmitter.hpp"
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 void PathfinderTest::SetUp()
 {

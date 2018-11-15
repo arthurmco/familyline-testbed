@@ -1,5 +1,5 @@
 #include "Timer.hpp"
-using namespace Familyline;
+using namespace familyline;
 
 Timer::Timer()
 {

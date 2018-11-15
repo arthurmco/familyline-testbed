@@ -1,6 +1,6 @@
 #include "Shader.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 Shader::Shader(const char* path, int type)
 {

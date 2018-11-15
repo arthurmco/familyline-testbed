@@ -10,8 +10,7 @@
 #ifndef CURSOR_HPP
 #define CURSOR_HPP
 
-namespace Familyline {
-namespace Input {
+namespace familyline::input {
 
     class Cursor {
     private:
@@ -31,9 +30,5 @@ namespace Input {
     };
 
 }
-}
-
-
-
 
 #endif /* end of include guard: CURSOR_HPP */

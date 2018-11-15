@@ -5,7 +5,7 @@
 
 #include <Log.hpp>
 
-using namespace Familyline::Logic;
+using namespace familyline::logic;
 
 std::queue<ObjectEvent> ObjectEventEmitter::events;
 std::vector<ObjectEventListener*> ObjectEventEmitter::listeners;

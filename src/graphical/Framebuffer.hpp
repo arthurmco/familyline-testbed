@@ -14,8 +14,7 @@
 #include "Log.hpp"
 #include "GFXExceptions.hpp"
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     class Framebuffer {
     private:
@@ -52,7 +51,6 @@ namespace Graphics {
     };
 
 
-} /* Graphics */
-} /* Familyline */
+} /* familyline::graphics */
 
 #endif /* end of include guard: FRAMEBUFFER_HPP */

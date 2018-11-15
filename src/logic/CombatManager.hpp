@@ -15,8 +15,7 @@
 #ifndef COMBAT_MANAGER
 #define COMBAT_MANAGER
 
-namespace Familyline {
-namespace Logic {
+namespace familyline::logic {
 
     struct Combat {
 	std::weak_ptr<AttackableObject> attacker;
@@ -52,7 +51,5 @@ namespace Logic {
 
     };    
 }
-}
-
 
 #endif

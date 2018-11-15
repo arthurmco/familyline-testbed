@@ -1,6 +1,6 @@
 #include "SceneObject.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 
 SceneObject::SceneObject(const char* name, glm::vec3 pos,

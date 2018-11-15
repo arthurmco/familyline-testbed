@@ -11,7 +11,7 @@
 #define TEST_OBJECT_H
 
 /*  A tent is a basic people storage building */
-class TestObject : public Familyline::Logic::Building {
+class TestObject : public familyline::logic::Building {
 private:
     
 public:

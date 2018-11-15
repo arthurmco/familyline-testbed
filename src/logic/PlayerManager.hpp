@@ -14,7 +14,7 @@
 #ifndef PLAYERMANAGER_HPP
 #define PLAYERMANAGER_HPP
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
     enum PlayerFlags {
 	/* Player is a human */

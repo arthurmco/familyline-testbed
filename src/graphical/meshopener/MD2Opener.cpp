@@ -1,7 +1,7 @@
 #include "MD2Opener.hpp"
 #include "../DeformAnimator.hpp"
 
-using namespace Familyline::Graphics;
+using namespace familyline::graphics;
 
 /*  MD2 vertex
     Each vertex is stored in a one-byte form, together with a multiplication

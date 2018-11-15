@@ -9,7 +9,7 @@
 #include <list>
 #include "Client.hpp"
 
-namespace Familyline::Server {
+namespace familyline::Server {
 
     struct NetPlayer {
 	Client* cli;

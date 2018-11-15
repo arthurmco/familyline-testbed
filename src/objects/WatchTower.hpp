@@ -10,10 +10,10 @@
 #ifndef WATCHTOWER_H
 #define WATCHTOWER_H
 
-namespace Familyline {
+namespace familyline {
 
 /*  A watch tower is a basic watch building */
-class WatchTower : public Logic::Building {
+class WatchTower : public logic::Building {
 private:
     static const int TID = 3;
 public:

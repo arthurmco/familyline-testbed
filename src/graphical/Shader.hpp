@@ -28,8 +28,7 @@
 #include "GFXExceptions.hpp"
 
 
-namespace Familyline {
-namespace Graphics {
+namespace familyline::graphics {
 
     enum ShaderType
     {
@@ -56,8 +55,6 @@ namespace Graphics {
     };
 
 }
-}
-
 
 
 #endif /* end of include guard: SHADER_HPP */

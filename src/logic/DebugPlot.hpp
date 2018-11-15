@@ -13,7 +13,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-namespace Familyline::Logic {
+namespace familyline::logic {
 
 	typedef int PathHandle;
 
