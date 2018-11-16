@@ -17,8 +17,11 @@ In it, you will guide a family, that goes from the end of neolythic until its ki
 inclusion to the Roman Empire. You will trade with other people, war, mount strategies
 and (if the money begin to appear) do a *lot* of quests.
 
-It's made with a homebrew engine. The major objective of this game is
-fun, to play and develop. Expect it to have a lot of good humor!
+It's made with a homebrew engine, for me to exclusively learn while
+bringing joy to its players. The major objective of this game is
+fun, to play and develop. 
+
+Expect it to have a lot of good humor!
 
 ## Build and Installation
 
@@ -63,13 +66,22 @@ variables key
 }
 ```
 
-Then, cmake it and build everything
+Then, cmake it
 
-## Running
+### Build
 
-Type `make familyline` to compile the game, `make
+To build the game, type `make familyline` to compile the game, `make
 familyline-server` to compile the server (that doesn't work yet) or
 `make familyline-tests` to make the tests.
+
+(On Windows, inside Visual Studio, the targets might appear as projects
+inside the solutions).
+
+We use doxygen to document the source, so if you want to generate some
+source documentation, type `make docs`. The docs will be generated
+inside the `docs/doxygen` folder
+
+## Running
 
 The executables have the same names as the targets. Have fun!
 
@@ -95,12 +107,14 @@ install in the `/usr/local` directory
 
 Aside from issues, there are things I would like to do very soon
 
- - Continuous integration
+ - ~~Continuous integration~~
  - Increase test coverage
- - Add support for vcpkg in Windows
+ - ~~Add support for vcpkg in Windows~~
  - Test build in clang
- - Try to build in a Mac, for those hipsters who use OS x (I kid! :wink:)
-
+ - Try to build in a Mac, for those hipsters who use OS x (I kid!
+   :wink:)
+ - Support animated meshes
+ 
 ## License
 
 Every file in this game is licensed under the MIT license, the best in
