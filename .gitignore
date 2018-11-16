@@ -50,13 +50,14 @@ GRTAGS
 GSYMS
 TAGS
 
-# Google test and CTest folders
+# Google test, Doxygen output and CTest folders
 googletest*/*
 googletest-src
 googletest-src/*
 Testing/*
 CTest*.cmake
 *.pc
+docs/doxygen/
 
 # Code::Blocks
 *.cbp
