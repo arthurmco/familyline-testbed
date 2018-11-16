@@ -1,4 +1,3 @@
-
 /***
     Game object class implementation
 
@@ -24,26 +23,34 @@ namespace familyline::logic {
     typedef int object_id_t;
 
     /**
-     * Object states
+     * Object lifecycle states
      */
     enum ObjectState {
-	/* An object is being created
+	/**
+	 * An object is being created
 	 * The building animation is playing
 	 */
 	Creating,
 
-	/* An object is created. The default state */
+	/**
+	 * An object is created. The default state
+	 */
 	Created,
 
-	/* An object is being attacked and is losing health */
+	/**
+	 * An object is being attacked and is losing health
+	 */
 	Hurt,
 
-	/* An object has just lost all of its lifepoints,
+	/**
+	 * An object has just lost all of its lifepoints,
 	 * The death animation is playing
 	 */
 	Dying,
 
-	/* An object is dead and will be destroyed soon */
+	/**
+	 * An object is dead and will be destroyed soon 
+	 */
 	Dead
     };
 
@@ -53,7 +60,6 @@ namespace familyline::logic {
      * Anything into the game that has a name, size and position is inherited from this
      * class
      */
-
     class GameObject {
 	friend class ObjectManager;
     private:
@@ -95,15 +101,16 @@ namespace familyline::logic {
 	 * do this one references. So, for example, we can execute the iterate() method in a correct
 	 * order, from the more referenced ones to the least referenced.
 	 *
-	 * You should not use getObject directly while in an object, but getObjectReference instead
+	 * \warning You should not use getObject directly while in an object, 
+	 *          but getObjectReference instead
 	 */
 	const GameObject* getObjectReference(object_id_t id);
-	
+
 	/**
 	 * The current stage of the object
 	 */
 	ObjectState state = ObjectState::Created;
-	
+
     public:
 	GameObject(object_id_t id, const char* type, const char* name)
 	    : id(id), type(type), name(name)
@@ -113,14 +120,14 @@ namespace familyline::logic {
 	const char* getType() const { return this->type; }
 	const char* getName() const { return this->name; }
 	ObjectState getState() const { return this->state; }
-	
+
 	ObjectState setState(ObjectState newstate) {
 	    auto s = this->state;
 	    this->state = newstate;
 	    return s;
 	}
-	
-	
+
+
 	/**
 	 * The object position.
 	 * For 'positionless' objects, it's (-1, -1, -1)
@@ -166,7 +173,8 @@ namespace familyline::logic {
 	 */
 	virtual void iterate();
 
-	/* Clone the object at a specified position
+	/**
+	 * Clone the object at a specified position
 	 *
 	 * This function needs to be implemented for each object, because it
 	 * will return the same class as the object

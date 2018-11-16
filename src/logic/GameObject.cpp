@@ -30,7 +30,8 @@ void GameObject::clearReferences()
  * do this one references. So, for example, we can execute the iterate() method in a correct
  * order, from the more referenced ones to the least referenced.
  *
- * You should not use getObject directly while in an object, but getObjectReference instead
+ * \warning You should not use getObject directly while in an object, 
+ *          but getObjectReference instead
  */
 const GameObject* GameObject::getObjectReference(object_id_t id)
 {

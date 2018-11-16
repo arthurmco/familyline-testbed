@@ -17,48 +17,56 @@
 
 namespace familyline::logic {
 
-/* Magic word for the terrain
- 	Meant to be 'TRTB' in ascii */
+/** 
+ * Magic word for the terrain.
+ * Meant to be 'TRTB' in ascii 
+ */
 #define TERRAIN_MAGIC_WORD 0x42545254
 
 /*** Some data structures from the terrain file ***/
-struct TerrainFileHeader {
-	uint32_t magic; // Magic word
-	uint32_t version; // Terrain version. Default is 1
-	uint32_t game;	// Game type. Default is 0
-	uint32_t thdr_offset; // Terrain data header file offset	
-};
 
-struct TerrainDataHeader {
-	uint32_t width, height;	// Terrain size
+    struct TerrainFileHeader {
+	uint32_t magic;       ///< Magic word
+	uint32_t version;     ///< Terrain version. Default is 1
+	uint32_t game;	      ///< Game type. Default is 0
+	uint32_t thdr_offset; ///< Terrain data header file offset	
+    };
+
+    struct TerrainDataHeader {
+	uint32_t width, height;	/// Terrain size
 	uint32_t name_offset;
 	uint32_t auth_offset;
 	uint32_t next_thdr_offset;
 	uint32_t data_offset;
-};
+    };
 
-/* The terrain file class itself */
-class TerrainFile {
-private:
+    /**
+     * \brief Manages the opening of a terrain file
+     */ 
+    class TerrainFile {
+    private:
 	FILE* fTerrain = nullptr;
 	
 	const char* fPath;
-public:
+    public:
 	
-	/* 	Opens the terrain file. 
-	 	Throws terrain_exception if fail
+	/**
+	 * We open the terrain file in the constructor
+	 *
+	 * \throws terrain_exception if opening fails
 	 */
 	TerrainFile(const char* path);
 
-	/* Retrieve the terrain.
-	 	index is the terrain index you want to get. Defaults to 0.
-	  */
+	/**
+	 * Retrieve the terrain.
+	 * \param index The terrain index you want to get. Defaults to 0.
+	 */
 	Terrain* GetTerrain(int index = 0);	
 
 	~TerrainFile();
-};
+    };
 
-class terrain_file_exception : public std::runtime_error
+    class terrain_file_exception : public std::runtime_error
     {
     public:
         explicit terrain_file_exception(std::string msg, 

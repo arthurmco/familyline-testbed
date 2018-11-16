@@ -34,17 +34,22 @@ namespace familyline::graphics {
 	ATexture
     };
 
-    /* A pointer to the asset
-       Binds an entry in the asset file to the object itself
-    */
-       
+    /**
+     * A pointer to the asset
+     *
+     * Binds an entry in the asset file to the object itself
+     */       
     struct AssetPointer {
 	AssetItem* item;
 	AssetType type;
 	s_optional<AssetObject> object;
     };
 
-
+    /**
+     * Asset management class
+     *
+     * \see AssetFile, AssetItem
+     */
     class AssetManager {
 
     private:

@@ -17,11 +17,16 @@
 namespace familyline::logic {
 
     enum PlayerFlags {
-	/* Player is a human */
+	/**
+	 * Player is a human 
+	 */
 	PlayerIsHuman = 1,
 
-	/* Player is from outside the computer
-	   Usually a network player */
+	/**
+	 * Player is from outside the computer.
+	 *
+	 * Usually a network player 
+	 */
 	PlayerIsOutsider = 2,
     };
 
@@ -31,31 +36,41 @@ namespace familyline::logic {
 	int flags;
     };
 
-    /*
+    /**
      * Manages players and is the base for interrelations (sending messages, 
      * resources etc.)
+     *
+     * \see PlayerFlags, PlayerData
      */
     class PlayerManager {
     private:
 	std::list<PlayerData> _playerdata;
 	
     public:
-	/* Add a player, receive its ID */
+	/**
+	 * Add a player, receive its ID 
+	 */
 	int AddPlayer(Player* p, int flags = 0);
 
-	/* Get a player by some information (ID or name) */
+	/**
+	 * Get a player by some information (ID or name) 
+	 */
 	const Player* GetbyID(int ID) const;
 	const Player* GetbyName(const char* name) const;
 
-	/* Process inputs of all players 
-	 * Returns true if any input was received
+	/**
+	 * Process inputs of all players 
+	 *
+	 * \return true if any input was received
 	 */
 	virtual bool ProcessInputs();
 
-	/* Play for all users.
-	   Return false only if the human player returns false.
-	   This usually mean that the human wants to stop the game.
-	*/
+	/**
+	 * \brief Play for all users.
+	 *
+	 * \return false only if the human player returns false.
+	 * This usually mean that the human wants to stop the game.
+	 */
 	bool PlayAll(GameContext* gct);
 
 	virtual ~PlayerManager() {}

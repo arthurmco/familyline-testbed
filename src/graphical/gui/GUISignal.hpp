@@ -43,18 +43,18 @@ namespace familyline::graphics::gui {
 
 	float xPos, yPos;
 
-	// Event extra parameters
+	/// Event extra parameters
 	int param[2];
 
 	union {
 	    // Group 1: Key/mouse/joystick
 	    struct {
-		char* keystr; // Key string representation
+		char* keystr; ///< Key string representation
 		unsigned keycode;
 	    } key;
 	    
 	    struct {
-		unsigned button; // What button? (1 = Left, 2 = Right, 3 = Middle)
+		unsigned button; ///< What button? (1 = Left, 2 = Right, 3 = Middle)
 		bool isPressed;
 		
 	    } mouse;
@@ -62,15 +62,15 @@ namespace familyline::graphics::gui {
 
 	    // Group 2: Timer event
 	    struct {
-		// Send a timer event. After 'msec' miliseconds, receives a TimerEnd event.
-		// Useful for events that need a little time, like a selection effect
+		/// Send a timer event. After 'msec' miliseconds, receives a TimerEnd event.
+		/// Useful for events that need a little time, like a selection effect
 		unsigned mseconds;
 		char* tag;
 	    } timer;
 	
 	    // Group 3: Container add, redraw
 	    struct {
-		// Absolute size, in pixels, of the screen
+		/// Absolute size, in pixels, of the screen
 		unsigned absw, absh;
 	    };
 	};

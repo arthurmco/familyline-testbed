@@ -1,7 +1,7 @@
 /***
-	City definitions
+    City definitions
 
-	Copyright (C) 2016-2018 Arthur M
+    Copyright (C) 2016-2018 Arthur M
 
 ***/
 #ifndef CITY_HPP
@@ -44,8 +44,6 @@ namespace familyline::logic {
 
     
     /**
-     *! City class
-     *
      * Defines a city.
      *
      * A city is a container for child objects of the game that belongs to the same user.
@@ -67,16 +65,17 @@ namespace familyline::logic {
 	// The player that controls the city.
 	Player* player;
 
-	// Listens for objects, only send the set city event if the object is
-	// from its own city
+	/// Listens for objects, only send the set city event if the object is
+	/// from its own city
 	ObjectEventListener oel;
 	
 	// A color. This color is a RGB color.
+	//
 	// We'll paint some parts of the units and buildings with this color
 	// This color will also identify the user.
 	glm::vec3 player_color;
 
-	// Player listener, to get the newly created objects by the player
+	/// Player listener, to get the newly created objects by the player
 	CityListener* cil;
 
     public:
@@ -86,7 +85,13 @@ namespace familyline::logic {
 
 	PlayerDiplomacy getDiplomacy(City* c);
 
+	/// The player that controls the city.
 	const Player* getPlayer() const { return this->player; }
+
+	/// The color that will identify the city
+	///
+	/// We'll paint the city objects with this color, so the
+	/// players can easily identify them.
 	const glm::vec3 getColor() const { return this->player_color; }
 
 

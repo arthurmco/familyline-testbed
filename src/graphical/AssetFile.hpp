@@ -25,7 +25,11 @@ extern "C" {
 
 namespace familyline::graphics {
 
-    /* The asset itself, as a file, not an object */
+    /**
+     * The asset itself, as a file, not an object 
+     *
+     * \see AssetFile
+     */
     struct AssetItem {
 	std::string name, type, path;
 	std::unordered_map<std::string /* key */, std::string> items;
@@ -39,15 +43,19 @@ namespace familyline::graphics {
 
     class AssetFile {
     private:
-	/* The list of assets
+	/**
+	 * The list of assets
 	 *
 	 * The dependencies will be evaluated only after all assets are loaded
+	 * \see AssetItem, AssetManager
 	 */
 	std::list<std::shared_ptr<AssetItem>> assets;
 
 	std::list<std::shared_ptr<AssetItem>> ParseFile(yaml_parser_t* parser);
 
-	/* Process the assets and discover the dependencies between them */
+	/**
+	 * Process the assets and discover the dependencies between them 
+	 */
 	std::list<std::shared_ptr<AssetItem>> ProcessDependencies(
 	    std::list<std::shared_ptr<AssetItem>>&& assets);
     
@@ -55,7 +63,9 @@ namespace familyline::graphics {
     public:
 	void LoadFile(const char* file);
 
-	/* Get an asset */
+	/**
+	 * Get an asset 
+	 */
 	AssetItem* GetAsset(const char* name) const;
     };
 

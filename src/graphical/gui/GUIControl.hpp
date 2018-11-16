@@ -17,93 +17,105 @@
 
 namespace familyline::graphics::gui {
 
-	/* The default type for GUI canvas */
-	typedef cairo_surface_t* GUICanvas;
+    /**
+     * The default type for GUI canvas 
+     */
+    typedef cairo_surface_t* GUICanvas;
 
-	/* THe GUI drawing context, where the used API saves its things */
-	typedef cairo_t* GUIContext;
+    /**
+     * THe GUI drawing context, where the used API saves its things 
+     */
+    typedef cairo_t* GUIContext;
+
+    /**
+     * Defines formatting for the controls
+     */
+    struct GUIFormat {
+	glm::vec4 foreground = glm::vec4(0.7, 0.7, 0.7, 1); ///< foreground, with alpha
+	glm::vec4 background = glm::vec4(1, 1, 1, 0); ///< background, with alpha
+
+	int fontSize = 16; ///< Font size
+	const char* fontName = "monospace";
+    };
+
+    /**
+     * Base class for GUI controls
+     *
+     * Defines just the base for our control to be identifiable (and maybe renderable? )
+     */
+    class GUIControl {
+    protected:
+	// How to draw
+	GUICanvas canvas = nullptr;
+	GUIContext ctxt = nullptr;
+
+	bool dirty = true;
+
+	std::queue<GUISignal> signals;
+
+	GUISignal receiveSignal();
 
 	/**
-	 * Defines formatting for the controls
-	 */
-	struct GUIFormat {
-		glm::vec4 foreground = glm::vec4(0.7, 0.7, 0.7, 1); // foreground, with alpha
-		glm::vec4 background = glm::vec4(1, 1, 1, 0); // background, with alpha
-
-		int fontSize = 16; // Font size
-		const char* fontName = "monospace";
-	};
-
-	/**
-	 * Base class for GUI controls
+	 * The function that does the real render
 	 *
-	 * Defines just the base for our control to be identifiable (and maybe renderable? )
+	 * It needs to be pure.
+	 *
+	 * If you want to do impure things, override the render function,
+	 * or simply don't do them here.
 	 */
-	class GUIControl {
-	protected:
-		// How to draw
-		GUICanvas canvas = nullptr;
-		GUIContext ctxt = nullptr;
+	virtual GUICanvas doRender(int absw, int absh) const = 0;
 
-		bool dirty = true;
+    public:
+	// Positional
+	float width, height;
+	float x, y;
 
-		std::queue<GUISignal> signals;
+	GUIFormat format;
 
-		GUISignal receiveSignal();
+	/**
+	 * Z-index. Smaller value means less rendering priority
+	 * aka your control will be behind others
+	 */
+	int z_index = 0;
 
-		/* The function that does the real render
-		   It needs to be pure.
-		   If you want to do impure things, override the render function,
-		   or simply don't do them here.
-		*/
-		virtual GUICanvas doRender(int absw, int absh) const = 0;
+	/**
+	 * \brief Update the drawing context.
+	 *
+	 * This is designed under Cairo API. The context (`cairo_t`) is used for drawing, and
+	 * it can only be created by the cairo_create. The `cairo_create` takes a surface
+	 * (the GUICanvas, `cairo_surface_t`). This means a context is binded to a surface
+	 *
+	 * absw and absh are the absolute width and height of the whole window, not the control
+	 */
+	void setContext(unsigned absw, unsigned absh);
 
-	public:
-		// Positional
-		float width, height;
-		float x, y;
+	/**
+	 * Try to handle the signals. 
+	 * \returns true if handled
+	 */
+	virtual bool processSignal(GUISignal s);
 
-		GUIFormat format;
+	bool hasSignal();
 
-		/* Z-index. Smaller value means less rendering priority
-		 * aka your control will be behind others
-		 */
-		int z_index = 0;
+	virtual void update();
 
-		/* Update the drawing context.
-		 *
-		 * This is designed under Cairo API. The context (cairo_t) is used for drawing, and
-		 * it can only be created by the cairo_create. The cairo_create takes a surface
-		 * (the GUICanvas, cairo_surface_t). This means a context is binded to a surface
-		 *
-		 * absw and absh are the absolute width and height of the whole window, not the control
-		 */
-		void setContext(unsigned absw, unsigned absh);
+	/**
+	 * Start the rendering process.
+	 *
+	 * Just calls doRender() and set the dirty status to false.
+	 * This function only exists so we can call render() inside tests.
+	 */
+	virtual void render(int absw, int absh);
 
-		/**
-		 * Try to handle the signals. Returns true if handled
-		 */
-		virtual bool processSignal(GUISignal s);
+	bool isDirty() const;
 
-		bool hasSignal();
+	GUICanvas getGUICanvas() const;
 
-		virtual void update();
+	void sendSignal(GUISignal s);
 
-		/* Start the rendering process.
-		   Just calls doRender() and set the dirty status to false.
-		   This function only exists so we can call render() inside tests.
-		*/
-		virtual void render(int absw, int absh);
+	virtual ~GUIControl();
 
-		bool isDirty() const;
-
-		GUICanvas getGUICanvas() const;
-
-		void sendSignal(GUISignal s);
-
-		virtual ~GUIControl();
-
-	};
+    };
 
 
 }

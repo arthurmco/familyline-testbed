@@ -15,27 +15,34 @@ namespace familyline::logic {
 
     class ObjectManager;
     class City;
-    
+
     enum ObjectEventType {
 
-	// A null event
+	/// A null event
 	EventNone,
-	
-	// An object has been created
+
+	/// An object has been created
 	ObjectCreated,
 
-	// An object has been destroyed
+	/// An object has been destroyed
 	ObjectDestroyed,
 
-	// An object changed its city
+	/// An object changed its city
 	ObjectCityChanged,
 
-	// An object changed state
+	/// An object changed state
 	ObjectStateChanged,
     };
 
 
-/* An object event. Haha */
+/**
+ * \brief An object event.
+ *
+ * This event will be transmitted from the ObjectEventEmitter to every
+ * instantiated ObjectEventListeners here
+ *
+ * This will ease decoupling between subsystems
+ */
     struct ObjectEvent {
 	const ObjectManager* object_manager;
 
@@ -73,5 +80,5 @@ namespace familyline::logic {
     };
 
 }
-    
+
 #endif /* OBJECTEVENT_HPP */

@@ -18,7 +18,7 @@ namespace familyline::graphics {
     enum SceneObjectType {
         SCENE_GENERIC = 0,
         SCENE_MESH,
-		SCENE_LIGHT,
+	SCENE_LIGHT,
     };
 
     class SceneObject
@@ -30,9 +30,9 @@ namespace familyline::graphics {
         int _type = 0;
 
         glm::vec3 _position;
-        float _rotations[3]; /*  Rotation angles in X, Y
-                                and Z axis respectively, in radians */
-        BoundingBox _box;    /* Object box, might represent size. */
+	
+        float _rotations[3]; /**< Rotation angles in X, Y and Z axis respectively, in radians */
+	BoundingBox _box;    /**< Object box, might represent size. */
     public:
 
         SceneObject(const char* name, glm::vec3 pos,

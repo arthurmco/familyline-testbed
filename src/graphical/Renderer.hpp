@@ -36,15 +36,15 @@ namespace familyline::graphics {
         GLuint vbo_pos, vbo_norm, vbo_tex;
         int material_offsets[9];
         GLuint vao_bbox = 0;
-		ShaderProgram* sp;
+	ShaderProgram* sp;
     };
 
 #define MAX_RENDERER_LIGHTS 4
-	struct LightRenderInfo {
-		glm::vec3 lightPosition;
-		glm::vec3 lightColor;
-		float lightStrength;
-	};
+    struct LightRenderInfo {
+	glm::vec3 lightPosition;
+	glm::vec3 lightColor;
+	float lightStrength;
+    };
 
 
     class Renderer
@@ -52,26 +52,26 @@ namespace familyline::graphics {
     private:
         SceneManager* _scenemng;
         std::vector<VertexRenderInfo> _vertices;
-		std::vector<VertexRenderInfo> _bb_vaos;
+	std::vector<VertexRenderInfo> _bb_vaos;
 
-		ShaderProgram *sForward, *sLines;
-		Texture* fake_tex;
+	ShaderProgram *sForward, *sLines;
+	Texture* fake_tex;
 
-		unsigned int lightCount = 0;
-		LightRenderInfo lri[MAX_RENDERER_LIGHTS];
+	unsigned int lightCount = 0;
+	LightRenderInfo lri[MAX_RENDERER_LIGHTS];
 
-		/* Custom properties */
-		bool renderBBs = false;
+	/* Custom properties */
+	bool renderBBs = false;
 
         void InitializeLibraries();
         void InitializeShaders();
 
         void SetMaterial(int index);
 
-		/* Render object bounding boxes */
-		void RenderBoundingBoxes();
-		int AddBoundingBox(Mesh*, glm::vec3 color);
-		void RemoveBoundingBox(GLuint);
+	/* Render object bounding boxes */
+	void RenderBoundingBoxes();
+	int AddBoundingBox(Mesh*, glm::vec3 color);
+	void RemoveBoundingBox(GLuint);
 
     public:
         Renderer();
@@ -81,7 +81,7 @@ namespace familyline::graphics {
         void SetSceneManager(SceneManager*);
 
         void UpdateFrames();
-		void UpdateObjects();
+	void UpdateObjects();
         /* Returns true if rendered successfully */
 
         bool Render(TerrainRenderer*);
@@ -91,7 +91,7 @@ namespace familyline::graphics {
         void RemoveVertexData(GLuint vaoid);
         void UpdateVertexData(int vbo, glm::vec3* data, size_t count);
 
-		void SetBoundingBox(bool);
+	void SetBoundingBox(bool);
     };
 
 }

@@ -18,6 +18,9 @@
 
 namespace familyline::logic {
 
+    /**
+     * \brief Represents a game player
+     */ 
     class Player {
 	friend class CityListener;
 	
@@ -43,23 +46,28 @@ namespace familyline::logic {
 
         void AddCity(City*);
 	
-        /***
-            Virtual function called on each iteration.
-
-            It allows player to decide its movement
-            (input for humans, AI decisions for AI... )
-
-            Returns true to continue its loop, false otherwise.
-        ***/
+        /**
+	 * Virtual function called on each iteration.
+	 *
+	 * It allows player to decide its movement
+	 * (input for humans, AI decisions for AI... )
+	 *
+	 * \return true to continue its loop, false otherwise.
+	 */
         virtual bool Play(GameContext*) = 0;
 
-	/***
-	    Process player input.
-	    Returns true if some input was received, false if not 
-	***/
+	/*
+	 * \brief Process player input.
+	 *
+	 * \return true if some input was received, false if not 
+	 */
 	virtual bool ProcessInput() = 0;
 	
-        /* True if this player has updated an object in the last Play() call */
+        /**
+	 * \brief Check if the player has updated an object in the last Play() call
+	 *
+	 * \return true if it has, false if not. 
+	 */
         virtual bool HasUpdatedObject() = 0;
 
 

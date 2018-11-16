@@ -1,3 +1,4 @@
+
 /*
     Object picking class
 
@@ -22,7 +23,7 @@ namespace familyline::input {
 #define MAX_PICK_ITERATIONS 16
 
     /**
-     * Object information needed by the picker
+     * \brief Object information needed by the picker
      *
      * This structure is made so we can get from the objects just what we
      * need when they are created.
@@ -39,10 +40,14 @@ namespace familyline::input {
 			 familyline::logic::object_id_t ID)
 	    : position(pos), mesh(mesh), ID(ID)
 	    {}
-    
+
     };
 
-    
+    /**
+     * \brief Allows the game to identify the game object under the cursor
+     *
+     * If you can select a unit or building, and see its information, thank this class
+     */
     class InputPicker {
     private:
 	familyline::graphics::TerrainRenderer* _terrain;
@@ -56,10 +61,10 @@ namespace familyline::input {
 
 	std::vector<const familyline::logic::GameObject*> _olist;
 	familyline::logic::ObjectEventListener oel;
-    
+
 	bool CheckIfTerrainIntersect(glm::vec3 ray, float start, float end);
 
-	std::vector<PickerObjectInfo> poi_list;	
+	std::vector<PickerObjectInfo> poi_list;
     public:
 
 	InputPicker(familyline::graphics::TerrainRenderer* terrain,
@@ -68,27 +73,39 @@ namespace familyline::input {
 		    familyline::graphics::Camera* cam,
 		    familyline::logic::ObjectManager* om);
 
-	/* Get cursor ray in screen space */
+	/**
+	 * Get cursor ray in screen space
+	 */
 	glm::vec4 GetCursorScreenRay();
 
-	/* Get cursor ray in eye space */
+	/**
+	 * Get cursor ray in eye space
+	 */
 	glm::vec4 GetCursorEyeRay();
 
-	/* Get cursor ray in world space */
+	/**
+	 * Get cursor ray in world space
+	 */
 	glm::vec3 GetCursorWorldRay();
 
 	void UpdateTerrainProjectedPosition();
 	void UpdateIntersectedObject();
 
-	/*	Get position where the cursor collides with the
-		terrain, in render coordinates */
+	/**
+	 * Get position where the cursor collides with the
+	 * terrain, in render coordinates
+	 */
 	glm::vec3 GetTerrainProjectedPosition();
 
-	/*	Get position where the cursor collides with the
-		terrain, in game coordinates */
+	/**
+	 * Get position where the cursor collides with the
+	 * terrain, in game coordinates
+	 */
 	glm::vec2 GetGameProjectedPosition();
 
-	/*	Get the object that were intersected by the cursor ray */
+	/**
+	 * Get the object that were intersected by the cursor ray 
+	 */
 	std::weak_ptr<familyline::logic::GameObject> GetIntersectedObject();
 
     };

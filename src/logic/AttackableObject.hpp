@@ -24,16 +24,19 @@ namespace familyline::logic {
 	double atkPoints;
 	double armorPoints;
 
-	/// Attack arc, in radians
+	/// Attack arc, in radians.
+	///
 	/// AoE attacks have 2*MATH_PI radius, a circle.
 	/// Direct attacks will have a lower arc
 	double atkArc;
 
-	/// Attack range
+	/// Attack range.
+	///
 	/// Simply the radius of said arc above
 	double atkRange;
 
-	/// Minor attack 
+	/// Minor attack.
+	///
 	/// Attack points in the external areas of the circle
 	double atkLower;
 
@@ -57,11 +60,8 @@ namespace familyline::logic {
      */
     class AttackableObject : public GameObject {
     protected:
-	/**
-	 * Current and maximum life points
-	 */
-	int currLifePoints;
-	int maxLifePoints;
+	int currLifePoints; ///< Current life points
+	int maxLifePoints;  ///< Maximum life points
 
 
 	/**
@@ -75,10 +75,12 @@ namespace familyline::logic {
 	int getCurrentLifePoints() const { return this->currLifePoints; }
 	AttackAttributes getAttackAttributes() const { return this->atkAttributes; }
 
-	/*
+	/**
 	 * Deal damage to this attackable object
 	 *
-	 * Return the health points after the damage
+	 * \param dmg The HP you want to remove from the attacked
+	 *
+	 * \return The health points after the damage
 	 */
 	double doDamage(double dmg);
 	
@@ -86,26 +88,29 @@ namespace familyline::logic {
 			 int maxLifePoints, int currLifePoints,
 			 AttackAttributes atkAttributes);
 
-	/* Clone the object at a specified position
+	/**
+	 * \brief Clone the object at a specified position
 	 * 
 	 * This function needs to be implemented for each object, because it
 	 * will return the same class as the object
 	 *
 	 * This is used in the ObjectFactory, to clone the object
 	 *
-	 * Returns a new object
+	 * \return A new object
 	 */
 	virtual GameObject* clone(glm::vec3 position);
 
 
-	/*
-	 * Attack other object
+	/**
+	 * \brief Attack other object
 	 *
 	 * Return the damage caused wrapped around a std::optional.
 	 * If the value doesn't exist, the attacked is out of range.
 	 * If the value exists, the damage is inside the optional
 	 *
 	 * (Since I'll change the engine to fixed timesteps, the attacks will be on a fixed rate)
+	 *
+	 * \return The attack amount, in health points
 	 */
 	std::optional<double> doAttack(AttackableObject* attacked);
     };

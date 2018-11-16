@@ -1,4 +1,4 @@
-/**
+/***
  * Object event listener class
  *
  * Copyright (C) 2018 Arthur Mendes
@@ -15,6 +15,8 @@ namespace familyline::logic {
 
     /**
      * An interface that every class that wishes to list for object events must inherit
+     *
+     * \see ObjectEvent
      */
     class ObjectEventListener {
     private:

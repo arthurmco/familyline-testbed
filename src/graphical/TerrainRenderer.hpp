@@ -3,8 +3,6 @@
 
     Renders the terrain using a custom shader
 
-
-
     Copyright (C) 2016 Arthur Mendes.
 
 ***/
@@ -29,7 +27,8 @@
 
 namespace familyline::graphics {
 
-    /* A stripped-down version of a vertex data.
+    /**
+     * A stripped-down version of a vertex data.
      *
      * We have only the vertex and normals.
      * We do not have material info here, only the terrain types, because the terrain material
@@ -66,7 +65,9 @@ namespace familyline::graphics {
 	Camera* _cam  = nullptr;
         glm::mat4 _wmatrix = glm::mat4(1.0f);
 
-        /* Create a terrain vertex data with the data from a specific terrain */
+        /**
+	 * Create a terrain vertex data with the data from a specific terrain 
+	 */
 	TerrainVertexData GetTerrainVerticesFromSection(unsigned int section);
 
 	GLuint CreateVAOFromTerrainData(TerrainVertexData& tvd);
@@ -77,7 +78,11 @@ namespace familyline::graphics {
 
 	std::array<unsigned int, ImageWidth*ImageHeight> GetTerrainTexture(unsigned int type_id);
 
-	/* Generate terrain texture from a certain terrain data */
+	/**
+	 * Generate terrain texture from a certain terrain data 
+	 *
+	 * \param data The said terrain data
+	 */
 	Texture* GenerateTerrainSlotTexture(familyline::logic::TerrainData* data);
 	
     public:
@@ -89,19 +94,27 @@ namespace familyline::graphics {
         void SetCamera(Camera*);
         Camera* GetCamera();
 
-	/* Update the terrain VAO with the current rendering information */
+	/**
+	 * Update the terrain VAO with the current rendering information 
+	 */
         void Update();
 
-	/* Render the terrain */
+	/**
+	 * Render the terrain 
+	 */
 	void Render();
 
     };
 
 
-    /* Convert a terrain point from graphical to game space */
+    /**
+     * Convert a terrain point from graphical to game space 
+     */
     glm::vec3 GraphicalToGameSpace(glm::vec3 graphical);
 
-    /* Convert a terrain point from game to graphical space*/
+    /**
+     * Convert a terrain point from game to graphical space
+     */
     glm::vec3 GameToGraphicalSpace(glm::vec3 game);
 
 }

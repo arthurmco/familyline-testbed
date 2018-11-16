@@ -17,6 +17,9 @@
 
 namespace familyline::logic {
 
+    /**
+     * The components of a combat
+     */
     struct Combat {
 	std::weak_ptr<AttackableObject> attacker;
 	std::weak_ptr<AttackableObject> defender;
@@ -26,6 +29,13 @@ namespace familyline::logic {
 
     typedef std::function<void(AttackableObject*)> OnDeathFunction;
 
+    /**
+     * \brief Manages fights between AttackableObjects
+     *
+     * Manages fights independently from other things, implementing things
+     * like notifying when some AttackableObject dies, be attacked and stop
+     * attacking if an object is out of range
+     */
     class CombatManager {
     private:
 	std::list<Combat> _combats;
@@ -46,7 +56,9 @@ namespace familyline::logic {
 
 	void SuspendAttack(std::weak_ptr<AttackableObject> attacker);
 
-	/* Set function to be run on the object death */
+	/**
+	 * Set function to be run on the object death 
+	 */
 	void SetOnDeath(OnDeathFunction f);
 
     };    

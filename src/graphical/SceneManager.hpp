@@ -22,12 +22,21 @@ namespace familyline::graphics {
     /* Scene quadrant size, in OpenGL coordinates */
     #define SCENE_QUADRANT_SIZE 64
 
-    /* A scene quadrant. Might help divide the scene in pieces, so rendering is faster */
+    /** 
+     * A scene quadrant. Might help divide the scene in pieces, so rendering is faster 
+     */
     struct SceneQuadrant {
         int x, y;
         std::list<SceneObject*> _quadrant_objects;
     };
 
+    /**
+     * Stores the scene graphical objects, such as meshes and lights, optionally
+     * hiding or showing them, so the Renderer does not render anything it should not need
+     *
+     * \see SceneObject for the said objects
+     * \see graphics::Mesh and graphics::Light for some concrete objects
+     */
     class SceneManager {
     private:
         bool _listModified = true;
@@ -43,7 +52,9 @@ namespace familyline::graphics {
     public:
         SceneManager(){}
 
-        /* Init the scene manager with terrain coordinates, in OpenGL units */
+        /**
+	 * Init the scene manager with terrain coordinates, in OpenGL units 
+	 */
         SceneManager(int terrW, int terrH);
 
         int AddObject(SceneObject*);
@@ -57,17 +68,24 @@ namespace familyline::graphics {
         Camera* GetCamera() const;
         void SetCamera(Camera*);
 
-        /* Output the camera quadrant int x and y */
+        /**
+	 * \brief Output the X and Y positions of the current camera quadrant
+	 */
         void GetCameraQuadrant(int& x, int& y);
 
-        /* Update the valid objects list.
-            This list is responsable to show the valid objects, the objects
-            visible to the camera and some beyond
-            Return FALSE if we don't have any alteration, TRUE if we have
-        */
+        /**
+	 * \brief Update the valid objects list.
+	 *
+	 * This list is responsable to show the valid objects, the objects
+         * visible to the camera and some beyond
+         * 
+	 * \return `false` if we don't have any alteration, `true` if we have
+	 */
         bool UpdateValidObjects();
 
-        /* Retrieve the valid objects list */
+        /**
+	 * Retrieve the valid objects list 
+	 */
         std::list<SceneObject*>* GetValidObjects();
     };
 

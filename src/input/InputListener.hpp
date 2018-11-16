@@ -17,21 +17,29 @@ private:
     std::queue<InputEvent> _events;
     bool inputAccepted = false;
     char* name;
-    
+
 public:
     InputListener(const char* name = "default");
-    
-    /* Called only by the InputManager class when you receive a wished event */
+
+    /**
+     * Called only by the InputManager class when you receive a wished event
+     */
     void OnListen(InputEvent e);
 
-    /* Return true if there's an event, and copy its data to ev */
+    /**
+     * Return true if there's an event, and copy its data to ev
+     */
     bool PopEvent(InputEvent& ev);
 
-    /* Call if you 'accept' the input, i.e, you already took care of it and
-       no one should take care */
+    /**
+     * Call if you 'accept' the input, i.e, you already took care of it and
+     * no one should take care
+     */
     void SetAccept();
 
-    /* Retrieves (and resets) input acception status */
+    /**
+     * Retrieves (and resets) input acception status
+     */
     bool GetAcception();
 
     char* GetName() const ;

@@ -178,6 +178,12 @@ file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DES
 
 endif (WIN32)
 
+# Custom targets
+add_custom_target(docs COMMAND "doxygen" "Doxyfile"
+  COMMENT "Creating the Doxygen documentation"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+
+
 # CPack configuration
 
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "crappy but fun RTS game, where you guide a family in its fantastic adventures through the Ancient Era")
