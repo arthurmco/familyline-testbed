@@ -1,4 +1,5 @@
-# Model contribution
+Model contribution
+===================
 
 Familyline supports, for now, two types of model formats: Wavefront OBJ and MD2, without animation 
 (MD2 animation support is partially working on _graphical_ branch
@@ -11,14 +12,16 @@ But there are some guidelines you'll have to follow if you want Familyline to co
 They are made specifically for Blender3D, 'cause it is what I use, but you can adapt it for other modelling 
 software if you're smart.
 
-## OBJ
+OBJ
+----
+
 * To export for OBJ format, the Forward direction needs to be -Z and the Up direction needs to be Y 
-(Forward: -Z forward and Up: Y up)
+  (Forward: -Z forward and Up: Y up)
 
 * "Triangulate Faces" *must* be selected, otherwise the engine won't load your model correctly.
 
 * The "Write Materials" option can be let checked, it will add an mtl file there. However, the usage of this option
-will be discouraged in the future.
+  will be discouraged in the future.
 
 * OBJ animations are not supported and never will be.
 
@@ -26,12 +29,14 @@ will be discouraged in the future.
 
 * The other defaults are OK.
 
-## MD2
+MD2
+----
+
 * Before exporting, please rotate the model so the Y axis (the green arrow) points to the model up direction, and
-the Z direction (the blue arrow) points to the back of your model.
+  the Z direction (the blue arrow) points to the back of your model.
 
 * You need to specify the texture in the code. Familyline doesn't support texture loading from MD2 and MD2 format
-doesn't specify material names. But the UV coordinates are read correcly.
+  doesn't specify material names. But the UV coordinates are read correcly.
 
 * MD2 animations are supported on graphical branch, but without respecting framerate (it will run at game framerate)
 

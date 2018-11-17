@@ -53,7 +53,7 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" )
 # Add packages natively supported by cmake
 find_package(GLEW REQUIRED)
 find_package(DevIL REQUIRED)
-find_package(Yaml REQUIRED)
+find_package(yaml REQUIRED)
 find_package(OpenGL REQUIRED)
 
 include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
@@ -75,7 +75,7 @@ if (MSVC)
   # We don't really need to put them here'
   include_directories(AFTER ${YAML_INCLUDE_DIR})
 
-  target_link_libraries(familyline SDL2::SDL2 SDL2::SDL2main)
+  target_link_libraries(familyline PRIVATE SDL2::SDL2 SDL2::SDL2main)
   target_link_libraries(familyline ${OPENGL_gl_LIBRARY})
   target_link_libraries(familyline ${GLEW_LIBRARY})
   target_link_libraries(familyline ${IL_LIBRARIES})

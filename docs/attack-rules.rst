@@ -1,4 +1,5 @@
-# Attack rules
+Attack rules
+============
 
 These are the object attack-defend rules in Familyline
 
@@ -22,13 +23,12 @@ are:
  
  Taking into account only those two, to calculate the damage, just:
  
- ```c
+ ::
  
 	 defensor.hp = (defensor.hp - (attacker.atk - defensor.def))
-	 
- ```
- 
-## Attack range bonus ##
+
+Attack range bonus
+-------------------
  
  Attack range bonus is a multiplier over the attacker atk points. When he's
  below half the maximum range, the multiplier is 1. When he's between half
@@ -37,11 +37,11 @@ are:
  
  A simple illustration, supposing the atk range bonus is 2
  
- ```
- atk range multiplier   1             1     1.5      2
-                       ||-------------|------|------||
- distance               0             4      6       8
- ```
+::
+
+    atk range multiplier   1             1     1.5      2
+                          ||-------------|------|------||
+    distance               0             4      6       8
 
 The atk range multiplier can be lower than 1, for attacks that lose
 strength on distance
@@ -50,7 +50,8 @@ This is done to mirror the arrow shot strength, when higher the distance,
 the impact is stronger
 
  
-## Unit & Building bonuses ##
+Unit & Building bonuses
+-----------------------
 
 The unit and building attack bonuses are attack multipliers when tke
 attacker is facing an unit or a building. 
@@ -62,8 +63,8 @@ buildings and high for units themselves.
 The unit and building defense bonuses are defense multipliers, for when the
 defender is being attacked by an unit or a building
 
-
-## Attack decay ##
+Attack decay
+------------
 
 The attack decay is a multiplier, generally low, applied recursively on
 each tick, after the attack has been done, to the attacked unit. It's used

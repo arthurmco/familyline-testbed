@@ -1,8 +1,10 @@
-# Terrain contribution
+Terrain contribution
+====================
 
 Here, I will describe the terrain generation tool and the terrain format
 
-## The tool
+The tool
+--------
 
 The terrain generation tool is called maketerrain.py. It grabs some image
 and extracts the red color as terrain data between 0 and 256, which
@@ -13,17 +15,16 @@ Each pixel there is a 'slot' in the game, so a 16x16 image will make a
 
 The tool usage is something like this: 
 
-```
+::
 
 	maketerrain.py SOURCE OUTPUT
-	
-```
 
-where _SOURCE_ is an image (any image supported by the Python Image Library
-should work) and _OUTPUT_ is the terrain output.
+where ``SOURCE`` is an image (any image supported by the Python Image Library
+should work) and ``OUTPUT`` is the terrain output.
 
 
-## The terrain format
+The terrain format
+------------------
 
 If something goes wrong in the terrain generation, you need to know the
 terrain format. Some things here aren't implemented in both the terrain
@@ -33,14 +34,17 @@ Offsets and sizes are in bytes. Multibyte formats are in little-endian byte
 encoding, but byte-switching isn't implemented (so the map will be
 incorrectly generated and read in big-endian architectures)
 
-### The file header
+The file header
++++++++++++++++
 
-| Offset | Size | Name        |
-| ------ | ---- |:----------- |
-| 0x0    | 4    | MAGIC       | 
-| 0x4    | 4    | VERSION     |
-| 0x8    | 4    | GAME        |
-| 0xc    | 4    | THDR_OFFSET |
+====== ==== ===========
+Offset Size Name       
+------ ---- -----------
+0x0    4    MAGIC       
+0x4    4    VERSION    
+0x8    4    GAME       
+0xc    4    THDR_OFFSET
+====== ==== ===========
  
 **MAGIC**: The terrain magic number. Equals to 0x42545254 in little
 endian. Equals 'TRTB' in ascii (**Tr**ibalia **T**errain **B**inary)
@@ -57,16 +61,19 @@ you can use the same value.
 **THDR_OFFSET**: Offset to the first terrain header. Usually is 0x10 or 16
 decimal.
 
-### The terrain header
+The terrain header
+++++++++++++++++++
 
-| Offset | Size | Name            |
-| ------ | ---- |:--------------- |
-| 0x00   | 4    | WIDTH           | 
-| 0x04   | 4    | HEIGHT          |
-| 0x08   | 4    | NAME\_OFF       |
-| 0x0c   | 4    | AUTHOR\_OFF     |
-| 0x10   | 4    | NEXT\_THDR\_OFF |
-| 0X14   | 4    | DATA_OFF        |
+====== ==== ===============
+Offset Size Name           
+------ ---- ---------------
+0x00   4    WIDTH          
+0x04   4    HEIGHT         
+0x08   4    NAME\_OFF      
+0x0c   4    AUTHOR\_OFF    
+0x10   4    NEXT\_THDR\_OFF
+0X14   4    DATA_OFF       
+====== ==== ===============
 
 **WIDTH** and **HEIGHT**: The terrain area, in slots
 
@@ -81,7 +88,8 @@ header. Currently unimplemented.
 
 **DATA\_OFF**: File offset to the terrain slot array. Usually 0x28 or 40.
 
-### The data
+The data
++++++++++
 
 Also called the terrain slot array. The terrain slot array is composed by
 two 16-bit integers. 
@@ -94,11 +102,10 @@ The high one is an unsigned 16-bit integer that represents the terrain type
 at that slot. When rendered, the terrain texture at that slot will expand
 to halfway the neighbor terrains. So
 
-![representation terrain points](terrain_contrib00.png)
+.. image:: _static/terrain_contrib00.png
+	:alt: representation terrain points
 
 will become
 
-![representation of terrain texture](terrain_contrib01.png)
-
-
-
+.. image:: _static/terrain_contrib01.png
+	:alt: representation of terrain texture

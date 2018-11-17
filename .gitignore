@@ -58,6 +58,7 @@ Testing/*
 CTest*.cmake
 *.pc
 docs/doxygen/
+docs/build/
 
 # Code::Blocks
 *.cbp
@@ -65,3 +66,4 @@ docs/doxygen/
 /.vs/slnx.sqlite
 /.vs/VSWorkspaceState.json
 /.vs
+build/
