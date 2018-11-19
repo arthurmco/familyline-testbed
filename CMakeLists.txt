@@ -53,7 +53,7 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" )
 # Add packages natively supported by cmake
 find_package(GLEW REQUIRED)
 find_package(DevIL REQUIRED)
-find_package(yaml REQUIRED)
+find_package(Yaml REQUIRED)
 find_package(OpenGL REQUIRED)
 
 include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
@@ -75,7 +75,7 @@ if (MSVC)
   # We don't really need to put them here'
   include_directories(AFTER ${YAML_INCLUDE_DIR})
 
-  target_link_libraries(familyline PRIVATE SDL2::SDL2 SDL2::SDL2main)
+  target_link_libraries(familyline SDL2::SDL2 SDL2::SDL2main)
   target_link_libraries(familyline ${OPENGL_gl_LIBRARY})
   target_link_libraries(familyline ${GLEW_LIBRARY})
   target_link_libraries(familyline ${IL_LIBRARIES})
@@ -155,26 +155,18 @@ if (WIN32)
 
   # Copy a stubborn dependent DLLs to the release directory, so the software can be run and packaged.
   # See https://github.com/Microsoft/vcpkg/issues/2630
-  file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
-file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
+  file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+  #file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
   # Copy the asset folders to the Debug folder
-  file(COPY "${CMAKE_SOURCE_DIR}/shaders" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
-  file(COPY "${CMAKE_SOURCE_DIR}/icons" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
-  file(COPY "${CMAKE_SOURCE_DIR}/materials" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
-  file(COPY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
-  file(COPY "${CMAKE_SOURCE_DIR}/textures" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
-  file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.trtb" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
-  file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
+  file(COPY "${CMAKE_SOURCE_DIR}/shaders" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+  file(COPY "${CMAKE_SOURCE_DIR}/icons" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+  file(COPY "${CMAKE_SOURCE_DIR}/materials" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+  file(COPY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+  file(COPY "${CMAKE_SOURCE_DIR}/textures" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+  file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.trtb" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+  file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
-  # and to the Release folder
-  file(COPY "${CMAKE_SOURCE_DIR}/shaders" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
-  file(COPY "${CMAKE_SOURCE_DIR}/icons" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
-  file(COPY "${CMAKE_SOURCE_DIR}/materials" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
-  file(COPY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
-  file(COPY "${CMAKE_SOURCE_DIR}/textures" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
-  file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.trtb" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
-  file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Release")
 
 endif (WIN32)
 
