@@ -1,41 +1,59 @@
-/**
-  * Animator based on mesh deformation, the simplest way of animating something
-  * It receives a frame number and a list of vertices.
-  * When we animate, it gets the list of vertices directly or interpolate between two
-  * lists, depending on the framerate of the animation.
-  *
-  * Copyright (C) 2018 Arthur M
-  */
+/***
+ * Animator for mesh deformation animation
+ *
+ * Copyright (C) 2018 Arthur Mendes
+ *
+ ***/
 
 #ifndef DEFORMANIMATOR_HPP
 #define DEFORMANIMATOR_HPP
 
 #include <map>
-#include <vector>
-#include "VertexData.hpp"
+#include <string>
+
+#include "Animator.hpp"
 
 namespace familyline::graphics {
+    
+    /**
+     * Mesh deformation animation class
+     * 
+     * Usually contains instructions for animating
+     * vertices one by one
+     */
+    class DeformAnimator final : Animator {
+    private:
+	std::map<std::string /*animation-name*/, std::vector<VertexDataGroup>> _animation_frames;
+	int _framerate;
 
-	class DeformAnimator : public BaseAnimator {
-	
-	private:
-		unsigned _framecount;
-		
-		std::map<unsigned /*frame*/, std::vector<glm::vec3>> _frames;
+	std::string _animation_name = "default";
 
-	public:
-		const unsigned DEFAULT_FPS = 60;
+	/**
+	 * What position in the animation we are.
+	 * It's double, because we can be in the middle of two frames
+	 */
+	double _frameptr = 0.0;
 
-		DeformAnimator(VertexData* vd, unsigned framecount)
-			: BaseAnimator(vd), _framecount(framecount)
-		{}
+    public:
+	DeformAnimator(std::map<std::string /*animation-name*/, std::vector<VertexDataGroup>>,
+		       int framerate);
 
-		void AddFrame(unsigned frameno, std::vector<glm::vec3> vertices);
+	/** 
+	 * Get vertex data from the current frame 
+	 */
+	virtual VertexDataGroup getCurrentFrame();
 
-		virtual const std::vector<glm::vec3>& getVertices(unsigned frameno);
-		virtual size_t getFrameCount() const;
-	};
+	/**
+	 * Advance animation by 'ms' milisseconds.
+	 * If ms is not the frametime of this animation, interpolate
+	 */
+	virtual void advance(int ms);
+
+	/**
+	 * Run some predefined animation named 'name'.
+	 * Set the internal pointer to the first frame of that animation
+	 */
+	virtual void runAnimation(const char* name);
+    };
 
 }
-
-#endif // !DEFORMANIMATOR_HPP

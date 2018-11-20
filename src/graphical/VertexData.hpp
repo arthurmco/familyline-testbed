@@ -1,7 +1,7 @@
 /***
     Raw vertex data
 
-    Copyright (C) 2016, 2018 Arthur Mendes.
+    Copyright (C) 2018 Arthur Mendes.
 
 ***/
 
@@ -15,85 +15,47 @@
 
 #include "ShaderProgram.hpp"
 
-
 namespace familyline::graphics {
 
-	struct VertexData;
-	class Mesh;
-	class Camera;
-
-	/* Base animator class */
-	class BaseAnimator {
-	protected:
-		VertexData* vdata;
-	public:
-		BaseAnimator(VertexData* v)
-			: vdata(v)
-		{}
-
-		/* Load a vertex */
-		virtual const std::vector<glm::vec3>& getVertices(unsigned frameno);
-		virtual size_t getFrameCount() const { return 1; }
-
-		virtual ~BaseAnimator() {}
-	};
-	
-	enum VertexRenderStyle {
-		Triangles,
-
-		PlotLines
-	};
-
-	/* Function pointer to a shader setup function
-	   This function receives five parameters: 
-	    - the shader itself
-	    - a model matrix, used to put the model somewhere
-		- a view matrix, used to transform the camera on the scene (the pointing angle)
-		- a projection matrix, used to transform the way you see the scene.
-		- the camera
-		
-	   Those parameters serves to setup the shader for that specific shader, so the
-	   renderer doesn't need to worry about the shader itself.
-	*/
-	typedef std::function<void(ShaderProgram*, glm::mat4, glm::mat4, 
-		glm::mat4, Camera*)> ShaderSetupFunction;
-	
-    /* Basic vertex information */
+    /**
+     * Contains base vertex data
+     */
     struct VertexData {
-	std::vector<glm::vec3> Positions;
-	std::vector<glm::vec3> Normals;
-	std::vector<glm::vec2> TexCoords;
+	std::vector<glm::vec3> position;
+	std::vector<glm::vec3> normals;
+	std::vector<glm::vec2> texcoords;
 
-	// The material ID for this vertex list
-	// -1 means 'no material'
-	int materialID = -1;
-	
-	VertexRenderStyle render_format = VertexRenderStyle::Triangles;
-
-	// The shader used
-	ShaderProgram* shader;
-
-	// TODO: Move this to the mesh?
-	std::unique_ptr<BaseAnimator> animator;
-
-	int vbo_pos;
-
-	// Pointer to the owning mesh, so we can draw the bounding boxes
-	Mesh* meshptr;
-
-	// Shader setup function
-	ShaderSetupFunction fnShaderSetup;
-
-	VertexData();
-	VertexData(VertexData& vd);
-	VertexData(BaseAnimator* a);
-
-	/* Sets the shader and the shader setup function together, so we
-	 * don't fuck up something 
-	 */
-	void SetShader(ShaderProgram* s);
+	/// The indices
+	///
+	/// Each one of them corresponds to an unique set of vertices, normals and
+	/// texcoords
+	/// i.e, the index 3 means that the vertex is made of the position at index 2,
+	/// normal at index 2 and texcoord at index 2 (the index start at 1)
+	std::vector<unsigned int> indices;
     };
 
+    /**
+     * Contains metainformation about the vertex set
+     */
+    struct VertexInfo {
+
+	/**
+	 * When you retrieve the vertex list from an animation, it
+	 * will come as a list of VertexDatas
+	 * \see VertexDataGroup
+	 *
+	 * Each VertexData corresponds to a group of vertices that
+	 * use a unique combination of material and shader, and are
+	 * grouped together
+	 *
+	 * The index is a reference to that list
+	 */
+	int index = 0;
+
+	int materialID = 0;   ///< Material ID for this vertex set
+	int shaderID = 0;     ///< Shader ID for this vertex set
+    };
+    
 }
 
 #endif /* end of include guard: VERTEXDATA_HPP */
