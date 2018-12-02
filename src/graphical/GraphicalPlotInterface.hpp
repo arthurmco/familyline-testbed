@@ -7,6 +7,8 @@
 #ifndef GRAPHICALPLOTINTERFACE_HPP
 #define GRAPHICALPLOTINTERFACE_HPP
 
+#include <map>
+
 #include "Renderer.hpp"
 #include "../logic/DebugPlot.hpp"
 
@@ -15,6 +17,7 @@ namespace familyline::graphics {
     class GraphicalPlotInterface : public logic::DebugPlotInterface {
     private:
 	Renderer* _renderer;
+	std::map<familyline::logic::PathHandle, VertexHandle> vertexmap;
 	
     public:
 	GraphicalPlotInterface(Renderer* renderer);

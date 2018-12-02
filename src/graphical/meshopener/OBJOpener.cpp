@@ -5,6 +5,7 @@
 
 #include <Log.hpp>
 #include "../MaterialManager.hpp"
+#include "../StaticAnimator.hpp"
 
 #include <glm/glm.hpp>
 
@@ -265,7 +266,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 			     vg.name, vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
 			     (vg.hasTexture ? "true" : "false"));
 
-	std::vector<VertexData*> vdlist;
+	VertexDataGroup vdlist;
 	unsigned idx = 0;
 	for (const auto& vl : vg.vertices) {
 	    if (vl.indices.size() == 0) continue; // Remove null vertex lists
@@ -318,7 +319,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 		    uvs.size(), index_list.size());
 
 	    // Build the vertex data
-	    VertexData* vdata = new VertexData{};
+	    VertexData vdata;
 
 	    // Make groups of 3 vertices, so the vga knows this is a triangle
 	    // TODO: Support vertex indices, and modify this loop
@@ -333,31 +334,33 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 		    uv.idxTexcoord;
 		
 		    
-		vdata->Positions.push_back(vertices[uvv]);
+		vdata.position.push_back(vertices[uvv]);
 
 		if (vg.hasNormal)
-		    vdata->Normals.push_back(normals[uvn]);
+		    vdata.normals.push_back(normals[uvn]);
 
 		if (vg.hasTexture)
-		    vdata->TexCoords.push_back(texcoords[uvt]);
+		    vdata.texcoords.push_back(texcoords[uvt]);
 
 		if (vl.mtlname) {
 		    auto mtl = MaterialManager::GetInstance()->GetMaterial(vl.mtlname);
 
-		    if (mtl)
-			vdata->materialID = mtl->GetID();
-		    else
-			Log::GetLog()->Warning("obj-opener", "cannot load material %s for %s",
-					       vl.mtlname, vg.name);
+//		    if (mtl)
+//			vdata->materialID = mtl->GetID();
+//		    else
+		    Log::GetLog()->Warning("obj-opener", "cannot load material %s for %s",
+					   vl.mtlname, vg.name);
 		}
 
 	    }
 
-	    vdlist.push_back(vdata);
+	    vdlist.push_back(std::move(vdata));
 	    idx++;
 	}
 
-	auto mesh = new Mesh{vdlist};
+	auto mesh = new Mesh{new StaticAnimator{vdlist},
+			     {{0, 0, "forward"}}};
+	
 	mesh->SetName(vg.name);
 
 	mesh_ret.push_back(mesh);

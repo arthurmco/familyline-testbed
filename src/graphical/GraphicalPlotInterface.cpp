@@ -30,15 +30,24 @@ PathHandle GraphicalPlotInterface::AddPath(std::vector<glm::vec3>& path,
 	});
 
     VertexData* v = new VertexData();
-    v->Positions = glpos;
-    v->Normals = glcolor;
-    v->render_format = VertexRenderStyle::PlotLines;
-    return (PathHandle)_renderer->AddVertexData(v, new glm::mat4(1.0));
-    
+    v->position = glpos;
+    v->normals = glcolor;
+    //v->render_format = VertexRenderStyle::PlotLines;
+//    return (PathHandle)_renderer->addVertexData(v, new glm::mat4(1.0));
+    VertexHandle vdata = _renderer->addVertexData(
+	*v, VertexInfo{0, 0, "lines", new glm::mat4(1.0)});
+
+
+    uintptr_t vcode = (uintptr_t)v;
+    PathHandle p = int(vcode);
+    vertexmap[p] = vdata;
 }
 
 /* Removes a path using its path handle */
 void GraphicalPlotInterface::RemovePath(PathHandle pathhandle)
 {
-    _renderer->RemoveVertexData((PathHandle)pathhandle);
+    auto vhandle = vertexmap[pathhandle];
+    _renderer->removeVertexData(std::move(vhandle));
+
+    vertexmap.erase(pathhandle);
 }

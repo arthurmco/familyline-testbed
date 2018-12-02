@@ -12,6 +12,7 @@
 
 #include "Cursor.hpp"
 #include "../graphical/TerrainRenderer.hpp"
+#include "../graphical/Mesh.hpp"
 #include "../graphical/Window.hpp"
 #include "../graphical/Camera.hpp"
 #include "../graphical/SceneManager.hpp"

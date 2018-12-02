@@ -19,7 +19,7 @@ namespace familyline::graphics {
      * out of a static one, so I only need to have one code 
      * path to return a model
      */
-    class StaticAnimator final : Animator {
+    class StaticAnimator final : public Animator {
     private:
 	VertexDataGroup _vdg;
 

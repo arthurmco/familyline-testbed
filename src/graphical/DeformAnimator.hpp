@@ -21,7 +21,7 @@ namespace familyline::graphics {
      * Usually contains instructions for animating
      * vertices one by one
      */
-    class DeformAnimator final : Animator {
+    class DeformAnimator final : public Animator {
     private:
 	std::map<std::string /*animation-name*/, std::vector<VertexDataGroup>> _animation_frames;
 	int _framerate;
@@ -57,3 +57,5 @@ namespace familyline::graphics {
     };
 
 }
+
+#endif

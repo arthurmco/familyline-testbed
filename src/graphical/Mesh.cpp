@@ -1,9 +1,11 @@
 #include "Mesh.hpp"
 #include "Material.hpp"
 
+#include <numeric>
+
 using namespace familyline::graphics;
 
-Mesh::Mesh(VertexData* vd)
+Mesh::Mesh(Animator* animator, const std::vector<VertexInfo>& vinfo)
     : SceneObject("Mesh", glm::vec3(0,0,0), 0, 0, 0)
 {
     _translMatrix = glm::mat4(1.0);
@@ -12,29 +14,11 @@ Mesh::Mesh(VertexData* vd)
 
     _modelMatrix = glm::mat4(1.0);
 
-    this->_vdata.push_back(new VertexData(*vd));
-    this->_vdata.at(0)->meshptr = this;
+    this->_animator = animator;
+    this->_vinfo = vinfo;
+//    this->_vdata.at(0)->meshptr = this;
     this->_type = SCENE_MESH;
 }
-
-
-Mesh::Mesh(std::vector<VertexData*> vd)
-    : SceneObject("", glm::vec3(0), 0, 0, 0)
-{
-    _translMatrix = glm::mat4(1.0);
-    _scaleMatrix = glm::mat4(1.0);
-    _rotMatrix = glm::mat4(1.0);
-
-    _modelMatrix = glm::mat4(1.0);
-
-    this->_vdata = vd;
-
-    for (auto& v : this->_vdata)
-	v->meshptr = this;
-
-    this->_type = SCENE_MESH;
-}
-
 
 void Mesh::Translate(glm::vec3 pos)
 {
@@ -101,11 +85,6 @@ void Mesh::AddRotation(float x, float y, float z)
     this->ApplyTransformations();
 }
 
-std::vector<VertexData*>& Mesh::GetVertexData()
-{
-    return this->_vdata;
-}
-
 glm::mat4* Mesh::GetModelMatrixPointer()
 {
     return &this->_modelMatrix;
@@ -118,10 +97,11 @@ void Mesh::GenerateBoundingBox()
     float miny = 10E6, maxy = 10E-6;
     float minx = 10E6, maxx = 10E-6;
 
-
-    for (const auto& vd : this->_vdata) {
-	for (auto it = vd->Positions.begin();
-	     it != vd->Positions.end(); ++it) {
+    auto vdgroup = this->_animator->getCurrentFrame();
+    
+    for (const auto& vd : vdgroup) {
+	for (auto it = vd.position.begin();
+	     it != vd.position.end(); ++it) {
 	    minz = std::min(it->z, minz);
 	    miny = std::min(it->y, miny);
 	    minx = std::min(it->x, minx);
@@ -154,11 +134,14 @@ void Mesh::GenerateBoundingBox()
 
 }
 
-
-/* Sets material for whole mesh */
-void Mesh::SetMaterial(Material* mt)
+/**
+ * \brief Get a reference to metainformation about the vertices,
+ *
+ * Get a reference about a structure that contains immutable data
+ * about the vertices: shaders and textures
+ */
+VertexInfo Mesh::getVertexInfo(unsigned int index)
 {
-    for (auto& vd : this->_vdata)
-	vd->materialID = mt->GetID();
-       
+    return _vinfo.at(index);
 }
+

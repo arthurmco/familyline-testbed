@@ -28,17 +28,15 @@
 
 
 namespace familyline::graphics {
-
-    struct VertexRenderInfo {
-        VertexData* vd;
-        glm::mat4* worldMat;
-        GLuint vao;
-        GLuint vbo_pos, vbo_norm, vbo_tex;
-        int material_offsets[9];
-        GLuint vao_bbox = 0;
+    struct VertexHandle {
+	GLuint vao;
+	GLuint vboPos, vboTex, vboNorm;
+	VertexData* vd;
+	VertexInfo vi;
+	GLuint vao_bbox = 0;
 	ShaderProgram* sp;
     };
-
+    
 #define MAX_RENDERER_LIGHTS 4
     struct LightRenderInfo {
 	glm::vec3 lightPosition;
@@ -51,8 +49,8 @@ namespace familyline::graphics {
     {
     private:
         SceneManager* _scenemng;
-        std::vector<VertexRenderInfo> _vertices;
-	std::vector<VertexRenderInfo> _bb_vaos;
+        std::vector<VertexHandle> _vertices;
+	std::vector<VertexHandle> _bb_vaos;
 
 	ShaderProgram *sForward, *sLines;
 	Texture* fake_tex;
@@ -82,14 +80,16 @@ namespace familyline::graphics {
 
         void UpdateFrames();
 	void UpdateObjects();
-        /* Returns true if rendered successfully */
 
-        bool Render(TerrainRenderer*);
+        /** 
+	 * Returns true if rendered successfully 
+	 */
+	bool Render(TerrainRenderer*);
 
-        /* Add vertex data structure. Returns its VAO ID */
-        GLint AddVertexData(VertexData*, glm::mat4* worldMatrix);
-        void RemoveVertexData(GLuint vaoid);
-        void UpdateVertexData(int vbo, glm::vec3* data, size_t count);
+	const VertexHandle addVertexData(const VertexData& vdata, const VertexInfo vinfo);
+	void updateVertexData(VertexHandle vhandle, const VertexData& vdata, const VertexInfo vinfo);
+	void removeVertexData(VertexHandle&& vhandle);
+	
 
 	void SetBoundingBox(bool);
     };

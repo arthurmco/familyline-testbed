@@ -11,7 +11,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <memory>
-#include <functional>
+#include <string>
 
 #include "ShaderProgram.hpp"
 
@@ -34,6 +34,12 @@ namespace familyline::graphics {
 	std::vector<unsigned int> indices;
     };
 
+    enum VertexRenderStyle {
+        Triangles, ///< The vertices make triangles
+        PlotLines  ///< The vertices make lines. Useful for debug lines
+    };
+
+    
     /**
      * Contains metainformation about the vertex set
      */
@@ -52,8 +58,10 @@ namespace familyline::graphics {
 	 */
 	int index = 0;
 
-	int materialID = 0;   ///< Material ID for this vertex set
-	int shaderID = 0;     ///< Shader ID for this vertex set
+	int materialID = 0;     ///< Material ID for this vertex set
+	std::string shaderName; ///< Shader name for this vertex set
+
+	glm::mat4* worldMat; ///< World matrix for this vertex set
     };
     
 }

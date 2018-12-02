@@ -124,7 +124,7 @@ AssetObject AssetManager::GetAsset(const char* name)
 		Material* mattex = new Material(texname, MaterialData(0.8f, 1.0f, 0.1f));
 		mattex->SetTexture(t);
 		MaterialManager::GetInstance()->AddMaterial(mattex);
-		assetobj.mesh->SetMaterial(mattex);
+//		assetobj.mesh->SetMaterial(mattex);
 
 		delete[] texname;
     }

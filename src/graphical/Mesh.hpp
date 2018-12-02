@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "VertexData.hpp"
+#include "Animator.hpp"
 #include "SceneObject.hpp"
 
 #ifndef MESH_HPP
@@ -40,11 +41,12 @@ namespace familyline::graphics {
         /* warning: rotate angle should be in radians */
         void Rotate(glm::vec3 axis, float angle);
 
-	std::vector<VertexData*> _vdata;
-    public:
-        Mesh(VertexData* vd);
-	Mesh(std::vector<VertexData*> vd);
+	Animator* _animator = nullptr;
+	std::vector<VertexInfo> _vinfo;
 	
+    public:
+        Mesh(Animator* animator, const std::vector<VertexInfo>& vinfo);
+
         virtual void SetPosition(glm::vec3);
         void AddPosition(glm::vec3);
 
@@ -56,13 +58,20 @@ namespace familyline::graphics {
         glm::mat4 GetModelMatrix() const;
         glm::mat4* GetModelMatrixPointer();
 
-        std::vector<VertexData*>& GetVertexData();
+//        std::vector<VertexData*>& GetVertexData();
 
         void GenerateBoundingBox();
 
-	/* Sets material for whole mesh */
-	void SetMaterial(Material* m);
+	/**
+	 * \brief Get a reference to metainformation about the vertices,
+	 *
+	 * Get a reference about a structure that contains immutable data
+	 * about the vertices: shaders and textures
+	 */
+	VertexInfo getVertexInfo(unsigned int index);
 
+	Animator* getAnimator() { return _animator; }
+	
 	virtual ~Mesh() {}
     };
 
