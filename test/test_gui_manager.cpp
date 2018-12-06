@@ -87,7 +87,7 @@ TEST_F(GUIManagerTest, TestControlRemove) {
     ASSERT_EQ(gl1.getCalls(), 1);
     ASSERT_EQ(gl2.getCalls(), 1);
 
-    GUISignal s;
+    GUISignal s = {};
     s.signal = SignalType::Redraw;
     gm.processSignal(s);
     gm.remove(&gl1);
