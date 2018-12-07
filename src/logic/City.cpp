@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <fmt/format.h>
 
 #include "City.hpp"
 #include "ObjectManager.hpp"
@@ -40,9 +41,9 @@ City::City(Player* player, glm::vec3 color)
     : GameObject(0, "city", player->getName()), player(player), player_color(color)
 {
 
-    char s[32];
-    sprintf(s, "city-listener-%s", player->getName());
-    cil = new CityListener{player, s};
+    fmt::memory_buffer out;
+    format_to(out, "city-listener-{:s}", player->getName());
+    cil = new CityListener{player, out.data()};
     
     ObjectEventEmitter::addListener(&oel);
 }

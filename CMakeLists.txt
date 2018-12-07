@@ -62,6 +62,8 @@ include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_D
 include_directories(AFTER "${CMAKE_SOURCE_DIR}/common")
 include_directories("${CMAKE_SOURCE_DIR}/server")
 
+add_subdirectory(fmt)
+
 if (MSVC)
 	
   include(${CMAKE_TOOLCHAIN_FILE})
@@ -70,6 +72,7 @@ if (MSVC)
   find_package(SDL2 CONFIG REQUIRED)
   find_package(GLM CONFIG REQUIRED)
   find_package(unofficial-cairo CONFIG REQUIRED)
+  find_package(fmt CONFIG REQUIRED)
 
   # SDL, GLM and cairo includes will be made available via vcpkg and put in a default path.
   # We don't really need to put them here'
@@ -121,6 +124,7 @@ else()
   target_link_libraries(familyline ${CAIRO_LIBRARIES})
   target_link_libraries(familyline ${GLM_LIBRARIES})
   target_link_libraries(familyline ${YAML_LIBRARIES})
+  target_link_libraries(familyline fmt::fmt fmt::fmt-header-only)
   
   if(DO_TESTS)
   	target_link_libraries(familyline-tests ${SDL2_LIBRARIES})
@@ -131,6 +135,7 @@ else()
   	target_link_libraries(familyline-tests ${CAIRO_LIBRARIES})
 	target_link_libraries(familyline-tests ${GLM_LIBRARIES})
 	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
+	target_link_libraries(familyline-tests fmt::fmt fmt::fmt-header-only)
   endif(DO_TESTS)
 
   # if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
