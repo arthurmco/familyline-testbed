@@ -33,6 +33,8 @@
 
 #include <cstring>
 
+#include <fmt/format.h>
+
 #include "Game.hpp"
 
 #include "graphical/Renderer.hpp"
@@ -82,20 +84,20 @@ static int get_arg_index(const char* name, int argc, char const* argv[])
 
 static void show_version()
 {
-	printf("Familyline " VERSION "\n");
-	printf("Compiled in " __DATE__ "\n");
-	printf("Commit hash " COMMIT "\n");
-	printf("\n");
+	fmt::print("Familyline " VERSION "\n");
+	fmt::print("Compiled in " __DATE__ "\n");
+	fmt::print("Commit hash " COMMIT "\n");
+	fmt::print("\n");
 }
 
 static void show_help()
 {
-	printf("Familyline help:\n");
-	printf("--version:\t\tPrint version and, if compiled inside a Git repo, commit hash\n");
-	printf("--help:\t\t\tPrint this help information\n");
-	printf("--size <W>x<H>:\t\tChanges the game resolution to <W>x<H> pixels\n");
-	printf("--connect <ipaddr>:\tConnects to a game server whose IP is ipaddr\n");
-	printf("--log [<filename>|screen]: Logs to filename 'filename', or screen to log to screen, or wherever stderr is bound to\n");
+	fmt::print("Familyline help:\n");
+	fmt::print("--version:\t\tPrint version and, if compiled inside a Git repo, commit hash\n");
+	fmt::print("--help:\t\t\tPrint this help information\n");
+	fmt::print("--size <W>x<H>:\t\tChanges the game resolution to <W>x<H> pixels\n");
+	fmt::print("--connect <ipaddr>:\tConnects to a game server whose IP is ipaddr\n");
+	fmt::print("--log [<filename>|screen]: Logs to filename 'filename', or screen to log to screen, or wherever stderr is bound to\n");
 }
 
 static int winW = 640, winH = 480;
@@ -103,16 +105,16 @@ static int winW = 640, winH = 480;
 static int check_size(int i, int argc, char const* argv[])
 {
 	if (i >= argc) {
-		printf("size not defined. Expected <W>x<H> for size! Aborting");
+		fmt::print("size not defined. Expected <W>x<H> for size! Aborting");
 		return -1;
 	}
 
 	if (sscanf(argv[i + 1], "%dx%d", &winW, &winH) <= 1) {
-		printf("size format is wrong. Expected <W>x<H> for size! Aborting...");
+		fmt::print("size format is wrong. Expected <W>x<H> for size! Aborting...");
 		return -1;
 	}
 
-	printf("pre-load: chosen %d x %d for screen size\n", winW, winH);
+	fmt::print("pre-load: chosen {:d} x {:d} for screen size\n", winW, winH);
 	return 0;
 
 }
@@ -130,11 +132,11 @@ int main(int argc, char const *argv[])
 	int i = get_arg_index("--log", argc, argv);
 	if (i >= 0) {
 		if ((i + 1) >= argc) {
-			fprintf(stderr, "--log: expected a filename or 'screen'\n");
+			fmt::print(stderr, "--log: expected a filename or 'screen'\n");
 			return EXIT_FAILURE;
 		}
 
-		fprintf(stderr, "logging in %s\n", argv[i + 1]);
+		fmt::print(stderr, "logging in {:s}\n", argv[i + 1]);
 		if (!strcmp(argv[i + 1], "screen")) {
 			fLog = stderr;
 		}
@@ -144,7 +146,7 @@ int main(int argc, char const *argv[])
 		}
 		if (!fLog) {
 			perror("Could not create log file: ");
-			fprintf(stderr, "Using defaults");
+			fmt::print(stderr, "Using defaults");
 		}
 	}
 
@@ -182,7 +184,7 @@ int main(int argc, char const *argv[])
 			fputs("\n\n", fLog);
 			if (!fLog) {
 				perror("Could not create log file: ");
-				fprintf(stderr, "Falling back to stderr");
+				fmt::print(stderr, "Falling back to stderr");
 				fLog = stderr;
 			}
 		}
@@ -229,19 +231,19 @@ int main(int argc, char const *argv[])
 	auto connectpos = get_arg_index("--connect", argc, argv);
 	if (connectpos > 0) {
 		if (connectpos >= argc - 1) {
-			fprintf(stderr, "--connect requires an argument: "
+			fmt::print(stderr, "--connect requires an argument: "
 				"the server address\n\n");
 			return EXIT_FAILURE;
 		}
 
 		const char* serveraddr = argv[connectpos + 1];
-		printf(" Connecting to %s...\n", serveraddr);
+		fmt::print(" Connecting to {:s}...\n", serveraddr);
 
 		try {
 			nserver = new Net::Server(serveraddr);
 			nserver->InitCommunications();
 
-			printf("Type the player's name: ");
+			fmt::print("Type the player's name: ");
 			char pname[128];
 			fgets(pname, 127, stdin);
 			pname[strlen(pname) - 1] = '\0';
@@ -252,21 +254,21 @@ int main(int argc, char const *argv[])
 			npm->GetRemotePlayers(nserver);
 
 
-			printf("\n\tPress \033[1mENTER\033[0m to tell the server that you are \033[1mready\033[0m\n");
+			fmt::print("\n\tPress \033[1mENTER\033[0m to tell the server that you are \033[1mready\033[0m\n");
 
 			char tmp[32];
 			fgets(tmp, 31, stdin);
 			nserver->SetReady(true);
 
-			printf("\n");
+			fmt::print("\n");
 			char spwheel[] = { '\\', '|', '/', '-' };
 			int i = 0;
 
 			while (!nserver->IsGameStarting()) {
 				nserver->GetMessages();
 				usleep(250000);
-				printf("\r\tWaiting for other clients to be ready... "
-					"\033[37;1m%c\033[0m  ", spwheel[i % 4]);
+				fmt::print("\r\tWaiting for other clients to be ready... "
+					"\033[37;1m{:c}\033[0m	", spwheel[i % 4]);
 				fflush(stdout);
 
 				// Receive chats
@@ -287,7 +289,7 @@ int main(int argc, char const *argv[])
 							nserver->GetQueue()->ReceiveTCP(mmsg, 256);
 							mcont[mlen] = 0;
 
-							printf("[ID %d] %s\n", cid, mcont);
+							fmt::print("[ID {:d}] {:s}\n", cid, mcont);
 
 						}
 					}
@@ -303,7 +305,7 @@ int main(int argc, char const *argv[])
 
 		}
 		catch (Net::ServerException& e) {
-			fprintf(stderr, "Error while connecting to the server: %s\n",
+			fmt::print(stderr, "Error while connecting to the server: {:s}\n",
 				e.what());
 			delete nserver;
 			return EXIT_FAILURE;
@@ -393,27 +395,22 @@ int main(int argc, char const *argv[])
 
 				char* m = new char[std::max(length * 2, length + 70)];
 
-				sprintf(m, "[#%d]%s %s: %s",
+				fmt::memory_buffer out;
+				format_to(out, "[#{:d}]{:s} {:s}: {:s}",
 					id, sseverity, stype, msg);
-
-				auto l = strlen(m);
-				if (m[l - 1] == '\n')
-					m[l - 1] = 0;
 
 				switch (severity) {
 				case GL_DEBUG_SEVERITY_HIGH:
-					Log::GetLog()->Fatal(ssource, m);
+					Log::GetLog()->Fatal(ssource, out.data());
 					break;
 				case GL_DEBUG_SEVERITY_MEDIUM:
-					Log::GetLog()->Warning(ssource, m);
+					Log::GetLog()->Warning(ssource, out.data());
 					break;
 
 				default:
-					Log::GetLog()->Write(ssource, m);
+					Log::GetLog()->Write(ssource, out.data());
 					break;
 				}
-
-				delete[] m;
 
 			};
 
@@ -508,7 +505,7 @@ int main(int argc, char const *argv[])
 			guir->remove(&bquit);
 			guir->remove(&ilogo);
 
-			printf("New Game\n");
+			fmt::print("New Game\n");
 			if (!pm)
 				pm = new PlayerManager();
 
@@ -562,12 +559,12 @@ int main(int argc, char const *argv[])
 
 
 		delete w;
-		printf("\nExited. (%d frames)\n", frames);
+		fmt::print("\nExited. ({:d} frames)\n", frames);
 
 	}
 	catch (window_exception& we) {
 		Log::GetLog()->Fatal("init", "Window creation error: %s (%d)", we.what(), we.code);
-		fprintf(stderr, "Error while creating the window: %s\n", we.what());
+		fmt::print(stderr, "Error while creating the window: {:s}\n", we.what());
 
 		exit(EXIT_FAILURE);
 	}
@@ -576,15 +573,14 @@ int main(int argc, char const *argv[])
 		Log::GetLog()->Fatal("init", "Shader file: %s, type %d", se.file.c_str(), se.type);
 
 		if (w) {
-			char* err = new char[512 + strlen(se.what())];
-			sprintf(err,
+			fmt::memory_buffer out;
+			format_to(out,
 				"Familyline found an error in a shader\n"
 				"\n"
-				"Error: %s\n"
-				"File: %s, type: %d, code: %d",
+				"Error: {:s}\n"
+				"File: {:s}, type: {:d}, code: {:d}",
 				se.what(), se.file.c_str(), se.type, se.code);
-			w->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
-			delete[] err;
+			w->ShowMessageBox(out.data(), "Error", MessageBoxInfo::Error);
 		}
 		
 		exit(EXIT_FAILURE);
@@ -594,13 +590,13 @@ int main(int argc, char const *argv[])
 		Log::GetLog()->Fatal("init", "Probably out of memory");
 
 		if (w) {
-			char err[512];
-			sprintf(err,
+			fmt::memory_buffer out;
+			format_to(out,
 				"Insufficient memory\n"
 				"\n"
-				"Error: %s",
+				"Error: {:s}",
 				be.what());
-			w->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
+			w->ShowMessageBox(out.data(), "Error", MessageBoxInfo::Error);
 		}
 
 		exit(EXIT_FAILURE);
