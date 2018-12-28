@@ -41,17 +41,18 @@ void AssetFile::LoadFile(const char* ofile)
 
 	yaml_parser_t parser;
 	if (!yaml_parser_initialize(&parser)) {
-		throw asset_exception(nullptr, "Failed to initialize asset file parser");
+	    fclose(fAsset);
+	    throw asset_exception(nullptr, "Failed to initialize asset file parser");
 	}
 
 	yaml_parser_set_input_file(&parser, fAsset);
 	
 	Log::GetLog()->Write("asset-file-loader", "loaded file %s", file);
-	auto lassets = std::move(this->ParseFile(&parser));
+	auto lassets = this->ParseFile(&parser);
 	Log::GetLog()->Write("asset-file-loader",
 		"loaded %zu assets", lassets.size());
 
-	this->assets = std::move(this->ProcessDependencies(std::move(lassets)));
+	this->assets = this->ProcessDependencies(std::move(lassets));
 
 	yaml_parser_delete(&parser);
 	fclose(fAsset);

@@ -38,6 +38,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		CombatManager::setDefault(new CombatManager);
 
 		rndr = new Renderer{};
+		rndr->initialize();
 		DebugPlotter::pinterface = std::unique_ptr<DebugPlotInterface>
 			(new GraphicalPlotInterface(rndr));
 

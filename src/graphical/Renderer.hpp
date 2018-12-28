@@ -31,7 +31,7 @@ namespace familyline::graphics {
     struct VertexHandle {
 	GLuint vao;
 	GLuint vboPos, vboTex, vboNorm;
-	VertexData* vd;
+	unsigned int vsize;
 	VertexInfo vi;
 	GLuint vao_bbox = 0;
 	ShaderProgram* sp;
@@ -44,10 +44,16 @@ namespace familyline::graphics {
 	float lightStrength;
     };
 
-
+    struct SceneIDCache {
+	int ID;
+	int lastcheck;
+	VertexHandle vhandle;
+	GLuint bbvao;
+    };
+    
     class Renderer
     {
-    private:
+    protected:
         SceneManager* _scenemng;
         std::vector<VertexHandle> _vertices;
 	std::vector<VertexHandle> _bb_vaos;
@@ -58,23 +64,33 @@ namespace familyline::graphics {
 	unsigned int lightCount = 0;
 	LightRenderInfo lri[MAX_RENDERER_LIGHTS];
 
+	int lastCheck = 0;
+	std::vector<SceneIDCache> _last_IDs;
+	
 	/* Custom properties */
 	bool renderBBs = false;
 
         void InitializeLibraries();
-        void InitializeShaders();
+        virtual void InitializeShaders();
 
         void SetMaterial(int index);
 
 	/* Render object bounding boxes */
 	void RenderBoundingBoxes();
-	int AddBoundingBox(Mesh*, glm::vec3 color);
+	virtual int AddBoundingBox(Mesh*, glm::vec3 color);
 	void RemoveBoundingBox(GLuint);
 
     public:
+	/* Virtual functions, so we can mock them*/
+	
         Renderer();
-        ~Renderer();
+        virtual ~Renderer();
 
+	/**
+	 * Initialize the renderer shaders and libraries
+	 */
+	virtual void initialize();
+	
         SceneManager* GetSceneManager() const;
         void SetSceneManager(SceneManager*);
 
@@ -86,8 +102,10 @@ namespace familyline::graphics {
 	 */
 	bool Render(TerrainRenderer*);
 
-	const VertexHandle addVertexData(const VertexData& vdata, const VertexInfo vinfo);
-	void updateVertexData(VertexHandle vhandle, const VertexData& vdata, const VertexInfo vinfo);
+	virtual const VertexHandle addVertexData(const VertexData& vdata,
+						 const VertexInfo vinfo);
+	void updateVertexData(VertexHandle vhandle,
+			      const VertexData& vdata, const VertexInfo vinfo);
 	void removeVertexData(VertexHandle&& vhandle);
 	
 

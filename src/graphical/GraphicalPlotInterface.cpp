@@ -41,6 +41,8 @@ PathHandle GraphicalPlotInterface::AddPath(std::vector<glm::vec3>& path,
     uintptr_t vcode = (uintptr_t)v;
     PathHandle p = int(vcode);
     vertexmap[p] = vdata;
+
+    return p;
 }
 
 /* Removes a path using its path handle */

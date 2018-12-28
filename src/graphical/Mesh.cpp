@@ -142,6 +142,9 @@ void Mesh::GenerateBoundingBox()
  */
 VertexInfo Mesh::getVertexInfo(unsigned int index)
 {
-    return _vinfo.at(index);
+    auto vi = _vinfo.at(index);
+    vi.worldMat = this->GetModelMatrixPointer();
+
+    return vi;
 }
 

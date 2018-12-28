@@ -63,15 +63,17 @@ Terrain* TerrainFile::GetTerrain(int index)
 	/** TODO: this function only reads index 0, fix that */
 	/* Read the terrain contents for the specified index*/
 	size_t tdh_area = tdh.width*tdh.height;
-	TerrainSlot* slots = new TerrainSlot[tdh_area];
 	Log::GetLog()->Write("terrain-file", "loading %.3f MB of data for slots",
 					(tdh_area*4) / 1048576.0);
 
+	TerrainSlot* slots = new TerrainSlot[tdh_area];
 	size_t read_data = fread(slots, sizeof(TerrainSlot), tdh_area, fTerrain);
 	if (read_data < tdh_area) {
-		throw terrain_file_exception("Unexpected end of file",
-						fPath, 0);
+	    delete[] slots;
+	    throw terrain_file_exception("Unexpected end of file",
+					 fPath, 0);
 	}
+
 
 	Terrain* t = new Terrain{(int)tdh.width, (int)tdh.height};
 	t->SetName("Test");

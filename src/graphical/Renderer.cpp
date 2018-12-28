@@ -15,8 +15,11 @@ Renderer::Renderer()
     glEnable(GL_DEPTH_TEST);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    
+}
 
-    InitializeShaders();
+void Renderer::initialize() {
+    this->InitializeShaders();
     sForward->Use();
 
     /* 	Create a fake texture, so we can render something
@@ -26,7 +29,6 @@ Renderer::Renderer()
 
     fake_color[0] = 0xffff00ff;
     fake_tex = new Texture(1, 1, GL_RGBA, fake_color);
-
 }
 
 void Renderer::InitializeLibraries()
@@ -37,6 +39,20 @@ void Renderer::InitializeLibraries()
 void Renderer::InitializeShaders()
 {
 
+#define TRY_COMPILE_OR_THROW(shader)					\
+    if (!shader->Compile()) {						\
+	throw shader_exception("Shader failed to compile", glGetError(), \
+			       shader->GetPath(), shader->GetType()); }
+    
+#define TRY_LINK_OR_THROW(program)					\
+    if (!program->Link()) {						\
+	char shnum[6];							\
+	sprintf(shnum, "%d", program->GetID());				\
+	throw shader_exception("Shader failed to link", glGetError(),	\
+			       shnum, SHADER_PROGRAM);			\
+    }
+
+    
     Shader *sFrag, *sVert;
     Shader *fLines, *vLines;
 
@@ -45,41 +61,18 @@ void Renderer::InitializeShaders()
     fLines = new Shader{ SHADERS_DIR "Lines.frag", SHADER_PIXEL };
     vLines = new Shader{ SHADERS_DIR "Lines.vert", SHADER_VERTEX };
 
-    if (!sFrag->Compile()) {
-	throw shader_exception("Shader failed to compile", glGetError(),
-			       sFrag->GetPath(), sFrag->GetType());
-    }
-
-    if (!sVert->Compile()) {
-	throw shader_exception("Shader failed to compile", glGetError(),
-			       sVert->GetPath(), sVert->GetType());
-    }
-
+    TRY_COMPILE_OR_THROW(sFrag)
+    TRY_COMPILE_OR_THROW(sVert)
+    
     sForward = new ShaderProgram{ "forward", sVert, sFrag };
-    if (!sForward->Link()) {
-	char shnum[6];
-	sprintf(shnum, "%d", sForward->GetID());
-	throw shader_exception("Shader failed to link", glGetError(),
-			       shnum, SHADER_PROGRAM);
-    }
-
-    if (!fLines->Compile()) {
-	throw shader_exception("Shader failed to compile", glGetError(),
-			       fLines->GetPath(), fLines->GetType());
-    }
-
-    if (!vLines->Compile()) {
-	throw shader_exception("Shader failed to compile", glGetError(),
-			       vLines->GetPath(), vLines->GetType());
-    }
+    TRY_LINK_OR_THROW(sForward);
+    
+    TRY_COMPILE_OR_THROW(fLines);
+    TRY_COMPILE_OR_THROW(vLines);
 
     sLines = new ShaderProgram{ "lines", vLines, fLines };
-    if (!sLines->Link()) {
-	char shnum[6];
-	sprintf(shnum, "%d", sLines->GetID());
-	throw shader_exception("Shader failed to link", glGetError(),
-			       shnum, SHADER_PROGRAM);
-    }
+    TRY_LINK_OR_THROW(sLines);
+    
 }
 
 #include "TextureManager.hpp"
@@ -110,17 +103,6 @@ void Renderer::SetMaterial(int ID)
     sForward->SetUniform("ambient_color", m->GetData()->ambientColor);
 
 }
-
-struct SceneIDCache {
-    int ID;
-    int lastcheck;
-    VertexHandle vhandle;
-    GLuint bbvao;
-};
-
-int lastCheck = 0;
-std::vector<SceneIDCache> _last_IDs;
-
 
 void Renderer::UpdateObjects()
 {
@@ -155,10 +137,12 @@ void Renderer::UpdateObjects()
 		mes->ApplyTransformations();
 
 		auto vdlist = mes->getAnimator()->getCurrentFrame();
+			    
 
 		if (meshIsNew) {
 		    auto vidx = 0;
 		    for (auto& vd : vdlist) {
+			printf("Size: %zu", vd.position.size());
 
 			VertexHandle vhandle = this->addVertexData(
 			    vd, mes->getVertexInfo(vidx));
@@ -169,6 +153,7 @@ void Renderer::UpdateObjects()
 			sidc.vhandle = vhandle;
 			sidc.bbvao = this->AddBoundingBox(mes, glm::vec3(1, 0, 0));
 			_last_IDs.push_back(sidc);
+			printf("???\n");
 
 			vidx++;
 		    }
@@ -270,7 +255,7 @@ bool Renderer::Render(TerrainRenderer* terr_rend)
 	  }
 	*/
 
-	material = 1; //it->vd->materialID;
+	material = it->vi.materialID;
 	const auto render_format = VertexRenderStyle::Triangles;
 
 	glBindVertexArray(it->vao);
@@ -298,7 +283,7 @@ bool Renderer::Render(TerrainRenderer* terr_rend)
 	    (void*)0            // array buffer offset
 	    );
 
-	if (it->vd->texcoords.size() > 0) {
+	if (it->vboTex) {
 	    glEnableVertexAttribArray(2);
 	    glBindBuffer(GL_ARRAY_BUFFER, it->vboTex);
 	    glVertexAttribPointer(
@@ -314,7 +299,7 @@ bool Renderer::Render(TerrainRenderer* terr_rend)
 	if (render_format == VertexRenderStyle::PlotLines) {
 	    glGetError();
 
-	    glDrawArrays(drawstyle, 0, it->vd->position.size());
+	    glDrawArrays(drawstyle, 0, it->vsize);
 
 	    GLenum err = glGetError();
 	    if (err != GL_NO_ERROR) {
@@ -322,9 +307,9 @@ bool Renderer::Render(TerrainRenderer* terr_rend)
 	    }
 	} else {
 	    SetMaterial(material);
-
 	    glGetError();
-	    glDrawArrays(drawstyle, 0, it->vd->position.size());
+
+	    glDrawArrays(drawstyle, 0, it->vsize);
 		    
 	    GLenum err = glGetError();
 	    if (err != GL_NO_ERROR) {
@@ -365,11 +350,9 @@ void Renderer::SetSceneManager(SceneManager* scenemng)
     this->_scenemng = scenemng;
 }
 
-
-
 const VertexHandle Renderer::addVertexData(const VertexData& vdata, const VertexInfo vinfo)
 {
-    VertexHandle vhandle;
+    VertexHandle vhandle = {};
 
     glGenVertexArrays(1, &vhandle.vao);
     glBindVertexArray(vhandle.vao);
@@ -400,10 +383,10 @@ const VertexHandle Renderer::addVertexData(const VertexData& vdata, const Vertex
 
     glBindVertexArray(0);
 
-    Log::GetLog()->Write("renderer", "Added vertices with VAO %d (VBO %d)",
-			 vhandle.vao, vhandle.vboPos);
+    Log::GetLog()->Write("renderer", "Added %zu vertices with VAO %d (VBO %d)",
+			 vdata.position.size(), vhandle.vao, vhandle.vboPos);
 
-    vhandle.vd = (VertexData*)&vdata;
+    vhandle.vsize = vdata.position.size();
     vhandle.vi = vinfo;
     vhandle.sp = ShaderManager::Get("forward");
     
@@ -441,7 +424,7 @@ void Renderer::removeVertexData(VertexHandle&& vhandle)
 	    glDeleteBuffers(1, &it->vboPos);
 	    glDeleteBuffers(1, &it->vboNorm);
 
-	    if (it->vd->texcoords.size() > 0)
+	    if (it->vboTex)
 		glDeleteBuffers(1, &it->vboTex);
 
 	    _vertices.erase(it);
@@ -486,7 +469,7 @@ void Renderer::RenderBoundingBoxes()
 	    );
 
 	glGetError();
-	glDrawArrays(GL_LINE_STRIP, 0, it->vd->position.size());
+	glDrawArrays(GL_LINE_STRIP, 0, it->vsize);
 
 	GLenum err = glGetError();
 	if (err != GL_NO_ERROR) {
@@ -497,7 +480,7 @@ void Renderer::RenderBoundingBoxes()
 
 int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
 {
-    VertexHandle vri;
+    VertexHandle vri = {};
     VertexHandle* vri_mesh = nullptr;
 
     /* Find the original mesh in our list */
@@ -512,31 +495,33 @@ int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
 
     m->GenerateBoundingBox();
     BoundingBox bb = m->GetBoundingBox();
-    vri.vd = new VertexData{};
-    vri.vd->position.push_back(glm::vec3(bb.minX, bb.minY, bb.minZ));
-    vri.vd->position.push_back(glm::vec3(bb.minX, bb.maxY, bb.minZ));
-    vri.vd->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.minZ));
-    vri.vd->position.push_back(glm::vec3(bb.minX, bb.minY, bb.minZ));
-    vri.vd->position.push_back(glm::vec3(bb.maxX, bb.minY, bb.minZ));
-    vri.vd->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.minZ));
+    auto vdata = new VertexData;
+    vdata->position.push_back(glm::vec3(bb.minX, bb.minY, bb.minZ));
+    vdata->position.push_back(glm::vec3(bb.minX, bb.maxY, bb.minZ));
+    vdata->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.minZ));
+    vdata->position.push_back(glm::vec3(bb.minX, bb.minY, bb.minZ));
+    vdata->position.push_back(glm::vec3(bb.maxX, bb.minY, bb.minZ));
+    vdata->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.minZ));
 
-    vri.vd->position.push_back(glm::vec3(bb.minX, bb.maxY, bb.minZ));
-    vri.vd->position.push_back(glm::vec3(bb.minX, bb.maxY, bb.maxZ));
-    vri.vd->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
-    vri.vd->position.push_back(glm::vec3(bb.minX, bb.maxY, bb.minZ));
-    vri.vd->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.minZ));
-    vri.vd->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
+    vdata->position.push_back(glm::vec3(bb.minX, bb.maxY, bb.minZ));
+    vdata->position.push_back(glm::vec3(bb.minX, bb.maxY, bb.maxZ));
+    vdata->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
+    vdata->position.push_back(glm::vec3(bb.minX, bb.maxY, bb.minZ));
+    vdata->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.minZ));
+    vdata->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
 
-    vri.vd->position.push_back(glm::vec3(bb.minX, bb.minY, bb.maxZ));
-    vri.vd->position.push_back(glm::vec3(bb.minX, bb.maxY, bb.maxZ));
-    vri.vd->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
-    vri.vd->position.push_back(glm::vec3(bb.minX, bb.minY, bb.maxZ));
-    vri.vd->position.push_back(glm::vec3(bb.maxX, bb.minY, bb.maxZ));
-    vri.vd->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
+    vdata->position.push_back(glm::vec3(bb.minX, bb.minY, bb.maxZ));
+    vdata->position.push_back(glm::vec3(bb.minX, bb.maxY, bb.maxZ));
+    vdata->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
+    vdata->position.push_back(glm::vec3(bb.minX, bb.minY, bb.maxZ));
+    vdata->position.push_back(glm::vec3(bb.maxX, bb.minY, bb.maxZ));
+    vdata->position.push_back(glm::vec3(bb.maxX, bb.maxY, bb.maxZ));
 
-    for (size_t i = 0; i < vri.vd->position.size(); i++) {
+    vri.vsize = vdata->position.size();
+	
+    for (size_t i = 0; i < vdata->position.size(); i++) {
 	// Use normals for color, so we can use the same struct.
-	vri.vd->normals.push_back(color);
+	vdata->normals.push_back(color);
     }
 
     vri.vi.worldMat = m->GetModelMatrixPointer();
@@ -546,13 +531,13 @@ int Renderer::AddBoundingBox(Mesh* m, glm::vec3 color)
 
     glGenBuffers(1, &vri.vboPos);
     glBindBuffer(GL_ARRAY_BUFFER, vri.vboPos);
-    glBufferData(GL_ARRAY_BUFFER, vri.vd->position.size() * sizeof(glm::vec3),
-		 vri.vd->position.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vdata->position.size() * sizeof(glm::vec3),
+		 vdata->position.data(), GL_STATIC_DRAW);
 
     glGenBuffers(1, &vri.vboNorm);
     glBindBuffer(GL_ARRAY_BUFFER, vri.vboNorm);
-    glBufferData(GL_ARRAY_BUFFER, vri.vd->normals.size() * sizeof(glm::vec3),
-		 vri.vd->normals.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vdata->normals.size() * sizeof(glm::vec3),
+		 vdata->normals.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
 

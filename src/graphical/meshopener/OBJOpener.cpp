@@ -166,7 +166,6 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 	}
 
 	// TODO: Switch vertex list on material change
-
 	// Vertex group changed
 	if (l[0] == 'g') {
 	    char gs;
@@ -267,6 +266,8 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 			     (vg.hasTexture ? "true" : "false"));
 
 	VertexDataGroup vdlist;
+	std::vector<VertexInfo> vinfo;
+	
 	unsigned idx = 0;
 	for (const auto& vl : vg.vertices) {
 	    if (vl.indices.size() == 0) continue; // Remove null vertex lists
@@ -300,7 +301,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 		    
 		    auto founduv = std::find_if(uvs.begin(), uvs.end(),
 					   [&iuv](const UniqueVertex& fuv) {
-					       return iuv == fuv;
+						    return iuv == fuv;
 					   });
 		    if (founduv == std::end(uvs)) {
 			iuv.idx = uvidx++;
@@ -320,7 +321,9 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
 	    // Build the vertex data
 	    VertexData vdata;
-
+	    VertexInfo vi;
+	    Material* mtl = nullptr;
+	    
 	    // Make groups of 3 vertices, so the vga knows this is a triangle
 	    // TODO: Support vertex indices, and modify this loop
 	    for (const auto& idxitem : index_list) {
@@ -342,27 +345,37 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 		if (vg.hasTexture)
 		    vdata.texcoords.push_back(texcoords[uvt]);
 
-		if (vl.mtlname) {
-		    auto mtl = MaterialManager::GetInstance()->GetMaterial(vl.mtlname);
-
-//		    if (mtl)
-//			vdata->materialID = mtl->GetID();
-//		    else
-		    Log::GetLog()->Warning("obj-opener", "cannot load material %s for %s",
-					   vl.mtlname, vg.name);
+		if (vl.mtlname && !mtl) {
+		    mtl = MaterialManager::GetInstance()->GetMaterial(vl.mtlname);
 		}
+
+	    }
+
+	    if (mtl) {
+		VertexInfo vi;
+		vi.index = idx;
+		vi.materialID = mtl->GetID();;
+		vi.shaderName = "forward";
+		vinfo.push_back(vi);
+			
+	    } else {
+		Log::GetLog()->Warning("obj-opener", "cannot load material %s for %s",
+				       vl.mtlname, vg.name);
+
+		vi.index = idx;
+		vi.materialID = 0;
+		vi.shaderName = "forward";
+		vinfo.push_back(vi);
+		Log::GetLog()->Warning("obj-opener", "\ta default material is being used");
 
 	    }
 
 	    vdlist.push_back(std::move(vdata));
 	    idx++;
 	}
-
-	auto mesh = new Mesh{new StaticAnimator{vdlist},
-			     {{0, 0, "forward"}}};
 	
+	auto mesh = new Mesh{new StaticAnimator{vdlist}, vinfo};
 	mesh->SetName(vg.name);
-
 	mesh_ret.push_back(mesh);
     }
 
