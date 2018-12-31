@@ -69,8 +69,15 @@ AssetObject AssetManager::GetAsset(const char* name)
 			delete[] e;
 		}
 
-		//auto material = mtl.materialvec->at(0);
-		//assetobj.mesh->SetMaterial(material);
+		/* Generally you set a material for a mesh only if it has one
+		 * type of material
+		 *
+		 * TODO: Allow multimaterials for asset files?
+		 */
+		auto material = mtl.materialvec->at(0);
+//		auto& vinfo = ai->mesh->getVertexInfo(0);
+//		vinfo.materialID = material->GetID();
+
 	    }
 	
 	    auto mtexture = ai->GetItemOr("mesh.texture", "");
@@ -124,8 +131,13 @@ AssetObject AssetManager::GetAsset(const char* name)
 		Material* mattex = new Material(texname, MaterialData(0.8f, 1.0f, 0.1f));
 		mattex->SetTexture(t);
 		MaterialManager::GetInstance()->AddMaterial(mattex);
-//		assetobj.mesh->SetMaterial(mattex);
 
+		if (assetobj.mesh && assetobj.mesh->getVertexInfoCount() > 0) {
+		    VertexInfo vi = assetobj.mesh->getVertexInfo(0);
+		    vi.materialID = mattex->GetID();
+		    assetobj.mesh->setVertexInfo(0, vi);
+		}
+		
 		delete[] texname;
     }
 

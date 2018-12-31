@@ -147,3 +147,13 @@ VertexInfo Mesh::getVertexInfo(unsigned int index)
     return vi;
 }
 
+
+void Mesh::setVertexInfo(unsigned int index, VertexInfo vi)
+{
+    vi.worldMat = this->GetModelMatrixPointer();
+    if (index >= _vinfo.size())
+	return; // No matching index!
+    
+    _vinfo[index] = vi;
+}
+

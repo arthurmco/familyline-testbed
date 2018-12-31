@@ -63,13 +63,16 @@ namespace familyline::graphics {
         void GenerateBoundingBox();
 
 	/**
-	 * \brief Get a reference to metainformation about the vertices,
+	 * \brief Get metainformation about the vertices,
 	 *
-	 * Get a reference about a structure that contains immutable data
+	 * Get data about a structure that contains immutable data
 	 * about the vertices: shaders and textures
 	 */
 	VertexInfo getVertexInfo(unsigned int index);
+	size_t getVertexInfoCount() const { return _vinfo.size(); }
 
+	void setVertexInfo(unsigned int index, VertexInfo vi);
+	
 	Animator* getAnimator() { return _animator; }
 	
 	virtual ~Mesh() {}
