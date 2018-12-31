@@ -35,7 +35,8 @@ PathHandle GraphicalPlotInterface::AddPath(std::vector<glm::vec3>& path,
     //v->render_format = VertexRenderStyle::PlotLines;
 //    return (PathHandle)_renderer->addVertexData(v, new glm::mat4(1.0));
     VertexHandle vdata = _renderer->addVertexData(
-	*v, VertexInfo{0, 0, "lines", new glm::mat4(1.0)});
+	*v, VertexInfo{0, 0, "lines", new glm::mat4(1.0),
+		VertexRenderStyle::PlotLines});
 
 
     uintptr_t vcode = (uintptr_t)v;

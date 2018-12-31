@@ -260,7 +260,7 @@ bool Renderer::Render(TerrainRenderer* terr_rend)
 	*/
 
 	material = it->vi.materialID;
-	const auto render_format = VertexRenderStyle::Triangles;
+	const auto render_format = it->vi.renderStyle;
 
 	glBindVertexArray(it->vao);
 

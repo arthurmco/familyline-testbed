@@ -25,7 +25,7 @@ namespace familyline::graphics {
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> texcoords;
 
-	/// The indices
+	/// The indices (Not used yet)
 	///
 	/// Each one of them corresponds to an unique set of vertices, normals and
 	/// texcoords
@@ -62,6 +62,8 @@ namespace familyline::graphics {
 	std::string shaderName; ///< Shader name for this vertex set
 
 	glm::mat4* worldMat; ///< World matrix for this vertex set
+	
+	VertexRenderStyle renderStyle = VertexRenderStyle::Triangles;
     };
     
 }
