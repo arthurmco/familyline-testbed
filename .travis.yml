@@ -33,6 +33,8 @@ env:
 # This is fixed in 18.04. We'll wait until travis support this version
 #
 before_install:
+  - wget -c https://github.com/fmtlib/fmt/archive/5.2.1.tar.gz
+  - tar zxvf 5.2.1.tar.gz && mv fmt-5.2.1 fmt
   - wget -c https://launchpad.net/ubuntu/+archive/primary/+files/libglm-dev_0.9.9~a2-2_all.deb
   - sudo dpkg -i libglm-dev_0.9.9~a2-2_all.deb
 

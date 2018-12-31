@@ -46,7 +46,7 @@ You will need to have vcpkg integrated with Visual Studio.
 
 Execute the following command:
 
-`> vcpkg install glm glew sdl2 devil cairo libyaml`
+`> vcpkg install glm glew sdl2 devil cairo libyaml fmt`
 
 Go make a coffee and buy needed things in the market. Order some
 food. This will take some time.
