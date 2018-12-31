@@ -16,7 +16,6 @@ Mesh::Mesh(Animator* animator, const std::vector<VertexInfo>& vinfo)
 
     this->_animator = animator;
     this->_vinfo = vinfo;
-//    this->_vdata.at(0)->meshptr = this;
     this->_type = SCENE_MESH;
 }
 

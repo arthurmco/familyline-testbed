@@ -244,6 +244,10 @@ bool Renderer::Render(TerrainRenderer* terr_rend)
 	ShaderProgram* shader = it->sp; //TODO: Get vertexinfo
 		
 	shader->Use();
+	shader->SetUniform("mvp", mProj * mView * mModel);
+	shader->SetUniform("mModel", mModel);
+	
+	
 //		it->vd->fnShaderSetup(shader, mModel, mView, mProj,
 //			_scenemng->GetCamera());
 
