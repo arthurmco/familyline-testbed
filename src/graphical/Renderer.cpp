@@ -279,7 +279,7 @@ bool Renderer::Render(TerrainRenderer* terr_rend)
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, it->vboNorm);
 	glVertexAttribPointer(
-	    1,                  // attribute 1 (normals)
+	    1,                  // attribute 1 (normals/color)
 	    3,                  // size
 	    GL_FLOAT,           // type
 	    GL_FALSE,           // normalized?
@@ -392,7 +392,7 @@ const VertexHandle Renderer::addVertexData(const VertexData& vdata, const Vertex
 
     vhandle.vsize = vdata.position.size();
     vhandle.vi = vinfo;
-    vhandle.sp = ShaderManager::Get("forward");
+    vhandle.sp = ShaderManager::Get(vinfo.shaderName.c_str());
     
     _vertices.push_back(vhandle);
     

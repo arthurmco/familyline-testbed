@@ -59,7 +59,7 @@ namespace familyline::graphics {
 	int index = 0;
 
 	int materialID = 0;     ///< Material ID for this vertex set
-	std::string shaderName; ///< Shader name for this vertex set
+	std::string shaderName = "forward"; ///< Shader name for this vertex set
 
 	glm::mat4* worldMat; ///< World matrix for this vertex set
 	
