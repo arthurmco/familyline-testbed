@@ -55,7 +55,7 @@ find_package(GLEW REQUIRED)
 find_package(DevIL REQUIRED)
 find_package(Yaml REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(fmt REQUIRED)
+find_package(fmt)
 
 include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
 
@@ -128,7 +128,7 @@ else()
   	if(DO_TESTS)
 		target_link_libraries(familyline-tests fmt::fmt)
 	endif(DO_TESTS)
-  endif(fmt::fmt)
+  endif(TARGET fmt::fmt)
   
   target_link_libraries(familyline ${SDL2_LIBRARIES})
   target_link_libraries(familyline ${OPENGL_gl_LIBRARY})
