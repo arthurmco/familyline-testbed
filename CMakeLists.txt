@@ -55,6 +55,7 @@ find_package(GLEW REQUIRED)
 find_package(DevIL REQUIRED)
 find_package(Yaml REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(fmt REQUIRED)
 
 include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
 
@@ -62,7 +63,6 @@ include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_D
 include_directories(AFTER "${CMAKE_SOURCE_DIR}/common")
 include_directories("${CMAKE_SOURCE_DIR}/server")
 
-add_subdirectory(fmt)
 
 if (MSVC)
 	
@@ -115,6 +115,20 @@ else()
   pkg_search_module(GLM REQUIRED glm) # finds glm
   
   
+  if (TARGET fmt::fmt)
+	target_link_libraries(familyline fmt::fmt)
+  	if(DO_TESTS)
+		target_link_libraries(familyline-tests fmt::fmt)
+	endif(DO_TESTS)
+  else()
+	message(WARNING "libfmt was not found, maybe we have it locally, like on travis")
+	add_subdirectory(fmt)
+
+  	target_link_libraries(familyline fmt::fmt)
+  	if(DO_TESTS)
+		target_link_libraries(familyline-tests fmt::fmt)
+	endif(DO_TESTS)
+  endif(fmt::fmt)
   
   target_link_libraries(familyline ${SDL2_LIBRARIES})
   target_link_libraries(familyline ${OPENGL_gl_LIBRARY})
@@ -124,8 +138,7 @@ else()
   target_link_libraries(familyline ${CAIRO_LIBRARIES})
   target_link_libraries(familyline ${GLM_LIBRARIES})
   target_link_libraries(familyline ${YAML_LIBRARIES})
-  target_link_libraries(familyline fmt::fmt fmt::fmt-header-only)
-  
+
   if(DO_TESTS)
   	target_link_libraries(familyline-tests ${SDL2_LIBRARIES})
   	target_link_libraries(familyline-tests ${OPENGL_gl_LIBRARY})
@@ -135,7 +148,6 @@ else()
   	target_link_libraries(familyline-tests ${CAIRO_LIBRARIES})
 	target_link_libraries(familyline-tests ${GLM_LIBRARIES})
 	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
-	target_link_libraries(familyline-tests fmt::fmt fmt::fmt-header-only)
   endif(DO_TESTS)
 
   # if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")

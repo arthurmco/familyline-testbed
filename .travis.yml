@@ -31,6 +31,7 @@ env:
 # ubuntu until 16.04, and that version ships with a glm without a pkgconfig entry
 # Without that, we don't have a reliable way of finding glm.
 # This is fixed in 18.04. We'll wait until travis support this version
+# The same might be said for libfmt
 #
 before_install:
   - wget -c https://github.com/fmtlib/fmt/archive/5.2.1.tar.gz
