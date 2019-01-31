@@ -29,7 +29,7 @@ namespace familyline::graphics {
 
 		/* 
 		 * Get the best lights, the strongest ones, from a circle that 
-		 * has the center in 'çenter' and radius 'radius'
+		 * has the center in 'Ã§enter' and radius 'radius'
 		 */
 		static std::list<Light*> GetBestLights(glm::vec3 center, double radius, const int max_lights);
 	};

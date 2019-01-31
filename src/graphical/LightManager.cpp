@@ -32,7 +32,7 @@ void LightManager::RemoveAll()
 
 /*
 * Get the best lights, the strongest ones, from a circle that
-* has the center in 'çenter' and radius 'radius'
+* has the center in 'Ã§enter' and radius 'radius'
 */
 std::list<Light*> LightManager::GetBestLights(glm::vec3 center,
 	double radius, const int max_lights)
