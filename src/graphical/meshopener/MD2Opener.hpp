@@ -53,7 +53,11 @@ private:
     struct md2_header_t hdr;
 
 public:
-    virtual Mesh* Open(const char* file);
+    MD2Opener() { OPENER_REGISTER("md2"); }
+        
+    virtual std::vector<Mesh*> OpenSpecialized(const char* file);
+
+    virtual ~MD2Opener() { this->UnregisterExtension("md2"); };
 };
 
 }

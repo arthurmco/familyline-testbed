@@ -28,10 +28,10 @@ VertexDataGroup DeformAnimator::getCurrentFrame() {
     auto currptr = unsigned(_frameptr);
     auto nextptr = std::min(currptr + 1, unsigned(avector.size()));
 
-    printf("[[ %d %d ]]", currptr, nextptr);
+    printf("[[ %d %d %d ]]", currptr, nextptr, int(_frameptr));
 
     /* No frame after here? Return the last one */
-    if (nextptr == currptr)
+    if (nextptr >= currptr+1)
 	return avector[int(_frameptr)];
 
     auto vdcurrent = avector[int(_frameptr)];

@@ -1,6 +1,9 @@
 #include "MD2Opener.hpp"
 #include "../DeformAnimator.hpp"
 
+#include <vector>
+#include <array>
+
 using namespace familyline::graphics;
 
 /*  MD2 vertex
@@ -31,194 +34,172 @@ struct md2_frame {
     char name[16];
 }; //__attribute__((packed));
 
-#define FREAD_OR_THROW(ptr, size, nmemb, f) \
-    if (fread(ptr, size, nmemb, f) < (size_t)nmemb) {			\
-	throw mesh_exception("Unexpected EOF while reading mesh", errno, file); \
+#include "anorms.h"
+
+constexpr int MD2Magic = 0x32504449; // IDP2
+
+// Default framerate (in frames per second) for md2 animations
+// (since they do not specify this in the file)
+constexpr int framerate = 30;
+
+VertexData create_vertex_data(FILE* file, int offset_tris,
+			      unsigned int num_tris,
+			      std::vector<glm::vec3>& vertices,
+			      std::vector<glm::vec3>& normals,
+			      std::vector<glm::vec2>& texcoords)
+{
+    fseek(file, offset_tris, SEEK_SET);
+
+    std::vector<struct md2_triangle> tris(num_tris);
+    fread((void*)tris.data(), sizeof(md2_triangle), num_tris, file);
+
+    VertexData vd;
+
+    // TODO: change this to use indexed rendering
+    for (const auto& t : tris) {
+	for (auto i = 0; i < 3; i++) {
+	    vd.position.push_back(vertices[t.vertex[i]]);
+	    vd.normals.push_back(normals[t.vertex[i]]);
+	    vd.texcoords.push_back(texcoords[t.st[i]]);
+	}
+    }
+
+    return vd;
+}
+
+std::vector<glm::vec3> decode_frame(FILE* file, int offset_frames,
+				    unsigned num_vertices,
+				    unsigned frame_size, unsigned frame_num)
+{
+
+
+    fseek(file, offset_frames + (frame_size * frame_num), SEEK_SET);
+
+    md2_frame frame;
+    fread((struct md2_frame*)&frame, sizeof(frame), 1, file);
+
+    std::vector<md2_vertex> vs(num_vertices);
+    fread((void*)vs.data(), sizeof(struct md2_vertex),
+	  num_vertices, file);
+
+    std::vector<glm::vec3> vertices;
+    vertices.reserve(num_vertices);
+
+    for (const auto& v : vs) {
+	vertices.push_back(
+	    glm::vec3(
+		(v.v[0] * frame.scaleX) + frame.transX,
+		(v.v[1] * frame.scaleY) + frame.transY,
+		(v.v[2] * frame.scaleZ) + frame.transZ));
+    }
+
+    return vertices;
+}
+
+std::vector<glm::vec3> decode_normals(FILE* file, int offset_frames,
+				      unsigned num_vertices) {
+
+
+    fseek(file, offset_frames, SEEK_SET);
+
+    md2_frame frame;
+    fread((struct md2_frame*)&frame, sizeof(frame), 1, file);
+
+    std::vector<md2_vertex> vs(num_vertices);
+    fread((void*)vs.data(), sizeof(struct md2_vertex),
+	  num_vertices, file);
+
+    std::vector<glm::vec3> normals;
+    normals.reserve(num_vertices);
+
+    for (const auto& v : vs) {
+	normals.push_back(
+	    glm::vec3(anorms[int(v.normal)][0],
+		      anorms[int(v.normal)][1],
+		      anorms[int(v.normal)][2]));
+    }
+
+    return normals;
+}
+
+
+std::vector<glm::vec2> decode_texcoords(FILE* file, int offset_st,
+					unsigned num_st,
+					unsigned skinwidth,
+					unsigned skinheight) {
+
+
+    fseek(file, offset_st, SEEK_SET);
+    std::vector<glm::vec2> texcoords;
+
+    std::vector<md2_texcoords> texes(num_st);
+    fread((void*)texes.data(), sizeof(struct md2_texcoords),
+	  num_st, file);
+
+    for (const auto& tex : texes) {
+	texcoords.push_back(
+	    glm::vec2(
+		float(tex.s) / skinwidth,
+		float(tex.t) / skinheight));
+    }
+
+    return texcoords;
+}
+
+
+
+
+std::vector<Mesh*> MD2Opener::OpenSpecialized(const char* file)
+{
+    FILE* fMD2 = fopen(file, "rb");
+    if (!fMD2) {
+	throw mesh_exception("Failure to open mesh", errno, file);
+    }
+
+    rewind(fMD2);
+    
+    md2_header_t header = {};
+    fread((md2_header_t*)&header, sizeof(header), 1, fMD2);
+
+    if (header.ident != MD2Magic) {
+	throw mesh_exception("Invalid MD2 header", -1, file);
+    }
+
+    /// TODO: check header numerical limits
+
+    auto normals = decode_normals(fMD2, header.offset_frames,
+				  unsigned(header.num_vertices));
+    auto texcoords = decode_texcoords(fMD2, header.offset_st,
+				      header.num_st, header.skinwidth,
+				      header.skinheight);
+
+    std::vector<VertexDataGroup> frames;
+    frames.reserve(header.num_frames);
+
+    for (auto i = 0; i < header.num_frames; i++) {
+	auto vertices = decode_frame(fMD2, header.offset_frames, header.num_vertices,
+				     header.framesize, i);
+
+	VertexDataGroup vdg;
+	vdg.push_back(create_vertex_data(fMD2, header.offset_tris,
+					 header.num_tris,
+					 vertices, normals, texcoords));
+
+	frames.push_back(vdg);
+
     }
 
 
-#include "anorms.h"
+    std::map<std::string, std::vector<VertexDataGroup>> framedata = {
+	{"default", frames}
+    };
 
-Mesh* MD2Opener::Open(const char* file)
-{
-//     FILE* fMD2 = fopen(file, "rb");
-//     rewind(fMD2);
-
-//     if (!fMD2) {
-//         throw mesh_exception("Failure to open mesh", errno, file);
-//     }
-
-//     FREAD_OR_THROW(&hdr, sizeof(md2_header_t), 1, fMD2);
-
-//     if (hdr.ident != 0x32504449) {
-//         throw mesh_exception("Invalid MD2 mesh header", errno, file);
-//     }
-
-//     if (hdr.version != 8) {
-//         throw mesh_exception("Invalid MD2 mesh version", errno, file);
-//     }
-
-//     /*  A MD2 file contains fields specifying the triangles and fields
-//         specifying the vertices.
-//         We must parse the vertices first, and then the triangles */
-
-//     auto verts = new std::vector<glm::vec3>{};
-//     auto normals = new std::vector<glm::vec3>{};    //each tris has 1 normal
-//     auto textures = new std::vector<glm::vec2>{};
-//     auto matids = new std::vector<int>{};
-
-//     /*  Read the frame information. The vertices are stored right after.
-//         Until we support animation, only one frame will be read
-//      */
-//     struct md2_frame frame;
-//     fseek(fMD2, hdr.offset_frames, SEEK_SET);
-//     FREAD_OR_THROW(&frame, sizeof(struct md2_frame), 1, fMD2);
-
-//     auto scaleMult = glm::vec3(frame.scaleX, frame.scaleY, frame.scaleZ);
-//     auto transMult = glm::vec3(frame.transX, frame.transY, frame.transZ);
-//     frame.name[15] = 0;
-
-//     auto vertsMD2 = new md2_vertex[hdr.num_vertices];
-//     auto trisMD2 = new md2_triangle[hdr.num_tris];
-//     auto texcoordsMD2 = new md2_texcoords[hdr.num_st];
+    DeformAnimator* da = new DeformAnimator{framedata, framerate};
+    da->runAnimation("default"); //Set the animator internat pointer
     
-    
-//     FREAD_OR_THROW(vertsMD2, sizeof(md2_vertex), hdr.num_vertices, fMD2);
+    std::vector<VertexInfo> vinfo = {
+	VertexInfo{0, 0, "forward", new glm::mat4(1.0)}
+    };
 
-//     auto aVerts = new glm::vec3[hdr.num_vertices];
-//     auto aNorms = new glm::vec3[hdr.num_vertices];
-//     auto aTex = new glm::vec2[hdr.num_st];
-
-//     for (size_t i = 0; i < (size_t)hdr.num_vertices; i++) {
-//         glm::vec3 vert = glm::vec3(vertsMD2[i].v[0], vertsMD2[i].v[1], vertsMD2[i].v[2]);
-//         aVerts[i] = (vert * scaleMult) + transMult;
-//         aNorms[i] = glm::vec3(anorms[vertsMD2[i].normal][0],
-//             anorms[vertsMD2[i].normal][1], anorms[vertsMD2[i].normal][2]);
-//     }
-
-//     /* Save the end of first frame position */
-//     int frame2coords = (int)ftell(fMD2);
-
-//     delete[] vertsMD2;
-
-//     /* Read texcoords */
-//     fseek(fMD2, hdr.offset_st, SEEK_SET);
-//     FREAD_OR_THROW(texcoordsMD2, sizeof(md2_texcoords), hdr.num_st, fMD2);
-
-//     for (size_t i = 0; i < (size_t)hdr.num_st; i++) {
-//         float texS,texT;
-//         texS = texcoordsMD2[i].s / (float)hdr.skinwidth;
-//         texT = texcoordsMD2[i].t / (float)hdr.skinheight;
-
-//         aTex[i] = glm::vec2(texS, texT);
-//     }
-
-//     delete[] texcoordsMD2;
-
-
-//     /* Read triangle data */
-//     fseek(fMD2, hdr.offset_tris, SEEK_SET);
-//     FREAD_OR_THROW(trisMD2, sizeof(md2_triangle), hdr.num_tris, fMD2);
-
-//     for (size_t i = 0; i < (size_t)hdr.num_tris; i++) {
-//         /*printf("tri %d: (%d %d %d)\n", i,
-//             trisMD2[i].vertex[0], trisMD2[i].vertex[1], trisMD2[i].vertex[2]); */
-//         verts->push_back(aVerts[trisMD2[i].vertex[0]]);
-//         verts->push_back(aVerts[trisMD2[i].vertex[1]]);
-//         verts->push_back(aVerts[trisMD2[i].vertex[2]]);
-
-//         normals->push_back(aNorms[trisMD2[i].vertex[0]]);
-//         normals->push_back(aNorms[trisMD2[i].vertex[1]]);
-//         normals->push_back(aNorms[trisMD2[i].vertex[2]]);
-
-
-//         /*printf("\t\t [%f %f %f], [%f %f %f], [%f %f %f]\n",
-//             aVerts[trisMD2[i].vertex[0]].x, aVerts[trisMD2[i].vertex[0]].y, aVerts[trisMD2[i].vertex[0]].z,
-//             aVerts[trisMD2[i].vertex[1]].x, aVerts[trisMD2[i].vertex[1]].y, aVerts[trisMD2[i].vertex[1]].z,
-//             aVerts[trisMD2[i].vertex[2]].x, aVerts[trisMD2[i].vertex[2]].y, aVerts[trisMD2[i].vertex[2]].z);
-//             */
-// ;
-//         textures->push_back(aTex[trisMD2[i].st[0]]);
-//         textures->push_back(aTex[trisMD2[i].st[1]]);
-//         textures->push_back(aTex[trisMD2[i].st[2]]);
-
-// 	matids->push_back(0);
-// 	matids->push_back(0);
-// 	matids->push_back(0);
-//     }
-
-//     int i = 0;
-//     for (auto it = normals->begin(); it != normals->end(); it++) {
-//         /*printf("\t%d: [%f %f %f]\n",
-//             i, it->x, it->y, it->z); */
-//         i++;
-//     }
-
-//     VertexData* vd = new VertexData;
-//     vd->position = *verts;
-//     vd->texcoords = *textures;
-//     vd->normals = *normals;
-// //    vd->MaterialIDs = *matids;
-
-//     if (hdr.num_frames > 1) {
-
-//         /* Read the remaining of frame information */
-//         printf("Reading frame data - %d frames detected\n", hdr.num_frames);
-// 		DeformAnimator* ad = new DeformAnimator(vd, hdr.num_frames);
-//         ad->AddFrame(0, vd->position);
-
-//         // Go to the second frame
-//         fseek(fMD2, frame2coords, SEEK_SET);
-
-//         glm::vec3* vlist = new glm::vec3[vd->position.size()];
-//         glm::vec3* avlist = new glm::vec3[hdr.num_vertices];
-
-//         for (size_t f = 1; f < (size_t)hdr.num_frames; f++) {
-
-//             struct md2_frame fframe;
-//             FREAD_OR_THROW(&fframe, sizeof(struct md2_frame), 1, fMD2);
-//  /*           printf("\tframe #%d: scalefactor: (%.3f,%.3f,%.3f), transfactor: (%.3f,%.3f,%.3f) \n",
-//                 f, fframe.scaleX, fframe.scaleY, fframe.scaleZ, fframe.transX,
-//                 fframe.transY, fframe.transZ);
-// */
-//             scaleMult = glm::vec3(fframe.scaleX, fframe.scaleY, fframe.scaleZ);
-//             transMult = glm::vec3(fframe.transX, fframe.transY, fframe.transZ);
-
-//             struct md2_vertex* fverts = new md2_vertex[hdr.num_vertices];
-//             FREAD_OR_THROW(fverts, sizeof(struct md2_vertex), hdr.num_vertices, fMD2);
-
-//             // Mount the triangles. Get all vertices, scale and transform them
-//             for (size_t i = 0; i < (size_t)hdr.num_vertices; i++) {
-//                 glm::vec3 v =  glm::vec3(fverts[i].v[0], fverts[i].v[1], fverts[i].v[2]);
-//                 v = (v * scaleMult) + transMult;
-//                 avlist[i] = v;
-//             }
-
-//             // Assemble
-//             for (   size_t i = 0, v = 0;
-//                     (i < (size_t)hdr.num_tris), (v < vd->position.size());
-//                     i++, v+=3) {
-//                 /*printf("tri %d: (%d %d %d)\n", i,
-//                     trisMD2[i].vfvertsertex[0], trisMD2[i].vertex[1], trisMD2[i].vertex[2]); */
-//                 vlist[v] = (avlist[trisMD2[i].vertex[0]]);
-//                 vlist[v+1] = (avlist[trisMD2[i].vertex[1]]);
-//                 vlist[v+2] = (avlist[trisMD2[i].vertex[2]]);
-
-//             }
-
-// 			std::vector<glm::vec3> veclist;
-// 			veclist.assign(vlist, vlist + vd->position.size());
-//             ad->AddFrame(f, veclist);
-
-//         }
-
-//         /* The list get copied, so we can delete it */
-//         delete[] vlist;
-//         delete[] avlist;
-// 		vd->animator = std::unique_ptr<BaseAnimator>(ad);
-
-//     }
-//     Mesh* m = new Mesh{vd};
-//     fclose(fMD2);
-    return nullptr;
+    return {new Mesh{da, vinfo}};
 }

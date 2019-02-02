@@ -32,9 +32,16 @@ TEST(MeshTest, OBJWorldMatTest) {
     delete m;
 }
 
-TEST(MeshTest, DISABLED_MD2OpenTest) {
-    OBJOpener om;
+TEST(MeshTest, MD2OpenTest) {
+    MD2Opener om;
     Mesh* m = om.Open("test/test.md2").at(0);
     ASSERT_EQ(36, m->getAnimator()->getCurrentFrame().at(0).position.size());
+    delete m;
+}
+
+TEST(MeshTest, MD2WorldMat) {
+    MD2Opener om;
+    Mesh* m = om.Open("test/test.md2").at(0);
+    ASSERT_EQ(m->getVertexInfo(0).worldMat, m->GetModelMatrixPointer());
     delete m;
 }
