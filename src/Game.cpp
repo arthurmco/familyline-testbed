@@ -27,6 +27,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 {
 	DebugPlotter::Init();
 
+	
+	
 	int winW, winH;
 	w->GetSize(winW, winH);
 	char* err = nullptr;

@@ -6,16 +6,17 @@ Familyline supports, for now, two types of model formats: Wavefront
 OBJ and MD2, without animation
 
 It will support animated MD2, MD3, MD4, FBX and Collada
-
-.. note:: The animation system is being rewritten
 	  
-Please note that the 'model unit 1' is equal to 1 meter, and the camera is +24m high, so take note of
-the size of your model to it not appear so big on Familyline than you expected (most md2 models I saw
-are ~40m high). For comparison, the default cube on Blender, and probably on other modeling software, is 1m^3
+Please note that the 'model unit 1' is equal to 1 meter, and the
+camera is +24m high, so take note of the size of your model to it not
+appear so big on Familyline than you expected (most md2 models I saw
+are ~40m high). For comparison, the default cube on Blender, and
+probably on other modeling software, is 1m^3
 
-But there are some guidelines you'll have to follow if you want Familyline to correctly load your model.
-They are made specifically for Blender3D, 'cause it is what I use, but you can adapt it for other modelling
-software if you're smart.
+But there are some guidelines you'll have to follow if you want
+Familyline to correctly load your model. They are made specifically
+for Blender3D, 'cause it is what I use, but you can adapt it for other
+modelling software if you're smart.
 
 OBJ
 ====
