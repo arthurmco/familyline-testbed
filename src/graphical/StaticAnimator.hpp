@@ -42,6 +42,13 @@ namespace familyline::graphics {
 	 * Set the internal pointer to the first frame of that animation
 	 */
 	virtual void runAnimation(const char* name);
+
+	/**
+	 * Clone an animator, returning a new one, with the same
+	 * frame data and class type as the old one, but in the
+	 * default position
+	 */
+	virtual Animator* clone() { return new StaticAnimator(this->_vdg); }
     };
 
 }  // familyline::graphics

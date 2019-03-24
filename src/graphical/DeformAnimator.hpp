@@ -54,6 +54,21 @@ namespace familyline::graphics {
 	 * Set the internal pointer to the first frame of that animation
 	 */
 	virtual void runAnimation(const char* name);
+
+	
+	/**
+	 * Clone an animator, returning a new one, with the same
+	 * frame data and class type as the old one, but in the
+	 * default position
+	 */
+	virtual Animator* clone() {
+	    auto d = new DeformAnimator(
+		this->_animation_frames, this->_framerate
+		);
+	    d->_frameptr = 0.0;
+
+	    return d;
+	}
     };
 
 }

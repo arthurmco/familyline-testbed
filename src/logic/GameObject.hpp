@@ -164,8 +164,6 @@ namespace familyline::logic {
 	/* Shared pointer to a mesh */
 	std::shared_ptr<IMesh> mesh;
 
-	// TODO: separate mesh into vertex data and transformations?
-
 	/**
 	 * Function with code that the object must run on every engine tick
 	 *
