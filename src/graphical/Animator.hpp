@@ -24,6 +24,13 @@ namespace familyline::graphics {
      * \see DeformAnimator
      */
     class Animator {
+    public:
+
+	/// Global list of animator objects
+	/// We store here so we can run every one of them at once, in the same
+	/// thread and place.
+	static std::vector<Animator*> animators;
+	
     protected:
 	/**
 	 * The base vertex data, the one that the mesh file
@@ -32,6 +39,10 @@ namespace familyline::graphics {
 	VertexDataGroup base_vdata;
 
     public:
+	Animator();
+	virtual ~Animator();
+	    
+	
 	/**
 	 * Get vertex data from the current frame 
 	 */
@@ -50,6 +61,15 @@ namespace familyline::graphics {
 	 * Set the internal pointer to the first frame of that animation
 	 */
 	virtual void runAnimation(const char* name) = 0;
+
+	/**
+	 * Clone an animator, returning a new one, with the same
+	 * frame data and class type as the old one, but in the
+	 * default position
+	 */
+	virtual Animator* clone() = 0;
+
+	static void runAllAnimations(int ms);
     };
 
     
