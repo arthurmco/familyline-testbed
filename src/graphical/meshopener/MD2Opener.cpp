@@ -32,7 +32,7 @@ struct md2_frame {
     float scaleX, scaleY, scaleZ;
     float transX, transY, transZ;
     char name[16];
-}; //__attribute__((packed));
+};
 
 #include "anorms.h"
 
@@ -84,13 +84,18 @@ std::vector<glm::vec3> decode_frame(FILE* file, int offset_frames,
 
     std::vector<glm::vec3> vertices;
     vertices.reserve(num_vertices);
-
+    
     for (const auto& v : vs) {
 	vertices.push_back(
 	    glm::vec3(
 		(v.v[0] * frame.scaleX) + frame.transX,
 		(v.v[1] * frame.scaleY) + frame.transY,
 		(v.v[2] * frame.scaleZ) + frame.transZ));
+
+	printf("%.2f %.2f %.2f\n",
+	       (v.v[0] * frame.scaleX) + frame.transX,
+	       (v.v[1] * frame.scaleY) + frame.transY,
+	       (v.v[2] * frame.scaleZ) + frame.transZ);
     }
 
     return vertices;

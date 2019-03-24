@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include "Game.hpp"
 #include "graphical/LightManager.hpp"
+#include "graphical/Animator.hpp"
 #include "logic/ObjectEventEmitter.hpp"
 
 using namespace familyline;
@@ -410,6 +411,7 @@ void Game::RunGraphical()
     fb3D->SetAsBoth();
     rndr->SetBoundingBox(hp->renderBBs);
 
+    Animator::runAllAnimations(16); // TODO: get correct frame time
     rndr->UpdateObjects();
 
     rndr->UpdateFrames();

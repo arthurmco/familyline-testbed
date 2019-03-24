@@ -13,6 +13,7 @@ void AssetManager::Create() {
 
     // Create the loaders
     new OBJOpener();
+    new MD2Opener();
 }
 
 
@@ -109,9 +110,9 @@ AssetObject AssetManager::GetAsset(const char* name)
 	
     }
 
-	if (subname && subname[0] == '\0')
-		subname = nullptr;
-
+    if (subname && subname[0] == '\0')
+	    subname = nullptr;
+    
     /* Then load the asset */
     auto assetobj = this->LoadAsset(type, ai->path.c_str(), subname);
 
@@ -145,6 +146,11 @@ AssetObject AssetManager::GetAsset(const char* name)
 
     Log::GetLog()->InfoWrite("asset-manager", "found asset %s at '%s'",
 			     name, ai->path.c_str());
+    if (!aap.object) {
+	    Log::GetLog()->Warning("asset-manager",
+	                           "%s is still null", name);
+    }
+    
     return aap.object.value_or(create_asset_from_null());
 }
 
@@ -193,13 +199,13 @@ AssetObject AssetManager::LoadAsset(AssetType type, const char* path, const char
 	// Find the appropriate mesh by its name
 	if (meshlist.size() > 0) {
 	    for (auto ml : meshlist) {
-			if (!subname) subname = "default";
-			fprintf(stderr, "%s |", subname);
-			fprintf(stderr, "%s \n", ml->GetName());
-			if (!strcmp(ml->GetName(), subname)) {
+		    if (!subname) subname = "Mesh";
+		    fprintf(stderr, "%s |", subname);
+		    fprintf(stderr, "%s \n", ml->GetName());
+		    if (!strcmp(ml->GetName(), subname)) {
 			    return create_asset_from_mesh(ml);
-			}
 		    }
+	    }
 	    
 		}
     } break;

@@ -23,7 +23,11 @@ void Renderer::initialize() {
     sForward->Use();
 
     /* 	Create a fake texture, so we can render something
-	if textures aren't available */
+	if textures aren't available 
+
+	Using a lot of 'ifs' in the render function can make
+	rendering slow.
+    */
 
     unsigned int* fake_color = new unsigned int;
 
@@ -33,7 +37,7 @@ void Renderer::initialize() {
 
 void Renderer::InitializeLibraries()
 {
-
+    
 }
 
 void Renderer::InitializeShaders()

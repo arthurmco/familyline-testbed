@@ -11,8 +11,9 @@ assets:
     path: ${TEXTURES_DIR}/test.bmp
     type: texture
 
+    # This tower.md2 is too fucking big!
   - name: WatchTower.obj
-    path: ${MODELS_DIR}/WatchTower.obj
+    path: ${MODELS_DIR}/tower.md2
     type: mesh
     mesh.material: WatchTower.mtl 
 

@@ -5,8 +5,13 @@
 
 using namespace familyline::graphics;
 
+/// TODO:
+///   - clone the animator, so animations run differently, instead
+///     of all meshes running in the same frame
+///   - test a md2 mesh here.
+
 Mesh::Mesh(Animator* animator, const std::vector<VertexInfo>& vinfo)
-    : SceneObject("Mesh", glm::vec3(0,0,0), 0, 0, 0)
+    : SceneObject("default", glm::vec3(0,0,0), 0, 0, 0)
 {
     _translMatrix = glm::mat4(1.0);
     _scaleMatrix = glm::mat4(1.0);
@@ -130,7 +135,6 @@ void Mesh::GenerateBoundingBox()
     this->_box.points[BOUNDING_BOX_UPPER_RIGHT_BACK]    = glm::vec3(minx, maxy, maxz);
     this->_box.points[BOUNDING_BOX_UPPER_LEFT_BACK]     = glm::vec3(maxx, maxy, minz);
     this->_box.points[BOUNDING_BOX_UPPER_LEFT_FRONT]    = glm::vec3(maxx, maxy, maxz);
-
 }
 
 /**
