@@ -92,10 +92,10 @@ std::vector<glm::vec3> decode_frame(FILE* file, int offset_frames,
 		(v.v[1] * frame.scaleY) + frame.transY,
 		(v.v[2] * frame.scaleZ) + frame.transZ));
 
-	printf("%.2f %.2f %.2f\n",
-	       (v.v[0] * frame.scaleX) + frame.transX,
-	       (v.v[1] * frame.scaleY) + frame.transY,
-	       (v.v[2] * frame.scaleZ) + frame.transZ);
+//	printf("%.2f %.2f %.2f\n",
+//	       (v.v[0] * frame.scaleX) + frame.transX,
+//	       (v.v[1] * frame.scaleY) + frame.transY,
+//	       (v.v[2] * frame.scaleZ) + frame.transZ);
     }
 
     return vertices;

@@ -29,9 +29,9 @@
 namespace familyline::graphics {
     
     enum AssetType {
-	AMesh,
-	AMaterial,
-	ATexture
+    AMesh,
+    AMaterial,
+    ATexture
     };
 
     /**
@@ -40,9 +40,9 @@ namespace familyline::graphics {
      * Binds an entry in the asset file to the object itself
      */       
     struct AssetPointer {
-	AssetItem* item;
-	AssetType type;
-	s_optional<AssetObject> object;
+    AssetItem* item;
+    AssetType type;
+    s_optional<AssetObject> object;
     };
 
     /**
@@ -53,21 +53,21 @@ namespace familyline::graphics {
     class AssetManager {
 
     private:
-	AssetFile af;
+    AssetFile af;
 
-	std::unordered_map<std::string, AssetPointer> assetlist; 
-	AssetObject LoadAsset(AssetType type, const char* path, const char* subname);
+    std::unordered_map<std::string, AssetPointer> assetlist; 
+    AssetObject LoadAsset(AssetType type, const char* path, const char* subname);
     public:
-	
-	void Create();
-	
-	AssetObject GetAsset(const char* name);
-	
-	static AssetManager* GetInstance() {
-	    static AssetManager* am = nullptr;
-	    if (!am)    am = new AssetManager;
-	    return am;
-	}
+    
+    void Create();
+    
+    AssetObject GetAsset(const char* name);
+    
+    static AssetManager* GetInstance() {
+        static AssetManager* am = nullptr;
+        if (!am)    am = new AssetManager;
+        return am;
+    }
 
     };
 

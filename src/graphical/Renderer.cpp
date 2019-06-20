@@ -160,6 +160,8 @@ void Renderer::UpdateObjects()
 			printf("???\n");
 
 			vidx++;
+
+			
 		    }
 		}
 				
