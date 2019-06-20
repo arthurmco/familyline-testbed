@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include "Game.hpp"
 #include "graphical/LightManager.hpp"
-#include "graphical/Animator.hpp"
+#include "graphical/animator.hpp"
 #include "logic/ObjectEventEmitter.hpp"
 
 using namespace familyline;

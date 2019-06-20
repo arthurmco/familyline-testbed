@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "../Material.hpp"
-#include "../GFXExceptions.hpp"
+#include "../exceptions.hpp"
 #include "Log.hpp"
 #include "../TextureOpener.hpp"
 

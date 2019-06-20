@@ -7,7 +7,7 @@
 
 #include <glm/glm.hpp>
 
-#include "SceneObject.hpp"
+#include "scene_object.hpp"
 
 #ifndef LIGHT_HPP
 #define LIGHT_HPP

@@ -13,8 +13,8 @@
 #include <map>
 
 #include "../logic/Terrain.hpp"
-#include "Camera.hpp"
-#include "VertexData.hpp"
+#include "camera.hpp"
+#include "vertexdata.hpp"
 #include "Texture.hpp"
 
 #include <glm/glm.hpp>

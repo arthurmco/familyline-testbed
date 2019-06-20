@@ -37,10 +37,10 @@
 
 #include "Game.hpp"
 
-#include "graphical/Renderer.hpp"
-#include "graphical/ShaderProgram.hpp"
-#include "graphical/Window.hpp"
-#include "graphical/Framebuffer.hpp"
+#include "graphical/renderer.hpp"
+#include "graphical/shader_manager.hpp"
+#include "graphical/window.hpp"
+#include "graphical/framebuffer.hpp"
 
 #include "net/NetServer.hpp"
 #include "graphical/gui/GUIManager.hpp"

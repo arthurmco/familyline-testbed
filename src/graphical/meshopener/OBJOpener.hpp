@@ -18,7 +18,7 @@
 #define OBJOPENER_HPP
 
 #include "MeshOpener.hpp"
-#include "../Mesh.hpp"
+#include "../mesh.hpp"
 
 namespace familyline::graphics {
     class OBJOpener : public MeshOpener {

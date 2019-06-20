@@ -18,8 +18,8 @@
 #include "GUIControl.hpp"
 #include "../../input/InputManager.hpp"
 #include "../../input/InputListener.hpp"
-#include "../ShaderProgram.hpp"
-#include "../Window.hpp"
+#include "../shader_manager.hpp"
+#include "../window.hpp"
 
 namespace familyline::graphics::gui {
 

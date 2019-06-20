@@ -18,7 +18,7 @@
 #include "logic/Player.hpp"
 #include "logic/PathFinder.hpp"
 #include "logic/ObjectFactory.hpp"
-#include "graphical/Camera.hpp"
+#include "graphical/camera.hpp"
 #include "graphical/TerrainRenderer.hpp"
 //#include "graphical/GUIActionManager.hpp"
 #include "logic/ObjectRenderer.hpp"

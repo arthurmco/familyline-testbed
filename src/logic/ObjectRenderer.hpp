@@ -17,8 +17,8 @@
 #include "ObjectEventEmitter.hpp"
 #include "GameActionListener.hpp"
 
-#include "../graphical/Mesh.hpp"
-#include "../graphical/SceneManager.hpp"
+#include "../graphical/mesh.hpp"
+#include "../graphical/scene_renderer.hpp"
 
 #ifndef OBJECTRENDERER_HPP
 #define OBJECTRENDERER_HPP
@@ -43,7 +43,7 @@ namespace familyline::logic {
     {
     private:
 	ObjectManager * _om;
-	familyline::graphics::SceneManager* _sm;
+	familyline::graphics::SceneRenderer* _sm;
 	ObjectEventListener oel;
 
 	std::vector<std::weak_ptr<GameObject>> _objects;
@@ -54,7 +54,7 @@ namespace familyline::logic {
 	std::map<int, bool> _deleted_ids;
 
     public:
-	ObjectRenderer(ObjectManager*, familyline::graphics::SceneManager*);
+	ObjectRenderer(ObjectManager*, familyline::graphics::SceneRenderer*);
 
 	virtual void OnListen(GameAction& a);
 

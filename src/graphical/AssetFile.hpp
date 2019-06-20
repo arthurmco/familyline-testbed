@@ -11,7 +11,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "GFXExceptions.hpp"
+#include "exceptions.hpp"
 
 #include <unordered_map>
 #include <list>

@@ -9,7 +9,7 @@
 
 #include <map>
 
-#include "Renderer.hpp"
+#include "renderer.hpp"
 #include "../logic/DebugPlot.hpp"
 
 namespace familyline::graphics {

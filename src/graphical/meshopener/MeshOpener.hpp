@@ -26,7 +26,7 @@
 #include <memory>
 #include <vector>
 
-#include "../Mesh.hpp"
+#include "../mesh.hpp"
 
 namespace familyline::graphics {
     

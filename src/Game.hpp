@@ -22,7 +22,7 @@
 #include "logic/PlayerManager.hpp"
 #include "logic/DebugPlot.hpp"
 
-#include "graphical/Camera.hpp"
+#include "graphical/camera.hpp"
 #include "graphical/AssetFile.hpp"
 #include "graphical/Light.hpp"
 #include "graphical/meshopener/OBJOpener.hpp"
@@ -32,9 +32,9 @@
 #include "graphical/TextureManager.hpp"
 #include "graphical/MaterialManager.hpp"
 #include "graphical/AssetManager.hpp"
-#include "graphical/Window.hpp"
-#include "graphical/Framebuffer.hpp"
-#include "graphical/Renderer.hpp"
+#include "graphical/window.hpp"
+#include "graphical/framebuffer.hpp"
+#include "graphical/renderer.hpp"
 #include "graphical/GraphicalPlotInterface.hpp"
 
 #include "graphical/gui/GUIManager.hpp"

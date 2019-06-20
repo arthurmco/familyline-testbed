@@ -12,7 +12,7 @@
 #ifndef ASSETOBJECT_HPP
 #define ASSETOBJECT_HPP
 
-#include "Mesh.hpp"
+#include "mesh.hpp"
 #include "Texture.hpp"
 #include "Material.hpp"
 #include <vector>
