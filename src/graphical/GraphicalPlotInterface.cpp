@@ -14,43 +14,12 @@ GraphicalPlotInterface::GraphicalPlotInterface(Renderer* renderer)
 PathHandle GraphicalPlotInterface::AddPath(std::vector<glm::vec3>& path,
 					   glm::vec3 color)
 {
-/* Convert the game-based coordinates in opengl based ones */
-    std::vector<glm::vec3> glpos;
-    std::vector<glm::vec3> glcolor;
-    glpos.resize(path.size());
-    glcolor.resize(path.size());
-    
-    std::transform(path.begin(), path.end(), glpos.begin(),
-		   [](glm::vec3 point) {
-		       return GameToGraphicalSpace(point);
-		   });
-
-    std::generate(glcolor.begin(), glcolor.end(), [&color](){
-	    return color;
-	});
-
-    VertexData* v = new VertexData();
-    v->position = glpos;
-    v->normals = glcolor;
-    //v->render_format = VertexRenderStyle::PlotLines;
-//    return (PathHandle)_renderer->addVertexData(v, new glm::mat4(1.0));
-    VertexHandle vdata = _renderer->addVertexData(
-	*v, VertexInfo{0, 0, "lines", new glm::mat4(1.0),
-		VertexRenderStyle::PlotLines});
-
-
-    uintptr_t vcode = (uintptr_t)v;
-    PathHandle p = int(vcode);
-    vertexmap[p] = vdata;
-
+    PathHandle p;
     return p;
 }
 
 /* Removes a path using its path handle */
 void GraphicalPlotInterface::RemovePath(PathHandle pathhandle)
 {
-    auto vhandle = vertexmap[pathhandle];
-    _renderer->removeVertexData(std::move(vhandle));
-
-    vertexmap.erase(pathhandle);
+//    vertexmap.erase(pathhandle);
 }

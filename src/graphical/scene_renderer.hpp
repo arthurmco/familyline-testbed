@@ -4,8 +4,9 @@
 #include "renderer.hpp"
 #include "scene_object.hpp"
 #include "camera.hpp"
+#include "vertexdata.hpp"
 
-using namespace familyline::graphics;
+namespace familyline::graphics {
 
 struct SceneObjectInfo {
 	std::shared_ptr<SceneObject> object;
@@ -51,3 +52,4 @@ public:
 	void remove(int meshHandle);
 	void update();
 };
+}

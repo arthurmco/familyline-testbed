@@ -1,8 +1,10 @@
 #include "gl_renderer.hpp"
 #include "exceptions.hpp"
 #include "shader_manager.hpp"
-#include "logger.hpp"
 
+#include "Log.hpp"
+
+using namespace familyline;
 using namespace familyline::graphics;
 
 GLRenderer::GLRenderer()
@@ -13,7 +15,7 @@ GLRenderer::GLRenderer()
 	});
 
 	_sForward->link();
-	}
+}
 
 VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
 {
@@ -25,7 +27,7 @@ VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
 	auto vhandle = std::make_unique<GLVertexHandle>(vao, *this, vi);
 	vhandle->vsize = vd.position.size();
 
-	LoggerService::getLogger()->write("gl-renderer", LogType::Debug,
+    Log::GetLog()->InfoWrite("gl-renderer",
 		"created vertex handle: vao=%#x, vsize=%zu",
 		vao, vhandle->vsize);
 
@@ -42,9 +44,9 @@ void GLRenderer::render(Camera* c)
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
-	
+
 	auto& shaderManager = GFXService::getManager();
-	auto& log = LoggerService::getLogger();
+    auto l = Log::GetLog();
 
 	auto viewMatrix = c->GetViewMatrix();
 	auto projMatrix = c->GetProjectionMatrix();
@@ -60,7 +62,7 @@ void GLRenderer::render(Camera* c)
 		bool hasTexture = true;
 
 		glBindVertexArray(vh->vao);
-		
+
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vh->vboPos);
@@ -96,7 +98,7 @@ void GLRenderer::render(Camera* c)
 		glDrawArrays(GL_TRIANGLES, 0, vh->vsize);
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
-			log->write("glrenderer", LogType::Fatal, "rendering plot: OpenGL error %#x", err);
+			l->Fatal("glrenderer", "rendering plot: OpenGL error %#x", err);
 			return;
 		}
 	}
@@ -144,7 +146,7 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd)
 	glBindVertexArray(0);
 
 
-	LoggerService::getLogger()->write("gl-renderer", LogType::Debug,
+    Log::GetLog()->InfoWrite("gl-renderer",
 		"created vertex set: vao=%#x, vbos=%#x,%#x,%#x",
 		vao, vboPos, vboNorm, vboTex);
 

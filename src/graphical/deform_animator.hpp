@@ -4,43 +4,47 @@
 #include <map>
 #include <string>
 
-/**
- * Mesh deformation animation class
- *
- * Usually contains instructions for animating
- * vertices one by one
- */
-class DeformAnimator final : public Animator {
-private:
-	std::map<std::string /*animation-name*/, std::vector<VertexDataGroup>> _animation_frames;
-	int _framerate;
+namespace familyline::graphics {
 
-	std::string _animation_name = "default";
+    /**
+     * Mesh deformation animation class
+     *
+     * Usually contains instructions for animating
+     * vertices one by one
+     */
+    class DeformAnimator final : public Animator {
+    private:
+        std::map<std::string /*animation-name*/, std::vector<VertexDataGroup>> _animation_frames;
+        int _framerate;
 
-	/**
-	 * What position in the animation we are.
-	 * It's double, because we can be in the middle of two frames
-	 */
-	double _frameptr = 0.0;
+        std::string _animation_name = "default";
 
-public:
-	DeformAnimator(std::map<std::string /*animation-name*/, std::vector<VertexDataGroup>>,
-		int framerate);
+        /**
+         * What position in the animation we are.
+         * It's double, because we can be in the middle of two frames
+         */
+        double _frameptr = 0.0;
 
-	/**
-	 * Get vertex data from the current frame
-	 */
-	virtual VertexDataGroup getCurrentFrame();
+    public:
+        DeformAnimator(std::map<std::string /*animation-name*/, std::vector<VertexDataGroup>>,
+                       int framerate);
 
-	/**
-	 * Advance animation by 'ms' milisseconds.
-	 * If ms is not the frametime of this animation, interpolate
-	 */
-	virtual void advance(int ms);
+        /**
+         * Get vertex data from the current frame
+         */
+        virtual VertexDataGroup getCurrentFrame();
 
-	/**
-	 * Run some predefined animation named 'name'.
-	 * Set the internal pointer to the first frame of that animation
-	 */
-	virtual void runAnimation(const char* name);
-};
+        /**
+         * Advance animation by 'ms' milisseconds.
+         * If ms is not the frametime of this animation, interpolate
+         */
+        virtual void advance(int ms);
+
+        /**
+         * Run some predefined animation named 'name'.
+         * Set the internal pointer to the first frame of that animation
+         */
+        virtual void runAnimation(const char* name);
+    };
+
+}

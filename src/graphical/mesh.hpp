@@ -4,32 +4,47 @@
 #include "scene_object.hpp"
 #include "animator.hpp"
 
-class Mesh : public SceneObject {
-private:
-	std::string _name;
-	glm::mat4 _worldMatrix;
-	Animator* _ani;
+#include "../logic/IMesh.hpp"
 
-public:
-	Mesh(const char* name, Animator* ani, std::vector<VertexInfo> vinfo)
-		: _name(name), _ani(ani), _worldMatrix(glm::mat4(1.0))
-	{
-		this->vinfo = vinfo;
-	}
+namespace familyline::graphics {
 
-	glm::vec3 worldPosition;
+    struct BoundingBox {
+        float minX, minY, minZ;
+        float maxX, maxY, maxZ;
+    };
+    
+    class Mesh : public SceneObject, public familyline::logic::IMesh  {
+    private:
+        std::string _name;
+        glm::mat4 _worldMatrix;
+        Animator* _ani;
 
-	/**
-	 * Update the world matrix and the animator
-	 */
-	virtual void update();
+    public:
+        Mesh(const char* name, Animator* ani, std::vector<VertexInfo> vinfo)
+            : _name(name), _ani(ani), _worldMatrix(glm::mat4(1.0))
+            {
+                this->vinfo = vinfo;
+            }
 
-	virtual std::string_view getName() const;
-	virtual glm::vec3 getPosition() const;
-	virtual glm::mat4 getWorldMatrix() const;
-	virtual std::vector<VertexData> getVertexData();
-	virtual bool isVertexDataDirty();
+        glm::vec3 worldPosition;
 
-	Animator* getAnimator();
+        /**
+         * Update the world matrix and the animator
+         */
+        virtual void update();
 
-};
+        virtual void setLogicPosition(glm::vec3 p) { this->worldPosition = p; } 
+        
+        virtual std::string_view getName() const;
+        virtual glm::vec3 getPosition() const;
+        virtual glm::mat4 getWorldMatrix() const;
+        virtual std::vector<VertexData> getVertexData();
+        virtual bool isVertexDataDirty();
+
+        // TODO: create a better function to return bounding boxes
+        BoundingBox getBoundingBox();
+        
+        Animator* getAnimator();
+
+    };
+}

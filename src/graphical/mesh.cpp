@@ -1,5 +1,9 @@
 #include "mesh.hpp"
 
+#include <algorithm>
+#include <numeric>
+#include <glm/gtc/matrix_transform.hpp>
+
 using namespace familyline::graphics;
 
 void Mesh::update()
@@ -44,4 +48,48 @@ std::vector<VertexData> Mesh::getVertexData()
 bool Mesh::isVertexDataDirty()
 {
 	return _ani->isDirty();
+}
+
+// TODO: create a better function to return bounding boxes
+BoundingBox Mesh::getBoundingBox()
+{
+    auto vdx = _ani->getCurrentFrame();
+    
+    std::vector<BoundingBox> binit;
+    auto bounds = std::transform(
+        vdx.begin(), vdx.end(), std::back_inserter(binit),
+        [](VertexData vd) {
+            BoundingBox b;
+            b.minX = b.minY = b.minZ = -99999999;
+            return std::accumulate(
+                vd.position.begin(), vd.position.end(), b,
+                [](BoundingBox bit, glm::vec3 v) {
+                    bit.maxX = glm::max(v.x, bit.maxX);
+                    bit.maxY = glm::max(v.y, bit.maxY);
+                    bit.maxZ = glm::max(v.z, bit.maxZ);
+                    bit.minX = glm::min(v.x, bit.minX);
+                    bit.minY = glm::min(v.y, bit.minY);
+                    bit.minZ = glm::min(v.z, bit.minZ);
+
+                    return bit;
+                }
+                );
+        });
+
+    BoundingBox b;
+    b.minX = b.minY = b.minZ = -99999999;
+    return std::accumulate(
+        binit.begin(), binit.end(), b,
+        [](BoundingBox cur, BoundingBox prev) {
+            cur.maxX = glm::max(prev.maxX, cur.maxX);
+            cur.maxY = glm::max(prev.maxY, cur.maxY);
+            cur.maxZ = glm::max(prev.maxZ, cur.maxZ);
+            cur.minX = glm::min(prev.minX, cur.minX);
+            cur.minY = glm::min(prev.minY, cur.minY);
+            cur.minZ = glm::min(prev.minZ, cur.minZ);
+
+            return cur;
+        });
+    
+    
 }

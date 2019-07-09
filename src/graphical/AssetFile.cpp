@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <string>
 
-#include "GFXExceptions.hpp"
+#include "exceptions.hpp"
 
 using namespace familyline::graphics;
 
@@ -36,13 +36,13 @@ void AssetFile::LoadFile(const char* ofile)
 	if (!fAsset) {
 		char e[256+256];
 		sprintf(e, "Failed to open asset file list %s", file);
-		throw asset_exception(nullptr, e);
+		throw asset_exception(e, 0x0);
 	}
 
 	yaml_parser_t parser;
 	if (!yaml_parser_initialize(&parser)) {
 	    fclose(fAsset);
-	    throw asset_exception(nullptr, "Failed to initialize asset file parser");
+	    throw asset_exception("Failed to initialize asset file parser", 0x1);
 	}
 
 	yaml_parser_set_input_file(&parser, fAsset);
@@ -97,7 +97,7 @@ std::list<std::shared_ptr<AssetItem>> AssetFile::ParseFile(yaml_parser_t* parser
 	} while (event.type != YAML_STREAM_END_EVENT);
 
 	if (!asset_str || !asset_list) {
-		throw asset_exception(nullptr, "Could not find the asset list in the file");
+		throw asset_exception("Could not find the asset list in the file", 0x3);
 	}
 
 	AssetItem current_asset;

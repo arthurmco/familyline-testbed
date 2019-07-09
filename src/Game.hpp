@@ -11,7 +11,7 @@
 #include "config.h"
 #include "EnviroDefs.h"
 
-#include "logic/ObjectRenderer.hpp"
+//#include "logic/ObjectRenderer.hpp"
 #include "logic/PathFinder.hpp"
 #include "logic/ObjectFactory.hpp"
 #include "logic/ObjectPathManager.hpp"
@@ -35,6 +35,7 @@
 #include "graphical/window.hpp"
 #include "graphical/framebuffer.hpp"
 #include "graphical/renderer.hpp"
+#include "graphical/scene_renderer.hpp"
 #include "graphical/GraphicalPlotInterface.hpp"
 
 #include "graphical/gui/GUIManager.hpp"
@@ -65,7 +66,7 @@ private:
     
     graphics::Window* win = nullptr;
     graphics::Renderer* rndr = nullptr;
-    graphics::SceneManager* scenemng = nullptr;
+    graphics::SceneRenderer* scenernd = nullptr;
 
     graphics::Framebuffer *fbGUI = nullptr, *fb3D = nullptr;
     graphics::gui::GUIManager* gr = nullptr;

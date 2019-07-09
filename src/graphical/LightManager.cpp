@@ -19,7 +19,7 @@ void LightManager::Remove(Light* l)
 {
 	std::remove_if(LightManager::_lights.begin(), LightManager::_lights.end(),
 		[l](Light* curr) {
-			return !strcmp(l->GetName(), curr->GetName()); 
+			return l->getName() == curr->getName();
 		}
 	);
 }
@@ -38,11 +38,11 @@ std::list<Light*> LightManager::GetBestLights(glm::vec3 center,
 	double radius, const int max_lights)
 {
 	auto ret = std::list<Light*>();
-	
+
 	/* Calculate the light score. Bigger score means a stronger light*/
 	auto fnGetScore = [&](Light* light) {
-		auto distance = glm::distance(center, light->GetPosition());
-		return (radius - distance) * light->GetStrength();
+		auto distance = glm::distance(center, light->getPosition());
+		return (radius - distance) * light->getStrength();
 	};
 
 	auto lights = LightManager::_lights;
@@ -54,7 +54,7 @@ std::list<Light*> LightManager::GetBestLights(glm::vec3 center,
 		for (auto light = lights.begin(); light != lights.end(); light++) {
 			const auto score = fnGetScore(*light);
 			Log::GetLog()->InfoWrite("light-manager", "light %s has score %.3f",
-						 (*light)->GetName(), score);
+						 (*light)->getName(), score);
 
 			if (score > minScore) {
 				minScore = score;

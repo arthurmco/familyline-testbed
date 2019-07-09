@@ -68,7 +68,7 @@ AssetObject AssetManager::GetAsset(const char* name)
             char* e = new char[128 + mmaterial.size() + ai->name.size() + ai->path.size()];
             sprintf(e, "Could not load material %s for mesh %s (%s)", mmaterial.c_str(),
                  ai->name.c_str(), ai->path.c_str());
-            throw asset_exception(nullptr, e);
+            throw asset_exception(e, 0x4);
             delete[] e;
         }
 
@@ -92,7 +92,7 @@ AssetObject AssetManager::GetAsset(const char* name)
             char* e = new char[128 + mtexture.size() + ai->name.size() + ai->path.size()];
             sprintf(e, "Could not load texture %s for mesh %s (%s)", mtexture.c_str(),
                  ai->name.c_str(), ai->path.c_str());
-            throw asset_exception(nullptr, e);
+            throw asset_exception(e, 0xc00c);
             delete[] e;
         }
 
@@ -135,10 +135,10 @@ AssetObject AssetManager::GetAsset(const char* name)
         mattex->SetTexture(t);
         MaterialManager::GetInstance()->AddMaterial(mattex);
 
-        if (assetobj.mesh && assetobj.mesh->getVertexInfoCount() > 0) {
-            VertexInfo vi = assetobj.mesh->getVertexInfo(0);
-            vi.materialID = mattex->GetID();
-            assetobj.mesh->setVertexInfo(0, vi);
+        if (assetobj.mesh && assetobj.mesh->getAnimator() && assetobj.mesh->isVertexDataDirty()) {
+            auto vi = assetobj.mesh->getVertexInfo();
+            vi[0].materialID = mattex->GetID();
+            assetobj.mesh->setVertexInfo(std::move(vi));
         }
         
         delete[] texname;
@@ -156,6 +156,7 @@ AssetObject AssetManager::GetAsset(const char* name)
     return aap.object.value_or(create_asset_from_null());
 }
 
+/// subname deveria ser std::string_view
 AssetObject AssetManager::LoadAsset(AssetType type, const char* path, const char* subname)
 {
 
@@ -204,8 +205,8 @@ AssetObject AssetManager::LoadAsset(AssetType type, const char* path, const char
         for (auto ml : meshlist) {
             if (!subname) subname = "Mesh";
             fprintf(stderr, "%s |", subname);
-            fprintf(stderr, "%s \n", ml->GetName());
-            if (!strcmp(ml->GetName(), subname)) {
+            fprintf(stderr, "%s \n", ml->getName().data());
+            if (ml->getName() == std::string_view{subname}) {
                 return create_asset_from_mesh(ml);
             }
         }

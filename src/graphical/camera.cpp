@@ -1,6 +1,8 @@
 #include "camera.hpp"
 #include "logger.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 using namespace familyline::graphics;
 
 Camera::Camera(glm::vec3 pos, float aspectRatio, glm::vec3 lookAt)

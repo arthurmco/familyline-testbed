@@ -3,6 +3,8 @@
 #include <vector>
 #include "renderer.hpp"
 
+namespace familyline::graphics {
+
 class GLRenderer;
 
 struct GLVertexHandle final : public VertexHandle {
@@ -45,3 +47,4 @@ public:
 
 	//virtual LightHandle createLight(LightData& ld) = 0;
 };
+}

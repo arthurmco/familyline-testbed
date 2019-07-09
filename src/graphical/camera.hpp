@@ -1,10 +1,13 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <cmath>
 
 #ifndef M_PI
 #define M_PI 3.1415f
 #endif
+
+namespace familyline::graphics {
 
 class Camera {
 private:
@@ -71,3 +74,4 @@ public:
 	glm::vec3 Project(int mouse_x, int mouse_y, int screenw, int screenh) const;
 
 };
+}

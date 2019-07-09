@@ -7,7 +7,9 @@ std::vector<Material*> MTLOpener::Open(const char* file)
     FILE* fMat = fopen(file, "r");
 
     if (!fMat) {
-        throw material_exception("Failure to open material", errno, file);
+        char s[512];
+        snprintf(s, 511, "Failure to open material %s", file);
+        throw asset_exception(s, errno);
     }
 
     std::vector<Material*> mats;

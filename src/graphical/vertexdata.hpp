@@ -9,6 +9,8 @@
 
 #include "shader.hpp"
 
+namespace familyline::graphics {
+
 	/**
 	 * Contains base vertex data
 	 */
@@ -46,8 +48,7 @@
 		void updateShader();
 	};
 
-
-	struct VertexHandle;
+    struct VertexHandle;
 
 	/**
 	 * Contains metainformation about the vertex set
@@ -74,3 +75,4 @@
 
 		VertexInfo(int index, int materialID, ShaderProgram* shader, VertexRenderStyle style);
 	};
+}

@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include "Game.hpp"
+#include "graphical/gl_renderer.hpp"
 #include "graphical/LightManager.hpp"
 #include "graphical/animator.hpp"
 #include "logic/ObjectEventEmitter.hpp"
@@ -21,6 +22,7 @@ public:
     }
 };
 
+/// TODO: rewrite this and Tribalia.cpp!!!
 
 Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 	GUIManager* gr, PlayerManager* pm, HumanPlayer* hp)
@@ -28,10 +30,10 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 {
 	DebugPlotter::Init();
 
-	
-	
+
+
 	int winW, winH;
-	w->GetSize(winW, winH);
+	w->getSize(winW, winH);
 	char* err = nullptr;
 
 	try {
@@ -40,8 +42,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		ObjectManager::setDefault(om);
 		CombatManager::setDefault(new CombatManager);
 
-		rndr = new Renderer{};
-		rndr->initialize();
+		rndr = new GLRenderer{};
 		DebugPlotter::pinterface = std::unique_ptr<DebugPlotInterface>
 			(new GraphicalPlotInterface(rndr));
 
@@ -58,17 +59,19 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		printf("%s -- %#x\n", tteam->name.c_str(), tteam->number);
 
 
-		scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
-
+//		scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
+        
 		cam = new Camera{ glm::vec3(6.0f, 36.0f, 6.0f), (float)winW / (float)winH, glm::vec3(0,0,0) };
-		scenemng->SetCamera(cam);
+        scenernd = new SceneRenderer((Renderer*)rndr, *cam);
+
+        //		scenernd->SetCamera(cam);
 		hp->SetCamera(cam);
 
-		rndr->SetSceneManager(scenemng);
+//		rndr->SetSceneManager(scenernd);
 
 		am->Create();
 
-		Light* l = new Light{"mainLight", glm::vec3(16, 16, 16), 0x0, 0x0, 0xff, 200 };
+//		Light* l = new Light{"mainLight", glm::vec3(16, 16, 16), 0x0, 0x0, 0xff, 200 };
 		std::vector<glm::vec3> p = {
 			glm::vec3(0, terr->GetHeightFromPoint(0, 0) + 16, 0),
 			glm::vec3(10, terr->GetHeightFromPoint(10, 10) + 16, 10),
@@ -76,19 +79,19 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		};
 
 		DebugPlotter::pinterface->AddPath(p, glm::vec3(1, 0, 0));
-		LightManager::AddLight(l);
+//		LightManager::AddLight(l);
 
 		terr_rend = new TerrainRenderer{ };
 		terr_rend->SetTerrain(terr);
 		terr_rend->SetCamera(cam);
 
-		objrend = new ObjectRenderer(om, scenemng);
-		hp->objr = objrend;
-		gam.AddListener(objrend);
+//		objrend = new ObjectRenderer(om, scenernd);
+//		hp->objr = objrend;
+		//gam.AddListener(objrend);
 
 		InputManager::GetInstance()->Initialize();
 
-		ip = new InputPicker{ terr_rend, win, scenemng, cam, om };
+		ip = new InputPicker{ terr_rend, win, scenernd, cam, om };
 		hp->SetPicker(ip);
 
 		pathf = new PathFinder(om);
@@ -108,54 +111,22 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		ObjectPathManager::getInstance()->SetTerrain(terr);
 
 	}
-	catch (window_exception& we) {
-		Log::GetLog()->Fatal("game", "Window creation error: %s (%d)", we.what(), we.code);
-		exit(EXIT_FAILURE);
-	}
 	catch (renderer_exception& re) {
 		Log::GetLog()->Fatal("game", "Rendering error: %s [%d]",
-			re.what(), re.code);
+			re.what(), 0xdeadbeef);
 
 		err = new char[192 + strlen(re.what())];
 		sprintf(err,
 			"Familyline found an error in rendering\n"
 			"\n"
 			"Error: %s\n", re.what());
-		win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
-		delete[] err;
-		exit(EXIT_FAILURE);
-	}
-	catch (mesh_exception& se) {
-		Log::GetLog()->Fatal("game", "Mesh error: %s", se.what());
-		Log::GetLog()->Fatal("game", "Mesh file: %s", se.file.c_str());
-
-		err = new char[512 + strlen(se.what())];
-		sprintf(err,
-			"Familyline found an error in a mesh\n"
-			"\n"
-			"Mesh file: %s, error: %s\n",
-			se.file.c_str(), se.what());
-		win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
-		delete[] err;
-		exit(EXIT_FAILURE);
-	}
-	catch (material_exception& se) {
-		Log::GetLog()->Fatal("game", "Material error: %s ", se.what());
-		Log::GetLog()->Fatal("game", "Material file: %s", se.file.c_str());
-
-		err = new char[512 + strlen(se.what())];
-		sprintf(err,
-			"Familyline found an error in a material\n"
-			"\n"
-			"Mesh file: %s, error: %s\n",
-			se.file.c_str(), se.what());
-		win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
+//		win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
 		delete[] err;
 		exit(EXIT_FAILURE);
 	}
 	catch (shader_exception& se) {
-		Log::GetLog()->Fatal("game", "Shader error: %s [%d]", se.what(), se.code);
-		Log::GetLog()->Fatal("game", "Shader file: %s, type %d", se.file.c_str(), se.type);
+		Log::GetLog()->Fatal("game", "Shader error: %s [%d]", se.what(), 0xbadbeef);
+		Log::GetLog()->Fatal("game", "Shader file: %s, type %d", "", 0x1e);
 
 		err = new char[512 + strlen(se.what())];
 		sprintf(err,
@@ -163,8 +134,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 			"\n"
 			"Error: %s\n"
 			"File: %s, type: %d, code: %d",
-			se.what(), se.file.c_str(), se.type, se.code);
-		win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
+			se.what(), "", 0x1e, 0xbadbeef);
+//		win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
 		delete[] err;
 		exit(EXIT_FAILURE);
 	}
@@ -172,17 +143,17 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		Log::GetLog()->Fatal("game", "Asset file error: %s", ae.what());
 		err = new char[768 + strlen(ae.what())];
 
-		if (ae.assetptr) {
-			AssetItem* a = (AssetItem*)ae.assetptr;
-			Log::GetLog()->Fatal("game", "Asset %s, file: %s", a->name.c_str(), a->path.c_str());
+//		if (ae.assetptr) {
+//			AssetItem* a = (AssetItem*)ae.assetptr;
+//			Log::GetLog()->Fatal("game", "Asset %s, file: %s", a->name.c_str(), a->path.c_str());
 
-			sprintf(err,
-				"Familyline found an error in an asset\n"
-				"\n"
-				"Asset named %s, file: %s\n"
-				"Error: %s\n",
-				a->name.c_str(), a->path.c_str(), ae.what());
-		}
+//			sprintf(err,
+//				"Familyline found an error in an asset\n"
+//				"\n"
+//				"Asset named %s, file: %s\n"
+//				"Error: %s\n",
+//				a->name.c_str(), a->path.c_str(), ae.what());
+//		}
 
 		sprintf(err,
 			"Familyline found an error in an asset\n"
@@ -190,28 +161,15 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 			"Error: %s\n",
 			ae.what());
 
-		win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
+//		win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
 		delete[] err;
 		exit(EXIT_FAILURE);
 	}
-	catch (terrain_file_exception& te) {
-		Log::GetLog()->Fatal("game", "Terrain file error: %s on file %s", te.what(), te.file.c_str());
-		if (te.code != 0) {
-			Log::GetLog()->Fatal("game", "Error code: %d (%s)", te.code, strerror(te.code));
-		}
-
-		err = new char[512 + strlen(te.what())];
-		sprintf(err,
-			"Familyline found an error in a terrain\n"
-			"\n"
-			"File: %s\n"
-			"error: %s (%s)\n",
-			te.file.c_str(), te.what(), strerror(te.code));
-		win->ShowMessageBox(err, "Error", MessageBoxInfo::Error);
-
-		delete[] err;
+    catch (graphical_exception& we) {
+		Log::GetLog()->Fatal("game", "Window creation error: %s (%d)", we.what(), 0xdeadc0de);
 		exit(EXIT_FAILURE);
 	}
+
 }
 
 GUILabel lblBuilding = GUILabel(0.05, 0.1, "!!!");
@@ -286,7 +244,7 @@ int Game::RunLoop()
 	int logicTime = LOGIC_DELTA;
 	int inputTime = INPUT_DELTA;
 	int limax = 0;
-	
+
 	do {
 	    player = true;
 
@@ -298,9 +256,9 @@ int Game::RunLoop()
 
 		inputTime -= INPUT_DELTA;
 	    }
-	    
+
 	    /* Run the logic code in steps of fixed blocks
-	     * This is called fixed timestep, and will ensure game consistency 
+	     * This is called fixed timestep, and will ensure game consistency
 	     * on multiplayer games
 	     */
 	    int li = 0;
@@ -312,7 +270,7 @@ int Game::RunLoop()
 
 	    if (frame > 1)
 		limax = std::max(li, limax);
-	    
+
 	    this->ShowDebugInfo();
 	    this->RunGraphical();
 
@@ -393,7 +351,7 @@ void Game::RunLogic()
 
     bool objupdate = objrend->Check();
     if (objupdate || hp->HasUpdatedObject()) {
-	objrend->Update();
+        objrend->Update();
 	pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
     }
     objrend->Update();
@@ -408,21 +366,22 @@ void Game::RunGraphical()
 
     /* Rendering */
 
-    fb3D->SetAsBoth();
-    rndr->SetBoundingBox(hp->renderBBs);
+    fb3D->startDraw();
+    //  rndr->SetBoundingBox(hp->renderBBs);
 
-    Animator::runAllAnimations(16); // TODO: get correct frame time
-    rndr->UpdateObjects();
+//    Animator::runAllAnimations(16); // TODO: get correct frame time
+//    rndr->UpdateObjects();
 
-    rndr->UpdateFrames();
-    rndr->Render(terr_rend);
+//    rndr->UpdateFrames();
+    rndr->render(cam);
 
-    fbGUI->SetAsBoth();
+    fb3D->endDraw();
+    fbGUI->startDraw();
     gr->render(0, 0);
     gr->renderToScreen();
-    fbGUI->Unset();
+    fbGUI->endDraw();
 
-    win->Update();
+    win->update();
 }
 
 
@@ -456,7 +415,7 @@ void Game::ShowDebugInfo()
 
     {
 	int qx, qy;
-	scenemng->GetCameraQuadrant(qx, qy);
+//	scenernd->GetCameraQuadrant(qx, qy);
 //			gr->DebugWrite(10, 160, "Camera quadrant: %d x %d", qx, qy);
     }
 

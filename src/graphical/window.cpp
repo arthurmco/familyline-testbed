@@ -5,8 +5,8 @@
 
 using namespace familyline::graphics;
 
-GLWindow::GLWindow(GLDevice* dev)
-	: _dev(dev)
+GLWindow::GLWindow(GLDevice* dev, int width, int height)
+	: _dev(dev), _width(width), _height(height)
 {
 	
 	/* Setup SDL GL context data */
@@ -40,6 +40,11 @@ GLWindow::GLWindow(GLDevice* dev)
 
 }
 
+void GLWindow::getSize(int& width, int& height)
+{
+    width = _width;
+    height = _height;
+}
 
 void GLWindow::show()
 {

@@ -24,7 +24,7 @@ namespace familyline::logic {
     class IMesh {
     public:
 	IMesh() {}
-	virtual void SetPosition(glm::vec3) = 0;
+	virtual void setLogicPosition(glm::vec3) = 0;
 
 	virtual ~IMesh() {}
 

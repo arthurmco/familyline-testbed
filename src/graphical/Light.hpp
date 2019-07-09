@@ -1,7 +1,8 @@
 /***
-    Light data
+    Light data. For things that emit light.
+    Not related to anyone named Yagami
 
-    Copyright (C) 2016 Arthur Mendes.
+    Copyright (C) 2016, 2019 Arthur Mendes.
 
 ***/
 
@@ -22,12 +23,19 @@ namespace familyline::graphics {
         /* Light strength */
         float _lightStrength;
 
+        std::string _name;
+        glm::vec3 _position;
+        
     public:
-        void SetColor(int r, int g, int b);
-        void GetColor(int& r, int& g, int& b);
+        void setColor(int r, int g, int b);
+        void getColor(int& r, int& g, int& b);
 
-        void SetStrength(float);
-        float GetStrength();
+        void setStrength(float);
+        float getStrength();
+
+        virtual std::string_view getName();
+        virtual glm::vec3 getPosition() const;
+        virtual void setPosition(glm::vec3 pos);
 
         Light(const char* name, glm::vec3 pos,
             int r, int g, int b, float strength);

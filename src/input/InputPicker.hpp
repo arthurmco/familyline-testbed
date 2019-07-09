@@ -53,7 +53,7 @@ namespace familyline::input {
     private:
 	familyline::graphics::TerrainRenderer* _terrain;
 	familyline::graphics::Window* _win;
-	familyline::graphics::SceneManager* _sm;
+	familyline::graphics::SceneRenderer* _sm;
 	familyline::graphics::Camera* _cam;
 	familyline::logic::ObjectManager* _om;
 
@@ -70,7 +70,7 @@ namespace familyline::input {
 
 	InputPicker(familyline::graphics::TerrainRenderer* terrain,
 		    familyline::graphics::Window* win,
-		    familyline::graphics::SceneManager* sm,
+		    familyline::graphics::SceneRenderer* sm,
 		    familyline::graphics::Camera* cam,
 		    familyline::logic::ObjectManager* om);
 

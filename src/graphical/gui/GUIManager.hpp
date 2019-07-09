@@ -1,13 +1,13 @@
 /*
  * The one that runs the GUI rendering code
  *
- * Copyright (C) 2018 Arthur Mendes
+ * Copyright (C) 2018, 2019 Arthur Mendes
  *
  */
 
- /*
-  * TODO: handle resize and resolution changes.
-  */
+/*
+ * TODO: handle resize and resolution changes.
+ */
 
 #ifndef GUIMANAGER_H
 #define GUIMANAGER_H
@@ -32,62 +32,62 @@ namespace familyline::graphics::gui {
      */
     class GUIManager : public GUIControl {
     private:
-	// Only force redraw on redraw events.
-	bool force_redraw = false;
+        // Only force redraw on redraw events.
+        bool force_redraw = false;
 
-	/* This listener receives the input events from the game and puts them into the control */
-	input::InputListener* listener = nullptr;
+        /* This listener receives the input events from the game and puts them into the control */
+        input::InputListener* listener = nullptr;
 
-	ShaderProgram* sGUI;
+        ShaderProgram* sGUI;
 
-	// OpenGL interface variables
-	GLuint vaoGUI;
-	GLuint attrPos, attrTex;
-	GLuint vboPos, vboTex;
-	GLuint texHandle;
+        // OpenGL interface variables
+        GLuint vaoGUI;
+        GLuint attrPos, attrTex;
+        GLuint vboPos, vboTex;
+        GLuint texHandle;
 
     public:
-	std::vector<GUIControl*> controls;
+        std::vector<GUIControl*> controls;
 
-	GUIManager();
-
-
-	void initShaders(familyline::graphics::Window* w);
+        GUIManager();
 
 
-	/** 
-	 * Add the controller (and send the containeradd event) 
-	 */
-	void add(GUIControl* c);
-
-	/**
-	 * Remove the control 
-	 */
-	void remove(GUIControl* c);
-
-	/**
-	 * Try to handle the signal. Returns true if handled
-	 */
-	virtual bool processSignal(GUISignal s);
-
-	/**
-	 * Process signals for all controls
-	 */
-	virtual void update();
-
-	virtual GUICanvas doRender(int absw, int absh) const;
+        void initShaders(familyline::graphics::Window* w);
 
 
-	/**
-	 * Render this into a graphical framebuffer
-	 *
-	 * Screen, for you
-	 */
-	void renderToScreen();
+        /** 
+         * Add the controller (and send the containeradd event) 
+         */
+        void add(GUIControl* c);
 
-	virtual void render(int absw, int absh);
+        /**
+         * Remove the control 
+         */
+        void remove(GUIControl* c);
 
-	virtual ~GUIManager() { }
+        /**
+         * Try to handle the signal. Returns true if handled
+         */
+        virtual bool processSignal(GUISignal s);
+
+        /**
+         * Process signals for all controls
+         */
+        virtual void update();
+
+        virtual GUICanvas doRender(int absw, int absh) const;
+
+
+        /**
+         * Render this into a graphical framebuffer
+         *
+         * Screen, for you
+         */
+        void renderToScreen();
+
+        virtual void render(int absw, int absh);
+
+        virtual ~GUIManager() { }
 
     };
 

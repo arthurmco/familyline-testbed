@@ -5,7 +5,7 @@ using namespace familyline::graphics;
 /**
  * Get a list of devices in the machine
   */
-std::vector<Device*> getDeviceList()
+std::vector<Device*> familyline::graphics::getDeviceList()
 {
 	// TODO: make this a static method of each device?
 	std::vector<Device*> devs;

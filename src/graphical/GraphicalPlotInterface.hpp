@@ -17,7 +17,7 @@ namespace familyline::graphics {
     class GraphicalPlotInterface : public logic::DebugPlotInterface {
     private:
 	Renderer* _renderer;
-	std::map<familyline::logic::PathHandle, VertexHandle> vertexmap;
+//	std::map<familyline::logic::PathHandle, VertexHandle> vertexmap;
 	
     public:
 	GraphicalPlotInterface(Renderer* renderer);

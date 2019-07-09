@@ -2,25 +2,31 @@
 
 #include "vertexdata.hpp"
 
-enum SceneObjectType {
-	SceneMesh,
-	SceneLight
-};
+namespace familyline::graphics {
 
-class SceneObject {
-protected:
-	SceneObjectType type;
-	std::vector<VertexInfo> vinfo;
-	// std::vector<LightHandle> lhandle;
-	// Animator* animator;
+    enum SceneObjectType {
+        SceneMesh,
+        SceneLight
+    };
 
-public:
-	virtual void update() = 0;
+    class SceneObject {
+    protected:
+        SceneObjectType type;
+        std::vector<VertexInfo> vinfo;
+        // std::vector<LightHandle> lhandle;
+        // Animator* animator;
 
-	virtual std::string_view getName() const = 0;
-	virtual glm::vec3 getPosition() const = 0;
-	virtual glm::mat4 getWorldMatrix() const = 0;
-	virtual std::vector<VertexInfo> getVertexInfo() const { return vinfo;  }
-	virtual std::vector<VertexData> getVertexData() = 0;
-	virtual bool isVertexDataDirty() = 0;
-};
+    public:
+        virtual void update() = 0;
+
+        virtual std::string_view getName() const = 0;
+        virtual glm::vec3 getPosition() const = 0;
+        virtual glm::mat4 getWorldMatrix() const = 0;
+    
+        virtual std::vector<VertexInfo> getVertexInfo() const { return vinfo;  }
+        virtual void setVertexInfo(std::vector<VertexInfo>&& v) { vinfo = v; }
+
+        virtual std::vector<VertexData> getVertexData() = 0;
+        virtual bool isVertexDataDirty() = 0;
+    };
+}
