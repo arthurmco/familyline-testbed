@@ -1,6 +1,9 @@
 #pragma once
 
+#include <GL/glew.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+
 #include "device.hpp"
 #include "framebuffer.hpp"
 #include "shader.hpp"

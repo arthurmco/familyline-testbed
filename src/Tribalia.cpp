@@ -234,10 +234,11 @@ int main(int argc, char const *argv[])
     return show_starting_menu();
 }
 
-static int show_starting_menu() {
-    Framebuffer* fbGUI = nullptr;
-    Framebuffer* fb3D = nullptr;
-    graphics::Window* w = nullptr;
+static void enable_gl_debug();
+
+static int show_starting_menu()
+{
+    graphics::Window* win = nullptr;
     GUIManager* guir = nullptr;
     try {
         auto devs = graphics::getDeviceList();
@@ -250,7 +251,7 @@ static int show_starting_menu() {
 
         for (auto d : devs) {
             Log::GetLog()->InfoWrite("main", "driver found: %s %s",
-                     d->getName().data(), (d->isDefault() ? "(default)" : ""));
+                                     d->getName().data(), (d->isDefault() ? "(default)" : ""));
 
             if (d->isDefault())
                 defaultdev = d;
@@ -261,132 +262,18 @@ static int show_starting_menu() {
             defaultdev = devs[0];
         }
 
-        if (GLEW_ARB_debug_output && glDebugMessageCallbackARB) {
-            struct LogTime {
-                unsigned qt = 0;
-                unsigned lastsec = 0;
-            };
-
-            auto gl_debug_callback = [](GLuint source, GLuint type,
-                unsigned int id, GLuint severity,
-                int length, const char* msg,
-                const void* userparam) {
-                (void)userparam;
-
-                /* Handle log suppressing */
-                static std::map<unsigned, LogTime> id_qt_map;
-                static unsigned lastsupp = (unsigned)-1;
-                auto t = time(NULL);
-
-                /* Unban after a long time */
-                if (id == lastsupp && id_qt_map[id].lastsec < t + 5) {
-                    id_qt_map[id].qt = 0;
-                    return;
-                }
-                else {
-                    lastsupp = -1;
-                }
-
-                if (t >= id_qt_map[id].lastsec) {
-                    id_qt_map[id].qt++;
-                    id_qt_map[id].lastsec = t;
-                }
-
-                if (id_qt_map[id].qt > 20 && id_qt_map[id].lastsec <= t) {
-                    Log::GetLog()->Write("gl-debug-output", "Suppressing id %d messages because they are too many", id);
-                    lastsupp = id;
-                    return;
-                }
-
-                id_qt_map[id].lastsec = t;
-
-
-                /* Handle message parsing and display */
-                const char *ssource, *stype, *sseverity;
-                switch (source) {
-                case GL_DEBUG_SOURCE_API: ssource = "gl-debug-opengl-api"; break;
-                case GL_DEBUG_SOURCE_WINDOW_SYSTEM: ssource = "gl-debug-window-system"; break;
-                case GL_DEBUG_SOURCE_SHADER_COMPILER: ssource = "gl-debug-shader-compiler"; break;
-                case GL_DEBUG_SOURCE_THIRD_PARTY: ssource = "gl-debug-third-party"; break;
-                case GL_DEBUG_SOURCE_APPLICATION: ssource = "gl-debug-application"; break;
-                case GL_DEBUG_SOURCE_OTHER: ssource = "gl-debug-other"; break;
-                default: ssource = "gl-debug"; break;
-                }
-
-                switch (type) {
-                case GL_DEBUG_TYPE_ERROR: stype = "error"; break;
-                case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: stype = "deprecated behavior"; break;
-                case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: stype = "undefined behavior"; break;
-                case GL_DEBUG_TYPE_PORTABILITY: stype = "portability issue"; break;
-                case GL_DEBUG_TYPE_PERFORMANCE: stype = "performance"; break;
-                case GL_DEBUG_TYPE_OTHER: stype = "other"; break;
-                default: stype = "unknown"; break;
-                }
-
-                switch (severity) {
-                case GL_DEBUG_SEVERITY_HIGH: sseverity = ""; break;
-                case GL_DEBUG_SEVERITY_MEDIUM: sseverity = ""; break;
-                case GL_DEBUG_SEVERITY_LOW: sseverity = " low prio: "; break;
-                case GL_DEBUG_SEVERITY_NOTIFICATION: sseverity = ""; break;
-                default: sseverity = " PRIO: ????"; break;
-                }
-
-                char* m = new char[std::max(length * 2, length + 70)];
-
-                fmt::memory_buffer out;
-                format_to(out, "[#{:d}]{:s} {:s}: {:s}",
-                    id, sseverity, stype, msg);
-
-                switch (severity) {
-                case GL_DEBUG_SEVERITY_HIGH:
-                    Log::GetLog()->Fatal(ssource, out.data());
-                    break;
-                case GL_DEBUG_SEVERITY_MEDIUM:
-                    Log::GetLog()->Warning(ssource, out.data());
-                    break;
-
-                default:
-                    Log::GetLog()->Write(ssource, out.data());
-                    break;
-                }
-
-            };
-
-            glEnable(GL_DEBUG_OUTPUT);
-            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-
-            if (GL_KHR_debug && glDebugMessageCallback) {
-                // Try KHR_debug first
-                Log::GetLog()->Write("init", "KHR_debug supported");
-                glDebugMessageCallback(gl_debug_callback, nullptr);
-                glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-
-            }
-            else {
-                // Try ARB_debug_output as a fallback (it's older, but best supported)
-                Log::GetLog()->Write("init", "ARB_debug_output supported");
-
-                /* Create the callback */
-                glDebugMessageCallbackARB(gl_debug_callback, nullptr);
-                glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-            }
-
-        }
-        else {
-            Log::GetLog()->Warning("init", "ARB_debug_output not supported");
-        }
-
         InputManager::GetInstance()->Initialize();
-        graphics::Window* win = new GLWindow((GLDevice*)defaultdev);
+        win = new GLWindow((GLDevice*)defaultdev);
 
-		win->show();
-
+        win->show();
+        enable_gl_debug();
+        
 		Framebuffer f3D = Framebuffer("f3D", winW, winH);
 		Framebuffer fGUI = Framebuffer("fGUI", winW, winH);
 		win->setFramebuffers(&f3D, &fGUI);
 
         guir = new GUIManager{};
-        guir->initShaders(w);
+        guir->initShaders(win);
 
         double b = SDL_GetTicks();
         int frames = 0;
@@ -394,20 +281,92 @@ static int show_starting_menu() {
         /* If we have a networked game ready, don't even show the main menu. */
         if (nserver) {
             Log::GetLog()->Write("init", "Network game detected, going direct "
-                "to it");
+                                 "to it");
 
             //      guir->InitInput();
-            auto g = Game(w, fb3D, fbGUI, guir, pm, hp);
+            auto g = Game(win, &f3D, &fGUI, guir, pm, hp);
             auto ret = g.RunLoop();
             if (pm)
                 delete pm;
             delete hp;
-            fbGUI->startDraw();
+        }
+        Log::GetLog()->InfoWrite("texture", "maximum tex size: %zu x %zu", Texture::GetMaximumSize(),
+                                 Texture::GetMaximumSize());
+
+
+		/* Render the menu */
+		bool r = true;
+		auto deflistener = InputManager::GetInstance()->GetDefaultListener();
+   
+		GUILabel l = GUILabel(0.37, 0.03, "FAMILYLINE");
+		l.format.foreground = glm::vec4(1, 1, 1, 1);
+
+		GUILabel lv = GUILabel(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
+		lv.format.foreground = glm::vec4(0.2, 0.2, 1, 1);
+		lv.format.background = glm::vec4(1, 1, 1, 0.5);
+
+		GUIButton bnew = GUIButton(0.1, 0.2, 0.8, 0.1, "New Game");
+		GUIButton bquit = GUIButton(0.1, 0.31, 0.8, 0.1, "Exit Game");
+
+		GUIImageControl ilogo = GUIImageControl(0.2, 0.1, 0.6, 0.9,
+                                                ICONS_DIR "/tribalia-logo.png");
+		ilogo.z_index = -100;
+		//ilogo.SetZIndex(0.9);
+		//ilogo.SetOpacity(0.5);
+
+		bquit.onClickHandler = [&r](GUIControl* cc) {
+                                   (void)cc;
+                                   r = false;
+                               };
+
+		bnew.onClickHandler = [&](GUIControl* cc) {
+                                  (void)cc;
+                                  guir->remove(&l);
+                                  guir->remove(&lv);
+                                  guir->remove(&bnew);
+                                  guir->remove(&bquit);
+                                  guir->remove(&ilogo);
+
+                                  fmt::print("New Game\n");
+                                  if (!pm)
+                                      pm = new PlayerManager();
+
+                                  if (!hp)
+                                      hp = new HumanPlayer{ "Arthur", 0 };
+
+
+                                  auto g = Game(win, &f3D, &fGUI, guir, pm, hp);
+                                  auto ret = g.RunLoop();
+                                  delete pm;
+                                  delete hp;
+                                  delete win;
+                                  exit(ret);
+                              };
+
+		guir->add(&l);
+		guir->add(&lv);
+		guir->add(&bquit);
+		guir->add(&bnew);
+		guir->add(&ilogo);
+        
+        while (1) {// Input
+			InputManager::GetInstance()->Run();
+			InputEvent ev;
+			guir->update();
+            if (deflistener->PopEvent(ev)) {
+				/* Only listen for FINISH events.
+				The others will be handled by the GUI listener */
+				if (ev.eventType == EVENT_FINISH)
+					r = false;
+			}
+
+			// Render            
+            fGUI.startDraw();
             guir->render(0, 0);
             guir->renderToScreen();
-            fbGUI->endDraw();
+            fGUI.endDraw();
 
-            w->update();
+            win->update();
             double e = SDL_GetTicks();
 
             if ((e - b) < 1000 / 60.0)
@@ -419,14 +378,14 @@ static int show_starting_menu() {
         }
 
 
-        delete w;
+        delete win;
         fmt::print("\nExited. ({:d} frames)\n", frames);
 
     }
     catch (shader_exception &se) {
         Log::GetLog()->Fatal("init", "Shader error: %s [d]", se.what());
 
-        if (w) {
+        if (win) {
 //            fmt::memory_buffer out;
 //            format_to(out,
 //                "Familyline found an error in a shader\n"
@@ -449,7 +408,7 @@ static int show_starting_menu() {
         Log::GetLog()->Fatal("init", "Allocation error: %s", be.what());
         Log::GetLog()->Fatal("init", "Probably out of memory");
 
-        if (w) {
+        if (win) {
 //            fmt::memory_buffer out;
 //            format_to(out,
 //                "Insufficient memory\n"
@@ -463,4 +422,118 @@ static int show_starting_menu() {
     }
 
     return 0;
+}
+
+
+static void enable_gl_debug()
+{
+    struct LogTime {
+        unsigned qt = 0;
+        unsigned lastsec = 0;
+    };
+
+    auto gl_debug_callback =
+        [](GLuint source, GLuint type,
+           unsigned int id, GLuint severity,
+           int length, const char* msg,
+           const void* userparam) {
+            (void)userparam;
+
+            /* Handle log suppressing */
+            static std::map<unsigned, LogTime> id_qt_map;
+            static unsigned lastsupp = (unsigned)-1;
+            auto t = time(NULL);
+
+            /* Unban after a long time */
+            if (id == lastsupp && id_qt_map[id].lastsec < t + 5) {
+                id_qt_map[id].qt = 0;
+                return;
+            }
+            else {
+                lastsupp = -1;
+            }
+
+            if (t >= id_qt_map[id].lastsec) {
+                id_qt_map[id].qt++;
+                id_qt_map[id].lastsec = t;
+            }
+
+            if (id_qt_map[id].qt > 20 && id_qt_map[id].lastsec <= t) {
+                Log::GetLog()->Write("gl-debug-output", "Suppressing id %d messages because they are too many", id);
+                lastsupp = id;
+                return;
+            }
+
+            id_qt_map[id].lastsec = t;
+
+
+            /* Handle message parsing and display */
+            const char *ssource, *stype, *sseverity;
+            switch (source) {
+            case GL_DEBUG_SOURCE_API: ssource = "gl-debug-opengl-api"; break;
+            case GL_DEBUG_SOURCE_WINDOW_SYSTEM: ssource = "gl-debug-window-system"; break;
+            case GL_DEBUG_SOURCE_SHADER_COMPILER: ssource = "gl-debug-shader-compiler"; break;
+            case GL_DEBUG_SOURCE_THIRD_PARTY: ssource = "gl-debug-third-party"; break;
+            case GL_DEBUG_SOURCE_APPLICATION: ssource = "gl-debug-application"; break;
+            case GL_DEBUG_SOURCE_OTHER: ssource = "gl-debug-other"; break;
+            default: ssource = "gl-debug"; break;
+            }
+
+            switch (type) {
+            case GL_DEBUG_TYPE_ERROR: stype = "error"; break;
+            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: stype = "deprecated behavior"; break;
+            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: stype = "undefined behavior"; break;
+            case GL_DEBUG_TYPE_PORTABILITY: stype = "portability issue"; break;
+            case GL_DEBUG_TYPE_PERFORMANCE: stype = "performance"; break;
+            case GL_DEBUG_TYPE_OTHER: stype = "other"; break;
+            default: stype = "unknown"; break;
+            }
+
+            switch (severity) {
+            case GL_DEBUG_SEVERITY_HIGH: sseverity = ""; break;
+            case GL_DEBUG_SEVERITY_MEDIUM: sseverity = ""; break;
+            case GL_DEBUG_SEVERITY_LOW: sseverity = " low prio: "; break;
+            case GL_DEBUG_SEVERITY_NOTIFICATION: sseverity = ""; break;
+            default: sseverity = " PRIO: ????"; break;
+            }
+
+            fmt::memory_buffer out;
+            format_to(out, "[#{:d}]{:s} {:s}: {:s}",
+                      id, sseverity, stype, msg);
+
+            switch (severity) {
+            case GL_DEBUG_SEVERITY_HIGH:
+                Log::GetLog()->Fatal(ssource, out.data());
+                break;
+            case GL_DEBUG_SEVERITY_MEDIUM:
+                Log::GetLog()->Warning(ssource, out.data());
+                break;
+
+            default:
+                Log::GetLog()->Write(ssource, out.data());
+                break;
+            }
+
+        };
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+    if (GL_KHR_debug && glDebugMessageCallback) {
+        // Try KHR_debug first
+        Log::GetLog()->Write("init", "KHR_debug supported");
+        glDebugMessageCallback(gl_debug_callback, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+    } else if (GLEW_ARB_debug_output && glDebugMessageCallbackARB) {
+        // Try ARB_debug_output as a fallback (it's older, but best supported)
+        Log::GetLog()->Write("init", "ARB_debug_output supported");
+
+        /* Create the callback */
+        glDebugMessageCallbackARB(gl_debug_callback, nullptr);
+        glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    } else {
+        Log::GetLog()->Warning("init", "ARB_debug_output not supported");
+    }
+    
 }

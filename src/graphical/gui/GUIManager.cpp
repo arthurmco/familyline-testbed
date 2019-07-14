@@ -57,8 +57,8 @@ void GUIManager::initShaders(Window* w)
     w->getSize(win_w, win_h);
 
     sGUI = new ShaderProgram("gui", {
-            Shader("GUI.vert", ShaderType::Vertex),
-            Shader("GUI.frag", ShaderType::Fragment)
+            Shader("shaders/GUI.vert", ShaderType::Vertex),
+            Shader("shaders/GUI.frag", ShaderType::Fragment)
         });
 
     sGUI->link();
@@ -66,9 +66,9 @@ void GUIManager::initShaders(Window* w)
     attrPos = 0; //sGUI->GetAttributeLocation("position");
     attrTex = 1; //sGUI->GetAttributeLocation("in_uv");
 
-
     width = win_w;
     height = win_h;
+    this->setContext(1, 1);
 
     // Create the vertices
     glGenVertexArrays(1, &(this->vaoGUI));
@@ -94,6 +94,9 @@ void GUIManager::initShaders(Window* w)
     glGenTextures(1, &(texHandle));
     glBindTexture(GL_TEXTURE_2D, texHandle);
 
+    printf("%.2f %.2f", width, height);
+    fflush(stdout);
+    
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA,
                  GL_UNSIGNED_BYTE,
                  (void*)cairo_image_surface_get_data(this->canvas));

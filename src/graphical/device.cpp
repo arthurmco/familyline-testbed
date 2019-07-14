@@ -1,4 +1,6 @@
 #include "device.hpp"
+#include <SDL2/SDL_opengl.h>
+
 
 using namespace familyline::graphics;
 

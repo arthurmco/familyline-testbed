@@ -20,9 +20,9 @@ Shader::Shader(const char* file, ShaderType type)
 	}
 
 	this->_handle = glCreateShader(gltype);
-	const char* cdata[] = { content.data() };
+	const char* cdata = content.c_str();
 
-	glShaderSource(this->_handle, 1, cdata, NULL);
+    glShaderSource(this->_handle, 1, (const char**)&cdata, NULL);
 
 	this->_file = file;
 	this->_type = type;
@@ -44,8 +44,9 @@ std::string Shader::readFile(const char* file)
 		throw shader_exception(e, errno);
 	}
 
-	while (!feof(f)) {
-		char s[1024];
+    char s[1024];
+    while (!feof(f)) {
+        memset(s, 0, 1024);
 		fgets(s, 1023, f);
 
 		data.append(s);
@@ -65,11 +66,11 @@ void Shader::compile()
 	GLint logsize = 0;
 	glGetShaderiv(this->_handle, GL_INFO_LOG_LENGTH, &logsize);
 
-	if (logsize > 1) {
+	if (res == GL_TRUE && logsize > 1) {
 		char* logdata = new char[logsize];
 
 		glGetShaderInfoLog(this->_handle, logsize, NULL, logdata);
-		std::string e = "Error while compiling";
+		std::string e = "Error while compiling ";
 		e.append(this->_file);
 		e.append(": ");
 		e.append(logdata);
@@ -109,8 +110,8 @@ void ShaderProgram::link()
 		e.append("': ");
 		e.append(logdata);
 
-		if (res == GL_TRUE)
-			throw shader_exception(e, 1023);
+		//if (res == GL_TRUE)
+        throw shader_exception(e, 1023);
 
 	}
 

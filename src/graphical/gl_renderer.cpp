@@ -10,8 +10,8 @@ using namespace familyline::graphics;
 GLRenderer::GLRenderer()
 {
 	_sForward = new ShaderProgram("forward", {
-		Shader("Forward.vert", ShaderType::Vertex),
-		Shader("Forward.frag", ShaderType::Fragment)
+		Shader("shaders/Forward.vert", ShaderType::Vertex),
+		Shader("shaders/Forward.frag", ShaderType::Fragment)
 	});
 
 	_sForward->link();

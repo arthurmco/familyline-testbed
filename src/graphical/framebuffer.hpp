@@ -1,5 +1,7 @@
 #pragma once
 
+#include <GL/glew.h>
+#include <SDL2/SDL_opengl.h>
 #include <string_view>
 
 namespace familyline::graphics {
@@ -15,13 +17,13 @@ class Framebuffer {
 private:
 	std::string_view _name;
 
-	unsigned int _handle;
+	GLuint _handle;
 
 	// texture, for color data, read-write
-	unsigned int _textureHandle;
+	GLuint _textureHandle;
 
 	// renderbuffer, for depth data, write-only
-	unsigned int _rboHandle;
+	GLuint _rboHandle;
 
 	void setupTexture(int width, int height);
 public:

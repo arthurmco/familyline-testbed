@@ -15,8 +15,8 @@ GLWindow::GLWindow(GLDevice* dev, int width, int height)
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
 	auto fflags = 0;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &fflags);
@@ -34,10 +34,10 @@ GLWindow::GLWindow(GLDevice* dev, int width, int height)
 	if (!_win) {
 		auto err = std::string("OpenGL context creation error: ");
 		err.append(SDL_GetError());
+        
 		SDL_Quit();
 		throw graphical_exception(err);
 	}
-
 }
 
 void GLWindow::getSize(int& width, int& height)
@@ -93,8 +93,8 @@ void GLWindow::createWindowSquare()
 	/* Compile the shader */
 	if (!winShader) {
 		winShader = new ShaderProgram("window", {
-			Shader("Window.vert", ShaderType::Vertex),
-			Shader("Window.frag", ShaderType::Fragment)
+			Shader("shaders/Window.vert", ShaderType::Vertex),
+			Shader("shaders/Window.frag", ShaderType::Fragment)
 		});
 
 		winShader->link();
@@ -128,23 +128,24 @@ void GLWindow::setFramebuffers(Framebuffer* f3D, Framebuffer* fGUI)
 
 void GLWindow::update()
 {
-	glClearColor(0, 0, 0, 1.0);
+	glClearColor(1.0, 0, 0, 1.0);
 	glViewport(0, 0, _width, _height);
 
 	glDisable(GL_DEPTH_TEST);
 	GFXService::getManager()->use(*winShader);
+    
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glActiveTexture(GL_TEXTURE0);
 	if (_f3D)
 		glBindTexture(GL_TEXTURE_2D, _f3D->getTextureHandle());
 
-	//glActiveTexture(GL_TEXTURE1);
-	//if (_fGUI)
-	//	glBindTexture(GL_TEXTURE_2D, _fGUI->getTextureHandle());
+	glActiveTexture(GL_TEXTURE1);
+	if (_fGUI)
+		glBindTexture(GL_TEXTURE_2D, _fGUI->getTextureHandle());
 
 	winShader->setUniform("texRender", 0);
-	//winShader->setUniform("texGUI", 0);
+	winShader->setUniform("texGUI", 1);
 
 	glBindVertexArray(base_vao);
 	glEnableVertexAttribArray(0);
@@ -157,11 +158,11 @@ void GLWindow::update()
 		0,                  // stride
 		(void*)0            // array buffer offset
 	);
-	// Draw the triangle !
-
+    
+	// Draw the screen triangle
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, base_index_vbo);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
+	
 	SDL_GL_SwapWindow(_win);
 
 	GLenum err = glGetError();
@@ -171,7 +172,7 @@ void GLWindow::update()
 		case GL_OUT_OF_MEMORY:
 			throw graphical_exception("Out of memory while rendering");
 		default:
-			printf("GL error %#x\n", err);
+			printf("\rGL error %#x\n", err);
 		}
 
 	}
