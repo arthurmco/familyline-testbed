@@ -49,7 +49,7 @@ namespace familyline::graphics::gui {
     public:
         std::vector<GUIControl*> controls;
 
-        GUIManager();
+        GUIManager(int width, int height);
 
 
         void initShaders(familyline::graphics::Window* w);

@@ -30,14 +30,14 @@ static const float window_texture_coord[][2] =
   {-1, 1}, {1, 1}, {1, -1} };
 
 
-GUIManager::GUIManager()
+GUIManager::GUIManager(int width = 640, int height = 480)
 {
     x = 0;
     y = 0;
 
-    width = float(640);
-    height = float(480);
-
+    this->width = width;
+    this->height = height;
+    
     this->listener = new input::InputListener("gui-listener");
     input::InputManager::GetInstance()->AddListener(
         input::EVENT_KEYEVENT | input::EVENT_MOUSEMOVE | input::EVENT_MOUSEEVENT,

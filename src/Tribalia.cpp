@@ -263,7 +263,7 @@ static int show_starting_menu()
         }
 
         InputManager::GetInstance()->Initialize();
-        win = new GLWindow((GLDevice*)defaultdev);
+        win = new GLWindow((GLDevice*)defaultdev, winW, winH);
 
         win->show();
         enable_gl_debug();
@@ -272,7 +272,7 @@ static int show_starting_menu()
 		Framebuffer fGUI = Framebuffer("fGUI", winW, winH);
 		win->setFramebuffers(&f3D, &fGUI);
 
-        guir = new GUIManager{};
+        guir = new GUIManager{winW, winH};
         guir->initShaders(win);
 
         double b = SDL_GetTicks();
@@ -349,13 +349,16 @@ static int show_starting_menu()
 		guir->add(&bnew);
 		guir->add(&ilogo);
         
-        while (1) {// Input
+        while (r) {
+
+            // Input
 			InputManager::GetInstance()->Run();
 			InputEvent ev;
 			guir->update();
+
             if (deflistener->PopEvent(ev)) {
-				/* Only listen for FINISH events.
-				The others will be handled by the GUI listener */
+				/* Only listen for FINISH events, because you sure want to close the window
+                   The others will be handled by the GUI listener */
 				if (ev.eventType == EVENT_FINISH)
 					r = false;
 			}
