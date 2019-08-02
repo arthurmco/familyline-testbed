@@ -1,6 +1,7 @@
 #include "TerrainRenderer.hpp"
 #include "TextureOpener.hpp"
 #include "../config.h"
+#include "gfx_service.hpp"
 
 #include "shader_manager.hpp"
 
@@ -229,7 +230,7 @@ void TerrainRenderer::Render()
 
     glm::mat4 wvpmatrix = _cam->GetProjectionMatrix() * _cam->GetViewMatrix() * glm::mat4(1.0);
 
-    auto& sm = GFXService::getManager();
+    auto& sm = GFXService::getShaderManager();
     auto forward = sm->getShader("forward");
 
     forward->setUniform("mvp", wvpmatrix);

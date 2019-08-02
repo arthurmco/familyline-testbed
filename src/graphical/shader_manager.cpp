@@ -1,10 +1,9 @@
 #include "shader_manager.hpp"
 #include "logger.hpp"
 #include "exceptions.hpp"
+#include "gfx_service.hpp"
 
 using namespace familyline::graphics;
-
-std::unique_ptr<ShaderManager> GFXService::_manager;
 
 void ShaderManager::use(ShaderProgram& s)
 {

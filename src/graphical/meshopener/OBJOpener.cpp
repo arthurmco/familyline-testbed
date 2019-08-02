@@ -10,6 +10,8 @@
 #include "../shader_manager.hpp"
 #include "../exceptions.hpp"
 
+#include "../gfx_service.hpp"
+
 #include <glm/glm.hpp>
 
 using namespace familyline::graphics;
@@ -353,7 +355,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
             }
 
-            auto fshader = GFXService::getManager()->getShader("forward");
+            auto fshader = GFXService::getShaderManager()->getShader("forward");
 
             if (mtl) {
                 VertexInfo vi(idx, mtl->GetID(), fshader, VertexRenderStyle::Triangles);

@@ -3,6 +3,7 @@
 #include "shader.hpp"
 #include "exceptions.hpp"
 #include "shader_manager.hpp"
+#include "gfx_service.hpp"
 
 using namespace familyline::graphics;
 
@@ -115,7 +116,7 @@ void ShaderProgram::link()
 
 	}
 
-	GFXService::getManager()->addShader(this);
+	GFXService::getShaderManager()->addShader(this);
 }
 
 /**

@@ -1,6 +1,7 @@
 #include "gl_renderer.hpp"
 #include "exceptions.hpp"
 #include "shader_manager.hpp"
+#include "gfx_service.hpp"
 
 #include "Log.hpp"
 
@@ -45,7 +46,7 @@ void GLRenderer::render(Camera* c)
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
 
-	auto& shaderManager = GFXService::getManager();
+	auto& shaderManager = GFXService::getShaderManager();
     auto l = Log::GetLog();
 
 	auto viewMatrix = c->GetViewMatrix();

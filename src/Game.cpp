@@ -69,7 +69,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 //		rndr->SetSceneManager(scenernd);
 
-		am->Create();
+//		am->Create();
 
 //		Light* l = new Light{"mainLight", glm::vec3(16, 16, 16), 0x0, 0x0, 0xff, 200 };
 		std::vector<glm::vec3> p = {

@@ -9,12 +9,12 @@
 
 #include "../logic/Building.hpp"
 #include "../logic/Unit.hpp"
-#include "../graphical/AssetManager.hpp"
+#include "../graphical/asset_manager.hpp"
+#include "../graphical/gfx_service.hpp"
 
 #include <memory>
 
-#define DEF_MESH(dasset) this->mesh = std::make_shared<graphics::Mesh>( \
-        *familyline::graphics::AssetManager::GetInstance()->GetAsset(dasset).mesh)
+#define DEF_MESH(dasset) this->mesh = nullptr /*std::dynamic_pointer_cast<Mesh>(familyline::graphics::GFXService::getAssetManager()->getAsset(dasset)) */
 
 /*  Build a game object, generically.
     So, your object always needs to have a constructor like (oid, x, y ,z) */

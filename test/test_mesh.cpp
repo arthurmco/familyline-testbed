@@ -2,7 +2,7 @@
 
 #include "graphical/meshopener/OBJOpener.hpp"
 #include "graphical/meshopener/MD2Opener.hpp"
-#include "graphical/AssetFile.hpp"
+#include "graphical/asset_file.hpp"
 
 class MeshTest : public ::testing::Test {
 protected:

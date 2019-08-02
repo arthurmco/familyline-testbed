@@ -28,5 +28,7 @@ namespace familyline::graphics {
 
         virtual std::vector<VertexData> getVertexData() = 0;
         virtual bool isVertexDataDirty() = 0;
+
+        virtual ~SceneObject() {}
     };
 }

@@ -296,6 +296,7 @@ GUICanvas GUIManager::doRender(int absw, int absh) const
     return this->canvas;
 }
 
+#include "../gfx_service.hpp"
 
 /* Render this into a graphical framebuffer
  * that is 'screen' for you
@@ -314,7 +315,7 @@ void GUIManager::renderToScreen()
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    GFXService::getManager()->use(*sGUI);
+    GFXService::getShaderManager()->use(*sGUI);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

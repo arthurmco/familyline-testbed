@@ -4,6 +4,8 @@
 #include "../shader_manager.hpp"
 #include "../exceptions.hpp"
 
+#include "../gfx_service.hpp"
+
 #include <vector>
 #include <array>
 
@@ -211,7 +213,7 @@ std::vector<Mesh*> MD2Opener::OpenSpecialized(const char* file)
     DeformAnimator* da = new DeformAnimator{framedata, framerate};
     da->runAnimation("default"); //Set the animator internat pointer
 
-    auto fshader = GFXService::getManager()->getShader("forward");
+    auto fshader = GFXService::getShaderManager()->getShader("forward");
     
     std::vector<VertexInfo> vinfo = {
         VertexInfo{0, 0, fshader, VertexRenderStyle::Triangles}

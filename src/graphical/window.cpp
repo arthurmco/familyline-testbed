@@ -2,6 +2,7 @@
 
 #include "shader_manager.hpp"
 #include "exceptions.hpp"
+#include "gfx_service.hpp"
 
 using namespace familyline::graphics;
 
@@ -132,7 +133,7 @@ void GLWindow::update()
 	glViewport(0, 0, _width, _height);
 
 	glDisable(GL_DEPTH_TEST);
-	GFXService::getManager()->use(*winShader);
+	GFXService::getShaderManager()->use(*winShader);
     
 	glClear(GL_COLOR_BUFFER_BIT);
 

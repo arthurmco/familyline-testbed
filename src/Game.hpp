@@ -23,7 +23,7 @@
 #include "logic/DebugPlot.hpp"
 
 #include "graphical/camera.hpp"
-#include "graphical/AssetFile.hpp"
+#include "graphical/asset_file.hpp"
 #include "graphical/Light.hpp"
 #include "graphical/meshopener/OBJOpener.hpp"
 #include "graphical/materialopener/MTLOpener.hpp"
@@ -31,17 +31,18 @@
 #include "graphical/TextureOpener.hpp"
 #include "graphical/TextureManager.hpp"
 #include "graphical/MaterialManager.hpp"
-#include "graphical/AssetManager.hpp"
+#include "graphical/asset_manager.hpp"
 #include "graphical/window.hpp"
 #include "graphical/framebuffer.hpp"
 #include "graphical/renderer.hpp"
 #include "graphical/scene_renderer.hpp"
 #include "graphical/GraphicalPlotInterface.hpp"
-
+#include "graphical/gfx_service.hpp"
 #include "graphical/gui/GUIManager.hpp"
 #include "graphical/gui/GUILabel.hpp"
 #include "graphical/gui/GUIButton.hpp"
 //#include "graphical/gui/ImageControl.hpp"
+
 
 #include "input/InputPicker.hpp"
 
@@ -75,7 +76,7 @@ private:
 
     graphics::Camera* cam;
 
-    graphics::AssetManager* am = graphics::AssetManager::GetInstance();
+    std::unique_ptr<graphics::AssetManager>& am = graphics::GFXService::getAssetManager();
 
     graphics::TerrainRenderer* terr_rend = nullptr;
     logic::ObjectRenderer* objrend = nullptr;
