@@ -58,6 +58,10 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 		auto tteam = std::make_shared<Team>(1, "Test team");
 		printf("%s -- %#x\n", tteam->name.c_str(), tteam->number);
 
+        AssetFile f;
+        f.loadFile("assets.yml");
+        am->loadFile(f);
+
 
 //		scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
         
@@ -103,7 +107,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 //		widgets.lblVersion->SetForeColor(255, 255, 255, 255);
 
 		gr->add(widgets.lblVersion);
-
+        
 		/* Adds the objects to the factory */
 		ObjectFactory::GetInstance()->AddObject(new WatchTower);
 		ObjectFactory::GetInstance()->AddObject(new Tent);

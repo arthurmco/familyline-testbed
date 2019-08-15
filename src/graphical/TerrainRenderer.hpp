@@ -35,19 +35,19 @@ namespace familyline::graphics {
      * can be guessed by the ID
      */
     struct TerrainVertexData {
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> normals;
-	std::vector<glm::vec2> texcoords; //Just for texture mapping
+        std::vector<glm::vec3> vertices;
+        std::vector<glm::vec3> normals;
+        std::vector<glm::vec2> texcoords; //Just for texture mapping
 
-	std::vector<unsigned int> indices;
-	std::vector<unsigned int> terrain_ids;
+        std::vector<unsigned int> indices;
+        std::vector<unsigned int> terrain_ids;
     };
 
     struct TerrainDataInfo {
-	unsigned int secidx;
-	size_t vcount;
-	GLuint vao;
-	Texture* texture;
+        unsigned int secidx;
+        size_t vcount;
+        GLuint vao;
+        Texture* texture;
     };
 
     /* Width and height of the terrain individual textures
@@ -58,32 +58,32 @@ namespace familyline::graphics {
     class TerrainRenderer {
     private:
 	
-	std::vector<TerrainDataInfo> _tdata;
+        std::vector<TerrainDataInfo> _tdata;
 
-	familyline::logic::Terrain* _t;
+        familyline::logic::Terrain* _t;
 
-	Camera* _cam  = nullptr;
+        Camera* _cam  = nullptr;
         glm::mat4 _wmatrix = glm::mat4(1.0f);
 
         /**
-	 * Create a terrain vertex data with the data from a specific terrain 
-	 */
-	TerrainVertexData GetTerrainVerticesFromSection(unsigned int section);
+         * Create a terrain vertex data with the data from a specific terrain 
+         */
+        TerrainVertexData GetTerrainVerticesFromSection(unsigned int section);
 
-	GLuint CreateVAOFromTerrainData(TerrainVertexData& tvd);
+        GLuint CreateVAOFromTerrainData(TerrainVertexData& tvd);
 
-	Texture* terrain_tex = nullptr;
+        Texture* terrain_tex = nullptr;
 	
-	bool needs_update = true;
+        bool needs_update = true;
 
-	std::array<unsigned int, ImageWidth*ImageHeight> GetTerrainTexture(unsigned int type_id);
+        std::array<unsigned int, ImageWidth*ImageHeight> GetTerrainTexture(unsigned int type_id);
 
-	/**
-	 * Generate terrain texture from a certain terrain data 
-	 *
-	 * \param data The said terrain data
-	 */
-	Texture* GenerateTerrainSlotTexture(familyline::logic::TerrainData* data);
+        /**
+         * Generate terrain texture from a certain terrain data 
+         *
+         * \param data The said terrain data
+         */
+        Texture* GenerateTerrainSlotTexture(familyline::logic::TerrainData* data);
 	
     public:
         TerrainRenderer();
@@ -94,15 +94,15 @@ namespace familyline::graphics {
         void SetCamera(Camera*);
         Camera* GetCamera();
 
-	/**
-	 * Update the terrain VAO with the current rendering information 
-	 */
+        /**
+         * Update the terrain VAO with the current rendering information 
+         */
         void Update();
 
-	/**
-	 * Render the terrain 
-	 */
-	void Render();
+        /**
+         * Render the terrain 
+         */
+        void Render();
 
     };
 

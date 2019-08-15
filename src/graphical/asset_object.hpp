@@ -9,9 +9,6 @@
 #ifndef ASSETOBJECT_HPP
 #define ASSETOBJECT_HPP
 
-#include "mesh.hpp"
-#include "Texture.hpp"
-#include "Material.hpp"
 #include <vector>
 
 namespace familyline::graphics {
@@ -19,7 +16,8 @@ namespace familyline::graphics {
     enum AssetType {
         MeshAsset,
         MaterialAsset,
-        TextureAsset
+        TextureAsset,
+        UnknownAsset
     };
 
     /**
@@ -30,7 +28,7 @@ namespace familyline::graphics {
      */
     class AssetObject {
     public:
-        virtual AssetType getAssetType() const;
+        virtual AssetType getAssetType() const = 0;
     };
 
 

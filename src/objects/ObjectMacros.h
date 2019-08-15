@@ -13,8 +13,9 @@
 #include "../graphical/gfx_service.hpp"
 
 #include <memory>
+#include "../graphical/mesh.hpp"
 
-#define DEF_MESH(dasset) this->mesh = nullptr /*std::dynamic_pointer_cast<Mesh>(familyline::graphics::GFXService::getAssetManager()->getAsset(dasset)) */
+#define DEF_MESH(dasset) this->mesh = std::dynamic_pointer_cast<familyline::graphics::Mesh>(familyline::graphics::GFXService::getAssetManager()->getAsset(dasset))
 
 /*  Build a game object, generically.
     So, your object always needs to have a constructor like (oid, x, y ,z) */

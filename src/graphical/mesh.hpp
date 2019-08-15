@@ -1,10 +1,13 @@
-#pragma once
 
 #include <string>
 #include "scene_object.hpp"
 #include "animator.hpp"
 
 #include "../logic/IMesh.hpp"
+#include "asset_object.hpp"
+
+#ifndef _MESH_HPP
+#define _MESH_HPP
 
 namespace familyline::graphics {
 
@@ -12,8 +15,8 @@ namespace familyline::graphics {
         float minX, minY, minZ;
         float maxX, maxY, maxZ;
     };
-    
-    class Mesh : public SceneObject, public familyline::logic::IMesh  {
+
+    class Mesh : public SceneObject, public AssetObject, public familyline::logic::IMesh  {
     private:
         std::string _name;
         glm::mat4 _worldMatrix;
@@ -33,8 +36,8 @@ namespace familyline::graphics {
          */
         virtual void update();
 
-        virtual void setLogicPosition(glm::vec3 p) { this->worldPosition = p; } 
-        
+        virtual void setLogicPosition(glm::vec3 p) { this->worldPosition = p; }
+
         virtual std::string_view getName() const;
         virtual glm::vec3 getPosition() const;
         virtual glm::mat4 getWorldMatrix() const;
@@ -43,8 +46,11 @@ namespace familyline::graphics {
 
         // TODO: create a better function to return bounding boxes
         BoundingBox getBoundingBox();
-        
+
         Animator* getAnimator();
 
+        virtual AssetType getAssetType() const { return AssetType::MeshAsset; }
     };
 }
+
+#endif
