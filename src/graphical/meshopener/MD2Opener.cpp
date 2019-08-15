@@ -156,17 +156,13 @@ std::vector<glm::vec2> decode_texcoords(FILE* file, int offset_st,
     return texcoords;
 }
 
-
-
-
 std::vector<Mesh*> MD2Opener::OpenSpecialized(const char* file)
 {
     FILE* fMD2 = fopen(file, "rb");
     if (!fMD2) {
         char s[512];
-        snprintf(s, 511, "Failure to open mesh %s", file);
-            
-        throw asset_exception(s, errno);
+        snprintf(s, 511, "Failure to open mesh %s (%d)", file, errno);
+        throw asset_exception(s, AssetError::AssetOpenError);
     }
 
     rewind(fMD2);
@@ -177,8 +173,7 @@ std::vector<Mesh*> MD2Opener::OpenSpecialized(const char* file)
     if (header.ident != MD2Magic) {
         char s[512];
         snprintf(s, 511, "Invalid MD2 header found when opening file %s", file);
-            
-        throw asset_exception(s, errno);
+        throw asset_exception(s, AssetError::AssetOpenError);
     }
 
     /// TODO: check header numerical limits

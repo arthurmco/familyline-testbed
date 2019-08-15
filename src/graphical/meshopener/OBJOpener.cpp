@@ -80,7 +80,10 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
     FILE* fObj = fopen(file, "r");
     if (!fObj) {
-        throw std::runtime_error{"File not found"};
+        char s[512];
+        snprintf(s, 511, "Failure to open mesh %s (%d)", file, errno);
+            
+        throw asset_exception(s, AssetError::AssetOpenError);
     }
 
     // TODO: Support meshes with more than 3 vertices per face

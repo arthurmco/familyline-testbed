@@ -6,19 +6,19 @@ using namespace familyline::graphics;
 #include <cstring>
 
 std::unordered_map<std::string /* extension */,
-		   MeshOpenerRef /*opener*/> MeshOpener::openers;
+                   MeshOpenerRef /*opener*/> MeshOpener::openers;
 
 
 /* Register the extension into the main class */
 void MeshOpener::RegisterExtension(const char* extension, MeshOpener* opener)
 {
     if (MeshOpener::openers[std::string{extension}].ref == 0) {
-	MeshOpener::openers[std::string{extension}].m = opener;
+        MeshOpener::openers[std::string{extension}].m = opener;
     }
     
     MeshOpener::openers[std::string{extension}].ref++;
     Log::GetLog()->Write("meshopener", "registered mesh opener for the .%s extension",
-			 extension);
+                         extension);
 }
 
 
@@ -28,7 +28,11 @@ void MeshOpener::UnregisterExtension(const char* extension)
     MeshOpener::openers[std::string{extension}].ref--;
 
     if (MeshOpener::openers[std::string{extension}].ref == 0)
-	MeshOpener::openers.erase(std::string{extension});
+        MeshOpener::openers.erase(std::string{extension});
+
+    Log::GetLog()->Write("meshopener", "unregistered mesh opener for the .%s extension",
+                         extension);
+
 }
 
 
@@ -48,10 +52,10 @@ std::vector<Mesh*> MeshOpener::Open(const char* file)
     auto meshit = MeshOpener::openers.find(edot);
 
     if (meshit == MeshOpener::openers.end()) {
-	char* s = new char[strlen(file) + 64];
-	sprintf(s, "error: cannot open %s, format unknown!", file);
-	throw std::runtime_error{s};
-	delete[] s;
+        char* s = new char[strlen(file) + 76];
+        sprintf(s, "error: cannot open %s (format %s), format unknown!", file, edot.c_str());
+        throw std::runtime_error{s};
+        delete[] s;
     }
 
     return meshit->second.m->OpenSpecialized(file);
