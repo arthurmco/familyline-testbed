@@ -3,11 +3,13 @@
 #include "../config.h"
 #include "meshopener/OBJOpener.hpp"
 #include "meshopener/MD2Opener.hpp"
+#include "TextureOpener.hpp"
 #include "materialopener/MTLOpener.hpp"
 #include <fmt/format.h>
 
 using namespace familyline::graphics;
 
+/// TODO: handle multiple assets in one file
 std::shared_ptr<AssetObject> loadMeshAsset(Asset& asset) {
     auto ms = MeshOpener::Open(asset.path.c_str());
 
@@ -15,12 +17,17 @@ std::shared_ptr<AssetObject> loadMeshAsset(Asset& asset) {
 }
 
 std::shared_ptr<AssetObject> loadTextureAsset(Asset& asset) {
+    auto tf = TextureOpener::OpenFile(asset.path.c_str());
 
+    return std::shared_ptr<TextureFile>(tf);
 }
 
 std::shared_ptr<AssetObject> loadMaterialAsset(Asset& asset)
 {
+    MTLOpener mo;
+    auto ms = mo.Open(asset.path.c_str());
 
+    return std::shared_ptr<Material>(ms[0]);
 }
 
 std::shared_ptr<AssetObject> Asset::loadAssetObject()

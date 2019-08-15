@@ -1,7 +1,7 @@
 /***
     Material data
 
-    Copyright (C) 2016 Arthur Mendes.
+    Copyright (C) 2016, 2019 Arthur Mendes.
 
 ***/
 
@@ -9,6 +9,7 @@
 #include <string>
 
 #include "Texture.hpp"
+#include "asset_object.hpp"
 
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
@@ -27,7 +28,7 @@ namespace familyline::graphics {
             ambientColor = amb;
         }
 
-	MaterialData(float dif, float spec, float amb) {
+        MaterialData(float dif, float spec, float amb) {
             diffuseColor = glm::vec3(dif);
             specularColor = glm::vec3(spec);
             ambientColor = glm::vec3(amb);
@@ -40,14 +41,14 @@ namespace familyline::graphics {
         }
     };
 
-    class Material
+    class Material : public AssetObject
     {
         friend class MaterialManager;
     private:
         int _ID;
         std::string _name;
         MaterialData _data;
-	Texture* _tex;
+        Texture* _tex;
 
     public:
         Material(int ID, const char* name, MaterialData data);
@@ -56,8 +57,11 @@ namespace familyline::graphics {
         int GetID() const;
         const char* GetName() const;
         MaterialData* GetData();
-	Texture* GetTexture();
-	void SetTexture(Texture*);
+        Texture* GetTexture();
+        void SetTexture(Texture*);
+
+        virtual AssetType getAssetType() const { return AssetType::MaterialAsset; }
+
     };
 
 }
