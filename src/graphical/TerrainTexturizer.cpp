@@ -45,14 +45,14 @@ static unsigned int ColorToPixel(glm::vec4 color) {
    the most significant byte is alpha)
 */
 static TerrainBitmap MergeTerrain(TerrainBitmap lt, TerrainBitmap rt,
-				   TerrainBitmap lb, TerrainBitmap rb)
+                                  TerrainBitmap lb, TerrainBitmap rb)
 {
     /*
-     lt------rt
-     |        |
-     |        |
-     |        |
-     lb------rb
+      lt------rt
+      |        |
+      |        |
+      |        |
+      lb------rb
     */
 
     TerrainBitmap ret;
@@ -61,13 +61,13 @@ static TerrainBitmap MergeTerrain(TerrainBitmap lt, TerrainBitmap rt,
        Easier to do calculations
     */
     auto fnGetFloatPixel = [](unsigned int val) {
-	unsigned r = val & 0xff;
-	unsigned g = (val >> 8) & 0xff;
-	unsigned b = (val >> 16) & 0xff;
-	unsigned a = (val >> 24) & 0xff;
+                               unsigned r = val & 0xff;
+                               unsigned g = (val >> 8) & 0xff;
+                               unsigned b = (val >> 16) & 0xff;
+                               unsigned a = (val >> 24) & 0xff;
 
-	return glm::vec4(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
-    };
+                               return glm::vec4(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
+                           };
 
 
     unsigned int* plt = (unsigned int*)lt.data();
@@ -76,44 +76,44 @@ static TerrainBitmap MergeTerrain(TerrainBitmap lt, TerrainBitmap rt,
     unsigned int* prb = (unsigned int*)rb.data();
 
     for (unsigned int y = 0; y < ImageHeight; y++) {
-	for (unsigned int x = 0; x < ImageWidth; x++) {
-	    float mixy = float(y) / float(ImageHeight);
-	    float mixx = float(x) / float(ImageWidth);
-	    const auto idx = y * ImageWidth + x;
+        for (unsigned int x = 0; x < ImageWidth; x++) {
+            float mixy = float(y) / float(ImageHeight);
+            float mixx = float(x) / float(ImageWidth);
+            const auto idx = y * ImageWidth + x;
 
-	    const glm::vec4 flt = fnGetFloatPixel(plt[idx]);
-	    const glm::vec4 frt = fnGetFloatPixel(prt[idx]);
-	    const glm::vec4 flb = fnGetFloatPixel(plb[idx]);
-	    const glm::vec4 frb = fnGetFloatPixel(prb[idx]);
+            const glm::vec4 flt = fnGetFloatPixel(plt[idx]);
+            const glm::vec4 frt = fnGetFloatPixel(prt[idx]);
+            const glm::vec4 flb = fnGetFloatPixel(plb[idx]);
+            const glm::vec4 frb = fnGetFloatPixel(prb[idx]);
 
-	    const glm::vec4 cleft = (flt * (1.0f-mixy) + flb * mixy) * (1.0f-mixx);
-	    const glm::vec4 cright = (frt * (1.0f-mixy) + frb * mixy) * (mixx);
-	    const glm::vec4 ctop = (flt * (1.0f-mixx) + frt * mixx ) * (1.0f-mixy);
-	    const glm::vec4 cbottom = (flb * (1.0f-mixx) + frb * mixx ) * (mixy);
+            const glm::vec4 cleft = (flt * (1.0f-mixy) + flb * mixy) * (1.0f-mixx);
+            const glm::vec4 cright = (frt * (1.0f-mixy) + frb * mixy) * (mixx);
+            const glm::vec4 ctop = (flt * (1.0f-mixx) + frt * mixx ) * (1.0f-mixy);
+            const glm::vec4 cbottom = (flb * (1.0f-mixx) + frb * mixx ) * (mixy);
 
-	    const glm::vec4 cfinal = cleft + cright + ctop + cbottom;
+            const glm::vec4 cfinal = cleft + cright + ctop + cbottom;
 
-	    ret[idx] = ColorToPixel(cfinal);
-	}
+            ret[idx] = ColorToPixel(cfinal);
+        }
     }
 
     return ret;
 }
 
 /* TODO: Read this from a configuration file */
-#define GET_TEXTURE_RAW(fn) (unsigned int*)\
+#define GET_TEXTURE_RAW(fn) (unsigned int*)                             \
     TextureOpener::OpenFile(fn)->GetTextureRaw(0, 0, ImageHeight, ImageWidth)
 
 TerrainBitmap TerrainRenderer::GetTerrainTexture(unsigned int type_id)
 {
     static unsigned int* textures[] = {
-	GET_TEXTURE_RAW("textures/terrain/grass.png")
+        GET_TEXTURE_RAW("textures/terrain/grass.png")
     };
     
     if (type_id >= (sizeof(textures)/sizeof(unsigned int*))) {
-	Log::GetLog()->Fatal("terrain-renderer", "terrain type %d has no texture! Using id 0 in place",
-			     type_id);
-	type_id = 0;
+        Log::GetLog()->Fatal("terrain-renderer", "terrain type %d has no texture! Using id 0 in place",
+                             type_id);
+        type_id = 0;
     }
     
     TerrainBitmap ret;
@@ -131,27 +131,30 @@ Texture* TerrainRenderer::GenerateTerrainSlotTexture(familyline::logic::TerrainD
     terrain_surface.resize(ImageWidth*SlotSide*ImageHeight*SlotSide);
     
     for (unsigned sy = 0; sy < SlotSide-1; sy++) {
-	for (unsigned sx = 0; sx < SlotSide-1; sx++) {
-	    auto texture_lt = data->data[(sy * SlotSide + sx)].terrain_type;
-	    auto texture_rt = data->data[(sy * SlotSide + sx+1)].terrain_type;
-	    auto texture_lb = data->data[((sy+1) * SlotSide + sx)].terrain_type;
-	    auto texture_rb = data->data[((sy+1) * SlotSide + sx+1)].terrain_type;
-	    
-	    auto srcs = MergeTerrain(GetTerrainTexture(texture_lt), GetTerrainTexture(texture_rt),
-				     GetTerrainTexture(texture_lb), GetTerrainTexture(texture_rb));
+        for (unsigned sx = 0; sx < SlotSide-1; sx++) {
+            auto texture_lt = data->data[(sy * SlotSide + sx)].terrain_type;
+            auto texture_rt = data->data[(sy * SlotSide + sx+1)].terrain_type;
+            auto texture_lb = data->data[((sy+1) * SlotSide + sx)].terrain_type;
+            auto texture_rb = data->data[((sy+1) * SlotSide + sx+1)].terrain_type;
+        
+            auto srcs = MergeTerrain(GetTerrainTexture(texture_lt), GetTerrainTexture(texture_rt),
+                                     GetTerrainTexture(texture_lb), GetTerrainTexture(texture_rb));
 
-	    const unsigned dstx = sx*ImageWidth;
-	    const unsigned dsty = sy*ImageHeight;
-	    const unsigned terrainw = ImageWidth*SlotSide;
-	    
-	    // Puts the terrain image into the whole texture for that slot.
-	    for (unsigned int offy = 0; offy < ImageHeight; offy++) {
-		auto itstart = (offy*ImageWidth);
-		std::copy_n(srcs.begin()+itstart, ImageWidth,
-			  terrain_surface.begin() + ((dsty + offy) * terrainw + dstx ));
-	    }
+            const unsigned dstx = sx*ImageWidth;
+            const unsigned dsty = sy*ImageHeight;
+            const unsigned terrainw = ImageWidth*SlotSide;
+        
+            // Puts the terrain image into the whole texture for that slot.
+            for (unsigned int offy = 0; offy < ImageHeight; offy++) {
+                auto itstart = (offy*ImageWidth);
+                std::copy_n(srcs.begin()+itstart, ImageWidth,
+                            terrain_surface.begin() + ((dsty + offy) * terrainw + dstx ));
+            }
 
-	}
+
+        }
+        
+        fprintf(stderr, ".");
     }
 
     Log::GetLog()->Write("terrain-renderer", "Terrain texture generation complete");

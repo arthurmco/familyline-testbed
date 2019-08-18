@@ -129,7 +129,7 @@ void GLWindow::setFramebuffers(Framebuffer* f3D, Framebuffer* fGUI)
 
 void GLWindow::update()
 {
-	glClearColor(1.0, 0, 0, 1.0);
+	glClearColor(0, 0, 0, 1.0);
 	glViewport(0, 0, _width, _height);
 
 	glDisable(GL_DEPTH_TEST);

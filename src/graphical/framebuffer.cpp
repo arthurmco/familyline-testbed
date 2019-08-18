@@ -14,15 +14,16 @@ Framebuffer::Framebuffer(std::string_view name, int width, int height)
 	l->InfoWrite("fb", "creating framebuffer %s: handle=%#x, size=%d x %d",
 		name.data(), _handle, width, height);
 
-	this->setupTexture(width, height);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureHandle, 0);
-
 	glGenRenderbuffers(1, &_rboHandle);
 	glBindRenderbuffer(GL_RENDERBUFFER, _rboHandle);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _rboHandle);
     
+
+	this->setupTexture(width, height);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureHandle, 0);
+
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		l->Warning("fb", "framebuffer %s (%#x) is not complete", name.data(), _handle); // should be error
 	}
@@ -50,7 +51,7 @@ void Framebuffer::setupTexture(int width, int height)
 	glGenTextures(1, &_textureHandle);
 	glBindTexture(GL_TEXTURE_2D, _textureHandle);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -59,12 +60,14 @@ void Framebuffer::setupTexture(int width, int height)
 
 void Framebuffer::startDraw()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, _handle);
+    glBindRenderbuffer(GL_RENDERBUFFER, _rboHandle);
+    glBindFramebuffer(GL_FRAMEBUFFER, _handle);
 }
 
 void Framebuffer::endDraw()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 

@@ -228,10 +228,13 @@ void TerrainRenderer::Render()
 {
     auto err = glGetError();
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
+
     glm::mat4 wvpmatrix = _cam->GetProjectionMatrix() * _cam->GetViewMatrix() * glm::mat4(1.0);
 
     auto& sm = GFXService::getShaderManager();
     auto forward = sm->getShader("forward");
+    sm->use(*forward);
 
     forward->setUniform("mvp", wvpmatrix);
     forward->setUniform("mModel", glm::mat4(1.0));
@@ -241,7 +244,6 @@ void TerrainRenderer::Render()
 
     forward->setUniform("tex_amount", 1.0f);
 
-    sm->use(*forward);
     for (const auto& tdi : this->_tdata) {
         glBindTexture(GL_TEXTURE_2D, tdi.texture->GetHandle());
         glBindVertexArray(tdi.vao);

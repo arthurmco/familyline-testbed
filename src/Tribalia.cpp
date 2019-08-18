@@ -156,7 +156,7 @@ int main(int argc, char const *argv[])
     if (!fLog) {
         if (isatty(fileno(stderr))) {
             fLog = stderr;
-            
+
 #ifdef _WIN32
             // Set output mode to handle virtual terminal sequences, so the
             // color escape sequences can work on Windows
@@ -267,7 +267,7 @@ static int show_starting_menu()
 
         win->show();
         enable_gl_debug();
-        
+
 		Framebuffer f3D = Framebuffer("f3D", winW, winH);
 		Framebuffer fGUI = Framebuffer("fGUI", winW, winH);
 		win->setFramebuffers(&f3D, &fGUI);
@@ -297,7 +297,7 @@ static int show_starting_menu()
 		/* Render the menu */
 		bool r = true;
 		auto deflistener = InputManager::GetInstance()->GetDefaultListener();
-   
+
 		GUILabel l = GUILabel(0.37, 0.03, "FAMILYLINE");
 		l.format.foreground = glm::vec4(1, 1, 1, 1);
 
@@ -348,7 +348,7 @@ static int show_starting_menu()
 		guir->add(&bquit);
 		guir->add(&bnew);
 		guir->add(&ilogo);
-        
+
         while (r) {
 
             // Input
@@ -363,7 +363,7 @@ static int show_starting_menu()
 					r = false;
 			}
 
-			// Render            
+			// Render
             fGUI.startDraw();
             guir->render(0, 0);
             guir->renderToScreen();
@@ -398,7 +398,7 @@ static int show_starting_menu()
 //                se.what(), se.file.c_str(), se.type, se.code);
 //            w->showMessageBox(out.data(), "Error", MessageBoxInfo::Error);
         }
-        
+
         exit(EXIT_FAILURE);
     }
     catch (graphical_exception& we) {
@@ -500,20 +500,26 @@ static void enable_gl_debug()
             default: sseverity = " PRIO: ????"; break;
             }
 
+            char* smsg = new char[length+1];
+            strncpy(smsg, msg, length);
+            smsg[length] = 0;
+
             fmt::memory_buffer out;
             format_to(out, "[#{:d}]{:s} {:s}: {:s}",
-                      id, sseverity, stype, msg);
+                      id, sseverity, stype, smsg);
+
+            delete[] smsg;
 
             switch (severity) {
             case GL_DEBUG_SEVERITY_HIGH:
-                Log::GetLog()->Fatal(ssource, out.data());
+                Log::GetLog()->Fatal(ssource, "%s", out.data());
                 break;
             case GL_DEBUG_SEVERITY_MEDIUM:
-                Log::GetLog()->Warning(ssource, out.data());
+                Log::GetLog()->Warning(ssource, "%s", out.data());
                 break;
 
             default:
-                Log::GetLog()->Write(ssource, out.data());
+                Log::GetLog()->Write(ssource, "%s", out.data());
                 break;
             }
 
@@ -538,5 +544,5 @@ static void enable_gl_debug()
     } else {
         Log::GetLog()->Warning("init", "ARB_debug_output not supported");
     }
-    
+
 }
