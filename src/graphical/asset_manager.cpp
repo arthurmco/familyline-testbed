@@ -26,7 +26,7 @@ std::shared_ptr<AssetObject> loadMaterialAsset(Asset& asset)
 {
     MTLOpener mo;
     auto ms = mo.Open(asset.path.c_str());
-
+    
     return std::shared_ptr<Material>(ms[0]);
 }
 
