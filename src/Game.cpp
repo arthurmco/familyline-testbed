@@ -3,7 +3,7 @@
 #include "graphical/gl_renderer.hpp"
 #include "graphical/LightManager.hpp"
 #include "graphical/animator.hpp"
-#include "logic/ObjectEventEmitter.hpp"
+#include "logic/game_event.hpp"
 
 using namespace familyline;
 using namespace familyline::logic;

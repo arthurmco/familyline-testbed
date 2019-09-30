@@ -3,7 +3,7 @@
 #include "scene_object.hpp"
 #include "animator.hpp"
 
-#include "../logic/IMesh.hpp"
+#include "../logic/imesh.hpp"
 #include "asset_object.hpp"
 
 #ifndef _MESH_HPP

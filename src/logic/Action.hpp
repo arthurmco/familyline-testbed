@@ -7,7 +7,7 @@
 #include <functional>
 #include <cstddef>
 #include <cstring>
-#include "AttackableObject.hpp"
+#include "game_object.hpp"
 
 #ifndef ACTION_HPP
 #define ACTION_HPP
@@ -25,20 +25,20 @@ namespace familyline::logic {
 
     /* Action event data */
     struct ActionData {
-	/* Player positional data.
-	   Mostly used for building objencts */
-	float xPos, yPos;
+        /* Player positional data.
+           Mostly used for building objencts */
+        float xPos, yPos;
 
-	/* The object that registered the action */
-	AttackableObject *actionOrigin;
+        /* The object that registered the action */
+        GameObject* actionOrigin;
     };
     
     /* Represents an action handler
        It's run each time an action is invoked
 
        An action might be invoked by two ways:
-        - in the user interface
-	- manually invoking it in the ActionManager
+       - in the user interface
+       - manually invoking it in the ActionManager
 
        Returns true if handler has been accepted, false if not (e.g you 
        have insufficient money to run the action)
@@ -47,16 +47,16 @@ namespace familyline::logic {
     
     /* Represents an individual action */
     struct Action {
-	std::string name;
-	std::string assetname;
-	ActionHandler handler = nullptr;
-	size_t refcount = 1;
+        std::string name;
+        std::string assetname;
+        ActionHandler handler = nullptr;
+        size_t refcount = 1;
 
-	Action(const char* name, const char* assetname)
-	    : name(name), assetname(assetname) {}
+        Action(const char* name, const char* assetname)
+            : name(name), assetname(assetname) {}
 	
-	Action()
-	    : Action("", "") {} 
+        Action()
+            : Action("", "") {} 
 
     };
 

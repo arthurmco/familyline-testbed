@@ -3,8 +3,7 @@
 
     Copyright (C) 2016 Arthur M
 ***/
-
-#include "../logic/Building.hpp"
+#include "../logic/game_object.hpp"
 #include "ObjectMacros.h"
 
 #ifndef TENT_H

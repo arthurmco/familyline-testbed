@@ -10,10 +10,10 @@
 
 #include <vector>
 
-#include "GameObject.hpp"
+#include "game_object.hpp"
 #include "Log.hpp"
 #include "Team.hpp"
-#include "ObjectEventListener.hpp"
+#include "game_event.hpp"
 #include "GameActionListener.hpp"
 
 #include <memory> //weak_ptr, shared_ptr
@@ -67,7 +67,7 @@ namespace familyline::logic {
 
 	/// Listens for objects, only send the set city event if the object is
 	/// from its own city
-	ObjectEventListener oel;
+	ObjectEventReceiver oel;
 	
 	// A color. This color is a RGB color.
 	//

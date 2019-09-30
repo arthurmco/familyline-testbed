@@ -4,7 +4,7 @@
     Copyright (C) 2016 Arthur M
 ***/
 
-#include "../logic/Building.hpp"
+#include "../logic/game_object.hpp"
 #include "ObjectMacros.h"
 
 #ifndef WATCHTOWER_H
@@ -12,8 +12,10 @@
 
 namespace familyline {
 
+// TODO: how to fit this in the new logic system?
+    
 /*  A watch tower is a basic watch building */
-class WatchTower : public logic::Building {
+class WatchTower : public logic::GameObject {
 private:
     static const int TID = 3;
 public:

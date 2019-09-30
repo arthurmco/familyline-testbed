@@ -5,20 +5,21 @@
 // Building    = location attack container?
 // Transporter = location attack container  movement
 
+#include <glm/glm.hpp>
 #include <vector>
 #include <optional>
 #include "imesh.hpp"
-#include "terrain.hpp"
+#include "Terrain.hpp"
 
 namespace familyline::logic {
     class GameObject;
 
 // TODO: Handle attacks on its component or elsewhere?
 
-/**
- * Allows objects to have something visible, something you can see on 
- * screen that represents it.
- */
+    /**
+     * Allows objects to have something visible, something you can see on 
+     * screen that represents it.
+     */
     struct LocationComponent {
         IMesh* mesh;
         GameObject* object;

@@ -3,7 +3,7 @@
 
 using namespace familyline::logic;
 
-void BuildQueue::Add(AttackableObject* o)
+void BuildQueue::Add(GameObject* o)
 {
     if (!o) {
 	Log::GetLog()->Warning("build-queue",
@@ -14,7 +14,7 @@ void BuildQueue::Add(AttackableObject* o)
     this->_objects.push(o);
 }
      
-AttackableObject* BuildQueue::BuildNext(glm::vec3 pos)
+GameObject* BuildQueue::BuildNext(glm::vec3 pos)
 {
     auto* o = this->_objects.front();
     o->position.x = pos.x;
@@ -23,7 +23,7 @@ AttackableObject* BuildQueue::BuildNext(glm::vec3 pos)
     return o;
 }
 
-AttackableObject* BuildQueue::GetNext()
+GameObject* BuildQueue::GetNext()
 {
     if (this->_objects.empty()) return nullptr;
 
@@ -35,7 +35,7 @@ void BuildQueue::Clear() {
 	this->_objects.pop();
 }
 
-bool DefaultBuildHandler(Action* ac, ActionData data, AttackableObject* built) {
+bool DefaultBuildHandler(Action* ac, ActionData data, GameObject* built) {
     (void)ac;
     
     if (!built) built = data.actionOrigin;

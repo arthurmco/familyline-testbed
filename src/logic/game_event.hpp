@@ -1,5 +1,6 @@
 #pragma once
 
+#include <queue>
 #include <memory>
 #include <string>
 
@@ -159,7 +160,6 @@ namespace familyline::logic {
         ~Event() {}
     };
 
-#include <queue>
 
 /**
  * Event receiver

@@ -16,9 +16,9 @@
 #include "../graphical/window.hpp"
 #include "../graphical/camera.hpp"
 #include "../graphical/scene_renderer.hpp"
-#include "../logic/ObjectManager.hpp"
-#include "../logic/AttackableObject.hpp"
-#include "../logic/ObjectEventListener.hpp"
+#include "../logic/object_manager.hpp"
+#include "../logic/object_components.hpp"
+#include "../logic/game_event.hpp"
 
 namespace familyline::input {
 #define MAX_PICK_ITERATIONS 16
@@ -61,7 +61,7 @@ namespace familyline::input {
         std::weak_ptr<familyline::logic::GameObject> _locatableObject;
 
         std::vector<const familyline::logic::GameObject*> _olist;
-        familyline::logic::ObjectEventListener oel;
+        familyline::logic::ObjectEventReceiver oel;
 
         bool CheckIfTerrainIntersect(glm::vec3 ray, float start, float end);
 

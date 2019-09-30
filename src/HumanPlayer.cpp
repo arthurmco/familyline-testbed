@@ -60,7 +60,7 @@ bool zoom_out = false;
 bool zoom_mouse = false;
 bool build_something = false;
 
-std::weak_ptr<AttackableObject> attacker, attackee;
+std::weak_ptr<GameObject> attacker, attackee;
 
 InputListener ilt;
 
@@ -273,7 +273,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 	    glm::vec3 p = ::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
 
 	    auto* build = BuildQueue::GetInstance()->BuildNext(p);
-	    AttackableObject* c = dynamic_cast<AttackableObject*>(build);
+	    GameObject* c = dynamic_cast<GameObject*>(build);
 
 	    if (c) {
 		BuildQueue::GetInstance()->Clear();
@@ -298,15 +298,15 @@ bool HumanPlayer::Play(GameContext* gctx)
     auto l = _ip->GetIntersectedObject().lock();
     if (l) {
         if (mouse_click) {
-            _selected_obj = std::dynamic_pointer_cast<AttackableObject>(l);
+            _selected_obj = std::dynamic_pointer_cast<GameObject>(l);
         }
 	//printf("intersected with %s\n", l->GetName());
     } else {
-        if (mouse_click)   _selected_obj = std::weak_ptr<AttackableObject>();
+        if (mouse_click)   _selected_obj = std::weak_ptr<GameObject>();
     }
 
     if (build_tent) {
-	BuildQueue::GetInstance()->Add( (AttackableObject*)
+	BuildQueue::GetInstance()->Add( (GameObject*)
 	    ObjectFactory::GetInstance()->GetObject("tent", 0, 0, 0));
 
 	build_tent = false;
@@ -314,7 +314,7 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
 
     if (build_tower) {
-	BuildQueue::GetInstance()->Add( (AttackableObject*)
+	BuildQueue::GetInstance()->Add( (GameObject*)
 	    ObjectFactory::GetInstance()->GetObject("watchtower", 0, 0, 0));
 
 	build_tower = false;
@@ -334,12 +334,12 @@ bool HumanPlayer::Play(GameContext* gctx)
     if (attack_ready) {
 	auto l = _ip->GetIntersectedObject().lock();
 	if (l && attack_set)
-	    attackee = std::dynamic_pointer_cast<AttackableObject>(l);
+	    attackee = std::dynamic_pointer_cast<GameObject>(l);
 
 	if (!attackee.expired()) {
 
 	    if (attack_set)
-		attacker = std::dynamic_pointer_cast<AttackableObject>(_selected_obj.lock());
+		attacker = std::dynamic_pointer_cast<GameObject>(_selected_obj.lock());
 
 	    if (!attacker.expired()) {
 		CombatManager::getDefault()->AddAttack(attacker, attackee);
@@ -349,7 +349,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 
 	} else {
 	    attack_ready = false;
-	    attacker = attackee = std::weak_ptr<AttackableObject>();
+	    attacker = attackee = std::weak_ptr<GameObject>();
 	}
     }
 
@@ -377,7 +377,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 
 
 
-AttackableObject* HumanPlayer::GetSelectedObject()
+GameObject* HumanPlayer::GetSelectedObject()
 {
     return (_selected_obj.expired() ? nullptr : _selected_obj.lock().get());
 }

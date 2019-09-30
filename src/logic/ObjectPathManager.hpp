@@ -9,7 +9,7 @@
 #include <vector>
 
 #include <glm/glm.hpp>
-#include "AttackableObject.hpp"
+#include "game_object.hpp"
 #include "Terrain.hpp"
 
 #ifndef OBJECTPATHMANAGER_HPP
@@ -20,7 +20,7 @@ namespace familyline::logic {
 /* The object path unit */
 struct ObjectPathRef {
     int pathid;
-    AttackableObject* lc;
+    GameObject* lc;
     std::vector<glm::vec2>* path;
     glm::vec2 path_point;
     unsigned int path_ptr = 0;
@@ -34,7 +34,7 @@ struct ObjectPathRef {
        that time
     */ 
     
-    ObjectPathRef(int pathid, AttackableObject* lc, 
+    ObjectPathRef(int pathid, GameObject* lc, 
 		  std::vector<glm::vec2>* path,
 		  int dbg_path_plot)
 	: pathid(pathid), lc(lc), path(path), path_point((*path)[0]),
@@ -52,7 +52,7 @@ public:
 	Returns true if added successfully, or false if there's already a path 
 	there for the same object
     */
-    bool AddPath(AttackableObject* o, std::vector<glm::vec2>* path);
+    bool AddPath(GameObject* o, std::vector<glm::vec2>* path);
 
     /* 	Removes a path from object 'oid'. 
 	Returns true if path removed, or false if path didn't exist there */

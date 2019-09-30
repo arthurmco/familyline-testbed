@@ -8,7 +8,7 @@
 #include "logic/ObjectManager.hpp"
 #include "logic/GameObject.hpp"
 #include "logic/ObjectEventEmitter.hpp"
-#include "logic/ObjectEventListener.hpp"
+#include "logic/ObjectEventReceiver.hpp"
 #include "TestObject.hpp"
 
 class ObjectTest : public ::testing::Test {
@@ -106,7 +106,7 @@ TEST_F(ObjectTest, TestObjectManagerOps) {
 }
 
 TEST_F(ObjectTest, TestCreateEvent) {
-    ObjectEventListener oel;
+    ObjectEventReceiver oel;
     ObjectEventEmitter::addListener(&oel);
     ASSERT_FALSE(oel.hasEvent());
 
@@ -135,7 +135,7 @@ TEST_F(ObjectTest, TestCreateEvent) {
 }
 
 TEST_F(ObjectTest, TestDestroyEvent) {
-    ObjectEventListener oel;
+    ObjectEventReceiver oel;
     ObjectEventEmitter::addListener(&oel);
     ASSERT_FALSE(oel.hasEvent());
 

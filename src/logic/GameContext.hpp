@@ -7,7 +7,7 @@
 
 ***/
 
-#include "ObjectManager.hpp"
+#include "object_manager.hpp"
 
 #ifndef GAMECONTEXT_HPP
 #define GAMECONTEXT_HPP
@@ -16,6 +16,8 @@ namespace familyline::logic {
 
     struct GameContext {
         ObjectManager* om;
+        unsigned long long game_tick;
+        
         double elapsed_seconds;
     };
 

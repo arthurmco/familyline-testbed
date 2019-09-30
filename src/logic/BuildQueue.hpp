@@ -9,7 +9,7 @@
 */
 
 #include "Action.hpp"
-#include "AttackableObject.hpp"
+#include "game_object.hpp"
 #include <queue>
 #include <glm/glm.hpp>
 
@@ -19,13 +19,13 @@
 namespace familyline::logic {
     class BuildQueue {
     private:
-	std::queue<AttackableObject*> _objects;
+	std::queue<GameObject*> _objects;
 
     public:
-	void Add(AttackableObject*);
+	void Add(GameObject*);
 
-	AttackableObject* BuildNext(glm::vec3 pos);
-	AttackableObject* GetNext();
+	GameObject* BuildNext(glm::vec3 pos);
+	GameObject* GetNext();
 	void Clear();
 
 	static BuildQueue* GetInstance() {
@@ -36,7 +36,7 @@ namespace familyline::logic {
 	}
     };
 
-    bool DefaultBuildHandler(Action* ac, ActionData data, AttackableObject* built);
+    bool DefaultBuildHandler(Action* ac, ActionData data, GameObject* built);
 }
 
 

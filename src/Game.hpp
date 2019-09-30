@@ -20,7 +20,7 @@
 #include "logic/BuildQueue.hpp"
 #include "logic/GameActionManager.hpp"
 #include "logic/PlayerManager.hpp"
-#include "logic/DebugPlot.hpp"
+#include "logic/debug_drawer.hpp"
 
 #include "graphical/camera.hpp"
 #include "graphical/asset_file.hpp"

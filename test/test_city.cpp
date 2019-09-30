@@ -44,7 +44,7 @@ TEST_F(CityTest, TestCityAllocation) {
 
 TEST_F(CityTest, TestCityEventTransmission) {
 
-    ObjectEventListener test_oel;
+    ObjectEventReceiver test_oel;
     ObjectEventEmitter::addListener(&test_oel);
 
     ObjectManager om;
@@ -87,7 +87,7 @@ TEST_F(CityTest, TestCityEventTransmission) {
 TEST_F(CityTest, TestCityEventTransmissionOnCityManager) {
 
     
-    ObjectEventListener test_oel;
+    ObjectEventReceiver test_oel;
     ObjectEventEmitter::addListener(&test_oel);
 
     ObjectManager om;

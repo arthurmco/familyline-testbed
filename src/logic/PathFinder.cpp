@@ -277,14 +277,15 @@ std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end) {
 
 
 
-std::vector<glm::vec2> PathFinder::CreatePath(AttackableObject* o, glm::vec2 destination)
+std::vector<glm::vec2> PathFinder::CreatePath(const GameObject& o, glm::vec2 destination)
 {
 	std::vector<glm::vec2> vec;
 	std::list<PathNode*> nodelist;
 
 	float r = 8;//o->GetRadius();
 
-	glm::vec2 from(o->position.x, o->position.z);
+    auto position = o.getPosition();
+	glm::vec2 from(position.x, position.z);
 
 	/* Unmap our object */
 	this->ClearPathmap(r * 2, r * 2, from.x - r, from.y - r);

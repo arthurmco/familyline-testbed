@@ -10,7 +10,7 @@
 #include <map>
 #include <string>
 
-#include "GameObject.hpp"
+#include "game_object.hpp"
 
 namespace familyline::logic {
 

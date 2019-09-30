@@ -24,7 +24,7 @@
 //#include "logic/ObjectRenderer.hpp"
 #include "logic/ObjectPathManager.hpp"
 #include "logic/BuildQueue.hpp"
-#include "logic/CombatManager.hpp"
+#include "logic/attack_manager.hpp"
 #include "input/InputPicker.hpp"
 #include "input/InputManager.hpp"
 
@@ -34,7 +34,7 @@ private:
     familyline::graphics::Camera* _cam;
 	familyline::input::InputPicker* _ip;
 
-	std::weak_ptr<familyline::logic::AttackableObject> _selected_obj;
+	std::weak_ptr<familyline::logic::GameObject> _selected_obj;
     familyline::logic::PathFinder* _pf = nullptr;
 	
     bool _updated = false;
@@ -74,7 +74,7 @@ public:
 
     virtual bool HasUpdatedObject();
 
-    familyline::logic::AttackableObject* GetSelectedObject();
+    familyline::logic::GameObject* GetSelectedObject();
     virtual ~HumanPlayer();
 };
 

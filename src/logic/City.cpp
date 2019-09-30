@@ -75,7 +75,7 @@ PlayerDiplomacy City::getDiplomacy(City* c) {
 
 /**
  * Check for player creation events received by the GameActionListener, crosscheck with
- * the ones created by the ones received by the ObjectEventListener, and set the new 
+ * the ones created by the ones received by the ObjectEventReceiver, and set the new 
  * objects created by a player to its city.
  */
 void City::iterate() {

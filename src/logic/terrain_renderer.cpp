@@ -1,6 +1,8 @@
 #include "terrain.hpp"
 #include "terrain_renderer.hpp"
 
+#include <glm/glm.hpp>
+
 using namespace familyline::logic;
 
 TerrainRenderer::TerrainRenderer(Terrain& t)

@@ -7,8 +7,8 @@
 #define OBJECTMACROS_H
 
 
-#include "../logic/Building.hpp"
-#include "../logic/Unit.hpp"
+#include "../logic/game_object.hpp"
+#include "../logic/object_components.hpp"
 #include "../graphical/asset_manager.hpp"
 #include "../graphical/gfx_service.hpp"
 

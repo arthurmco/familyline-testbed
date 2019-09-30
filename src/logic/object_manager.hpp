@@ -11,9 +11,9 @@
 
 namespace familyline::logic {
 
-/**
- * Basic object event emitter
- */
+    /**
+     * Basic object event emitter
+     */
     class ObjectEventEmitter : public EventEmitter {
     private:
         std::string _name;
@@ -39,6 +39,14 @@ namespace familyline::logic {
         void notifyRemoval(object_id_t id, const std::string& name);
 
         virtual const std::string getName();
+    };
+
+    class ObjectEventReceiver : public EventReceiver {
+    public:
+
+      virtual const std::string getName() {
+          return "object-event-receiver";
+      }
     };
 
     class ObjectManager {
@@ -82,6 +90,5 @@ namespace familyline::logic {
          * not
          */
         std::optional<std::shared_ptr<GameObject>> get(object_id_t id);
-
     };
 }

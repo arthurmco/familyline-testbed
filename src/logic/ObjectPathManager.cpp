@@ -20,7 +20,7 @@ static std::vector<glm::vec3> ConvertTo3DPath(std::vector<glm::vec2>* path)
 	Returns true if added successfully, or false if there's already a path 
 	there for the same object
  */
-bool ObjectPathManager::AddPath(AttackableObject* o, 
+bool ObjectPathManager::AddPath(GameObject* o, 
 				std::vector<glm::vec2>* path)
 {
 	for (auto& ref : _pathrefs) {
@@ -40,9 +40,9 @@ bool ObjectPathManager::AddPath(AttackableObject* o,
 
 
 	auto p3dpath = ConvertTo3DPath(path);
-	auto dbg_plot = DebugPlotter::pinterface->AddPath(p3dpath, glm::vec3(0, 0, 1));
-	_pathrefs.emplace_back(maxpathID++, o, new std::vector<glm::vec2>(*path),
-			       dbg_plot);	
+//	auto dbg_plot = DebugPlotter::pinterface->AddPath(p3dpath, glm::vec3(0, 0, 1));
+//	_pathrefs.emplace_back(maxpathID++, o, new std::vector<glm::vec2>(*path),
+//			       dbg_plot);	
 	return true;
 }
 
@@ -52,7 +52,7 @@ bool ObjectPathManager::RemovePath(long oid)
 {
 	for (auto it = _pathrefs.begin(); it != _pathrefs.end(); it++) {
 		if (it->lc->getID() == oid) {
-		    DebugPlotter::pinterface->RemovePath(it->dbg_path_plot);
+//		    DebugPlotter::pinterface->RemovePath(it->dbg_path_plot);
 		    _pathrefs.erase(it);
 		    return true;
 		}
@@ -80,10 +80,11 @@ void ObjectPathManager::UpdatePaths(unsigned ms_frame)
 		auto pz = it->path_point.y;
 
 		it->current_time += ms_frame;
-		
-		it->lc->position.x = (px);
-		it->lc->position.y = (_terr->GetHeightFromPoint(px, pz));
-		it->lc->position.z = (pz);
+
+        auto lcpos = it->lc->getPosition();
+		lcpos.x = (px);
+		lcpos.y = (_terr->GetHeightFromPoint(px, pz));
+		lcpos.z = (pz);
 
 		// 1 step = 0.1 second
 		if (it->path_ptr < it->path->size()-1) {
@@ -103,7 +104,7 @@ void ObjectPathManager::UpdatePaths(unsigned ms_frame)
 
 	/* Delete the reserved iterators */
 	for (auto& it : compl_its) {
-	    DebugPlotter::pinterface->RemovePath(it->dbg_path_plot);
+//	    DebugPlotter::pinterface->RemovePath(it->dbg_path_plot);
 	    _pathrefs.erase(it);
 	}
 }
