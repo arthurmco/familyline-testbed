@@ -37,6 +37,7 @@ namespace familyline::graphics {
         virtual void update();
 
         virtual void setLogicPosition(glm::vec3 p) { this->worldPosition = p; }
+        virtual void addLogicPosition(glm::vec3 p) { this->worldPosition = p; }
 
         virtual std::string_view getName() const;
         virtual glm::vec3 getPosition() const;

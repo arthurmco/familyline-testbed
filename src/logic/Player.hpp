@@ -18,13 +18,6 @@
 
 namespace familyline::logic {
 
-    /// TODO: remove this and replace this entire logic part by the new one
-    class ObjectRenderer {
-    public:
-        void Update() {}
-        bool Check() { return true; }
-    };
-
     /**
      * \brief Represents a game player
      */

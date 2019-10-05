@@ -1,6 +1,6 @@
 #include "game_object.hpp"
 #include "object_components.hpp"
-#include "terrain.hpp"
+#include "Terrain.hpp"
 
 #include <cmath>
 #include <algorithm> //for std::max
@@ -12,9 +12,9 @@ using namespace familyline::logic;
  * the graphical/OpenGL space and then setting it as the mesh position
  */
 void LocationComponent::updateMesh(const Terrain& t, glm::vec3 pos) {
-	auto height = t.getHeightFromPoint(pos.x, pos.z);
+	auto height = t.GetHeightFromPoint(pos.x, pos.z);
 
-	this->mesh->setPosition(t.getRenderer().convertToModelSpace(glm::vec3(pos.x, height, pos.y)));
+	//this->mesh->setPosition(t.GetRenderer().convertToModelSpace(glm::vec3(pos.x, height, pos.y)));
 }
 
 /**

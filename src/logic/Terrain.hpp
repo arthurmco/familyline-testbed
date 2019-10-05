@@ -59,7 +59,7 @@ namespace familyline::logic {
 	/**
 	 * Gets the height from a point, in game space 
 	 */
-	int GetHeightFromPoint(unsigned x, unsigned y);
+	int GetHeightFromPoint(unsigned x, unsigned y) const;
 
         const char* GetName() const;
         const char* GetDescription() const;

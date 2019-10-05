@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include <glm/gtc/matrix_transform.hpp>
-#include "../logic/ObjectEventEmitter.hpp"
+//#include "../logic/ObjectEventEmitter.hpp"
 
 using namespace familyline::input;
 using namespace familyline::graphics;
@@ -18,7 +18,7 @@ InputPicker::InputPicker(TerrainRenderer* terrain, Window* win, SceneRenderer* s
     this->_cam = cam;
     this->_om = om;
 
-    ObjectEventEmitter::addListener(&oel);
+    //    ObjectEventEmitter::addListener(&oel);
 }
 
 /* Get cursor ray in screen space */
@@ -146,32 +146,32 @@ void InputPicker::UpdateIntersectedObject()
     glm::vec3 origin = _cam->GetPosition();
 
     // Update the internal object list
-    ObjectEvent e;
-    while (oel.popEvent(e)) {
-        switch (e.type) {
-        case ObjectCreated: {
-            if (e.to.expired())
-                continue;
-
-            auto sto = e.to.lock();
-            auto mm = std::dynamic_pointer_cast<graphics::Mesh>(sto->mesh);
-            poi_list.emplace_back(sto->position, mm, e.oid);
-            break;
-        }
-
-        case ObjectDestroyed:
-            poi_list.erase(
-                std::remove_if(poi_list.begin(), poi_list.end(),
-                               [&](const PickerObjectInfo& poi) {
-                                   return poi.ID == e.oid;
-                               })
-                );
-            break;
-        default:
-            continue;
-        }
-
-    }
+    // ObjectEvent e;
+    //while (oel.popEvent(e)) {
+    //    switch (e.type) {
+    //    case ObjectCreated: {
+    //        if (e.to.expired())
+    //            continue;
+    //
+    //            auto sto = e.to.lock();
+    //            auto mm = std::dynamic_pointer_cast<graphics::Mesh>(sto->mesh);
+    //            poi_list.emplace_back(sto->position, mm, e.oid);
+    //            break;
+    //        }
+    //
+    //        case ObjectDestroyed:
+    //            poi_list.erase(
+    //                std::remove_if(poi_list.begin(), poi_list.end(),
+    //                               [&](const PickerObjectInfo& poi) {
+    //                                   return poi.ID == e.oid;
+    //                               })
+    //                );
+    //            break;
+    //        default:
+    //            continue;
+    //        }
+    //
+    //    }
 
     // Check the existing objects
     for (const PickerObjectInfo& poi : poi_list) {
@@ -234,7 +234,7 @@ void InputPicker::UpdateIntersectedObject()
 
         /* Collided with both 3 axis! */
         if (tmax >= tmin) {
-            _locatableObject = _om->getObject(poi.ID);
+            _locatableObject = _om->get(poi.ID).value();
 
             if (!_locatableObject.expired())
                 return;

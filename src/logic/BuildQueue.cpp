@@ -3,27 +3,24 @@
 
 using namespace familyline::logic;
 
-void BuildQueue::Add(GameObject* o)
+void BuildQueue::Add(std::shared_ptr<GameObject> o)
 {
-    if (!o) {
-	Log::GetLog()->Warning("build-queue",
-			       "adding a null pointer to the build queue!");
-	return;
-    }
-    
     this->_objects.push(o);
 }
      
-GameObject* BuildQueue::BuildNext(glm::vec3 pos)
+std::shared_ptr<GameObject> BuildQueue::BuildNext(glm::vec3 pos)
 {
-    auto* o = this->_objects.front();
-    o->position.x = pos.x;
-    o->position.z = pos.z;
+    auto o = this->_objects.front();
+
+    auto opos = o->getPosition();
+    opos.x = pos.x;
+    opos.z = pos.z;
+
     this->_objects.pop();
     return o;
 }
 
-GameObject* BuildQueue::GetNext()
+std::shared_ptr<GameObject> BuildQueue::GetNext()
 {
     if (this->_objects.empty()) return nullptr;
 
@@ -32,7 +29,7 @@ GameObject* BuildQueue::GetNext()
 
 void BuildQueue::Clear() {
     while(!this->_objects.empty())
-	this->_objects.pop();
+        this->_objects.pop();
 }
 
 bool DefaultBuildHandler(Action* ac, ActionData data, GameObject* built) {
@@ -40,6 +37,6 @@ bool DefaultBuildHandler(Action* ac, ActionData data, GameObject* built) {
     
     if (!built) built = data.actionOrigin;
 
-    BuildQueue::GetInstance()->Add(built);
+    BuildQueue::GetInstance()->Add(std::shared_ptr<GameObject>(built));
     return true;
 }

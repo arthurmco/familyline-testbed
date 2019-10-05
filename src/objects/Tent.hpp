@@ -12,7 +12,7 @@
 namespace familyline {
 
 /*  A tent is a basic people storage building */
-class Tent : public logic::Building {
+class Tent : public logic::GameObject {
 private:
     static const int TID = 2;
 public:

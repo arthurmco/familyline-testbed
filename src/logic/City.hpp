@@ -25,20 +25,20 @@ namespace familyline::logic {
 
     class CityListener : public GameActionListener {
     private:
-	std::queue<std::weak_ptr<GameObject>> obj_queue;
-	int cityID;
+        std::queue<std::weak_ptr<GameObject>> obj_queue;
+        int cityID;
     
     public:
-	CityListener(Player* p, const char* name);
+        CityListener(Player* p, const char* name);
 
-	virtual void OnListen(GameAction& ga);
+        virtual void OnListen(GameAction& ga);
 	
-	/*
-	 * Get next created object, or nullptr if no object is next
-	 */
-	std::weak_ptr<GameObject> getNextObject();
+        /*
+         * Get next created object, or nullptr if no object is next
+         */
+        std::weak_ptr<GameObject> getNextObject();
 	
-	virtual ~CityListener() {}
+        virtual ~CityListener() {}
     
     };
 
@@ -56,50 +56,51 @@ namespace familyline::logic {
      * neutrals should not
      *
      */
-    class City : public GameObject {
+    class City {
     private:
-	// TODO: Does the city have to own the game object too?
-	// Nooooo. When the object is destroyed, the city should let it go.
-	std::vector<GameObject*> citizens;
+        // TODO: Does the city have to own the game object too?
+        // Nooooo. When the object is destroyed, the city should let it go.
+        std::vector<GameObject*> citizens;
 
-	// The player that controls the city.
-	Player* player;
+        // The player that controls the city.
+        Player* player;
 
-	/// Listens for objects, only send the set city event if the object is
-	/// from its own city
-	ObjectEventReceiver oel;
+        /// Listens for objects, only send the set city event if the object is
+        /// from its own city
+        /// ObjectEventReceiver oel;
 	
-	// A color. This color is a RGB color.
-	//
-	// We'll paint some parts of the units and buildings with this color
-	// This color will also identify the user.
-	glm::vec3 player_color;
+        // A color. This color is a RGB color.
+        //
+        // We'll paint some parts of the units and buildings with this color
+        // This color will also identify the user.
+        glm::vec3 player_color;
 
-	/// Player listener, to get the newly created objects by the player
-	CityListener* cil;
+        /// Player listener, to get the newly created objects by the player
+        CityListener* cil;
 
     public:
-	City(Player* player, glm::vec3 color);
+        City(Player* player, glm::vec3 color);
 
-	std::shared_ptr<Team> team;
+        std::shared_ptr<Team> team;
 
-	PlayerDiplomacy getDiplomacy(City* c);
+        PlayerDiplomacy getDiplomacy(City* c);
 
-	/// The player that controls the city.
-	const Player* getPlayer() const { return this->player; }
+        /// The player that controls the city.
+        const Player* getPlayer() const { return this->player; }
 
-	/// The color that will identify the city
-	///
-	/// We'll paint the city objects with this color, so the
-	/// players can easily identify them.
-	const glm::vec3 getColor() const { return this->player_color; }
+        /// The color that will identify the city
+        ///
+        /// We'll paint the city objects with this color, so the
+        /// players can easily identify them.
+        const glm::vec3 getColor() const { return this->player_color; }
 
 
         /**
-	 * Update all cities' objects
-	 */
-	virtual void iterate();
+         * Update all cities' objects
+         */
+        virtual void iterate();
 
+        int getID() { return 0x908796; }
     };
 
 

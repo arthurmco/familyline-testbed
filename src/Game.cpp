@@ -3,7 +3,9 @@
 #include "graphical/gl_renderer.hpp"
 #include "graphical/LightManager.hpp"
 #include "graphical/animator.hpp"
+
 #include "logic/game_event.hpp"
+#include "logic/logic_service.hpp"
 
 using namespace familyline;
 using namespace familyline::logic;
@@ -28,9 +30,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
            GUIManager* gr, PlayerManager* pm, HumanPlayer* hp)
     : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm), hp(hp)
 {
-    DebugPlotter::Init();
-
-
+    //    DebugPlotter::Init();
 
     int winW, winH;
     w->getSize(winW, winH);
@@ -39,12 +39,13 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
     try {
         /* Initialise things */
         om = new ObjectManager{};
-        ObjectManager::setDefault(om);
-        CombatManager::setDefault(new CombatManager);
+        //        ObjectManager::setDefault(om);
 
+        auto& atk_manager = LogicService::getAttackManager();
+        
         rndr = new GLRenderer{};
-        DebugPlotter::pinterface = std::unique_ptr<DebugPlotInterface>
-            (new GraphicalPlotInterface(rndr));
+        // DebugPlotter::pinterface = std::unique_ptr<DebugPlotInterface>
+        //    (new GraphicalPlotInterface(rndr));
 
         gctx.om = om;
 
@@ -82,15 +83,15 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
             glm::vec3(10, terr->GetHeightFromPoint(10, 0) + 16, 0)
         };
 
-        DebugPlotter::pinterface->AddPath(p, glm::vec3(1, 0, 0));
+        //        DebugPlotter::pinterface->AddPath(p, glm::vec3(1, 0, 0));
 //      LightManager::AddLight(l);
 
         terr_rend = new TerrainRenderer{ };
         terr_rend->SetTerrain(terr);
         terr_rend->SetCamera(cam);
 
-//      objrend = new ObjectRenderer(om, scenernd);
-//      hp->objr = objrend;
+        objrend = new ObjectRenderer(*terr);
+        hp->objr = objrend;
         //gam.AddListener(objrend);
 
         InputManager::GetInstance()->Initialize();
@@ -108,8 +109,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         gr->add(widgets.lblVersion);
         
         /* Adds the objects to the factory */
-        ObjectFactory::GetInstance()->AddObject(new WatchTower);
-        ObjectFactory::GetInstance()->AddObject(new Tent);
+        //ObjectFactory::GetInstance()->AddObject(new WatchTower);
+        //ObjectFactory::GetInstance()->AddObject(new Tent);
 
         ObjectPathManager::getInstance()->SetTerrain(terr);
 
@@ -192,9 +193,9 @@ GUILabel lblKeys = GUILabel(0.05, 0.05, "Press C to build Tent, E to build Watch
 
 int Game::RunLoop()
 {
-    CombatManager::getDefault()->SetOnDeath([&](logic::AttackableObject* at) {
-                                                gctx.om->removeObject(gctx.om->getObject(at->getID()).lock());
-                                            });
+    //    CombatManager::getDefault()->SetOnDeath([&](logic::AttackableObject* at) {
+    //                                            gctx.om->removeObject(gctx.om->getObject(at->getID()).lock());
+    //                                        });
 
 
     // Panel pnl = Panel(0.0, 0.8, 1.0, 0.2, true);
@@ -349,18 +350,20 @@ void Game::RunLogic()
     /* Logic & graphical processing */
     gam.ProcessListeners();
     terr_rend->Update();
-    om->iterateAll();
-    ObjectEventEmitter::distributeMessages();
+    om->update();
 
-    bool objupdate = objrend->Check();
+    LogicService::getActionQueue()->processEvents();
+
+    bool objupdate = objrend->willUpdate();
     if (objupdate || hp->HasUpdatedObject()) {
-        objrend->Update();
+        objrend->update();
         pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
     }
-    objrend->Update();
+    objrend->update();
 
-    CombatManager::getDefault()->DoAttacks(LOGIC_DELTA);
-    ObjectPathManager::getInstance()->UpdatePaths(LOGIC_DELTA);
+    LogicService::getAttackManager()->processAttacks();
+    // CombatManager::getDefault()->DoAttacks(LOGIC_DELTA);
+    //ObjectPathManager::getInstance()->UpdatePaths(LOGIC_DELTA);
 
 }
 
@@ -397,7 +400,7 @@ void Game::RunGraphical()
  */
 void Game::ShowDebugInfo()
 {
-    AttackableObject* selected = hp->GetSelectedObject();
+    GameObject* selected = hp->GetSelectedObject();
 
     if (BuildQueue::GetInstance()->GetNext()) {
         char s[256];
@@ -411,12 +414,17 @@ void Game::ShowDebugInfo()
 
     auto locc = ip->GetIntersectedObject().lock();
     if (locc) {
-        auto alocc = dynamic_cast<AttackableObject*>(locc.get());
+        auto alocc = locc.get();
 //          gr->DebugWrite(10, 100, "Hovering object '%s'", locc->getName());
 
-        if (alocc && selected && alocc->getMaxLifePoints()) {
-            AttackableObject* a = alocc;
-            lblRange.setText(a->doAttack((AttackableObject*)selected) ? "In range" : "Not in range");
+        bool attackable = selected->getAttackComponent().has_value();
+            
+        if (alocc && attackable && selected && alocc->getMaxHealth()) {
+
+            auto inRange = selected->getAttackComponent()->isInAttackRange(
+                alocc->getAttackComponent().value());
+                
+            lblRange.setText(inRange ? "In range" : "Not in range");
         }
     }
 
@@ -430,14 +438,16 @@ void Game::ShowDebugInfo()
     lblSelected.setText("");
     if (selected) {
         char s[150];
-        AttackableObject* a = dynamic_cast<AttackableObject*>(selected);
-        if (selected) {
-            sprintf(s, "Selected object: '%s' (%4d/%4d)",
-                    a->getName(),
-                    a->getCurrentLifePoints(),
-                    a->getMaxLifePoints());
+        auto& acomp = selected->getAttackComponent();
+        
+        if (acomp) {
+            sprintf(s, "Selected object: '%s' (%4f/%4d)",
+                    selected->getName().c_str(),
+                    selected->getHealth(),
+                    selected->getMaxHealth());
         } else {
-            sprintf(s, "Selected object: '%s'", selected->getName());
+            sprintf(s, "Selected object: '%s'",
+                    selected->getName().c_str());
         }
 
         lblSelected.setText(s);

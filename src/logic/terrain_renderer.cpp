@@ -1,4 +1,4 @@
-#include "terrain.hpp"
+#include "Terrain.hpp"
 #include "terrain_renderer.hpp"
 
 #include <glm/glm.hpp>
@@ -8,7 +8,7 @@ using namespace familyline::logic;
 TerrainRenderer::TerrainRenderer(Terrain& t)
 	: _terrain(t)
 {
-	_terrain._renderer = this;
+	//_terrain._renderer = this;
 }
 
 
@@ -42,5 +42,5 @@ glm::vec3 TerrainRenderer::convertToModelSpace(glm::vec3 terrainPos) const
 
 TerrainRenderer::~TerrainRenderer()
 {
-	_terrain._renderer = nullptr;
+    //	_terrain._renderer = nullptr;
 }

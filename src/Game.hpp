@@ -34,6 +34,7 @@
 #include "graphical/asset_manager.hpp"
 #include "graphical/window.hpp"
 #include "graphical/framebuffer.hpp"
+#include "graphical/object_renderer.hpp"
 #include "graphical/renderer.hpp"
 #include "graphical/scene_renderer.hpp"
 #include "graphical/GraphicalPlotInterface.hpp"
@@ -68,7 +69,6 @@ private:
     graphics::Window* win = nullptr;
     graphics::Renderer* rndr = nullptr;
     graphics::SceneRenderer* scenernd = nullptr;
-
     graphics::Framebuffer *fbGUI = nullptr, *fb3D = nullptr;
     graphics::gui::GUIManager* gr = nullptr;
     
@@ -79,7 +79,7 @@ private:
     std::unique_ptr<graphics::AssetManager>& am = graphics::GFXService::getAssetManager();
 
     graphics::TerrainRenderer* terr_rend = nullptr;
-    logic::ObjectRenderer* objrend = nullptr;
+    graphics::ObjectRenderer* objrend = nullptr;
 
     input::InputPicker* ip = nullptr;
     logic::PathFinder* pathf = nullptr;

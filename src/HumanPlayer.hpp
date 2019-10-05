@@ -15,13 +15,15 @@
 
 #include <memory>
 
+#include "graphical/camera.hpp"
+#include "graphical/TerrainRenderer.hpp"
+
 #include "logic/Player.hpp"
 #include "logic/PathFinder.hpp"
 #include "logic/ObjectFactory.hpp"
-#include "graphical/camera.hpp"
-#include "graphical/TerrainRenderer.hpp"
+#include "logic/object_manager.hpp"
 //#include "graphical/GUIActionManager.hpp"
-//#include "logic/ObjectRenderer.hpp"
+#include "graphical/object_renderer.hpp"
 #include "logic/ObjectPathManager.hpp"
 #include "logic/BuildQueue.hpp"
 #include "logic/attack_manager.hpp"
@@ -42,7 +44,7 @@ private:
 public:
 	bool renderBBs = false;
 
-    familyline::logic::ObjectRenderer* objr;
+    familyline::graphics::ObjectRenderer* objr;
 
     HumanPlayer(const char* name, int xp=0,
                 familyline::logic::GameActionManager* gam = nullptr);

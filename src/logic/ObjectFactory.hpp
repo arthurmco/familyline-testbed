@@ -1,6 +1,6 @@
-/*	Represents an object factory
+/*  Represents an object factory
  
-	Copyright (C) 2016, 2018 Arthur M
+    Copyright (C) 2016, 2018 Arthur M
 */
 
 #ifndef OBJECTFACTORY_HPP
@@ -26,30 +26,30 @@ namespace familyline::logic {
      */
     class ObjectFactory {
     private:
-	std::map<std::string /*type*/, GameObject*> _objects;
+        std::map<std::string /*type*/, GameObject*> _objects;
 
     public:
-	/** 
-	 * Gets an instance of object with type 'typeID', or
-	 * nullptr if given object wasn't added to the factory
-	 * i.e, doesn't exist 
-	 */
-	GameObject* GetObject(const char* type, float x, float y, float z);
+        /** 
+         * Gets an instance of object with type 'typeID', or
+         * nullptr if given object wasn't added to the factory
+         * i.e, doesn't exist 
+         */
+        std::shared_ptr<GameObject> GetObject(
+            const char* type, float x, float y, float z);
 
-	/** 
-	 * Adds an object to the factory 
-	 */
-	void AddObject(GameObject* object);
+        /** 
+         * Adds an object to the factory 
+         */
+        void AddObject(GameObject* object);
 
-	static ObjectFactory* GetInstance() {
-	    static ObjectFactory* f = nullptr;
-	    if (!f) 	f = new ObjectFactory;
-	
-	    return f;
-	}
+        static ObjectFactory* GetInstance() {
+            static ObjectFactory* f = nullptr;
+            if (!f)     f = new ObjectFactory;
+    
+            return f;
+        }
     };
 
 }
 
 #endif
- 

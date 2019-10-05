@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "attack_manager.hpp"
 #include "game_object.hpp"
 #include "logic_service.hpp"
@@ -81,7 +83,7 @@ void AttackManager::checkRemovedObjects()
 	}
 
 	for (auto [handle, oid] : to_remove) {
-		printf("removed %x %llx\n", oid, handle);
+		printf("removed %x %lx\n", oid, handle);
 		if (handle > 0)
 			this->attacks.erase(handle);
 		

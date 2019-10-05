@@ -87,6 +87,11 @@ namespace familyline::logic {
         double range;
 
         /**
+         * Check if the attacked component is in range of the attacker
+         */
+        bool isInAttackRange(const AttackComponent& other) { return true; }
+        
+        /**
          * Attack directly another object
          *
          * Do a certain amount of damage to him.

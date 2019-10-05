@@ -48,7 +48,7 @@ Terrain::Terrain(int w, int h)
 
 }
 
-int Terrain::GetHeightFromPoint(unsigned x, unsigned y)
+int Terrain::GetHeightFromPoint(unsigned x, unsigned y) const
 {
     unsigned sectionX = floor(float(x) / (SECTION_SIDE * 1.0));
     unsigned sectionY = floor(float(y) / (SECTION_SIDE * 1.0));

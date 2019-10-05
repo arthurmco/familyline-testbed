@@ -4,6 +4,7 @@
 #include <string_view>
 #include <optional>
 
+#include <memory>
 #include "object_components.hpp"
 
 namespace familyline::logic {

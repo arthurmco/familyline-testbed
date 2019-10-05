@@ -17,9 +17,11 @@ void ObjectRenderer::remove(object_id_t id)
 void ObjectRenderer::update()
 {
 	for (auto& l : this->components) {
-        std::shared<Mesh> m = std::dynamic_pointer_cast<Mesh>(l.component->mesh);
+        Mesh* m = (Mesh*)
+            l.component->getLocationComponent().value().mesh;
+        
         if (m) {
-            m->
+            m->update();
         }
 	}
 }

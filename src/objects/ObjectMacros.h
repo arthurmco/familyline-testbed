@@ -6,7 +6,6 @@
 #ifndef OBJECTMACROS_H
 #define OBJECTMACROS_H
 
-
 #include "../logic/game_object.hpp"
 #include "../logic/object_components.hpp"
 #include "../graphical/asset_manager.hpp"

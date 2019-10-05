@@ -3,6 +3,8 @@
 class Camera;
 class Terrain;
 
+#include <glm/glm.hpp>
+
 namespace familyline::logic {
 /**
  * Controls terrain rendering
