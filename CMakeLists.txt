@@ -110,6 +110,7 @@ else()
   option(IS_DEBUG "Set if you want to output debugging symbols" OFF)
 
   find_package(PkgConfig REQUIRED)
+  pkg_search_module(GLEW REQUIRED glew) # finds glew
   pkg_search_module(SDL2 REQUIRED sdl2) # finds sdl
   pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
   pkg_search_module(GLM REQUIRED glm) # finds glm
@@ -132,7 +133,7 @@ else()
   
   target_link_libraries(familyline ${SDL2_LIBRARIES})
   target_link_libraries(familyline ${OPENGL_gl_LIBRARY})
-  target_link_libraries(familyline ${GLEW_LIBRARY})
+  target_link_libraries(familyline ${GLEW_LIBRARIES})
   target_link_libraries(familyline ${IL_LIBRARIES})
   target_link_libraries(familyline ${ILU_LIBRARIES})
   target_link_libraries(familyline ${CAIRO_LIBRARIES})
@@ -142,7 +143,7 @@ else()
   if(DO_TESTS)
   	target_link_libraries(familyline-tests ${SDL2_LIBRARIES})
   	target_link_libraries(familyline-tests ${OPENGL_gl_LIBRARY})
-  	target_link_libraries(familyline-tests ${GLEW_LIBRARY})
+  	target_link_libraries(familyline-tests ${GLEW_LIBRARIES})
   	target_link_libraries(familyline-tests ${IL_LIBRARIES})
   	target_link_libraries(familyline-tests ${ILU_LIBRARIES})
   	target_link_libraries(familyline-tests ${CAIRO_LIBRARIES})
@@ -158,7 +159,7 @@ else()
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SDL2_CFLAGS_OTHER}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall -Wextra")
-  include_directories(AFTER ${SDL2_INCLUDE_DIRS} `${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
+  include_directories(AFTER  ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} `${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
 
   if (IS_DEBUG)
 	  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
