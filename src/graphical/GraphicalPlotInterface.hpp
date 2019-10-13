@@ -10,7 +10,7 @@
 #include <map>
 
 #include "renderer.hpp"
-#include "logic/debug_drawer.hpp"
+//#include "logic/debug_drawer.hpp"
 
 namespace familyline::graphics {
 

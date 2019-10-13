@@ -22,8 +22,6 @@ public:
 	
     WatchTower();
 
-    WatchTower(int oid, float x, float y, float z);
-
     /* Called on object initialization */
     virtual bool Initialize();
 

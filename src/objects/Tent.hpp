@@ -21,8 +21,6 @@ public:
 
 /*  250 HP, no baseAtk, 1.0 baseArmor, 1.0 building material, 0.95 bulding
     strength, 2 units of garrison capacity */
-	
-    Tent(int oid, float x, float y, float z);
 
     /* Called on object initialization */
     virtual bool Initialize();

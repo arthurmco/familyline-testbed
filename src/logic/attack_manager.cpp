@@ -112,7 +112,8 @@ void AttackManager::processAttacks()
 
 }
 
-attack_handle_t make_attack_handle(int attackerOID, int defenderOID)
+attack_handle_t familyline::logic::make_attack_handle(
+    int attackerOID, int defenderOID)
 {
 	static_assert(sizeof(int) * 2 == sizeof(attack_handle_t), "Mismatched size for attack handle");
 
@@ -122,7 +123,8 @@ attack_handle_t make_attack_handle(int attackerOID, int defenderOID)
 /**
  * Split an attack handle to the attacker and defender
  */
-std::tuple<int, int> break_attack_handle(attack_handle_t handle)
+std::tuple<int, int> familyline::logic::break_attack_handle(
+    attack_handle_t handle)
 {
 	return std::make_tuple<int, int>(handle >> 32, handle & 0xffffffff);
 }

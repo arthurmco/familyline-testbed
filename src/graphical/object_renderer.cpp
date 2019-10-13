@@ -18,7 +18,7 @@ void ObjectRenderer::update()
 {
 	for (auto& l : this->components) {
         Mesh* m = (Mesh*)
-            l.component->getLocationComponent().value().mesh;
+            l.component->getLocationComponent().value().mesh.get();
         
         if (m) {
             m->update();

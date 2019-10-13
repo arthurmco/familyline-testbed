@@ -69,6 +69,8 @@ namespace familyline::logic {
          */
         glm::vec3 _position;
 
+    protected:
+        
         std::optional<LocationComponent> cLocation;
         std::optional<AttackComponent> cAttack;
         std::optional<ContainerComponent> cContainer;

@@ -12,6 +12,9 @@ namespace familyline::logic {
         std::vector<EventType> events;
     };
 
+    /**
+     * Acts like a central hub for events
+     */
     class ActionQueue {
     private:
         std::queue<Event> events;

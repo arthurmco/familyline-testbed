@@ -4,6 +4,7 @@ using namespace familyline::logic;
 
 std::unique_ptr<ActionQueue> LogicService::_action_queue;
 std::unique_ptr<AttackManager> LogicService::_atk_manager;
+std::unique_ptr<ObjectListener> LogicService::_object_listener;
 
 std::unique_ptr<ActionQueue>& LogicService::getActionQueue()
 {
@@ -21,4 +22,20 @@ std::unique_ptr<AttackManager>& LogicService::getAttackManager()
 	}
 
 	return _atk_manager;
+}
+
+std::unique_ptr<ObjectListener>& LogicService::getObjectListener()
+{
+	if (!_object_listener) {
+		_object_listener = std::make_unique<ObjectListener>();
+        getActionQueue()->addReceiver(
+            _object_listener.get(),
+            {
+                EventType::ObjectCreated,
+                EventType::ObjectDestroyed,
+            }
+        );
+	}
+
+	return _object_listener;
 }

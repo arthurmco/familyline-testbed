@@ -7,6 +7,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <memory>
 #include <optional>
 #include "imesh.hpp"
 #include "Terrain.hpp"
@@ -21,7 +22,7 @@ namespace familyline::logic {
      * screen that represents it.
      */
     struct LocationComponent {
-        IMesh* mesh;
+        std::shared_ptr<IMesh> mesh;
         GameObject* object;
 
         /**

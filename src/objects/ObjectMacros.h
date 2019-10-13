@@ -14,7 +14,8 @@
 #include <memory>
 #include "../graphical/mesh.hpp"
 
-#define DEF_MESH(dasset) this->mesh = std::dynamic_pointer_cast<familyline::graphics::Mesh>(familyline::graphics::GFXService::getAssetManager()->getAsset(dasset))
+#define DEF_MESH(dasset) this->cLocation.value().mesh = \
+        std::dynamic_pointer_cast<familyline::graphics::Mesh>(familyline::graphics::GFXService::getAssetManager()->getAsset(dasset))
 
 /*  Build a game object, generically.
     So, your object always needs to have a constructor like (oid, x, y ,z) */
@@ -22,16 +23,14 @@
     new ##object (oid, x, y, z)
 
 
-
 #define CLONE_MACRO_H(classname) \
-    virtual GameObject* clone(glm::vec3 position);
+    virtual std::shared_ptr<GameObject> create();
 
 
-#define CLONE_MACRO_CPP(classname)              \
-    GameObject* classname ::clone(glm::vec3 position) { \
-    auto a = new classname ();                     \
-    a->position = position;                        \
-    return a;                              \
+#define CLONE_MACRO_CPP(classname)                              \
+    std::shared_ptr<GameObject> classname ::create() {  \
+        auto* c = new classname();                              \
+        return std::make_shared< classname >();               \
     }
 
 #endif /* end of include guard: OBJECTMACROS_H */
