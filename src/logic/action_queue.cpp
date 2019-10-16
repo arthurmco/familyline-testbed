@@ -38,8 +38,12 @@ void ActionQueue::processEvents()
 	while (!this->events.empty()) {
 		Event e = this->events.front();
 
+        printf("event %x !\n", e.type);
+
 		for (auto& rec : this->receivers) {
 			if (std::find(rec.events.begin(), rec.events.end(), e.type) != rec.events.end()) {
+
+                printf("\t received by %s\n", rec.receiver->getName().c_str());
 				rec.receiver->pushEvent(e);
 			}
 		}

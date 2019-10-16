@@ -36,11 +36,13 @@ namespace familyline::logic {
         friend class ObjectManager;
 
     private:
-        object_id_t _id = -1;
+       
+    protected:
         std::string _type;
         std::string _name;
 
-    protected:
+        object_id_t _id = -1;
+
         double _health;
         int _maxHealth;
 
@@ -117,7 +119,7 @@ namespace familyline::logic {
 
         ObjectCategory getCategory() { return this->category; }
 
-        virtual ~GameObject() {}
+        virtual ~GameObject() {printf("%d destroyed\n", _id);}
 
 
     };

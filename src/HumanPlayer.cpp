@@ -269,30 +269,32 @@ bool HumanPlayer::Play(GameContext* gctx)
         _cam->AddRotation(glm::vec3(0, 1, 0), glm::radians(-1.0f));
 
     if (mouse_click && build_something) {
-        if (BuildQueue::GetInstance()->GetNext()) {
+
+        if (BuildQueue::GetInstance()->getNext()) {
             glm::vec3 p = ::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
 
             auto build = BuildQueue::GetInstance()->BuildNext(p);
-            GameObject* c = dynamic_cast<GameObject*>(build.get());
+            auto c = std::dynamic_pointer_cast<GameObject>(build);
 
             if (c) {
                 BuildQueue::GetInstance()->Clear();
                 auto buildpos = build->getPosition();
-        
+
                 buildpos.y = p.y;
                 build->setPosition(buildpos);
 
                 // the object will be added to the city
                 Log::GetLog()->InfoWrite("human-player",
-                                         "creating %s at %.3f %.3f %.3f", c->getName(), p.x, p.y, p.z);
+                                         "creating %s at %.3f %.3f %.3f", c->getName().c_str(), p.x, p.y, p.z);
 
-                auto shobj = std::shared_ptr<GameObject>(c);
+                auto shobj = c;
                 auto cobjID = gctx->om->add(std::move(shobj));
-                
+
                 auto ncobj =  gctx->om->get(cobjID).value();
                 this->RegisterCreation(ncobj.get());
-                Log::GetLog()->InfoWrite("human-player",
-                                         "%s has id %d now", ncobj->getName(), cobjID);
+                Log::GetLog()->InfoWrite(
+                    "human-player",
+                    "%s has id %d now", ncobj->getName().c_str(), cobjID);
 
             }
 
@@ -312,18 +314,29 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
 
     if (build_tent) {
-        BuildQueue::GetInstance()->Add(
-            std::dynamic_pointer_cast<GameObject>(
-                ObjectFactory::GetInstance()->GetObject("tent", 0, 0, 0)));
+        printf("Tent built\n");
+
+        auto nobj = std::dynamic_pointer_cast<GameObject>(
+            ObjectFactory::GetInstance()->GetObject("tent", 0, 0, 0));
+
+        if (!nobj) {
+            Log::GetLog()->Fatal("human-player", "Type 'tent' has not been found in the object factory!");
+        }
+
+        BuildQueue::GetInstance()->Add(nobj);
 
         build_tent = false;
         build_something = true;
     }
 
     if (build_tower) {
-        BuildQueue::GetInstance()->Add(
-            std::dynamic_pointer_cast<GameObject>(
-                ObjectFactory::GetInstance()->GetObject("watchtower", 0, 0, 0)));
+        auto nobj = std::dynamic_pointer_cast<GameObject>(
+            ObjectFactory::GetInstance()->GetObject("watchtower", 0, 0, 0));
+        if (!nobj) {
+            Log::GetLog()->Fatal("human-player", "Type 'watchtower' has not been found in the object factory!");
+        }
+
+        BuildQueue::GetInstance()->Add(nobj);
 
         build_tower = false;
         build_something = true;
@@ -348,19 +361,19 @@ bool HumanPlayer::Play(GameContext* gctx)
 
             auto attackerOID = -1;
             auto attackedOID = -1;
-            
+
             if (attack_set) {
                 attacker = std::dynamic_pointer_cast<GameObject>(_selected_obj.lock());
             }
 
             if (!attacker.expired()) {
-               
+
                 this->RegisterAttack(attacker.lock().get(),
                                      attackee.lock().get());
 
                 LogicService::getAttackManager()->startAttack(
                     attacker.lock()->getID(), attackee.lock()->getID());
-               
+
                 attack_ready = false;
             }
 

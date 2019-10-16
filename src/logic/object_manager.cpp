@@ -100,6 +100,7 @@ void ObjectManager::remove(object_id_t id)
 void ObjectManager::update()
 {
 	for (auto& o : _objects) {
+        printf("! <%d>\n", o->getID());
 		o->update();
 	}
 }
@@ -115,5 +116,5 @@ std::optional<std::shared_ptr<GameObject>> ObjectManager::get(object_id_t id)
 		return std::optional<std::shared_ptr<GameObject>>();
 	}
 
-	return std::optional<std::shared_ptr<GameObject>>(*r);
+	return std::make_optional(*r);
 }

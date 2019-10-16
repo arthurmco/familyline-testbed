@@ -5,7 +5,8 @@ using namespace familyline::logic;
 
 void BuildQueue::Add(std::shared_ptr<GameObject> o)
 {
-    this->_objects.push(o);
+    if (o)
+        this->_objects.push(o);
 }
      
 std::shared_ptr<GameObject> BuildQueue::BuildNext(glm::vec3 pos)
@@ -20,11 +21,12 @@ std::shared_ptr<GameObject> BuildQueue::BuildNext(glm::vec3 pos)
     return o;
 }
 
-std::shared_ptr<GameObject> BuildQueue::GetNext()
+std::optional<std::shared_ptr<GameObject>> BuildQueue::getNext() const
 {
-    if (this->_objects.empty()) return nullptr;
-
-    return this->_objects.front();
+    if (this->_objects.empty())
+        return std::optional<std::shared_ptr<GameObject>>();
+    else
+        return std::make_optional(this->_objects.front());
 }
 
 void BuildQueue::Clear() {

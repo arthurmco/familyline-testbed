@@ -31,8 +31,6 @@ public:
     CLONE_MACRO_H(Tent)
 //    ADD_CLONE_MACRO(Tent, "Tent")
 
-    Tent(const Tent&);
-    
 };
 
 }

@@ -51,5 +51,5 @@ std::shared_ptr<GameObject> GameObject::create()
  */
 void GameObject::update()
 {
-
+    printf("\t<%d>\n", this->_id);
 }

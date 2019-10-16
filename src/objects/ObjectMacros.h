@@ -28,9 +28,10 @@
 
 
 #define CLONE_MACRO_CPP(classname)                              \
-    std::shared_ptr<GameObject> classname ::create() {  \
+    std::shared_ptr<GameObject> classname ::create() {          \
         auto* c = new classname();                              \
-        return std::make_shared< classname >();               \
+        c->_id = -1;                                            \
+        return std::make_shared< classname >();                 \
     }
 
 #endif /* end of include guard: OBJECTMACROS_H */

@@ -109,8 +109,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         gr->add(widgets.lblVersion);
         
         /* Adds the objects to the factory */
-        //ObjectFactory::GetInstance()->AddObject(new WatchTower);
-        //ObjectFactory::GetInstance()->AddObject(new Tent);
+        ObjectFactory::GetInstance()->AddObject(new WatchTower);
+        ObjectFactory::GetInstance()->AddObject(new Tent);
 
         ObjectPathManager::getInstance()->SetTerrain(terr);
 
@@ -402,10 +402,11 @@ void Game::ShowDebugInfo()
 {
     GameObject* selected = hp->GetSelectedObject();
 
-    if (BuildQueue::GetInstance()->GetNext()) {
+    if (BuildQueue::GetInstance()->getNext()) {
         char s[256];
         sprintf(s, "Click to build %s",
-                BuildQueue::GetInstance()->GetNext()->getName());
+                BuildQueue::GetInstance()->getNext().value()
+                ->getName().c_str());
         lblBuilding.setText(s);
     }
     else {

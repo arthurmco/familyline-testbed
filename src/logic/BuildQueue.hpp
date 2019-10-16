@@ -13,6 +13,7 @@
 #include <queue>
 #include <glm/glm.hpp>
 #include <memory>
+#include <optional>
 
 #ifndef BUILDQUEUE_HPP
 #define BUILDQUEUE_HPP
@@ -26,7 +27,8 @@ namespace familyline::logic {
         void Add(std::shared_ptr<GameObject>);
 
         std::shared_ptr<GameObject> BuildNext(glm::vec3 pos);
-        std::shared_ptr<GameObject> GetNext();
+        std::optional<std::shared_ptr<GameObject>> getNext() const;
+
         void Clear();
 
         static BuildQueue* GetInstance() {

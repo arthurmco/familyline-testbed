@@ -30,8 +30,6 @@ public:
 
     CLONE_MACRO_H(WatchTower)
 //    ADD_CLONE_MACRO(WatchTower, NULL)
-
-    WatchTower(const WatchTower&);
 };
 
 }
