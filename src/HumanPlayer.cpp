@@ -292,6 +292,8 @@ bool HumanPlayer::Play(GameContext* gctx)
 
                 auto ncobj =  gctx->om->get(cobjID).value();
                 this->RegisterCreation(ncobj.get());
+                objr->add(ncobj.get());
+                
                 Log::GetLog()->InfoWrite(
                     "human-player",
                     "%s has id %d now", ncobj->getName().c_str(), cobjID);

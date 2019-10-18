@@ -1,5 +1,5 @@
 #include "scene_renderer.hpp"
-#include "logger.hpp"
+#include "Log.hpp"
 #include "mesh.hpp"
 
 using namespace familyline::graphics;
@@ -24,10 +24,13 @@ int SceneRenderer::add(std::shared_ptr<SceneObject> so)
 	}
 
 	_sceneObjects.emplace_back(so, id, vhandles);
-
-	LoggerService::getLogger()->write("scene-renderer", LogType::Debug,
-		"added scene object %s with ID %#x", so->getName().data(), id);
-
+    
+    //	LoggerService::getLogger()->write("scene-renderer", LogType::Debug,
+	//	"added scene object %s with ID %#x", so->getName().data(), id);
+    auto l = Log::GetLog();
+    l->InfoWrite("scene-renderer", "added scene object %s with ID %#x",
+                 so->getName().data(), id);
+    
 	return id;
 }
 

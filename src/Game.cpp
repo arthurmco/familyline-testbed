@@ -90,7 +90,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         terr_rend->SetTerrain(terr);
         terr_rend->SetCamera(cam);
 
-        objrend = new ObjectRenderer(*terr);
+        objrend = new ObjectRenderer(*terr, *scenernd);
         hp->objr = objrend;
         //gam.AddListener(objrend);
 
@@ -382,7 +382,7 @@ void Game::RunGraphical()
 //    rndr->UpdateObjects();
 
 //    rndr->UpdateFrames();
-//    rndr->render(cam);
+    rndr->render(cam);
     
     fb3D->endDraw();
     

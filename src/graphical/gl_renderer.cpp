@@ -43,8 +43,8 @@ VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
 
 void GLRenderer::render(Camera* c)
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
 
 	auto& shaderManager = GFXService::getShaderManager();
     auto l = Log::GetLog();

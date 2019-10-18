@@ -100,7 +100,6 @@ void ObjectManager::remove(object_id_t id)
 void ObjectManager::update()
 {
 	for (auto& o : _objects) {
-        printf("! <%d>\n", o->getID());
 		o->update();
 	}
 }

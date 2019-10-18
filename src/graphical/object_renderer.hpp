@@ -12,6 +12,7 @@
 #include "../logic/object_components.hpp"
 #include "../logic/game_object.hpp"
 #include "../logic/Terrain.hpp"
+#include "scene_renderer.hpp"
 
 namespace familyline::graphics {
     /**
@@ -23,7 +24,8 @@ namespace familyline::graphics {
     struct RendererSlot {
         familyline::logic::object_id_t id;
         familyline::logic::GameObject* component;
-
+        int meshHandle = 0;
+        
         RendererSlot(familyline::logic::object_id_t id,
                      familyline::logic::GameObject* c)
             : id(id), component(c)
@@ -34,10 +36,12 @@ namespace familyline::graphics {
     private:
         std::vector<RendererSlot> components;
         const familyline::logic::Terrain& _terrain;
-
+        SceneRenderer& _sr;
+        
     public:
-        ObjectRenderer(const familyline::logic::Terrain& t)
-            : _terrain(t)
+        ObjectRenderer(const familyline::logic::Terrain& t,
+                       SceneRenderer& sr)
+            : _terrain(t), _sr(sr)
         {}
 
         void add(familyline::logic::GameObject* const o);
