@@ -11,6 +11,8 @@ void ObjectRenderer::add(GameObject* const o)
     std::shared_ptr<Mesh> m = std::dynamic_pointer_cast<Mesh>(
         o->getLocationComponent().value().mesh);
     this->components[o->getID()].meshHandle = _sr.add(m);
+
+    printf("added mesh handle %x\n", this->components[o->getID()].meshHandle);
     
 }
 
@@ -22,13 +24,8 @@ void ObjectRenderer::remove(object_id_t id)
 void ObjectRenderer::update()
 {
 	for (auto& l : this->components) {
-        std::shared_ptr<Mesh> m = std::dynamic_pointer_cast<Mesh>(
-            l.component->getLocationComponent().value().mesh);
-        printf(" <%d> ", l.component->getID());
-        
-        if (m) {
-            m->update();
+        if (l.component->getLocationComponent()) {
+            l.component->getLocationComponent()->updateMesh(_terrain);
         }
 	}
-    puts(" ");
 }

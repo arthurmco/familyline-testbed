@@ -83,7 +83,7 @@ ShaderProgram::ShaderProgram(std::string_view name, std::initializer_list<Shader
 {
 	this->_name = name;
 	this->_handle = glCreateProgram();
-	
+
 	for (auto& s : shaders) {
 		_files.push_back(std::make_pair(s.getType(), s));
 		glAttachShader(_handle, s.getHandle());
@@ -124,18 +124,24 @@ void ShaderProgram::link()
  *
  * We have a cache because getting this info from the shader is expensive, becayse, well
  * you need to talk to the video card, and even if the video card is fast, the transport is
- * slow, because of PCI bus.
+ * slow, because of the PCI bus.
  * Even if you are using an APU, because APUs use the PCI bus to communicate with the processor
  */
 GLint ShaderProgram::getUniformLocation(std::string_view name)
 {
-	if (_uniform_cache.find(name) == _uniform_cache.end()) {
+    std::string sname{name};
+	if (_uniform_cache.find(sname) == _uniform_cache.end()) {
 		// Not found. Adds to the cache
-		_uniform_cache[name] = glGetUniformLocation(this->_handle, name.data());
-        printf("%s => %d\n", name.data(), _uniform_cache[name]);
+        auto uniformVal = glGetUniformLocation(this->_handle, sname.c_str());
+
+        if (uniformVal >= 0)
+            _uniform_cache[sname] = uniformVal;
+
+        printf("(%s) %s => %d\n", _name.data(), sname.c_str(),
+               uniformVal);
 	}
 
-	return _uniform_cache[name];
+	return _uniform_cache[sname];
 }
 
 void ShaderProgram::setUniform(std::string_view name, glm::vec3 val)

@@ -102,6 +102,7 @@ void ObjectManager::update()
 	for (auto& o : _objects) {
 		o->update();
 	}
+    
 }
 
 std::optional<std::shared_ptr<GameObject>> ObjectManager::get(object_id_t id)

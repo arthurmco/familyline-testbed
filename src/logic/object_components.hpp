@@ -29,7 +29,7 @@ namespace familyline::logic {
          * Updates a mesh by getting a coordinate in the logic space, converting it to
          * the graphical/OpenGL space and then setting it as the mesh position
          */
-        void updateMesh(const Terrain& t, glm::vec3);
+        void updateMesh(const Terrain& t);
     };
 
 /**

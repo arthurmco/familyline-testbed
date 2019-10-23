@@ -16,6 +16,7 @@ std::shared_ptr<GameObject> BuildQueue::BuildNext(glm::vec3 pos)
     auto opos = o->getPosition();
     opos.x = pos.x;
     opos.z = pos.z;
+    o->setPosition(opos);
 
     this->_objects.pop();
     return o;
@@ -23,10 +24,11 @@ std::shared_ptr<GameObject> BuildQueue::BuildNext(glm::vec3 pos)
 
 std::optional<std::shared_ptr<GameObject>> BuildQueue::getNext() const
 {
-    if (this->_objects.empty())
+    if (this->_objects.empty()) {
         return std::optional<std::shared_ptr<GameObject>>();
-    else
+    } else {
         return std::make_optional(this->_objects.front());
+    }
 }
 
 void BuildQueue::Clear() {

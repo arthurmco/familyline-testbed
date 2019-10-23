@@ -94,7 +94,7 @@ namespace familyline::logic {
         int getCityID() const { return _cityID; }
 	
         glm::vec3 getPosition() const { return _position; }
-        glm::vec3 setPosition(glm::vec3 v) { _position += v; return _position; }
+        glm::vec3 setPosition(glm::vec3 v) { _position = v; return _position; }
 
         GameObject(std::string type, std::string name, int health, int maxHealth, bool showHealth = true);
 

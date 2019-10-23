@@ -55,11 +55,11 @@ void GLRenderer::render(Camera* c)
 	for (auto& vh : _vhandle_list) {
 		ShaderProgram* shader = vh->vinfo.shaderState.shader;
 		shaderManager->use(*shader);
+
+        shader->setUniform("mView", viewMatrix);
+		shader->setUniform("mProjection", projMatrix);
 		vh->vinfo.shaderState.updateShader();
-
-		shader->setUniform("m_view", viewMatrix);
-		shader->setUniform("m_projection", projMatrix);
-
+        
 		bool hasTexture = true;
 
 		glBindVertexArray(vh->vao);

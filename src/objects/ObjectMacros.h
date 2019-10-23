@@ -23,15 +23,19 @@
     new ##object (oid, x, y, z)
 
 
-#define CLONE_MACRO_H(classname) \
+#define CLONE_MACRO_H(classname)                    \
     virtual std::shared_ptr<GameObject> create();
 
 
 #define CLONE_MACRO_CPP(classname)                              \
     std::shared_ptr<GameObject> classname ::create() {          \
-        auto* c = new classname();                              \
-        c->_id = -1;                                            \
-        return std::make_shared< classname >();                 \
+    auto* c = new classname();                                  \
+    c->_id = -1;                                                \
+    this->cLocation = std::make_optional<LocationComponent>();  \
+    this->cLocation.value().object = this;                      \
+    this->cAttack = std::make_optional<AttackComponent>();          \
+    this->cAttack.value().object = this;                        \
+    return std::shared_ptr< classname >(c);                     \
     }
 
 #endif /* end of include guard: OBJECTMACROS_H */

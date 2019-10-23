@@ -1,9 +1,8 @@
 #include "InputPicker.hpp"
 
 #include <algorithm>
-
 #include <glm/gtc/matrix_transform.hpp>
-//#include "../logic/ObjectEventEmitter.hpp"
+#include "../logic/logic_service.hpp"
 
 using namespace familyline::input;
 using namespace familyline::graphics;
@@ -145,33 +144,55 @@ void InputPicker::UpdateIntersectedObject()
 
     glm::vec3 origin = _cam->GetPosition();
 
-    // Update the internal object list
-    // ObjectEvent e;
-    //while (oel.popEvent(e)) {
-    //    switch (e.type) {
-    //    case ObjectCreated: {
-    //        if (e.to.expired())
-    //            continue;
-    //
-    //            auto sto = e.to.lock();
-    //            auto mm = std::dynamic_pointer_cast<graphics::Mesh>(sto->mesh);
-    //            poi_list.emplace_back(sto->position, mm, e.oid);
-    //            break;
-    //        }
-    //
-    //        case ObjectDestroyed:
-    //            poi_list.erase(
-    //                std::remove_if(poi_list.begin(), poi_list.end(),
-    //                               [&](const PickerObjectInfo& poi) {
-    //                                   return poi.ID == e.oid;
-    //                               })
-    //                );
-    //            break;
-    //        default:
-    //            continue;
-    //        }
-    //
-    //    }
+    const auto& olist = familyline::logic::LogicService::getObjectListener();
+
+    std::set<object_id_t> toAdd;
+    std::set<object_id_t> toRemove;
+
+    std::map<object_id_t, bool> aliveMap;
+    auto aliveObjects = olist->getAliveObjects();
+    for (auto obj : this->poi_list) {
+
+        // Stored object is still alive
+        if (aliveObjects.find(obj.ID) != aliveObjects.end()) {
+            aliveMap[obj.ID] = true;
+        }
+
+        // Stored object is not alive anymore
+        if (aliveObjects.find(obj.ID) == aliveObjects.end()) {
+            aliveMap[obj.ID] = false;
+            toRemove.insert(obj.ID);
+        }
+    }
+
+    for (auto objid : aliveObjects) {
+        // We have a new stored object
+        if (aliveMap.find(objid) == aliveMap.end()) {
+            toAdd.insert(objid);
+        }
+    }
+
+    for (auto objid : toRemove) {
+        poi_list.erase(
+            std::remove_if(poi_list.begin(), poi_list.end(),
+                           [&](const PickerObjectInfo& poi) {
+                               return poi.ID == objid;
+                           })
+                       );
+    }
+    
+    for (auto objid : toAdd) {
+        auto object = _om->get(objid).value();
+
+        if (!object->getLocationComponent()) {
+            continue;
+        }
+        
+        auto mesh = object->getLocationComponent()->mesh;
+        poi_list.emplace_back(object->getPosition(),
+                              std::dynamic_pointer_cast<Mesh>(mesh),
+                              objid);
+    }
 
     // Check the existing objects
     for (const PickerObjectInfo& poi : poi_list) {

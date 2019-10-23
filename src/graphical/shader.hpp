@@ -45,7 +45,7 @@ namespace familyline::graphics {
         std::string_view _name;
         std::vector<std::pair<ShaderType, Shader>> _files;
         int _handle;
-        std::unordered_map<std::string_view, GLint> _uniform_cache;
+        std::unordered_map<std::string, GLint> _uniform_cache;
 
         GLint getUniformLocation(std::string_view name);
 

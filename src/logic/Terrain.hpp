@@ -13,17 +13,17 @@
 
 #ifndef TERRAIN_HPP
 #define TERRAIN_HPP
-
+    
 namespace familyline::logic {
 
     struct TerrainSlot {
-	  int16_t elevation;
-	  uint16_t terrain_type;
-     };
+        int16_t elevation;
+        uint16_t terrain_type;
+    };
 
-    #define SECTION_SIDE 256
+#define SECTION_SIDE 256
     struct TerrainData {
-	TerrainSlot data[SECTION_SIDE*SECTION_SIDE];
+        TerrainSlot data[SECTION_SIDE*SECTION_SIDE];
     };
 
     /**
@@ -56,21 +56,21 @@ namespace familyline::logic {
         int GetHeight() const;
         int GetSectionCount() const;
 
-	/**
-	 * Gets the height from a point, in game space 
-	 */
-	int GetHeightFromPoint(unsigned x, unsigned y) const;
+        /**
+         * Gets the height from a point, in game space 
+         */
+        int GetHeightFromPoint(unsigned x, unsigned y) const;
 
         const char* GetName() const;
         const char* GetDescription() const;
 
-	void SetName(const char*);
-	void SetDescription(const char*);
+        void SetName(const char*);
+        void SetDescription(const char*);
 
-	/**
-	 * Get raw terrain data and split it into sections 
-	 */
-	void SetData(TerrainSlot* slot);
+        /**
+         * Get raw terrain data and split it into sections 
+         */
+        void SetData(TerrainSlot* slot);
 
     };
 

@@ -72,7 +72,8 @@ namespace familyline::graphics {
 		ShaderState shaderState;
 
 		VertexRenderStyle renderStyle = VertexRenderStyle::Triangles;
-
-		VertexInfo(int index, int materialID, ShaderProgram* shader, VertexRenderStyle style);
+        
+		VertexInfo(int index, int materialID, ShaderProgram* shader,
+                   VertexRenderStyle style);
 	};
 }

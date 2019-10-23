@@ -13,7 +13,7 @@ namespace familyline::logic {
         virtual glm::vec3 getPosition() const = 0;
         virtual void setLogicPosition(glm::vec3) = 0;
         virtual void addLogicPosition(glm::vec3) = 0;
-	
+
     };
 
 }

@@ -21,6 +21,7 @@ namespace familyline::graphics {
         std::string _name;
         glm::mat4 _worldMatrix;
         Animator* _ani;
+        glm::vec3 worldPosition;
 
     public:
         Mesh(const char* name, Animator* ani, std::vector<VertexInfo> vinfo)
@@ -28,16 +29,14 @@ namespace familyline::graphics {
             {
                 this->vinfo = vinfo;
             }
-
-        glm::vec3 worldPosition;
-
+        
         /**
          * Update the world matrix and the animator
          */
         virtual void update();
 
         virtual void setLogicPosition(glm::vec3 p) { this->worldPosition = p; }
-        virtual void addLogicPosition(glm::vec3 p) { this->worldPosition = p; }
+        virtual void addLogicPosition(glm::vec3 p) { this->worldPosition += p; }
 
         virtual std::string_view getName() const;
         virtual glm::vec3 getPosition() const;

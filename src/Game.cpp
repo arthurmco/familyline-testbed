@@ -359,7 +359,6 @@ void Game::RunLogic()
         objrend->update();
         pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
     }
-    objrend->update();
 
     LogicService::getAttackManager()->processAttacks();
     // CombatManager::getDefault()->DoAttacks(LOGIC_DELTA);
@@ -378,6 +377,8 @@ void Game::RunGraphical()
 
     //  rndr->SetBoundingBox(hp->renderBBs);
 
+    scenernd->update();
+    
 //    Animator::runAllAnimations(16); // TODO: get correct frame time
 //    rndr->UpdateObjects();
 

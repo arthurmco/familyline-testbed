@@ -36,7 +36,7 @@ void TerrainRenderer::SetTerrain(Terrain* t)
 
     Log::GetLog()->Write("terrain-renderer", "Added terrain with %d sections",
                          t->GetSectionCount());
-
+    
     needs_update = true;
 }
 
@@ -228,17 +228,16 @@ void TerrainRenderer::Render()
 {
     auto err = glGetError();
 
+    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
-
-    glm::mat4 wvpmatrix = _cam->GetProjectionMatrix() * _cam->GetViewMatrix() * glm::mat4(1.0);
 
     auto& sm = GFXService::getShaderManager();
     auto forward = sm->getShader("forward");
     sm->use(*forward);
 
-    forward->setUniform("mvp", wvpmatrix);
     forward->setUniform("mModel", glm::mat4(1.0));
     forward->setUniform("mView", _cam->GetViewMatrix());
+    forward->setUniform("mProjection", _cam->GetProjectionMatrix());
     forward->setUniform("diffuse_color", glm::vec3(0.5, 0.5, 0.5));
     forward->setUniform("ambient_color", glm::vec3(0.1, 0.1, 0.1));
 

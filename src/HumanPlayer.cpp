@@ -274,31 +274,32 @@ bool HumanPlayer::Play(GameContext* gctx)
             glm::vec3 p = ::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
 
             auto build = BuildQueue::GetInstance()->BuildNext(p);
-            auto c = std::dynamic_pointer_cast<GameObject>(build);
 
-            if (c) {
-                BuildQueue::GetInstance()->Clear();
-                auto buildpos = build->getPosition();
+            BuildQueue::GetInstance()->Clear();
+            auto buildpos = build->getPosition();
 
-                buildpos.y = p.y;
-                build->setPosition(buildpos);
+            buildpos.y = p.y;
+            build->setPosition(buildpos);
 
-                // the object will be added to the city
-                Log::GetLog()->InfoWrite("human-player",
-                                         "creating %s at %.3f %.3f %.3f", c->getName().c_str(), p.x, p.y, p.z);
+            
+            // the object will be added to the city
+            Log::GetLog()->InfoWrite("human-player",
+                                     "creating %s at %.3f %.3f %.3f",
+                                     build->getName().c_str(), buildpos.x, buildpos.y, buildpos.z);
 
-                auto shobj = c;
-                auto cobjID = gctx->om->add(std::move(shobj));
+            auto cobjID = gctx->om->add(std::move(build));
 
-                auto ncobj =  gctx->om->get(cobjID).value();
-                this->RegisterCreation(ncobj.get());
-                objr->add(ncobj.get());
+            auto ncobj =  gctx->om->get(cobjID).value();
+
+            this->RegisterCreation(ncobj.get());
+            objr->add(ncobj.get());
+
+            assert(ncobj->getPosition().x == buildpos.x);
+            assert(ncobj->getPosition().z == buildpos.z);
                 
-                Log::GetLog()->InfoWrite(
-                    "human-player",
-                    "%s has id %d now", ncobj->getName().c_str(), cobjID);
-
-            }
+            Log::GetLog()->InfoWrite(
+                "human-player",
+                "%s has id %d now", ncobj->getName().c_str(), cobjID);
 
         }
     }

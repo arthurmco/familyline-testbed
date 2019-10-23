@@ -10,14 +10,15 @@ using namespace familyline::graphics;
 void Mesh::update()
 {
 	auto translMatrix = glm::mat4(1.0);
-	glm::translate(translMatrix, this->worldPosition);
+	translMatrix = glm::translate(translMatrix, this->worldPosition);
 
 	_worldMatrix = translMatrix;
-	
+    
 	// update values in the shader state
 	for (auto& vi : vinfo) {
-		vi.shaderState.matrixUniforms["m_world"] = _worldMatrix;
+		vi.shaderState.matrixUniforms["mWorld"] = _worldMatrix;
 	}
+
 }
 
 std::string_view Mesh::getName() const
