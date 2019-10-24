@@ -19,6 +19,14 @@ AttackManager::AttackManager()
 	ame_emitter = new AttackManagerEventEmitter{};
 }
 
+AttackManager::~AttackManager()
+{
+    //LogicService::getActionQueue()->removeReceiver(ame_receiver);
+	//LogicService::getActionQueue()->removeEmitter(ame_emitter);
+	//  delete ame_receiver;
+	//  delete ame_emitter;
+}
+
 std::optional<double> AttackManager::attack(AttackComponent& defender)
 {
 	return std::optional<double>();

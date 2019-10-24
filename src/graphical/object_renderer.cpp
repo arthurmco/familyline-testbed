@@ -6,13 +6,17 @@ using namespace familyline::graphics;
 
 void ObjectRenderer::add(GameObject* const o)
 {
-    this->components.emplace_back(o->getID(), o);
+    if (!o->getLocationComponent()) {
+        return;
+    }
 
+    RendererSlot rs(o->getID(), o);
     std::shared_ptr<Mesh> m = std::dynamic_pointer_cast<Mesh>(
         o->getLocationComponent().value().mesh);
-    this->components[o->getID()].meshHandle = _sr.add(m);
-
-    printf("added mesh handle %x\n", this->components[o->getID()].meshHandle);
+    rs.meshHandle = _sr.add(m);
+ 
+    this->components.push_back(rs);
+    printf("added mesh handle %x\n", rs.meshHandle);
     
 }
 

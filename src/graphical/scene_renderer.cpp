@@ -52,8 +52,6 @@ void SceneRenderer::updateVisibleObjects()
 			continue;
 		}
 
-        printf(" -- ");
-        
 		si.object->update();
 
 		auto vinfos = si.object->getVertexInfo();
@@ -74,7 +72,6 @@ void SceneRenderer::updateVisibleObjects()
 		}
 	}
 
-    puts("|");
 }
 
 void SceneRenderer::changeVertexStatusOnRenderer()

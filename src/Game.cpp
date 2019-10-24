@@ -360,9 +360,8 @@ void Game::RunLogic()
         pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
     }
 
-    LogicService::getAttackManager()->processAttacks();
-    // CombatManager::getDefault()->DoAttacks(LOGIC_DELTA);
-    //ObjectPathManager::getInstance()->UpdatePaths(LOGIC_DELTA);
+    LogicService::getAttackManager()->processAttacks();    
+    ObjectPathManager::getInstance()->UpdatePaths(LOGIC_DELTA);
 
 }
 

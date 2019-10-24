@@ -22,7 +22,7 @@ void GUILabel::autoResize(GUISignal s)
 {
 
 	// Calculate the size of the rendered text. This will be the width
-	cairo_text_extents_t te;
+	cairo_text_extents_t te = {};
 	cairo_text_extents(ctxt, this->text.c_str(), &te);
 
 	this->width = (te.width + te.x_advance) / (s.absw * 1.15);
@@ -96,7 +96,7 @@ GUICanvas GUILabel::doRender(int absw, int absh) const
 	cairo_select_font_face(ctxt, this->format.fontName,
 		CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
 
-	cairo_text_extents_t  te;
+	cairo_text_extents_t te = {};
 	cairo_text_extents(ctxt, this->text.c_str(), &te);
 	cairo_move_to(ctxt, 0, 16);
 	cairo_show_text(ctxt, this->text.c_str());

@@ -49,7 +49,7 @@ glm::vec3 InputPicker::GetCursorWorldRay()
       glm::vec3 cur_world3 = glm::vec3(cur_world.x, cur_world.y, cur_world.z);
       return glm::normalize(cur_world3);
     */
-    int x, y, w, h;
+    int x=0, y=0, w=0, h=0;
     _win->getSize(w, h);
     Cursor::GetInstance()->GetPositions(x, y);
 
@@ -83,7 +83,7 @@ void InputPicker::UpdateTerrainProjectedPosition()
     float prolong_near = 0.1f, prolong_far = 128.0f;
     float prolong_now = prolong_near + ((prolong_far - prolong_near ) / 2.0f);
 
-    glm::vec3 pHalf;
+    glm::vec3 pHalf = glm::vec3(64,0,64);
 
 //  printf("near: %.3f %.3f %.3f, far: %.3f %.3f %.3f, prolongs: { ",
 //         pNear.x, pNear.y, pNear.z, pFar.x, pFar.y, pFar.z);

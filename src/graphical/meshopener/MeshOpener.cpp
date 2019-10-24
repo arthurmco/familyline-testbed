@@ -58,6 +58,8 @@ std::vector<Mesh*> MeshOpener::Open(const char* file)
         delete[] s;
     }
 
+    free(cfile);
+    
     return meshit->second.m->OpenSpecialized(file);
 }
 

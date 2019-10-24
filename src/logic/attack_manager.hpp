@@ -67,7 +67,8 @@ namespace familyline::logic {
     public:
 
         AttackManager();
-
+        ~AttackManager();
+        
         void doRegister(int oid, AttackComponent& atk);
 
         /**

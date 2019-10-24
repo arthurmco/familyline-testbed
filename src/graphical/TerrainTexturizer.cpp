@@ -75,6 +75,7 @@ static TerrainBitmap MergeTerrain(TerrainBitmap lt, TerrainBitmap rt,
     unsigned int* plb = (unsigned int*)lb.data();
     unsigned int* prb = (unsigned int*)rb.data();
 
+    #pragma omp parallel for
     for (unsigned int y = 0; y < ImageHeight; y++) {
         for (unsigned int x = 0; x < ImageWidth; x++) {
             float mixy = float(y) / float(ImageHeight);
@@ -129,7 +130,8 @@ Texture* TerrainRenderer::GenerateTerrainSlotTexture(familyline::logic::TerrainD
 {
     TerrainSlotTexture terrain_surface;
     terrain_surface.resize(ImageWidth*SlotSide*ImageHeight*SlotSide);
-    
+
+    #pragma omp parallel for
     for (unsigned sy = 0; sy < SlotSide-1; sy++) {
         for (unsigned sx = 0; sx < SlotSide-1; sx++) {
             auto texture_lt = data->data[(sy * SlotSide + sx)].terrain_type;

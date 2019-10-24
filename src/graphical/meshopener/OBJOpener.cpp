@@ -255,6 +255,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
         }
 
     }
+    delete[] line;
 
     // File parsing ended. We can close the file
     fclose(fObj);
