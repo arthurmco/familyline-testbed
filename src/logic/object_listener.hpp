@@ -42,5 +42,7 @@ namespace familyline::logic {
         void updateObjects();
 
         std::set<object_id_t> getAliveObjects() const;
+
+        ~ObjectListener();
     };
 }

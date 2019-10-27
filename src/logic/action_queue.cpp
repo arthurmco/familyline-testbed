@@ -24,6 +24,23 @@ void ActionQueue::addReceiver(EventReceiver* r, std::initializer_list<EventType>
 }
 
 
+void ActionQueue::removeReceiver(EventReceiver* r)
+{
+    auto newend = std::remove_if(
+        receivers.begin(), receivers.end(),
+        [r](ReceiverData rec) {
+            return (rec.receiver->getName() == r->getName());
+        });
+    receivers.erase(newend);
+}
+
+void ActionQueue::removeEmitter(EventEmitter* e)
+{
+    e->queue = nullptr;
+}
+        
+
+
 void ActionQueue::pushEvent(const Event& e)
 {
 	const char* evnames[] = {"null", "ObjectCreated", "ObjectDestroyed", "ObjectMoved", "ObjectStateChanged", "ObjectAttack"};

@@ -23,7 +23,10 @@ namespace familyline::logic {
     public:
         void addEmitter(EventEmitter* e);
         void addReceiver(EventReceiver* r, std::initializer_list<EventType> events);
-	
+
+        void removeReceiver(EventReceiver*);
+        void removeEmitter(EventEmitter*);
+        
         void pushEvent(const Event& e);
         void processEvents();
     };

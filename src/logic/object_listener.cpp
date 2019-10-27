@@ -28,3 +28,10 @@ std::set<object_id_t> ObjectListener::getAliveObjects() const
     return _objects;
 }
 
+#include "logic_service.hpp"
+
+ObjectListener::~ObjectListener()
+{
+    LogicService::getActionQueue()->removeReceiver(this);
+}
+

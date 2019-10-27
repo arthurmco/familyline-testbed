@@ -26,6 +26,7 @@ std::unique_ptr<AttackManager>& LogicService::getAttackManager()
 
 std::unique_ptr<ObjectListener>& LogicService::getObjectListener()
 {
+    
 	if (!_object_listener) {
 		_object_listener = std::make_unique<ObjectListener>();
         getActionQueue()->addReceiver(

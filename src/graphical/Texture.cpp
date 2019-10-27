@@ -120,6 +120,9 @@ glm::mat4 Texture::GetOffsetMatrix()
 size_t Texture::GetMaximumSize()
 {
     auto maxtex = 0;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxtex);
+
+    maxtex = 4096;
+    //glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxtex);
+    
     return (size_t)maxtex;
 }

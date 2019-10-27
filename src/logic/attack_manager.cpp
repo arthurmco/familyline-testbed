@@ -1,5 +1,4 @@
 #include <algorithm>
-
 #include "attack_manager.hpp"
 #include "game_object.hpp"
 #include "logic_service.hpp"
@@ -21,10 +20,10 @@ AttackManager::AttackManager()
 
 AttackManager::~AttackManager()
 {
-    //LogicService::getActionQueue()->removeReceiver(ame_receiver);
-	//LogicService::getActionQueue()->removeEmitter(ame_emitter);
-	//  delete ame_receiver;
-	//  delete ame_emitter;
+    LogicService::getActionQueue()->removeReceiver(ame_receiver);
+	LogicService::getActionQueue()->removeEmitter(ame_emitter);
+	delete ame_receiver;
+	delete ame_emitter;
 }
 
 std::optional<double> AttackManager::attack(AttackComponent& defender)
