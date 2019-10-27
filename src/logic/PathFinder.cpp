@@ -32,9 +32,9 @@ void PathFinder::InitPathmap(int w, int h)
 
 // Object information used by the pathfinder
 struct ObjectPathData {
+    std::weak_ptr<GameObject> obj;
     int size;
     object_id_t ID;
-    std::weak_ptr<GameObject> obj;
 
     ObjectPathData(std::weak_ptr<GameObject> obj, int size, object_id_t ID)
         : obj(obj), size(size), ID(ID)

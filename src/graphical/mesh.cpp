@@ -58,7 +58,7 @@ BoundingBox Mesh::getBoundingBox()
     auto vdx = _ani->getCurrentFrame();
     
     std::vector<BoundingBox> binit;
-    auto bounds = std::transform(
+    std::transform(
         vdx.begin(), vdx.end(), std::back_inserter(binit),
         [](VertexData vd) {
             BoundingBox b;

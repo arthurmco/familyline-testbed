@@ -361,6 +361,9 @@ void GUIManager::renderToScreen()
 
 void GUIManager::render(int absw, int absh)
 {
+    (void)absw;
+    (void)absh;
+    
     auto c = this->doRender(this->width, this->height);
 
     this->canvas = c;

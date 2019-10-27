@@ -285,7 +285,7 @@ static int show_starting_menu()
 
             //      guir->InitInput();
             auto g = Game(win, &f3D, &fGUI, guir, pm, hp);
-            auto ret = g.RunLoop();
+            g.RunLoop();
             if (pm)
                 delete pm;
             delete hp;

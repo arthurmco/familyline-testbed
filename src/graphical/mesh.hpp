@@ -19,8 +19,8 @@ namespace familyline::graphics {
     class Mesh : public SceneObject, public AssetObject, public familyline::logic::IMesh  {
     private:
         std::string _name;
-        glm::mat4 _worldMatrix;
         Animator* _ani;
+        glm::mat4 _worldMatrix;
         glm::vec3 worldPosition;
 
     public:

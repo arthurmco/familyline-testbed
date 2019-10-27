@@ -39,6 +39,8 @@ void ObjectEventEmitter::notifyCreationStart(object_id_t id, const std::string& 
  * No more operations with it will be executed.
  */
 void ObjectEventEmitter::notifyRemoval(object_id_t id, const std::string& name) {
+    (void)name;
+    
 	Event e{ ObjectDestroyed };
 	e.emitter = this;
 	e.object.id = id;

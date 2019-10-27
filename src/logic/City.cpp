@@ -25,6 +25,8 @@ void CityListener::OnListen(GameAction& ga) {
  * Get next created object, or nullptr if no object is next
  */
 std::weak_ptr<GameObject> CityListener::getNextObject() {
+    return std::weak_ptr<GameObject>();
+    
 }
 
 ///////////////////////////////////////////////////

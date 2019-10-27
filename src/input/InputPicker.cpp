@@ -207,7 +207,7 @@ void InputPicker::UpdateIntersectedObject()
         glm::min(vmin.y, 0.0f);
         glm::max(vmax.y, 0.0f);
 
-        glm::vec3 planePosX, planePosY, planePosZ;
+        //glm::vec3 planePosX, planePosY, planePosZ;
 
         float tmin = -100000;
         float tmax = 100000;

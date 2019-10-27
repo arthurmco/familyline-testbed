@@ -295,7 +295,7 @@ AssetItem* AssetFile::getAsset(std::string_view name) const
 
 std::optional<std::shared_ptr<AssetItem>> AssetFile::nextAsset()
 {
-    if (this->_asset_idx >= assets.size())
+    if ((unsigned)this->_asset_idx >= assets.size())
         return std::optional<std::shared_ptr<AssetItem>>();
 
     return make_optional(this->assets[this->_asset_idx++]);

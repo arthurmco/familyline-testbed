@@ -1,7 +1,7 @@
 /*
   Game loop class
 
-  Copyright (C) 2017 Arthur M
+  Copyright (C) 2017, 2019 Arthur Mendes
 
 */
 
@@ -55,64 +55,65 @@
 
 namespace familyline {
     
-class Game {
-private:
-    logic::ObjectManager* om = nullptr;
-    HumanPlayer* hp = nullptr;
-    logic::Terrain* terr = nullptr;
-    logic::PlayerManager* pm = nullptr;
-    logic::TerrainFile* terrFile;
+    class Game {
+    private:
+        graphics::Window* win = nullptr;
+        graphics::Renderer* rndr = nullptr;
+        graphics::SceneRenderer* scenernd = nullptr;
+        graphics::Framebuffer *fbGUI = nullptr, *fb3D = nullptr;
+        graphics::gui::GUIManager* gr = nullptr;
+        logic::PlayerManager* pm = nullptr;
+        logic::ObjectManager* om = nullptr;
+        
+        HumanPlayer* hp = nullptr;
+        logic::Terrain* terr = nullptr;
+        logic::TerrainFile* terrFile;
     
-    logic::GameContext gctx;
-    logic::GameActionManager gam;
+        logic::GameContext gctx;
+        logic::GameActionManager gam;
     
-    graphics::Window* win = nullptr;
-    graphics::Renderer* rndr = nullptr;
-    graphics::SceneRenderer* scenernd = nullptr;
-    graphics::Framebuffer *fbGUI = nullptr, *fb3D = nullptr;
-    graphics::gui::GUIManager* gr = nullptr;
     
-    bool player = false;
+        bool player = false;
 
-    graphics::Camera* cam;
+        graphics::Camera* cam;
 
-    std::unique_ptr<graphics::AssetManager>& am = graphics::GFXService::getAssetManager();
+        std::unique_ptr<graphics::AssetManager>& am = graphics::GFXService::getAssetManager();
 
-    graphics::TerrainRenderer* terr_rend = nullptr;
-    graphics::ObjectRenderer* objrend = nullptr;
+        graphics::TerrainRenderer* terr_rend = nullptr;
+        graphics::ObjectRenderer* objrend = nullptr;
 
-    input::InputPicker* ip = nullptr;
-    logic::PathFinder* pathf = nullptr;
+        input::InputPicker* ip = nullptr;
+        logic::PathFinder* pathf = nullptr;
 
-    struct {
-//	graphics::gui::GUIPanel *p;
-	graphics::gui::GUILabel *lbl;
-	graphics::gui::GUILabel *lblVersion;
-//	graphics::gui::GUIPanel *pnl;
-	graphics::gui::GUIButton* btn;
-    } widgets;
+        struct {
+            //  graphics::gui::GUIPanel *p;
+            graphics::gui::GUILabel *lbl;
+            graphics::gui::GUILabel *lblVersion;
+            //  graphics::gui::GUIPanel *pnl;
+            graphics::gui::GUIButton* btn;
+        } widgets;
 
 
-    /* Run input-related code
-     * Return false if the player asked to exit the game.
-     */
-    bool RunInput();
+        /* Run input-related code
+         * Return false if the player asked to exit the game.
+         */
+        bool RunInput();
     
-    void RunLogic();
-    void RunGraphical();
+        void RunLogic();
+        void RunGraphical();
 
-    /* Show on-screen debug info
-     * (aka the words in monospaced font you see in-game)
-     */
-    void ShowDebugInfo();
+        /* Show on-screen debug info
+         * (aka the words in monospaced font you see in-game)
+         */
+        void ShowDebugInfo();
 
-public:
-    Game(graphics::Window* w, graphics::Framebuffer* fb3D,
-	 graphics::Framebuffer* fbGUI, graphics::gui::GUIManager* gr,
-	 logic::PlayerManager* pm, HumanPlayer* hp);
+    public:
+        Game(graphics::Window* w, graphics::Framebuffer* fb3D,
+             graphics::Framebuffer* fbGUI, graphics::gui::GUIManager* gr,
+             logic::PlayerManager* pm, HumanPlayer* hp);
 
-    int RunLoop();
-};
+        int RunLoop();
+    };
     
 }
 

@@ -45,7 +45,7 @@ namespace familyline::graphics {
 
         virtual AssetType getAssetType() const { return AssetType::TextureAsset; }
 
-        ~TextureFile();
+        virtual ~TextureFile();
         
     };
     

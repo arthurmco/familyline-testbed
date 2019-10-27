@@ -36,7 +36,6 @@ Event::Event(const Event& other)
 
 void EventEmitter::pushEvent(Event& e)
 {
-	auto time = std::chrono::system_clock::now();
 	auto epoch = std::chrono::duration_cast<std::chrono::microseconds>
 		(std::chrono::system_clock::now().time_since_epoch()).count();
 

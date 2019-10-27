@@ -90,7 +90,7 @@ namespace familyline::logic {
         /**
          * Check if the attacked component is in range of the attacker
          */
-        bool isInAttackRange(const AttackComponent& other) { return true; }
+        bool isInAttackRange(const AttackComponent& other);
         
         /**
          * Attack directly another object

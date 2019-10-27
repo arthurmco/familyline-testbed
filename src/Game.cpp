@@ -337,7 +337,6 @@ bool Game::RunInput()
 
     gctx.elapsed_seconds = INPUT_DELTA/1000.0;
 
-    InputEvent ev;
     gr->update();
 
     pm->ProcessInputs();
@@ -429,11 +428,11 @@ void Game::ShowDebugInfo()
         }
     }
 
-    {
-        int qx, qy;
-//  scenernd->GetCameraQuadrant(qx, qy);
-//          gr->DebugWrite(10, 160, "Camera quadrant: %d x %d", qx, qy);
-    }
+    //   {
+    //       int qx, qy;
+    //       scenernd->GetCameraQuadrant(qx, qy);
+    //       gr->DebugWrite(10, 160, "Camera quadrant: %d x %d", qx, qy);
+    //   }
 
 
     lblSelected.setText("");

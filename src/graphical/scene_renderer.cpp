@@ -36,7 +36,7 @@ int SceneRenderer::add(std::shared_ptr<SceneObject> so)
 
 void SceneRenderer::remove(int meshHandle)
 {
-
+    (void)meshHandle; //TODO: implement
 }
 
 void SceneRenderer::update()

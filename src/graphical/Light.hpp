@@ -17,15 +17,15 @@ namespace familyline::graphics {
 
     class Light : public SceneObject {
     private:
+        std::string _name;
+        glm::vec3 _position;
+
         /* Light color */
         glm::vec3 _lightColor;
 
         /* Light strength */
         float _lightStrength;
 
-        std::string _name;
-        glm::vec3 _position;
-        
     public:
         void setColor(int r, int g, int b);
         void getColor(int& r, int& g, int& b);

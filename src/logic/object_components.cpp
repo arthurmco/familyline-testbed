@@ -23,6 +23,16 @@ void LocationComponent::updateMesh(const Terrain& t) {
         graphics::GameToGraphicalSpace(glm::vec3(pos.x, height, pos.z)));
 }
 
+
+/**
+ * Check if the attacked component is in range of the attacker
+ */
+bool AttackComponent::isInAttackRange(const AttackComponent& other)
+{
+    return (other.object != nullptr);
+
+}
+
 /**
  * Attack directly another object
  *

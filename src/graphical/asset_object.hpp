@@ -29,6 +29,9 @@ namespace familyline::graphics {
     class AssetObject {
     public:
         virtual AssetType getAssetType() const = 0;
+
+        virtual ~AssetObject() {}
+
     };
 
 

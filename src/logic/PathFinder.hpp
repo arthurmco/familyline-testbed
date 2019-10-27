@@ -29,9 +29,9 @@ namespace familyline::logic {
      * Path node
      */
     struct PathNode {
+        PathFinder* const pf;
         glm::vec2 pos; ///< Position
         PathNode* prev = nullptr; ///< The previous nodes in the node list
-        PathFinder* const pf;
 
         double f = 0;
 

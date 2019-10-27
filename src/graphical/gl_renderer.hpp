@@ -12,13 +12,15 @@ private:
 	GLRenderer& _renderer;
 	
 public:
-	GLVertexHandle(int vao, GLRenderer& renderer, VertexInfo& vinfo)
+    int vao;
+	int vboPos, vboNorm, vboTex;
+	size_t vsize;
+
+    
+    GLVertexHandle(int vao, GLRenderer& renderer, VertexInfo& vinfo)
 		: VertexHandle(vinfo), vao(vao), _renderer(renderer)
 	{}
 
-	int vao;
-	int vboPos, vboNorm, vboTex;
-	size_t vsize;
 
 	virtual bool update(VertexData& vd);
 	virtual bool remove();
