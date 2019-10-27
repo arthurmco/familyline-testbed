@@ -98,7 +98,9 @@ std::shared_ptr<AssetObject> AssetManager::getAsset(std::string_view assetName)
             AssetError::AssetNotFound);
     }
 
-    asset_it->second.object = std::make_optional(asset_it->second.loadAssetObject());
+    //    if (!asset_it->second.object) {
+        asset_it->second.object = std::make_optional(asset_it->second.loadAssetObject());
+        //    }
     
     Log::GetLog()->InfoWrite("asset-manager", "getting asset '%s' at path '%s'",
                              asset_it->second.name.c_str(), asset_it->second.path.c_str());

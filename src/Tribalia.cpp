@@ -297,7 +297,7 @@ static int show_starting_menu()
 		/* Render the menu */
 		bool r = true;
 		auto deflistener = InputManager::GetInstance()->GetDefaultListener();
-
+        
 		GUILabel l = GUILabel(0.37, 0.03, "FAMILYLINE");
 		l.format.foreground = glm::vec4(1, 1, 1, 1);
 

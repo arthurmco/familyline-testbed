@@ -36,6 +36,9 @@ namespace familyline::graphics {
         int _totalw, _totalh;
         bool _handleowner = true;
 
+        // XXX: Please move this from here.
+        static GLint texture_size;
+        
     public:
         Texture(int width, int height, GLenum format, void* data);
         Texture(GLuint handle, int w, int h, glm::vec2 uv_pos, glm::vec2 uv_size);

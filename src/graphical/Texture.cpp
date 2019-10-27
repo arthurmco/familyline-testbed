@@ -1,8 +1,9 @@
 #include "Texture.hpp"
 
-
-
 using namespace familyline::graphics;
+
+
+GLint Texture::texture_size = -1;
 
 /* Create a texture from an new image */
 Texture::Texture(int width, int height, GLenum format, void* data)
@@ -10,23 +11,23 @@ Texture::Texture(int width, int height, GLenum format, void* data)
     GLuint tex_handle = 0;
     _totalw = _w = width;
     _totalh = _h = height;
-    
+
     // Create, bind and setup texture
     glGenTextures(1, &tex_handle);
     glBindTexture(GL_TEXTURE_2D, tex_handle);
 
-    glGetError();    
+    glGetError();
     GLenum glerr = GL_NO_ERROR;
     if ((glerr = glGetError()) != GL_NO_ERROR) {
 	Log::GetLog()->Warning("texture", "GL error %#x while binding texture handle %d",
 			       glerr, tex_handle);
     }
-    
+
     GLenum dest_format = GL_RGB;
     if (format == GL_RGBA || format == GL_BGRA) {
 	dest_format = GL_RGBA;
-    } 
-    
+    }
+
     glTexImage2D(GL_TEXTURE_2D, 0, dest_format, width, height, 0, format,
 		 GL_UNSIGNED_BYTE, data);
 
@@ -41,10 +42,11 @@ Texture::Texture(int width, int height, GLenum format, void* data)
     Log::GetLog()->Write("texture", "Created texture with %dx%d, format %#x, with id %d",
 			 width, height, format, tex_handle);
 
-    
+
     // Unbind texture
     glBindTexture(GL_TEXTURE_2D, 0);
     _tex_handle = tex_handle;
+
 }
 
 GLint Texture::GetHandle() const { return _tex_handle; }
@@ -98,11 +100,11 @@ Texture* Texture::GetSubTexture(int xpos, int ypos, int w, int h)
     t->_totalw = _totalw;
     t->_totalh = _totalh;
     t->_handleowner = false;
-    
+
     Log::GetLog()->Write("texture", "Created a subdivision from texture %s (handle %d) at point (%d, %d) size (%d, %d)", t->_name.c_str(), _tex_handle, xpos, ypos, w, h);
     t->_name = _name.append("_sub");
     return t;
-    
+
 }
 
 glm::mat4 Texture::GetOffsetMatrix()
@@ -113,16 +115,20 @@ glm::mat4 Texture::GetOffsetMatrix()
 	0, 0, 1, 1,
 	0, 0, 0, 1
 	);
-	
+
 }
 
 /* Get maximum possible size for a texture */
 size_t Texture::GetMaximumSize()
 {
-    auto maxtex = 0;
+    if (texture_size == -1) {
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texture_size);
+        Log::GetLog()->Write("texture", "Discovered texture max size: %dx%d", texture_size, texture_size);
 
-    maxtex = 4096;
-    //glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxtex);
-    
-    return (size_t)maxtex;
+        if (texture_size < 0) {
+            Log::GetLog()->Fatal("texture", "Invalid texture max size. Something is wrong");            
+        }
+
+    }
+    return (texture_size > 0) ? texture_size : 0;
 }
