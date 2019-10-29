@@ -180,14 +180,14 @@ void InputPicker::UpdateIntersectedObject()
                            })
                        );
     }
-    
+
     for (auto objid : toAdd) {
         auto object = _om->get(objid).value();
 
         if (!object->getLocationComponent()) {
             continue;
         }
-        
+
         auto mesh = object->getLocationComponent()->mesh;
         poi_list.emplace_back(object->getPosition(),
                               std::dynamic_pointer_cast<Mesh>(mesh),
@@ -213,7 +213,6 @@ void InputPicker::UpdateIntersectedObject()
         float tmax = 100000;
 
         float dxmin, dxMax;
-        //printf("\n%s\n", loc->GetName());
         if (direction.x != 0) {
             dxmin = (vmin.x - origin.x) / direction.x;
             dxMax = (vmax.x - origin.x) / direction.x;
@@ -246,7 +245,7 @@ void InputPicker::UpdateIntersectedObject()
 
         }
 
-        //printf("total: %.4f %.4f\n", tmin, tmax);
+        printf("total: %.4f %.4f\n", tmin, tmax);
 
         /* Ray misses */
         if (tmin < 0) {

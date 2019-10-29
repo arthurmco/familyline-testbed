@@ -42,7 +42,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         //        ObjectManager::setDefault(om);
 
         auto& atk_manager = LogicService::getAttackManager();
-        
+
         rndr = new GLRenderer{};
         // DebugPlotter::pinterface = std::unique_ptr<DebugPlotInterface>
         //    (new GraphicalPlotInterface(rndr));
@@ -65,7 +65,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 
 //      scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() * SEC_SIZE);
-        
+
         cam = new Camera{ glm::vec3(6.0f, 36.0f, 6.0f), (float)winW / (float)winH, glm::vec3(0,0,0) };
         scenernd = new SceneRenderer((Renderer*)rndr, *cam);
 
@@ -105,9 +105,9 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         hp->SetPathfinder(pathf);
 
         widgets.lblVersion = new GUILabel(10, 10, "Familyline " VERSION " commit " COMMIT);
-        
+
         gr->add(widgets.lblVersion);
-        
+
         /* Adds the objects to the factory */
         ObjectFactory::GetInstance()->AddObject(new WatchTower);
         ObjectFactory::GetInstance()->AddObject(new Tent);
@@ -346,6 +346,8 @@ bool Game::RunInput()
 
 void Game::RunLogic()
 {
+    LogicService::getObjectListener()->updateObjects();
+
     /* Logic & graphical processing */
     gam.ProcessListeners();
     terr_rend->Update();
@@ -359,7 +361,7 @@ void Game::RunLogic()
         pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
     }
 
-    LogicService::getAttackManager()->processAttacks();    
+    LogicService::getAttackManager()->processAttacks();
     ObjectPathManager::getInstance()->UpdatePaths(LOGIC_DELTA);
 
 }
@@ -376,15 +378,15 @@ void Game::RunGraphical()
     //  rndr->SetBoundingBox(hp->renderBBs);
 
     scenernd->update();
-    
+
 //    Animator::runAllAnimations(16); // TODO: get correct frame time
 //    rndr->UpdateObjects();
 
 //    rndr->UpdateFrames();
     rndr->render(cam);
-    
+
     fb3D->endDraw();
-    
+
     fbGUI->startDraw();
     gr->render(0, 0);
     gr->renderToScreen();
@@ -413,17 +415,17 @@ void Game::ShowDebugInfo()
     }
 
     auto locc = ip->GetIntersectedObject().lock();
-    if (locc) {
+    if (locc && selected) {
         auto alocc = locc.get();
 //          gr->DebugWrite(10, 100, "Hovering object '%s'", locc->getName());
 
         bool attackable = selected->getAttackComponent().has_value();
-            
+
         if (alocc && attackable && selected && alocc->getMaxHealth()) {
 
             auto inRange = selected->getAttackComponent()->isInAttackRange(
                 alocc->getAttackComponent().value());
-                
+
             lblRange.setText(inRange ? "In range" : "Not in range");
         }
     }
@@ -439,7 +441,7 @@ void Game::ShowDebugInfo()
     if (selected) {
         char s[150];
         auto& acomp = selected->getAttackComponent();
-        
+
         if (acomp) {
             sprintf(s, "Selected object: '%s' (%4f/%4d)",
                     selected->getName().c_str(),
