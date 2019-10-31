@@ -105,7 +105,7 @@ void GLRenderer::render(Camera* c)
 		}
 
         auto glFormat = vh->vinfo.renderStyle == VertexRenderStyle::Triangles ?
-            GL_TRIANGLES : GL_LINES;        
+            GL_TRIANGLES : GL_LINE_STRIP;        
 		glDrawArrays(glFormat, 0, vh->vsize);
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {

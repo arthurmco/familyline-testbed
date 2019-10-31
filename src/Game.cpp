@@ -368,6 +368,9 @@ void Game::RunLogic()
 
     LogicService::getDebugDrawer()->drawLine(glm::vec3(0, 250, 0), glm::vec3(6, 250, 6),
                                              glm::vec4(1.0, 0, 0, 1));
+    LogicService::getDebugDrawer()->drawSquare(glm::vec3(6, 250, 6), glm::vec3(24, 250, 24),
+                                               glm::vec4(0.0, 0.2, 1.0, 1),
+                                               glm::vec4(0, 0, 0, 0));
     LogicService::getDebugDrawer()->update();
 }
 

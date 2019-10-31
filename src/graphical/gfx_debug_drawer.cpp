@@ -82,8 +82,8 @@ void GFXDebugDrawer::drawSquare(glm::vec3 start, glm::vec3 end,
     
     glm::vec3 fore3 = foreground;
     VertexData vdata;
-    vdata.position = { Game2GFX(x0), Game2GFX(x1), Game2GFX(y0),
-                       Game2GFX(x1), Game2GFX(y0), Game2GFX(y1)};
+    vdata.position = { Game2GFX(x0), Game2GFX(x1), Game2GFX(y1),
+                       Game2GFX(x0), Game2GFX(y0), Game2GFX(y1)};
     vdata.normals = { fore3, fore3, fore3, fore3, fore3, fore3};
     vdata.texcoords = { glm::vec2(0, 0), glm::vec2(0, 0),
                         glm::vec2(0, 0), glm::vec2(0, 0),
