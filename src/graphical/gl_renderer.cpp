@@ -16,6 +16,13 @@ GLRenderer::GLRenderer()
 	});
 
 	_sForward->link();
+
+    _sLines = new ShaderProgram("lines", {
+		Shader("shaders/Lines.vert", ShaderType::Vertex),
+		Shader("shaders/Lines.frag", ShaderType::Fragment)
+	});
+
+	_sLines->link();
 }
 
 VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
@@ -58,6 +65,7 @@ void GLRenderer::render(Camera* c)
 
         shader->setUniform("mView", viewMatrix);
 		shader->setUniform("mProjection", projMatrix);
+		shader->setUniform("mvp", projMatrix * viewMatrix * glm::mat4(1.0));
 		vh->vinfo.shaderState.updateShader();
         
 		bool hasTexture = true;
@@ -96,7 +104,9 @@ void GLRenderer::render(Camera* c)
 				GL_FLOAT, GL_FALSE, 0, (void*)0);
 		}
 
-		glDrawArrays(GL_TRIANGLES, 0, vh->vsize);
+        auto glFormat = vh->vinfo.renderStyle == VertexRenderStyle::Triangles ?
+            GL_TRIANGLES : GL_LINES;        
+		glDrawArrays(glFormat, 0, vh->vsize);
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
 			l->Fatal("glrenderer", "rendering plot: OpenGL error %#x", err);

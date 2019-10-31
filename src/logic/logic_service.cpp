@@ -5,6 +5,7 @@ using namespace familyline::logic;
 std::unique_ptr<ActionQueue> LogicService::_action_queue;
 std::unique_ptr<AttackManager> LogicService::_atk_manager;
 std::unique_ptr<ObjectListener> LogicService::_object_listener;
+std::unique_ptr<DebugDrawer> LogicService::_debug_drawer;
 
 std::unique_ptr<ActionQueue>& LogicService::getActionQueue()
 {
@@ -39,4 +40,14 @@ std::unique_ptr<ObjectListener>& LogicService::getObjectListener()
 	}
 
 	return _object_listener;
+}
+
+void LogicService::initDebugDrawer(DebugDrawer* d)
+{
+    _debug_drawer = std::unique_ptr<DebugDrawer>(d);
+}
+
+std::unique_ptr<DebugDrawer>& LogicService::getDebugDrawer()
+{
+    return _debug_drawer;
 }

@@ -43,6 +43,7 @@ namespace familyline::graphics {
 	struct ShaderState {
 		ShaderProgram* shader;
 		std::map<std::string, glm::mat4> matrixUniforms;
+		std::map<std::string, glm::vec3> vec3Uniforms;
 
 		// Set the stored shader uniforms in the shader
 		void updateShader();

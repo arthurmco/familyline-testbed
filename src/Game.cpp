@@ -3,6 +3,7 @@
 #include "graphical/gl_renderer.hpp"
 #include "graphical/LightManager.hpp"
 #include "graphical/animator.hpp"
+#include "graphical/gfx_debug_drawer.hpp"
 
 #include "logic/game_event.hpp"
 #include "logic/logic_service.hpp"
@@ -114,6 +115,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         ObjectPathManager::getInstance()->SetTerrain(terr);
 
+        LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr));
     }
     catch (renderer_exception& re) {
         Log::GetLog()->Fatal("game", "Rendering error: %s [%d]",
@@ -364,6 +366,9 @@ void Game::RunLogic()
     LogicService::getAttackManager()->processAttacks();
     ObjectPathManager::getInstance()->UpdatePaths(LOGIC_DELTA);
 
+    LogicService::getDebugDrawer()->drawLine(glm::vec3(0, 250, 0), glm::vec3(6, 250, 6),
+                                             glm::vec4(1.0, 0, 0, 1));
+    LogicService::getDebugDrawer()->update();
 }
 
 void Game::RunGraphical()

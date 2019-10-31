@@ -245,7 +245,7 @@ void InputPicker::UpdateIntersectedObject()
 
         }
 
-        printf("total: %.4f %.4f\n", tmin, tmax);
+        //printf("total: %.4f %.4f\n", tmin, tmax);
 
         /* Ray misses */
         if (tmin < 0) {

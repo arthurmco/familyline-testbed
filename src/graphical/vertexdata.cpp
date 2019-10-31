@@ -13,4 +13,8 @@ void ShaderState::updateShader()
 	for (auto& state : this->matrixUniforms) {
 		this->shader->setUniform(state.first, state.second);
 	}
+
+	for (auto& state : this->vec3Uniforms) {
+		this->shader->setUniform(state.first, state.second);
+	}
 }

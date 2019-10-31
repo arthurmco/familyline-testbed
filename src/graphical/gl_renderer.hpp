@@ -32,6 +32,7 @@ private:
 	std::vector<std::unique_ptr<GLVertexHandle>> _vhandle_list;
 	
 	ShaderProgram* _sForward = nullptr;
+	ShaderProgram* _sLines = nullptr;
 
 public:
 	GLRenderer();
