@@ -62,7 +62,7 @@ BoundingBox Mesh::getBoundingBox()
         vdx.begin(), vdx.end(), std::back_inserter(binit),
         [](VertexData vd) {
             BoundingBox b;
-            b.minX = b.minY = b.minZ = -99999999;
+            b.minX = b.minY = b.minZ = 99999999;
             return std::accumulate(
                 vd.position.begin(), vd.position.end(), b,
                 [](BoundingBox bit, glm::vec3 v) {
@@ -79,7 +79,7 @@ BoundingBox Mesh::getBoundingBox()
         });
 
     BoundingBox b;
-    b.minX = b.minY = b.minZ = -99999999;
+    b.minX = b.minY = b.minZ = 99999999;
     return std::accumulate(
         binit.begin(), binit.end(), b,
         [](BoundingBox cur, BoundingBox prev) {
