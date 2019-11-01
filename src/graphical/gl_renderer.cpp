@@ -23,7 +23,7 @@ GLRenderer::GLRenderer()
 	});
 
 	_sLines->link();
-    glLineWidth(4.0);
+    glLineWidth(4.0f);
 }
 
 VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)

@@ -41,8 +41,8 @@ bool ObjectPathManager::AddPath(GameObject* o,
 
     auto p3dpath = ConvertTo3DPath(path);
     //  auto dbg_plot = DebugPlotter::pinterface->AddPath(p3dpath, glm::vec3(0, 0, 1));
-    //  _pathrefs.emplace_back(maxpathID++, o, new std::vector<glm::vec2>(*path),
-    //                 dbg_plot);   
+    _pathrefs.emplace_back(maxpathID++, o, new std::vector<glm::vec2>(*path),
+                           0);   
     return true;
 }
 
@@ -85,6 +85,7 @@ void ObjectPathManager::UpdatePaths(unsigned ms_frame)
         lcpos.x = (px);
         lcpos.y = (_terr->GetHeightFromPoint(px, pz));
         lcpos.z = (pz);
+        it->lc->setPosition(lcpos);
 
         // 1 step = 0.1 second
         if (it->path_ptr < it->path->size()-1) {
