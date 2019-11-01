@@ -46,8 +46,10 @@ public:
 	 * Useful when we need to only retrieve the basic elements VAO, without an object
 	 */
 	std::tuple<int, int, int, int> createRaw(VertexData& vd);
-	void removeVertex(int vao);
 
+    
+    virtual void removeVertex(VertexHandle* vh);
+	
 	//virtual LightHandle createLight(LightData& ld) = 0;
 };
 }

@@ -47,8 +47,8 @@ uint64_t hashPath(glm::vec3 start, glm::vec3 end)
 void GFXDebugDrawer::drawLine(glm::vec3 start, glm::vec3 end, glm::vec4 color)
 {
     auto hash = hashPath(start, end);
-    if (_vhandles.find(hash) != _vhandles.end()) {
-        // TODO: only update color
+    if (auto fhash = _vhandles.find(hash); fhash != _vhandles.end()) {
+        fhash->second.last_tick = this->last_tick;
         return;
     }
 
@@ -70,8 +70,8 @@ void GFXDebugDrawer::drawSquare(glm::vec3 start, glm::vec3 end,
                                 glm::vec4 foreground, glm::vec4 background)
 {
     auto hash = hashPath(start, end);
-    if (_vhandles.find(hash) != _vhandles.end()) {
-        // TODO: only update color
+    if (auto fhash = _vhandles.find(hash); fhash != _vhandles.end()) {
+        fhash->second.last_tick = this->last_tick;
         return;
     }
 
@@ -103,11 +103,28 @@ void GFXDebugDrawer::drawCircle(glm::vec3 point, glm::vec3 radius,
 
 }
 
+/**
+ * Update the debug drawer by removing lines that were not redrawn in the last
+ * frame
+ */
 void GFXDebugDrawer::update()
 {
+    VertexHandle* remove_handle = nullptr;
+    uint64_t remove_hash = 0;
+    
     for (auto [hash, vdata] : _vhandles) {
+        if (vdata.last_tick < this->last_tick) {
+            remove_hash = hash;
+            remove_handle = vdata.handle;
+            break;
+        }
         
     }
-    
+
+    if (remove_handle) {
+        _vhandles.erase(remove_hash);
+        remove_handle->remove();    
+    }
+
     this->last_tick++;
 }

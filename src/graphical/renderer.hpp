@@ -25,6 +25,7 @@ struct VertexHandle {
 class Renderer {
 public:
 	virtual VertexHandle* createVertex(VertexData& vd, VertexInfo& vi) = 0;
+    virtual void removeVertex(VertexHandle* vh) = 0;
 	virtual void render(Camera* c) = 0;
 	//virtual LightHandle createLight(LightData& ld) = 0;
 };

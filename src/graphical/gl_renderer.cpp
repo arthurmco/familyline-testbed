@@ -23,6 +23,7 @@ GLRenderer::GLRenderer()
 	});
 
 	_sLines->link();
+    glLineWidth(4.0);
 }
 
 VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
@@ -164,8 +165,24 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd)
 	return std::tie(vao, vboPos, vboNorm, vboTex);
 }
 
-void GLRenderer::removeVertex(int vao)
+void GLRenderer::removeVertex(VertexHandle* vh)
 {
+    GLVertexHandle* gvh = dynamic_cast<GLVertexHandle*>(vh);
+    if (!gvh)
+        return;
+
+    glDeleteVertexArrays(1, (GLuint*)&gvh->vao);
+    glDeleteBuffers(1, (GLuint*)&gvh->vboPos);
+    glDeleteBuffers(1, (GLuint*)&gvh->vboNorm);
+
+    if (gvh->vboTex > 0)
+		glDeleteBuffers(1, (GLuint*)&gvh->vboTex);
+
+    _vhandle_list
+        .erase(std::remove_if(_vhandle_list.begin(), _vhandle_list.end(),
+                              [gvh](std::unique_ptr<GLVertexHandle> &handle) {
+                                  return (handle->vao == gvh->vao);
+                              }));
 
 }
 
@@ -183,7 +200,7 @@ bool GLVertexHandle::update(VertexData & vd)
 
 bool GLVertexHandle::remove()
 {
-	this->_renderer.removeVertex(this->vao);
+    this->_renderer.removeVertex(this);
 	return true;
 }
 
