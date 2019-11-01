@@ -48,9 +48,11 @@ void ObjectRenderer::update()
 
             vmin3.y = pstart.y;
             vmax3.y = pend.y;
+            vmin3 += glm::vec3(-0.5, 1, -0.5);
+            vmax3 += glm::vec3(0.5, 2, 0.5);
 
             LogicService::getDebugDrawer()->drawSquare(
-                vmin3, vmax3, glm::vec4(0.5, 0.2, 1.0, 1),
+                vmin3, vmax3, glm::vec4(0.8, 0, 0.5, 1),
                 glm::vec4(0,0, 0,0));
 
 
