@@ -51,60 +51,24 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
     const auto& olist = familyline::logic::LogicService::getObjectListener();
     auto aliveObjects = olist->getAliveObjects();
 
-    
-    /*
-    // Update the object list
-    ObjectEvent ev;
-    while (this->oel.popEvent(ev)) {
-        switch (ev.type) {
-        case ObjectCreated: {
-            if (ev.to.expired())
-                continue;
+    for (auto oid : aliveObjects) {
+        auto objval = _om->get(oid);
 
-            Log::GetLog()->InfoWrite("pathfinder", ">> created %d at %.2f %.2f", ev.oid);
-            auto sto = std::dynamic_pointer_cast<GameObject>(ev.to.lock());
-            opd.emplace_back(sto, 3, ev.oid);
-            break;
-        }
-        
-        case ObjectDestroyed:       
-            Log::GetLog()->InfoWrite("pathfinder",
-                                     ">> destroyed %d", ev.oid);
-            opd.erase(
-                std::remove_if(std::begin(opd), std::end(opd),
-                               [&](const ObjectPathData& op) {
-                                   if (op.obj.expired())
-                                       return true;
-                       
-                                   return op.ID == ev.oid;
-                               })
-                      );
-            break;
-        
-        default:
-            continue;
-        }
-        
-    }
-    
-    for (const auto& opddata : opd) {
-        auto sobj = opddata.obj.lock();
-        if (!sobj)
+        if (!objval.has_value())
             continue;
 
-        auto spos = sobj->getPosition();
-        
-        int ox = spos.x, oz = spos.z;
-        float r = opddata.size;
+        const auto cobj = objval.value();
+        glm::vec3 pos = cobj->getPosition();
+        glm::vec2 size = cobj->getSize();
 
-        for (int y = oz - r; y < oz + r; y++) {
-            for (int x = ox - r; x < ox + r; x++) {
+        for (int y = pos.z - (size.y/2); y < pos.z + (size.y/2); y++) {
+            for (int x = pos.x - (size.x/2); x < pos.x + (size.x/2); x++) {
                 _pathing_slots[y*_mapWidth + x] = 0xff;
             }
         }
+
     }
 
-    */
 }
 
 void PathFinder::ClearPathmap(int w, int h, int x, int y) {
