@@ -362,9 +362,6 @@ bool HumanPlayer::Play(GameContext* gctx)
 
         if (!attackee.expired()) {
 
-            //auto attackerOID = -1;
-            //auto attackedOID = -1;
-
             if (attack_set) {
                 attacker = std::dynamic_pointer_cast<GameObject>(_selected_obj.lock());
             }

@@ -269,7 +269,7 @@ std::vector<glm::vec2> PathFinder::CreatePath(const GameObject& o, glm::vec2 des
      * Change the direction to be more closer to the start
      */
     while (this->_pathing_slots[size_t(destination.x) +
-                                size_t(destination.y * this->_mapWidth)] == 0xff) {
+                                size_t(destination.y) * this->_mapWidth] == 0xff) {
         auto directionx = (from.x - destination.x);
         auto directiony = (from.y - destination.y);
 
@@ -286,6 +286,8 @@ std::vector<glm::vec2> PathFinder::CreatePath(const GameObject& o, glm::vec2 des
         else if (directiony > 0) {
             destination.y++;
         }
+
+        printf("%.1f %.1f -- ", destination.x, destination.y);
     }
 
     if (this->node_list)
