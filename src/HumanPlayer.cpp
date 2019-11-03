@@ -356,6 +356,8 @@ bool HumanPlayer::Play(GameContext* gctx)
     }
 
     if (attack_ready) {
+        attack_ready = false;
+
         auto l = _ip->GetIntersectedObject().lock();
         if (l && attack_set)
             attackee = std::dynamic_pointer_cast<GameObject>(l);
@@ -368,13 +370,22 @@ bool HumanPlayer::Play(GameContext* gctx)
 
             if (!attacker.expired()) {
 
-                this->RegisterAttack(attacker.lock().get(),
-                                     attackee.lock().get());
+                auto atkl = attacker.lock();
+                auto defl = attackee.lock();
 
-                LogicService::getAttackManager()->startAttack(
-                    attacker.lock()->getID(), attackee.lock()->getID());
+                if (atkl->getAttackComponent() && defl->getAttackComponent()) {
+                    this->RegisterAttack(atkl.get(), defl.get());
 
-                attack_ready = false;
+                    auto& atkManager = LogicService::getAttackManager();
+                    atkManager->doRegister(
+                        atkl->getID(), atkl->getAttackComponent().value());
+                    atkManager->doRegister(
+                        defl->getID(), defl->getAttackComponent().value());
+                    atkManager->startAttack(
+                        atkl->getID(), defl->getID());
+
+                }
+
             }
 
         } else {

@@ -79,7 +79,7 @@ namespace familyline::logic {
         double armor = 0;
 
         /**
-         * Unit range, in radians
+         * Unit range, or attack "vision", in radians
          *
          * The range is symmetrical, the zero axis is the unit "normal", where it is
          * looking at, and it is mirrored against this vector. So a range of 45deg is

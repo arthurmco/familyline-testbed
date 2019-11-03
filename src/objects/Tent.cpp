@@ -8,6 +8,18 @@ using namespace familyline::logic;
 Tent::Tent() : GameObject("tent", "Tent", glm::vec2(15, 15), 250, 250)
 {
     DEF_MESH("Tent.obj");
+
+    this->cAttack = std::optional<AttackComponent>({
+            this,
+
+            // atkRanged, atkMelee, atkSiege, atkTransporter
+            0.0, 0.0, 0.0, 0.0,
+            // defRanged, defMelee, defSiege, defTransporter
+            2.0, 2.0, 2.0, 1.0,
+            // rotation, atkDistance, armor, range
+            0, 10, 1, M_PI
+        });
+
 };
 
 /* Called on object initialization */

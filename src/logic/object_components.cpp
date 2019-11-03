@@ -82,6 +82,10 @@ std::optional<double> AttackComponent::doDirectAttack(const AttackComponent& def
 		return std::make_optional(std::max(0.0, damage));
 	}
 
+    printf("sin (atk/def): %.2f %.2f\t", sin(arcUpper), sin_defAngle);
+    printf("cos (atk/def): %.2f %.2f\t", cos(arcUpper), cos_defAngle);
+    printf("distance (atk/def): %.2f %.2f\n", this->atkDistance, defDistance);
+    
 	return std::nullopt;
 
 }

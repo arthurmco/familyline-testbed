@@ -287,7 +287,6 @@ std::vector<glm::vec2> PathFinder::CreatePath(const GameObject& o, glm::vec2 des
             destination.y++;
         }
 
-        printf("%.1f %.1f -- ", destination.x, destination.y);
     }
 
     if (this->node_list)

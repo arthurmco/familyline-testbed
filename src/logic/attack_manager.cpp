@@ -3,6 +3,8 @@
 #include "game_object.hpp"
 #include "logic_service.hpp"
 
+#include "Log.hpp"
+
 using namespace familyline::logic;
 
 AttackManagerEventReceiver::AttackManagerEventReceiver()
@@ -40,12 +42,18 @@ attack_handle_t AttackManager::startAttack(int attackerOID, int defenderOID)
 {
 	auto atkhandle = make_attack_handle(attackerOID, defenderOID);
 
+    Log::GetLog()->Write("attack-manager", "attack started: object ID %d will attack object ID %d",
+                         attackerOID, defenderOID);
+
 	AttackData adata;
 	adata.atk = this->components[attackerOID];
 	adata.def = this->components[defenderOID];
 
+    assert(adata.atk != nullptr);
+    assert(adata.def != nullptr);
+
 	this->attacks[atkhandle] = adata;
-	
+
 	return atkhandle;
 }
 
@@ -93,7 +101,7 @@ void AttackManager::checkRemovedObjects()
 		printf("removed %x %lx\n", oid, handle);
 		if (handle > 0)
 			this->attacks.erase(handle);
-		
+
 		this->components.erase(oid);
 	}
 }
@@ -111,10 +119,32 @@ void AttackManager::processAttacks()
 			to_remove.push_back(ahandle);
 			continue;
 		}
-		
+
 		auto vdmg = dmg.value_or(0);
-		adata.def->object->addHealth(-vdmg);
+        if (vdmg == 0.0) {
+            printf("damage is null");
+			to_remove.push_back(ahandle);
+			continue;
+        }
+
+        adata.def->object->addHealth(-vdmg);
 		this->ame_emitter->generateAttackEvent(adata.atk, adata.def, vdmg);
+
+        // When dying, set the health to zero and remove the object
+        if (adata.def->object->getHealth() <= 0) {
+            GameObject* go = adata.def->object;
+
+            go->addHealth(-adata.def->object->getHealth());
+            printf("the defender is dead");
+            components.erase(go->getID());
+			to_remove.push_back(ahandle);
+			continue;
+        }
+    }
+
+	for (auto handle : to_remove) {
+		printf("removed %lx\n", handle);
+        this->attacks.erase(handle);
 	}
 
 }
@@ -144,7 +174,8 @@ AttackManagerEventEmitter::AttackManagerEventEmitter()
 const std::string AttackManagerEventEmitter::getName() { return _name; }
 
 
-void AttackManagerEventEmitter::generateAttackEvent(AttackComponent* atk, AttackComponent* def, double dmg)
+void AttackManagerEventEmitter::generateAttackEvent(
+    AttackComponent* atk, AttackComponent* def, double dmg)
 {
 	Event eatk(EventType::ObjectAttack);
 	Event edef(EventType::ObjectStateChanged);
@@ -172,6 +203,10 @@ void AttackManagerEventEmitter::generateAttackEvent(AttackComponent* atk, Attack
 	eatk.attack.name = eatk.object.name;
 	edef.attack = eatk.attack;
 
-	this->pushEvent(eatk);
+    if (def->object->getHealth() <= 0.0) {
+        edef.object.objectState = ObjectState::Dying;
+    }
+
+    this->pushEvent(eatk);
 	this->pushEvent(edef);
 }

@@ -19,7 +19,8 @@ namespace familyline::logic {
         AttackComponent* atk;
         AttackComponent* def;
 
-
+        // Delay until the next attack, in game ticks
+        int atk_tick_delay = 0;
     };
 
     class AttackManagerEventReceiver : public EventReceiver
@@ -30,6 +31,8 @@ namespace familyline::logic {
         AttackManagerEventReceiver();
 
         virtual const std::string getName();
+
+        virtual ~AttackManagerEventReceiver() {}
     };
 
 
@@ -43,6 +46,8 @@ namespace familyline::logic {
         virtual const std::string getName();
 
         void generateAttackEvent(AttackComponent* atk, AttackComponent* def, double dmg);
+
+        virtual ~AttackManagerEventEmitter() {}
     };
 
 

@@ -1,4 +1,5 @@
 #include "WatchTower.hpp"
+#include <cmath> // for M_PI
 
 using namespace familyline;
 using namespace familyline::logic;
@@ -9,6 +10,17 @@ WatchTower::WatchTower()
     : GameObject("watchtower", "Watch Tower", glm::vec2(10, 10), 1000, 1000)
 {
     DEF_MESH("WatchTower.obj");
+
+    this->cAttack = std::optional<AttackComponent>({
+            this,
+
+            // atkRanged, atkMelee, atkSiege, atkTransporter
+            2.0, 1.0, 1.0, 1.5,
+            // defRanged, defMelee, defSiege, defTransporter
+            2.0, 4.0, 1.0, 1.0,
+            // rotation, atkDistance, armor, range
+            0, 50, 2, M_PI
+        });
 }
 
 /* Called on object initialization */
