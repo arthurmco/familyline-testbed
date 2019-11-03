@@ -5,7 +5,7 @@ using namespace familyline::logic;
 
 //static AttackAttributes atk(0, 1, glm::radians(0.0), 0, 0);
 
-Tent::Tent() : GameObject("tent", "Tent", 250, 250)
+Tent::Tent() : GameObject("tent", "Tent", glm::vec2(15, 15), 250, 250)
 {
     DEF_MESH("Tent.obj");
 };

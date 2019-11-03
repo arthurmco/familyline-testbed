@@ -3,10 +3,12 @@
 
 using namespace familyline::logic;
 
-GameObject::GameObject(std::string type, std::string name, int health, int maxHealth, bool showHealth)
-	: _type(type), _name(name), _health(health), _maxHealth(maxHealth), _showHealth(showHealth)
+GameObject::GameObject(std::string type, std::string name, glm::vec2 size,
+                       int health, int maxHealth, bool showHealth)
+	: _type(type), _name(name), _size(size), _health(health), _maxHealth(maxHealth),
+      _showHealth(showHealth)
 {
-	this->cLocation = std::make_optional<LocationComponent>();
+    this->cLocation = std::make_optional<LocationComponent>();
 	this->cLocation.value().object = this;
 
 	this->cAttack = std::make_optional<AttackComponent>();
@@ -23,8 +25,9 @@ GameObject::GameObject(std::string type, std::string name, int health, int maxHe
  */
 std::shared_ptr<GameObject> GameObject::create()
 {
-	auto cloned = std::make_shared<GameObject>(this->_name, this->_type, 
-		this->_health, this->_maxHealth, this->_showHealth);
+	auto cloned = std::make_shared<GameObject>(
+        this->_name, this->_type, this->_size,
+        this->_health, this->_maxHealth, this->_showHealth);
 	
 	// TODO: copy the components.
 	cloned->cAttack = this->cAttack ? std::make_optional<AttackComponent>(this->cAttack.value()) 

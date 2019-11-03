@@ -1,6 +1,7 @@
 #include "PathFinder.hpp"
 #include <cstring> //memset()
 #include <algorithm>
+#include "logic_service.hpp"
 
 //#include "ObjectEventEmitter.hpp"
 
@@ -47,6 +48,10 @@ void PathFinder::UpdatePathmap(int w, int h, int x, int y)
 {
     this->ClearPathmap(w, h, x, y);
 
+    const auto& olist = familyline::logic::LogicService::getObjectListener();
+    auto aliveObjects = olist->getAliveObjects();
+
+    
     /*
     // Update the object list
     ObjectEvent ev;

@@ -43,6 +43,17 @@ namespace familyline::logic {
 
         object_id_t _id = -1;
 
+        /**
+         * Object hitbox width and length, in game units
+         * The X position is the width, the Y position is the length
+         *
+         * The hitbox center is at the object location
+         */
+        glm::vec2 _size;
+
+        /**
+         * Current and maximum health
+         */
         double _health;
         int _maxHealth;
 
@@ -70,7 +81,7 @@ namespace familyline::logic {
          * Y coordinate is the "height".
          */
         glm::vec3 _position;
-
+        
     protected:
         
         std::optional<LocationComponent> cLocation;
@@ -92,11 +103,13 @@ namespace familyline::logic {
         double addHealth(double v) { _health += v; return _health; }
 	
         int getCityID() const { return _cityID; }
-	
+        glm::vec2 getSize() const { return _size; }
+
         glm::vec3 getPosition() const { return _position; }
         glm::vec3 setPosition(glm::vec3 v) { _position = v; return _position; }
 
-        GameObject(std::string type, std::string name, int health, int maxHealth, bool showHealth = true);
+        GameObject(std::string type, std::string name, glm::vec2 size, int health,
+                   int maxHealth, bool showHealth = true);
 
         /**
          * Function to be called by the ObjectFactory, so it can 

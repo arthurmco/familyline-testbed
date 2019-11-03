@@ -36,7 +36,10 @@ void ObjectRenderer::update()
             auto* o = l.component;
             glm::vec3 pstart = o->getPosition();
             glm::vec3 pend = o->getPosition();
+            pstart.y += 5;
+            pend.y += 5;
 
+            // draw square for mesh bounding box
             std::shared_ptr<Mesh> gmesh = std::dynamic_pointer_cast<Mesh>(
                 l.component->getLocationComponent()->mesh);
             BoundingBox bb = gmesh->getBoundingBox();
@@ -48,13 +51,19 @@ void ObjectRenderer::update()
 
             vmin3.y = pstart.y;
             vmax3.y = pend.y;
-            vmin3 += glm::vec3(-0.5, 1, -0.5);
-            vmax3 += glm::vec3(0.5, 2, 0.5);
+            vmin3 += glm::vec3(-0.5, 0, -0.5);
+            vmax3 += glm::vec3(0.5, 0, 0.5);
 
             LogicService::getDebugDrawer()->drawSquare(
                 vmin3, vmax3, glm::vec4(0.8, 0, 0.5, 1),
                 glm::vec4(0,0, 0,0));
 
+            // draw square for object hitbox
+            glm::vec3 halfsize = glm::vec3(o->getSize().x/2, 0, o->getSize().y/2);
+            LogicService::getDebugDrawer()->drawSquare(
+                pstart - halfsize, pend + halfsize, glm::vec4(0.1, 0, 1, 1),
+                glm::vec4(0,0, 0,0));
+            
 
 
             l.component->getLocationComponent()->updateMesh(_terrain);

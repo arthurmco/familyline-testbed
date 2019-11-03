@@ -6,7 +6,7 @@ using namespace familyline::logic;
 //static AttackAttributes atk(1.2, 1.5, glm::radians(180.0), 25, 1.2);
 
 WatchTower::WatchTower()
-    : GameObject("watchtower", "Watch Tower", 1000, 1000)
+    : GameObject("watchtower", "Watch Tower", glm::vec2(10, 10), 1000, 1000)
 {
     DEF_MESH("WatchTower.obj");
 }

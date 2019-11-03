@@ -109,21 +109,18 @@ void GFXDebugDrawer::drawCircle(glm::vec3 point, glm::vec3 radius,
  */
 void GFXDebugDrawer::update()
 {
-    VertexHandle* remove_handle = nullptr;
-    uint64_t remove_hash = 0;
+    decltype(_vhandles) erase_handles;
     
     for (auto [hash, vdata] : _vhandles) {
         if (vdata.last_tick < this->last_tick) {
-            remove_hash = hash;
-            remove_handle = vdata.handle;
-            break;
+            erase_handles[hash] = vdata;
         }
         
     }
 
-    if (remove_handle) {
-        _vhandles.erase(remove_hash);
-        remove_handle->remove();    
+    for (auto [ehash, edata] : erase_handles) {
+        _vhandles.erase(ehash);
+        edata.handle->remove();    
     }
 
     this->last_tick++;
