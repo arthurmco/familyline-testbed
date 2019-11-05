@@ -52,7 +52,7 @@ namespace familyline::logic {
             Returns true if added successfully, or false if there's already a path 
             there for the same object
         */
-        bool AddPath(GameObject* o, std::vector<glm::vec2>* path);
+        bool AddPath(GameObject* o, std::vector<glm::vec2> path);
 
         /*  Removes a path from object 'oid'. 
             Returns true if path removed, or false if path didn't exist there */

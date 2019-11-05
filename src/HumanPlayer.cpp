@@ -220,7 +220,7 @@ bool HumanPlayer::ProcessInput()
                         Log::GetLog()->InfoWrite("human-player",
                                                  "moved to %.2fx%.2f", lp.x, lp.y);
 
-                        ObjectPathManager::getInstance()->AddPath(slock.get(), &path);
+                        ObjectPathManager::getInstance()->AddPath(slock.get(), path);
 
                         this->RegisterMove(slock.get(), to);
                         _updated = true;

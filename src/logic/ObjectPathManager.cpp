@@ -21,7 +21,7 @@ static std::vector<glm::vec3> ConvertTo3DPath(std::vector<glm::vec2>* path)
     there for the same object
 */
 bool ObjectPathManager::AddPath(GameObject* o, 
-                                std::vector<glm::vec2>* path)
+                                std::vector<glm::vec2> path)
 {
     for (auto& ref : _pathrefs) {
         if (ref.lc->getID() == o->getID()) {
@@ -38,11 +38,9 @@ bool ObjectPathManager::AddPath(GameObject* o,
     std::remove_if(_pathrefs.begin(), _pathrefs.end(), [](ObjectPathRef& r)
     { return r.interrupted; });
 
-
-    auto p3dpath = ConvertTo3DPath(path);
-    //  auto dbg_plot = DebugPlotter::pinterface->AddPath(p3dpath, glm::vec3(0, 0, 1));
-    _pathrefs.emplace_back(maxpathID++, o, new std::vector<glm::vec2>(*path),
-                           0);   
+    std::vector<glm::vec2>* ppath = new std::vector<glm::vec2>(path);
+    
+    _pathrefs.emplace_back(maxpathID++, o, ppath, 0);   
     return true;
 }
 
@@ -68,12 +66,12 @@ void ObjectPathManager::UpdatePaths(unsigned ms_frame)
 {
     /* Store a vector of 'completed path' iterators.
      * Nuke them in iteration end */
-    std::vector<std::vector<ObjectPathRef>::iterator> compl_its;
+    std::vector<int> compl_pathids;
 
     for (auto it = _pathrefs.begin(); it != _pathrefs.end(); it++) {
         if (it->path_point == it->path->back()) {
             /* Path completed. Remove the iterator */
-            compl_its.push_back(it);
+            compl_pathids.push_back(it->pathid);
         }
 
         auto px = it->path_point.x;
@@ -87,7 +85,7 @@ void ObjectPathManager::UpdatePaths(unsigned ms_frame)
         lcpos.z = (pz);
         it->lc->setPosition(lcpos);
 
-        // 1 step = 0.1 second
+         // 1 step = 0.1 second
         if (it->path_ptr < it->path->size()-1) {
             const unsigned timedelta = it->current_time - it->last_step_time;
 
@@ -103,10 +101,15 @@ void ObjectPathManager::UpdatePaths(unsigned ms_frame)
         }
     }
 
+    
     /* Delete the reserved iterators */
-    for (auto& it : compl_its) {
+    for (auto& pathid : compl_pathids) {
         //      DebugPlotter::pinterface->RemovePath(it->dbg_path_plot);
-        _pathrefs.erase(it);
+        _pathrefs.erase(
+            std::remove_if(_pathrefs.begin(), _pathrefs.end(),
+                           [&](const ObjectPathRef& ref) {
+                               return (ref.pathid == pathid);
+                           }));
     }
 }
 
