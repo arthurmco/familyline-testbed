@@ -157,6 +157,7 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
     return tvd;
 }
 
+
 GLuint TerrainRenderer::CreateVAOFromTerrainData(TerrainVertexData& tvd)
 {
     auto err = glGetError();
@@ -235,8 +236,8 @@ void TerrainRenderer::Render()
     auto forward = sm->getShader("forward");
     sm->use(*forward);
 
-    forward->setUniform("mModel", glm::mat4(1.0));
-    forward->setUniform("mView", _cam->GetViewMatrix());
+	forward->setUniform("mWorld", glm::mat4(1.0));
+	forward->setUniform("mView", _cam->GetViewMatrix());
     forward->setUniform("mProjection", _cam->GetProjectionMatrix());
     forward->setUniform("diffuse_color", glm::vec3(0.5, 0.5, 0.5));
     forward->setUniform("ambient_color", glm::vec3(0.1, 0.1, 0.1));
@@ -245,8 +246,8 @@ void TerrainRenderer::Render()
 
     for (const auto& tdi : this->_tdata) {
         glBindTexture(GL_TEXTURE_2D, tdi.texture->GetHandle());
-        glBindVertexArray(tdi.vao);
-        glDrawElements(GL_TRIANGLES, tdi.vcount, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(tdi.vao);
+		glDrawElements(GL_TRIANGLES, tdi.vcount, GL_UNSIGNED_INT, 0);
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);

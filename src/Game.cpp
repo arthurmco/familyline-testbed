@@ -393,7 +393,7 @@ void Game::RunGraphical()
     fbGUI->startDraw();
     gr->render(0, 0);
     gr->renderToScreen();
-    fbGUI->endDraw();
+	fbGUI->endDraw();
 
     win->update();
 }

@@ -28,7 +28,7 @@ namespace familyline::graphics {
 		std::vector<unsigned int> indices;
 	};
 
-	enum VertexRenderStyle {
+	enum class VertexRenderStyle {
 		Triangles, ///< The vertices make triangles
 		PlotLines  ///< The vertices make lines. Useful for debug lines
 	};

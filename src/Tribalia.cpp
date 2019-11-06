@@ -8,7 +8,6 @@
 #define GLM_FORCE_RADIANS
 #include <GL/glew.h>
 
-
 #ifdef __linux__
 #include <GL/glxew.h>
 #include <unistd.h>
