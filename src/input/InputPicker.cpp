@@ -254,7 +254,11 @@ void InputPicker::UpdateIntersectedObject()
 
         /* Collided with both 3 axis! */
         if (tmax >= tmin) {
-            _locatableObject = _om->get(poi.ID).value();
+            auto lobj = _om->get(poi.ID);
+            if (!lobj.has_value())
+                return;
+            
+            _locatableObject = lobj.value();
 
             if (!_locatableObject.expired())
                 return;

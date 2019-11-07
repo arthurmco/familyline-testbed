@@ -2,6 +2,8 @@
 #include "Log.hpp"
 #include "mesh.hpp"
 
+#include <algorithm>
+
 using namespace familyline::graphics;
 
 // TODO: texture animation
@@ -36,7 +38,23 @@ int SceneRenderer::add(std::shared_ptr<SceneObject> so)
 
 void SceneRenderer::remove(int meshHandle)
 {
-    (void)meshHandle; //TODO: implement
+    auto iter = std::find_if(_sceneObjects.begin(), _sceneObjects.end(),
+                             [meshHandle](SceneObjectInfo& soi) {
+                                 return soi.id == meshHandle;
+                             });
+
+    if (iter == _sceneObjects.end())
+        return;
+
+    for (auto h : iter->handles) {
+        h->remove();
+    }
+
+    auto l = Log::GetLog();
+    l->InfoWrite("scene-renderer", "removed scene object %s with ID %#x",
+                 iter->object->getName().data(), meshHandle);
+
+    _sceneObjects.erase(iter);
 }
 
 void SceneRenderer::update()
