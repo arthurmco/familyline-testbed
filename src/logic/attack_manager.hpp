@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "object_components.hpp"
 #include "game_event.hpp"
+#include "lifecycle_manager.hpp"
 
 namespace familyline::logic {
 
@@ -98,7 +99,7 @@ namespace familyline::logic {
         /**
          * Process all scheduled attacks
          */
-        void processAttacks();
+        void processAttacks(ObjectLifecycleManager& olm);
 
     };
 

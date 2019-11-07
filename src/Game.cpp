@@ -42,6 +42,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         om = new ObjectManager{};
         //        ObjectManager::setDefault(om);
 
+        olm = new ObjectLifecycleManager {*om};
         auto& atk_manager = LogicService::getAttackManager();
 
         rndr = new GLRenderer{};
@@ -52,6 +53,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         gam.AddListener(new GameActionListenerImpl());
         hp->SetGameActionManager(&gam);
+        hp->olm = olm;
         pm->AddPlayer(hp, PlayerFlags::PlayerIsHuman);
 
         terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
@@ -116,6 +118,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         ObjectPathManager::getInstance()->SetTerrain(terr);
 
         LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr));
+
     }
     catch (renderer_exception& re) {
         Log::GetLog()->Fatal("game", "Rendering error: %s [%d]",
@@ -348,6 +351,8 @@ bool Game::RunInput()
 
 void Game::RunLogic()
 {
+    olm->update();
+    
     LogicService::getObjectListener()->updateObjects();
 
     /* Logic & graphical processing */
@@ -363,7 +368,7 @@ void Game::RunLogic()
         pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
     }
 
-    LogicService::getAttackManager()->processAttacks();
+    LogicService::getAttackManager()->processAttacks(*olm);
     ObjectPathManager::getInstance()->UpdatePaths(LOGIC_DELTA);
 
     LogicService::getDebugDrawer()->update();

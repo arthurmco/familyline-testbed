@@ -292,11 +292,15 @@ bool HumanPlayer::Play(GameContext* gctx)
             auto ncobj =  gctx->om->get(cobjID).value();
 
             this->RegisterCreation(ncobj.get());
-            objr->add(ncobj.get());
-
+            
+            objr->add(ncobj);
+            olm->doRegister(ncobj);
+            
             assert(ncobj->getPosition().x == buildpos.x);
             assert(ncobj->getPosition().z == buildpos.z);
-                
+
+            olm->notifyCreation(cobjID);
+            
             Log::GetLog()->InfoWrite(
                 "human-player",
                 "%s has id %d now", ncobj->getName().c_str(), cobjID);

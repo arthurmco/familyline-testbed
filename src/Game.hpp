@@ -21,6 +21,7 @@
 #include "logic/GameActionManager.hpp"
 #include "logic/PlayerManager.hpp"
 #include "logic/debug_drawer.hpp"
+#include "logic/lifecycle_manager.hpp"
 
 #include "graphical/camera.hpp"
 #include "graphical/asset_file.hpp"
@@ -85,6 +86,8 @@ namespace familyline {
         input::InputPicker* ip = nullptr;
         logic::PathFinder* pathf = nullptr;
 
+        logic::ObjectLifecycleManager* olm = nullptr;
+        
         struct {
             //  graphics::gui::GUIPanel *p;
             graphics::gui::GUILabel *lbl;

@@ -23,11 +23,11 @@ namespace familyline::graphics {
      */
     struct RendererSlot {
         familyline::logic::object_id_t id;
-        familyline::logic::GameObject* component;
+        std::weak_ptr<familyline::logic::GameObject> component;
         int meshHandle = 0;
-        
+
         RendererSlot(familyline::logic::object_id_t id,
-                     familyline::logic::GameObject* c)
+                     std::weak_ptr<familyline::logic::GameObject> c)
             : id(id), component(c)
         {}
     };
@@ -44,7 +44,7 @@ namespace familyline::graphics {
             : _terrain(t), _sr(sr)
         {}
 
-        void add(familyline::logic::GameObject* const o);
+        void add(std::shared_ptr<familyline::logic::GameObject> o);
         void remove(familyline::logic::object_id_t id);
 
         /**

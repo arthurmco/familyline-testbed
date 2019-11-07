@@ -107,7 +107,7 @@ void AttackManager::checkRemovedObjects()
 }
 
 
-void AttackManager::processAttacks()
+void AttackManager::processAttacks(ObjectLifecycleManager& olm)
 {
 	this->checkRemovedObjects();
 
@@ -138,6 +138,9 @@ void AttackManager::processAttacks()
             printf("the defender is dead");
             components.erase(go->getID());
 			to_remove.push_back(ahandle);
+
+            olm.notifyDeath(go->getID());
+            
 			continue;
         }
     }

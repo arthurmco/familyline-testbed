@@ -2,10 +2,12 @@
 #include "mesh.hpp"
 #include "../logic/logic_service.hpp"
 
+#include <algorithm>
+
 using namespace familyline::logic;
 using namespace familyline::graphics;
 
-void ObjectRenderer::add(GameObject* const o)
+void ObjectRenderer::add(std::shared_ptr<GameObject> o)
 {
     if (!o->getLocationComponent()) {
         return;
@@ -23,25 +25,41 @@ void ObjectRenderer::add(GameObject* const o)
 
 void ObjectRenderer::remove(object_id_t id)
 {
-	//this->components.erase(id);
+    auto iter = std::find_if(components.begin(), components.end(),
+                             [id](RendererSlot rs) {
+                                 return rs.id == id;
+                             });
+    if (iter == components.end())
+        return;
+
+    _sr.remove(iter->meshHandle);    
+    this->components.erase(iter);
 }
 
 #include "TerrainRenderer.hpp"
 
 void ObjectRenderer::update()
 {
+    std::vector<object_id_t> expired;
+    
 	for (auto& l : this->components) {
-        if (l.component->getLocationComponent()) {
 
-            auto* o = l.component;
-            glm::vec3 pstart = o->getPosition();
-            glm::vec3 pend = o->getPosition();
+        if (l.component.expired()) {
+            expired.push_back(l.id);
+            continue;
+        }
+        
+        auto comp = l.component.lock();
+        if (comp->getLocationComponent()) {
+
+            glm::vec3 pstart = comp->getPosition();
+            glm::vec3 pend = comp->getPosition();
             pstart.y += 5;
             pend.y += 5;
 
             // draw square for mesh bounding box
             std::shared_ptr<Mesh> gmesh = std::dynamic_pointer_cast<Mesh>(
-                l.component->getLocationComponent()->mesh);
+                comp->getLocationComponent()->mesh);
             BoundingBox bb = gmesh->getBoundingBox();
             glm::vec4 vmin = glm::vec4(bb.minX, bb.minY, bb.minZ, 1);
             glm::vec4 vmax = glm::vec4(bb.maxX, bb.maxY, bb.maxZ, 1);
@@ -59,14 +77,16 @@ void ObjectRenderer::update()
                 glm::vec4(0,0, 0,0));
 
             // draw square for object hitbox
-            glm::vec3 halfsize = glm::vec3(o->getSize().x/2, 0, o->getSize().y/2);
+            glm::vec3 halfsize = glm::vec3(comp->getSize().x/2, 0, comp->getSize().y/2);
             LogicService::getDebugDrawer()->drawSquare(
                 pstart - halfsize, pend + halfsize, glm::vec4(0.1, 0, 1, 1),
                 glm::vec4(0,0, 0,0));
             
-
-
-            l.component->getLocationComponent()->updateMesh(_terrain);
+            comp->getLocationComponent()->updateMesh(_terrain);
         }
 	}
+
+    for (auto id : expired) {
+        this->remove(id);
+    }
 }
