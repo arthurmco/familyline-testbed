@@ -1,5 +1,6 @@
 #include "MeshOpener.hpp"
 #include <Log.hpp>
+#include <stdexcept>
 
 using namespace familyline::graphics;
 

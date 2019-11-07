@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <string_view>
 
+#include <optional>
 #include <unordered_map>
 #include <list>
 #include <memory>

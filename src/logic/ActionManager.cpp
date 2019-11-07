@@ -1,6 +1,7 @@
 #include "ActionManager.hpp"
 #include "Log.hpp"
 #include <cstdio>
+#include <stdexcept>
 
 using namespace familyline::logic;
 
@@ -49,7 +50,7 @@ void ActionManager::SetVisibleActions(std::vector<const char*> actions)
                    [&](const char* stract) -> Action* {
                        try {
                            return &_actions.at(stract);                
-                       } catch (std::out_of_range& e) {
+                       } catch (std::out_of_range e) {
                            Log::GetLog()->Fatal("action-manager",
                                                 "Action %s doesn't exist",
                                                 stract);

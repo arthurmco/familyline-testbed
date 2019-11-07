@@ -14,6 +14,10 @@
 #include <memory>
 #include "../graphical/mesh.hpp"
 
+#ifndef M_PI
+#define M_PI 3.141592653589
+#endif
+
 #define DEF_MESH(dasset) this->cLocation.value().mesh = \
         std::dynamic_pointer_cast<familyline::graphics::Mesh>(familyline::graphics::GFXService::getAssetManager()->getAsset(dasset))
 
