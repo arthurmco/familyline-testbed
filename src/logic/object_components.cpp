@@ -63,12 +63,14 @@ std::optional<double> AttackComponent::doDirectAttack(const AttackComponent& def
 	const double arcUpper = this->range / 2;
 	//    const double arcLower = -this->atkAttributes.atkArc/2;
 
-	const double sin_defAngle = sin(defAngle);
-	const double cos_defAngle = cos(defAngle);
+	const double sin_defAngle = std::abs(sin(defAngle));
+	const double cos_defAngle = std::abs(cos(defAngle));
 
-	if (sin(arcUpper) > sin_defAngle &&
-		cos(arcUpper) < cos_defAngle &&
-		this->atkDistance > defDistance) {
+    bool all360 = (arcUpper >= M_PI);
+    bool validAngle = all360 || (sin(arcUpper) > sin_defAngle &&
+                                 cos(arcUpper) < cos_defAngle);
+    
+	if (validAngle && this->atkDistance > defDistance) {
 
 		const double factor = (1 - std::abs(sin_defAngle / arcUpper));
 
