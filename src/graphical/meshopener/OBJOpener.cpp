@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #include <Log.hpp>
-#include "../MaterialManager.hpp"
+#include "../material_manager.hpp"
 #include "../static_animator.hpp"
 
 #include "../shader_manager.hpp"
@@ -354,7 +354,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
                     vdata.texcoords.push_back(texcoords[uvt]);
 
                 if (vl.mtlname && !mtl) {
-                    mtl = MaterialManager::GetInstance()->GetMaterial(vl.mtlname);
+                    mtl = GFXService::getMaterialManager()->getMaterial(vl.mtlname);
                 }
 
             }
@@ -362,14 +362,14 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
             auto fshader = GFXService::getShaderManager()->getShader("forward");
 
             if (mtl) {
-                VertexInfo vi(idx, mtl->GetID(), fshader, VertexRenderStyle::Triangles);
+                VertexInfo vi(idx, mtl->getID(), fshader, VertexRenderStyle::Triangles);
                 vinfo.push_back(vi);
             
             } else {
                 Log::GetLog()->Warning("obj-opener", "cannot load material %s for %s",
                                        vl.mtlname, vg.name);
 
-                VertexInfo vi(idx, 0, fshader, VertexRenderStyle::Triangles);
+                VertexInfo vi(idx, -1, fshader, VertexRenderStyle::Triangles);
                 vinfo.push_back(vi);
                 Log::GetLog()->Warning("obj-opener", "\ta default material is being used");
 

@@ -69,7 +69,7 @@ namespace familyline::graphics {
 		 */
 		int index = 0;
 
-		int materialID = 0;     ///< Material ID for this vertex set
+		int materialID = -1;     ///< Material ID for this vertex set
 		ShaderState shaderState;
 
 		VertexRenderStyle renderStyle = VertexRenderStyle::Triangles;

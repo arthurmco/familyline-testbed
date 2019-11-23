@@ -1,4 +1,4 @@
-#include "Material.hpp"
+#include "material.hpp"
 
 using namespace familyline::graphics;
 
@@ -18,9 +18,9 @@ Material::Material(const char* name, MaterialData data)
     _ID = lastID++;
 }
 
-int Material::GetID() const { return _ID; }
-const char* Material::GetName() const { return _name.c_str(); }
-MaterialData* Material::GetData() { return &_data; }
+int Material::getID() const { return _ID; }
+const char* Material::getName() const { return _name.c_str(); }
+MaterialData& Material::getData() { return _data; }
 
-Texture* Material::GetTexture() { return _tex; }
-void Material::SetTexture(Texture* tex) { _tex = tex; }
+Texture* Material::getTexture() { return _tex; }
+void Material::setTexture(Texture* tex) { _tex = tex; }

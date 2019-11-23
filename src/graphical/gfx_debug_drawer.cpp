@@ -58,7 +58,7 @@ void GFXDebugDrawer::drawLine(glm::vec3 start, glm::vec3 end, glm::vec4 color)
     vdata.normals = { color3, color3 };
     vdata.texcoords = { glm::vec2(0, 0), glm::vec2(0, 0)};
 
-    VertexInfo vinfo(0, 0, GFXService::getShaderManager()->getShader("lines"),
+    VertexInfo vinfo(0, -1, GFXService::getShaderManager()->getShader("lines"),
                      VertexRenderStyle::PlotLines);
     //vinfo.shaderState.vec3Uniforms["color"] = color;
 
@@ -89,7 +89,7 @@ void GFXDebugDrawer::drawSquare(glm::vec3 start, glm::vec3 end,
                         glm::vec2(0, 0), glm::vec2(0, 0),
                         glm::vec2(0, 0), glm::vec2(0, 0)};
 
-    VertexInfo vinfo(0, 0, GFXService::getShaderManager()->getShader("lines"),
+    VertexInfo vinfo(0, -1, GFXService::getShaderManager()->getShader("lines"),
                      VertexRenderStyle::PlotLines);
     //vinfo.shaderState.vec3Uniforms["color"] = foreground;
 

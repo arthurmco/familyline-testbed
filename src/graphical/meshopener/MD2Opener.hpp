@@ -10,7 +10,7 @@
 #include <cctype>
 
 #include "MeshOpener.hpp"
-#include "../MaterialManager.hpp"
+#include "../material_manager.hpp"
 
 #ifndef MD2OPENER_HPP
 #define MD2OPENER_HPP

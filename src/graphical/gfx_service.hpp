@@ -2,6 +2,7 @@
 
 #include "asset_manager.hpp"
 #include "shader_manager.hpp"
+#include "material_manager.hpp"
 
 namespace familyline::graphics {
 
@@ -10,6 +11,7 @@ namespace familyline::graphics {
     private:
         static std::unique_ptr<ShaderManager> _shaderm;
         static std::unique_ptr<AssetManager> _assetm;
+        static std::unique_ptr<MaterialManager> _materialm;
         
     public:
         static std::unique_ptr<ShaderManager>& getShaderManager() {
@@ -26,6 +28,14 @@ namespace familyline::graphics {
             }
 
             return _assetm;
+        }
+
+        static std::unique_ptr<MaterialManager>& getMaterialManager() {
+            if (!_materialm) {
+                _materialm = std::make_unique<MaterialManager>();
+            }
+
+            return _materialm;
         }
 
     };

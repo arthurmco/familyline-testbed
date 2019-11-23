@@ -76,11 +76,10 @@ vec3 get_point_light_color() {
 
 void main() {
   vec3 vcolor = diffuse_color;
-
   vec3 texel = vec3(1,0,0);
+
   texel = texture(tex_sam, tex_coords).rgb;
-  vcolor = mix(diffuse_color, texel, tex_amount);
-  
+  vcolor = mix(diffuse_color, texel, tex_amount);  
 
   vec3 directional_color = get_directional_light_color(vcolor, vec3(1, 1, 1), 1,
         vec3(80, 200, 80));
@@ -88,5 +87,5 @@ void main() {
   
   vec3 finalColor = (ambient_color) + directional_color + point_color;
 
-  ocolor = vec4(finalColor, 1.0);
+  ocolor = vec4(finalColor, 1.0);  
 }

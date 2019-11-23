@@ -59,16 +59,43 @@ void GLRenderer::render(Camera* c)
 
 	auto viewMatrix = c->GetViewMatrix();
 	auto projMatrix = c->GetProjectionMatrix();
+	
 
 	for (auto& vh : _vhandle_list) {
 		ShaderProgram* shader = vh->vinfo.shaderState.shader;
 		shaderManager->use(*shader);
+        shader->setUniform("lightCount", 1);
+        shader->setUniform("lights[0].position", glm::vec3(30, 50, 30));
+        shader->setUniform("lights[0].color", glm::vec3(1, 1, 1));
+        shader->setUniform("lights[0].strength", 100.0f);
 
         shader->setUniform("mView", viewMatrix);
 		shader->setUniform("mProjection", projMatrix);
 		shader->setUniform("mvp", projMatrix * viewMatrix * glm::mat4(1.0));
-		vh->vinfo.shaderState.updateShader();
-        
+        shader->setUniform("tex_amount", 0.0f);
+
+        if (vh->vinfo.materialID >= 0) {
+  
+            Material* m = GFXService::getMaterialManager()->getMaterial(vh->vinfo.materialID);
+            MaterialData md = m->getData();
+
+            shader->setUniform("diffuse_color", md.diffuseColor);
+            shader->setUniform("ambient_color", md.ambientColor);
+            shader->setUniform("diffuse_intensity", 1.0f);
+            shader->setUniform("ambient_intensity", 1.0f);
+
+//            printf("<<<< %d dif=%.2f,%.2f,%.2f amb=%.2f,%.2f,%.2f  >>>>",
+//                   vh->vinfo.materialID,
+//                   md.diffuseColor.x, md.diffuseColor.y, md.diffuseColor.z,
+//                   md.ambientColor.x, md.ambientColor.y, md.ambientColor.z);
+
+        } else {            
+            shader->setUniform("diffuse_intensity", 0.0f);
+            shader->setUniform("ambient_intensity", 0.0f);            
+        }
+
+        vh->vinfo.shaderState.updateShader();
+
 		bool hasTexture = true;
 
 		glBindVertexArray(vh->vao);

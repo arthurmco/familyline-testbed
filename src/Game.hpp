@@ -31,7 +31,7 @@
 #include "graphical/TerrainRenderer.hpp"
 #include "graphical/TextureOpener.hpp"
 #include "graphical/TextureManager.hpp"
-#include "graphical/MaterialManager.hpp"
+#include "graphical/material_manager.hpp"
 #include "graphical/asset_manager.hpp"
 #include "graphical/window.hpp"
 #include "graphical/framebuffer.hpp"

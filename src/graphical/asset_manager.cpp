@@ -5,6 +5,7 @@
 #include "meshopener/MD2Opener.hpp"
 #include "TextureOpener.hpp"
 #include "materialopener/MTLOpener.hpp"
+#include "gfx_service.hpp"
 #include <fmt/format.h>
 
 using namespace familyline::graphics;
@@ -56,6 +57,9 @@ AssetManager::AssetManager()
  *
  * We could use const, but we have a pseudo-iterator that have an internal
  * pointer that points to the current file, so.....
+ *
+ * We also add the textures and materials automatically to their respective
+ * managers
  */
 void AssetManager::loadFile(AssetFile& file)
 {
@@ -65,20 +69,23 @@ void AssetManager::loadFile(AssetFile& file)
 
         Asset asset;
         asset.name = av->name;
+        asset.path = av->path;
+        asset.error = std::optional<AssetError>();
+        asset.object = std::optional<std::shared_ptr<AssetObject>>();
 
         if (av->type == "mesh") {
             asset.type = AssetType::MeshAsset;
         } else if (av->type == "texture") {
             asset.type = AssetType::TextureAsset;
+            asset.object = std::make_optional(asset.loadAssetObject());
         } else if (av->type == "material") {
             asset.type = AssetType::MaterialAsset;
+            asset.object = std::make_optional(asset.loadAssetObject());
+            GFXService::getMaterialManager()->addMaterial(
+                (Material*)asset.object->get());
         } else {
             asset.type = AssetType::UnknownAsset;
         }
-
-        asset.path = av->path;
-        asset.error = std::optional<AssetError>();
-        asset.object = std::optional<std::shared_ptr<AssetObject>>();
 
         this->_assets[asset.name] = asset;
         Log::GetLog()->InfoWrite("asset-manager", "found asset '%s' at path '%s'",
@@ -99,7 +106,7 @@ std::shared_ptr<AssetObject> AssetManager::getAsset(std::string_view assetName)
     }
 
     //    if (!asset_it->second.object) {
-        asset_it->second.object = std::make_optional(asset_it->second.loadAssetObject());
+    asset_it->second.object = std::make_optional(asset_it->second.loadAssetObject());
         //    }
     
     Log::GetLog()->InfoWrite("asset-manager", "getting asset '%s' at path '%s'",
