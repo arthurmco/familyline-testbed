@@ -73,6 +73,7 @@ namespace familyline::graphics {
 		ShaderState shaderState;
 
 		VertexRenderStyle renderStyle = VertexRenderStyle::Triangles;
+        bool hasTexCoords = true;
         
 		VertexInfo(int index, int materialID, ShaderProgram* shader,
                    VertexRenderStyle style);

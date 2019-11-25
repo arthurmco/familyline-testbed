@@ -97,6 +97,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
     VertexList* current_vert = &current_group->vertices.back();
 
     char* line = new char[256];
+    printf("<<<< %s >>>>\n", file);
     while (!feof(fObj)) {
         auto l = fgets(line, 255, fObj);
         if (!l) {
@@ -353,7 +354,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
                 if (vg.hasTexture)
                     vdata.texcoords.push_back(texcoords[uvt]);
 
-                if (vl.mtlname && !mtl) {
+                if (vl.mtlname && !mtl) {                    
                     mtl = GFXService::getMaterialManager()->getMaterial(vl.mtlname);
                 }
 
@@ -363,13 +364,16 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
             if (mtl) {
                 VertexInfo vi(idx, mtl->getID(), fshader, VertexRenderStyle::Triangles);
+                vi.hasTexCoords = vg.hasTexture;
                 vinfo.push_back(vi);
+                mtl = nullptr;
             
             } else {
                 Log::GetLog()->Warning("obj-opener", "cannot load material %s for %s",
                                        vl.mtlname, vg.name);
 
                 VertexInfo vi(idx, -1, fshader, VertexRenderStyle::Triangles);
+                vi.hasTexCoords = vg.hasTexture;
                 vinfo.push_back(vi);
                 Log::GetLog()->Warning("obj-opener", "\ta default material is being used");
 

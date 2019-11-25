@@ -43,7 +43,7 @@ namespace familyline::graphics {
          *
          * Returns the asset object on success, throws asset_exception on error
          */
-        std::shared_ptr<AssetObject> loadAssetObject();
+        std::vector<std::shared_ptr<AssetObject>> loadAssetObject();
     };
 
     /**
@@ -71,3 +71,4 @@ namespace familyline::graphics {
 
 
 #endif /* end of include guard: ASSETMANAGER_H */
+

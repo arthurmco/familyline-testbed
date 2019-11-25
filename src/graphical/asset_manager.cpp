@@ -11,31 +11,36 @@
 using namespace familyline::graphics;
 
 /// TODO: handle multiple assets in one file
-std::shared_ptr<AssetObject> loadMeshAsset(Asset& asset) {
+std::vector<std::shared_ptr<AssetObject>> loadMeshAsset(Asset& asset) {
     auto ms = MeshOpener::Open(asset.path.c_str());
 
-    return std::shared_ptr<Mesh>(ms[0]);
+    return { std::shared_ptr<Mesh>(ms[0]) };
 }
 
-std::shared_ptr<AssetObject> loadTextureAsset(Asset& asset) {
+std::vector<std::shared_ptr<AssetObject>> loadTextureAsset(Asset& asset) {
     auto tf = TextureOpener::OpenFile(asset.path.c_str());
 
-    return std::shared_ptr<TextureFile>(tf);
+    return { std::shared_ptr<TextureFile>(tf) };
 }
 
-std::shared_ptr<AssetObject> loadMaterialAsset(Asset& asset)
+std::vector<std::shared_ptr<AssetObject>> loadMaterialAssets(Asset& asset)
 {
     MTLOpener mo;
     auto ms = mo.Open(asset.path.c_str());
-    
-    return std::shared_ptr<Material>(ms[0]);
+
+    std::vector<std::shared_ptr<AssetObject>> mlist;
+    for (auto& m : ms) {
+        mlist.push_back(std::shared_ptr<Material>(m));
+    }
+
+    return mlist;
 }
 
-std::shared_ptr<AssetObject> Asset::loadAssetObject()
+std::vector<std::shared_ptr<AssetObject>> Asset::loadAssetObject()
 {
     switch (this->type) {
     case MeshAsset: return loadMeshAsset(*this);
-    case MaterialAsset: return loadMaterialAsset(*this);
+    case MaterialAsset: return loadMaterialAssets(*this);
     case TextureAsset: return loadTextureAsset(*this);
     default:
         this->error = std::make_optional(AssetError::InvalidAssetType);
@@ -77,12 +82,16 @@ void AssetManager::loadFile(AssetFile& file)
             asset.type = AssetType::MeshAsset;
         } else if (av->type == "texture") {
             asset.type = AssetType::TextureAsset;
-            asset.object = std::make_optional(asset.loadAssetObject());
+            asset.object = std::make_optional(asset.loadAssetObject()[0]);
         } else if (av->type == "material") {
             asset.type = AssetType::MaterialAsset;
-            asset.object = std::make_optional(asset.loadAssetObject());
-            GFXService::getMaterialManager()->addMaterial(
-                (Material*)asset.object->get());
+
+            auto ms = asset.loadAssetObject();            
+            asset.object = std::make_optional(ms[0]);
+            for (auto& m : ms) {                
+                GFXService::getMaterialManager()->addMaterial(
+                    (Material*)m.get());                
+            }
         } else {
             asset.type = AssetType::UnknownAsset;
         }
@@ -105,8 +114,8 @@ std::shared_ptr<AssetObject> AssetManager::getAsset(std::string_view assetName)
             AssetError::AssetNotFound);
     }
 
-    //    if (!asset_it->second.object) {
-    asset_it->second.object = std::make_optional(asset_it->second.loadAssetObject());
+    //    if (!asset_it->second.object) {    
+    asset_it->second.object = std::make_optional(asset_it->second.loadAssetObject()[0]);
         //    }
     
     Log::GetLog()->InfoWrite("asset-manager", "getting asset '%s' at path '%s'",
