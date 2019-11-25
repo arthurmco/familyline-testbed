@@ -30,10 +30,32 @@ std::vector<std::shared_ptr<AssetObject>> loadMeshAsset(Asset& asset) {
                          return (a.type == AssetType::TextureAsset);
                      });
 
+    auto materialAsset =
+        std::find_if(asset.dependencies.begin(), asset.dependencies.end(),
+                     [&](Asset& a) {
+                         return (a.type == AssetType::MaterialAsset);
+                     });
+
+    
+    int materialID = ms[0]->getVertexInfo()[0].materialID;
+    if (materialID < 0 && materialAsset != asset.dependencies.end()) {
+        // Get the material from the assets.yml
+
+        auto mats = materialAsset->loadAssetObject();
+        Material* meshMaterial = GFXService::getMaterialManager()
+            ->getMaterial(std::dynamic_pointer_cast<Material>(mats[0])->getName());
+        materialID = meshMaterial->getID();
+        printf("loaded material for %s: %d\n",
+               asset.name.c_str(), materialID);
+        auto vdata = ms[0]->getVertexInfo();
+
+        vdata[0].materialID = materialID;
+        ms[0]->setVertexInfo(std::move(vdata));
+    }
+
     // We have a texture
     if (textureAsset != asset.dependencies.end()) {
 
-        int materialID = ms[0]->getVertexInfo()[0].materialID;
 
         char* matname = new char[textureAsset->name.size() + 10];
         sprintf(matname, "texture:%s", textureAsset->name.c_str());
@@ -44,9 +66,6 @@ std::vector<std::shared_ptr<AssetObject>> loadMeshAsset(Asset& asset) {
             auto vdata = ms[0]->getVertexInfo();
 
             vdata[0].materialID = texMaterial->getID();
-            printf("new material and texID for: %d %d %s",
-                   texMaterial->getID(), texMaterial->getTexture()->GetHandle(),
-                   asset.name.c_str());            
             ms[0]->setVertexInfo(std::move(vdata));
 
         } else if (materialID >= 0 && texMaterial){
