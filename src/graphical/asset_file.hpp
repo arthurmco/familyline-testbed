@@ -51,7 +51,6 @@ namespace familyline::graphics {
         std::vector<std::shared_ptr<AssetItem>> assets;
         int _asset_idx = 0;
 
-        
         std::vector<std::shared_ptr<AssetItem>> parseFile(yaml_parser_t* parser);
 
         /**

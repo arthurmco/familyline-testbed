@@ -52,6 +52,10 @@ unsigned char* TextureFile::GetTextureRaw(int x, int y, int w, int h)
 
 Texture* TextureFile::GetTextureCut(int x, int y, int w, int h)
 {
+    ilBindImage(_handle);    
+    if (w < 0) w = ilGetInteger(IL_IMAGE_WIDTH);
+    if (h < 0) h = ilGetInteger(IL_IMAGE_HEIGHT);
+    
     return new Texture(w, h, _format, GetTextureRaw(x, y, w, h));
 }
 

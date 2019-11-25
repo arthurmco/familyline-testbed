@@ -30,7 +30,7 @@
 #include "graphical/materialopener/MTLOpener.hpp"
 #include "graphical/TerrainRenderer.hpp"
 #include "graphical/TextureOpener.hpp"
-#include "graphical/TextureManager.hpp"
+#include "graphical/texture_manager.hpp"
 #include "graphical/material_manager.hpp"
 #include "graphical/asset_manager.hpp"
 #include "graphical/window.hpp"

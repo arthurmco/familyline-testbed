@@ -1,4 +1,6 @@
 #include "MTLOpener.hpp"
+#include "../gfx_service.hpp"
+#include "../texture_manager.hpp"
 
 using namespace familyline::graphics;
 
@@ -91,7 +93,7 @@ std::vector<Material*> MTLOpener::Open(const char* file)
             Texture* t = TextureOpener::OpenTexture(texpath);
 
             if (t) {
-                TextureManager::GetInstance()->AddTexture(texname.c_str(), t);
+                GFXService::getTextureManager()->AddTexture(texname.c_str(), t);
             } else {
                 Log::GetLog()->Warning("Texture %s failed to load", texpath);
             }

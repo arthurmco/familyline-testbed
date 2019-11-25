@@ -1,8 +1,6 @@
-#include "TextureManager.hpp"
+#include "texture_manager.hpp"
 
 using namespace familyline::graphics;
-
-TextureManager* TextureManager::_tm = nullptr;
 
 /* Add texture, return its ID */
 int TextureManager::AddTexture(const char* name, Texture* t)

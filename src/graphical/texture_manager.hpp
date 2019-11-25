@@ -1,18 +1,16 @@
 /***
     Texture manager
 
-    Copyright (C) 2016, 2018 Arthur Mendes.
+    Copyright (C) 2016, 2018-2019 Arthur Mendes.
 
 ***/
+#pragma once
 
 #include <map>
 #include <string>
 #include <cstring> //strcmp()
 #include "Texture.hpp"
 #include "Log.hpp"
-
-#ifndef TEXTUREMANAGER_HPP
-#define TEXTUREMANAGER_HPP
 
 namespace familyline::graphics {
 
@@ -29,16 +27,6 @@ namespace familyline::graphics {
 
         Texture* GetTexture(int ID);
         Texture* GetTexture(const char* name);
-
-        static TextureManager* GetInstance()
-        {
-            if (!_tm)
-                _tm = new TextureManager();
-
-            return _tm;
-        }
     };
 
 }
-
-#endif

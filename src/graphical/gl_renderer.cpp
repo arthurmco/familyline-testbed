@@ -59,9 +59,10 @@ void GLRenderer::render(Camera* c)
 
 	auto viewMatrix = c->GetViewMatrix();
 	auto projMatrix = c->GetProjectionMatrix();
-	
 
-	for (auto& vh : _vhandle_list) {
+    
+
+	for (auto& vh : _vhandle_list) {        
 		ShaderProgram* shader = vh->vinfo.shaderState.shader;
 		shaderManager->use(*shader);
         shader->setUniform("lightCount", 0);
@@ -72,7 +73,6 @@ void GLRenderer::render(Camera* c)
         shader->setUniform("mView", viewMatrix);
 		shader->setUniform("mProjection", projMatrix);
 		shader->setUniform("mvp", projMatrix * viewMatrix * glm::mat4(1.0));
-        shader->setUniform("tex_amount", 0.0f);
 
         if (vh->vinfo.materialID >= 0) {
   
@@ -84,12 +84,23 @@ void GLRenderer::render(Camera* c)
             shader->setUniform("diffuse_intensity", 1.0f);
             shader->setUniform("ambient_intensity", 1.0f);
 
+            if (Texture *t = m->getTexture(); t) {
+                glBindTexture(GL_TEXTURE_2D, t->GetHandle());
+                shader->setUniform("tex_amount", 1.0f);
+
+            } else {
+                glBindTexture(GL_TEXTURE_2D, 0);
+                shader->setUniform("tex_amount", 0.0f);
+            }
+
 //            printf("<<<< %d dif=%.2f,%.2f,%.2f amb=%.2f,%.2f,%.2f  >>>>",
 //                   vh->vinfo.materialID,
 //                   md.diffuseColor.x, md.diffuseColor.y, md.diffuseColor.z,
 //                   md.ambientColor.x, md.ambientColor.y, md.ambientColor.z);
 
-        } else {            
+        } else {
+            glBindTexture(GL_TEXTURE_2D, 0);
+            shader->setUniform("tex_amount", 0.0f);
             shader->setUniform("diffuse_color", glm::vec3(0.5));
             shader->setUniform("ambient_color", glm::vec3(0.1));
             shader->setUniform("diffuse_intensity", 0.0f);
@@ -143,6 +154,8 @@ void GLRenderer::render(Camera* c)
 			return;
 		}
 	}
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 
 //	glBindVertexArray(0);
 }

@@ -53,6 +53,9 @@ namespace familyline::graphics {
     private:
         std::unordered_map<std::string, Asset> _assets;
 
+        Asset processAsset(AssetItem&);
+
+
     public:
         AssetManager();
         

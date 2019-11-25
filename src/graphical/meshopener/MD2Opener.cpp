@@ -211,7 +211,7 @@ std::vector<Mesh*> MD2Opener::OpenSpecialized(const char* file)
     auto fshader = GFXService::getShaderManager()->getShader("forward");
     
     std::vector<VertexInfo> vinfo = {
-        VertexInfo{0, 0, fshader, VertexRenderStyle::Triangles}
+        VertexInfo{0, -1, fshader, VertexRenderStyle::Triangles}
     };
 
     const char* name = "test_name";

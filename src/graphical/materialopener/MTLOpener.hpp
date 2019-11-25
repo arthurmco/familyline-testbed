@@ -7,7 +7,6 @@
 #include <cstring>
 
 #include "MaterialOpener.hpp"
-#include "../TextureManager.hpp"
 
 #ifndef MTLOPENER_HPP
 #define MTLOPENER_HPP
