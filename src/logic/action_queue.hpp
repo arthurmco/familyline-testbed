@@ -29,6 +29,12 @@ namespace familyline::logic {
         
         void pushEvent(const Event& e);
         void processEvents();
+
+        void clearEvents() {
+            while (!events.empty()) {
+                events.pop();
+            }
+        }
     };
 
 }
