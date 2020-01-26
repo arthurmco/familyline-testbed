@@ -40,6 +40,8 @@ TEST(ObjectOps, ObjectRunsUpdate) {
     auto component = make_object(objParams);
 
     ObjectManager om;
+    auto id = om.add(std::move(component));
+    EXPECT_GT(id, 0);
 
     EXPECT_FALSE(updated);
     om.update();
