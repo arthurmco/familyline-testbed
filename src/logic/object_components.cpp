@@ -29,7 +29,7 @@ void LocationComponent::updateMesh(const Terrain& t) {
  */
 bool AttackComponent::isInAttackRange(const AttackComponent& other)
 {
-    return (other.object != nullptr);
+    return (other.object != nullptr && this->doDirectAttack(other).has_value());
 
 }
 
