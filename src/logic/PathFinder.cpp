@@ -98,6 +98,34 @@ bool NodeList::isObstacle(glm::vec2 pos) {
     return this->pathlist[x + y * this->width] == 0xff;
 }
 
+/***
+ * Check if the object can fit in the specified position
+ *
+ * Even if 'pos' is emply, maybe the object that is on pos, whose size
+ * is specified by objw x objh, will not fit
+ */
+bool NodeList::canObjectFit(glm::vec2 pos, double objw, double objh)
+{
+    if (this->isObstacle(pos))
+        return false;
+
+    int radiusx = int(objw/2);
+    int radiusy = int(objh/2);
+
+    if (radiusx == 0 || radiusy == 0)
+        return true;
+
+    for (int x = std::max(0.0f, pos.x - radiusx); x <= pos.x + radiusx; x++) {
+        for (int y = std::max(0.0f, pos.y - radiusy); y <= pos.y + radiusy; y++) {
+            if (this->isObstacle(glm::vec2(x, y))) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 /*  Get a node from the node definitions
     Makes easier to create a node and ensure that it have the same properties
     (score, etc) for the same paths
@@ -108,7 +136,8 @@ PathNode* NodeList::getNode(glm::vec2 pos) {
     });
 
     if (pi == nodes.end()) {
-        return (this->isObstacle(pos)) ? nullptr : new PathNode(this->pf, pos);
+        return (this->isObstacle(pos) ||
+                !this->canObjectFit(pos, 3, 3)) ? nullptr : new PathNode(this->pf, pos);
     }
     else {
         return *pi;
@@ -184,7 +213,8 @@ struct PathNodeComparator {
     }
 };
 
-std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end) {
+std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end,
+                                            double width, double height) {
 
     /* The border of our pathfinder, the nodes here are the most periferical ones */
     std::priority_queue<PathNode*, std::vector<PathNode*>, 
@@ -256,13 +286,14 @@ std::vector<glm::vec2> PathFinder::CreatePath(const GameObject& o, glm::vec2 des
     std::vector<glm::vec2> vec;
     std::list<PathNode*> nodelist;
 
-    float r = 8;//o->GetRadius();
-
+    int rx = std::ceil(o.getSize().x/2.0);
+    int ry = std::ceil(o.getSize().y/2.0);
+    
     auto position = o.getPosition();
     glm::vec2 from(position.x, position.z);
 
     /* Unmap our object */
-    this->ClearPathmap(r * 2, r * 2, from.x - r, from.y - r);
+    this->ClearPathmap(rx * 2, rx * 2, from.x - rx, from.y - ry);
 
     /* If we have an obstruction in the destiny, we change the destiny
      *
@@ -293,5 +324,6 @@ std::vector<glm::vec2> PathFinder::CreatePath(const GameObject& o, glm::vec2 des
         delete this->node_list;
 
     this->node_list = new NodeList( this, this->_pathing_slots, unsigned(this->_mapWidth) );
-    return this->FindPath(from, glm::vec2(int(destination.x), int(destination.y)));
+    return this->FindPath(from, glm::vec2(int(destination.x), int(destination.y)),
+                          o.getSize().x, o.getSize().y);
 }

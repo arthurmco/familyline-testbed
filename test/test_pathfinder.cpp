@@ -18,11 +18,13 @@ TEST(Pathfinder, CanWalkStraightLine) {
     auto component = make_object(objParams);
     component->setPosition(glm::vec3(10, 1, 10));
 
+    auto id = om.add(std::move(component));
+    
     PathFinder pf(&om);
     pf.InitPathmap(100, 100);
     pf.UpdatePathmap(100, 100);
-
-    auto path = pf.CreatePath(*component.get(), glm::vec2(20, 10));
+    
+    auto path = pf.CreatePath(*om.get(id).value().get(), glm::vec2(20, 10));
 
     EXPECT_EQ(11, path.size());
     ASSERT_EQ(glm::vec2(10, 10), path[0]);
@@ -51,11 +53,13 @@ TEST(Pathfinder, CanWalkDiagonalLine) {
     auto component = make_object(objParams);
     component->setPosition(glm::vec3(10, 1, 10));
 
+    auto id = om.add(std::move(component));
+
     PathFinder pf(&om);
     pf.InitPathmap(100, 100);
     pf.UpdatePathmap(100, 100);
 
-    auto path = pf.CreatePath(*component.get(), glm::vec2(22, 22));
+    auto path = pf.CreatePath(*om.get(id).value().get(), glm::vec2(22, 22));
 
     EXPECT_EQ(13, path.size());
     ASSERT_EQ(glm::vec2(10, 10), path[0]);
@@ -74,6 +78,11 @@ TEST(Pathfinder, CanWalkDiagonalLine) {
 }
 
 TEST(Pathfinder, CanWalkAroundObstacle) {
+    auto& actionQueue = LogicService::getActionQueue();
+    actionQueue->clearEvents();
+
+    const auto& olist = familyline::logic::LogicService::getObjectListener();
+    
     ObjectManager om;
 
     auto atkComp = std::optional<AttackComponent>();
@@ -88,13 +97,19 @@ TEST(Pathfinder, CanWalkAroundObstacle) {
     component->setPosition(glm::vec3(10, 1, 10));
     obstacle->setPosition(glm::vec3(16, 1, 16));
 
+    auto id = om.add(std::move(component));
+    om.add(std::move(obstacle));
+
+    actionQueue->processEvents();
+    olist->updateObjects();
+    
     PathFinder pf(&om);
     pf.InitPathmap(100, 100);
     pf.UpdatePathmap(100, 100);
 
-    auto path = pf.CreatePath(*component.get(), glm::vec2(22, 22));
+    auto path = pf.CreatePath(*om.get(id).value().get(), glm::vec2(22, 22));
 
-    EXPECT_GT(13, path.size());
+    EXPECT_LT(13, path.size());
     ASSERT_EQ(glm::vec2(10, 10), path[0]);
     ASSERT_EQ(glm::vec2(11, 11), path[1]);
     ASSERT_EQ(glm::vec2(12, 12), path[2]);

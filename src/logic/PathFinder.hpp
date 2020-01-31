@@ -1,9 +1,10 @@
 /***
 	Path finder class.
 
-	Copyright (C) 2016, 2017, 2018 Arthur M
+	Copyright (C) 2016-2018, 2020 Arthur M
 
 ***/
+#pragma once
 
 #include "Terrain.hpp"
 #include "object_components.hpp"
@@ -16,9 +17,6 @@
 #include <queue>
 #include <array>
 #include <glm/glm.hpp>
-
-#ifndef PATHFINDER_HPP
-#define PATHFINDER_HPP
 
 namespace familyline::logic {
 
@@ -61,6 +59,14 @@ namespace familyline::logic {
         unsigned width;
 
         NodeList(PathFinder* const pf, unsigned char* pathlist = nullptr, unsigned w = 0);
+
+        /***
+         * Check if the object can fit in the specified position
+         *
+         * Even if 'pos' is emply, maybe the object that is on pos, whose size
+         * is specified by objw x objh, will not fit
+         */
+        bool canObjectFit(glm::vec2 pos, double objw, double objh);
 
         /**
          * Check if node has an obstacle on it
@@ -109,7 +115,8 @@ namespace familyline::logic {
          */
         std::vector<glm::vec2> BuildPath(PathNode* last);
 
-        std::vector<glm::vec2> FindPath(glm::vec2 start, glm::vec2 end);
+        std::vector<glm::vec2> FindPath(glm::vec2 start, glm::vec2 end,
+                                        double width, double height);
 
     public:
         PathFinder(ObjectManager*);
@@ -125,5 +132,3 @@ namespace familyline::logic {
 
 
 }
-
-#endif /* end of include guard: PATHFINDER_HPP */
