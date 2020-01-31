@@ -6,10 +6,11 @@
 
 using namespace familyline::logic;
 
-TEST(SceneManager, TestMeshPlot) {
+// TODO: need a nice way to mock graphical objects.
+//TEST(SceneManager, TestMeshPlot) {
+//
+//}
 
-}
-
-TEST(SceneManager, TestMeshRemoveWhenObjectRemoves) {
-
-}
+//TEST(SceneManager, TestMeshRemoveWhenObjectRemoves) {
+//
+//}
