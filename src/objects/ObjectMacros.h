@@ -14,6 +14,7 @@
 #include <memory>
 #include "../graphical/mesh.hpp"
 
+// Define PI if it is absent, like in Visual C++
 #ifndef M_PI
 #define M_PI 3.141592653589
 #endif

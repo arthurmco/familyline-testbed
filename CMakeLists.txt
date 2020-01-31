@@ -55,7 +55,7 @@ find_package(GLEW REQUIRED)
 find_package(DevIL REQUIRED)
 find_package(Yaml REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(fmt)
+find_package(fmt CONFIG REQUIRED)
 
 include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
 
@@ -72,32 +72,32 @@ if (MSVC)
   find_package(SDL2 CONFIG REQUIRED)
   find_package(GLM CONFIG REQUIRED)
   find_package(unofficial-cairo CONFIG REQUIRED)
-  find_package(fmt CONFIG REQUIRED)
-
+  
   # SDL, GLM and cairo includes will be made available via vcpkg and put in a default path.
   # We don't really need to put them here'
   include_directories(AFTER ${YAML_INCLUDE_DIR})
 
   target_link_libraries(familyline SDL2::SDL2 SDL2::SDL2main)
   target_link_libraries(familyline ${OPENGL_gl_LIBRARY})
-  target_link_libraries(familyline ${GLEW_LIBRARY})
+  target_link_libraries(familyline GLEW::GLEW)
   target_link_libraries(familyline ${IL_LIBRARIES})
   target_link_libraries(familyline ${ILU_LIBRARIES})
   target_link_libraries(familyline unofficial::cairo::cairo)
   target_link_libraries(familyline glm)
   target_link_libraries(familyline ${YAML_LIBRARIES}) # You need to build YAML as a dll (use -DBUILD_SHARED_LIBS)
   target_link_libraries(familyline wsock32 ws2_32)
+  target_link_libraries(familyline fmt::fmt fmt::fmt-header-only)
 
   target_link_libraries(familyline-server wsock32 ws2_32)
 
   #if (DO_TESTS)
-	target_link_libraries(familyline SDL2::SDL2 SDL2::SDL2main)
+	target_link_libraries(familyline-tests SDL2::SDL2 SDL2::SDL2main)
   	target_link_libraries(familyline-tests ${OPENGL_gl_LIBRARY})
   	target_link_libraries(familyline-tests ${GLEW_LIBRARY})
   	target_link_libraries(familyline-tests ${IL_LIBRARIES})
   	target_link_libraries(familyline-tests ${ILU_LIBRARIES})
-	target_link_libraries(familyline unofficial::cairo::cairo)
-	target_link_libraries(familyline glm)
+	target_link_libraries(familyline-tests unofficial::cairo::cairo)
+	target_link_libraries(familyline-tests glm)
 	target_link_libraries(familyline-tests wsock32 ws2_32)
 	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
   #endif(DO_TESTS)
