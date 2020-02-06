@@ -37,21 +37,14 @@ if (DO_TESTS)
   
   file( GLOB SRC_TEST_FILES "${CMAKE_SOURCE_DIR}/test/*.cpp" )
 
-  # Remove Server.cpp (the one with main) from being compiled with the tests
-  set(SRC_SERVER_TEST "${SRC_SERVER}")
-  list(REMOVE_ITEM SRC_SERVER_TEST "${CMAKE_SOURCE_DIR}/server/Server.cpp" "${CMAKE_SOURCE_DIR}/server/server.cpp")
   message("${SRC_SERVER_TEST}")
   
-  add_executable(familyline-tests ${SRC_TEST_FILES} ${SRC_LOGIC} ${SRC_GFX} ${SRC_GUI} ${SRC_INPUT} ${SRC_SERVER_TEST}
-    ${SRC_COMMON}  "${CMAKE_SOURCE_DIR}/src/Timer.cpp") 
+  add_executable(familyline-tests ${SRC_TEST_FILES})
+  target_link_libraries(familyline-tests familyline-client)
+  target_include_directories(familyline-tests PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
-  include_directories("${CMAKE_SOURCE_DIR}/src")
-  include_directories("${CMAKE_SOURCE_DIR}/server")
-  include_directories("${CMAKE_SOURCE_DIR}/common")
-  
   file(COPY "${CMAKE_SOURCE_DIR}/test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
   
-
   option(DO_CHECK_ASAN "Enable address sanitizer" OFF)
   option(SET_COVERAGE "Enable coverage testing" OFF)
 
