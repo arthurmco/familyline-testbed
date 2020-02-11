@@ -1,5 +1,5 @@
-#include "GUIImageControl.hpp"
-#include <Log.hpp>
+#include <client/graphical/gui/GUIImageControl.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline;
 using namespace familyline::graphics::gui;

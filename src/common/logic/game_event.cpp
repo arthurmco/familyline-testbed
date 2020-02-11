@@ -1,7 +1,7 @@
-#include "game_event.hpp"
+#include <common/logic/game_event.hpp>
 
 #include <chrono>
-#include "action_queue.hpp"
+#include <common/logic/action_queue.hpp>
 
 using namespace familyline::logic;
 

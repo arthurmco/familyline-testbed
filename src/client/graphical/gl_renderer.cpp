@@ -1,9 +1,9 @@
-#include "gl_renderer.hpp"
-#include "exceptions.hpp"
-#include "shader_manager.hpp"
-#include "gfx_service.hpp"
+#include <client/graphical/gl_renderer.hpp>
+#include <client/graphical/exceptions.hpp>
+#include <client/graphical/shader_manager.hpp>
+#include <client/graphical/gfx_service.hpp>
 
-#include "Log.hpp"
+#include <common/Log.hpp>
 
 using namespace familyline;
 using namespace familyline::graphics;

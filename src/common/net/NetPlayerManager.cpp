@@ -1,5 +1,6 @@
-#include "NetPlayerManager.hpp"
-#include "NetServer.hpp"
+#include <common/net/NetPlayerManager.hpp>
+#include <common/net/NetServer.hpp>
+#include <common/Log.hpp>
 
 
 #ifdef _WIN32

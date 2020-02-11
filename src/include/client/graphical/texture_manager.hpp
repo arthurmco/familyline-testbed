@@ -10,7 +10,6 @@
 #include <string>
 #include <cstring> //strcmp()
 #include "Texture.hpp"
-#include "Log.hpp"
 
 namespace familyline::graphics {
 

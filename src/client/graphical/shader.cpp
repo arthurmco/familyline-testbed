@@ -1,9 +1,9 @@
 #include <cstdio>
 
-#include "shader.hpp"
-#include "exceptions.hpp"
-#include "shader_manager.hpp"
-#include "gfx_service.hpp"
+#include <client/graphical/shader.hpp>
+#include <client/graphical/exceptions.hpp>
+#include <client/graphical/shader_manager.hpp>
+#include <client/graphical/gfx_service.hpp>
 
 using namespace familyline::graphics;
 

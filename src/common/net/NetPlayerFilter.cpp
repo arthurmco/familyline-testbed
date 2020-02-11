@@ -1,8 +1,8 @@
-#include "NetPlayerFilter.hpp"
-#include <Log.hpp>
+#include <common/net/NetPlayerFilter.hpp>
+#include <common/Log.hpp>
 
 #include <stdio.h>
-#include "NetServer.hpp"
+#include <common/net/NetServer.hpp>
 
 using namespace familyline::Net;
 using namespace familyline::Server;

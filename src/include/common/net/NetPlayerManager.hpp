@@ -9,9 +9,8 @@
 #ifndef NETPLAYERMANAGER_HPP
 #define NETPLAYERMANAGER_HPP
 
-#include "../logic/PlayerManager.hpp"
-#include "Log.hpp"
-#include "../HumanPlayer.hpp"
+#include <common/logic/PlayerManager.hpp>
+#include <client/HumanPlayer.hpp>
 #include "NetPlayerFilter.hpp"
 
 namespace familyline::Net {

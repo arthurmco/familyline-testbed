@@ -1,12 +1,12 @@
 #include <GL/glew.h>
-#include "Game.hpp"
-#include "graphical/gl_renderer.hpp"
-#include "graphical/LightManager.hpp"
-#include "graphical/animator.hpp"
-#include "graphical/gfx_debug_drawer.hpp"
+#include <client/Game.hpp>
+#include <client/graphical/gl_renderer.hpp>
+#include <client/graphical/LightManager.hpp>
+#include <client/graphical/animator.hpp>
+#include <client/graphical/gfx_debug_drawer.hpp>
 
-#include "logic/game_event.hpp"
-#include "logic/logic_service.hpp"
+#include <common/logic/game_event.hpp>
+#include <common/logic/logic_service.hpp>
 
 using namespace familyline;
 using namespace familyline::logic;

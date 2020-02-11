@@ -1,16 +1,16 @@
-#include "OBJOpener.hpp"
+#include <client/graphical/meshopener/OBJOpener.hpp>
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
 
-#include <Log.hpp>
-#include "../material_manager.hpp"
-#include "../static_animator.hpp"
+#include <common/Log.hpp>
+#include <client/graphical/material_manager.hpp>
+#include <client/graphical/static_animator.hpp>
 
-#include "../shader_manager.hpp"
-#include "../exceptions.hpp"
+#include <client/graphical/shader_manager.hpp>
+#include <client/graphical/exceptions.hpp>
 
-#include "../gfx_service.hpp"
+#include <client/graphical/gfx_service.hpp>
 
 #include <glm/glm.hpp>
 

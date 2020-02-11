@@ -1,4 +1,4 @@
-#include "device.hpp"
+#include <client/graphical/device.hpp>
 #include <SDL2/SDL_opengl.h>
 
 

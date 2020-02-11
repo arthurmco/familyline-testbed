@@ -1,10 +1,10 @@
-#include "MD2Opener.hpp"
-#include "../deform_animator.hpp"
+#include <client/graphical/meshopener/MD2Opener.hpp>
+#include <client/graphical/meshopener/../deform_animator.hpp>
 
-#include "../shader_manager.hpp"
-#include "../exceptions.hpp"
+#include <client/graphical/meshopener/../shader_manager.hpp>
+#include <client/graphical/meshopener/../exceptions.hpp>
 
-#include "../gfx_service.hpp"
+#include <client/graphical/meshopener/../gfx_service.hpp>
 
 #include <vector>
 #include <array>
@@ -39,7 +39,7 @@ struct md2_frame {
     char name[16];
 };
 
-#include "anorms.h"
+#include <client/graphical/meshopener/anorms.h>
 
 constexpr int MD2Magic = 0x32504449; // IDP2
 

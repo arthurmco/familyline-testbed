@@ -7,15 +7,9 @@ cmake_minimum_required(VERSION 3.12)
 
 project(Familyline VERSION 0.1.97)
 
-# Retrieve commit number (useful when getting logs from git clones)
-execute_process(
-  COMMAND git log -1 --format=%h
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE COMMIT_HASH OUTPUT_STRIP_TRAILING_WHITESPACE )
+option(USE_RELATIVE_PATH "Set if you want the path to the game resources to be local" OFF)
 
-# Retrieve the user who compiled
-execute_process(COMMAND whoami OUTPUT_VARIABLE USERNAME
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 
 #Familyline game data
 add_subdirectory(src/common)
@@ -24,10 +18,8 @@ add_subdirectory(src/client)
 add_executable(familyline "src/client/Tribalia.cpp")
 target_link_libraries(familyline familyline-client)
 
-target_compile_definitions(familyline PRIVATE VERSION=${PROJECT_VERSION}
-  COMMIT=${COMMIT_HASH} USERNAME=${USERNAME})
 
-target_compile_features(familyline PRIVATE cxx_std_20)
+target_compile_features(familyline PUBLIC cxx_std_20)
 
 include("test/unit-tests.cmake")
 
@@ -41,7 +33,7 @@ find_package(OpenGL REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 
 include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
-include_directories(AFTER "${CMAKE_SOURCE_DIR}/src/include")
+target_include_directories(familyline PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
 
 if (MSVC)
@@ -85,9 +77,6 @@ if (MSVC)
   add_compile_options(/EHsc /GR /W4)
 else()
 	
-  # Some compiler-dependant options
-  option(IS_DEBUG "Set if you want to output debugging symbols" OFF)
-
   find_package(PkgConfig REQUIRED)
   pkg_search_module(GLEW REQUIRED glew) # finds glew
   pkg_search_module(SDL2 REQUIRED sdl2) # finds sdl
@@ -142,10 +131,6 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall -Wextra")
   include_directories(AFTER  ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} `${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
 
-  if (IS_DEBUG)
-	  add_compile_options(-g)
-  endif(IS_DEBUG)
-
 endif(MSVC)
 
 if (WIN32)
@@ -156,15 +141,6 @@ if (WIN32)
   # See https://github.com/Microsoft/vcpkg/issues/2630
   file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
   #file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-
-  # Copy the asset folders to the Debug folder
-  file(COPY "${CMAKE_SOURCE_DIR}/shaders" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-  file(COPY "${CMAKE_SOURCE_DIR}/icons" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-  file(COPY "${CMAKE_SOURCE_DIR}/materials" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-  file(COPY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-  file(COPY "${CMAKE_SOURCE_DIR}/textures" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-  file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.trtb" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-  file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
 
 endif (WIN32)
@@ -197,23 +173,19 @@ SET(CPACK_RPM_PACKAGE_LICENSE "MIT")
 INCLUDE(CPack)
 
 
-option(USE_RELATIVE_PATH "Set if you want the path to the game resources to be local" OFF)
 
-if (WIN32 OR USE_RELATIVE_PATH)
-	set(SHADERS_DIR "\"./shaders/\"")
-	set(ICONS_DIR "\"./icons/\"")
-	set(MATERIALS_DIR "\"./materials/\"")
-	set(MODELS_DIR "\"./models/\"")
-	set(TEXTURES_DIR "\"./textures/\"")
-	set(ASSET_FILE_DIR "\"./\"")
-else()
-	set(SHADERS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/shaders/\"")
-	set(ICONS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/icons/\"")
-	set(MATERIALS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/materials/\"")
-	set(MODELS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/models/\"")
-	set(TEXTURES_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/textures/\"")
-	set(ASSET_FILE_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/\"")
-endif(WIN32 OR USE_RELATIVE_PATH)
+# Copy the asset folders to the build folder
+# This means that we have to make a separate build directory.
+# Usually this is the case.
+file(COPY "${CMAKE_SOURCE_DIR}/shaders" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/icons" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/materials" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/textures" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.trtb" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+
+
 
 
 # Install locations

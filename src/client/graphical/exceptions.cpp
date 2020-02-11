@@ -1,4 +1,4 @@
-#include "exceptions.hpp"
+#include <client/graphical/exceptions.hpp>
 
 using namespace familyline::graphics;
 

@@ -1,5 +1,5 @@
-#include "GUIControl.hpp"
-#include <Log.hpp>
+#include <client/graphical/gui/GUIControl.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::graphics::gui;
 

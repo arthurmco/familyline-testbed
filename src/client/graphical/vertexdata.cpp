@@ -1,4 +1,4 @@
-#include "vertexdata.hpp"
+#include <client/graphical/vertexdata.hpp>
 
 using namespace familyline::graphics;
 

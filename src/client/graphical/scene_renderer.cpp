@@ -1,6 +1,6 @@
-#include "scene_renderer.hpp"
-#include "Log.hpp"
-#include "mesh.hpp"
+#include <client/graphical/scene_renderer.hpp>
+#include <common/Log.hpp>
+#include <client/graphical/mesh.hpp>
 
 #include <algorithm>
 

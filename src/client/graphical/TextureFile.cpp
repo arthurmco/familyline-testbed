@@ -1,5 +1,6 @@
-#include "TextureOpener.hpp"
+#include <client/graphical/TextureOpener.hpp>
 #include <IL/ilu.h>
+#include <common/Log.hpp>
 
 using namespace familyline::graphics;
 

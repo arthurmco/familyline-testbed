@@ -1,8 +1,8 @@
-#include "GUIManager.hpp"
-#include "../../config.h" //for SHADERS_DIR
+#include <client/graphical/gui/GUIManager.hpp>
 #include <algorithm> // for remove_if
 
-#include "../shader_manager.hpp"
+#include <client/graphical/shader_manager.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::graphics;
 using namespace familyline::graphics::gui;
@@ -296,7 +296,7 @@ GUICanvas GUIManager::doRender(int absw, int absh) const
     return this->canvas;
 }
 
-#include "../gfx_service.hpp"
+#include <client/graphical/gui/../gfx_service.hpp>
 
 /* Render this into a graphical framebuffer
  * that is 'screen' for you

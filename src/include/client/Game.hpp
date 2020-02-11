@@ -12,47 +12,47 @@
 #include "EnviroDefs.h"
 
 //#include "logic/ObjectRenderer.hpp"
-#include "logic/PathFinder.hpp"
-#include "logic/ObjectFactory.hpp"
-#include "logic/ObjectPathManager.hpp"
-#include "logic/TerrainFile.hpp"
-#include "logic/Team.hpp"
-#include "logic/BuildQueue.hpp"
-#include "logic/GameActionManager.hpp"
-#include "logic/PlayerManager.hpp"
-#include "logic/debug_drawer.hpp"
-#include "logic/lifecycle_manager.hpp"
+#include <common/logic/PathFinder.hpp>
+#include <common/logic/ObjectFactory.hpp>
+#include <common/logic/ObjectPathManager.hpp>
+#include <common/logic/TerrainFile.hpp>
+#include <common/logic/Team.hpp>
+#include <common/logic/BuildQueue.hpp>
+#include <common/logic/GameActionManager.hpp>
+#include <common/logic/PlayerManager.hpp>
+#include <common/logic/debug_drawer.hpp>
+#include <common/logic/lifecycle_manager.hpp>
 
-#include "graphical/camera.hpp"
-#include "graphical/asset_file.hpp"
-#include "graphical/Light.hpp"
-#include "graphical/meshopener/OBJOpener.hpp"
-#include "graphical/materialopener/MTLOpener.hpp"
-#include "graphical/TerrainRenderer.hpp"
-#include "graphical/TextureOpener.hpp"
-#include "graphical/texture_manager.hpp"
-#include "graphical/material_manager.hpp"
-#include "graphical/asset_manager.hpp"
-#include "graphical/window.hpp"
-#include "graphical/framebuffer.hpp"
-#include "graphical/object_renderer.hpp"
-#include "graphical/renderer.hpp"
-#include "graphical/scene_renderer.hpp"
-#include "graphical/GraphicalPlotInterface.hpp"
-#include "graphical/gfx_service.hpp"
-#include "graphical/gui/GUIManager.hpp"
-#include "graphical/gui/GUILabel.hpp"
-#include "graphical/gui/GUIButton.hpp"
+#include <client/graphical/camera.hpp>
+#include <client/graphical/asset_file.hpp>
+#include <client/graphical/Light.hpp>
+#include <client/graphical/meshopener/OBJOpener.hpp>
+#include <client/graphical/materialopener/MTLOpener.hpp>
+#include <client/graphical/TerrainRenderer.hpp>
+#include <client/graphical/TextureOpener.hpp>
+#include <client/graphical/texture_manager.hpp>
+#include <client/graphical/material_manager.hpp>
+#include <client/graphical/asset_manager.hpp>
+#include <client/graphical/window.hpp>
+#include <client/graphical/framebuffer.hpp>
+#include <client/graphical/object_renderer.hpp>
+#include <client/graphical/renderer.hpp>
+#include <client/graphical/scene_renderer.hpp>
+#include <client/graphical/GraphicalPlotInterface.hpp>
+#include <client/graphical/gfx_service.hpp>
+#include <client/graphical/gui/GUIManager.hpp>
+#include <client/graphical/gui/GUILabel.hpp>
+#include <client/graphical/gui/GUIButton.hpp>
 //#include "graphical/gui/ImageControl.hpp"
 
 
-#include "input/InputPicker.hpp"
+#include <client/input/InputPicker.hpp>
 
-#include "Log.hpp"
-#include "Timer.hpp"
-#include "HumanPlayer.hpp"
-#include "objects/WatchTower.hpp"
-#include "objects/Tent.hpp"
+#include <common/Log.hpp>
+#include <client/Timer.hpp>
+#include <client/HumanPlayer.hpp>
+#include <common/objects/WatchTower.hpp>
+#include <common/objects/Tent.hpp>
 
 namespace familyline {
     

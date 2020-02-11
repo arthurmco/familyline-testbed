@@ -1,4 +1,4 @@
-#include "game_object.hpp"
+#include <common/logic/game_object.hpp>
 #include <algorithm>
 
 using namespace familyline::logic;

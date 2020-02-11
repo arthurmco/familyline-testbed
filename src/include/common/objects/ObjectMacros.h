@@ -6,13 +6,13 @@
 #ifndef OBJECTMACROS_H
 #define OBJECTMACROS_H
 
-#include "../logic/game_object.hpp"
-#include "../logic/object_components.hpp"
-#include "../graphical/asset_manager.hpp"
-#include "../graphical/gfx_service.hpp"
+#include <common/logic/game_object.hpp>
+#include <common/logic/object_components.hpp>
+#include <client/graphical/asset_manager.hpp>
+#include <client/graphical/gfx_service.hpp>
 
 #include <memory>
-#include "../graphical/mesh.hpp"
+#include <client/graphical/mesh.hpp>
 
 // Define PI if it is absent, like in Visual C++
 #ifndef M_PI

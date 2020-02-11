@@ -1,4 +1,4 @@
-#include "WatchTower.hpp"
+#include <common/objects/WatchTower.hpp>
 #include <cmath> // for M_PI
 
 using namespace familyline;

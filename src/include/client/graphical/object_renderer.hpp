@@ -9,9 +9,9 @@
 #include <vector>
 #include <map>
 #include <memory>
-#include "../logic/object_components.hpp"
-#include "../logic/game_object.hpp"
-#include "../logic/Terrain.hpp"
+#include <common/logic/object_components.hpp>
+#include <common/logic/game_object.hpp>
+#include <common/logic/Terrain.hpp>
 #include "scene_renderer.hpp"
 
 namespace familyline::graphics {

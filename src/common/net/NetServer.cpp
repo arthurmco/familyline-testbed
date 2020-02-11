@@ -1,4 +1,5 @@
-#include "NetServer.hpp"
+#include <common/net/NetServer.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::Net;
 

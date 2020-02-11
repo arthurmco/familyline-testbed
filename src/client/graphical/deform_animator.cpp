@@ -1,4 +1,4 @@
-#include "deform_animator.hpp"
+#include <client/graphical/deform_animator.hpp>
 
 #include <algorithm>
 

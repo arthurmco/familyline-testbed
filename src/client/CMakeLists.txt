@@ -53,4 +53,31 @@ add_library(
   "Timer.cpp"
   )
 
+target_include_directories(familyline-client PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 target_link_libraries(familyline-client familyline-common)
+target_compile_features(familyline-client PRIVATE cxx_std_20)
+
+if (WIN32 OR USE_RELATIVE_PATH)
+  set(SHADERS_DIR "\"./shaders/\"")
+	set(ICONS_DIR "\"./icons/\"")
+	set(MATERIALS_DIR "\"./materials/\"")
+	set(MODELS_DIR "\"./models/\"")
+	set(TEXTURES_DIR "\"./textures/\"")
+	set(ASSET_FILE_DIR "\"./\"")
+else()
+	set(SHADERS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/shaders/\"")
+	set(ICONS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/icons/\"")
+	set(MATERIALS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/materials/\"")
+	set(MODELS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/models/\"")
+	set(TEXTURES_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/textures/\"")
+	set(ASSET_FILE_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/\"")
+endif(WIN32 OR USE_RELATIVE_PATH)
+
+target_compile_definitions(familyline-client PUBLIC
+  SHADERS_DIR=${SHADERS_DIR}
+  ICONS_DIR=${ICONS_DIR}
+  MATERIALS_DIR=${MATERIALS_DIR}
+  MODELS_DIR=${MODELS_DIR}
+  TEXTURES_DIR=${TEXTURES_DIR}
+  ASSET_FILE_DIR=${ASSET_FILE_DIR}
+)

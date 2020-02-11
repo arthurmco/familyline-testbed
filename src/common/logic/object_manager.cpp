@@ -1,5 +1,5 @@
-#include "object_manager.hpp"
-#include "logic_service.hpp"
+#include <common/logic/object_manager.hpp>
+#include <common/logic/logic_service.hpp>
 
 #include <algorithm>
 

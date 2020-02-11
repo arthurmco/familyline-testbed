@@ -1,4 +1,4 @@
-#include "logic_service.hpp"
+#include <common/logic/logic_service.hpp>
 
 using namespace familyline::logic;
 

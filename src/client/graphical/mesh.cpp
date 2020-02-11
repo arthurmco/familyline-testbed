@@ -1,9 +1,9 @@
-#include "mesh.hpp"
+#include <client/graphical/mesh.hpp>
 
 #include <algorithm>
 #include <numeric>
 #include <glm/gtc/matrix_transform.hpp>
-#include "asset_object.hpp"
+#include <client/graphical/asset_object.hpp>
 
 using namespace familyline::graphics;
 

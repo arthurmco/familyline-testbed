@@ -1,14 +1,15 @@
-#include "asset_manager.hpp"
+#include <client/graphical/asset_manager.hpp>
 
-#include "../config.h"
-#include "meshopener/OBJOpener.hpp"
-#include "meshopener/MD2Opener.hpp"
-#include "TextureOpener.hpp"
-#include "materialopener/MTLOpener.hpp"
-#include "gfx_service.hpp"
+#include <client/graphical/../config.h>
+#include <client/graphical/meshopener/OBJOpener.hpp>
+#include <client/graphical/meshopener/MD2Opener.hpp>
+#include <client/graphical/TextureOpener.hpp>
+#include <client/graphical/materialopener/MTLOpener.hpp>
+#include <client/graphical/gfx_service.hpp>
 #include <fmt/format.h>
 #include <algorithm>
 #include <iterator> // for std::back_inserter
+#include <common/Log.hpp>
 
 using namespace familyline::graphics;
 

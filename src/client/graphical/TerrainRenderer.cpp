@@ -1,9 +1,9 @@
-#include "TerrainRenderer.hpp"
-#include "TextureOpener.hpp"
-#include "../config.h"
-#include "gfx_service.hpp"
+#include <client/graphical/TerrainRenderer.hpp>
+#include <client/graphical/TextureOpener.hpp>
+#include <client/graphical/gfx_service.hpp>
 
-#include "shader_manager.hpp"
+#include <client/graphical/shader_manager.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::graphics;
 using namespace familyline::logic;

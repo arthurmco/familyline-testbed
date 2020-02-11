@@ -1,10 +1,11 @@
 #include <algorithm>
 #include <fmt/format.h>
 
-#include "City.hpp"
-#include "object_manager.hpp"
-#include "game_event.hpp"
-#include "Player.hpp"
+#include <common/logic/City.hpp>
+#include <common/logic/object_manager.hpp>
+#include <common/logic/game_event.hpp>
+#include <common/logic/Player.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline;
 using namespace familyline::logic;

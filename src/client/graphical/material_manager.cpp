@@ -1,4 +1,5 @@
-#include "material_manager.hpp"
+#include <client/graphical/material_manager.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::graphics;
 

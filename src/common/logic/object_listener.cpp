@@ -1,4 +1,4 @@
-#include "object_listener.hpp"
+#include <common/logic/object_listener.hpp>
 
 using namespace familyline::logic;
 
@@ -28,7 +28,7 @@ std::set<object_id_t> ObjectListener::getAliveObjects() const
     return _objects;
 }
 
-#include "logic_service.hpp"
+#include <common/logic/logic_service.hpp>
 
 ObjectListener::~ObjectListener()
 {

@@ -1,11 +1,10 @@
-#include "asset_file.hpp"
-#include "Log.hpp"
-#include "../config.h"
+#include <client/graphical/asset_file.hpp>
+#include <common/Log.hpp>
 
 #include <algorithm>
 #include <string>
 
-#include "exceptions.hpp"
+#include <client/graphical/exceptions.hpp>
 
 using namespace familyline::graphics;
 

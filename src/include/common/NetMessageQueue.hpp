@@ -38,8 +38,8 @@
 #endif
 
 
-#include <ClientUDPMessage.hpp>
-#include "../src/net/socket.h"
+#include <common/ClientUDPMessage.hpp>
+#include <common/net/socket.h>
 
 #define MAX_CLIENT_BUFFER 8192
 

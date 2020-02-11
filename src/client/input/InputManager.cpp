@@ -1,5 +1,6 @@
-#include "InputManager.hpp"
+#include <client/input/InputManager.hpp>
 #include <algorithm>
+#include <common/Log.hpp>
 
 using namespace familyline::input;
 

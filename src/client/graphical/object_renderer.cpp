@@ -1,6 +1,6 @@
-#include "object_renderer.hpp"
-#include "mesh.hpp"
-#include "../logic/logic_service.hpp"
+#include <client/graphical/object_renderer.hpp>
+#include <client/graphical/mesh.hpp>
+#include <common/logic/logic_service.hpp>
 
 #include <algorithm>
 
@@ -36,7 +36,7 @@ void ObjectRenderer::remove(object_id_t id)
     this->components.erase(iter);
 }
 
-#include "TerrainRenderer.hpp"
+#include <client/graphical/TerrainRenderer.hpp>
 
 void ObjectRenderer::update()
 {

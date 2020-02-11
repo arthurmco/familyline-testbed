@@ -15,22 +15,22 @@
 
 #include <memory>
 
-#include "logic/Player.hpp"
-#include "logic/PathFinder.hpp"
-#include "logic/ObjectFactory.hpp"
-#include "logic/object_manager.hpp"
-#include "logic/ObjectPathManager.hpp"
-#include "logic/BuildQueue.hpp"
-#include "logic/attack_manager.hpp"
-#include "logic/lifecycle_manager.hpp"
+#include <common/logic/Player.hpp>
+#include <common/logic/PathFinder.hpp>
+#include <common/logic/ObjectFactory.hpp>
+#include <common/logic/object_manager.hpp>
+#include <common/logic/ObjectPathManager.hpp>
+#include <common/logic/BuildQueue.hpp>
+#include <common/logic/attack_manager.hpp>
+#include <common/logic/lifecycle_manager.hpp>
 
-#include "graphical/camera.hpp"
-#include "graphical/TerrainRenderer.hpp"
-//#include "graphical/GUIActionManager.hpp"
-#include "graphical/object_renderer.hpp"
+#include <client/graphical/camera.hpp>
+#include <client/graphical/TerrainRenderer.hpp>
+//#include "graphical/GUIActionManager.hpp>
+#include <client/graphical/object_renderer.hpp>
 
-#include "input/InputPicker.hpp"
-#include "input/InputManager.hpp"
+#include <client/input/InputPicker.hpp>
+#include <client/input/InputManager.hpp>
 
 class HumanPlayer : public familyline::logic::Player
 {

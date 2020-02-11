@@ -1,6 +1,6 @@
-#include "GameActionManager.hpp"
+#include <common/logic/GameActionManager.hpp>
 #include <cstdio>
-#include "Log.hpp"
+#include <common/Log.hpp>
 
 using namespace familyline::logic;
 

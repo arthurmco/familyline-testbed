@@ -9,7 +9,6 @@
 
 #include "../material.hpp"
 #include "../exceptions.hpp"
-#include "Log.hpp"
 #include "../TextureOpener.hpp"
 
 #ifndef MATERIALOPENER_HPP

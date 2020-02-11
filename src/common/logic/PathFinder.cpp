@@ -1,7 +1,8 @@
-#include "PathFinder.hpp"
+#include <common/logic/PathFinder.hpp>
 #include <cstring> //memset()
 #include <algorithm>
-#include "logic_service.hpp"
+#include <common/logic/logic_service.hpp>
+#include <common/Log.hpp>
 
 //#include "ObjectEventEmitter.hpp"
 

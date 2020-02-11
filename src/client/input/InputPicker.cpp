@@ -1,8 +1,8 @@
-#include "InputPicker.hpp"
+#include <client/input/InputPicker.hpp>
 
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
-#include "../logic/logic_service.hpp"
+#include <common/logic/logic_service.hpp>
 
 using namespace familyline::input;
 using namespace familyline::graphics;

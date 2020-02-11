@@ -1,8 +1,8 @@
-#include "gfx_debug_drawer.hpp"
+#include <client/graphical/gfx_debug_drawer.hpp>
 #include <string_view>
-#include "vertexdata.hpp"
-#include "TerrainRenderer.hpp"
-#include "gfx_service.hpp"
+#include <client/graphical/vertexdata.hpp>
+#include <client/graphical/TerrainRenderer.hpp>
+#include <client/graphical/gfx_service.hpp>
 
 using namespace familyline::graphics;
 

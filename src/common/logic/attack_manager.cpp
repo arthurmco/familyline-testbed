@@ -1,9 +1,9 @@
 #include <algorithm>
-#include "attack_manager.hpp"
-#include "game_object.hpp"
-#include "logic_service.hpp"
+#include <common/logic/attack_manager.hpp>
+#include <common/logic/game_object.hpp>
+#include <common/logic/logic_service.hpp>
 
-#include "Log.hpp"
+#include <common/Log.hpp>
 
 using namespace familyline::logic;
 

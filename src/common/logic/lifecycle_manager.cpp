@@ -1,5 +1,5 @@
-#include "lifecycle_manager.hpp"
-#include "Log.hpp"
+#include <common/logic/lifecycle_manager.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::logic;
 

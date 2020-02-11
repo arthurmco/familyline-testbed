@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "game_object.hpp"
-#include "Log.hpp"
 #include "Team.hpp"
 #include "game_event.hpp"
 #include "GameActionListener.hpp"

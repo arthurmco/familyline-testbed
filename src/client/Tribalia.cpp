@@ -23,8 +23,8 @@
 
 #endif
 
-#include "EnviroDefs.h"
-#include "config.h"
+#include <client/EnviroDefs.h>
+#include <client/config.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -34,23 +34,23 @@
 
 #include <fmt/format.h>
 
-#include "Game.hpp"
+#include <client/Game.hpp>
 
-#include "graphical/device.hpp"
-#include "graphical/renderer.hpp"
-#include "graphical/shader_manager.hpp"
-#include "graphical/window.hpp"
-#include "graphical/framebuffer.hpp"
+#include <client/graphical/device.hpp>
+#include <client/graphical/renderer.hpp>
+#include <client/graphical/shader_manager.hpp>
+#include <client/graphical/window.hpp>
+#include <client/graphical/framebuffer.hpp>
 
-#include "net/NetServer.hpp"
-#include "graphical/gui/GUIManager.hpp"
-#include "graphical/gui/GUILabel.hpp"
-#include "graphical/gui/GUIButton.hpp"
-#include "graphical/gui/GUIImageControl.hpp"
+#include <common/net/NetServer.hpp>
+#include <client/graphical/gui/GUIManager.hpp>
+#include <client/graphical/gui/GUILabel.hpp>
+#include <client/graphical/gui/GUIButton.hpp>
+#include <client/graphical/gui/GUIImageControl.hpp>
 
-#include "input/InputPicker.hpp"
+#include <client/input/InputPicker.hpp>
 
-#include "Log.hpp"
+#include <common/Log.hpp>
 
 #include <glm/gtc/matrix_transform.hpp> //glm::lookAt()
 

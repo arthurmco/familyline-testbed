@@ -1,6 +1,7 @@
-#include "MTLOpener.hpp"
-#include "../gfx_service.hpp"
-#include "../texture_manager.hpp"
+#include <client/graphical/materialopener/MTLOpener.hpp>
+#include <client/graphical/materialopener/../gfx_service.hpp>
+#include <client/graphical/materialopener/../texture_manager.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::graphics;
 

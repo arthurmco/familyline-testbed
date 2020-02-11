@@ -1,4 +1,4 @@
-#include "static_animator.hpp"
+#include <client/graphical/static_animator.hpp>
 
 using namespace familyline::graphics;
 

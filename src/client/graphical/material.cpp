@@ -1,4 +1,4 @@
-#include "material.hpp"
+#include <client/graphical/material.hpp>
 
 using namespace familyline::graphics;
 

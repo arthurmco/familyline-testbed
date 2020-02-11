@@ -11,14 +11,14 @@
 #include <glm/glm.hpp>
 
 #include "Cursor.hpp"
-#include "../graphical/TerrainRenderer.hpp"
-#include "../graphical/mesh.hpp"
-#include "../graphical/window.hpp"
-#include "../graphical/camera.hpp"
-#include "../graphical/scene_renderer.hpp"
-#include "../logic/object_manager.hpp"
-#include "../logic/object_components.hpp"
-#include "../logic/game_event.hpp"
+#include <client/graphical/TerrainRenderer.hpp>
+#include <client/graphical/mesh.hpp>
+#include <client/graphical/window.hpp>
+#include <client/graphical/camera.hpp>
+#include <client/graphical/scene_renderer.hpp>
+#include <common/logic/object_manager.hpp>
+#include <common/logic/object_components.hpp>
+#include <common/logic/game_event.hpp>
 
 namespace familyline::input {
 #define MAX_PICK_ITERATIONS 16

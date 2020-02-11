@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "../logic/debug_drawer.hpp"
+#include <common/logic/debug_drawer.hpp>
 #include "renderer.hpp"
 #include <cstdint>
 #include <unordered_map>

@@ -1,5 +1,5 @@
-#include "MeshOpener.hpp"
-#include <Log.hpp>
+#include <client/graphical/meshopener/MeshOpener.hpp>
+#include <common/Log.hpp>
 #include <stdexcept>
 
 using namespace familyline::graphics;

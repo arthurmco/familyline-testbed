@@ -1,4 +1,4 @@
-#include "Tent.hpp"
+#include <common/objects/Tent.hpp>
 
 using namespace familyline;
 using namespace familyline::logic;

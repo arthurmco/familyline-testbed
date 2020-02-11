@@ -1,5 +1,5 @@
-#include "ActionManager.hpp"
-#include "Log.hpp"
+#include <common/logic/ActionManager.hpp>
+#include <common/Log.hpp>
 #include <cstdio>
 #include <stdexcept>
 

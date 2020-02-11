@@ -1,4 +1,4 @@
-#include "NetMessageQueue.hpp"
+#include <common/NetMessageQueue.hpp>
 
 using namespace familyline::Server;
 

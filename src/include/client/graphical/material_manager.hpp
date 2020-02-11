@@ -9,7 +9,6 @@
 #include <vector>
 #include <cstring> //strcmp()
 #include "material.hpp"
-#include "Log.hpp"
 
 namespace familyline::graphics {
 

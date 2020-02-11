@@ -12,7 +12,6 @@
 #include <cstdio>
 
 #include "Texture.hpp"
-#include "Log.hpp"
 
 #include "asset_object.hpp"
 

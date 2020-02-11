@@ -1,8 +1,8 @@
-#include "game_object.hpp"
-#include "object_components.hpp"
+#include <common/logic/game_object.hpp>
+#include <common/logic/object_components.hpp>
 
-#include "Terrain.hpp"
-#include "../graphical/TerrainRenderer.hpp"
+#include <common/logic/Terrain.hpp>
+#include <client/graphical/TerrainRenderer.hpp>
 
 #include <cmath>
 #include <algorithm> //for std::max

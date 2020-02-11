@@ -8,7 +8,7 @@
 #ifndef NETPLAYERFILTER_HPP
 #define NETPLAYERFILTER_HPP
 
-#include <NetMessageQueue.hpp>
+#include <common/NetMessageQueue.hpp>
 #include <map>
 
 namespace familyline::Net {

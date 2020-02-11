@@ -36,3 +36,18 @@ add_library(
   "objects/WatchTower.cpp"
   )
 
+target_include_directories(familyline-common PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
+target_compile_features(familyline-common PRIVATE cxx_std_20)
+
+# Retrieve commit number (useful when getting logs from git clones)
+execute_process(
+  COMMAND git log -1 --format=%h
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE COMMIT_HASH OUTPUT_STRIP_TRAILING_WHITESPACE )
+
+# Retrieve the user who compiled
+execute_process(COMMAND whoami OUTPUT_VARIABLE USERNAME
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+target_compile_definitions(familyline-common PUBLIC VERSION="${PROJECT_VERSION}"
+  COMMIT="${COMMIT_HASH}" USERNAME="${USERNAME}")

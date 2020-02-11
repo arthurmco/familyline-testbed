@@ -1,4 +1,5 @@
-#include "Texture.hpp"
+#include <client/graphical/Texture.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::graphics;
 

@@ -1,4 +1,4 @@
-#include "Cursor.hpp"
+#include <client/input/Cursor.hpp>
 
 using namespace familyline::input;
 

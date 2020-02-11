@@ -10,10 +10,9 @@
 #include <vector>
 #include <stdexcept>
 #include "socket.h"
-#include <Log.hpp>
 #include "NetPlayerManager.hpp"
 
-#include <NetMessageQueue.hpp>
+#include <common/NetMessageQueue.hpp>
 
 #include <cstring>
 #include <cstdlib>

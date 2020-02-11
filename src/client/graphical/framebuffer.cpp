@@ -1,6 +1,6 @@
-#include "framebuffer.hpp"
-#include "exceptions.hpp"
-#include "Log.hpp"
+#include <client/graphical/framebuffer.hpp>
+#include <client/graphical/exceptions.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::graphics;
 

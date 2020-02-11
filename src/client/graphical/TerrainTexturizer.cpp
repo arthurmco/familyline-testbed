@@ -2,12 +2,14 @@
 
 #include <glm/glm.hpp>
 
-#include "TerrainRenderer.hpp"
-#include "TextureOpener.hpp"
+#include <client/graphical/TerrainRenderer.hpp>
+#include <client/graphical/TextureOpener.hpp>
 
 #include <algorithm>
 #include <array>
 #include <iterator>
+
+#include <common/Log.hpp>
 
 using namespace familyline::graphics;
 

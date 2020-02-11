@@ -1,6 +1,7 @@
-#include "HumanPlayer.hpp"
-#include "graphical/meshopener/OBJOpener.hpp"
-#include "logic/logic_service.hpp"
+#include <client/HumanPlayer.hpp>
+#include <client/graphical/meshopener/OBJOpener.hpp>
+#include <common/logic/logic_service.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline;
 using namespace familyline::graphics;

@@ -1,5 +1,5 @@
-#include "InputListener.hpp"
-#include "Log.hpp"
+#include <client/input/InputListener.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::input;
 

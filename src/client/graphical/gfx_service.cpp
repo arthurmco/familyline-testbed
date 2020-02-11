@@ -1,4 +1,4 @@
-#include "gfx_service.hpp"
+#include <client/graphical/gfx_service.hpp>
 
 using namespace familyline::graphics;
 

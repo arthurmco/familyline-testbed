@@ -1,4 +1,4 @@
-#include "logger.hpp"
+#include <client/graphical/logger.hpp>
 
 #include <cstdarg>
 

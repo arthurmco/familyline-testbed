@@ -1,5 +1,5 @@
-#include "PlayerManager.hpp"
-#include "Log.hpp"
+#include <common/logic/PlayerManager.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::logic;
 

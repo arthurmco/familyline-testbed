@@ -1,8 +1,8 @@
-#include "LightManager.hpp"
+#include <client/graphical/LightManager.hpp>
 #include <algorithm>
 #include <cstring>
 
-#include <Log.hpp>
+#include <common/Log.hpp>
 
 using namespace familyline::graphics;
 

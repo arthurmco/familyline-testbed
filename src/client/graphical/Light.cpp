@@ -1,4 +1,4 @@
-#include "Light.hpp"
+#include <client/graphical/Light.hpp>
 
 using namespace familyline::graphics;
 

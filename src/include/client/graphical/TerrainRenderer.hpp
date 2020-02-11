@@ -12,7 +12,7 @@
 
 #include <map>
 
-#include "../logic/Terrain.hpp"
+#include <common/logic/Terrain.hpp>
 #include "camera.hpp"
 #include "vertexdata.hpp"
 #include "Texture.hpp"

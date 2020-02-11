@@ -1,5 +1,6 @@
-#include "Player.hpp"
-#include "City.hpp"
+#include <common/logic/Player.hpp>
+#include <common/logic/City.hpp>
+#include <common/Log.hpp>
 #include <chrono>
 
 using namespace familyline;
