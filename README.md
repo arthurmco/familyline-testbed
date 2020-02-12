@@ -38,6 +38,21 @@ On Linux, you will need the softwares below:
  - *cairo:* for drawing the interfaces
  - *libyaml:* For parsing the `assets.yaml` file, aka the asset list.
 
+Please build in a separate directory from the source. For exemple,
+when you clone the repository, you can create a directory named
+`build` and run cmake from there. Like:
+
+```
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DUSE_RELATIVE_PATH=off
+-DDO_TESTS=off ..
+make familyline
+```
+
+The relative path tells that some files, like assets, are in the same
+directory as the executable rather than the default path (/usr/share)
+
 ### Windows
 
 On Windows, you can use `vcpkg`. Use [these
@@ -87,10 +102,11 @@ The executables have the same names as the targets. Have fun!
 
 ## Packaging
 
-To generate a package, simply run these two commands:
+To generate a package, simply run these three commands:
 
 ```
-cmake -DCMAKE_BUILD_TYPE=Release -DUSE_RELATIVE_PATH=off -DDO_TESTS=off .
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DUSE_RELATIVE_PATH=off -DDO_TESTS=off ..
 make package
 ```
 
@@ -101,7 +117,7 @@ the package.
 By default, it generates a DEB and a RPM file.
 
 Note that, unless you customize the `CMAKE_INSTALL_PREFIX`, it will
-install in the `/usr/local` directory
+install in the `/usr/local` directory when you run `make install`
 
 ## Things to do
 
