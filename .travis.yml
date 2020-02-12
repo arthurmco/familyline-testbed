@@ -24,7 +24,6 @@ addons:
       - libcairo2-dev
       - libyaml-0-2
       - libyaml-dev
-      - libfmt-dev
       
 env:
   - CXX=g++-8

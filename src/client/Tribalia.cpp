@@ -23,9 +23,6 @@
 
 #endif
 
-#include <client/EnviroDefs.h>
-#include <client/config.h>
-
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>

@@ -8,9 +8,6 @@
 #ifndef _GAME_HPP
 #define _GAME_HPP
 
-#include "config.h"
-#include "EnviroDefs.h"
-
 //#include "logic/ObjectRenderer.hpp"
 #include <common/logic/PathFinder.hpp>
 #include <common/logic/ObjectFactory.hpp>
