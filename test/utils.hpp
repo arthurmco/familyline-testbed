@@ -7,8 +7,8 @@
 #include <memory>
 #include <functional>
 
-#include "../src/logic/game_object.hpp"
-#include "../src/objects/ObjectMacros.h"
+#include <common/logic/game_object.hpp>
+#include <common/objects/ObjectMacros.h>
 
 struct object_init {
     std::string type;

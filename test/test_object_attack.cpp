@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include "utils.hpp"
 
-#include "../src/logic/logic_service.hpp"
-#include "../src/logic/attack_manager.hpp"
-#include "../src/logic/lifecycle_manager.hpp"
+#include <common/logic/logic_service.hpp>
+#include <common/logic/attack_manager.hpp>
+#include <common/logic/lifecycle_manager.hpp>
 
 using namespace familyline::logic;
 

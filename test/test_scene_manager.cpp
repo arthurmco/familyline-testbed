@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include "utils.hpp"
 
-#include "../src/logic/logic_service.hpp"
-#include "../src/logic/ObjectFactory.hpp"
+#include <common/logic/logic_service.hpp>
+#include <common/logic/ObjectFactory.hpp>
 
 using namespace familyline::logic;
 
