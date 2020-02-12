@@ -305,7 +305,7 @@ static int show_starting_menu()
 		GUIButton bquit = GUIButton(0.1, 0.31, 0.8, 0.1, "Exit Game");
 
 		GUIImageControl ilogo = GUIImageControl(0.2, 0.1, 0.6, 0.9,
-                                                ICONS_DIR "/tribalia-logo.png");
+                                                ICONS_DIR "/familyline-logo.png");
 		ilogo.z_index = -100;
 		//ilogo.SetZIndex(0.9);
 		//ilogo.SetOpacity(0.5);
