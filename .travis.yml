@@ -41,6 +41,7 @@ before_install:
 
 script:
   - eval "${MATRIX_EVAL}"
-  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
+  - mkdir build && cd build
+  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -Dfmt_DIR=../fmt ..
   - make familyline-tests
   - ./familyline-tests
