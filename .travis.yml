@@ -1,18 +1,20 @@
 language: cpp
-dist: xenial
-sudo: required
+dist: bionic
 compiler:
   - gcc
 
+os:
+  - linux
+  
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
 
     packages:
-      - g++-7
+      - g++-8
       - libglm-dev
-      - libglew1.10
+      - libglew2.0
       - libglew-dev
       - libsdl2-2.0.0
       - libsdl2-dev
@@ -22,26 +24,16 @@ addons:
       - libcairo2-dev
       - libyaml-0-2
       - libyaml-dev
-
+      - libfmt-dev
+      
 env:
-  - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-
-#
-# We need to download a newer version of glm manually, because travis only support
-# ubuntu until 16.04, and that version ships with a glm without a pkgconfig entry
-# Without that, we don't have a reliable way of finding glm.
-# This is fixed in 18.04. We'll wait until travis support this version
-# The same might be said for libfmt
-#
-before_install:
-  - wget -c https://github.com/fmtlib/fmt/archive/5.2.1.tar.gz
-  - tar zxvf 5.2.1.tar.gz && mv fmt-5.2.1 fmt
-  - wget -c https://launchpad.net/ubuntu/+archive/primary/+files/libglm-dev_0.9.9~a2-2_all.deb
-  - sudo dpkg -i libglm-dev_0.9.9~a2-2_all.deb
+  - CXX=g++-8
 
 script:
-  - eval "${MATRIX_EVAL}"
+  - wget -c http://mirrors.kernel.org/ubuntu/pool/universe/f/fmtlib/libfmt-dev_5.2.1+ds-2_amd64.deb
+  - sudo dpkg -i libfmt-dev_5.2.1+ds-2_amd64.deb
+  - ${CXX} --version
   - mkdir build && cd build
-  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -Dfmt_DIR=../fmt ..
+  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
   - make familyline-tests
   - ./familyline-tests
