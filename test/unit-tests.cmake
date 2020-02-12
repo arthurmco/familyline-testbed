@@ -40,6 +40,7 @@ if (DO_TESTS)
   message("${SRC_SERVER_TEST}")
   
   add_executable(familyline-tests ${SRC_TEST_FILES})
+  target_link_libraries(familyline-tests familyline-common)
   target_link_libraries(familyline-tests familyline-client)
   target_include_directories(familyline-tests PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
