@@ -6,6 +6,7 @@
 #include "attack_manager.hpp"
 #include "object_listener.hpp"
 #include "debug_drawer.hpp"
+#include "object_factory.hpp"
 
 /**
  * Logic service class
@@ -18,6 +19,7 @@ namespace familyline::logic {
         static std::unique_ptr<AttackManager> _atk_manager;
         static std::unique_ptr<ObjectListener> _object_listener;
         static std::unique_ptr<DebugDrawer> _debug_drawer;
+        static std::unique_ptr<ObjectFactory> _object_factory;
 
     public:
         static std::unique_ptr<ActionQueue>& getActionQueue();
@@ -26,7 +28,9 @@ namespace familyline::logic {
 
         static void initDebugDrawer(DebugDrawer*);
         static std::unique_ptr<DebugDrawer>& getDebugDrawer();
-        
+
+        static std::unique_ptr<ObjectFactory>& getObjectFactory();
+
     };
 
 }

@@ -17,7 +17,7 @@
 
 #include <common/logic/Player.hpp>
 #include <common/logic/PathFinder.hpp>
-#include <common/logic/ObjectFactory.hpp>
+#include <common/logic/object_factory.hpp>
 #include <common/logic/object_manager.hpp>
 #include <common/logic/ObjectPathManager.hpp>
 #include <common/logic/BuildQueue.hpp>

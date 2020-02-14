@@ -321,11 +321,13 @@ bool HumanPlayer::Play(GameContext* gctx)
         if (mouse_click)   _selected_obj = std::weak_ptr<GameObject>();
     }
 
+    auto& of = LogicService::getObjectFactory();
+
     if (build_tent) {
         printf("Tent built\n");
 
         auto nobj = std::dynamic_pointer_cast<GameObject>(
-            ObjectFactory::GetInstance()->GetObject("tent", 0, 0, 0));
+            of->getObject("tent", 0, 0, 0));
 
         if (!nobj) {
             Log::GetLog()->Fatal("human-player", "Type 'tent' has not been found in the object factory!");
@@ -339,7 +341,7 @@ bool HumanPlayer::Play(GameContext* gctx)
 
     if (build_tower) {
         auto nobj = std::dynamic_pointer_cast<GameObject>(
-            ObjectFactory::GetInstance()->GetObject("watchtower", 0, 0, 0));
+            of->getObject("watchtower", 0, 0, 0));
         if (!nobj) {
             Log::GetLog()->Fatal("human-player", "Type 'watchtower' has not been found in the object factory!");
         }

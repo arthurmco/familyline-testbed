@@ -111,9 +111,11 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         gr->add(widgets.lblVersion);
 
+        auto& of = LogicService::getObjectFactory();
+
         /* Adds the objects to the factory */
-        ObjectFactory::GetInstance()->AddObject(new WatchTower);
-        ObjectFactory::GetInstance()->AddObject(new Tent);
+        of->addObject(new WatchTower);
+        of->addObject(new Tent);
 
         ObjectPathManager::getInstance()->SetTerrain(terr);
 
@@ -352,7 +354,7 @@ bool Game::RunInput()
 void Game::RunLogic()
 {
     olm->update();
-    
+
     LogicService::getObjectListener()->updateObjects();
 
     /* Logic & graphical processing */

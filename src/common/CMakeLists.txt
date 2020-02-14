@@ -18,7 +18,7 @@ add_library(
   "logic/lifecycle_manager.cpp"
   "logic/logic_service.cpp"
   "logic/object_components.cpp"
-  "logic/ObjectFactory.cpp"
+  "logic/object_factory.cpp"
   "logic/object_listener.cpp"
   "logic/object_manager.cpp"
   "logic/ObjectPathManager.cpp"

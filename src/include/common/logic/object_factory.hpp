@@ -1,11 +1,8 @@
 /*  Represents an object factory
  
-    Copyright (C) 2016, 2018 Arthur M
+    Copyright (C) 2016, 2018, 2020 Arthur M
 */
-
-#ifndef OBJECTFACTORY_HPP
-#define OBJECTFACTORY_HPP
-
+#pragma once
 
 #include <map>
 #include <string>
@@ -34,22 +31,14 @@ namespace familyline::logic {
          * nullptr if given object wasn't added to the factory
          * i.e, doesn't exist 
          */
-        std::shared_ptr<GameObject> GetObject(
+        std::shared_ptr<GameObject> getObject(
             const char* type, float x, float y, float z);
 
         /** 
          * Adds an object to the factory 
          */
-        void AddObject(GameObject* object);
+        void addObject(GameObject* object);
 
-        static ObjectFactory* GetInstance() {
-            static ObjectFactory* f = nullptr;
-            if (!f)     f = new ObjectFactory;
-    
-            return f;
-        }
     };
 
 }
-
-#endif

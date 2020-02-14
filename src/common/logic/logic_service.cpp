@@ -6,6 +6,7 @@ std::unique_ptr<ActionQueue> LogicService::_action_queue;
 std::unique_ptr<AttackManager> LogicService::_atk_manager;
 std::unique_ptr<ObjectListener> LogicService::_object_listener;
 std::unique_ptr<DebugDrawer> LogicService::_debug_drawer;
+std::unique_ptr<ObjectFactory> LogicService::_object_factory;
 
 std::unique_ptr<ActionQueue>& LogicService::getActionQueue()
 {
@@ -50,4 +51,14 @@ void LogicService::initDebugDrawer(DebugDrawer* d)
 std::unique_ptr<DebugDrawer>& LogicService::getDebugDrawer()
 {
     return _debug_drawer;
+}
+
+
+std::unique_ptr<ObjectFactory>& LogicService::getObjectFactory()
+{
+	if (!_object_factory) {
+		_object_factory = std::make_unique<ObjectFactory>();
+	}
+
+	return _object_factory;
 }

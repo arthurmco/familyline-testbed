@@ -2,7 +2,7 @@
 #include "utils.hpp"
 
 #include <common/logic/logic_service.hpp>
-#include <common/logic/ObjectFactory.hpp>
+#include <common/logic/object_factory.hpp>
 
 using namespace familyline::logic;
 
@@ -18,11 +18,11 @@ TEST(ObjectFactoryOps, ObjectTestCreate) {
     });
 
     ObjectFactory of;
-    of.AddObject(component1.get());
-    of.AddObject(component2.get());
+    of.addObject(component1.get());
+    of.addObject(component2.get());
 
-    auto o1 = of.GetObject("test-obj-one", 3, 100, 3);
-    auto o2 = of.GetObject("test-obj-two", 5, 100, 5);
+    auto o1 = of.getObject("test-obj-one", 3, 100, 3);
+    auto o2 = of.getObject("test-obj-two", 5, 100, 5);
 
     EXPECT_EQ(100, o1->getHealth());
     EXPECT_EQ(300, o2->getHealth());
@@ -40,11 +40,11 @@ TEST(ObjectFactoryOps, ObjectNotRepeat) {
     });
 
     ObjectFactory of;
-    of.AddObject(component1.get());
-    of.AddObject(component2.get());
+    of.addObject(component1.get());
+    of.addObject(component2.get());
 
-    auto o1 = of.GetObject("test-obj-one", 3, 100, 3);
-    auto o2 = of.GetObject("test-obj-one", 5, 100, 5);
+    auto o1 = of.getObject("test-obj-one", 3, 100, 3);
+    auto o2 = of.getObject("test-obj-one", 5, 100, 5);
 
     ASSERT_EQ(3, o1->getPosition().x);
     ASSERT_EQ(5, o2->getPosition().x);
