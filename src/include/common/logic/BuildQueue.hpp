@@ -18,6 +18,7 @@
 #ifndef BUILDQUEUE_HPP
 #define BUILDQUEUE_HPP
 
+// TODO: move this to the player
 namespace familyline::logic {
     class BuildQueue {
     private:

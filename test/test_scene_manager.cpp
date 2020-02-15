@@ -2,7 +2,7 @@
 #include "utils.hpp"
 
 #include <common/logic/logic_service.hpp>
-#include <common/logic/ObjectFactory.hpp>
+#include <common/logic/object_factory.hpp>
 
 using namespace familyline::logic;
 
