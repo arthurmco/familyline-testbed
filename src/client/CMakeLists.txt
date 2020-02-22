@@ -47,9 +47,11 @@ add_library(
   "graphical/window.cpp"
   "HumanPlayer.cpp"
   "input/Cursor.cpp"
-  "input/InputListener.cpp"
-  "input/InputManager.cpp"
+  "input/input_processor.cpp"
+  "input/input_manager.cpp"
   "input/InputPicker.cpp"
+  "input/InputListener.cpp"
+  "input/input_service.cpp"
   "Timer.cpp"
   )
 

@@ -43,7 +43,8 @@
 //#include "graphical/gui/ImageControl.hpp"
 
 
-#include <client/input/InputPicker.hpp>
+//#include <client/input/InputPicker.hpp>
+#include <client/input/input_manager.hpp>
 
 #include <common/Log.hpp>
 #include <client/Timer.hpp>
@@ -69,8 +70,7 @@ namespace familyline {
     
         logic::GameContext gctx;
         logic::GameActionManager gam;
-    
-    
+
         bool player = false;
 
         graphics::Camera* cam;

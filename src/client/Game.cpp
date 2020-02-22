@@ -8,6 +8,8 @@
 #include <common/logic/game_event.hpp>
 #include <common/logic/logic_service.hpp>
 
+#include <client/input/input_service.hpp>
+
 using namespace familyline;
 using namespace familyline::logic;
 using namespace familyline::input;
@@ -97,9 +99,10 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         hp->objr = objrend;
         //gam.AddListener(objrend);
 
-        InputManager::GetInstance()->Initialize();
+//        InputManager::GetInstance()->Initialize();
 
-        ip = new InputPicker{ terr_rend, win, scenernd, cam, om };
+                
+//        ip = new InputPicker{ terr_rend, win, scenernd, cam, om };
         hp->SetPicker(ip);
 
         pathf = new PathFinder(om);
@@ -338,7 +341,9 @@ int Game::RunLoop()
 bool Game::RunInput()
 {
     /* Input processing  */
-    InputManager::GetInstance()->Run();
+
+    InputService::getInputManager()->processEvents();
+    
     ip->UpdateIntersectedObject();
     ip->UpdateTerrainProjectedPosition();
 

@@ -20,5 +20,5 @@ void Cursor::GetPositions(int& x, int& y)
 Cursor::Cursor()
 {
     _listener = new InputListener{"cursor"};
-    InputManager::GetInstance()->AddListener(EVENT_MOUSEMOVE, _listener, 0.01);
+//    InputManager::GetInstance()->AddListener(EVENT_MOUSEMOVE, _listener, 0.01);
 }

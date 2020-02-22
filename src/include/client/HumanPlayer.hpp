@@ -30,7 +30,7 @@
 #include <client/graphical/object_renderer.hpp>
 
 #include <client/input/InputPicker.hpp>
-#include <client/input/InputManager.hpp>
+#include <client/input/input_manager.hpp>
 
 class HumanPlayer : public familyline::logic::Player
 {

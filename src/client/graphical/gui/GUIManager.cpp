@@ -38,10 +38,10 @@ GUIManager::GUIManager(int width = 640, int height = 480)
     this->width = width;
     this->height = height;
     
-    this->listener = new input::InputListener("gui-listener");
-    input::InputManager::GetInstance()->AddListener(
-        input::EVENT_KEYEVENT | input::EVENT_MOUSEMOVE | input::EVENT_MOUSEEVENT,
-        this->listener, 0.8);
+//    this->listener = new input::InputListener("gui-listener");
+//    input::InputManager::GetInstance()->AddListener(
+//        input::EVENT_KEYEVENT | input::EVENT_MOUSEMOVE | input::EVENT_MOUSEEVENT,
+//        this->listener, 0.8);
 
     // Create the cairo context.
     // It wiil do this->width * 1

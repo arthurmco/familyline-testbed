@@ -5,7 +5,7 @@
 */
 
 #include "InputListener.hpp"
-#include "InputManager.hpp"
+#include <client/input/input_manager.hpp>
 
 #ifndef CURSOR_HPP
 #define CURSOR_HPP

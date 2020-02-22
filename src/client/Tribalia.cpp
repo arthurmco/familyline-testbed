@@ -45,6 +45,7 @@
 #include <client/graphical/gui/GUIButton.hpp>
 #include <client/graphical/gui/GUIImageControl.hpp>
 
+#include <client/input/input_service.hpp>
 #include <client/input/InputPicker.hpp>
 
 #include <common/Log.hpp>
@@ -258,7 +259,12 @@ static int show_starting_menu()
             defaultdev = devs[0];
         }
 
-        InputManager::GetInstance()->Initialize();
+        InputProcessor* ipr = new InputProcessor;
+        InputService::setInputManager(std::make_unique<InputManager>(*ipr));
+        auto& ima = InputService::getInputManager();
+
+        
+//        InputManager::GetInstance()->Initialize();
         win = new GLWindow((GLDevice*)defaultdev, winW, winH);
 
         win->show();
@@ -292,7 +298,7 @@ static int show_starting_menu()
 
 		/* Render the menu */
 		bool r = true;
-		auto deflistener = InputManager::GetInstance()->GetDefaultListener();
+		//auto deflistener = InputManager::GetInstance()->GetDefaultListener();
         
 		GUILabel l = GUILabel(0.37, 0.03, "FAMILYLINE");
 		l.format.foreground = glm::vec4(1, 1, 1, 1);
@@ -348,11 +354,13 @@ static int show_starting_menu()
         while (r) {
 
             // Input
-			InputManager::GetInstance()->Run();
-			InputEvent ev;
+            ima->processEvents();
+            
+            InputEvent ev;
 			guir->update();
 
-            if (deflistener->PopEvent(ev)) {
+//            if (deflistener->PopEvent(ev)) {
+            if (false) {
 				/* Only listen for FINISH events, because you sure want to close the window
                    The others will be handled by the GUI listener */
 				if (ev.eventType == EVENT_FINISH)

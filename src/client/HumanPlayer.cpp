@@ -3,6 +3,8 @@
 #include <common/logic/logic_service.hpp>
 #include <common/Log.hpp>
 
+#include <client/input/input_service.hpp>
+
 using namespace familyline;
 using namespace familyline::graphics;
 using namespace familyline::logic;
@@ -68,15 +70,17 @@ InputListener ilt;
 bool HumanPlayer::ProcessInput()
 {
     _updated = false;
-    InputManager::GetInstance()->Run();
+    auto& ima = InputService::getInputManager();
 
+    ima->processEvents();
+    
     if (zoom_mouse) {
         zoom_in = false;
         zoom_out = false;
         zoom_mouse = false;
     }
 
-    while (InputManager::GetInstance()->GetDefaultListener()->PopEvent(ev)) {
+    while (false) {
         if (ev.eventType == EVENT_FINISH) {
             exit_game = true;
             return true;

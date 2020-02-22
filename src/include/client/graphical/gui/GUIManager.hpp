@@ -16,7 +16,7 @@
 #include <queue>
 
 #include "GUIControl.hpp"
-#include "../../input/InputManager.hpp"
+#include <client/input/input_manager.hpp>
 #include "../../input/InputListener.hpp"
 #include "../shader_manager.hpp"
 #include "../window.hpp"
