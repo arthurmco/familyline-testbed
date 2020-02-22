@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 3.12)
 project(Familyline VERSION 0.1.97)
 
 option(USE_RELATIVE_PATH "Set if you want the path to the game resources to be local" OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 
@@ -35,6 +36,9 @@ find_package(fmt CONFIG REQUIRED)
 include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
 target_include_directories(familyline PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
+target_link_libraries(familyline ${OPENGL_LIBRARIES})
+target_link_libraries(familyline ${YAML_LIBRARIES}) # You need to build YAML as a dll (use -DBUILD_SHARED_LIBS)
+
 
 if (MSVC)
 	
@@ -50,13 +54,11 @@ if (MSVC)
   include_directories(AFTER ${YAML_INCLUDE_DIR})
 
   target_link_libraries(familyline SDL2::SDL2 SDL2::SDL2main)
-  target_link_libraries(familyline ${OPENGL_gl_LIBRARY})
   target_link_libraries(familyline GLEW::GLEW)
   target_link_libraries(familyline ${IL_LIBRARIES})
   target_link_libraries(familyline ${ILU_LIBRARIES})
   target_link_libraries(familyline unofficial::cairo::cairo)
   target_link_libraries(familyline glm)
-  target_link_libraries(familyline ${YAML_LIBRARIES}) # You need to build YAML as a dll (use -DBUILD_SHARED_LIBS)
   target_link_libraries(familyline wsock32 ws2_32)
   target_link_libraries(familyline fmt::fmt fmt::fmt-header-only)
 
@@ -100,13 +102,11 @@ else()
   endif(TARGET fmt::fmt)
   
   target_link_libraries(familyline ${SDL2_LIBRARIES})
-  target_link_libraries(familyline ${OPENGL_gl_LIBRARY})
   target_link_libraries(familyline ${GLEW_LIBRARIES})
   target_link_libraries(familyline ${IL_LIBRARIES})
   target_link_libraries(familyline ${ILU_LIBRARIES})
   target_link_libraries(familyline ${CAIRO_LIBRARIES})
   target_link_libraries(familyline ${GLM_LIBRARIES})
-  target_link_libraries(familyline ${YAML_LIBRARIES})
 
   if(DO_TESTS)
   	target_link_libraries(familyline-tests ${SDL2_LIBRARIES})
@@ -127,8 +127,6 @@ else()
 
   add_compile_options(${SDL2_CFLAGS_OTHER} -Wall -Wextra)
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SDL2_CFLAGS_OTHER}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -Wall -Wextra")
   include_directories(AFTER  ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} `${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
 
 endif(MSVC)
