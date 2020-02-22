@@ -80,6 +80,7 @@ if (MSVC)
 else()
 	
   find_package(PkgConfig REQUIRED)
+  find_package(Threads REQUIRED)
   pkg_search_module(GLEW REQUIRED glew) # finds glew
   pkg_search_module(SDL2 REQUIRED sdl2) # finds sdl
   pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
@@ -107,7 +108,8 @@ else()
   target_link_libraries(familyline ${ILU_LIBRARIES})
   target_link_libraries(familyline ${CAIRO_LIBRARIES})
   target_link_libraries(familyline ${GLM_LIBRARIES})
-
+  target_link_libraries(familyline Threads::Threads)
+  
   if(DO_TESTS)
   	target_link_libraries(familyline-tests ${SDL2_LIBRARIES})
   	target_link_libraries(familyline-tests ${OPENGL_gl_LIBRARY})
@@ -117,6 +119,7 @@ else()
   	target_link_libraries(familyline-tests ${CAIRO_LIBRARIES})
 	target_link_libraries(familyline-tests ${GLM_LIBRARIES})
 	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
+    target_link_libraries(familyline-tests Threads::Threads)
   endif(DO_TESTS)
 
   # if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")

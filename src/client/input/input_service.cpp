@@ -9,8 +9,7 @@ std::unique_ptr<InputManager>& InputService::getInputManager()
     return _input_manager;
 }
 
-std::unique_ptr<InputManager>& InputService::setInputManager(
-    std::unique_ptr<InputManager> v)
+void InputService::setInputManager(std::unique_ptr<InputManager> v)
 {
     _input_manager.swap(v);
 }

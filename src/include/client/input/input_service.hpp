@@ -16,8 +16,7 @@ namespace familyline::input {
 
     public:
         static std::unique_ptr<InputManager>& getInputManager();
-        static std::unique_ptr<InputManager>& setInputManager(
-            std::unique_ptr<InputManager> v);
+        static void setInputManager(std::unique_ptr<InputManager> v);
         
     };    
     

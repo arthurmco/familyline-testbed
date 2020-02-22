@@ -351,23 +351,31 @@ static int show_starting_menu()
 		guir->add(&bnew);
 		guir->add(&ilogo);
 
+        ima->addListenerHandler([&](HumanInputAction hia) {
+
+            /* Only listen for game exit events, because you sure want to
+               close the window The others will be handled by the GUI listener */
+            if (std::holds_alternative<GameExit>(hia.type)) {
+                r = false;
+                return true;                
+            }
+
+            return false;
+        });
+
         while (r) {
 
             // Input
             ima->processEvents();
-            
+
             InputEvent ev;
-			guir->update();
+            guir->update();
 
-//            if (deflistener->PopEvent(ev)) {
+            //            if (deflistener->PopEvent(ev)) {
             if (false) {
-				/* Only listen for FINISH events, because you sure want to close the window
-                   The others will be handled by the GUI listener */
-				if (ev.eventType == EVENT_FINISH)
-					r = false;
-			}
+            }
 
-			// Render
+            // Render
             fGUI.startDraw();
             guir->render(0, 0);
             guir->renderToScreen();

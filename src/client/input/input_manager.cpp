@@ -2,6 +2,13 @@
 
 using namespace familyline::input;
 
+InputManager::InputManager(InputProcessor& ip)
+    : _ip(ip)
+{
+    ip.startInputReceiver();
+}
+
+
 /**
  * Process input events, human inputs and player inputs
  *
@@ -12,6 +19,15 @@ void InputManager::processEvents()
 {
     _tick++;
 
+    HumanInputAction hia;
+    while (_ip.pollAction(hia)) {
+        puts("event");
+
+        for (auto& [id, fn] : _human_input_fns) {
+            fn(hia);
+        }
+        
+    }
     
 }
 

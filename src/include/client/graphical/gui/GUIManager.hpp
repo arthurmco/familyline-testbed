@@ -36,8 +36,10 @@ namespace familyline::graphics::gui {
         bool force_redraw = false;
 
         /* This listener receives the input events from the game and puts them into the control */
-        input::InputListener* listener = nullptr;
 
+        input::HumanListenerHandler _listener;
+        bool _isFocused = false;
+        
         ShaderProgram* sGUI;
 
         // OpenGL interface variables

@@ -35,9 +35,8 @@ namespace familyline::input {
         std::queue<PlayerInputAction> _input_actions;
 
     public:
-        InputManager(InputProcessor& ip)
-            : _ip(ip)
-            {}
+        InputManager(InputProcessor& ip);
+
 
         /**
          * Process input events, human inputs and player inputs

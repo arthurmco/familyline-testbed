@@ -2,7 +2,9 @@
 #include <algorithm> // for remove_if
 
 #include <client/graphical/shader_manager.hpp>
+#include <client/input/input_service.hpp>
 #include <common/Log.hpp>
+#include <variant>
 
 using namespace familyline::graphics;
 using namespace familyline::graphics::gui;
@@ -37,7 +39,49 @@ GUIManager::GUIManager(int width = 640, int height = 480)
 
     this->width = width;
     this->height = height;
-    
+
+
+    _listener = [&](HumanInputAction hia){
+
+        SignalType signalType = SignalType::Redraw;
+        GUISignal gs;
+        bool ret = false;
+
+        if (std::holds_alternative<MouseAction>(hia.type)) {
+            signalType = SignalType::MouseHover;
+
+            MouseAction ma = std::get<MouseAction>(hia.type);
+
+            gs.xPos = ma.screenX / this->width;
+            gs.yPos = ma.screenY / this->height;
+            _isFocused = true;
+            ret = true;
+        } else if (std::holds_alternative<ClickAction>(hia.type)){
+            signalType = SignalType::MouseClick;
+
+            ClickAction ca = std::get<ClickAction>(hia.type);
+
+            gs.xPos = ca.screenX / this->width;
+            gs.yPos = ca.screenY / this->height;
+            gs.mouse.button = ca.buttonCode;
+            gs.mouse.isPressed = ca.isPressed;
+            _isFocused = true;
+            ret = true;
+
+        } else {
+            return false;
+        }
+
+        gs.from = nullptr;
+        gs.to = this;
+        gs.signal = signalType;
+        this->processSignal(gs);
+
+        return ret;
+    };
+
+    input::InputService::getInputManager()->addListenerHandler(_listener);
+
 //    this->listener = new input::InputListener("gui-listener");
 //    input::InputManager::GetInstance()->AddListener(
 //        input::EVENT_KEYEVENT | input::EVENT_MOUSEMOVE | input::EVENT_MOUSEEVENT,
@@ -96,7 +140,7 @@ void GUIManager::initShaders(Window* w)
 
     printf("%.2f %.2f", width, height);
     fflush(stdout);
-    
+
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA,
                  GL_UNSIGNED_BYTE,
                  (void*)cairo_image_surface_get_data(this->canvas));
@@ -216,39 +260,8 @@ void GUIManager::update()
 {
     // Receive the input signals from the input listeners...
     input::InputEvent ev;
-    bool isFocused = false;
+    _isFocused = false;
 
-    while (this->listener->PopEvent(ev)) {
-        SignalType signalType = SignalType::Redraw;
-        GUISignal gs;
-
-        switch (ev.eventType) {
-        case EVENT_MOUSEMOVE: signalType = SignalType::MouseHover; break;
-        case EVENT_MOUSEEVENT:
-            signalType = SignalType::MouseClick;
-
-            gs.mouse.button = ev.event.mouseev.button;
-            gs.mouse.isPressed = ev.event.mouseev.status == KEY_KEYPRESS;
-            isFocused = true;
-
-            break;
-        default: continue; // Ignore other events for now
-        }
-
-        gs.xPos = ev.mousex / this->width;
-        gs.yPos = ev.mousey / this->height;
-        gs.from = nullptr;
-        gs.to = this;
-        gs.signal = signalType;
-        this->processSignal(gs);
-
-    }
-
-    if (isFocused) {
-        this->listener->SetAccept();
-    }
-
-    this->listener->GetAcception(); // reset
 
     // ...and send them to the controls
     GUIControl::update();
@@ -363,7 +376,7 @@ void GUIManager::render(int absw, int absh)
 {
     (void)absw;
     (void)absh;
-    
+
     auto c = this->doRender(this->width, this->height);
 
     this->canvas = c;
