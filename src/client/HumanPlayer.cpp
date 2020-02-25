@@ -149,6 +149,8 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
                     mouse_click = true;
                 else
                     mouse_click = false;
+
+				return true;
             }
 
             if (event.buttonCode == SDL_BUTTON_RIGHT && !_selected_obj.expired()) {
@@ -197,7 +199,7 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
             return true;
         } else if (std::holds_alternative<GameExit>(hia.type)) {
             exit_game = true;
-            return true;
+            return false;
         }
         
 

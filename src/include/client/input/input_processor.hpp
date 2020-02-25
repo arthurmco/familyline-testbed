@@ -32,6 +32,9 @@ namespace familyline::input {
 
         std::thread _runThread;
         bool _isRunning = false;
+
+
+		void enqueueEvent(const SDL_Event& e, int& lastX, int& lastY);
     public:
 
 //        InputProcessor(InputPicker& ip)

@@ -55,7 +55,9 @@ GUIManager::GUIManager(int width = 640, int height = 480)
             gs.xPos = ma.screenX / this->width;
             gs.yPos = ma.screenY / this->height;
             _isFocused = true;
-            ret = true;
+
+			// TODO: only return false when not hovering any object
+            ret = false;
         } else if (std::holds_alternative<ClickAction>(hia.type)){
             signalType = SignalType::MouseClick;
 
@@ -65,8 +67,8 @@ GUIManager::GUIManager(int width = 640, int height = 480)
             gs.yPos = ca.screenY / this->height;
             gs.mouse.button = ca.buttonCode;
             gs.mouse.isPressed = ca.isPressed;
-            _isFocused = true;
-            ret = true;
+           
+			ret = _isFocused;
 
         } else {
             return false;

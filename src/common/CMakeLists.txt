@@ -36,6 +36,17 @@ add_library(
   "objects/WatchTower.cpp"
   )
 
+ 
+
+if (MSVC)
+	
+  include(${CMAKE_TOOLCHAIN_FILE})
+  find_package(fmt CONFIG REQUIRED)
+  target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
+  target_link_libraries(familyline-common PUBLIC fmt::fmt fmt::fmt-header-only)
+
+endif(MSVC)
+
 target_include_directories(familyline-common PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 target_compile_features(familyline-common PRIVATE cxx_std_20)
 
