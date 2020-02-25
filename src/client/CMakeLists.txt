@@ -50,7 +50,6 @@ add_library(
   "input/input_processor.cpp"
   "input/input_manager.cpp"
   "input/InputPicker.cpp"
-  "input/InputListener.cpp"
   "input/input_service.cpp"
   "Timer.cpp"
   )

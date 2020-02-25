@@ -82,11 +82,6 @@ GUIManager::GUIManager(int width = 640, int height = 480)
 
     input::InputService::getInputManager()->addListenerHandler(_listener);
 
-//    this->listener = new input::InputListener("gui-listener");
-//    input::InputManager::GetInstance()->AddListener(
-//        input::EVENT_KEYEVENT | input::EVENT_MOUSEMOVE | input::EVENT_MOUSEEVENT,
-//        this->listener, 0.8);
-
     // Create the cairo context.
     // It wiil do this->width * 1
 
@@ -259,7 +254,6 @@ bool GUIManager::processSignal(GUISignal s)
 void GUIManager::update()
 {
     // Receive the input signals from the input listeners...
-    input::InputEvent ev;
     _isFocused = false;
 
 

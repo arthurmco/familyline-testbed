@@ -368,12 +368,8 @@ static int show_starting_menu()
             // Input
             ima->processEvents();
 
-            InputEvent ev;
             guir->update();
 
-            //            if (deflistener->PopEvent(ev)) {
-            if (false) {
-            }
 
             // Render
             fGUI.startDraw();
