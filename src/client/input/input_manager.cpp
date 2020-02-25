@@ -20,9 +20,8 @@ void InputManager::processEvents()
     _tick++;
 
     HumanInputAction hia;
-    while (_ip.pollAction(hia)) {
-        puts("event");
 
+    while (_ip.pollAction(hia)) {
         for (auto& [id, fn] : _human_input_fns) {
             fn(hia);
         }
