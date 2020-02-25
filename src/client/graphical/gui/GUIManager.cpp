@@ -82,7 +82,7 @@ GUIManager::GUIManager(int width = 640, int height = 480)
         return ret;
     };
 
-    input::InputService::getInputManager()->addListenerHandler(_listener);
+    input::InputService::getInputManager()->addListenerHandler(_listener, 15);
 
     // Create the cairo context.
     // It wiil do this->width * 1

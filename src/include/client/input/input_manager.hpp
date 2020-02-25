@@ -9,7 +9,7 @@
 #include "input_processor.hpp"
 
 #include <functional>
-#include <unordered_map>
+#include <vector>
 #include <queue>
 
 namespace familyline::input {
@@ -17,7 +17,23 @@ namespace familyline::input {
     using HumanListenerHandler = std::function<bool(HumanInputAction)>;
     using PlayerListenerHandler = std::function<bool(PlayerInputAction)>;
 
-    using listener_handler_t = int;
+
+	using listener_handler_t = int;
+
+	/**
+	 * Struct used to implement ordering to the handlers, so we can call them
+	 * in the correct order, like first the GUI, and then the 3d area, since we
+	 * do not want to, instead of typing something into the chat, we build some
+	 * random buildings
+	 *
+	 * It is templated so we can use one for both the human and player input listeners
+	 */
+	template <typename T>
+	struct HandlerOrder {
+		T handler;
+		listener_handler_t id;
+		int zindex;
+	};
 
     /**
      * Manages user input, and forward it to the listeners via a
@@ -29,8 +45,8 @@ namespace familyline::input {
 
         unsigned _tick = 0;
 
-        std::unordered_map<listener_handler_t, HumanListenerHandler> _human_input_fns;
-        std::unordered_map<listener_handler_t, PlayerListenerHandler> _player_input_fns;
+        std::vector<HandlerOrder<HumanListenerHandler>> _human_input_fns;
+        std::vector<HandlerOrder<PlayerListenerHandler>> _player_input_fns;
 
         std::queue<PlayerInputAction> _input_actions;
 
@@ -55,8 +71,8 @@ namespace familyline::input {
         /**
          * Adds a listener handler, returns an ID
          */
-        listener_handler_t addListenerHandler(HumanListenerHandler h);
-        listener_handler_t addListenerHandler(PlayerListenerHandler h);
+        listener_handler_t addListenerHandler(HumanListenerHandler h, int zorder=0);
+        listener_handler_t addListenerHandler(PlayerListenerHandler h, int zorder=0);
 
 
         void removeListenerHandler(listener_handler_t);

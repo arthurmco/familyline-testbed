@@ -22,8 +22,8 @@ void InputManager::processEvents()
     HumanInputAction hia;
 
     while (_ip.pollAction(hia)) {
-        for (auto& [id, fn] : _human_input_fns) {
-            auto ret = fn(hia);
+        for (const auto& v: _human_input_fns) {
+            auto ret = v.handler(hia);
 
             if (ret) {
                 break;
@@ -54,18 +54,44 @@ int generateHandlerNumber()
 /**
  * Adds a listener handler, returns an ID
  */
-listener_handler_t InputManager::addListenerHandler(HumanListenerHandler h)
+listener_handler_t InputManager::addListenerHandler(HumanListenerHandler h, int zorder)
 {
     auto id = generateHandlerNumber();
-    _human_input_fns[id] = h;
+	auto ho = HandlerOrder<HumanListenerHandler>{ h, id, zorder };
+
+	int insertidx = 0;
+	for (int i = 0; i < _human_input_fns.size(); i++) {
+		if (_human_input_fns[i].zindex < zorder) {
+			break;
+		}
+		
+
+		insertidx++;
+	}
+
+	_human_input_fns.insert(_human_input_fns.begin() + insertidx, ho);
+
     return id;
 }
 
-listener_handler_t InputManager::addListenerHandler(PlayerListenerHandler h)
+listener_handler_t InputManager::addListenerHandler(PlayerListenerHandler h, int zorder)
 {
     auto id = generateHandlerNumber();
-    _player_input_fns[id] = h;
-    return id;
+
+	auto ho = HandlerOrder<PlayerListenerHandler>{ h, id, zorder };
+
+	int insertidx = 0;
+	for (int i = 0; i < _player_input_fns.size(); i++) {
+		if (_human_input_fns[i].zindex < zorder) {
+			break;
+		}
+
+
+		insertidx++;
+	}
+
+	_player_input_fns.insert(_player_input_fns.begin() + insertidx, ho); 
+	return id;
 }
 
 

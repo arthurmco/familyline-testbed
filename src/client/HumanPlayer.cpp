@@ -199,7 +199,7 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
             return true;
         } else if (std::holds_alternative<GameExit>(hia.type)) {
             exit_game = true;
-            return false;
+            return true;
         }
         
 
@@ -207,7 +207,7 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
 
     };
 
-    input::InputService::getInputManager()->addListenerHandler(_listener);
+    input::InputService::getInputManager()->addListenerHandler(_listener, 10);
 
 }
 
