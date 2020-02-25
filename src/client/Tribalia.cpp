@@ -360,7 +360,7 @@ static int show_starting_menu()
                close the window The others will be handled by the GUI listener */
             if (std::holds_alternative<GameExit>(hia.type)) {
                 r = false;
-                return true;                
+                return false;                
             }
 
             return false;
@@ -511,26 +511,26 @@ static void enable_gl_debug()
             default: sseverity = " PRIO: ????"; break;
             }
 
-            char* smsg = new char[length+1];
+            char* smsg = new char[length+2];
+			memset(smsg, 0, length + 2);
             strncpy(smsg, msg, length);
-            smsg[length] = 0;
-
+		
             fmt::memory_buffer out;
-            format_to(out, "[#{:d}]{:s} {:s}: {:s}",
+            format_to(out, "[#{:d}] {:s} {:s}: {:s}\0\0",
                       id, sseverity, stype, smsg);
 
             delete[] smsg;
 
             switch (severity) {
             case GL_DEBUG_SEVERITY_HIGH:
-                Log::GetLog()->Fatal(ssource, "%s", out.data());
+                Log::GetLog()->Fatal(ssource, "%s", fmt::to_string(out).data());
                 break;
             case GL_DEBUG_SEVERITY_MEDIUM:
-                Log::GetLog()->Warning(ssource, "%s", out.data());
+                Log::GetLog()->Warning(ssource, "%s", fmt::to_string(out).data());
                 break;
 
             default:
-                Log::GetLog()->Write(ssource, "%s", out.data());
+                Log::GetLog()->Write(ssource, "%s", fmt::to_string(out).data());
                 break;
             }
 
