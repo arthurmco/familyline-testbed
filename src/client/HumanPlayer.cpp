@@ -10,39 +10,6 @@ using namespace familyline::graphics;
 using namespace familyline::logic;
 using namespace familyline::input;
 
-HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
-    : Player(name, xp, gam)
-{
-    /* Initialize input subsystems */
-	srand((size_t)name*xp);
-
-}
-
-
-void HumanPlayer::SetCamera(familyline::graphics::Camera* c) { _cam = c;}
-void HumanPlayer::SetPicker(familyline::input::InputPicker* ip) { _ip = ip; }
-void HumanPlayer::SetPathfinder(familyline::logic::PathFinder* p) { _pf = p; }
-
-bool build_tent = false, build_tower = false;
-
-void HumanPlayer::SetGameActionManager(familyline::logic::GameActionManager* gam)
-{
-    this->_gam = gam;
-
-    /* Create a city for it */
-    City* c = new City{this, glm::vec3(1, 0, 0)};
-    AddCity(c);
-}
-
-
-/***
-    Virtual function called on each iteration.
-
-    It allows player to decide its movement
-    (input for humans, AI decisions for AI... )
-
-    Returns true to continue its loop, false otherwise.
-***/
 
 #include <cstdio>
 
@@ -62,104 +29,90 @@ bool zoom_in = false;
 bool zoom_out = false;
 bool zoom_mouse = false;
 bool build_something = false;
+bool build_tent = false, build_tower = false;
 
 std::weak_ptr<GameObject> attacker, attackee;
 
-InputListener ilt;
 
-bool HumanPlayer::ProcessInput()
+HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
+    : Player(name, xp, gam)
 {
-    _updated = false;
-    auto& ima = InputService::getInputManager();
+    /* Initialize input subsystems */
+	srand((size_t)name*xp);
 
-    ima->processEvents();
-    
-    if (zoom_mouse) {
-        zoom_in = false;
-        zoom_out = false;
-        zoom_mouse = false;
-    }
+    _listener = [&](HumanInputAction hia) {
+        if (std::holds_alternative<KeyAction>(hia.type)) {
+            auto event = std::get<KeyAction>(hia.type);
 
-    while (false) {
-        if (ev.eventType == EVENT_FINISH) {
-            exit_game = true;
-            return true;
-        }
-
-
-        if (ev.eventType == EVENT_KEYEVENT) {
-            switch (ev.event.keyev.scancode) {
+            switch (event.keycode) {
             case SDLK_w:
-                if (ev.event.keyev.status == KEY_KEYPRESS)
+                if (event.isPressed)
                     front = true;
-                else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                else
                     front = false;
                 break;
             case SDLK_s:
-                if (ev.event.keyev.status == KEY_KEYPRESS)
+                if (event.isPressed)
                     back = true;
-                else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                else
                     back = false;
                 break;
             case SDLK_a:
-                if (ev.event.keyev.status == KEY_KEYPRESS)
+                if (event.isPressed)
                     left = true;
-                else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                else
                     left = false;
                 break;
             case SDLK_d:
-                if (ev.event.keyev.status == KEY_KEYPRESS)
+                if (event.isPressed)
                     right = true;
-                else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                else
                     right = false;
                 break;
             case SDLK_LEFT:
-                if (ev.event.keyev.status == KEY_KEYPRESS)
+                if (event.isPressed)
                     rotate_left = true;
-                else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                else
                     rotate_left = false;
                 break;
             case SDLK_RIGHT:
-                if (ev.event.keyev.status == KEY_KEYPRESS)
+                if (event.isPressed)
                     rotate_right = true;
-                else if (ev.event.keyev.status == KEY_KEYRELEASE)
+                else
                     rotate_right = false;
                 break;
 
-
             case SDLK_c:
-                {
-                    if (ev.event.keyev.status != KEY_KEYPRESS)
-                        return false;
+            {
+                if (!event.isPressed)
+                    return false;
 
-                    build_tent = true;
-                }
-                break;
+                build_tent = true;
+            }
+            break;
             case SDLK_e:
-                {
-                    if (ev.event.keyev.status != KEY_KEYPRESS)
-                        return false;
+            {
+                if (!event.isPressed)
+                    return false;
 
-                    build_tower = true;
-                }
-                break;
+                build_tower = true;
+            }
+            break;
             case SDLK_r:
-                {
-                    if (ev.event.keyev.status != KEY_KEYPRESS)
-                        return false;
+            {
+                if (!event.isPressed)
+                    return false;
 
-                    remove_object = true;
-                }
-                break;
+                remove_object = true;
+            }
+            break;
 
-            case SDLK_b :
-                {
-                    if (ev.event.keyev.status != KEY_KEYPRESS)
-                        return false;
+            case SDLK_b: {
+                if (!event.isPressed)
+                    return false;
 
-                    this->renderBBs = !this->renderBBs;
-                }
-                break;
+                this->renderBBs = !this->renderBBs;
+            } break;
 
             case SDLK_k:
                 attack_set = true;
@@ -167,7 +120,7 @@ bool HumanPlayer::ProcessInput()
 
             case SDLK_PLUS:
             case SDLK_KP_PLUS:
-                if (ev.event.keyev.status != KEY_KEYPRESS)
+                if (!event.isPressed)
                     zoom_in = false;
                 else
                     zoom_in = true;
@@ -176,42 +129,31 @@ bool HumanPlayer::ProcessInput()
 
             case SDLK_MINUS:
             case SDLK_KP_MINUS:
-                if (ev.event.keyev.status != KEY_KEYPRESS)
+                if (!event.isPressed)
                     zoom_out = false;
                 else
                     zoom_out = true;
                 break;
-
-
-
             }
+            return true;
 
-        } else if (ev.eventType == EVENT_MOUSEEVENT ) {
-            if (attack_set && attack_ready) { attack_set = false; }
+        } else if (std::holds_alternative<ClickAction>(hia.type)) {
+            auto event = std::get<ClickAction>(hia.type);
 
-            if (ev.event.mouseev.scrolly > 0) {
-                zoom_in = true;
-                zoom_out = false;
-                zoom_mouse = true;
-            }
-
-            if (ev.event.mouseev.scrolly < 0) {
-                zoom_out = true;
-                zoom_in = false;
-                zoom_mouse = true;
-            }
-
-
-            if (ev.event.mouseev.button == MOUSE_LEFT) {
+            if (attack_set && attack_ready) {
                 attack_set = false;
-                if (ev.event.mouseev.status == KEY_KEYPRESS)
+            }
+            
+            if (event.buttonCode == MOUSE_LEFT) {
+                attack_set = false;
+                if (event.isPressed)
                     mouse_click = true;
                 else
                     mouse_click = false;
             }
 
-            if (ev.event.mouseev.button == MOUSE_RIGHT && !_selected_obj.expired()) {
-                if (ev.event.mouseev.status == KEY_KEYPRESS) {
+            if (event.buttonCode == MOUSE_RIGHT && !_selected_obj.expired()) {
+                if (event.isPressed) {
 
                     if (!attack_set) {
                         attack_ready = false;
@@ -222,8 +164,8 @@ bool HumanPlayer::ProcessInput()
 
                         auto path = _pf->CreatePath(*slock.get(), to);
                         glm::vec2 lp = path.back();
-                        Log::GetLog()->InfoWrite("human-player",
-                                                 "moved to %.2fx%.2f", lp.x, lp.y);
+                        Log::GetLog()->InfoWrite("human-player", "moved to %.2fx%.2f",
+                                                 lp.x, lp.y);
 
                         ObjectPathManager::getInstance()->AddPath(slock.get(), path);
 
@@ -233,16 +175,77 @@ bool HumanPlayer::ProcessInput()
                         attack_ready = true;
                         attack_set = true;
                     }
-
-
                 }
+
+                return true;
+            }
+            
+        } else if (std::holds_alternative<WheelAction>(hia.type)) {
+            auto event = std::get<WheelAction>(hia.type);
+
+            if (event.scrollY > 0) {
+                zoom_in = true;
+                zoom_out = false;
+                zoom_mouse = true;
             }
 
+            if (event.scrollY <= 0) {
+                zoom_out = true;
+                zoom_in = false;
+                zoom_mouse = true;
+            }
+
+            return true;
+        } else if (std::holds_alternative<GameExit>(hia.type)) {
+            exit_game = true;
+            return true;
         }
+        
+
+        return false;
+
+    };
+
+    input::InputService::getInputManager()->addListenerHandler(_listener);
+
+}
+
+void HumanPlayer::SetCamera(familyline::graphics::Camera* c) { _cam = c;}
+void HumanPlayer::SetPicker(familyline::input::InputPicker* ip) { _ip = ip; }
+void HumanPlayer::SetPathfinder(familyline::logic::PathFinder* p) { _pf = p; }
+
+void HumanPlayer::SetGameActionManager(familyline::logic::GameActionManager* gam)
+{
+    this->_gam = gam;
+
+    /* Create a city for it */
+    City* c = new City{this, glm::vec3(1, 0, 0)};
+    AddCity(c);
+}
+
+
+/***
+    Virtual function called on each iteration.
+
+    It allows player to decide its movement
+    (input for humans, AI decisions for AI... )
+
+    Returns true to continue its loop, false otherwise.
+***/
+bool HumanPlayer::ProcessInput()
+{
+    _updated = false;
+    auto& ima = InputService::getInputManager();
+
+    ima->processEvents();
+
+    if (zoom_mouse) {
+        zoom_in = false;
+        zoom_out = false;
+        zoom_mouse = false;
     }
 
     return true;
-
 }
 
 bool HumanPlayer::Play(GameContext* gctx)
@@ -286,7 +289,7 @@ bool HumanPlayer::Play(GameContext* gctx)
             buildpos.y = p.y;
             build->setPosition(buildpos);
 
-            
+
             // the object will be added to the city
             Log::GetLog()->InfoWrite("human-player",
                                      "creating %s at %.3f %.3f %.3f",
@@ -297,15 +300,15 @@ bool HumanPlayer::Play(GameContext* gctx)
             auto ncobj =  gctx->om->get(cobjID).value();
 
             this->RegisterCreation(ncobj.get());
-            
+
             objr->add(ncobj);
             olm->doRegister(ncobj);
-            
+
             assert(ncobj->getPosition().x == buildpos.x);
             assert(ncobj->getPosition().z == buildpos.z);
 
             olm->notifyCreation(cobjID);
-            
+
             Log::GetLog()->InfoWrite(
                 "human-player",
                 "%s has id %d now", ncobj->getName().c_str(), cobjID);

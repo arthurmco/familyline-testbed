@@ -31,6 +31,7 @@
 
 #include <client/input/InputPicker.hpp>
 #include <client/input/input_manager.hpp>
+#include <client/input/input_service.hpp>
 
 class HumanPlayer : public familyline::logic::Player
 {
@@ -40,7 +41,10 @@ private:
 
 	std::weak_ptr<familyline::logic::GameObject> _selected_obj;
     familyline::logic::PathFinder* _pf = nullptr;
-	
+
+    familyline::input::HumanListenerHandler _listener;
+
+    
     bool _updated = false;
 
 public:

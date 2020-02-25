@@ -102,7 +102,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 //        InputManager::GetInstance()->Initialize();
 
                 
-//        ip = new InputPicker{ terr_rend, win, scenernd, cam, om };
+        ip = new InputPicker{ terr_rend, win, scenernd, cam, om };
         hp->SetPicker(ip);
 
         pathf = new PathFinder(om);
