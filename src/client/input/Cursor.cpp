@@ -19,14 +19,15 @@ Cursor::Cursor()
 
           _x = event.screenX;
           _y = event.screenY;
-          
-          return true;
+
+          // We received the event, but we also want the event to pass through normally
+          // so we return false anyway
         }
 
         return false;
       };
 
-  input::InputService::getInputManager()->addListenerHandler(_listener);
+  input::InputService::getInputManager()->addListenerHandler(_listener, 20);
 
   //    InputManager::GetInstance()->AddListener(EVENT_MOUSEMOVE, _listener,
   //    0.01);
