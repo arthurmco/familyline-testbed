@@ -23,7 +23,11 @@ void InputManager::processEvents()
 
     while (_ip.pollAction(hia)) {
         for (auto& [id, fn] : _human_input_fns) {
-            fn(hia);
+            auto ret = fn(hia);
+
+            if (ret) {
+                break;
+            }
         }
         
     }
