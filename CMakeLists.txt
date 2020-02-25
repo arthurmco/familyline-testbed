@@ -48,7 +48,7 @@ if (MSVC)
   find_package(SDL2 CONFIG REQUIRED)
   find_package(GLM CONFIG REQUIRED)
   find_package(unofficial-cairo CONFIG REQUIRED)
-  
+ 
   # SDL, GLM and cairo includes will be made available via vcpkg and put in a default path.
   # We don't really need to put them here'
   include_directories(AFTER ${YAML_INCLUDE_DIR})
@@ -60,9 +60,8 @@ if (MSVC)
   target_link_libraries(familyline unofficial::cairo::cairo)
   target_link_libraries(familyline glm)
   target_link_libraries(familyline wsock32 ws2_32)
-  target_link_libraries(familyline fmt::fmt fmt::fmt-header-only)
-
-  target_link_libraries(familyline-server wsock32 ws2_32)
+  
+#  target_link_libraries(familyline-server wsock32 ws2_32)
 
   #if (DO_TESTS)
 	target_link_libraries(familyline-tests SDL2::SDL2 SDL2::SDL2main)
@@ -77,6 +76,7 @@ if (MSVC)
   #endif(DO_TESTS)
 
   add_compile_options(/EHsc /GR /W4)
+
 else()
 	
   find_package(PkgConfig REQUIRED)

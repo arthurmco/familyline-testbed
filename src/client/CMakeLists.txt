@@ -54,6 +54,13 @@ add_library(
   "Timer.cpp"
   )
 
+
+if (MSVC)
+	
+  include(${CMAKE_TOOLCHAIN_FILE})
+  target_include_directories(familyline-client PUBLIC ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} `${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
+endif(MSVC)
+
 target_include_directories(familyline-client PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 target_link_libraries(familyline-client familyline-common)
 target_compile_features(familyline-client PRIVATE cxx_std_20)
