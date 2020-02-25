@@ -4,8 +4,8 @@
     Copyright (C) 2016 Arthur M
 */
 
-#include "InputListener.hpp"
 #include <client/input/input_manager.hpp>
+#include <client/input/input_service.hpp>
 
 #ifndef CURSOR_HPP
 #define CURSOR_HPP
@@ -16,7 +16,8 @@ namespace familyline::input {
     private:
         static Cursor* cursor;
 
-        InputListener* _listener;
+        HumanListenerHandler _listener;
+
         int _x, _y;
     public:
         static Cursor* GetInstance() {

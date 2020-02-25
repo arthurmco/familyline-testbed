@@ -6,19 +6,28 @@ Cursor* Cursor::cursor = nullptr;
 
 void Cursor::GetPositions(int& x, int& y)
 {
-    InputEvent ev;
-    if (_listener->PopEvent(ev)) {
-        _x = ev.mousex;
-        _y = ev.mousey;
-	_listener->SetAccept();
-    }
-
     x = _x;
     y = _y;
 }
 
 Cursor::Cursor()
 {
-    _listener = new InputListener{"cursor"};
-//    InputManager::GetInstance()->AddListener(EVENT_MOUSEMOVE, _listener, 0.01);
+  _listener =
+      [&](HumanInputAction hia) {
+        if (std::holds_alternative<MouseAction>(hia.type)) {
+          auto event = std::get<MouseAction>(hia.type);
+
+          _x = event.screenX;
+          _y = event.screenY;
+          
+          return true;
+        }
+
+        return false;
+      };
+
+  input::InputService::getInputManager()->addListenerHandler(_listener);
+
+  //    InputManager::GetInstance()->AddListener(EVENT_MOUSEMOVE, _listener,
+  //    0.01);
 }

@@ -13,7 +13,6 @@ using namespace familyline::input;
 
 #include <cstdio>
 
-InputEvent ev;
 bool front = false, back = false;
 bool left = false, right = false;
 bool rotate_left = false, rotate_right = false;
@@ -144,7 +143,7 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
                 attack_set = false;
             }
             
-            if (event.buttonCode == MOUSE_LEFT) {
+            if (event.buttonCode == SDL_BUTTON_LEFT) {
                 attack_set = false;
                 if (event.isPressed)
                     mouse_click = true;
@@ -152,7 +151,7 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
                     mouse_click = false;
             }
 
-            if (event.buttonCode == MOUSE_RIGHT && !_selected_obj.expired()) {
+            if (event.buttonCode == SDL_BUTTON_RIGHT && !_selected_obj.expired()) {
                 if (event.isPressed) {
 
                     if (!attack_set) {
