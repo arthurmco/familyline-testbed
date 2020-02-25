@@ -18,8 +18,10 @@ namespace familyline::graphics {
     class Device {
     public:
 	
-        /// Get the device name
+        /// Get the device code, name and vendor
+        virtual std::string_view getCode() = 0;
         virtual std::string_view getName() = 0;
+        virtual std::string_view getVendor() = 0;
 	
         virtual bool isDefault() = 0;
 
@@ -32,16 +34,19 @@ namespace familyline::graphics {
 
     class GLDevice : public Device {
     private:
-        std::string_view _name;
+        std::string_view _code;
         bool _default;
         std::any _data;
 
     public:
-        GLDevice(const char* name, bool is_default, int index);
+        GLDevice(const char* code, bool is_default, int index);
 
-        /// Get the device name
+        /// Get the device code, name and vendor
+        virtual std::string_view getCode();
         virtual std::string_view getName();
+        virtual std::string_view getVendor();
 
+        
         virtual bool isDefault();
 
         virtual std::any getCustomData();

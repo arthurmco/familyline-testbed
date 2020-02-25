@@ -248,7 +248,7 @@ static int show_starting_menu()
 
         for (auto d : devs) {
             Log::GetLog()->InfoWrite("main", "driver found: %s %s",
-                                     d->getName().data(), (d->isDefault() ? "(default)" : ""));
+                                     d->getCode().data(), (d->isDefault() ? "(default)" : ""));
 
             if (d->isDefault())
                 defaultdev = d;
@@ -261,14 +261,17 @@ static int show_starting_menu()
 
         InputProcessor* ipr = new InputProcessor;
         InputService::setInputManager(std::make_unique<InputManager>(*ipr));
-        auto& ima = InputService::getInputManager();
-
+        auto& ima = InputService::getInputManager();        
         
 //        InputManager::GetInstance()->Initialize();
         win = new GLWindow((GLDevice*)defaultdev, winW, winH);
 
         win->show();
         enable_gl_debug();
+
+        Log::GetLog()->Write("", "Device name: %s", defaultdev->getName().data());
+        Log::GetLog()->Write("", "Device vendor: %s ", defaultdev->getVendor().data());       
+        
 
 		Framebuffer f3D = Framebuffer("f3D", winW, winH);
 		Framebuffer fGUI = Framebuffer("fGUI", winW, winH);
