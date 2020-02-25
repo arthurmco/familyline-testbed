@@ -10,11 +10,14 @@
 
 #include <cstring> // strcmp
 #include <cstdlib> // getenv
+#include <mutex>
 
 using namespace familyline;
 using namespace std::chrono;
 
 Log* Log::l = NULL;
+
+std::mutex mtx;
 
 Log* Log::GetLog(){
     if (!l){
@@ -78,6 +81,7 @@ double Log::GetDelta() {
 void Log::InfoWrite(const char* tag, const char* fmt, ...) {
     if (!this->_logFile) return;
 
+	mtx.lock();
     const char* colon = (tag[0] == '\0') ? "" : ":";
     
     /* Print timestamp */
@@ -96,12 +100,14 @@ void Log::InfoWrite(const char* tag, const char* fmt, ...) {
     /* Print line terminator */
     fprintf(_logFile, "%s\r\n", L_NORMAL);
     fflush(this->_logFile);
+	mtx.unlock();
 }
 
 void Log::Write(const char* tag, const char* fmt, ...)
 {
     if (!this->_logFile) return;
 
+	mtx.lock();
     const char* colon = (tag[0] == '\0') ? "" : ":";
     
     /* Print timestamp */
@@ -120,12 +126,14 @@ void Log::Write(const char* tag, const char* fmt, ...)
     /* Print line terminator */
     fprintf(_logFile, "%s\r\n", L_NORMAL);
     fflush(this->_logFile);
+	mtx.unlock();
 }
 
 void Log::Fatal(const char* tag, const char* fmt, ...)
 {
     if (!this->_logFile) return;
     
+	mtx.lock();
     /* Print timestamp */
     fprintf(_logFile, "[%13.4f] %s%s: (FATAL) %s%s", 
 	    GetDelta(), L_BOLDRED, tag, L_NORMAL, L_RED);
@@ -141,12 +149,14 @@ void Log::Fatal(const char* tag, const char* fmt, ...)
     /* Print line terminator */
     fprintf(_logFile, "%s\r\n", L_NORMAL);
     fflush(this->_logFile);
+	mtx.unlock();
 }
 
 void Log::Warning(const char* tag, const char* fmt, ...)
 {
     if (!this->_logFile) return;
 	
+	mtx.lock();
     /* Print timestamp */
     fprintf(_logFile, "[%13.4f] %s%s: (WARNING) %s%s",
 	    GetDelta(), L_BOLDYELLOW, tag, L_NORMAL, L_YELLOW);
@@ -162,4 +172,5 @@ void Log::Warning(const char* tag, const char* fmt, ...)
     /* Print line terminator */
     fprintf(_logFile, "%s\r\n", L_NORMAL);
     fflush(this->_logFile);
+	mtx.unlock();
 }
