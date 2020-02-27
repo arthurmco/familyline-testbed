@@ -7,6 +7,7 @@
  */
 
 #include <cstdio>
+#include <chrono>
 #include <memory>
 
 namespace familyline {
@@ -26,9 +27,12 @@ namespace familyline {
     private:
         FILE* _out = nullptr;
 
+        std::chrono::steady_clock::time_point _start;
+        double getDelta();
+
     public:
         Logger(FILE* out = stderr)
-            : _out(out)
+            : _out(out), _start(std::chrono::steady_clock::now())
             {}
 
         void write(const char* tag, LogType type, const char* format, ...);

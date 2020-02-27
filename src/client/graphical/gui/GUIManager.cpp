@@ -135,7 +135,9 @@ void GUIManager::initShaders(Window* w)
     glGenTextures(1, &(texHandle));
     glBindTexture(GL_TEXTURE_2D, texHandle);
 
-    printf("%.2f %.2f", width, height);
+    LOGDEBUG(LoggerService::getLogger(), "gui-manager",
+             "gui size: %.2f %.2f", width, height);
+    
     fflush(stdout);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA,

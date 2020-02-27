@@ -3,6 +3,7 @@
 #include <client/graphical/shader_manager.hpp>
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/gfx_service.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::graphics;
 
@@ -173,7 +174,8 @@ void GLWindow::update()
 		case GL_OUT_OF_MEMORY:
 			throw graphical_exception("Out of memory while rendering");
 		default:
-			printf("\rGL error %#x\n", err);
+            LoggerService::getLogger()->write("window", LogType::Error,
+                                              "GL error %#x\n", err);
 		}
 
 	}

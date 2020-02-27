@@ -3,6 +3,7 @@
 #include <cstdarg>
 
 using namespace familyline;
+using namespace std::chrono;
 
 std::unique_ptr<Logger> LoggerService::_logger;
 
@@ -15,7 +16,7 @@ void Logger::write(const char* tag, LogType type, const char* format, ...)
 	const char* prefix;
     const char* colorstart;
     const char* colorend = "\033[0m";
-	
+
 	switch (type) {
 	case LogType::Debug:
         prefix = "[debug] ";
@@ -43,7 +44,7 @@ void Logger::write(const char* tag, LogType type, const char* format, ...)
 	}
 
 	char msg[1024] = {};
-	
+
 	va_list vl;
 	va_start(vl, format);
 
@@ -53,10 +54,23 @@ void Logger::write(const char* tag, LogType type, const char* format, ...)
 
     mtx.lock();
 
-    if (!tag || tag[0] == '\0')
-        fprintf(_out, "%s%s%s%s\n", colorstart, prefix, msg, colorend);
-    else
-        fprintf(_out, "%s%s%s: %s%s\n", colorstart, prefix, tag, msg, colorend);
+    if (!tag || tag[0] == '\0') {
+        fprintf(_out, "[%13.4f] %s%s%s%s\n", this->getDelta(), prefix,
+                colorstart, msg, colorend);
+    } else {
+        char stag[128] = {};
+        snprintf(stag, 127, "\033[1m%s\033[0m", tag);
+
+        fprintf(_out, "[%13.4f] %s%s: %s%s%s\n",
+                this->getDelta(), prefix, stag, colorstart, msg, colorend);
+    }
     
     mtx.unlock();
+}
+
+double Logger::getDelta()
+{
+    decltype(_start) now = steady_clock::now();
+    auto deltatime = duration_cast<duration<double>>(now-_start);
+    return deltatime.count();
 }
