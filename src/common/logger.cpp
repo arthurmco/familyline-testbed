@@ -12,7 +12,9 @@ std::mutex mtx;
 
 void Logger::write(const char* tag, LogType type, const char* format, ...)
 {
-
+    if (type < _minlog)
+        return;
+    
 	const char* prefix;
     const char* colorstart;
     const char* colorend = "\033[0m";

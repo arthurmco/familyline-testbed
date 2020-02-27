@@ -26,13 +26,14 @@ namespace familyline {
 
     private:
         FILE* _out = nullptr;
-
+        LogType _minlog;
+        
         std::chrono::steady_clock::time_point _start;
         double getDelta();
 
     public:
-        Logger(FILE* out = stderr)
-            : _out(out), _start(std::chrono::steady_clock::now())
+        Logger(FILE* out = stderr, LogType minlog = LogType::Info)
+            : _out(out), _minlog(minlog), _start(std::chrono::steady_clock::now())
             {}
 
         void write(const char* tag, LogType type, const char* format, ...);
@@ -43,9 +44,9 @@ namespace familyline {
         static std::unique_ptr<Logger> _logger;
 
     public: 
-        static void createLogger(FILE* out = stderr)
+        static void createLogger(FILE* out = stderr, LogType minlog = LogType::Info)
             {
-                _logger = std::make_unique<Logger>(out);
+                _logger = std::make_unique<Logger>(out, minlog);
             }
 
         static std::unique_ptr<Logger>& getLogger()
