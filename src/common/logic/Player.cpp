@@ -1,6 +1,5 @@
 #include <common/logic/Player.hpp>
 #include <common/logic/City.hpp>
-#include <common/Log.hpp>
 #include <chrono>
 
 using namespace familyline;
@@ -8,11 +7,7 @@ using namespace familyline::logic;
 
 Player::Player(const char* name, int xp, GameActionManager* gam)
     : _name{name},  _xp(xp), _gam(gam)
-{
-    Log::GetLog()->Write("player",
-			 "Created player %s, %d XP",
-            name, xp);
-}
+{}
 
 void Player::AddCity(City* c)
 {

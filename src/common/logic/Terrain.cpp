@@ -1,5 +1,5 @@
 #include <common/logic/Terrain.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::logic;
 
@@ -17,16 +17,16 @@ Terrain::Terrain(int w, int h)
     /* Create the sections */
     for (int y = 0; y < _section_height; y++) {
         for (int x = 0; x < _section_width; x++) {
-	    unsigned index = x + y * _section_width;
-	    _data[index] = new TerrainData();
+            unsigned index = x + y * _section_width;
+            _data[index] = new TerrainData();
 
-	    for (int iy = 0; iy < SECTION_SIDE; iy++) {
-		for (int ix = 0; ix < SECTION_SIDE; ix++) {
-		    int16_t v = (int16_t)(sqrt(ix*iy));
-		    _data[index]->data[iy*SECTION_SIDE+ix].elevation = v;
-//					printf(">> x:%d y%d sqrt %d\n", ix, iy, v);
-		}
-	    }
+            for (int iy = 0; iy < SECTION_SIDE; iy++) {
+                for (int ix = 0; ix < SECTION_SIDE; ix++) {
+                    int16_t v = (int16_t)(sqrt(ix*iy));
+                    _data[index]->data[iy*SECTION_SIDE+ix].elevation = v;
+//                  printf(">> x:%d y%d sqrt %d\n", ix, iy, v);
+                }
+            }
         }
     }
 
@@ -36,15 +36,17 @@ Terrain::Terrain(int w, int h)
     const char* unit_index[] = {"bytes", "kB", "MB", "GB", "TB", "PB"};
 
     while (size >= 1024) {
-	unit = unit_index[++index];
-	size /= 1024.0;
+        unit = unit_index[++index];
+        size /= 1024.0;
 
-	if (index >= 6)
-	    break;
+        if (index >= 6)
+            break;
     }
 
-    Log::GetLog()->Write("terrain", "Created terrain of %d x %d points, %d section (~ %.3f %s)", _width, _height, (_section_height * _section_width),
-			 size, unit);
+    LoggerService::getLogger()->write(
+        "terrain", LogType::Info,
+        "Created terrain of %d x %d points, %d section (~ %.3f %s)",
+        _width, _height, (_section_height * _section_width), size, unit);
 
 
 }
@@ -87,35 +89,35 @@ void Terrain::SetDescription(const char* d) { _description = std::string{d}; }
 /* Get raw terrain data and split it into sections */
 void Terrain::SetData(TerrainSlot* slot) {
     if (!slot) {
-	Log::GetLog()->Warning("terrain",
-			       "terrain slot data is a null pointer");
+        LoggerService::getLogger()->write(
+            "terrain", LogType::Error,
+            "terrain slot data is a null pointer");
     }
 
     for (int sy = 0; sy < _section_height; sy++) {
-	for (int sx = 0; sx < _section_width; sx++) {
-	    int index = sy*_section_width+sx;
-	    for (int y = 0; y < SECTION_SIDE; y++) {
-		if ((sy * SECTION_SIDE + y) >= _height) {
-		    /* No more terrain after this */
-		    break;
-		}
+        for (int sx = 0; sx < _section_width; sx++) {
+            int index = sy*_section_width+sx;
+            for (int y = 0; y < SECTION_SIDE; y++) {
+                if ((sy * SECTION_SIDE + y) >= _height) {
+                    /* No more terrain after this */
+                    break;
+                }
 
-		for (int x = 0; x < SECTION_SIDE; x++) {
-		    if ((sx * SECTION_SIDE + x) >= _width) {
-			/* There's no more terrain after this */
-			break;
-		    }
-			
-		    size_t slotindex = size_t((sy * SECTION_SIDE + y) * _width + (sx * SECTION_SIDE + x));
-		    _data[index]->data[y*SECTION_SIDE+x] = slot[slotindex];
-		}
-	    }
-		
-	}
-	    
-    }	
+                for (int x = 0; x < SECTION_SIDE; x++) {
+                    if ((sx * SECTION_SIDE + x) >= _width) {
+                        /* There's no more terrain after this */
+                        break;
+                    }
+
+                    size_t slotindex = size_t((sy * SECTION_SIDE + y) * _width +
+                                              (sx * SECTION_SIDE + x));
+                    _data[index]->data[y*SECTION_SIDE+x] = slot[slotindex];
+                }
+            }
+
+        }
+
+    }
 
     delete[] slot;
 }
-
-

@@ -24,7 +24,6 @@ add_library(
   "graphical/gui/GUIManager.cpp"
   "graphical/Light.cpp"
   "graphical/LightManager.cpp"
-  "graphical/logger.cpp"
   "graphical/material.cpp"
   "graphical/material_manager.cpp"
   "graphical/materialopener/MTLOpener.cpp"

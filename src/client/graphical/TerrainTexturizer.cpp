@@ -9,7 +9,7 @@
 #include <array>
 #include <iterator>
 
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::graphics;
 
@@ -109,13 +109,14 @@ static TerrainBitmap MergeTerrain(TerrainBitmap lt, TerrainBitmap rt,
 
 TerrainBitmap TerrainRenderer::GetTerrainTexture(unsigned int type_id)
 {
+    auto& log = LoggerService::getLogger();
     static unsigned int* textures[] = {
         GET_TEXTURE_RAW("textures/terrain/grass.png")
     };
     
     if (type_id >= (sizeof(textures)/sizeof(unsigned int*))) {
-        Log::GetLog()->Fatal("terrain-renderer", "terrain type %d has no texture! Using id 0 in place",
-                             type_id);
+        log->write("terrain-renderer", LogType::Error,
+                   "terrain type %d has no texture! Using id 0 in place", type_id);
         type_id = 0;
     }
     
@@ -161,6 +162,8 @@ Texture* TerrainRenderer::GenerateTerrainSlotTexture(familyline::logic::TerrainD
         fprintf(stderr, ".");
     }
 
-    Log::GetLog()->Write("terrain-renderer", "Terrain texture generation complete");
+    auto& log = LoggerService::getLogger();
+
+    log->write("terrain-renderer", LogType::Info, "Terrain texture generation complete");
     return new Texture(ImageWidth * SlotSide, ImageHeight * SlotSide, GL_RGBA, terrain_surface.data());
 }

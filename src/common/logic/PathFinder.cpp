@@ -2,7 +2,7 @@
 #include <cstring> //memset()
 #include <algorithm>
 #include <common/logic/logic_service.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 //#include "ObjectEventEmitter.hpp"
 
@@ -216,6 +216,7 @@ struct PathNodeComparator {
 
 std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end,
                                             double width, double height) {
+    auto& log = LoggerService::getLogger();
 
     /* The border of our pathfinder, the nodes here are the most periferical ones */
     std::priority_queue<PathNode*, std::vector<PathNode*>, 
@@ -261,14 +262,18 @@ std::vector<glm::vec2> PathFinder::FindPath(glm::vec2 start, glm::vec2 end,
 
         
         if (frontier.size() > (size_t)(abs(end.x - start.x) * abs(end.x - start.y) * 10)) {
-            Log::GetLog()->Fatal("pathfinder", "would get caught in an infinite loop!\n"
-                                 "\t\tMight be a bug in the pathfinder");
-            Log::GetLog()->InfoWrite("", "origin:          (%.3f, %.3f)", 
-                                     start.x, start.y);
-            Log::GetLog()->InfoWrite("", "destiny:         (%.3f, %.3f)", 
-                                     end.x, end.y);
-            Log::GetLog()->InfoWrite("", "actual location: (%.3f, %.3f)",
-                                     frontier.top()->pos.x, frontier.top()->pos.y);
+
+            log->write("pathfinder", LogType::Error,
+                       "would get caught in an infinite loop!\n"
+                       "\t\tMight be a bug in the pathfinder");
+
+            log->write("", LogType::Error, "origin:          (%.3f, %.3f)", 
+                       start.x, start.y);
+            
+            log->write("", LogType::Error, "destiny:         (%.3f, %.3f)", 
+                       end.x, end.y);
+            log->write("", LogType::Error, "actual location: (%.3f, %.3f)",
+                       frontier.top()->pos.x, frontier.top()->pos.y);
             break;
         }
     

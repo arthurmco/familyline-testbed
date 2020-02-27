@@ -1,6 +1,5 @@
 #include <common/net/NetPlayerManager.hpp>
 #include <common/net/NetServer.hpp>
-#include <common/Log.hpp>
 
 
 #ifdef _WIN32
@@ -76,9 +75,6 @@ void NetPlayerManager::GetRemotePlayers(Server* ns)
 	char tr[10], pl[10];
 	sscanf(msg, "%s %s %d", tr, pl, &playerqt);
 
-	Log::GetLog()->Write("net-player-manager",
-			     "%d players identified", playerqt);
-
 	auto msgsize = 32 + playerqt*48;
 	char* rmsg = new char[msgsize];
 	
@@ -94,10 +90,6 @@ void NetPlayerManager::GetRemotePlayers(Server* ns)
 	    int playerxp = 0;
 	    sscanf(rmsg, "%d %s %d", &playerid,
 		   pname, &playerxp);
-
-	    Log::GetLog()->InfoWrite("net-player-manager",
-				     "\t player %s, ID %d, %d XP",
-				     pname, playerid, playerxp);
 	    
 	    playersep = npsep;
 	}

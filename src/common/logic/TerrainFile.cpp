@@ -1,5 +1,5 @@
 #include <common/logic/TerrainFile.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::logic;
 
@@ -57,15 +57,18 @@ Terrain* TerrainFile::GetTerrain(int index)
 						fPath, 0);
 	}
 
-	Log::GetLog()->Write("terrain-file", "%s is a %ux%u terrain",
-					fPath, tdh.width, tdh.height);
+    auto& log = LoggerService::getLogger();
+
+    log->write("terrain-file", LogType::Info, "%s is a %ux%u terrain",
+               fPath, tdh.width, tdh.height);
 
 
 	/** TODO: this function only reads index 0, fix that */
 	/* Read the terrain contents for the specified index*/
 	size_t tdh_area = tdh.width*tdh.height;
-	Log::GetLog()->Write("terrain-file", "loading %.3f MB of data for slots",
-					(tdh_area*4) / 1048576.0);
+    log->write("terrain-file", LogType::Info, "%s is a %ux%u terrain",
+               "loading %.3f MB of data for slots",
+               (tdh_area*4) / 1048576.0);
 
 	TerrainSlot* slots = new TerrainSlot[tdh_area];
 	size_t read_data = fread(slots, sizeof(TerrainSlot), tdh_area, fTerrain);

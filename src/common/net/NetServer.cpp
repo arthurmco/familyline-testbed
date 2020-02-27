@@ -1,5 +1,4 @@
 #include <common/net/NetServer.hpp>
-#include <common/Log.hpp>
 
 using namespace familyline::Net;
 
@@ -58,8 +57,6 @@ const char* Server::Receive(size_t maxlen)
 		slen = recv(_serversock, &ret[i * 128],
 			(maxlen < 128) ? maxlen : 128, 0);
 		if (slen == 0) {
-			Log::GetLog()->Warning("net-server",
-				"Server was shut down unexpectedly");
 			throw ServerException("Server was shut down unexpectedly");
 			return nullptr;
 		}
@@ -68,7 +65,6 @@ const char* Server::Receive(size_t maxlen)
 			char* s_strerror = strerror(errno);
 			char* err = new char[256 + strlen(s_strerror)];
 			sprintf(err, "error while receiving message: %s", s_strerror);
-			Log::GetLog()->Fatal("net-server", err);
 
 			throw ServerException(err);
 			delete[] err;
@@ -106,8 +102,6 @@ const char* Server::Receive(size_t maxlen)
 
 	}
 
-	Log::GetLog()->Warning("net-server",
-		"received message not fully ended");
 
 	char* dupret = strdup(ret);
 	delete[] ret;
@@ -190,8 +184,6 @@ void Server::InitCommunications()
 
 	if (requiredcapslist.size() > 0) {
 		for (auto cap : requiredcapslist) {
-			Log::GetLog()->Fatal("net-server",
-				"Unsupported capability: %s", cap);
 		}
 
 		throw ServerException("Server required for some capabilities we "
@@ -200,18 +192,11 @@ void Server::InitCommunications()
 
 	if (requiredcapslist.size() > 0) {
 		for (auto cap : requiredcapslist) {
-			Log::GetLog()->Fatal("net-server",
-				"Unsupported capability: %s", cap);
 		}
 
 		throw ServerException("Server required for some capabilities we "
 			"don't support");
 	}
-
-	Log::GetLog()->InfoWrite("net-server",
-		"server has %d optional capabilities and %d "
-		"required ones",
-		capslist.size(), requiredcapslist.size());
 
 	write(_serversock, "[TRIBALIA CAPS ]", 18);
 }
@@ -236,8 +221,6 @@ void Server::GetMessages()
 		// Do not block recv
 		auto slen = recv(_serversock, ret, 512, MSG_DONTWAIT);
 		if (slen == 0) {
-			Log::GetLog()->Warning("net-server",
-				"Server was shut down unexpectedly while filling the message queue");
 			throw ServerException("Server was shut down unexpectedly while filling the messahe queue");
 		}
 
@@ -250,7 +233,6 @@ void Server::GetMessages()
 			char* s_strerror = strerror(errno);
 			char* err = new char[256 + strlen(s_strerror)];
 			sprintf(err, "Error while filliing message queue: %s", s_strerror);
-			Log::GetLog()->Fatal("net-server", err);
 
 			throw ServerException(err);
 			delete[] err;
@@ -298,10 +280,6 @@ NetPlayerManager* Server::GetPlayerManager(const char* playername)
 	}
 	int playerid = -1;
 	sscanf(&msg[21], "%d", &playerid);
-
-	Log::GetLog()->InfoWrite("net-server",
-		"received id %d for player %s",
-		playerid, playername);
 
 	delete[] msg;
 	return new NetPlayerManager(playername, playerid, this->cmq);

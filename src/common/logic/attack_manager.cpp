@@ -2,8 +2,7 @@
 #include <common/logic/attack_manager.hpp>
 #include <common/logic/game_object.hpp>
 #include <common/logic/logic_service.hpp>
-
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::logic;
 
@@ -42,8 +41,10 @@ attack_handle_t AttackManager::startAttack(int attackerOID, int defenderOID)
 {
 	auto atkhandle = make_attack_handle(attackerOID, defenderOID);
 
-    Log::GetLog()->Write("attack-manager", "attack started: object ID %d will attack object ID %d",
-                         attackerOID, defenderOID);
+    LoggerService::getLogger()->write(
+        "attack-manager", LogType::Info,
+        "attack started: object ID %d will attack object ID %d",
+        attackerOID, defenderOID);
 
 	AttackData adata;
 	adata.atk = this->components[attackerOID];
@@ -98,7 +99,9 @@ void AttackManager::checkRemovedObjects()
 	}
 
 	for (auto [handle, oid] : to_remove) {
-		printf("removed %x %lx\n", oid, handle);
+        LoggerService::getLogger()->write("attack-manager", LogType::Debug,
+                                          "removed %x %lx\n", oid, handle);
+        
 		if (handle > 0)
 			this->attacks.erase(handle);
 
@@ -110,19 +113,22 @@ void AttackManager::checkRemovedObjects()
 void AttackManager::processAttacks(ObjectLifecycleManager& olm)
 {
 	this->checkRemovedObjects();
+    auto& log = LoggerService::getLogger();
 
 	std::vector<attack_handle_t> to_remove;
 	for ( auto [ahandle, adata] : this->attacks) {
 		auto dmg = adata.atk->doDirectAttack(*adata.def);
 		if (!dmg) {
-			printf("out of range\n");
+            log->write("attack-manager", LogType::Debug,
+                       "out of range");
 			to_remove.push_back(ahandle);
 			continue;
 		}
 
 		auto vdmg = dmg.value_or(0);
         if (vdmg == 0.0) {
-            printf("damage is null");
+            log->write("attack-manager", LogType::Debug,
+                       "damage is null");
 			to_remove.push_back(ahandle);
 			continue;
         }
@@ -135,7 +141,8 @@ void AttackManager::processAttacks(ObjectLifecycleManager& olm)
             GameObject* go = adata.def->object;
 
             go->addHealth(-adata.def->object->getHealth());
-            printf("the defender is dead");
+            log->write("attack-manager", LogType::Debug,
+                       "the defender is dead");
             components.erase(go->getID());
 			to_remove.push_back(ahandle);
 
@@ -146,7 +153,8 @@ void AttackManager::processAttacks(ObjectLifecycleManager& olm)
     }
 
 	for (auto handle : to_remove) {
-		printf("removed %lx\n", handle);
+        log->write("attack-manager", LogType::Debug,
+                   "removed %lx\n", handle);
         this->attacks.erase(handle);
 	}
 

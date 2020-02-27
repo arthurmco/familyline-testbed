@@ -3,7 +3,7 @@
 #include <client/graphical/shader_manager.hpp>
 #include <client/graphical/gfx_service.hpp>
 
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline;
 using namespace familyline::graphics;
@@ -28,6 +28,7 @@ GLRenderer::GLRenderer()
 
 VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
 {
+    auto& log = LoggerService::getLogger();
 	auto [vao, vboPos, vboNorm, vboTex] = this->createRaw(vd);
 
 	if (!vi.shaderState.shader)
@@ -36,7 +37,7 @@ VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
 	auto vhandle = std::make_unique<GLVertexHandle>(vao, *this, vi);
 	vhandle->vsize = vd.position.size();
 
-    Log::GetLog()->InfoWrite("gl-renderer",
+    log->write("gl-renderer", LogType::Info,
 		"created vertex handle: vao=%#x, vsize=%zu",
 		vao, vhandle->vsize);
 
@@ -55,7 +56,7 @@ void GLRenderer::render(Camera* c)
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
 
 	auto& shaderManager = GFXService::getShaderManager();
-    auto l = Log::GetLog();
+    auto& log = LoggerService::getLogger();
 
 	auto viewMatrix = c->GetViewMatrix();
 	auto projMatrix = c->GetProjectionMatrix();
@@ -150,7 +151,8 @@ void GLRenderer::render(Camera* c)
 		glDrawArrays(glFormat, 0, vh->vsize);
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
-			l->Fatal("glrenderer", "rendering plot: OpenGL error %#x", err);
+		    log->write("gl-renderer", LogType::Error,
+                       "OpenGL error %#x", err);
 			return;
 		}
 	}
@@ -167,6 +169,8 @@ void GLRenderer::render(Camera* c)
  */
 std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd)
 {
+    auto& log = LoggerService::getLogger();
+
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
@@ -200,9 +204,9 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd)
 	glBindVertexArray(0);
 
 
-    Log::GetLog()->InfoWrite("gl-renderer",
-		"created vertex set: vao=%#x, vbos=%#x,%#x,%#x",
-		vao, vboPos, vboNorm, vboTex);
+    log->write("gl-renderer", LogType::Debug,
+               "created vertex set: vao=%#x, vbos=%#x,%#x,%#x",
+               vao, vboPos, vboNorm, vboTex);
 
 	return std::tie(vao, vboPos, vboNorm, vboTex);
 }

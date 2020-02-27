@@ -17,8 +17,6 @@ using namespace std::chrono;
 
 Log* Log::l = NULL;
 
-std::mutex mtx;
-
 Log* Log::GetLog(){
     if (!l){
         l = new Log();

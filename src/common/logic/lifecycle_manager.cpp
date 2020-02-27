@@ -1,5 +1,5 @@
 #include <common/logic/lifecycle_manager.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::logic;
 
@@ -36,10 +36,12 @@ object_id_t ObjectLifecycleManager::doRegister(std::weak_ptr<GameObject> o)
  */
 void ObjectLifecycleManager::notifyCreation(object_id_t id)
 {
+    auto& log = LoggerService::getLogger();
+
     auto optr = _o_creating.find(id);
     if (optr == _o_creating.end()) {
-        Log::GetLog()->Warning("lifecycle-manager",
-                               "Tried to notify creation of object id %ld, but it cannot be transferred to that state", id);
+        log->write("lifecycle-manager", LogType::Warning,
+                   "Tried to notify creation of object id %ld, but it cannot be transferred to that state", id);
         return;
     }
 
@@ -50,8 +52,8 @@ void ObjectLifecycleManager::notifyCreation(object_id_t id)
     _o_created[id] = lcd;
     _o_creating.erase(id);
 
-    Log::GetLog()->InfoWrite("lifecycle-manager",
-                             "Object with ID %ld has been created", id);
+    log->write("lifecycle-manager", LogType::Info,
+               "Object with ID %ld has been created", id);
 
 }
 
@@ -60,7 +62,7 @@ void ObjectLifecycleManager::notifyCreation(object_id_t id)
  * Notify that the object started dying
  *
  * You do not need to delete the object after you send this
- * event, because we need a time between the dying and dead 
+ * event, because we need a time between the dying and dead
  * events, so that the animations can run
  *
  * After some ticks, the dead event will be sent and the
@@ -68,10 +70,12 @@ void ObjectLifecycleManager::notifyCreation(object_id_t id)
  */
 void ObjectLifecycleManager::notifyDeath(object_id_t id)
 {
+    auto& log = LoggerService::getLogger();
+
     auto optr = _o_created.find(id);
     if (optr == _o_created.end()) {
-        Log::GetLog()->Warning("lifecycle-manager",
-                               "Tried to notify death of object id %ld, but it cannot be transferred to that state", id);
+        log->write("lifecycle-manager", LogType::Warning,
+                   "Tried to notify death of object id %ld, but it cannot be transferred to that state", id);
         return;
     }
 
@@ -79,12 +83,12 @@ void ObjectLifecycleManager::notifyDeath(object_id_t id)
     lcd.event = EventType::ObjectStateChanged;
     lcd.state = ObjectState::Dying;
     lcd.time_to_die = 80; // 80 ticks before removing the object
-    
+
     _o_dying[id] = lcd;
     _o_created.erase(id);
 
-    Log::GetLog()->InfoWrite("lifecycle-manager",
-                             "object with ID %ld died", id);
+    log->write("lifecycle-manager", LogType::Info,
+               "object with ID %ld died", id);
 
 }
 
@@ -95,26 +99,28 @@ void ObjectLifecycleManager::notifyDeath(object_id_t id)
  */
 void ObjectLifecycleManager::update()
 {
+    auto& log = LoggerService::getLogger();
+
+
     // Remove the dead objects
     for (auto [id, lcd] : _o_dead) {
         _om.remove(id);
-        
+
     }
     _o_dead.clear();
 
-    
+
     // Update the dying countdown
     std::vector<object_id_t> dying_remove;
     for (auto& [id, lcd] : _o_dying) {
-        printf("%d => %d\t", id, lcd.time_to_die);
         lcd.time_to_die--;
 
         if (lcd.time_to_die <= 0) {
             lcd.event = EventType::ObjectDestroyed;
             lcd.state = ObjectState::Dead;
 
-            Log::GetLog()->InfoWrite("lifecycle-manager",
-                                     "object with ID %ld is dead and will be removed", id);
+            log->write("lifecycle-manager", LogType::Info,
+                       "object with ID %ld is dead and will be removed", id);
 
             _o_dead[id] = lcd;
             dying_remove.push_back(id);

@@ -1,8 +1,13 @@
-#include <client/graphical/logger.hpp>
-
+#include <common/logger.hpp>
+#include <mutex>
 #include <cstdarg>
 
+using namespace familyline;
+
 std::unique_ptr<Logger> LoggerService::_logger;
+
+std::mutex mtx;
+
 
 void Logger::write(const char* tag, LogType type, const char* format, ...)
 {
@@ -18,7 +23,7 @@ void Logger::write(const char* tag, LogType type, const char* format, ...)
 	default: prefix = ""; break;
 	}
 
-	char msg[512];
+	char msg[1024] = {};
 	
 	va_list vl;
 	va_start(vl, format);
@@ -27,5 +32,12 @@ void Logger::write(const char* tag, LogType type, const char* format, ...)
 
 	va_end(vl);
 
-	fprintf(_out, "%s%s: %s\n", prefix, tag, msg);
+    mtx.lock();
+
+    if (!tag || tag[0] == '\0')
+        fprintf(_out, "%s%s\n", prefix, msg);
+    else
+        fprintf(_out, "%s%s: %s\n", prefix, tag, msg);
+    
+    mtx.unlock();
 }

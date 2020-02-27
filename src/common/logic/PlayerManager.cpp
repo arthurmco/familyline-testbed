@@ -1,5 +1,4 @@
 #include <common/logic/PlayerManager.hpp>
-#include <common/Log.hpp>
 
 using namespace familyline::logic;
 
@@ -11,9 +10,6 @@ int PlayerManager::AddPlayer(Player* p, int flags)
     PlayerData pd = {p, ++last_player_id, flags};
     this->_playerdata.push_back(std::move(pd));
 
-    Log::GetLog()->Write("player-manager",
-			 "Added player (name: %s, id: %d, flags %04x)",
-			 p->getName(), last_player_id, flags);
     return last_player_id;
 }
 

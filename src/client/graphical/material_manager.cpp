@@ -1,5 +1,5 @@
 #include <client/graphical/material_manager.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::graphics;
 
@@ -10,22 +10,21 @@ int MaterialManager::addMaterial(Material* m)
 {
     int id = _materials.size();
     m->_ID = id;
+    auto& log = LoggerService::getLogger();
 
-    Log::GetLog()->Write("material-manager", "Added material %s (id %d) ["
-        " diffuse (%.2f %.2f %.2f) "
-        " ambient (%.2f %.2f %.2f) ]",
+    log->write("material-manager", LogType::Debug,
+               "Added material %s (id %d) [diffuse (%.2f %.2f %.2f) ambient (%.2f %.2f %.2f) ]",
         m->getName(), m->getID(),
         m->getData().diffuseColor.r, m->getData().diffuseColor.g,
         m->getData().diffuseColor.b,
         m->getData().ambientColor.r, m->getData().ambientColor.g,
         m->getData().ambientColor.b);
 
-    printf("<<< %s %d >>>\n", m->getName(), m->getID());
     _materials.push_back(*m);
 	return id;
 }
 
-/* Add materials*/
+/* Add materials */
 void MaterialManager::addMaterials(std::vector<Material*> materials)
 {
     for (unsigned i = 0; i < materials.size(); i++) {

@@ -1,5 +1,4 @@
 #include <client/graphical/gui/GUIButton.hpp>
-#include <common/Log.hpp>
 
 using namespace familyline;
 using namespace familyline::graphics::gui;

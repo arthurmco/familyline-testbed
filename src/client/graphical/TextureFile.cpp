@@ -1,6 +1,6 @@
 #include <client/graphical/TextureOpener.hpp>
 #include <IL/ilu.h>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::graphics;
 
@@ -11,11 +11,14 @@ TextureFile::TextureFile(ILuint handle, GLenum format)
 
 unsigned char* TextureFile::GetTextureRaw(int x, int y, int w, int h)
 {
+    auto& log = LoggerService::getLogger();
+
     const auto maxtex = Texture::GetMaximumSize();
     auto lhandle = _handle;
 
     if ((unsigned)w > maxtex || (unsigned)h > maxtex) {
-        Log::GetLog()->Warning("texture-file", "The solicited cutting size [%d, %d] from texture handle %d exceeded the max allowed size for your videocard (%d x %d)", w, h, _handle, maxtex, maxtex);
+        log->write("texture-file", LogType::Warning,
+                   "The solicited cutting size [%d, %d] from texture handle %d exceeded the max allowed size for your videocard (%d x %d)", w, h, _handle, maxtex, maxtex);
 
         // Create another handle and bind it
         ilGenImages(1, &lhandle);
@@ -33,7 +36,9 @@ unsigned char* TextureFile::GetTextureRaw(int x, int y, int w, int h)
         }
 
         iluScale(w, h, 1);
-        Log::GetLog()->Warning("texture-file", "Rescaled it to %d x %d", w, h);
+        
+        log->write("texture-file", LogType::Warning,
+                   "Rescaled it to %d x %d", w, h);
     }
 
     ilBindImage(lhandle);
@@ -44,7 +49,8 @@ unsigned char* TextureFile::GetTextureRaw(int x, int y, int w, int h)
     if (h < 0) h = ilGetInteger(IL_IMAGE_HEIGHT);
 
     char* c = new char[w*h*s];
-    Log::GetLog()->Write("texture-file", "Got image with handle %d and format 0x%x, cutting [%d, %d, %d, %d]", lhandle, _format, x, y, w, h);
+    log->write("texture-file", LogType::Debug,
+               "Got image with handle %d and format 0x%x, cutting [%d, %d, %d, %d]", lhandle, _format, x, y, w, h);
 
     ilCopyPixels(x, y, 0, w, h, 1, _format, IL_UNSIGNED_BYTE, c);
     ilBindImage(0);

@@ -1,5 +1,4 @@
 #include <common/net/NetPlayerFilter.hpp>
-#include <common/Log.hpp>
 
 #include <stdio.h>
 #include <common/net/NetServer.hpp>
@@ -49,8 +48,6 @@ void NetPlayerFilter::Filter()
 		    pq = new NetMessageQueue(this->_server_mq->GetSocket(),
 						this->_server_mq->GetAddress());
 		    this->_cli_queues[clientid] = pq;
-		    Log::GetLog()->Write("net-player-filter",
-					 "Added client with ID %d", clientid);
 		}
 
 		printf("Chat Message: %s\n", &m[14]);

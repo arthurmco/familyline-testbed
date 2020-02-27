@@ -1,5 +1,5 @@
 #include <client/Timer.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline;
 
@@ -19,9 +19,12 @@ Timer::Timer()
    */
 int Timer::AddFunctionCall(double ms, TimerFunction f, void* opt_inst, void* opt_arg)
 {
+    auto& log = LoggerService::getLogger();
+
     auto it_evt = _function_events.find(ms);
-    Log::GetLog()->Write("timer", "Added function @%#p with instance %#p, arg %#p at each %.1f ms",
-        f, opt_inst, opt_arg, ms);
+    log->write("timer", LogType::Debug,
+               "Added function @%#p with instance %#p, arg %#p at each %.1f ms",
+               f, opt_inst, opt_arg, ms);
 
 
     TimerFunctionStruct tfs;

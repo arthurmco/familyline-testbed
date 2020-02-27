@@ -1,7 +1,7 @@
 #include <common/logic/ActionManager.hpp>
-#include <common/Log.hpp>
 #include <cstdio>
 #include <stdexcept>
+#include <common/logger.hpp>
 
 using namespace familyline::logic;
 
@@ -13,9 +13,10 @@ void ActionManager::AddAction(Action a)
         _actions[a.name.c_str()].refcount++;
     }
 
-
-    Log::GetLog()->Write("action-manager", "Added action %s (refcount %d)",
-                         a.name.c_str(), _actions[a.name].refcount);
+    LoggerService::getLogger()->write(
+        "action-manager", LogType::Info,
+        "Added action %s (refcount %d)",
+        a.name.c_str(), _actions[a.name].refcount);
 }
 
 void ActionManager::RemoveVisibleAction(const char* name) {
@@ -51,9 +52,9 @@ void ActionManager::SetVisibleActions(std::vector<const char*> actions)
                        try {
                            return &_actions.at(stract);                
                        } catch (std::out_of_range e) {
-                           Log::GetLog()->Fatal("action-manager",
-                                                "Action %s doesn't exist",
-                                                stract);
+                           LoggerService::getLogger()->write(
+                               "action-manager", LogType::Fatal,
+                               "Action %s doesn't exist", stract);
                            return nullptr;
                        }
                    });

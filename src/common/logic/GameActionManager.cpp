@@ -1,6 +1,5 @@
 #include <common/logic/GameActionManager.hpp>
 #include <cstdio>
-#include <common/Log.hpp>
 
 using namespace familyline::logic;
 
@@ -45,8 +44,6 @@ bool GameActionManager::Pop(GameAction& a)
 
 void GameActionManager::AddListener(GameActionListener* l)
 {
-    Log::GetLog()->Write("game-action-manager", "Add action listener %s",
-			 l->GetName());
     _listeners.push_back(l);
 }
 

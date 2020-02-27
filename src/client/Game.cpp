@@ -5,6 +5,7 @@
 #include <client/graphical/animator.hpp>
 #include <client/graphical/gfx_debug_drawer.hpp>
 
+#include <common/logger.hpp>
 #include <common/logic/game_event.hpp>
 #include <common/logic/logic_service.hpp>
 
@@ -23,7 +24,8 @@ public:
 
     virtual void OnListen(GameAction& a) {
         (void)a;
-        Log::GetLog()->InfoWrite("bogus-listener", "received from listener");
+        LoggerService::getLogger()->write("bogus-listener", LogType::Info,
+                                          "received from listener");
     }
 };
 
@@ -34,7 +36,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
     : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm), hp(hp)
 {
     //    DebugPlotter::Init();
-
+    auto& log = LoggerService::getLogger();
+    
     int winW, winH;
     w->getSize(winW, winH);
     char* err = nullptr;
@@ -126,7 +129,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
     }
     catch (renderer_exception& re) {
-        Log::GetLog()->Fatal("game", "Rendering error: %s [%d]",
+        log->write("game", LogType::Fatal,
+                   "Rendering error: %s [%d]",
                              re.what(), 0xdeadbeef);
 
         err = new char[192 + strlen(re.what())];
@@ -139,8 +143,10 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         exit(EXIT_FAILURE);
     }
     catch (shader_exception& se) {
-        Log::GetLog()->Fatal("game", "Shader error: %s [%d]", se.what(), 0xbadbeef);
-        Log::GetLog()->Fatal("game", "Shader file: %s, type %d", "", 0x1e);
+        log->write("game", LogType::Fatal,
+                   "Shader error: %s [%d]", se.what(), 0xbadbeef);
+        log->write("game", LogType::Fatal,
+                   "Shader file: %s, type %d", "", 0x1e);
 
         err = new char[512 + strlen(se.what())];
         sprintf(err,
@@ -154,7 +160,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         exit(EXIT_FAILURE);
     }
     catch (asset_exception& ae) {
-        Log::GetLog()->Fatal("game", "Asset file error: %s", ae.what());
+        log->write("game", LogType::Fatal,
+                   "Asset file error: %s", ae.what());
         err = new char[768 + strlen(ae.what())];
 
 //      if (ae.assetptr) {
@@ -180,7 +187,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         exit(EXIT_FAILURE);
     }
     catch (graphical_exception& we) {
-        Log::GetLog()->Fatal("game", "Window creation error: %s (%d)", we.what(), 0xdeadc0de);
+        log->write("game", LogType::Fatal,
+                   "Window creation error: %s (%d)", we.what(), 0xdeadc0de);
         exit(EXIT_FAILURE);
     }
 
@@ -203,10 +211,7 @@ GUILabel lblKeys = GUILabel(0.05, 0.05, "Press C to build Tent, E to build Watch
 
 int Game::RunLoop()
 {
-    //    CombatManager::getDefault()->SetOnDeath([&](logic::AttackableObject* at) {
-    //                                            gctx.om->removeObject(gctx.om->getObject(at->getID()).lock());
-    //                                        });
-
+    auto& log = LoggerService::getLogger();
 
     // Panel pnl = Panel(0.0, 0.8, 1.0, 0.2, true);
     // pnl.SetBackColor(0, 0, 0, 185);
@@ -327,9 +332,11 @@ int Game::RunLoop()
     double maxfps = 1000 / mindelta;// less delta, more fps
     double minfps = 1000 / maxdelta;
     double avgfps = sumfps / frame;
-    Log::GetLog()->Write("game", "fps max: %.3f (%.3f ms), min: %.3f (%.3f ms), avg: %.3f",
-                         maxfps, mindelta, minfps, maxdelta, avgfps);
-    Log::GetLog()->Write("game", "Total frames: %d", frame);
+    log->write("game", LogType::Info,
+               "fps max: %.3f (%.3f ms), min: %.3f (%.3f ms), avg: %.3f",
+               maxfps, mindelta, minfps, maxdelta, avgfps);
+    
+    log->write("game", LogType::Info, "Total frames: %d", frame);
 
     return 0;
 }

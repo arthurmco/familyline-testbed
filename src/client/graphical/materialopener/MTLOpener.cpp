@@ -1,12 +1,13 @@
 #include <client/graphical/materialopener/MTLOpener.hpp>
 #include <client/graphical/materialopener/../gfx_service.hpp>
 #include <client/graphical/materialopener/../texture_manager.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::graphics;
 
 std::vector<Material*> MTLOpener::Open(const char* file)
 {
+    auto& log = LoggerService::getLogger();
     FILE* fMat = fopen(file, "r");
 
     if (!fMat) {
@@ -96,7 +97,8 @@ std::vector<Material*> MTLOpener::Open(const char* file)
             if (t) {
                 GFXService::getTextureManager()->AddTexture(texname.c_str(), t);
             } else {
-                Log::GetLog()->Warning("Texture %s failed to load", texpath);
+                log->write("material-opener::mtl", LogType::Warning,
+                           "Texture %s failed to load", texpath);
             }
 
 

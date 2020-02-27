@@ -1,17 +1,18 @@
 #include <client/graphical/framebuffer.hpp>
 #include <client/graphical/exceptions.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::graphics;
 
 Framebuffer::Framebuffer(std::string_view name, int width, int height)
 	: _name(name)
 {
+    auto& log = LoggerService::getLogger();
+
 	glGenFramebuffers(1, &_handle);
 	glBindFramebuffer(GL_FRAMEBUFFER, _handle);
 
-	auto l = Log::GetLog();
-	l->InfoWrite("fb", "creating framebuffer %s: handle=%#x, size=%d x %d",
+	log->write("fb", LogType::Debug, "creating framebuffer %s: handle=%#x, size=%d x %d",
 		name.data(), _handle, width, height);
 
 	glGenRenderbuffers(1, &_rboHandle);
@@ -25,7 +26,8 @@ Framebuffer::Framebuffer(std::string_view name, int width, int height)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureHandle, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		l->Warning("fb", "framebuffer %s (%#x) is not complete", name.data(), _handle); // should be error
+		log->write("fb", LogType::Warning,
+                   "framebuffer %s (%#x) is not complete", name.data(), _handle); // should be error
 	}
 
 	GLenum err = glGetError();
@@ -36,7 +38,7 @@ Framebuffer::Framebuffer(std::string_view name, int width, int height)
 		throw graphical_exception(std::string(e));
 	}
 
-	l->InfoWrite("fb", "\tcompleted: texhandle=%#x, rbohandle=%#x",
+	log->write("fb", LogType::Debug, "\tcompleted: texhandle=%#x, rbohandle=%#x",
 		_textureHandle, _rboHandle);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -1,5 +1,5 @@
 #include <client/graphical/asset_file.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 #include <algorithm>
 #include <string>
@@ -45,12 +45,16 @@ void AssetFile::loadFile(const char* ofile)
                               AssetError::AssetFileParserError);
     }
 
+
+    auto& log = LoggerService::getLogger();
+
+
     yaml_parser_set_input_file(&parser, fAsset);
 
-    Log::GetLog()->Write("asset-file-loader", "loaded file %s", file);
+    log->write("asset-file-loader", LogType::Info, "loaded file %s", file);
     auto lassets = this->parseFile(&parser);
-    Log::GetLog()->Write("asset-file-loader",
-                         "loaded %zu assets", lassets.size());
+    log->write("asset-file-loader", LogType::Info,
+               "loaded %zu assets", lassets.size());
 
     this->assets = this->processDependencies(std::move(lassets));
 
@@ -61,6 +65,8 @@ void AssetFile::loadFile(const char* ofile)
 
 std::vector<std::shared_ptr<AssetItem>> AssetFile::parseFile(yaml_parser_t* parser)
 {
+    auto& log = LoggerService::getLogger();
+
     std::vector<std::shared_ptr<AssetItem>> alist;
 
     bool asset_str = false;
@@ -180,10 +186,10 @@ std::vector<std::shared_ptr<AssetItem>> AssetFile::parseFile(yaml_parser_t* pars
 
             current_asset.path = cpath;
 
-            Log::GetLog()->InfoWrite("asset-file-loader",
-                                     "found asset %s type %s path %s",
-                                     current_asset.name.c_str(), current_asset.type.c_str(),
-                                     current_asset.path.c_str());
+            log->write("asset-file-loader", LogType::Info,
+                       "found asset %s type %s path %s",
+                       current_asset.name.c_str(), current_asset.type.c_str(),
+                       current_asset.path.c_str());
 
             alist.push_back(std::shared_ptr<AssetItem>{new AssetItem{ current_asset }});
             is_key = false;
@@ -226,6 +232,8 @@ std::vector<std::shared_ptr<AssetItem>> AssetFile::parseFile(yaml_parser_t* pars
 std::vector<std::shared_ptr<AssetItem>> AssetFile::processDependencies(
     std::vector<std::shared_ptr<AssetItem>>&& assets)
 {
+    auto& log = LoggerService::getLogger();
+
     /* Callback for mesh dependency.
      * Return true if the mesh 'asset_name' is a child of mesh.
      *
@@ -264,13 +272,13 @@ std::vector<std::shared_ptr<AssetItem>> AssetFile::processDependencies(
                                    fnDependency);
 
         asset->dependencies.erase(it_dep, asset->dependencies.end());
-        Log::GetLog()->InfoWrite("asset-file-loader",
-                                 "asset %s has %zu dependencies", asset->name.c_str(),
-                                 asset->dependencies.size());
+        log->write("asset-file-loader", LogType::Info, 
+                   "asset %s has %zu dependencies", asset->name.c_str(),
+                   asset->dependencies.size());
 
         for (auto dep : asset->dependencies) {
-            Log::GetLog()->InfoWrite("asset-file-loader",
-                                     "\t%s", dep->name.c_str());
+            log->write("", LogType::Info, 
+                       "\t%s", dep->name.c_str());
         }
 
 

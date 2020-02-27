@@ -46,7 +46,6 @@
 //#include <client/input/InputPicker.hpp>
 #include <client/input/input_manager.hpp>
 
-#include <common/Log.hpp>
 #include <client/Timer.hpp>
 #include <client/HumanPlayer.hpp>
 #include <common/objects/WatchTower.hpp>

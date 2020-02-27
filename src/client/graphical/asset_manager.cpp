@@ -9,13 +9,15 @@
 #include <fmt/format.h>
 #include <algorithm>
 #include <iterator> // for std::back_inserter
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
+using namespace familyline;
 using namespace familyline::graphics;
 
 /// TODO: handle multiple assets in one file
 std::vector<std::shared_ptr<AssetObject>> loadMeshAsset(Asset& asset) {
     auto ms = MeshOpener::Open(asset.path.c_str());
+    auto& log = LoggerService::getLogger();
 
     // Check if we have a texture and a material in the file
     // If we have neither, leave as it is, the renderer will set
@@ -46,8 +48,9 @@ std::vector<std::shared_ptr<AssetObject>> loadMeshAsset(Asset& asset) {
         Material* meshMaterial = GFXService::getMaterialManager()
             ->getMaterial(std::dynamic_pointer_cast<Material>(mats[0])->getName());
         materialID = meshMaterial->getID();
-        printf("loaded material for %s: %d\n",
-               asset.name.c_str(), materialID);
+        log->write("asset-manager", LogType::Debug,
+                   "loaded material for %s: %d\n",
+                   asset.name.c_str(), materialID);
         auto vdata = ms[0]->getVertexInfo();
 
         vdata[0].materialID = materialID;
@@ -184,6 +187,8 @@ Asset AssetManager::processAsset(AssetItem& av)
  */
 void AssetManager::loadFile(AssetFile& file)
 {
+    auto& log = LoggerService::getLogger();
+
     file.resetAsset();
     for (auto a = file.nextAsset(); a; a = file.nextAsset()) {
 
@@ -200,19 +205,19 @@ void AssetManager::loadFile(AssetFile& file)
 
             Asset dasset = this->processAsset(*dep.get());
             this->_assets[dasset.name] = dasset;
-            Log::GetLog()->InfoWrite("asset-manager", "found asset '%s' at path '%s' "
-                                     "(%zu dependencies)",
-                                     dasset.name.c_str(), dasset.path.c_str(),
-                                     dasset.dependencies.size());
+            log->write("asset-manager", LogType::Info,
+                       "found asset '%s' at path '%s' (%zu dependencies)",
+                       dasset.name.c_str(), dasset.path.c_str(),
+                       dasset.dependencies.size());
         }
 
         Asset asset = this->processAsset(*av);
 
         this->_assets[asset.name] = asset;
-        Log::GetLog()->InfoWrite("asset-manager", "found asset '%s' at path '%s' "
-                                 "(%zu dependencies)",
-                                 asset.name.c_str(), asset.path.c_str(),
-                                 asset.dependencies.size());
+        log->write("asset-manager", LogType::Info,
+                   "found asset '%s' at path '%s' (%zu dependencies)",
+                   asset.name.c_str(), asset.path.c_str(),
+                   asset.dependencies.size());
     }
     file.resetAsset();
 
@@ -221,6 +226,8 @@ void AssetManager::loadFile(AssetFile& file)
 // TODO: copy the asset data at each load
 std::shared_ptr<AssetObject> AssetManager::getAsset(std::string_view assetName)
 {
+    auto& log = LoggerService::getLogger();
+
     auto asset_it = this->_assets.find(std::string{assetName});
     if (asset_it == this->_assets.end()) {
         throw asset_exception(
@@ -231,9 +238,9 @@ std::shared_ptr<AssetObject> AssetManager::getAsset(std::string_view assetName)
     //    if (!asset_it->second.object) {
     asset_it->second.object = std::make_optional(asset_it->second.loadAssetObject()[0]);
         //    }
-
-    Log::GetLog()->InfoWrite("asset-manager", "getting asset '%s' at path '%s'",
-                             asset_it->second.name.c_str(), asset_it->second.path.c_str());
+    log->write("asset-manager", LogType::Info,
+               "getting asset '%s' at path '%s'",
+               asset_it->second.name.c_str(), asset_it->second.path.c_str());
 
     return asset_it->second.object.value();
 }

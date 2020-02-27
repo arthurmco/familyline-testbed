@@ -3,7 +3,7 @@
 #include <client/graphical/gfx_service.hpp>
 
 #include <client/graphical/shader_manager.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::graphics;
 using namespace familyline::logic;
@@ -32,10 +32,12 @@ TerrainRenderer::TerrainRenderer()
 
 void TerrainRenderer::SetTerrain(Terrain* t)
 {
+    auto& log = LoggerService::getLogger();
+
     _t = t;
 
-    Log::GetLog()->Write("terrain-renderer", "Added terrain with %d sections",
-                         t->GetSectionCount());
+    log->write("terrain-renderer", LogType::Info, "Added terrain with %d sections",
+               t->GetSectionCount());
     
     needs_update = true;
 }
@@ -193,9 +195,11 @@ GLuint TerrainRenderer::CreateVAOFromTerrainData(TerrainVertexData& tvd)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, tvd.indices.size() * sizeof(unsigned int),
                  tvd.indices.data(), GL_STATIC_DRAW);
 
+    auto& log = LoggerService::getLogger();
     err = glGetError();
     if (err != GL_NO_ERROR) {
-        Log::GetLog()->Warning("terrain-renderer", "GL error %#x while creating VAO", err);
+        log->write("terrain-renderer", LogType::Warning,
+                   "GL error %#x while creating VAO", err);
     }
 
     return vao;
@@ -204,6 +208,7 @@ GLuint TerrainRenderer::CreateVAOFromTerrainData(TerrainVertexData& tvd)
 /* Update the terrain VAO with the current rendering information */
 void TerrainRenderer::Update()
 {
+    auto& log = LoggerService::getLogger();
     if (!needs_update) {
         return;
     }
@@ -217,9 +222,11 @@ void TerrainRenderer::Update()
     tdi.vao = vao;
     tdi.secidx = 0;
 
-    Log::GetLog()->Write("terrain-renderer", "Starting terrain texture generation for section 0");
+    log->write("terrain-renderer", LogType::Debug,
+               "Starting terrain texture generation for section 0");
     tdi.texture = this->GenerateTerrainSlotTexture(_t->GetSection(0));
-    Log::GetLog()->Write("terrain-renderer", "Terrain texture for section 0 created");
+    log->write("terrain-renderer", LogType::Debug,
+               "Terrain texture for section 0 created");
 
     this->_tdata.push_back(tdi);
 }
@@ -227,6 +234,7 @@ void TerrainRenderer::Update()
 
 void TerrainRenderer::Render()
 {
+    auto& log = LoggerService::getLogger();
     auto err = glGetError();
 
     glClearColor(0, 0, 0, 0);
@@ -254,7 +262,7 @@ void TerrainRenderer::Render()
 
     err = glGetError();
     if (err != GL_NO_ERROR) {
-        Log::GetLog()->Warning("terrain-renderer", "GL error %#x", err);
+        log->write("terrain-renderer", LogType::Warning, "GL error %#x", err);
     }
 }
 

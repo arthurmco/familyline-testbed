@@ -1,5 +1,4 @@
 #include <common/logic/BuildQueue.hpp>
-#include <common/Log.hpp>
 
 using namespace familyline::logic;
 

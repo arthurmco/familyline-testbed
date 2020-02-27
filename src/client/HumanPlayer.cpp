@@ -1,7 +1,7 @@
 #include <client/HumanPlayer.hpp>
 #include <client/graphical/meshopener/OBJOpener.hpp>
 #include <common/logic/logic_service.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 
 #include <client/input/input_service.hpp>
 
@@ -38,6 +38,7 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
 {
     /* Initialize input subsystems */
 	srand((size_t)name*xp);
+    auto& log = LoggerService::getLogger();
 
     _listener = [&](HumanInputAction hia) {
         if (std::holds_alternative<KeyAction>(hia.type)) {
@@ -165,8 +166,8 @@ HumanPlayer::HumanPlayer(const char* name, int xp, GameActionManager* gam)
 
                         auto path = _pf->CreatePath(*slock.get(), to);
                         glm::vec2 lp = path.back();
-                        Log::GetLog()->InfoWrite("human-player", "moved to %.2fx%.2f",
-                                                 lp.x, lp.y);
+                        log->write("human-player", LogType::Debug,
+                                   "moved to %.2fx%.2f", lp.x, lp.y);
 
                         ObjectPathManager::getInstance()->AddPath(slock.get(), path);
 
@@ -251,6 +252,8 @@ bool HumanPlayer::ProcessInput()
 
 bool HumanPlayer::Play(GameContext* gctx)
 {
+    auto& log = LoggerService::getLogger();
+
     if (exit_game)
         return false;
 
@@ -292,9 +295,9 @@ bool HumanPlayer::Play(GameContext* gctx)
 
 
             // the object will be added to the city
-            Log::GetLog()->InfoWrite("human-player",
-                                     "creating %s at %.3f %.3f %.3f",
-                                     build->getName().c_str(), buildpos.x, buildpos.y, buildpos.z);
+            log->write("human-player", LogType::Debug,
+                       "creating %s at %.3f %.3f %.3f",
+                       build->getName().c_str(), buildpos.x, buildpos.y, buildpos.z);
 
             auto cobjID = gctx->om->add(std::move(build));
 
@@ -310,9 +313,8 @@ bool HumanPlayer::Play(GameContext* gctx)
 
             olm->notifyCreation(cobjID);
 
-            Log::GetLog()->InfoWrite(
-                "human-player",
-                "%s has id %d now", ncobj->getName().c_str(), cobjID);
+            log->write("human-player", LogType::Debug,
+                       "%s has id %d now", ncobj->getName().c_str(), cobjID);
 
         }
     }
@@ -338,7 +340,8 @@ bool HumanPlayer::Play(GameContext* gctx)
             of->getObject("tent", 0, 0, 0));
 
         if (!nobj) {
-            Log::GetLog()->Fatal("human-player", "Type 'tent' has not been found in the object factory!");
+            log->write("human-player", LogType::Fatal,
+                       "Type 'tent' has not been found in the object factory!");
         }
 
         BuildQueue::GetInstance()->Add(nobj);
@@ -351,7 +354,8 @@ bool HumanPlayer::Play(GameContext* gctx)
         auto nobj = std::dynamic_pointer_cast<GameObject>(
             of->getObject("watchtower", 0, 0, 0));
         if (!nobj) {
-            Log::GetLog()->Fatal("human-player", "Type 'watchtower' has not been found in the object factory!");
+            log->write("human-player", LogType::Fatal,
+                       "Type 'watchtower' has not been found in the object factory!");
         }
 
         BuildQueue::GetInstance()->Add(nobj);

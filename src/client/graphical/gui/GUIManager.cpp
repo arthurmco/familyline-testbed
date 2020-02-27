@@ -3,7 +3,7 @@
 
 #include <client/graphical/shader_manager.hpp>
 #include <client/input/input_service.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 #include <variant>
 
 using namespace familyline::graphics;
@@ -43,44 +43,44 @@ GUIManager::GUIManager(int width = 640, int height = 480)
 
     _listener = [&](HumanInputAction hia){
 
-        SignalType signalType = SignalType::Redraw;
-        GUISignal gs;
-        bool ret = false;
+                    SignalType signalType = SignalType::Redraw;
+                    GUISignal gs;
+                    bool ret = false;
 
-        if (std::holds_alternative<MouseAction>(hia.type)) {
-            signalType = SignalType::MouseHover;
+                    if (std::holds_alternative<MouseAction>(hia.type)) {
+                        signalType = SignalType::MouseHover;
 
-            MouseAction ma = std::get<MouseAction>(hia.type);
+                        MouseAction ma = std::get<MouseAction>(hia.type);
 
-            gs.xPos = ma.screenX / this->width;
-            gs.yPos = ma.screenY / this->height;
-            _isFocused = true;
+                        gs.xPos = ma.screenX / this->width;
+                        gs.yPos = ma.screenY / this->height;
+                        _isFocused = true;
 
-			// TODO: only return false when not hovering any object
-            ret = false;
-        } else if (std::holds_alternative<ClickAction>(hia.type)){
-            signalType = SignalType::MouseClick;
+                        // TODO: only return false when not hovering any object
+                        ret = false;
+                    } else if (std::holds_alternative<ClickAction>(hia.type)){
+                        signalType = SignalType::MouseClick;
 
-            ClickAction ca = std::get<ClickAction>(hia.type);
+                        ClickAction ca = std::get<ClickAction>(hia.type);
 
-            gs.xPos = ca.screenX / this->width;
-            gs.yPos = ca.screenY / this->height;
-            gs.mouse.button = ca.buttonCode;
-            gs.mouse.isPressed = ca.isPressed;
+                        gs.xPos = ca.screenX / this->width;
+                        gs.yPos = ca.screenY / this->height;
+                        gs.mouse.button = ca.buttonCode;
+                        gs.mouse.isPressed = ca.isPressed;
            
-			ret = _isFocused;
+                        ret = _isFocused;
 
-        } else {
-            return false;
-        }
+                    } else {
+                        return false;
+                    }
 
-        gs.from = nullptr;
-        gs.to = this;
-        gs.signal = signalType;
-        this->processSignal(gs);
+                    gs.from = nullptr;
+                    gs.to = this;
+                    gs.signal = signalType;
+                    this->processSignal(gs);
 
-        return ret;
-    };
+                    return ret;
+                };
 
     input::InputService::getInputManager()->addListenerHandler(_listener, 15);
 
@@ -315,6 +315,7 @@ GUICanvas GUIManager::doRender(int absw, int absh) const
  */
 void GUIManager::renderToScreen()
 {
+    auto& log = LoggerService::getLogger();
 
     // Make the GUI texture transparent
     glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -355,7 +356,7 @@ void GUIManager::renderToScreen()
 
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
-        Log::GetLog()->Fatal("gui-renderer", "OpenGL error %#x", err);
+        log->write("gui-renderer", LogType::Error, "OpenGL error %#x", err);
     }
 
     glBindVertexArray(0);

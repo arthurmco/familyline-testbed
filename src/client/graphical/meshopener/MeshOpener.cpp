@@ -1,5 +1,5 @@
 #include <client/graphical/meshopener/MeshOpener.hpp>
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 #include <stdexcept>
 
 using namespace familyline::graphics;
@@ -13,27 +13,30 @@ std::unordered_map<std::string /* extension */,
 /* Register the extension into the main class */
 void MeshOpener::RegisterExtension(const char* extension, MeshOpener* opener)
 {
+    auto& log = LoggerService::getLogger();
     if (MeshOpener::openers[std::string{extension}].ref == 0) {
         MeshOpener::openers[std::string{extension}].m = opener;
     }
     
     MeshOpener::openers[std::string{extension}].ref++;
-    Log::GetLog()->Write("meshopener", "registered mesh opener for the .%s extension",
-                         extension);
+    log->write("meshopener", LogType::Debug,
+               "registered mesh opener for the .%s extension",
+               extension);
 }
 
 
 /* Unregister the extension into the main class */
 void MeshOpener::UnregisterExtension(const char* extension)
 {
+    auto& log = LoggerService::getLogger();
     MeshOpener::openers[std::string{extension}].ref--;
 
     if (MeshOpener::openers[std::string{extension}].ref == 0)
         MeshOpener::openers.erase(std::string{extension});
 
-    Log::GetLog()->Write("meshopener", "unregistered mesh opener for the .%s extension",
-                         extension);
-
+    log->write("meshopener", LogType::Debug,
+               "unregistered mesh opener for the .%s extension",
+               extension);
 }
 
 

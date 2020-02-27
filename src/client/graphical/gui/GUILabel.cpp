@@ -1,6 +1,5 @@
 #include <client/graphical/gui/GUILabel.hpp>
 #include <cstring> // for strcmp
-#include <common/Log.hpp>
 
 using namespace familyline::graphics::gui;
 

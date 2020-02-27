@@ -5,7 +5,6 @@
 #include <common/logic/object_manager.hpp>
 #include <common/logic/game_event.hpp>
 #include <common/logic/Player.hpp>
-#include <common/Log.hpp>
 
 using namespace familyline;
 using namespace familyline::logic;

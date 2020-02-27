@@ -3,7 +3,7 @@
 #include <cstring>
 #include <algorithm>
 
-#include <common/Log.hpp>
+#include <common/logger.hpp>
 #include <client/graphical/material_manager.hpp>
 #include <client/graphical/static_animator.hpp>
 
@@ -67,6 +67,7 @@ struct VertexGroup {
 
 std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 {
+    auto& log = LoggerService::getLogger();
 
     /* The vertices, normals and texcoords of the file
      *
@@ -97,7 +98,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
     VertexList* current_vert = &current_group->vertices.back();
 
     char* line = new char[256];
-    printf("<<<< %s >>>>\n", file);
+
     while (!feof(fObj)) {
         auto l = fgets(line, 255, fObj);
         if (!l) {
@@ -191,7 +192,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
             current_group->vertices.push_back(VertexList{});
             current_vert = &current_group->vertices.back();
 
-            Log::GetLog()->InfoWrite("obj-opener", "found group '%s'", gname);
+            log->write("meshopener::obj", LogType::Debug, "found group '%s'", gname);
 
             continue;
         }
@@ -201,9 +202,10 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
         
             if (!strncmp(l, "usemtl", 6)) {
                 char* mtlname = strdup(&l[7]);
-        
-                Log::GetLog()->InfoWrite("obj-opener", "group %s: found material '%s'",
-                                         current_group->name, mtlname);
+
+                log->write("meshopener::obj", LogType::Debug,
+                         "group %s: found material '%s'",
+                         current_group->name, mtlname);
                 // switch vertex list       
                 current_group->vertices.push_back(VertexList{});
                 current_vert = &current_group->vertices.back();
@@ -270,10 +272,10 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
     // Ensure that every index references an unique combination of vertex, normal and texcoords
     for (const auto& vg : verts) {
         if (!vg.hasNormal && !vg.hasTexture) continue; // No normal and no texture? Unsupported
-
-        Log::GetLog()->Write("obj-opener", "mesh %s, %zu vertex lists, normals=%s, textures=%s",
-                             vg.name, vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
-                             (vg.hasTexture ? "true" : "false"));
+        log->write("meshopener::obj", LogType::Debug,
+                 "mesh %s, %zu vertex lists, normals=%s, textures=%s",
+                 vg.name, vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
+                 (vg.hasTexture ? "true" : "false"));
 
         VertexDataGroup vdlist;
         std::vector<VertexInfo> vinfo;
@@ -289,7 +291,8 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
             index_list.reserve(vl.indices.size());
 
             unsigned uvidx = 0;
-            Log::GetLog()->Write("obj-opener", "\tvertex list %u, %zu edges", idx, vl.indices.size());
+            log->write("meshopener::obj", LogType::Debug,
+                     "\tvertex list %u, %zu edges", idx, vl.indices.size());
 
             /* The obj file creates a index unique for each normal, vertex or texcoords.
              *
@@ -324,10 +327,9 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
                 }
             }
 
-            Log::GetLog()->InfoWrite("obj-opener",
-                                     "%zu unique vert/texcoord/normal combinations detected, "
-                                     "%zu indices\n",
-                                     uvs.size(), index_list.size());
+            log->write("meshopener::obj", LogType::Debug,
+                     "%zu unique vert/texcoord/normal combinations detected, %zu indices\n",
+                     uvs.size(), index_list.size());
 
             // Build the vertex data
             VertexData vdata;
@@ -369,13 +371,16 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
                 mtl = nullptr;
             
             } else {
-                Log::GetLog()->Warning("obj-opener", "cannot load material %s for %s",
-                                       vl.mtlname, vg.name);
+                log->write("meshopener::obj", LogType::Warning,
+                         "cannot load material %s for %s",
+                         vl.mtlname, vg.name);
 
                 VertexInfo vi(idx, -1, fshader, VertexRenderStyle::Triangles);
                 vi.hasTexCoords = vg.hasTexture;
                 vinfo.push_back(vi);
-                Log::GetLog()->Warning("obj-opener", "\ta default material is being used");
+
+                log->write("meshopener::obj", LogType::Warning,
+                         "\ta default material is being used");
 
             }
 
