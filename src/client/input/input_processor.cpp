@@ -1,12 +1,13 @@
 #include <client/input/input_processor.hpp>
 #include <chrono>
 #include <SDL2/SDL.h>
+#include <common/logger.hpp>
 
 using namespace familyline::input;
 
 void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
-{
-	
+{	
+    auto& log = LoggerService::getLogger();
 	auto duration = std::chrono::system_clock::now().time_since_epoch();
 	uint64_t millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
@@ -19,7 +20,6 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
 
 	case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP: {
-		puts("click");
 		bool isPressed = (e.button.state == SDL_PRESSED);
 		_actions.push({ millis, ClickAction{e.motion.x, e.motion.y, e.button.button,
 										   e.button.clicks, isPressed} });
@@ -49,7 +49,7 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
 					break;
 
 	case SDL_QUIT:
-		fprintf(stderr, "event: GameExit\n");
+        LOGDEBUG(log, "input-processor", "event: GameExit %d", 0);
 		_actions.push({ millis, GameExit{0} });
 		_isRunning = false;
 		break;
@@ -114,14 +114,16 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
 			break;
 		}
 
-
-		fprintf(stderr, "SDL_WindowEvent: %s (id %08x), event %08x, data %08x,%08x\n",
-			winevent, e.window.windowID, e.window.event,
-			e.window.data1, e.window.data2);
+        LOGDEBUG(log, "input-processor",
+                 "SDL_WindowEvent: %s (id %08x), event %08x, data %08x,%08x",
+                 winevent, e.window.windowID, e.window.event,
+                 e.window.data1, e.window.data2);
 
 		break;
 	default:
-		fprintf(stderr, "unknown event id %08x\n", e.type);
+
+        LOGDEBUG(log, "input-processor",
+                 "unknown event id %08x", e.type);
 	}
 
 }
