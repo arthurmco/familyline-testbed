@@ -14,6 +14,7 @@ enum ShaderType {
 #include <utility>
 #include <unordered_map>
 
+#include <string>
 #include <string_view>
 
 namespace familyline::graphics {

@@ -32,7 +32,7 @@ static const float window_texture_coord[][2] =
   {-1, 1}, {1, 1}, {1, -1} };
 
 
-GUIManager::GUIManager(int width = 640, int height = 480)
+GUIManager::GUIManager(int width, int height)
 {
     x = 0;
     y = 0;
