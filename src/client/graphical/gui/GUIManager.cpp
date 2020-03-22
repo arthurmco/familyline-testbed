@@ -2,6 +2,7 @@
 #include <algorithm> // for remove_if
 
 #include <client/graphical/shader_manager.hpp>
+#include <client/graphical/exceptions.hpp>
 #include <client/input/input_service.hpp>
 #include <common/logger.hpp>
 #include <variant>
@@ -14,11 +15,11 @@ using namespace familyline::input;
    It's a big rectangle, that fills the entire screen  */
 static const float window_pos_coord[][3] =
 {
-    {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1},
-    {-1, 1, 1}, {1, 1, 1}, {1, -1, 1}
+   {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1},
+   {-1, 1, 1}, {1, 1, 1}, {1, -1, 1}
 
-    // {-1, -1, 1}, { 1, -1, 1}, { 1, 1, 1},
-    // {-1, -1, 1}, {-1,  1, 1}, { 1, 1, 1}
+   //  {-1, -1, 1}, { 1, -1, 1}, { 1, 1, 1},
+   //  {-1, -1, 1}, {-1,  1, 1}, { 1, 1, 1}
 };
 
 /* Coordinates for every panel texture.
@@ -148,6 +149,14 @@ void GUIManager::initShaders(Window* w)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     glBindTexture(GL_TEXTURE_2D, 0);
+	
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+	char e[128];
+	snprintf(e, 127, "error %#x while setting texture for GUI content",
+		err);
+	throw graphical_exception(std::string(e));
+    }
 }
 
 

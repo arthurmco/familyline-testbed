@@ -8,6 +8,7 @@ Framebuffer::Framebuffer(std::string_view name, int width, int height)
 	: _name(name)
 {
     auto& log = LoggerService::getLogger();
+	glGetError();
 
 	glGenFramebuffers(1, &_handle);
 	glBindFramebuffer(GL_FRAMEBUFFER, _handle);
@@ -24,13 +25,20 @@ Framebuffer::Framebuffer(std::string_view name, int width, int height)
 
 	this->setupTexture(width, height);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureHandle, 0);
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR) {
+		char e[128];
+		snprintf(e, 127, "error %#x while setting texture for framebuffer %s",
+			err, name.data());
+		throw graphical_exception(std::string(e));
+	}
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		log->write("fb", LogType::Warning,
                    "framebuffer %s (%#x) is not complete", name.data(), _handle); // should be error
 	}
 
-	GLenum err = glGetError();
+	err = glGetError();
 	if (err != GL_NO_ERROR) {
 		char e[128];
 		snprintf(e, 127, "error %#x while creating framebuffer %s",
@@ -52,8 +60,22 @@ void Framebuffer::setupTexture(int width, int height)
 {
 	glGenTextures(1, &_textureHandle);
 	glBindTexture(GL_TEXTURE_2D, _textureHandle);
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR) {
+		char e[128];
+		snprintf(e, 127, "error %#x while creating or binding framebuffer texture",
+			err);
+		throw graphical_exception(std::string(e));
+	}
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	err = glGetError();
+	if (err != GL_NO_ERROR) {
+		char e[128];
+		snprintf(e, 127, "error %#x while setting up framebuffer texture",
+			err);
+		throw graphical_exception(std::string(e));
+	}
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

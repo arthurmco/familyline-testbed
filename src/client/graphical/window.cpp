@@ -20,6 +20,9 @@ GLWindow::GLWindow(GLDevice* dev, int width, int height)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
+	// Needed to run in macOS
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
 	auto fflags = 0;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &fflags);
 	fflags |= SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
