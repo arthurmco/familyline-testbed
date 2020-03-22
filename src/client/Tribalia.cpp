@@ -280,11 +280,14 @@ static int show_starting_menu()
         log->write("", LogType::Info,
                    "Device vendor: %s ", defaultdev->getVendor().data());
 
-		Framebuffer f3D = Framebuffer("f3D", winW, winH);
-		Framebuffer fGUI = Framebuffer("fGUI", winW, winH);
+        int fwidth, fheight;
+        win->getFramebufferSize(fwidth, fheight);
+
+		Framebuffer f3D = Framebuffer("f3D", fwidth, fheight);
+		Framebuffer fGUI = Framebuffer("fGUI", fwidth, fheight);
 		win->setFramebuffers(&f3D, &fGUI);
 
-        guir = new GUIManager{winW, winH};
+        guir = new GUIManager{fwidth, fheight};
         guir->initShaders(win);
 
         double b = SDL_GetTicks();

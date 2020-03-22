@@ -34,7 +34,7 @@ GLWindow::GLWindow(GLDevice* dev, int width, int height)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, fflags);
 	_win = SDL_CreateWindow("Familyline",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+		SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI);
 
 	if (!_win) {
 		auto err = std::string("OpenGL context creation error: ");
@@ -51,12 +51,27 @@ void GLWindow::getSize(int& width, int& height)
     height = _height;
 }
 
+
+/* Get the window framebuffer size
+ *
+ * This value can differ from the window size if the
+ * OS do some sort of dpi scaling
+ *
+ * macOS is one example
+ */
+void GLWindow::getFramebufferSize(int& width, int& height)
+{
+    width = _fwidth;
+    height = _fheight;
+}
+
+
 void GLWindow::show()
 {
 
 	/* Create the context */
 	_glctxt = SDL_GL_CreateContext(_win);
-
+    
 	if (_glctxt == NULL) {
 		auto err = std::string("OpenGL context creation error: ");
 		err.append(SDL_GetError());
@@ -82,6 +97,9 @@ void GLWindow::show()
 		throw renderer_exception(err, glewStatus);
 	}
 
+    SDL_GL_GetDrawableSize(_win, &_fwidth, &_fheight);
+    printf("apparent window size is %d x %d\n", _fwidth, _fheight);
+    
 	this->createWindowSquare();
 	SDL_ShowWindow(_win);
 }
@@ -133,8 +151,8 @@ void GLWindow::setFramebuffers(Framebuffer* f3D, Framebuffer* fGUI)
 
 void GLWindow::update()
 {
-	glClearColor(0, 0, 0, 1.0);
-	glViewport(0, 0, _width, _height);
+	glClearColor(0, 1.0, 0, 1.0);
+	glViewport(0, 0, _fwidth, _fheight);
 
 	glDisable(GL_DEPTH_TEST);
 	GFXService::getShaderManager()->use(*winShader);
