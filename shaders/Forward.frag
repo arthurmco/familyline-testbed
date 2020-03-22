@@ -3,7 +3,8 @@
 uniform vec3 color;
 
 in vec3 norm_Model;
-in vec3 norm_Camera;
+//in vec3 norm_Camera;
+
 in vec2 tex_coords;
 
 uniform vec3 diffuse_color;

@@ -10,7 +10,7 @@ out vec3 norm_out;
 out vec2 tex_coords;
 
 out vec3 norm_Model;
-out vec3 norm_Camera;
+//out vec3 norm_Camera;
 
 uniform int lightCount;
 struct LightInfo {
@@ -46,6 +46,6 @@ void main() {
   norm_Model = (mWorld * vec4(normal, 0.0)).xyz;
   vec3 normal_Camera = (mView * mWorld * vec4(normal, 0.0)).xyz;
 
-  norm_Camera = normal_Camera;
+  //norm_Camera = normal_Camera;
   tex_coords = texcoord;
 }
