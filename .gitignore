@@ -18,7 +18,11 @@ EnviroDefs.h
 
 #CMake generated files
 CMakeCache.txt
+
 CMakeFiles/*
+src/*/CMakeFiles/*
+
+
 cmake_install.cmake
 Makefile
 src/config.h

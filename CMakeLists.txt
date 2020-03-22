@@ -31,8 +31,9 @@ find_package(DevIL REQUIRED)
 find_package(Yaml REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(fmt CONFIG REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
 
-include_directories(AFTER ${GLEW_INCLUDE_DIR} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
+include_directories(AFTER ${GLEW_INCLUDE_DIRS} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
 target_include_directories(familyline PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
 target_link_libraries(familyline ${OPENGL_LIBRARIES})
@@ -43,7 +44,6 @@ if (MSVC)
   include(${CMAKE_TOOLCHAIN_FILE})
 
   # Set include directories
-  find_package(SDL2 CONFIG REQUIRED)
   find_package(GLM CONFIG REQUIRED)
   find_package(unofficial-cairo CONFIG REQUIRED)
  
@@ -79,8 +79,6 @@ else()
 	
   find_package(PkgConfig REQUIRED)
   find_package(Threads REQUIRED)
-  pkg_search_module(GLEW REQUIRED glew) # finds glew
-  pkg_search_module(SDL2 REQUIRED sdl2) # finds sdl
   pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
   pkg_search_module(GLM REQUIRED glm) # finds glm
   
@@ -101,7 +99,7 @@ else()
   endif(TARGET fmt::fmt)
   
   target_link_libraries(familyline ${SDL2_LIBRARIES})
-  target_link_libraries(familyline ${GLEW_LIBRARIES})
+  target_link_libraries(familyline GLEW::GLEW)
   target_link_libraries(familyline ${IL_LIBRARIES})
   target_link_libraries(familyline ${ILU_LIBRARIES})
   target_link_libraries(familyline ${CAIRO_LIBRARIES})
@@ -110,7 +108,7 @@ else()
   
   if(DO_TESTS)
   	target_link_libraries(familyline-tests ${SDL2_LIBRARIES})
-  	target_link_libraries(familyline-tests ${GLEW_LIBRARIES})
+  	target_link_libraries(familyline-tests GLEW::GLEW)
   	target_link_libraries(familyline-tests ${IL_LIBRARIES})
   	target_link_libraries(familyline-tests ${ILU_LIBRARIES})
   	target_link_libraries(familyline-tests ${CAIRO_LIBRARIES})

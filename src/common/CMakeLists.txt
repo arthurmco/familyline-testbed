@@ -36,13 +36,22 @@ add_library(
   )
 
  
+find_package(fmt CONFIG REQUIRED)
 
 if (MSVC)
 	
   include(${CMAKE_TOOLCHAIN_FILE})
-  find_package(fmt CONFIG REQUIRED)
+  find_package(GLM CONFIG REQUIRED)
   target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
-  target_link_libraries(familyline-common PUBLIC fmt::fmt fmt::fmt-header-only)
+  target_link_libraries(familyline-common PUBLIC fmt::fmt fmt::fmt-header-only glm)
+
+
+else()
+  find_package(PkgConfig REQUIRED)
+  pkg_search_module(GLM REQUIRED glm) # finds glm
+  target_link_libraries(familyline-common PUBLIC fmt::fmt fmt::fmt-header-only ${GLM_LIBRARIES})
+  target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS})
+
 
 endif(MSVC)
 
