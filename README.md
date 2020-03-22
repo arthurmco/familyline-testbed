@@ -83,6 +83,18 @@ variables key
 
 Then, cmake it
 
+
+### Fruits
+
+Follow the same steps as the penguins one, because penguins and fruits are made
+by the same God, the God of UNIX compatibility
+
+However, there are some differences:
+
+ - You may want to install your dependencies with homebrew
+ - Xcode is needed, because the OpenGL headers come with it.  
+   (yes, we still use it, but Vulkan support is coming :wink:)
+
 ### Build
 
 To build the game, type `make familyline` to compile the game, `make
