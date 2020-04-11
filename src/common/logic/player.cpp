@@ -1,6 +1,8 @@
 #include <common/logic/player.hpp>
+#include <common/logic/player_manager.hpp>
 
 using namespace familyline::logic;
+
 
 void Player::pushToBuildQueue(std::string type)
 {
@@ -21,6 +23,10 @@ void Player::buildNext()
     // TODO: create an action to build the one that is on the top of the stack
 }
 
+
+void Player::pushAction(PlayerInputType type) {
+    this->pm_.pushAction(this->code_, type);
+}
 
 /**
  * Process the player input actions

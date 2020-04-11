@@ -359,17 +359,16 @@ bool Game::RunInput()
 
     gctx.elapsed_seconds = INPUT_DELTA/1000.0;
 
+    pm->generateInput();
     gr->update();
 
-    pm->run(gctx.tick);
-
-    return true;
-    // return !pm->exitRequested()
+    return !pm->exitRequested();
 }
 
 
 void Game::RunLogic()
 {
+    pm->run(gctx.tick);
     olm->update();
 
     LogicService::getObjectListener()->updateObjects();
@@ -429,7 +428,7 @@ void Game::RunGraphical()
 void Game::ShowDebugInfo()
 {
     GameObject* selected = nullptr; //hp->GetSelectedObject();
-
+    
     if (BuildQueue::GetInstance()->getNext()) {
         char s[256];
         sprintf(s, "Click to build %s",

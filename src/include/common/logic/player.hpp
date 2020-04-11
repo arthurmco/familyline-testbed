@@ -14,20 +14,21 @@
 #include <functional>
 
 #include <common/logic/game_object.hpp>
+#include <common/logic/player_actions.hpp>
 
 /// TODO: make the player manager handle the player actions, not the
 /// input manager
 
 namespace familyline::logic {
 
-    class PlayerManager;
+    class PlayerManager;    
 
     struct GameContext {
         void* om = nullptr;
         int tick = 0;
         double elapsed_seconds = 0;
     };
-    
+
     /// TODO: add player input actions for pushing and popping entity
 /// action state, and to add and remove an action to said state
 
@@ -86,7 +87,7 @@ namespace familyline::logic {
         std::string name_;
         int code_;
         PlayerManager& pm_;
-        
+
         /**
          * The build queue
          *
@@ -106,21 +107,24 @@ namespace familyline::logic {
          *
          * They are individual for each player
          *
-         * It is a stack of hashmaps. The stack is for easing pushing/popping 
+         * It is a stack of hashmaps. The stack is for easing pushing/popping
          * states, and the hashmap is to map grid position to actions
          *
          * The actions are drawn in the interface a grid, so this is good for knowing the
          * position
          */
         std::stack<std::map<int, EntityAction>> entity_actions_;
-    
+
     protected:
         void pushToBuildQueue(std::string type);
         void clearBuildQueue();
         /**
          * Builds the next available object in the build queue
          */
-        void buildNext();    
+        void buildNext();
+
+        void pushAction(PlayerInputType type);
+        
     public:
         Player(PlayerManager& pm, const char* name, int code)
             : pm_(pm), name_(name), code_(code)
@@ -135,6 +139,12 @@ namespace familyline::logic {
 
 
         /**
+         * Does this player requested game exit?
+         */
+        virtual bool exitRequested() { return false; }
+        
+        
+        /**
          * Process the player input actions
          *
          * They might do things like moving a unit, or attacking someone,
@@ -148,5 +158,5 @@ namespace familyline::logic {
     };
 
 
-    
+
 }

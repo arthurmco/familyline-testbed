@@ -48,7 +48,7 @@ namespace familyline::input {
 
         std::vector<HandlerOrder<HumanListenerHandler>> _human_input_fns;
 
-        std::queue<PlayerInputAction> _input_actions;
+        std::queue<familyline::logic::PlayerInputAction> _input_actions;
 
     public:
         InputManager(InputProcessor& ip);

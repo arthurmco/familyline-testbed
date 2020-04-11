@@ -41,6 +41,7 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
     auto& log = LoggerService::getLogger();
 
     _listener = [&](HumanInputAction hia) {
+        
         if (std::holds_alternative<KeyAction>(hia.type)) {
             auto event = std::get<KeyAction>(hia.type);
 
@@ -236,9 +237,34 @@ void HumanPlayer::SetGameActionManager(familyline::logic::GameActionManager* gam
  */
 void HumanPlayer::generateInput()
 {
+    double camera_speed = 0.1;
+    double zoom_speed = 0.1;
+
     
+    if (front) {
+        this->pushAction(CameraMove{0, camera_speed, 0});
+    }
+    if (back) {
+        this->pushAction(CameraMove{0, -camera_speed, 0});
+    }
+    if (left) {
+        this->pushAction(CameraMove{-camera_speed, 0, 0});
+    }
+    if (right) {
+        this->pushAction(CameraMove{-camera_speed, 0, 0});
+    }
+
+
 }
 
+
+/**
+ * Does this player requested game exit?
+ */
+bool HumanPlayer::exitRequested()
+{
+    return exit_game;
+}
 
 GameObject* HumanPlayer::GetSelectedObject()
 {

@@ -39,6 +39,8 @@ namespace familyline::logic {
         std::vector<PlayerHandlerInfo> player_input_listeners_;
 
         unsigned int _tick = 0;
+
+        void processAction(const PlayerInputAction& a);
         
     public:
         /**
@@ -60,6 +62,18 @@ namespace familyline::logic {
          */
         int addListener(PlayerListenerHandler h);
 
+        /**
+         * Generate input from all players
+         */
+        void generateInput();
+
+        /**
+         * Exit was requested by some player
+         *
+         * This can only be requested by the human player.
+         */
+        bool exitRequested();
+        
         /**
          * Run the input handlers and pop the event from the input action
          * queue

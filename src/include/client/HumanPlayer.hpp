@@ -62,7 +62,10 @@ public:
      */
     virtual void generateInput();
 
-
+    /**
+     * Does this player requested game exit?
+     */
+    virtual bool exitRequested();
 	
     void SetCamera(familyline::graphics::Camera*);
 	void SetPicker(familyline::input::InputPicker* ip);
