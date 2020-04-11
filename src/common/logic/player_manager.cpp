@@ -10,7 +10,7 @@ using namespace familyline::logic;
  */
 int PlayerManager::add(std::unique_ptr<Player> p)
 {
-    auto& pi = players_.emplace_back((uintptr_t)p.get() / ((uintptr_t)players_.size()*16384),
+    auto& pi = players_.emplace_back((uintptr_t)p.get() / 1+(((uintptr_t)players_.size()*16384)),
                                      std::move(p));
     return pi.id;
 }
@@ -44,6 +44,7 @@ int PlayerManager::addListener(PlayerListenerHandler h)
     phi.handler = h;
 
     player_input_listeners_.push_back(phi);
+    return phi.id;
 }
 
 /**

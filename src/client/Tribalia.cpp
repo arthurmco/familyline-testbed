@@ -121,7 +121,6 @@ static int check_size(int i, int argc, char const* argv[])
 
 Net::Server* nserver = nullptr;
 PlayerManager* pm = nullptr;
-std::unique_ptr<HumanPlayer> hp;
 
 int main(int argc, char const *argv[])
 {
@@ -297,6 +296,7 @@ static int show_starting_menu()
                        "Network game detected, going direct to it");
 
             //      guir->InitInput();
+            std::unique_ptr<HumanPlayer> hp;
             auto g = Game(win, &f3D, &fGUI, guir, pm, std::move(hp));
             g.RunLoop();
             if (pm)
@@ -344,9 +344,7 @@ static int show_starting_menu()
                                   if (!pm)
                                       pm = new PlayerManager();
 
-                                  if (!hp)
-                                      hp = std::make_unique<HumanPlayer>(*pm, "Arthur", 0);
-
+                                  std::unique_ptr<HumanPlayer> hp = std::make_unique<HumanPlayer>(*pm, "Arthur", 0);
 
                                   auto g = Game(win, &f3D, &fGUI, guir, pm, std::move(hp));
                                   auto ret = g.RunLoop();

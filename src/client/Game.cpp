@@ -33,7 +33,7 @@ public:
 
 Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
            GUIManager* gr, PlayerManager* pm, std::unique_ptr<HumanPlayer> hp)
-    : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm), hp(std::move(hp))
+    : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm)
 {
     //    DebugPlotter::Init();
     auto& log = LoggerService::getLogger();
@@ -79,9 +79,6 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         //      scenernd->SetCamera(cam);
         hp->SetCamera(cam);
 
-        std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());
-        pm->add(std::move(humanp));
-
 //      rndr->SetSceneManager(scenernd);
 
 //      am->Create();
@@ -116,6 +113,9 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         hp->SetPathfinder(pathf);
 
         widgets.lblVersion = new GUILabel(10, 10, "Familyline " VERSION " commit " COMMIT);
+
+        std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());
+        pm->add(std::move(humanp));
 
         gr->add(widgets.lblVersion);
 
@@ -363,8 +363,8 @@ bool Game::RunInput()
 
     pm->run(gctx.tick);
 
-    return false;
-    // return pm->exitRequested()
+    return true;
+    // return !pm->exitRequested()
 }
 
 
@@ -428,7 +428,7 @@ void Game::RunGraphical()
  */
 void Game::ShowDebugInfo()
 {
-    GameObject* selected = hp->GetSelectedObject();
+    GameObject* selected = nullptr; //hp->GetSelectedObject();
 
     if (BuildQueue::GetInstance()->getNext()) {
         char s[256];

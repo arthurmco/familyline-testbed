@@ -63,7 +63,7 @@ namespace familyline {
         logic::PlayerManager* pm = nullptr;
         logic::ObjectManager* om = nullptr;
         
-        std::unique_ptr<HumanPlayer> hp = nullptr;
+//        std::unique_ptr<HumanPlayer> hp;
         logic::Terrain* terr = nullptr;
         logic::TerrainFile* terrFile;
     
