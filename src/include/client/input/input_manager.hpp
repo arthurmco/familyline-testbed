@@ -7,6 +7,7 @@
  */
 
 #include "input_processor.hpp"
+#include <common/logic/player_actions.hpp>
 
 #include <functional>
 #include <vector>
@@ -15,7 +16,7 @@
 namespace familyline::input {
 
     using HumanListenerHandler = std::function<bool(HumanInputAction)>;
-    using PlayerListenerHandler = std::function<bool(PlayerInputAction)>;
+    using PlayerListenerHandler = std::function<bool(familyline::logic::PlayerInputAction)>;
 
 
 	using listener_handler_t = int;
@@ -46,7 +47,6 @@ namespace familyline::input {
         unsigned _tick = 0;
 
         std::vector<HandlerOrder<HumanListenerHandler>> _human_input_fns;
-        std::vector<HandlerOrder<PlayerListenerHandler>> _player_input_fns;
 
         std::queue<PlayerInputAction> _input_actions;
 
@@ -64,15 +64,9 @@ namespace familyline::input {
 
 
         /**
-         * Enqueue a player input
-         */
-        void queuePlayerInput(PlayerInputType type, int playerCode);
-
-        /**
          * Adds a listener handler, returns an ID
          */
         listener_handler_t addListenerHandler(HumanListenerHandler h, int zorder=0);
-        listener_handler_t addListenerHandler(PlayerListenerHandler h, int zorder=0);
 
 
         void removeListenerHandler(listener_handler_t);

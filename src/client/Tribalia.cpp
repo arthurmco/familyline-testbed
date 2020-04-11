@@ -121,7 +121,7 @@ static int check_size(int i, int argc, char const* argv[])
 
 Net::Server* nserver = nullptr;
 PlayerManager* pm = nullptr;
-HumanPlayer* hp = nullptr;
+std::unique_ptr<HumanPlayer> hp;
 
 int main(int argc, char const *argv[])
 {
@@ -297,11 +297,10 @@ static int show_starting_menu()
                        "Network game detected, going direct to it");
 
             //      guir->InitInput();
-            auto g = Game(win, &f3D, &fGUI, guir, pm, hp);
+            auto g = Game(win, &f3D, &fGUI, guir, pm, std::move(hp));
             g.RunLoop();
             if (pm)
                 delete pm;
-            delete hp;
         }
         log->write("texture", LogType::Info,
                    "maximum tex size: %zu x %zu", Texture::GetMaximumSize(),
@@ -346,13 +345,12 @@ static int show_starting_menu()
                                       pm = new PlayerManager();
 
                                   if (!hp)
-                                      hp = new HumanPlayer{ "Arthur", 0 };
+                                      hp = std::make_unique<HumanPlayer>(*pm, "Arthur", 0);
 
 
-                                  auto g = Game(win, &f3D, &fGUI, guir, pm, hp);
+                                  auto g = Game(win, &f3D, &fGUI, guir, pm, std::move(hp));
                                   auto ret = g.RunLoop();
                                   delete pm;
-                                  delete hp;
                                   delete win;
                                   exit(ret);
                               };

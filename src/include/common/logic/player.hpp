@@ -1,0 +1,152 @@
+#pragma once
+
+/**
+ * Base player class, from whom all players will inherit from
+ *
+ * (C) 2020 Arthur Mendes
+ */
+
+#include <string_view>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <map>
+#include <functional>
+
+#include <common/logic/game_object.hpp>
+
+/// TODO: make the player manager handle the player actions, not the
+/// input manager
+
+namespace familyline::logic {
+
+    class PlayerManager;
+
+    struct GameContext {
+        void* om = nullptr;
+        int tick = 0;
+        double elapsed_seconds = 0;
+    };
+    
+    /// TODO: add player input actions for pushing and popping entity
+/// action state, and to add and remove an action to said state
+
+    enum EntityActionMethod {
+        Click,
+        Activate
+    };
+
+/**
+ * The entity action handler
+ *
+ * Returns a bool if the action was run, false if it was not
+ *
+ * Passes the originating game object, and a bool to signify if the
+ * action is being activated or deactivated. If it is a click action
+ * this value is always true
+ */
+    using EntityActionHandler = std::function<bool(GameObject&, bool)>;
+
+/**
+ * An entity action is anything that a game object makes the player
+ * able to do
+ *
+ * They usually appear in the action bar (the one with a lot of
+ * buttons with icons).
+ *
+ * They can have a name, a description, an icon, a key combination
+ * (as a string, that will be parsed) and a handler
+ *
+ * They also have the execution method: click and activate (the action
+ * can be set on/off, like a switch). They also can be enabled or not.
+ *
+ * When the user strikes the key combination, or clicks on the icon,
+ * the handler will run
+ */
+    struct EntityAction {
+        std::string name, description, iconpath, keycombo;
+
+        EntityActionMethod eact_method;
+        bool enabled;
+
+        EntityActionHandler handler;
+    };
+
+
+/**
+ * The player class
+ *
+ * Handles the player actions
+ *
+ * To implement a player type, you might want to inherit this, but the only
+ * methods you will need to implement are the input generation methods
+ */
+    class Player {
+    private:
+        std::string name_;
+        int code_;
+        PlayerManager& pm_;
+        
+        /**
+         * The build queue
+         *
+         * Holds the buildings that the player told the game to build
+         * Units that are trained are not handled by this.
+         *
+         * TODO: check if is possible to treat building creation as a special
+         * type of action
+         *
+         * The strings it holds are the type names of the buildings
+         * the user wants to build
+         */
+        std::queue<std::string> build_queue_;
+
+        /**
+         * The entity action states
+         *
+         * They are individual for each player
+         *
+         * It is a stack of hashmaps. The stack is for easing pushing/popping 
+         * states, and the hashmap is to map grid position to actions
+         *
+         * The actions are drawn in the interface a grid, so this is good for knowing the
+         * position
+         */
+        std::stack<std::map<int, EntityAction>> entity_actions_;
+    
+    protected:
+        void pushToBuildQueue(std::string type);
+        void clearBuildQueue();
+        /**
+         * Builds the next available object in the build queue
+         */
+        void buildNext();    
+    public:
+        Player(PlayerManager& pm, const char* name, int code)
+            : pm_(pm), name_(name), code_(code)
+            {}
+
+        /**
+         * Generate the input actions.
+         *
+         * They must be pushed to the input manager
+         */
+        virtual void generateInput() = 0;
+
+
+        /**
+         * Process the player input actions
+         *
+         * They might do things like moving a unit, or attacking someone,
+         * or running some action
+         *
+         * They will receive data from the input manager.
+         */
+        void processActions();
+
+        std::string_view getName() { return this->name_; }
+    };
+
+
+    
+}

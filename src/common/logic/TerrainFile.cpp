@@ -66,8 +66,7 @@ Terrain* TerrainFile::GetTerrain(int index)
 	/** TODO: this function only reads index 0, fix that */
 	/* Read the terrain contents for the specified index*/
 	size_t tdh_area = tdh.width*tdh.height;
-    log->write("terrain-file", LogType::Info, "%s is a %ux%u terrain",
-               "loading %.3f MB of data for slots",
+    log->write("terrain-file", LogType::Info, "loading %.3f MB of data for slots",
                (tdh_area*4) / 1048576.0);
 
 	TerrainSlot* slots = new TerrainSlot[tdh_area];

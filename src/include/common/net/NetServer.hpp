@@ -81,7 +81,8 @@ namespace familyline::Net {
 	 * 
 	 * @param playername The local player name
 	 */
-	NetPlayerManager* GetPlayerManager(const char* playername);
+
+        logic::PlayerManager* GetPlayerManager(const char* playername);
 
 	/**
 	 * Notify to the server that you're ready, or not

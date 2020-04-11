@@ -15,7 +15,7 @@
 
 #include <memory>
 
-#include <common/logic/Player.hpp>
+#include <common/logic/player.hpp>
 #include <common/logic/PathFinder.hpp>
 #include <common/logic/object_factory.hpp>
 #include <common/logic/object_manager.hpp>
@@ -52,36 +52,23 @@ public:
 
     familyline::graphics::ObjectRenderer* objr;
     familyline::logic::ObjectLifecycleManager* olm;
-    
-    HumanPlayer(const char* name, int xp=0,
-                familyline::logic::GameActionManager* gam = nullptr);
+
+    HumanPlayer(familyline::logic::PlayerManager &pm, const char *name, int code);
+
+    /**
+     * Generate the input actions.
+     *
+     * They must be pushed to the input manager
+     */
+    virtual void generateInput();
 
 
-    /***
-        Virtual function called on each iteration.
-
-        It allows player to decide its movement
-        (input for humans, AI decisions for AI... )
-
-        Returns true to continue its loop, false otherwise.
-    ***/
-    virtual bool Play(familyline::logic::GameContext*);
-
-	
-	/***
-	    Process player input.
-	    Returns true if some input was received, false if not 
-	***/
-	virtual bool ProcessInput();
-	
 	
     void SetCamera(familyline::graphics::Camera*);
 	void SetPicker(familyline::input::InputPicker* ip);
     void SetInputManager(familyline::input::InputManager*);
     void SetPathfinder(familyline::logic::PathFinder*);
-	void SetGameActionManager(familyline::logic::GameActionManager* );
-
-    virtual bool HasUpdatedObject();
+//	void SetGameActionManager(familyline::logic::GameActionManager* );
 
     familyline::logic::GameObject* GetSelectedObject();
     virtual ~HumanPlayer();

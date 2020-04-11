@@ -35,14 +35,6 @@ void InputManager::processEvents()
 }
 
 
-/**
- * Enqueue a player input
- */
-void InputManager::queuePlayerInput(PlayerInputType type, int playerCode)
-{
-    
-}
-
 int generateHandlerNumber()
 {
     static int id = 0;
@@ -73,27 +65,6 @@ listener_handler_t InputManager::addListenerHandler(HumanListenerHandler h, int 
 
     return id;
 }
-
-listener_handler_t InputManager::addListenerHandler(PlayerListenerHandler h, int zorder)
-{
-    auto id = generateHandlerNumber();
-
-	auto ho = HandlerOrder<PlayerListenerHandler>{ h, id, zorder };
-
-	int insertidx = 0;
-	for (int i = 0; i < _player_input_fns.size(); i++) {
-		if (_human_input_fns[i].zindex < zorder) {
-			break;
-		}
-
-
-		insertidx++;
-	}
-
-	_player_input_fns.insert(_player_input_fns.begin() + insertidx, ho); 
-	return id;
-}
-
 
 void InputManager::removeListenerHandler(listener_handler_t id)
 {

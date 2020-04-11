@@ -32,12 +32,12 @@ public:
 /// TODO: rewrite this and Tribalia.cpp!!!
 
 Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
-           GUIManager* gr, PlayerManager* pm, HumanPlayer* hp)
-    : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm), hp(hp)
+           GUIManager* gr, PlayerManager* pm, std::unique_ptr<HumanPlayer> hp)
+    : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm), hp(std::move(hp))
 {
     //    DebugPlotter::Init();
     auto& log = LoggerService::getLogger();
-    
+
     int winW, winH;
     w->getSize(winW, winH);
     char* err = nullptr;
@@ -54,12 +54,11 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         // DebugPlotter::pinterface = std::unique_ptr<DebugPlotInterface>
         //    (new GraphicalPlotInterface(rndr));
 
-        gctx.om = om;
+        //gctx.om = om;
 
         gam.AddListener(new GameActionListenerImpl());
-        hp->SetGameActionManager(&gam);
+        //hp->SetGameActionManager(&gam);
         hp->olm = olm;
-        pm->AddPlayer(hp, PlayerFlags::PlayerIsHuman);
 
         terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
         terr = terrFile->GetTerrain();
@@ -79,6 +78,9 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         //      scenernd->SetCamera(cam);
         hp->SetCamera(cam);
+
+        std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());
+        pm->add(std::move(humanp));
 
 //      rndr->SetSceneManager(scenernd);
 
@@ -104,7 +106,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 //        InputManager::GetInstance()->Initialize();
 
-                
+
         ip = new InputPicker{ terr_rend, win, scenernd, cam, om };
         hp->SetPicker(ip);
 
@@ -285,6 +287,7 @@ int Game::RunLoop()
             this->RunLogic();
             logicTime -= LOGIC_DELTA;
             li++;
+            gctx.tick++;
         }
 
         if (frame > 1)
@@ -335,7 +338,7 @@ int Game::RunLoop()
     log->write("game", LogType::Info,
                "fps max: %.3f (%.3f ms), min: %.3f (%.3f ms), avg: %.3f",
                maxfps, mindelta, minfps, maxdelta, avgfps);
-    
+
     log->write("game", LogType::Info, "Total frames: %d", frame);
 
     return 0;
@@ -350,7 +353,7 @@ bool Game::RunInput()
     /* Input processing  */
 
     InputService::getInputManager()->processEvents();
-    
+
     ip->UpdateIntersectedObject();
     ip->UpdateTerrainProjectedPosition();
 
@@ -358,8 +361,10 @@ bool Game::RunInput()
 
     gr->update();
 
-    pm->ProcessInputs();
-    return pm->PlayAll(&gctx);
+    pm->run(gctx.tick);
+
+    return false;
+    // return pm->exitRequested()
 }
 
 
@@ -377,7 +382,7 @@ void Game::RunLogic()
     LogicService::getActionQueue()->processEvents();
 
     bool objupdate = objrend->willUpdate();
-    if (objupdate || hp->HasUpdatedObject()) {
+    if (objupdate) {
         objrend->update();
         pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
     }

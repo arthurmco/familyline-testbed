@@ -260,29 +260,9 @@ void Server::GetMessages()
 //  * 
 //  * @param playername The local player name
 //  */
-NetPlayerManager* Server::GetPlayerManager(const char* playername)
+familyline::logic::PlayerManager* Server::GetPlayerManager(const char* playername)
 {
-	const char* msg = this->Receive();
-	if (strncmp(msg, "[TRIBALIA PLAYERINFO?]", 22)) {
-		printf("'%s'", msg);
-		throw ServerException("Invalid playerinfo message");
-	}
-	free((void*)msg);
-
-	char* plname_msg = new char[strlen(playername) + 32];
-	sprintf(plname_msg, "[TRIBALIA PLAYERINFO %s 1]\n", playername);
-	write(_serversock, plname_msg, strlen(plname_msg));
-	delete[] plname_msg;
-
-	msg = this->Receive();
-	if (strncmp(msg, "[TRIBALIA PLAYERINFO", 20)) {
-		throw ServerException("Invalid player ID message");
-	}
-	int playerid = -1;
-	sscanf(&msg[21], "%d", &playerid);
-
-	delete[] msg;
-	return new NetPlayerManager(playername, playerid, this->cmq);
+    return nullptr;
 }
 
 /**

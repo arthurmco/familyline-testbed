@@ -16,7 +16,7 @@
 #include <common/logic/Team.hpp>
 #include <common/logic/BuildQueue.hpp>
 #include <common/logic/GameActionManager.hpp>
-#include <common/logic/PlayerManager.hpp>
+#include <common/logic/player_manager.hpp>
 #include <common/logic/debug_drawer.hpp>
 #include <common/logic/lifecycle_manager.hpp>
 
@@ -63,7 +63,7 @@ namespace familyline {
         logic::PlayerManager* pm = nullptr;
         logic::ObjectManager* om = nullptr;
         
-        HumanPlayer* hp = nullptr;
+        std::unique_ptr<HumanPlayer> hp = nullptr;
         logic::Terrain* terr = nullptr;
         logic::TerrainFile* terrFile;
     
@@ -109,7 +109,7 @@ namespace familyline {
     public:
         Game(graphics::Window* w, graphics::Framebuffer* fb3D,
              graphics::Framebuffer* fbGUI, graphics::gui::GUIManager* gr,
-             logic::PlayerManager* pm, HumanPlayer* hp);
+             logic::PlayerManager* pm, std::unique_ptr<HumanPlayer> hp);
 
         int RunLoop();
     };
