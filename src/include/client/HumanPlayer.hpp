@@ -36,7 +36,6 @@
 class HumanPlayer : public familyline::logic::Player
 {
 private:
-    familyline::graphics::Camera* _cam;
 	familyline::input::InputPicker* _ip;
 
 	std::weak_ptr<familyline::logic::GameObject> _selected_obj;
@@ -67,7 +66,7 @@ public:
      */
     virtual bool exitRequested();
 	
-    void SetCamera(familyline::graphics::Camera*);
+    void setCamera(familyline::graphics::Camera*);
 	void SetPicker(familyline::input::InputPicker* ip);
     void SetInputManager(familyline::input::InputManager*);
     void SetPathfinder(familyline::logic::PathFinder*);

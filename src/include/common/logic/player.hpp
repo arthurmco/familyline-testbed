@@ -13,6 +13,8 @@
 #include <map>
 #include <functional>
 
+
+#include <common/logic/icamera.hpp>
 #include <common/logic/game_object.hpp>
 #include <common/logic/player_actions.hpp>
 
@@ -83,6 +85,8 @@ namespace familyline::logic {
  * methods you will need to implement are the input generation methods
  */
     class Player {
+        friend class PlayerManager;
+        
     private:
         std::string name_;
         int code_;
@@ -124,6 +128,8 @@ namespace familyline::logic {
         void buildNext();
 
         void pushAction(PlayerInputType type);
+
+        std::optional<ICamera*> camera_; 
         
     public:
         Player(PlayerManager& pm, const char* name, int code)
@@ -155,6 +161,8 @@ namespace familyline::logic {
         void processActions();
 
         std::string_view getName() { return this->name_; }
+
+        std::optional<ICamera*> getCamera() const { return this->camera_; }         
     };
 
 

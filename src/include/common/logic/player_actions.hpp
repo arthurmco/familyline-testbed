@@ -17,12 +17,26 @@ namespace familyline::logic {
 
     
     /**
-     * Build some object
+     * Enqueue the build of some object
      */
-    struct BuildAction {
+    struct EnqueueBuildAction {
         std::string type_name;
     };
 
+    /**
+     * Commit the last build, starts building it at the specified game
+     * position.
+     * The server should verify that the build position is valid, that is
+     * it is inside the camera vision range
+     *
+     * last_build value means, if false, that we should expect more
+     * commits 
+     */
+    struct CommitLastBuildAction {
+        double destX, destZ;
+        bool last_build;
+    };
+    
     /**
      * Select an object
      */
@@ -71,7 +85,8 @@ namespace familyline::logic {
     };
 
     using PlayerInputType =
-        std::variant<BuildAction, ObjectSelectAction, ObjectMoveAction,
+        std::variant<EnqueueBuildAction, CommitLastBuildAction,
+                     ObjectSelectAction, ObjectMoveAction,
                      ObjectUseAction, ObjectRunAction, CameraMove>;
 
     

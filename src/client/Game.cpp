@@ -77,7 +77,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         scenernd = new SceneRenderer((Renderer*)rndr, *cam);
 
         //      scenernd->SetCamera(cam);
-        hp->SetCamera(cam);
+        hp->setCamera(cam);
 
 //      rndr->SetSceneManager(scenernd);
 
@@ -269,7 +269,7 @@ int Game::RunLoop()
     
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
-
+    
     do {
         player = true;
 

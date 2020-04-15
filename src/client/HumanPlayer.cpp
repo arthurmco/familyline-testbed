@@ -159,8 +159,8 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
                 if (event.isPressed) {
 
                     if (!attack_set) {
-                        attack_ready = false;
-
+                        attack_ready = false;                        
+                        
                         /* Move the object to some position */
                         glm::vec2 to = _ip->GetGameProjectedPosition();
                         auto slock = _selected_obj.lock();
@@ -213,7 +213,10 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
 
 }
 
-void HumanPlayer::SetCamera(familyline::graphics::Camera* c) { _cam = c;}
+void HumanPlayer::setCamera(familyline::graphics::Camera* c) {
+    camera_ = std::optional(dynamic_cast<ICamera*>(c));
+}
+
 void HumanPlayer::SetPicker(familyline::input::InputPicker* ip) { _ip = ip; }
 void HumanPlayer::SetPathfinder(familyline::logic::PathFinder* p) { _pf = p; }
 
@@ -238,22 +241,41 @@ void HumanPlayer::SetGameActionManager(familyline::logic::GameActionManager* gam
 void HumanPlayer::generateInput()
 {
     double camera_speed = 0.1;
-    double zoom_speed = 0.1;
+    double zoom_speed = 0.01;
 
     
     if (front) {
-        this->pushAction(CameraMove{0, camera_speed, 0});
+        this->pushAction(CameraMove{0, -camera_speed, 0});
     }
     if (back) {
-        this->pushAction(CameraMove{0, -camera_speed, 0});
+        this->pushAction(CameraMove{0, camera_speed, 0});
     }
     if (left) {
         this->pushAction(CameraMove{-camera_speed, 0, 0});
     }
     if (right) {
-        this->pushAction(CameraMove{-camera_speed, 0, 0});
+        this->pushAction(CameraMove{camera_speed, 0, 0});
     }
 
+    if (build_tent) {
+        this->pushAction(EnqueueBuildAction{"tent"});
+        build_tent = false;
+        mouse_click = false;
+        build_something = true;
+    }
+    
+    if (build_tower) {
+        this->pushAction(EnqueueBuildAction{"watch-tent"});
+        build_tower = false;
+        mouse_click = false;
+        build_something = true;
+    }
+
+    if (build_something && mouse_click) {
+        glm::vec2 to = _ip->GetGameProjectedPosition();
+        this->pushAction(CommitLastBuildAction{to.x, to.y, true});
+        build_something = false;
+    }
 
 }
 

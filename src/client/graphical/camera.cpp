@@ -6,6 +6,7 @@
 using namespace familyline::graphics;
 
 Camera::Camera(glm::vec3 pos, float aspectRatio, glm::vec3 lookAt)
+    : familyline::logic::ICamera()
 {
 	this->_pos = pos;
 	this->_posOriginal = pos;

@@ -41,6 +41,8 @@ namespace familyline::logic {
         unsigned int _tick = 0;
 
         void processAction(const PlayerInputAction& a);
+
+        std::optional<Player*> getPlayerFromID(int id);
         
     public:
         /**
@@ -48,7 +50,7 @@ namespace familyline::logic {
          * 
          * Return its generated ID
          */
-        int add(std::unique_ptr<Player> p);
+        int add(std::unique_ptr<Player> p, bool allocate_id = true);
 
         /**
          * Push an action

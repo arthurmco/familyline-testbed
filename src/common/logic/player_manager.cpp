@@ -1,4 +1,5 @@
 #include <common/logic/player_manager.hpp>
+#include <algorithm>
 #include <chrono>
 
 using namespace familyline::logic;
@@ -8,12 +9,31 @@ using namespace familyline::logic;
  *
  * Return its generated ID
  */
-int PlayerManager::add(std::unique_ptr<Player> p)
+int PlayerManager::add(std::unique_ptr<Player> p, bool allocate_id)
 {
     auto& pi = players_.emplace_back((uintptr_t)p.get() / 1+(((uintptr_t)players_.size()*16384)),
                                      std::move(p));
+
+    if (allocate_id)
+        pi.player->code_ = pi.id;
+
     return pi.id;
 }
+
+std::optional<Player*> PlayerManager::getPlayerFromID(int id)
+{
+    auto p = std::find_if(players_.begin(), players_.end(),
+                       [&](PlayerInfo& pi) {
+                           return pi.id == id;
+                       });
+
+    if (p == players_.end()) {
+        return std::optional<Player*>();
+    }
+
+    return std::optional<Player*>(p->player.get());
+}
+
 
 /**
  * Push an action
@@ -53,8 +73,14 @@ void PlayerManager::processAction(const PlayerInputAction& pia)
             pia.playercode, pia.tick);
 
     struct InputVisitor {
-        void operator()(BuildAction a) {
-            fprintf(stderr, "\033[1m\tBuildAction: typename %s \033[0m\n", a.type_name.c_str());
+        std::optional<Player*> pl;
+        
+        void operator()(EnqueueBuildAction a) {
+            fprintf(stderr, "\033[1m\tEnqueueBuildAction: typename %s \033[0m\n", a.type_name.c_str());
+        }
+        void operator()(CommitLastBuildAction a) {
+            fprintf(stderr, "\033[1m\tCommitLastBuildAction: pos: %.2f, %.2f, last: %s",
+                    a.destX, a.destZ, a.last_build ? "true" : "false");
         }
         void operator()(ObjectSelectAction a) {
             fprintf(stderr, "\033[1m\tObjectSelectAction: id %ld \033[0m\n", a.objectID);
@@ -74,10 +100,21 @@ void PlayerManager::processAction(const PlayerInputAction& pia)
         void operator()(CameraMove a) {
             fprintf(stderr, "\033[1m\tCameraMove: dx: %.2f, dy: %.2f, dZoom: %.3f \033[0m\n",
                     a.deltaX, a.deltaY, a.deltaZoom);
+
+            if (this->pl.has_value()) {
+                auto optcam = (*this->pl)->getCamera();
+                if (optcam.has_value()) {
+
+                    glm::vec3 mov(a.deltaX, 0, a.deltaY);
+
+                    (*optcam)->AddPosition(mov);
+                    (*optcam)->AddLookAt(mov);                    
+                }
+            }            
         }
 
     };
-    std::visit(InputVisitor{}, pia.type);
+    std::visit(InputVisitor{this->getPlayerFromID(pia.playercode)}, pia.type);
 
 }
 
@@ -90,11 +127,11 @@ void PlayerManager::processAction(const PlayerInputAction& pia)
 bool PlayerManager::exitRequested()
 {
     bool r = false;
-    
+
     for (auto& p : players_) {
         r = r || p.player->exitRequested();
     }
-    
+
     return r;
 }
 
