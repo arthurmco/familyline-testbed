@@ -38,12 +38,17 @@ if (DO_TESTS)
   file( GLOB SRC_TEST_FILES "${CMAKE_SOURCE_DIR}/test/*.cpp" )
 
   message("${SRC_SERVER_TEST}")
+
+  find_package(OpenGL REQUIRED)
   
   add_executable(familyline-tests ${SRC_TEST_FILES})
   target_link_libraries(familyline-tests familyline-common)
   target_link_libraries(familyline-tests familyline-client)
-  target_compile_features(familyline-tests PUBLIC cxx_std_20)
+  target_link_libraries(familyline-tests ${OPENGL_LIBRARIES})
+  target_link_libraries(familyline-tests ${YAML_LIBRARIES}) # You need to build YAML as a dll (use -DB  target_compile_features(familyline-tests PUBLIC cxx_std_20)
 
+  target_compile_features(familyline-tests PUBLIC cxx_std_20)
+  
   target_include_directories(familyline-tests PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
   file(COPY "${CMAKE_SOURCE_DIR}/test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")

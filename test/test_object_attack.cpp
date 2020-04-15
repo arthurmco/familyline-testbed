@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "utils.hpp"
+#include <optional>
 
 #include <common/logic/logic_service.hpp>
 #include <common/logic/attack_manager.hpp>

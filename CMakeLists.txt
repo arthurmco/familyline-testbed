@@ -19,7 +19,6 @@ add_subdirectory(src/client)
 add_executable(familyline "src/client/Tribalia.cpp")
 target_link_libraries(familyline familyline-client)
 
-
 target_compile_features(familyline PUBLIC cxx_std_20)
 
 include("test/unit-tests.cmake")
@@ -38,7 +37,6 @@ target_include_directories(familyline PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
 target_link_libraries(familyline ${OPENGL_LIBRARIES})
 target_link_libraries(familyline ${YAML_LIBRARIES}) # You need to build YAML as a dll (use -DBUILD_SHARED_LIBS)
-
 
 if (MSVC)
 	
@@ -112,7 +110,6 @@ else()
   
   if(DO_TESTS)
   	target_link_libraries(familyline-tests ${SDL2_LIBRARIES})
-  	target_link_libraries(familyline-tests ${OPENGL_gl_LIBRARY})
   	target_link_libraries(familyline-tests ${GLEW_LIBRARIES})
   	target_link_libraries(familyline-tests ${IL_LIBRARIES})
   	target_link_libraries(familyline-tests ${ILU_LIBRARIES})
