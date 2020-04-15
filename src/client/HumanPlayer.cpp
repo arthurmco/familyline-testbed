@@ -34,14 +34,14 @@ std::weak_ptr<GameObject> attacker, attackee;
 
 
 HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
-     : Player(pm, name, code) 
+     : Player(pm, name, code)
 {
     /* Initialize input subsystems */
 	srand((size_t)name*code);
     auto& log = LoggerService::getLogger();
 
     _listener = [&](HumanInputAction hia) {
-        
+
         if (std::holds_alternative<KeyAction>(hia.type)) {
             auto event = std::get<KeyAction>(hia.type);
 
@@ -144,7 +144,7 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
             if (attack_set && attack_ready) {
                 attack_set = false;
             }
-            
+
             if (event.buttonCode == SDL_BUTTON_LEFT) {
                 attack_set = false;
                 if (event.isPressed)
@@ -159,8 +159,8 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
                 if (event.isPressed) {
 
                     if (!attack_set) {
-                        attack_ready = false;                        
-                        
+                        attack_ready = false;
+
                         /* Move the object to some position */
                         glm::vec2 to = _ip->GetGameProjectedPosition();
                         auto slock = _selected_obj.lock();
@@ -182,7 +182,7 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
 
                 return true;
             }
-            
+
         } else if (std::holds_alternative<WheelAction>(hia.type)) {
             auto event = std::get<WheelAction>(hia.type);
 
@@ -203,7 +203,7 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
             exit_game = true;
             return true;
         }
-        
+
 
         return false;
 
@@ -243,7 +243,7 @@ void HumanPlayer::generateInput()
     double camera_speed = 0.1;
     double zoom_speed = 0.01;
 
-    
+
     if (front) {
         this->pushAction(CameraMove{0, -camera_speed, 0});
     }
@@ -263,9 +263,9 @@ void HumanPlayer::generateInput()
         mouse_click = false;
         build_something = true;
     }
-    
+
     if (build_tower) {
-        this->pushAction(EnqueueBuildAction{"watch-tent"});
+        this->pushAction(EnqueueBuildAction{"watchtower"});
         build_tower = false;
         mouse_click = false;
         build_something = true;
@@ -273,7 +273,9 @@ void HumanPlayer::generateInput()
 
     if (build_something && mouse_click) {
         glm::vec2 to = _ip->GetGameProjectedPosition();
-        this->pushAction(CommitLastBuildAction{to.x, to.y, true});
+        glm::vec3 p = ::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
+
+        this->pushAction(CommitLastBuildAction{to.x, to.y, p.y, true});
         build_something = false;
     }
 

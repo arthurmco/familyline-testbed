@@ -34,6 +34,7 @@ namespace familyline::logic {
      */
     struct CommitLastBuildAction {
         double destX, destZ;
+        double destY; // do not serialize this value, it can be determined automatically
         bool last_build;
     };
     

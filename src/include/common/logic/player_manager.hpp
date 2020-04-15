@@ -13,6 +13,7 @@
 
 #include <common/logic/player.hpp>
 #include <common/logic/player_actions.hpp>
+#include <common/logic/lifecycle_manager.hpp>
 
 namespace familyline::logic {
 
@@ -40,11 +41,20 @@ namespace familyline::logic {
 
         unsigned int _tick = 0;
 
-        void processAction(const PlayerInputAction& a);
+        void processAction(const PlayerInputAction& a, ObjectManager& om);
 
         std::optional<Player*> getPlayerFromID(int id);
+
+        //familyline::graphics::ObjectRenderer* objr;
         
     public:
+        ObjectLifecycleManager* olm;
+
+        /* Callback to a function that allows us to add
+         * an object to the renderer
+         */
+        std::function<void(std::shared_ptr<GameObject>)> render_add_callback;
+        
         /**
          * Add a player here
          * 
@@ -80,7 +90,7 @@ namespace familyline::logic {
          * Run the input handlers and pop the event from the input action
          * queue
          */
-        void run(unsigned int tick);
+        void run(GameContext& gctx);
     };
     
 }

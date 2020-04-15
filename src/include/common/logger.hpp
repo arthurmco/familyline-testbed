@@ -44,7 +44,7 @@ namespace familyline {
         static std::unique_ptr<Logger> _logger;
 
     public: 
-        static void createLogger(FILE* out = stderr, LogType minlog = LogType::Info)
+        static void createLogger(FILE* out = stderr, LogType minlog = LogType::Debug)
             {
                 _logger = std::make_unique<Logger>(out, minlog);
             }

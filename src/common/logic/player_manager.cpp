@@ -1,6 +1,10 @@
 #include <common/logic/player_manager.hpp>
+#include <common/logic/logic_service.hpp>
+#include <common/logger.hpp>
 #include <algorithm>
 #include <chrono>
+#include <fmt/format.h>
+#include <cassert>
 
 using namespace familyline::logic;
 
@@ -67,39 +71,104 @@ int PlayerManager::addListener(PlayerListenerHandler h)
     return phi.id;
 }
 
-void PlayerManager::processAction(const PlayerInputAction& pia)
+void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& om)
 {
-    fprintf(stderr, "action of player %lu at tick %d | ",
-            pia.playercode, pia.tick);
+    fmt::memory_buffer out;
+    format_to(out, "action of player {:x} at tick {:d}",
+              pia.playercode, pia.tick);
 
     struct InputVisitor {
         std::optional<Player*> pl;
+        fmt::memory_buffer& out;
+        ObjectManager& om;
+        ObjectLifecycleManager& olm;
+        std::function<void(std::shared_ptr<GameObject>)> render_add_cb;
         
         void operator()(EnqueueBuildAction a) {
-            fprintf(stderr, "\033[1m\tEnqueueBuildAction: typename %s \033[0m\n", a.type_name.c_str());
+            auto& log = LoggerService::getLogger();
+            log->write("player-manager", LogType::Debug,
+                       "%s type: EnqueueBuildAction: typename %s",
+                       fmt::to_string(out).data(),
+                       a.type_name.c_str());
+            
+            if (this->pl.has_value()) {
+                (*this->pl)->pushNextBuilding(a.type_name);
+            }
+            
         }
         void operator()(CommitLastBuildAction a) {
-            fprintf(stderr, "\033[1m\tCommitLastBuildAction: pos: %.2f, %.2f, last: %s",
-                    a.destX, a.destZ, a.last_build ? "true" : "false");
+            auto& log = LoggerService::getLogger();
+            log->write("player-manager", LogType::Debug,
+                       "%s type: CommitLastBuildAction: pos: %.2f, %.2f, last: %s",
+                       fmt::to_string(out).data(),
+                       a.destX, a.destZ, a.last_build ? "true" : "false");
+
+            if (this->pl.has_value()) {
+                auto player = (*this->pl);
+                auto building = player->getNextBuilding();
+
+                if (building.has_value()) {
+                    auto& of = LogicService::getObjectFactory();
+                    auto nobj = std::dynamic_pointer_cast<GameObject>(
+                        of->getObject(building->c_str(), 0, 0, 0));
+
+                    if (!nobj) {
+                        log->write("player-manager", LogType::Error,
+                                   "building type %s not found", building->c_str());
+                        return;
+                    }
+
+                    glm::vec3 buildpos(a.destX, a.destY, a.destZ);
+                    nobj->setPosition(buildpos);
+
+                    auto cobjID = om.add(std::move(nobj));
+                    auto ncobj =  om.get(cobjID).value();
+
+                    assert(ncobj->getPosition().x == buildpos.x);
+                    assert(ncobj->getPosition().z == buildpos.z);
+
+                    render_add_cb(ncobj);
+
+                    olm.doRegister(ncobj);
+                    olm.notifyCreation(cobjID);
+
+                }
+            }
         }
         void operator()(ObjectSelectAction a) {
-            fprintf(stderr, "\033[1m\tObjectSelectAction: id %ld \033[0m\n", a.objectID);
+            auto& log = LoggerService::getLogger();
+            log->write("player-manager", LogType::Debug,
+                       "%s type: ObjectSelectAction: id %ld",
+                       fmt::to_string(out).data(),
+                       a.objectID);
         }
         void operator()(ObjectMoveAction a) {
-            fprintf(stderr, "\033[1m\tObjectMoveAction: move selected object to %.2f,%.2f \033[0m\n",
-                    a.destX, a.destZ);
+            auto& log = LoggerService::getLogger();
+            log->write("player-manager", LogType::Debug,
+                       "%s type: ObjectMoveAction: move selected object to %.2f,%.2f",
+                       fmt::to_string(out).data(),
+                       a.destX, a.destZ);
         }
         void operator()(ObjectUseAction a) {
-            fprintf(stderr, "\033[1m\tObjectUseAction: make selected object use object %ld \033[0m\n",
-                    a.useWhat);
+            auto& log = LoggerService::getLogger();
+            log->write("player-manager", LogType::Debug,
+                       "%s type: ObjectUseAction: make selected object use object %ld",
+                       fmt::to_string(out).data(),
+                       a.useWhat);
         }
         void operator()(ObjectRunAction a) {
-            fprintf(stderr, "\033[1m\tObjectRunAction: make selected object run action %s \033[0m\n",
-                    a.actionName.c_str());
+            auto& log = LoggerService::getLogger();
+            log->write("player-manager", LogType::Debug,
+                       "%s type: ObjectRunAction: make selected object run action %s",
+                       fmt::to_string(out).data(),
+                       a.actionName.c_str());
         }
         void operator()(CameraMove a) {
-            fprintf(stderr, "\033[1m\tCameraMove: dx: %.2f, dy: %.2f, dZoom: %.3f \033[0m\n",
-                    a.deltaX, a.deltaY, a.deltaZoom);
+            auto& log = LoggerService::getLogger();
+            log->write("player-manager", LogType::Debug,
+                       "%s type: CameraMove: dx: %.2f, dy: %.2f, dZoom: %.3f",
+                       fmt::to_string(out).data(),
+                       a.deltaX, a.deltaY, a.deltaZoom);
 
             if (this->pl.has_value()) {
                 auto optcam = (*this->pl)->getCamera();
@@ -114,8 +183,9 @@ void PlayerManager::processAction(const PlayerInputAction& pia)
         }
 
     };
-    std::visit(InputVisitor{this->getPlayerFromID(pia.playercode)}, pia.type);
-
+    std::visit(InputVisitor{this->getPlayerFromID(pia.playercode), out, om,
+            *olm, this->render_add_callback},
+        pia.type);
 }
 
 
@@ -149,12 +219,12 @@ void PlayerManager::generateInput()
  * Run the input handlers and pop the event from the input action
  * queue
  */
-void PlayerManager::run(unsigned int tick)
+void PlayerManager::run(GameContext& gctx)
 {
-    _tick = tick;
+    _tick = gctx.tick;
     if (!actions_.empty()) {
         PlayerInputAction& a = actions_.front();
-        this->processAction(a);
+        this->processAction(a, *gctx.om);
 
         for (auto h : player_input_listeners_) {
             h.handler(a);

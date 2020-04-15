@@ -16,6 +16,7 @@
 
 #include <common/logic/icamera.hpp>
 #include <common/logic/game_object.hpp>
+#include <common/logic/object_manager.hpp>
 #include <common/logic/player_actions.hpp>
 
 /// TODO: make the player manager handle the player actions, not the
@@ -26,7 +27,7 @@ namespace familyline::logic {
     class PlayerManager;    
 
     struct GameContext {
-        void* om = nullptr;
+        ObjectManager* om = nullptr;
         int tick = 0;
         double elapsed_seconds = 0;
     };
@@ -119,14 +120,8 @@ namespace familyline::logic {
          */
         std::stack<std::map<int, EntityAction>> entity_actions_;
 
+        std::optional<std::string> nextBuilding_;
     protected:
-        void pushToBuildQueue(std::string type);
-        void clearBuildQueue();
-        /**
-         * Builds the next available object in the build queue
-         */
-        void buildNext();
-
         void pushAction(PlayerInputType type);
 
         std::optional<ICamera*> camera_; 
@@ -135,7 +130,12 @@ namespace familyline::logic {
         Player(PlayerManager& pm, const char* name, int code)
             : pm_(pm), name_(name), code_(code)
             {}
-
+        
+        std::optional<std::string> getNextBuilding() const { return nextBuilding_; }
+        void popNextBuilding() { nextBuilding_ = std::optional<std::string>(); }
+        void pushNextBuilding(std::string b) {
+            nextBuilding_ = std::optional<std::string>(b); }
+        
         /**
          * Generate the input actions.
          *

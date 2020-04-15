@@ -54,11 +54,9 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         // DebugPlotter::pinterface = std::unique_ptr<DebugPlotInterface>
         //    (new GraphicalPlotInterface(rndr));
 
-        //gctx.om = om;
-
+        gctx.om = om;
         gam.AddListener(new GameActionListenerImpl());
         //hp->SetGameActionManager(&gam);
-        hp->olm = olm;
 
         terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
         terr = terrFile->GetTerrain();
@@ -98,7 +96,11 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         terr_rend->SetCamera(cam);
 
         objrend = new ObjectRenderer(*terr, *scenernd);
-        hp->objr = objrend;
+
+        pm->render_add_callback = [&](std::shared_ptr<GameObject> o) {
+            objrend->add(o);
+        };
+        
         //gam.AddListener(objrend);
 
 //        InputManager::GetInstance()->Initialize();
@@ -114,7 +116,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         widgets.lblVersion = new GUILabel(10, 10, "Familyline " VERSION " commit " COMMIT);
 
-        std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());
+        std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());        
         pm->add(std::move(humanp));
 
         gr->add(widgets.lblVersion);
@@ -129,6 +131,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr));
 
+        pm->olm = olm;
     }
     catch (renderer_exception& re) {
         log->write("game", LogType::Fatal,
@@ -376,7 +379,7 @@ bool Game::RunInput()
 
 void Game::RunLogic()
 {
-    pm->run(gctx.tick);
+    pm->run(gctx);
     olm->update();
 
     LogicService::getObjectListener()->updateObjects();

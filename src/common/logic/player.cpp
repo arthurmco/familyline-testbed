@@ -4,25 +4,6 @@
 using namespace familyline::logic;
 
 
-void Player::pushToBuildQueue(std::string type)
-{
-    build_queue_.push(type);
-}
-
-void Player::clearBuildQueue()
-{
-    while (!build_queue_.empty())
-        build_queue_.pop();
-}
-
-/**
- * Builds the next available object in the build queue
- */
-void Player::buildNext()
-{
-    // TODO: create an action to build the one that is on the top of the stack
-}
-
 
 void Player::pushAction(PlayerInputType type) {
     this->pm_.pushAction(this->code_, type);

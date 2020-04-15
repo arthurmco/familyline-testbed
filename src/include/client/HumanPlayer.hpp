@@ -22,7 +22,6 @@
 #include <common/logic/ObjectPathManager.hpp>
 #include <common/logic/BuildQueue.hpp>
 #include <common/logic/attack_manager.hpp>
-#include <common/logic/lifecycle_manager.hpp>
 
 #include <client/graphical/camera.hpp>
 #include <client/graphical/TerrainRenderer.hpp>
@@ -48,9 +47,6 @@ private:
 
 public:
 	bool renderBBs = false;
-
-    familyline::graphics::ObjectRenderer* objr;
-    familyline::logic::ObjectLifecycleManager* olm;
 
     HumanPlayer(familyline::logic::PlayerManager &pm, const char *name, int code);
 
