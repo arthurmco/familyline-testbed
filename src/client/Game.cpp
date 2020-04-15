@@ -254,9 +254,6 @@ int Game::RunLoop()
     gr->add(&lblKeys);
     gr->add(&lblTerrainPos);
 
-    unsigned int ticks = SDL_GetTicks();
-    unsigned int frame = 0;
-
     int delta = 1;
     double pms = 0.0;
 
@@ -265,6 +262,13 @@ int Game::RunLoop()
     int logicTime = LOGIC_DELTA;
     int inputTime = INPUT_DELTA;
     int limax = 0;
+
+    // Update the terrain first, so the terrain textures can load
+    // TODO: generate the terrain textures before? in another function?
+    terr_rend->Update();
+    
+    unsigned int ticks = SDL_GetTicks();
+    unsigned int frame = 0;
 
     do {
         player = true;
@@ -321,10 +325,14 @@ int Game::RunLoop()
             SDL_Delay(sleepdelta);
         }
 
-        if (delta < mindelta)
+        // Make the mininum and maximum frame calculation more fair
+        // because usually the first frame is when we load things, and
+        // its the slowest.
+        
+        if (delta < mindelta && frame > 2)
             mindelta = delta;
 
-        if (delta > maxdelta)
+        if (delta > maxdelta && frame > 2)
             maxdelta = delta;
 
         sumfps += (1000 / delta);
