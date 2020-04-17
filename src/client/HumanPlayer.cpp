@@ -46,7 +46,7 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
             auto event = std::get<KeyAction>(hia.type);
 
             printf("<%s>\n", event.isPressed ? "pressed" : "released");
-            
+
             switch (event.keycode) {
             case SDLK_w:
                 if (event.isPressed)
@@ -163,16 +163,16 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
                     if (!attack_set) {
                         attack_ready = false;
 
-                        /* Move the object to some position */
-                        glm::vec2 to = _ip->GetGameProjectedPosition();
-                        auto slock = _selected_obj.lock();
+                        // /* Move the object to some position */
+                        // glm::vec2 to = _ip->GetGameProjectedPosition();
+                        // auto slock = _selected_obj.lock();
 
-                        auto path = _pf->CreatePath(*slock.get(), to);
-                        glm::vec2 lp = path.back();
-                        log->write("human-player", LogType::Debug,
-                                   "moved to %.2fx%.2f", lp.x, lp.y);
+                        // auto path = _pf->CreatePath(*slock.get(), to);
+                        // glm::vec2 lp = path.back();
+                        // log->write("human-player", LogType::Debug,
+                        //            "moved to %.2fx%.2f", lp.x, lp.y);
 
-                        ObjectPathManager::getInstance()->AddPath(slock.get(), path);
+                        // ObjectPathManager::getInstance()->AddPath(slock.get(), path);
 
 //                        this->RegisterMove(slock.get(), to);
                         _updated = true;
@@ -263,9 +263,9 @@ void HumanPlayer::generateInput()
     if (right) {
         cameraSpeedVec.x += camera_speed;
     }
-    
+
     if (isCameraMove) {
-        this->pushAction(CameraMove{cameraSpeedVec.x, cameraSpeedVec.y, 0});        
+        this->pushAction(CameraMove{cameraSpeedVec.x, cameraSpeedVec.y, 0});
     }
 
     if (build_tent) {
@@ -282,12 +282,27 @@ void HumanPlayer::generateInput()
         build_something = true;
     }
 
+    bool has_selection = !_ip->GetIntersectedObject().expired();
+
     if (build_something && mouse_click) {
+        // Something is queued to be built.
         glm::vec2 to = _ip->GetGameProjectedPosition();
         glm::vec3 p = ::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
 
         this->pushAction(CommitLastBuildAction{to.x, to.y, p.y, true});
         build_something = false;
+        mouse_click = false;
+    } else if (has_selection && mouse_click) {
+        // Individual object selection, click-based
+        // TODO: do multiple object selection, drag-based
+        //       this can be started by adding a DragAction on input_actions.hpp
+        auto l = _ip->GetIntersectedObject().lock();
+        this->pushAction(ObjectSelectAction{l->getID()});
+        mouse_click = false;
+    } else if (!has_selection && mouse_click) {
+        // Object deselection, aka click on anything.
+        this->pushAction(SelectionClearAction{0});
+        mouse_click = false;        
     }
 
 }

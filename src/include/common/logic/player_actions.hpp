@@ -45,6 +45,13 @@ namespace familyline::logic {
         long int objectID;
     };
 
+    /**
+     * Clear object selection
+     */
+    struct SelectionClearAction {
+        int dummy = 0;
+    };
+
 
     /**
      * Move the selected object to some location
@@ -87,7 +94,7 @@ namespace familyline::logic {
 
     using PlayerInputType =
         std::variant<EnqueueBuildAction, CommitLastBuildAction,
-                     ObjectSelectAction, ObjectMoveAction,
+                     ObjectSelectAction, ObjectMoveAction, SelectionClearAction,
                      ObjectUseAction, ObjectRunAction, CameraMove>;
 
     

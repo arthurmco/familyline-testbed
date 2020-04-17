@@ -32,6 +32,8 @@ namespace familyline::logic {
         PlayerListenerHandler handler;
     };
 
+    using PlayerCallback = std::function<void(Player*)>;
+    
     class PlayerManager {
     private:
         std::vector<PlayerInfo> players_;
@@ -65,7 +67,7 @@ namespace familyline::logic {
         /**
          * Push an action
          */
-        void pushAction(int id, PlayerInputType type);
+        void pushAction(unsigned int id, PlayerInputType type);
 
         /**
          * Adds a listener to the player input action event listeners
@@ -91,6 +93,12 @@ namespace familyline::logic {
          * queue
          */
         void run(GameContext& gctx);
+
+        /** 
+         * Iterate between the players, allows the game interface to iterate on the player
+         * list
+         */
+        void iterate(PlayerCallback c);
     };
     
 }

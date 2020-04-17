@@ -55,6 +55,8 @@ namespace familyline {
     
     class Game {
     private:
+        unsigned human_id_;
+        
         graphics::Window* win = nullptr;
         graphics::Renderer* rndr = nullptr;
         graphics::SceneRenderer* scenernd = nullptr;
@@ -106,6 +108,8 @@ namespace familyline {
          */
         void ShowDebugInfo();
 
+        void showHumanPlayerInfo(logic::Player*);
+        
     public:
         Game(graphics::Window* w, graphics::Framebuffer* fb3D,
              graphics::Framebuffer* fbGUI, graphics::gui::GUIManager* gr,

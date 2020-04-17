@@ -117,7 +117,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         widgets.lblVersion = new GUILabel(10, 10, "Familyline " VERSION " commit " COMMIT);
 
         std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());        
-        pm->add(std::move(humanp));
+        human_id_ = pm->add(std::move(humanp));
 
         gr->add(widgets.lblVersion);
 
@@ -432,13 +432,11 @@ void Game::RunGraphical()
     win->update();
 }
 
-
-/* Show on-screen debug info
- * (aka the words in monospaced font you see in-game)
- */
-void Game::ShowDebugInfo()
-{
-    GameObject* selected = nullptr; //hp->GetSelectedObject();
+void Game::showHumanPlayerInfo(Player* hp) {
+    
+    auto selections = hp->getSelections();
+    std::shared_ptr<GameObject> selected = selections.size() == 1 ?
+        selections[0].lock() : std::shared_ptr<GameObject>();
     
     if (BuildQueue::GetInstance()->getNext()) {
         char s[256];
@@ -502,5 +500,19 @@ void Game::ShowDebugInfo()
     lblTerrainPos.setText(texs);
     // gr->DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
     //  "Enabled" : "Disabled");
+    
 
+}
+
+/* Show on-screen debug info
+ * (aka the words in monospaced font you see in-game)
+ */
+void Game::ShowDebugInfo()
+{
+    pm->iterate([&](Player* p) {
+
+        if (p->getCode() == human_id_) {
+            this->showHumanPlayerInfo(p);
+        }
+    });
 }

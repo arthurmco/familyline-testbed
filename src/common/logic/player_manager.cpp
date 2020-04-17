@@ -38,11 +38,23 @@ std::optional<Player*> PlayerManager::getPlayerFromID(int id)
     return std::optional<Player*>(p->player.get());
 }
 
+/**
+ * Iterate between the players, allows the game interface to iterate on the player
+ * list
+ */
+void PlayerManager::iterate(PlayerCallback c)
+{
+    std::for_each(players_.begin(), players_.end(),
+                  [&](auto& p) {
+                      c(p.player.get());
+                  });
+}
+
 
 /**
  * Push an action
  */
-void PlayerManager::pushAction(int id, PlayerInputType type)
+void PlayerManager::pushAction(unsigned int id, PlayerInputType type)
 {
     auto duration = std::chrono::system_clock::now().time_since_epoch();
 	uint64_t micros = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
@@ -83,18 +95,18 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
         ObjectManager& om;
         ObjectLifecycleManager& olm;
         std::function<void(std::shared_ptr<GameObject>)> render_add_cb;
-        
+
         void operator()(EnqueueBuildAction a) {
             auto& log = LoggerService::getLogger();
             log->write("player-manager", LogType::Debug,
                        "%s type: EnqueueBuildAction: typename %s",
                        fmt::to_string(out).data(),
                        a.type_name.c_str());
-            
+
             if (this->pl.has_value()) {
                 (*this->pl)->pushNextBuilding(a.type_name);
             }
-            
+
         }
         void operator()(CommitLastBuildAction a) {
             auto& log = LoggerService::getLogger();
@@ -118,6 +130,8 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                         return;
                     }
 
+                    player->clearSelection();
+
                     glm::vec3 buildpos(a.destX, a.destY, a.destZ);
                     nobj->setPosition(buildpos);
 
@@ -135,24 +149,48 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                 }
             }
         }
+        void operator()(SelectionClearAction a) {
+            auto& log = LoggerService::getLogger();
+            log->write("player-manager", LogType::Debug,
+                       "%s type: SelectionClearAction",
+                       fmt::to_string(out).data());
+
+            if (this->pl.has_value()) {
+                auto player = (*this->pl);
+
+                // TODO: add an action to clear a previous selection
+
+                player->clearSelection();
+            }
+        }
         void operator()(ObjectSelectAction a) {
             auto& log = LoggerService::getLogger();
             log->write("player-manager", LogType::Debug,
                        "%s type: ObjectSelectAction: id %ld",
                        fmt::to_string(out).data(),
                        a.objectID);
+
+            auto obj = om.get(a.objectID);
+            if (this->pl.has_value() && obj.has_value()) {
+                auto player = (*this->pl);
+
+                // TODO: add an action to clear a previous selection
+
+                player->clearSelection();
+                player->pushToSelection(a.objectID, *obj);
+            }
         }
         void operator()(ObjectMoveAction a) {
             auto& log = LoggerService::getLogger();
             log->write("player-manager", LogType::Debug,
-                       "%s type: ObjectMoveAction: move selected object to %.2f,%.2f",
+                       "%s type: ObjectMoveAction: move selected objects to %.2f,%.2f",
                        fmt::to_string(out).data(),
                        a.destX, a.destZ);
         }
         void operator()(ObjectUseAction a) {
             auto& log = LoggerService::getLogger();
             log->write("player-manager", LogType::Debug,
-                       "%s type: ObjectUseAction: make selected object use object %ld",
+                       "%s type: ObjectUseAction: make selected objects use object %ld",
                        fmt::to_string(out).data(),
                        a.useWhat);
         }
@@ -177,9 +215,9 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                     glm::vec3 mov(a.deltaX, 0, a.deltaY);
 
                     (*optcam)->AddPosition(mov);
-                    (*optcam)->AddLookAt(mov);                    
+                    (*optcam)->AddLookAt(mov);
                 }
-            }            
+            }
         }
 
     };
@@ -222,6 +260,7 @@ void PlayerManager::generateInput()
 void PlayerManager::run(GameContext& gctx)
 {
     _tick = gctx.tick;
+
     while (!actions_.empty()) {
         PlayerInputAction& a = actions_.front();
         this->processAction(a, *gctx.om);

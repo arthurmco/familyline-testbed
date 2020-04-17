@@ -24,7 +24,7 @@
 
 namespace familyline::logic {
 
-    class PlayerManager;    
+    class PlayerManager;
 
     struct GameContext {
         ObjectManager* om = nullptr;
@@ -87,7 +87,7 @@ namespace familyline::logic {
  */
     class Player {
         friend class PlayerManager;
-        
+
     private:
         std::string name_;
         int code_;
@@ -124,18 +124,36 @@ namespace familyline::logic {
     protected:
         void pushAction(PlayerInputType type);
 
-        std::optional<ICamera*> camera_; 
-        
+        std::optional<ICamera*> camera_;
+        std::vector<std::weak_ptr<GameObject>> selected_;
+
     public:
         Player(PlayerManager& pm, const char* name, int code)
             : pm_(pm), name_(name), code_(code)
             {}
+
+        unsigned int getCode() { return (unsigned)code_; }
         
         std::optional<std::string> getNextBuilding() const { return nextBuilding_; }
         void popNextBuilding() { nextBuilding_ = std::optional<std::string>(); }
         void pushNextBuilding(std::string b) {
             nextBuilding_ = std::optional<std::string>(b); }
-        
+
+
+        /**
+         * Push a selection to the player selected items list
+         *
+         * The object_id is just for error reporting, you pass the object ID
+         * of the game object you are passing
+         */
+        void pushToSelection(unsigned object_id, std::weak_ptr<GameObject>);
+
+        void popFromSelection(unsigned object_id);
+
+        void clearSelection() { selected_.clear(); }
+
+        const std::vector<std::weak_ptr<GameObject>>& getSelections() const { return selected_; }
+
         /**
          * Generate the input actions.
          *
@@ -148,8 +166,8 @@ namespace familyline::logic {
          * Does this player requested game exit?
          */
         virtual bool exitRequested() { return false; }
-        
-        
+
+
         /**
          * Process the player input actions
          *
@@ -162,7 +180,7 @@ namespace familyline::logic {
 
         std::string_view getName() { return this->name_; }
 
-        std::optional<ICamera*> getCamera() const { return this->camera_; }         
+        std::optional<ICamera*> getCamera() const { return this->camera_; }
     };
 
 
