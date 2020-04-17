@@ -454,7 +454,7 @@ void Game::ShowDebugInfo()
     auto locc = ip->GetIntersectedObject().lock();
     if (locc && selected) {
         auto alocc = locc.get();
-//          gr->DebugWrite(10, 100, "Hovering object '%s'", locc->getName());
+        //gr->DebugWrite(10, 100, "Hovering object '%s'", locc->getName());
 
         bool attackable = selected->getAttackComponent().has_value();
 

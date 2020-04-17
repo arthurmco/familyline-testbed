@@ -222,7 +222,7 @@ void PlayerManager::generateInput()
 void PlayerManager::run(GameContext& gctx)
 {
     _tick = gctx.tick;
-    if (!actions_.empty()) {
+    while (!actions_.empty()) {
         PlayerInputAction& a = actions_.front();
         this->processAction(a, *gctx.om);
 

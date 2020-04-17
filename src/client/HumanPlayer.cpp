@@ -45,6 +45,8 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
         if (std::holds_alternative<KeyAction>(hia.type)) {
             auto event = std::get<KeyAction>(hia.type);
 
+            printf("<%s>\n", event.isPressed ? "pressed" : "released");
+            
             switch (event.keycode) {
             case SDLK_w:
                 if (event.isPressed)
@@ -243,18 +245,27 @@ void HumanPlayer::generateInput()
     double camera_speed = 0.1;
     double zoom_speed = 0.01;
 
+    glm::vec2 cameraSpeedVec = glm::vec2(0, 0);
+    bool isCameraMove = front || back || left || right;
 
     if (front) {
-        this->pushAction(CameraMove{0, -camera_speed, 0});
+        cameraSpeedVec.y -= camera_speed;
     }
+
     if (back) {
-        this->pushAction(CameraMove{0, camera_speed, 0});
+        cameraSpeedVec.y += camera_speed;
     }
+
     if (left) {
-        this->pushAction(CameraMove{-camera_speed, 0, 0});
+        cameraSpeedVec.x -= camera_speed;
     }
+
     if (right) {
-        this->pushAction(CameraMove{camera_speed, 0, 0});
+        cameraSpeedVec.x += camera_speed;
+    }
+    
+    if (isCameraMove) {
+        this->pushAction(CameraMove{cameraSpeedVec.x, cameraSpeedVec.y, 0});        
     }
 
     if (build_tent) {
