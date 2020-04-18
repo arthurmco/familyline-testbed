@@ -29,6 +29,8 @@ namespace familyline::logic {
         virtual void SetLookAt(glm::vec3) = 0;
         virtual void AddLookAt(glm::vec3) = 0;
 
+        virtual void AddZoomLevel(float) = 0;
+        
         virtual ~ICamera() {}
     };
 }

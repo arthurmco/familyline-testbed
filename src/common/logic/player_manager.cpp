@@ -264,6 +264,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
 
                     (*optcam)->AddPosition(mov);
                     (*optcam)->AddLookAt(mov);
+                    (*optcam)->AddZoomLevel(a.deltaZoom);
                 }
             }
         }

@@ -26,6 +26,7 @@ bool remove_object = false;
 
 bool zoom_in = false;
 bool zoom_out = false;
+double zoom_factor = 0;
 bool zoom_mouse = false;
 bool build_something = false;
 bool build_tent = false, build_tower = false;
@@ -177,12 +178,14 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
                 zoom_in = true;
                 zoom_out = false;
                 zoom_mouse = true;
+                zoom_factor = event.scrollY;
             }
 
             if (event.scrollY <= 0) {
                 zoom_out = true;
                 zoom_in = false;
                 zoom_mouse = true;
+                zoom_factor = -event.scrollY;
             }
 
             return true;
@@ -228,10 +231,11 @@ void HumanPlayer::generateInput()
 {
     double camera_speed = 0.1;
     double zoom_speed = 0.01;
-
+    
     glm::vec2 cameraSpeedVec = glm::vec2(0, 0);
-    bool isCameraMove = front || back || left || right;
-
+    bool isCameraMove = front || back || left || right || zoom_mouse;
+    double zoom_val = 0;
+    
     if (front) {
         cameraSpeedVec.y -= camera_speed;
     }
@@ -248,8 +252,19 @@ void HumanPlayer::generateInput()
         cameraSpeedVec.x += camera_speed;
     }
 
+    if (zoom_mouse) {
+        if (zoom_in)
+            zoom_val = +(zoom_speed * zoom_factor);
+
+        if (zoom_out)
+            zoom_val = -(zoom_speed * zoom_factor);
+
+        zoom_mouse = false;
+    }
+
     if (isCameraMove) {
-        this->pushAction(CameraMove{cameraSpeedVec.x, cameraSpeedVec.y, 0});
+        this->pushAction(CameraMove{cameraSpeedVec.x, cameraSpeedVec.y, zoom_val});
+        zoom_factor = 0;
     }
 
     if (build_tent) {

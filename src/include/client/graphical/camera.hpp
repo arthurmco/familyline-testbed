@@ -70,6 +70,11 @@ namespace familyline::graphics {
         float GetZoomLevel() const;
         void SetZoomLevel(float);
 
+        virtual void AddZoomLevel(float v) {
+            this->SetZoomLevel(_zoom + v);
+        }
+
+        
         /*  Get the cursor position and return a ray to the scene in
             world space */
         glm::vec3 Project(int mouse_x, int mouse_y, int screenw, int screenh) const;
