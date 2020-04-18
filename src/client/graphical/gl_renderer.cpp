@@ -37,7 +37,7 @@ VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
 	auto vhandle = std::make_unique<GLVertexHandle>(vao, *this, vi);
 	vhandle->vsize = vd.position.size();
 
-    log->write("gl-renderer", LogType::Info,
+    log->write("gl-renderer", LogType::Debug,
 		"created vertex handle: vao=%#x, vsize=%zu",
 		vao, vhandle->vsize);
 

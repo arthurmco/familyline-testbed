@@ -238,9 +238,36 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
         void operator()(ObjectUseAction a) {
             auto& log = LoggerService::getLogger();
             log->write("player-manager", LogType::Debug,
-                       "%s type: ObjectUseAction: make selected objects do action on object %ld",
+                       "%s type: ObjectUseAction: make selected objects do default action on object %ld",
                        fmt::to_string(out).data(),
                        a.useWhat);
+
+            if (this->pl.has_value()) {
+                auto player = (*this->pl);
+            
+                /// We only implement the attack action, but other actions will be implemented
+                /// when the action system is good.
+                std::string default_action = std::string{"attack"};
+
+                if (default_action == std::string{"attack"}) {
+                    auto attacker_w = (*pl)->getSelections().at(0);
+                    auto attackee_o = om.get(a.useWhat);
+
+                    if (!attacker_w.expired() && attackee_o.has_value()) {
+                        auto attacker = attacker_w.lock();
+                        auto attackee = (*attackee_o);
+
+                        auto& atkManager = LogicService::getAttackManager();
+                        atkManager->doRegister(
+                            attacker->getID(), attacker->getAttackComponent().value());
+                        atkManager->doRegister(
+                            attackee->getID(), attackee->getAttackComponent().value());
+                        atkManager->startAttack(
+                            attacker->getID(), attackee->getID());
+                    }
+                    
+                }
+            }
         }
         void operator()(ObjectRunAction a) {
             auto& log = LoggerService::getLogger();

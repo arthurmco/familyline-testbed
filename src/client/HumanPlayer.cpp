@@ -31,7 +31,7 @@ bool zoom_mouse = false;
 bool build_something = false;
 bool build_tent = false, build_tower = false;
 
-bool move_something = false;
+bool do_something = false;
 
 std::weak_ptr<GameObject> attacker, attackee;
 
@@ -47,8 +47,6 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
 
         if (std::holds_alternative<KeyAction>(hia.type)) {
             auto event = std::get<KeyAction>(hia.type);
-
-            printf("<%s>\n", event.isPressed ? "pressed" : "released");
 
             switch (event.keycode) {
             case SDLK_w:
@@ -162,10 +160,10 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
 
             if (event.buttonCode == SDL_BUTTON_RIGHT) {
                 if (event.isPressed) {
-                    move_something = true;
+                    do_something = true;
 
                 } else {
-                    move_something = false;
+                    do_something = false;
                 }
 
                 return true;
@@ -231,11 +229,11 @@ void HumanPlayer::generateInput()
 {
     double camera_speed = 0.1;
     double zoom_speed = 0.01;
-    
+
     glm::vec2 cameraSpeedVec = glm::vec2(0, 0);
     bool isCameraMove = front || back || left || right || zoom_mouse;
     double zoom_val = 0;
-    
+
     if (front) {
         cameraSpeedVec.y -= camera_speed;
     }
@@ -304,13 +302,26 @@ void HumanPlayer::generateInput()
         mouse_click = false;
     }
 
-    if (selected_.size() > 0 && move_something) {
+    if (selected_.size() > 0 && do_something) {
         // Requested to move a selected object
         glm::vec2 to = _ip->GetGameProjectedPosition();
-        this->pushAction(SelectedObjectMoveAction{to.x, to.y});
 
-        move_something = false;
+        if (has_selection) {
+            // Requested to run the default action on the selected object
+            // Can be harvest or attack.
+            auto l = _ip->GetIntersectedObject().lock();
+            this->pushAction(ObjectUseAction{l->getID()});
+
+            // TODO: how to treat things when the object is too far from the
+            // destination to perform an action?
+        } else {
+            this->pushAction(SelectedObjectMoveAction{to.x, to.y});
+        }
+
+
+        do_something = false;
     }
+
 }
 
 
