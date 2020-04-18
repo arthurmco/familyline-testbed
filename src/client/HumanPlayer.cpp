@@ -30,6 +30,8 @@ bool zoom_mouse = false;
 bool build_something = false;
 bool build_tent = false, build_tower = false;
 
+bool move_something = false;
+
 std::weak_ptr<GameObject> attacker, attackee;
 
 
@@ -117,9 +119,9 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
                 this->renderBBs = !this->renderBBs;
             } break;
 
-            case SDLK_k:
-                attack_set = true;
-                break;
+//            case SDLK_k:
+//                attack_set = true;
+//                break;
 
             case SDLK_PLUS:
             case SDLK_KP_PLUS:
@@ -157,29 +159,12 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
 				return true;
             }
 
-            if (event.buttonCode == SDL_BUTTON_RIGHT && !_selected_obj.expired()) {
+            if (event.buttonCode == SDL_BUTTON_RIGHT) {
                 if (event.isPressed) {
+                    move_something = true;
 
-                    if (!attack_set) {
-                        attack_ready = false;
-
-                        // /* Move the object to some position */
-                        // glm::vec2 to = _ip->GetGameProjectedPosition();
-                        // auto slock = _selected_obj.lock();
-
-                        // auto path = _pf->CreatePath(*slock.get(), to);
-                        // glm::vec2 lp = path.back();
-                        // log->write("human-player", LogType::Debug,
-                        //            "moved to %.2fx%.2f", lp.x, lp.y);
-
-                        // ObjectPathManager::getInstance()->AddPath(slock.get(), path);
-
-//                        this->RegisterMove(slock.get(), to);
-                        _updated = true;
-                    } else {
-                        attack_ready = true;
-                        attack_set = true;
-                    }
+                } else {
+                    move_something = false;
                 }
 
                 return true;
@@ -220,7 +205,6 @@ void HumanPlayer::setCamera(familyline::graphics::Camera* c) {
 }
 
 void HumanPlayer::SetPicker(familyline::input::InputPicker* ip) { _ip = ip; }
-void HumanPlayer::SetPathfinder(familyline::logic::PathFinder* p) { _pf = p; }
 
 #if 0
 void HumanPlayer::SetGameActionManager(familyline::logic::GameActionManager* gam)
@@ -302,9 +286,16 @@ void HumanPlayer::generateInput()
     } else if (!has_selection && mouse_click) {
         // Object deselection, aka click on anything.
         this->pushAction(SelectionClearAction{0});
-        mouse_click = false;        
+        mouse_click = false;
     }
 
+    if (selected_.size() > 0 && move_something) {
+        // Requested to move a selected object
+        glm::vec2 to = _ip->GetGameProjectedPosition();
+        this->pushAction(SelectedObjectMoveAction{to.x, to.y});
+
+        move_something = false;
+    }
 }
 
 
@@ -314,11 +305,6 @@ void HumanPlayer::generateInput()
 bool HumanPlayer::exitRequested()
 {
     return exit_game;
-}
-
-GameObject* HumanPlayer::GetSelectedObject()
-{
-    return (_selected_obj.expired() ? nullptr : _selected_obj.lock().get());
 }
 
 /*

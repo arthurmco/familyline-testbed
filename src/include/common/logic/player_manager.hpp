@@ -14,6 +14,7 @@
 #include <common/logic/player.hpp>
 #include <common/logic/player_actions.hpp>
 #include <common/logic/lifecycle_manager.hpp>
+#include <common/logic/PathFinder.hpp>
 
 namespace familyline::logic {
 
@@ -50,7 +51,8 @@ namespace familyline::logic {
         //familyline::graphics::ObjectRenderer* objr;
         
     public:
-        ObjectLifecycleManager* olm;
+        ObjectLifecycleManager* olm = nullptr;
+        PathFinder* pf = nullptr;
 
         /* Callback to a function that allows us to add
          * an object to the renderer

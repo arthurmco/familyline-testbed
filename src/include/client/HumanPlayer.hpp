@@ -16,10 +16,8 @@
 #include <memory>
 
 #include <common/logic/player.hpp>
-#include <common/logic/PathFinder.hpp>
 #include <common/logic/object_factory.hpp>
 #include <common/logic/object_manager.hpp>
-#include <common/logic/ObjectPathManager.hpp>
 #include <common/logic/BuildQueue.hpp>
 #include <common/logic/attack_manager.hpp>
 
@@ -38,7 +36,6 @@ private:
 	familyline::input::InputPicker* _ip;
 
 	std::weak_ptr<familyline::logic::GameObject> _selected_obj;
-    familyline::logic::PathFinder* _pf = nullptr;
 
     familyline::input::HumanListenerHandler _listener;
 
@@ -65,10 +62,8 @@ public:
     void setCamera(familyline::graphics::Camera*);
 	void SetPicker(familyline::input::InputPicker* ip);
     void SetInputManager(familyline::input::InputManager*);
-    void SetPathfinder(familyline::logic::PathFinder*);
 //	void SetGameActionManager(familyline::logic::GameActionManager* );
 
-    familyline::logic::GameObject* GetSelectedObject();
     virtual ~HumanPlayer();
 };
 

@@ -1,4 +1,5 @@
 #include <common/logic/player_manager.hpp>
+#include <common/logic/ObjectPathManager.hpp>
 #include <common/logic/logic_service.hpp>
 #include <common/logger.hpp>
 #include <algorithm>
@@ -68,6 +69,30 @@ void PlayerManager::pushAction(unsigned int id, PlayerInputType type)
     actions_.push(a);
 }
 
+auto getValidSelections(const std::vector<std::weak_ptr<GameObject>>& selections) {
+
+    // TODO: PLEASE use ranges instead of this.
+    std::vector<std::weak_ptr<GameObject>> temp_selections;
+    std::vector<std::shared_ptr<GameObject>> valid_selections;
+
+    std::copy_if(selections.begin(), selections.end(), std::back_inserter(temp_selections),
+                 [](auto& sel) {
+                     if (sel.expired())
+                         return false;
+
+                     return true;
+                 });
+
+    std::transform(temp_selections.begin(), temp_selections.end(),
+                   std::back_inserter(valid_selections),
+                   [](auto& sel) {
+                       return sel.lock();
+                   });
+
+    return valid_selections;
+
+}
+
 /**
  * Adds a listener to the player input action event listeners
  *
@@ -89,11 +114,15 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
     format_to(out, "action of player {:x} at tick {:d}",
               pia.playercode, pia.tick);
 
+    assert(olm != nullptr);
+    assert(pf != nullptr);
+    
     struct InputVisitor {
         std::optional<Player*> pl;
         fmt::memory_buffer& out;
         ObjectManager& om;
         ObjectLifecycleManager& olm;
+        PathFinder& pf;
         std::function<void(std::shared_ptr<GameObject>)> render_add_cb;
 
         void operator()(EnqueueBuildAction a) {
@@ -180,17 +209,36 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                 player->pushToSelection(a.objectID, *obj);
             }
         }
-        void operator()(ObjectMoveAction a) {
+        void operator()(SelectedObjectMoveAction a) {
             auto& log = LoggerService::getLogger();
             log->write("player-manager", LogType::Debug,
-                       "%s type: ObjectMoveAction: move selected objects to %.2f,%.2f",
+                       "%s type: SelectedObjectMoveAction: move selected objects to %.2f,%.2f",
                        fmt::to_string(out).data(),
                        a.destX, a.destZ);
+
+            if (this->pl.has_value()) {
+                auto player = (*this->pl);
+
+                // TODO: add an action to clear a previous selection
+                auto selections = player->getSelections();
+                auto valid_selections = getValidSelections(selections);
+
+                for (auto& s : valid_selections) {
+                    auto path = pf.CreatePath(*s.get(), glm::vec2(a.destX, a.destZ));
+                    glm::vec2 lp = path.back();
+                    log->write("human-player", LogType::Debug,
+                               "moved to %.2fx%.2f", lp.x, lp.y);
+
+                    ObjectPathManager::getInstance()->AddPath(s.get(), path);
+                }
+                
+            }
+
         }
         void operator()(ObjectUseAction a) {
             auto& log = LoggerService::getLogger();
             log->write("player-manager", LogType::Debug,
-                       "%s type: ObjectUseAction: make selected objects use object %ld",
+                       "%s type: ObjectUseAction: make selected objects do action on object %ld",
                        fmt::to_string(out).data(),
                        a.useWhat);
         }
@@ -222,7 +270,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
 
     };
     std::visit(InputVisitor{this->getPlayerFromID(pia.playercode), out, om,
-            *olm, this->render_add_callback},
+            *olm, *pf, this->render_add_callback},
         pia.type);
 }
 

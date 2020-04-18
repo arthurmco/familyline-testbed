@@ -15,7 +15,6 @@ void Player::pushToSelection(unsigned object_id, std::weak_ptr<GameObject> o)
         log->write("player", LogType::Error, "tried to push a removed object (id %d)", object_id);
     }    
 
-    puts("oh");
     std::shared_ptr<GameObject> so = o.lock();
     assert(so->getID() == object_id);
     selected_.push_back(so);

@@ -56,7 +56,7 @@ namespace familyline::logic {
     /**
      * Move the selected object to some location
      */
-    struct ObjectMoveAction {
+    struct SelectedObjectMoveAction {
         double destX, destZ;
     };
 
@@ -94,7 +94,7 @@ namespace familyline::logic {
 
     using PlayerInputType =
         std::variant<EnqueueBuildAction, CommitLastBuildAction,
-                     ObjectSelectAction, ObjectMoveAction, SelectionClearAction,
+                     ObjectSelectAction, SelectedObjectMoveAction, SelectionClearAction,
                      ObjectUseAction, ObjectRunAction, CameraMove>;
 
     

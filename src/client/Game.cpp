@@ -112,7 +112,6 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         pathf = new PathFinder(om);
         pathf->InitPathmap(terr->GetWidth(), terr->GetHeight());
         pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
-        hp->SetPathfinder(pathf);
 
         widgets.lblVersion = new GUILabel(10, 10, "Familyline " VERSION " commit " COMMIT);
 
@@ -132,6 +131,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr));
 
         pm->olm = olm;
+        pm->pf = pathf;
     }
     catch (renderer_exception& re) {
         log->write("game", LogType::Fatal,
