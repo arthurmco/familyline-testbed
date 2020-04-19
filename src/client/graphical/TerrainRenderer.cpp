@@ -38,7 +38,7 @@ void TerrainRenderer::SetTerrain(Terrain* t)
 
     log->write("terrain-renderer", LogType::Info, "Added terrain with %d sections",
                t->GetSectionCount());
-    
+
     needs_update = true;
 }
 
@@ -63,6 +63,7 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
 
             // Send the actual vertex
             tvd.vertices.push_back(glm::vec3(x * SEC_SIZE, height, y * SEC_SIZE));
+
 
             /* Use x = 0 when x is even, x = 1 when x is odd
                This will make the texture repeat across the terrain
@@ -162,32 +163,45 @@ TerrainVertexData TerrainRenderer::GetTerrainVerticesFromSection(unsigned int se
 
 GLuint TerrainRenderer::CreateVAOFromTerrainData(TerrainVertexData& tvd)
 {
+    auto& sm = GFXService::getShaderManager();
+    auto forward = sm->getShader("forward");
+
     auto err = glGetError();
 
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
+    auto fnGetAttrib =
+        [&](const char* name) {
+            return glGetAttribLocation(forward->getHandle(), name);
+        };
+
+    printf("|| %d %d %d ||", fnGetAttrib("position"), fnGetAttrib("normal"), fnGetAttrib("texcoord"));
+    
     GLuint vboVertices, vboNormals, vboTextures, vboElement;
     glGenBuffers(1, &vboVertices);
     glBindBuffer(GL_ARRAY_BUFFER, vboVertices);
     glBufferData(GL_ARRAY_BUFFER, tvd.vertices.size() * sizeof(glm::vec3),
                  tvd.vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(fnGetAttrib("position"), 3, GL_FLOAT,
+                          GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
     glGenBuffers(1, &vboNormals);
     glBindBuffer(GL_ARRAY_BUFFER, vboNormals);
     glBufferData(GL_ARRAY_BUFFER, tvd.normals.size() * sizeof(glm::vec3),
                  tvd.normals.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(fnGetAttrib("normal"), 3, GL_FLOAT,
+                          GL_FALSE, 0, 0);
     glEnableVertexAttribArray(1);
 
     glGenBuffers(1, &vboTextures);
     glBindBuffer(GL_ARRAY_BUFFER, vboTextures);
     glBufferData(GL_ARRAY_BUFFER, tvd.texcoords.size() * sizeof(glm::vec2),
                  tvd.texcoords.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(fnGetAttrib("texcoord"), 2, GL_FLOAT,
+                          GL_FALSE, 0, 0);
     glEnableVertexAttribArray(2);
 
     glGenBuffers(1, &vboElement);
@@ -245,8 +259,8 @@ void TerrainRenderer::Render()
     sm->use(*forward);
 
 	forward->setUniform("mWorld", glm::mat4(1.0));
-	forward->setUniform("mView", _cam->GetViewMatrix());
-    forward->setUniform("mProjection", _cam->GetProjectionMatrix());
+	forward->setUniform("mView",  _cam->GetViewMatrix());
+    forward->setUniform("mProjection",  _cam->GetProjectionMatrix());
     forward->setUniform("diffuse_color", glm::vec3(0.5, 0.5, 0.5));
     forward->setUniform("ambient_color", glm::vec3(0.1, 0.1, 0.1));
 

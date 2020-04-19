@@ -45,7 +45,7 @@ public:
 	 *
 	 * Useful when we need to only retrieve the basic elements VAO, without an object
 	 */
-	std::tuple<int, int, int, int> createRaw(VertexData& vd);
+	std::tuple<int, int, int, int> createRaw(VertexData& vd, ShaderProgram& shader);
 
     
     virtual void removeVertex(VertexHandle* vh);

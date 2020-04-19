@@ -165,5 +165,6 @@ Texture* TerrainRenderer::GenerateTerrainSlotTexture(familyline::logic::TerrainD
     auto& log = LoggerService::getLogger();
 
     log->write("terrain-renderer", LogType::Info, "Terrain texture generation complete");
+
     return new Texture(ImageWidth * SlotSide, ImageHeight * SlotSide, GL_RGBA, terrain_surface.data());
 }

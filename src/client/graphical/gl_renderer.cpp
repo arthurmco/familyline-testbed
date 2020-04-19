@@ -29,11 +29,11 @@ GLRenderer::GLRenderer()
 VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
 {
     auto& log = LoggerService::getLogger();
-	auto [vao, vboPos, vboNorm, vboTex] = this->createRaw(vd);
 
 	if (!vi.shaderState.shader)
 		throw graphical_exception("Invalid shader detected while creating vertex");
 
+	auto [vao, vboPos, vboNorm, vboTex] = this->createRaw(vd, *vi.shaderState.shader);
 	auto vhandle = std::make_unique<GLVertexHandle>(vao, *this, vi);
 	vhandle->vsize = vd.position.size();
 
@@ -114,11 +114,27 @@ void GLRenderer::render(Camera* c)
 
 		glBindVertexArray(vh->vao);
 
+        auto fnGetAttrib =
+            [&](const char* name) {
+                glGetError();
+                auto r = glGetAttribLocation(shader->getHandle(), name);
+
+                GLenum err = glGetError();
+                if (err != GL_NO_ERROR) {
+                    log->write("gl-renderer", LogType::Error,
+                               "OpenGL error %#x while searching for shader attribute %s (shader is invalid)", err, name);
+                }
+
+                return r;
+            };
+
+
+        
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vh->vboPos);
 		glVertexAttribPointer(
-			0,                  // attribute 0 (positions)
+			fnGetAttrib("position"),
 			3,                  // size
 			GL_FLOAT,           // type
 			GL_FALSE,           // normalized?
@@ -129,7 +145,7 @@ void GLRenderer::render(Camera* c)
 		glEnableVertexAttribArray(1);
 		glBindBuffer(GL_ARRAY_BUFFER, vh->vboNorm);
 		glVertexAttribPointer(
-			1,                  // attribute 1 (normals/color)
+            fnGetAttrib(shader->getName() == std::string_view{"lines"} ? "color" : "normal"),
 			3,                  // size
 			GL_FLOAT,           // type
 			GL_FALSE,           // normalized?
@@ -137,11 +153,11 @@ void GLRenderer::render(Camera* c)
 			(void*)0            // array buffer offset
 		);
 
-		if (hasTexture) {
+		if (hasTexture && fnGetAttrib("texcoord") >= 0) {
 			glEnableVertexAttribArray(2);
 			glBindBuffer(GL_ARRAY_BUFFER, vh->vboTex);
 			glVertexAttribPointer(
-				2,					// attribute 2 (texcoords)
+				fnGetAttrib("texcoord"),
 				2,					// size
 				GL_FLOAT, GL_FALSE, 0, (void*)0);
 		}
@@ -153,13 +169,16 @@ void GLRenderer::render(Camera* c)
 		if (err != GL_NO_ERROR) {
 		    log->write("gl-renderer", LogType::Error,
                        "OpenGL error %#x", err);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindVertexArray(0);
+
 			return;
 		}
+
 	}
 
     glBindTexture(GL_TEXTURE_2D, 0);
-
-//	glBindVertexArray(0);
+	glBindVertexArray(0);
 }
 
 /**
@@ -167,7 +186,8 @@ void GLRenderer::render(Camera* c)
  *
  * Useful when we need to only retrieve the basic elements VAO, without an object
  */
-std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd)
+std::tuple<int, int, int, int> GLRenderer::createRaw(
+    VertexData& vd, ShaderProgram& shader)
 {
     auto& log = LoggerService::getLogger();
 
@@ -178,26 +198,41 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd)
 	GLuint vboPos, vboNorm, vboTex;
 	bool animated = true;
 
+
+    auto fnGetAttrib =
+        [&](const char* name) {
+            glGetError();
+            auto r = glGetAttribLocation(shader.getHandle(), name);
+
+            GLenum err = glGetError();
+            if (err != GL_NO_ERROR) {
+                log->write("gl-renderer", LogType::Error,
+                           "OpenGL error %#x while searching for shader attribute %s on vertex set addition (shader is invalid)", err, name);
+            }
+
+            return r;
+        };
+    
 	glGenBuffers(1, &vboPos);
 	glBindBuffer(GL_ARRAY_BUFFER, vboPos);
 	glBufferData(GL_ARRAY_BUFFER, vd.position.size() * sizeof(glm::vec3),
 		vd.position.data(), (animated ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(fnGetAttrib("position"), 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
 	glGenBuffers(1, &vboNorm);
 	glBindBuffer(GL_ARRAY_BUFFER, vboNorm);
 	glBufferData(GL_ARRAY_BUFFER, vd.normals.size() * sizeof(glm::vec3),
 		vd.normals.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(fnGetAttrib(shader.getName() == std::string_view{"lines"} ? "color" : "normal"), 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(1);
 
-	if (vd.texcoords.size() > 0) {
+	if (vd.texcoords.size() > 0 && fnGetAttrib("texcoord") >= 0) {
 		glGenBuffers(1, &vboTex);
 		glBindBuffer(GL_ARRAY_BUFFER, vboTex);
 		glBufferData(GL_ARRAY_BUFFER, vd.texcoords.size() * sizeof(glm::vec2),
 			vd.texcoords.data(), GL_STATIC_DRAW);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(fnGetAttrib("texcoord"), 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(2);
 	}
 
@@ -252,7 +287,7 @@ bool GLVertexHandle::remove()
 
 bool GLVertexHandle::recreate(VertexData & vd, VertexInfo& vi)
 {
-	auto [vao, vboPos, vboNorm, vboTex] = this->_renderer.createRaw(vd);
+	auto [vao, vboPos, vboNorm, vboTex] = this->_renderer.createRaw(vd, *vi.shaderState.shader);
 	auto err = glGetError();
 
 	if (err == GL_NO_ERROR) {
