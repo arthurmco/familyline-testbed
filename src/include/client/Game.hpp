@@ -13,12 +13,12 @@
 #include <common/logic/object_factory.hpp>
 #include <common/logic/ObjectPathManager.hpp>
 #include <common/logic/TerrainFile.hpp>
-#include <common/logic/Team.hpp>
 #include <common/logic/BuildQueue.hpp>
 #include <common/logic/GameActionManager.hpp>
 #include <common/logic/player_manager.hpp>
 #include <common/logic/debug_drawer.hpp>
 #include <common/logic/lifecycle_manager.hpp>
+#include <common/logic/colony_manager.hpp>
 
 #include <client/graphical/camera.hpp>
 #include <client/graphical/asset_file.hpp>
@@ -65,7 +65,7 @@ namespace familyline {
         logic::PlayerManager* pm = nullptr;
         logic::ObjectManager* om = nullptr;
         
-//        std::unique_ptr<HumanPlayer> hp;
+        std::unique_ptr<logic::ColonyManager> cm_;
         logic::Terrain* terr = nullptr;
         logic::TerrainFile* terrFile;
     

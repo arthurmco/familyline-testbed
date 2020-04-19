@@ -47,6 +47,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         om = new ObjectManager{};
         //        ObjectManager::setDefault(om);
 
+        cm_ = std::make_unique<ColonyManager>();
+
         olm = new ObjectLifecycleManager {*om};
         auto& atk_manager = LogicService::getAttackManager();
 
@@ -60,9 +62,6 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
         terr = terrFile->GetTerrain();
-
-        auto tteam = std::make_shared<Team>(1, "Test team");
-        printf("%s -- %#x\n", tteam->name.c_str(), tteam->number);
 
         AssetFile f;
         f.loadFile("assets.yml");
@@ -100,7 +99,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         pm->render_add_callback = [&](std::shared_ptr<GameObject> o) {
             objrend->add(o);
         };
-        
+
         //gam.AddListener(objrend);
 
 //        InputManager::GetInstance()->Initialize();
@@ -115,7 +114,9 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         widgets.lblVersion = new GUILabel(10, 10, "Familyline " VERSION " commit " COMMIT);
 
-        std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());        
+        std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());
+        auto& alliance = cm_->createAlliance(std::string { humanp->getName()});
+        cm_->createColony(*humanp.get(), 0x0000ff, std::optional{std::reference_wrapper<Alliance>{alliance}});
         human_id_ = pm->add(std::move(humanp));
 
         gr->add(widgets.lblVersion);
@@ -269,10 +270,10 @@ int Game::RunLoop()
     // Update the terrain first, so the terrain textures can load
     // TODO: generate the terrain textures before? in another function?
     terr_rend->Update();
-    
+
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
-    
+
     do {
         player = true;
 
@@ -331,7 +332,7 @@ int Game::RunLoop()
         // Make the mininum and maximum frame calculation more fair
         // because usually the first frame is when we load things, and
         // its the slowest.
-        
+
         if (delta < mindelta && frame > 2)
             mindelta = delta;
 
@@ -433,11 +434,11 @@ void Game::RunGraphical()
 }
 
 void Game::showHumanPlayerInfo(Player* hp) {
-    
+
     auto selections = hp->getSelections();
     std::shared_ptr<GameObject> selected = selections.size() == 1 ?
         selections[0].lock() : std::shared_ptr<GameObject>();
-    
+
     if (BuildQueue::GetInstance()->getNext()) {
         char s[256];
         sprintf(s, "Click to build %s",
@@ -500,7 +501,7 @@ void Game::showHumanPlayerInfo(Player* hp) {
     lblTerrainPos.setText(texs);
     // gr->DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
     //  "Enabled" : "Disabled");
-    
+
 
 }
 

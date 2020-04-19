@@ -207,19 +207,6 @@ void HumanPlayer::setCamera(familyline::graphics::Camera* c) {
 
 void HumanPlayer::SetPicker(familyline::input::InputPicker* ip) { _ip = ip; }
 
-#if 0
-void HumanPlayer::SetGameActionManager(familyline::logic::GameActionManager* gam)
-{
-    this->_gam = gam;
-
-    /* Create a city for it */
-    City* c = new City{this, glm::vec3(1, 0, 0)};
-    AddCity(c);
-}
-#endif
-
-
-
 /**
  * Generate the input actions.
  *

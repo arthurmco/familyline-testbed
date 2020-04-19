@@ -1,12 +1,14 @@
 #include <common/logic/colony.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::logic;
 
 Colony::Colony(Player& p, unsigned color, Alliance& a)
     : player_(p), color_(color), alliance_(a)
 {
-    printf("colony for player %s created\n", p.getName().data());
-    printf("added into alliance %s\n", a.name.c_str());
+    auto& log = LoggerService::getLogger();
+    log->write("colony", LogType::Info, "colony for player %s created", p.getName().data());
+    log->write("colony", LogType::Info, "added into alliance %s", a.name.c_str());
 }
 
 

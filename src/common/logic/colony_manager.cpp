@@ -1,4 +1,5 @@
 #include <common/logic/colony_manager.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::logic;
 
@@ -13,11 +14,10 @@ Colony& ColonyManager::createColony(Player& p, unsigned color,
     if (colonies_.size()+1 >= ColonyManager::MaxColonies) {
         throw std::runtime_error("maximum colony size reached!");
     }
-            
-        
-        
-    Alliance& a = alliance.value_or(
+
+    Alliance& a = alliance.has_value() ? alliance.value() : std::reference_wrapper<Alliance>(
         this->createAlliance(std::string{p.getName()}));
+    
     colonies_.push_back(std::make_unique<Colony>(p, color, a));
 
     auto& c = colonies_.back();
@@ -32,8 +32,9 @@ Alliance& ColonyManager::createAlliance(std::string name)
 
     alliances_.push_back(a);
 
-    printf("alliance %s created\n", name.c_str());
-        
+    auto& log = LoggerService::getLogger();
+    log->write("colony-manager", LogType::Info, "alliance %s created", name.c_str());
+
     auto& ab = alliances_.back();
     return ab;
 }
@@ -57,7 +58,7 @@ DiplomacyStatus ColonyManager::getDiplomacy(Colony const& c, Colony const& other
                          return alliance_other.getID() == alliance.get().getID();
                      }) != alliance_c.allies.end())
         return DiplomacyStatus::Ally;
-        
+
     return DiplomacyStatus::Neutral;
 }
 
@@ -68,37 +69,40 @@ DiplomacyStatus ColonyManager::getDiplomacy(Colony const& c, Colony const& other
  */
 void ColonyManager::setAllianceDiplomacy(Alliance& a, Alliance& other, DiplomacyStatus s)
 {
+    auto& log = LoggerService::getLogger();
 
     auto enemies_end = std::remove_if(
         a.enemies.begin(), a.enemies.end(),
         [&](auto alliance) {
             return other.getID() == alliance.get().getID();
         });
-            
+
     auto allies_end = std::remove_if(
         a.allies.begin(), a.allies.end(),
         [&](auto alliance) {
             return other.getID() == alliance.get().getID();
         });
 
-    printf("before: len allies=%zu, len enemies=%zu\n",
-           a.allies.size(), a.enemies.size());
     a.enemies.erase(enemies_end, a.enemies.end());
     a.allies.erase(allies_end, a.allies.end());
-    printf("after: len allies=%zu, len enemies=%zu\n",
-           a.allies.size(), a.enemies.size());
 
     switch (s) {
     case DiplomacyStatus::Enemy:
+        log->write("colony-manager", LogType::Info, "%s is now enemy of %s",
+                   a.name.c_str(), other.name.c_str());
         a.enemies.push_back(other);
         break;
-                
+
     case DiplomacyStatus::Ally:
+        log->write("colony-manager", LogType::Info, "%s is now ally of %s",
+                   a.name.c_str(), other.name.c_str());
         a.allies.push_back(other);
         break;
 
     default:
+        log->write("colony-manager", LogType::Info, "%s is now neutral of %s (have no diplomacy set)",
+                   a.name.c_str(), other.name.c_str());
         return;
-                
+
     }
 }

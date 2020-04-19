@@ -34,7 +34,8 @@ namespace familyline::logic {
     };
 
     using PlayerCallback = std::function<void(Player*)>;
-    
+
+    /////////////////
     class PlayerManager {
     private:
         std::vector<PlayerInfo> players_;
@@ -48,8 +49,6 @@ namespace familyline::logic {
 
         std::optional<Player*> getPlayerFromID(int id);
 
-        //familyline::graphics::ObjectRenderer* objr;
-        
     public:
         ObjectLifecycleManager* olm = nullptr;
         PathFinder* pf = nullptr;
