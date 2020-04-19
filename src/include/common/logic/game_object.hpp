@@ -5,21 +5,21 @@
 #include <optional>
 
 #include <memory>
-#include "object_components.hpp"
+#include <common/logic/object_components.hpp>
 
 namespace familyline::logic {
     typedef unsigned int object_id_t;
 
-/**
- * Game object type
- *
- * We can use the absence or presence of certain components to guess type,
- * but is easier to the human and to the computer if we could explicitly say
- * this.
- *
- * The human would not have to guess and think much, and the computer would
- * have to compare only one value. It would also remove ambiguity
- */
+    /**
+     * Game object type
+     *
+     * We can use the absence or presence of certain components to guess type,
+     * but is easier to the human and to the computer if we could explicitly say
+     * this.
+     *
+     * The human would not have to guess and think much, and the computer would
+     * have to compare only one value. It would also remove ambiguity
+     */
     enum ObjectCategory {
         CommonUnit,
         Building,
@@ -29,9 +29,9 @@ namespace familyline::logic {
     };
 
 
-/**
- * Our beloved base game object
- */
+    /**
+     * Our beloved base game object
+     */
     class GameObject {
         friend class ObjectManager;
 
@@ -64,17 +64,6 @@ namespace familyline::logic {
         bool _showHealth;
 
         /**
-         * City ID of this object
-         *
-         * Every object needs a city, so we can know who is the owner, and
-         * color it, and calculate diplomacy thibgs
-         *
-         * City ID = 0 is "no city", might appear in game as Nature, Gaia or
-         * something like this.
-         */
-        int _cityID;
-
-        /**
          * Logic engine position
          *
          * X and Z coordinates are mapped to the X and Y axis on the terrain.
@@ -88,6 +77,7 @@ namespace familyline::logic {
         std::optional<AttackComponent> cAttack;
         std::optional<ContainerComponent> cContainer;
         std::optional<MovementComponent> cMovement;
+        std::optional<ColonyComponent> cColony;
 
         ObjectCategory category;
 
@@ -102,7 +92,6 @@ namespace familyline::logic {
 
         double addHealth(double v) { _health += v; return _health; }
 	
-        int getCityID() const { return _cityID; }
         glm::vec2 getSize() const { return _size; }
 
         glm::vec3 getPosition() const { return _position; }
@@ -129,10 +118,11 @@ namespace familyline::logic {
         std::optional<AttackComponent>& getAttackComponent() { return cAttack; }
         std::optional<ContainerComponent>& getContainerComponent() { return cContainer; }
         std::optional<MovementComponent>& getMovementComponent() { return cMovement; }
+        std::optional<ColonyComponent>& getColonyComponent() { return cColony; }
 
         ObjectCategory getCategory() { return this->category; }
 
-        virtual ~GameObject() {printf("%d destroyed\n", _id);}
+        virtual ~GameObject() {}
 
 
     };

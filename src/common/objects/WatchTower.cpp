@@ -21,6 +21,9 @@ WatchTower::WatchTower()
             // rotation, atkDistance, armor, range
             0, 50, 2, M_PI
         });
+
+    this->cColony = std::make_optional(ColonyComponent());
+
 }
 
 /* Called on object initialization */

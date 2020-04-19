@@ -9,8 +9,10 @@
 #include <vector>
 #include <memory>
 #include <optional>
-#include "imesh.hpp"
-#include "Terrain.hpp"
+
+#include <common/logic/imesh.hpp>
+#include <common/logic/Terrain.hpp>
+
 
 namespace familyline::logic {
     class GameObject;
@@ -32,9 +34,9 @@ namespace familyline::logic {
         void updateMesh(const Terrain& t);
     };
 
-/**
- * Allows objects to attack and be attacked.
- */
+    /**
+     * Allows objects to attack and be attacked.
+     */
     struct AttackComponent {
         GameObject* object;
 
@@ -101,26 +103,48 @@ namespace familyline::logic {
         std::optional<double> doDirectAttack(const AttackComponent& other);
     };
 
-/**
- * Allows objects to have objects inside them
- *
- * The objects inside the building might or might not affect the properties
- * of the container object, the engine have no restrictions against it
- *
- * We also will not impose restrictions of what you can store, but please
- * try not to store buildings inside it
- */
+    /**
+     * Allows objects to have objects inside them
+     *
+     * The objects inside the building might or might not affect the properties
+     * of the container object, the engine have no restrictions against it
+     *
+     * We also will not impose restrictions of what you can store, but please
+     * try not to store buildings inside it
+     */
     struct ContainerComponent {
         int maxObjects;
         std::vector<GameObject*> storedObjects;
     };
 
-/**
- * Allows objects to move
- */
+    /**
+     * Allows objects to move
+     */
     struct MovementComponent {
 
         //! Tenths of game units per second
         double speed;
     };
+    
+    class Colony;
+    
+    /**
+     * Binds a colony to an object
+     *
+     * Objects without this component will not be bound to any colony.
+     * Objects with this component but with no colony will be bound
+     * to "Gaia", the "nature" city
+     *
+     * You should always define this component, unless the game object
+     * is something from nature, like a tree or a resource extraction
+     * entity, or some decorative-only object.
+     */
+    struct ColonyComponent {
+        std::optional<std::reference_wrapper<Colony>> owner;
+
+        ColonyComponent() 
+            : owner(std::optional<std::reference_wrapper<Colony>>())
+            {}
+    };
+
 }

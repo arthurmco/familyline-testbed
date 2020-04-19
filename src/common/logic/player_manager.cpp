@@ -124,6 +124,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
         ObjectLifecycleManager& olm;
         PathFinder& pf;
         std::function<void(std::shared_ptr<GameObject>)> render_add_cb;
+        std::function<void(std::shared_ptr<GameObject>, unsigned /*player_id*/)> colony_add_callback;
 
         void operator()(EnqueueBuildAction a) {
             auto& log = LoggerService::getLogger();
@@ -171,8 +172,9 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                     assert(ncobj->getPosition().z == buildpos.z);
 
                     render_add_cb(ncobj);
-
+                    
                     olm.doRegister(ncobj);
+                    colony_add_callback(ncobj, player->getCode());
                     olm.notifyCreation(cobjID);
 
                 }
@@ -298,7 +300,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
 
     };
     std::visit(InputVisitor{this->getPlayerFromID(pia.playercode), out, om,
-            *olm, *pf, this->render_add_callback},
+                            *olm, *pf, this->render_add_callback, this->colony_add_callback},
         pia.type);
 }
 

@@ -100,6 +100,18 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
             objrend->add(o);
         };
 
+        pm->colony_add_callback = [&](std::shared_ptr<GameObject> o, unsigned player_id) {
+                                      auto& col = o->getColonyComponent();
+                                      if (col.has_value()) {
+                                          col->owner = std::make_optional(colonies_.at(player_id));
+                                          log->write("game", LogType::Info,
+                                                     "set object id %d (%s) to city %s",
+                                                     o->getID(), o->getName().c_str(),
+                                                     col->owner.value().get().getName().data());
+
+                                      }
+                                  };
+
         //gam.AddListener(objrend);
 
 //        InputManager::GetInstance()->Initialize();
@@ -116,9 +128,10 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());
         auto& alliance = cm_->createAlliance(std::string { humanp->getName()});
-        cm_->createColony(*humanp.get(), 0x0000ff, std::optional{std::reference_wrapper<Alliance>{alliance}});
+        auto& colony = cm_->createColony(*humanp.get(), 0x0000ff, std::optional{std::reference_wrapper<Alliance>{alliance}});
         human_id_ = pm->add(std::move(humanp));
 
+        colonies_.insert({human_id_, std::reference_wrapper<Colony>(colony)});
         gr->add(widgets.lblVersion);
 
         auto& of = LogicService::getObjectFactory();
@@ -133,6 +146,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
         pm->olm = olm;
         pm->pf = pathf;
+
     }
     catch (renderer_exception& re) {
         log->write("game", LogType::Fatal,

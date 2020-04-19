@@ -20,6 +20,7 @@ Tent::Tent() : GameObject("tent", "Tent", glm::vec2(15, 15), 250, 250)
             0, 10, 1, M_PI
         });
 
+    this->cColony = std::make_optional(ColonyComponent());
 };
 
 /* Called on object initialization */

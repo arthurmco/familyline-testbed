@@ -5,7 +5,6 @@
 add_library(
   familyline-common
   "logger.cpp"
-  "logic/ActionManager.cpp"
   "logic/action_queue.cpp"
   "logic/attack_manager.cpp"
   "logic/BuildQueue.cpp"

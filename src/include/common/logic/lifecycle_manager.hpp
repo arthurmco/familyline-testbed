@@ -21,6 +21,9 @@ namespace familyline::logic {
         int time_to_die = -1;
     };
 
+
+    class Player;
+    
     /**
      * This class manages the game object lifecycle
      *

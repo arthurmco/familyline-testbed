@@ -91,3 +91,4 @@ std::optional<double> AttackComponent::doDirectAttack(const AttackComponent& def
 	return std::nullopt;
 
 }
+

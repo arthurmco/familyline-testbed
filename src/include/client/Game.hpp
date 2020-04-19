@@ -109,7 +109,8 @@ namespace familyline {
         void ShowDebugInfo();
 
         void showHumanPlayerInfo(logic::Player*);
-        
+
+        std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>> colonies_;
     public:
         Game(graphics::Window* w, graphics::Framebuffer* fb3D,
              graphics::Framebuffer* fbGUI, graphics::gui::GUIManager* gr,

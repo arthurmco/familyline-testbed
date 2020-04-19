@@ -57,6 +57,13 @@ namespace familyline::logic {
          * an object to the renderer
          */
         std::function<void(std::shared_ptr<GameObject>)> render_add_callback;
+
+        /**
+         * Callback to a function that allows us to
+         * add an object to a colony
+         */
+        std::function<void(std::shared_ptr<GameObject>, unsigned /*player_id*/)> colony_add_callback;
+        
         
         /**
          * Add a player here
