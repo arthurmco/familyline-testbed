@@ -71,3 +71,6 @@ docs/build/
 /.vs/VSWorkspaceState.json
 /.vs
 build/
+
+.DS_Store
+.clangd/
