@@ -181,6 +181,8 @@ namespace familyline::logic {
         std::string_view getName() { return this->name_; }
 
         std::optional<ICamera*> getCamera() const { return this->camera_; }
+
+        virtual ~Player() {}
     };
 
 
