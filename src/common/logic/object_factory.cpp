@@ -8,10 +8,6 @@ using namespace familyline::logic;
 std::shared_ptr<GameObject> ObjectFactory::getObject(const char* type, float x, float y, float z)
 {
     if (_objects.find(type) != _objects.end()) {
-        //  const char* n = _objects[type]->GetName();
-        //  char* nn = new char[strlen(n)+1];
-        //  memcpy(nn, n, strlen(n)+1);
-        //  return _objects[type]->Clone(x, y, z, nn);
         auto newo = _objects[type]->create();
         newo->setPosition(glm::vec3(x, y, z));
         return newo;

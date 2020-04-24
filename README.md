@@ -138,9 +138,9 @@ Aside from issues, there are things I would like to do very soon
  - ~~Continuous integration~~
  - Increase test coverage
  - ~~Add support for vcpkg in Windows~~
- - Test build in clang
- - Try to build in a Mac, for those hipsters who use OS x (I kid!
-   :wink:)
+ - ~~Test build in clang~~
+ - ~~Try to build in a Mac, for those hipsters who use OS x (I kid!
+   :wink:)~~
  - Support animated meshes
  
 ## License
@@ -149,3 +149,4 @@ Every file in this game is licensed under the MIT license, the best in
 existence.
 
 Copyright (C) 2016-2018 Arthur Mendes.
+n

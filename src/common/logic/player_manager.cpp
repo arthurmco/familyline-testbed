@@ -116,7 +116,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
 
     assert(olm != nullptr);
     assert(pf != nullptr);
-    
+
     struct InputVisitor {
         std::optional<Player*> pl;
         fmt::memory_buffer& out;

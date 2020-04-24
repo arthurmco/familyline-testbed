@@ -6,7 +6,7 @@ using namespace familyline::logic;
 
 void ActionQueue::addEmitter(EventEmitter* e)
 {
-	printf("\tadded event emitter %s\n", e->getName().c_str());
+	//printf("\tadded event emitter %s\n", e->getName().c_str());
 
 	e->queue = this;
 }
@@ -17,7 +17,7 @@ void ActionQueue::addReceiver(EventReceiver* r, std::initializer_list<EventType>
 	rd.events = events;
 	rd.receiver = r;
 
-	printf("\tadded event receiver %s\n", r->getName().c_str());
+	//printf("\tadded event receiver %s\n", r->getName().c_str());
 
 
 	this->receivers.push_back(rd);

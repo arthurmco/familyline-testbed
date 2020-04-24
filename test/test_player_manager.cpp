@@ -1,0 +1,319 @@
+#include <gtest/gtest.h>
+#include "utils.hpp"
+
+#include <common/logic/logic_service.hpp>
+#include <common/logic/PathFinder.hpp>
+#include <common/logic/lifecycle_manager.hpp>
+#include <common/logic/player_manager.hpp>
+#include <common/logic/ObjectPathManager.hpp>
+#include <common/logic/player.hpp>
+#include <common/logic/PathFinder.hpp>
+
+using namespace familyline::logic;
+
+/// A basic player that mocks a real player.
+///
+/// It has a custom callback where the player can push actions.
+class DummyPlayer : public Player {
+private:    
+    std::function<std::vector<PlayerInputType>(void)> player_input_cb_;
+    
+public:
+    DummyPlayer(PlayerManager& pm, const char* name, int code,
+                decltype(player_input_cb_) input_cb)
+        : Player(pm, name, code), player_input_cb_(input_cb)
+        {}
+
+    virtual void generateInput() {
+        auto input = player_input_cb_();
+
+        for (auto& i : input) {
+            this->pushAction(i);
+        }
+    }
+};
+
+void stepLogic(PlayerManager& pm, GameContext& gctx) {
+    pm.generateInput();
+    pm.run(gctx);
+    constexpr auto elapsed = 16/1000.0;
+
+    gctx.tick++;
+    gctx.elapsed_seconds += elapsed;
+    ObjectPathManager::getInstance()->UpdatePaths(elapsed*1000);
+
+}
+
+TEST(PlayerManager, TestIfPlayerCanBuild) {    
+    LogicService::getObjectFactory()->clear();
+    
+    ObjectManager om;
+    ObjectLifecycleManager olm{om};
+    PathFinder pf{&om};
+
+    bool object_rendered = false;
+
+    PlayerManager pm;
+    pm.olm = &olm;
+    pm.pf = &pf;
+    
+    auto atkc1 = std::optional<AttackComponent>(
+        AttackComponent { nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto obj_s = make_object(
+        {"test", "Test Object", glm::vec2(0, 0), 200, 200, true, []() {}, atkc1});    
+    LogicService::getObjectFactory()->addObject(obj_s.get());
+    
+    auto d = std::make_unique<DummyPlayer>(
+        pm, "Test", 1, [&]() -> std::vector<PlayerInputType> {
+            return {
+                EnqueueBuildAction {"test"},
+                CommitLastBuildAction {10.0, 12.0, 1.0, true}
+            };
+        });
+
+    auto i = pm.add(std::move(d));
+    ASSERT_NE(1, i);
+
+    GameContext gctx = {&om, 1, 0};
+    pm.render_add_callback = [&](std::shared_ptr<GameObject> o) {        
+        auto pos = o->getPosition();
+        ASSERT_FLOAT_EQ(10.0, pos.x);
+        ASSERT_FLOAT_EQ(12.0, pos.z);
+        ASSERT_FLOAT_EQ(1.0, pos.y);
+        
+        object_rendered = true;
+    };
+    pm.colony_add_callback = [](auto o, auto id) {};
+
+    stepLogic(pm, gctx);
+
+    ASSERT_TRUE(object_rendered);
+}
+
+
+TEST(PlayerManager, TestIfPlayerCanSelect) {    
+    LogicService::getObjectFactory()->clear();
+    
+    ObjectManager om;
+    ObjectLifecycleManager olm{om};
+    PathFinder pf{&om};
+
+    bool object_rendered = false;
+
+    PlayerManager pm;
+    pm.olm = &olm;
+    pm.pf = &pf;
+    
+    auto atkc1 = std::optional<AttackComponent>(
+        AttackComponent { nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto obj_s1 = make_object(
+        {"test", "Test Object", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});    
+
+    auto atkc2 = std::optional<AttackComponent>(
+        AttackComponent { nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto obj_s2 = make_object(
+        {"test2", "Test Object2", glm::vec2(20, 20), 200, 200, true, []() {}, atkc1});    
+
+    auto sid = om.add(obj_s1);
+    om.add(obj_s2);
+
+    
+    auto d = std::make_unique<DummyPlayer>(
+        pm, "Test", 1, [&]() -> std::vector<PlayerInputType> {
+            return {
+                ObjectSelectAction {sid},
+            };
+        });
+    ASSERT_EQ(0, d->getSelections().size());
+
+    auto i = pm.add(std::move(d));
+    ASSERT_NE(1, i);
+
+    GameContext gctx = {&om, 1, 0};
+    stepLogic(pm, gctx);
+
+    int iterated = 0;
+
+    pm.iterate([&](Player* p) {
+        iterated++;
+        ASSERT_EQ(1, p->getSelections().size());
+
+        auto sels = p->getSelections();
+        auto sel0 = sels[0].lock();
+
+        ASSERT_EQ(std::string{"Test Object"}, sel0->getName());
+    });
+    
+    ASSERT_EQ(1, iterated);
+}
+
+
+TEST(PlayerManager, TestIfPlayerCanDeselect) {    
+    LogicService::getObjectFactory()->clear();
+    
+    ObjectManager om;
+    ObjectLifecycleManager olm{om};
+    PathFinder pf{&om};
+
+    bool object_rendered = false;
+
+    PlayerManager pm;
+    pm.olm = &olm;
+    pm.pf = &pf;
+    
+    auto atkc1 = std::optional<AttackComponent>(
+        AttackComponent { nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto obj_s1 = make_object(
+        {"test", "Test Object", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});    
+
+    auto atkc2 = std::optional<AttackComponent>(
+        AttackComponent { nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto obj_s2 = make_object(
+        {"test2", "Test Object2", glm::vec2(20, 20), 200, 200, true, []() {}, atkc1});    
+
+    auto sid = om.add(obj_s1);
+    om.add(obj_s2);
+
+    GameContext gctx = {&om, 1, 0};
+
+    auto d = std::make_unique<DummyPlayer>(
+        pm, "Test", 1, [&]() -> std::vector<PlayerInputType> {
+            switch (gctx.tick) {
+            case 1:
+                return {
+                    ObjectSelectAction {sid},
+                };
+            default:
+                return {
+                    SelectionClearAction {},
+                };
+            }
+            
+        });
+
+    auto i = pm.add(std::move(d));
+    ASSERT_NE(1, i);
+
+    int iterated = 0;
+
+    auto iterFn = [&](Player* p) {
+        iterated++;
+        switch (gctx.tick) {
+        case 2:
+            ASSERT_EQ(1, p->getSelections().size()) << "Wrong selection on iteration " << iterated;
+            break;
+        default:
+            ASSERT_EQ(0, p->getSelections().size()) << "Wrong deselection on iteration " << iterated;
+
+        }
+    };
+    
+    pm.iterate(iterFn);
+    stepLogic(pm, gctx);
+    pm.iterate(iterFn);
+    stepLogic(pm, gctx);
+    pm.iterate(iterFn);
+    
+    
+    ASSERT_EQ(3, iterated);
+}
+
+TEST(PlayerManager, TestIfPlayerCanMove) {    
+    LogicService::getObjectFactory()->clear();
+    auto t = std::make_unique<Terrain>(30, 30);
+    ObjectPathManager::getInstance()->SetTerrain(t.get());
+    
+    ObjectManager om;
+    ObjectLifecycleManager olm{om};
+    PathFinder pf{&om};
+    pf.InitPathmap(30, 30);
+    
+    bool object_rendered = false;
+
+    PlayerManager pm;
+    pm.olm = &olm;
+    pm.pf = &pf;
+    
+    auto atkc1 = std::optional<AttackComponent>(
+        AttackComponent { nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto obj_s1 = make_object(
+        {"test", "Test Object", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});    
+
+    auto atkc2 = std::optional<AttackComponent>(
+        AttackComponent { nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto obj_s2 = make_object(
+        {"test2", "Test Object2", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});    
+
+    obj_s2->setPosition(glm::vec3(20, 1, 20));
+    
+    om.add(obj_s1);
+    auto sid = om.add(obj_s2);
+
+    GameContext gctx = {&om, 1, 0};
+
+    auto d = std::make_unique<DummyPlayer>(
+        pm, "Test", 1, [&]() -> std::vector<PlayerInputType> {
+            switch (gctx.tick) {
+            case 1:
+                return {
+                    ObjectSelectAction {sid},
+                };
+            case 2:
+                return {
+                    SelectedObjectMoveAction {15, 14},
+                };
+            default:
+                return {
+                    SelectionClearAction {},
+                };
+            }
+            
+        });
+
+    auto i = pm.add(std::move(d));
+    ASSERT_NE(1, i);
+
+    int iterated = 0;
+
+        {
+        auto obj = om.get(sid);
+        auto opos = (*obj)->getPosition();
+        ASSERT_FLOAT_EQ(20.0, opos.x);
+        ASSERT_FLOAT_EQ(20.0, opos.z);
+    }
+
+    stepLogic(pm, gctx);
+
+    {
+        auto obj = om.get(sid);
+        auto opos = (*obj)->getPosition();
+        ASSERT_FLOAT_EQ(20.0, opos.x);
+        ASSERT_FLOAT_EQ(20.0, opos.z);
+    }
+
+    stepLogic(pm, gctx);
+    stepLogic(pm, gctx);
+    stepLogic(pm, gctx);
+    stepLogic(pm, gctx);
+    stepLogic(pm, gctx);
+    stepLogic(pm, gctx);
+    stepLogic(pm, gctx);
+    
+
+    auto obj = om.get(sid);
+    auto opos = (*obj)->getPosition();
+
+    ASSERT_FLOAT_EQ(15.0, opos.x);
+    ASSERT_FLOAT_EQ(14.0, opos.z);
+
+    // TODO: refactor the path manager PLEASE
+    ObjectPathManager::getInstance()->SetTerrain(nullptr);
+}
+

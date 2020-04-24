@@ -39,6 +39,7 @@ namespace familyline::logic {
          */
         void addObject(GameObject* object);
 
+        void clear() { _objects.clear(); }
     };
 
 }
