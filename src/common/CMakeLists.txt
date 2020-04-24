@@ -51,9 +51,18 @@ else()
   pkg_search_module(GLM REQUIRED glm) # finds glm
   target_link_libraries(familyline-common PUBLIC fmt::fmt ${GLM_LIBRARIES})
   target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS})
-
-
 endif(MSVC)
+
+if (SET_COVERAGE)
+  target_compile_options(familyline-common PUBLIC "-fprofile-arcs")
+  target_compile_options(familyline-common PUBLIC "-ftest-coverage")
+  target_compile_options(familyline-common PUBLIC "-O0")
+  target_link_libraries(familyline-common PUBLIC "-fprofile-arcs")
+  target_link_libraries(familyline-common PUBLIC "-ftest-coverage")
+  target_link_libraries(familyline-common PUBLIC "gcov")
+  target_link_libraries(familyline-common PUBLIC "--coverage")
+endif()
+
 
 target_include_directories(familyline-common PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 target_compile_features(familyline-common PRIVATE cxx_std_20)
