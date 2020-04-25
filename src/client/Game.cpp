@@ -29,6 +29,57 @@ public:
     }
 };
 
+/// A no-op player that will only plot an existing building into the map
+/// at the start of the game and do nothing.
+///
+/// It is only temporary, to test attacks in the future.
+class DummyPlayer : public Player {
+private:
+    size_t tick = 0;
+    bool done = false;
+    
+    void pushActions(std::initializer_list<PlayerInputType> input) {
+        for (auto& i : input) {
+            this->pushAction(i);
+        }
+    }
+
+public:
+    DummyPlayer(PlayerManager& pm, const char* name, int code)
+        : Player(pm, name, code)
+        {}
+
+    virtual void generateInput() {
+        if (done)
+            return;
+        
+        if (tick == 2) {
+            this->pushActions({
+                    EnqueueBuildAction{"tent"}
+                });
+        }
+
+        if (tick == 3) {
+            this->pushActions({
+                    CommitLastBuildAction{20.0, 20.0, 2.4, true},
+                    EnqueueBuildAction{"tent"}
+                });
+        }
+
+        if (tick == 4) {
+            this->pushActions({
+                    CommitLastBuildAction{30.0, 35.0, 2.4, true},
+                });
+
+            puts("Dummy player built everything it needed");
+            done = true;
+        }        
+
+        tick++;
+    }
+
+};
+
 /// TODO: rewrite this and Tribalia.cpp!!!
 
 Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
@@ -127,11 +178,18 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         widgets.lblVersion = new GUILabel(10, 10, "Familyline " VERSION " commit " COMMIT);
 
         std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());
-        auto& alliance = cm_->createAlliance(std::string { humanp->getName()});
-        auto& colony = cm_->createColony(*humanp.get(), 0x0000ff, std::optional{std::reference_wrapper<Alliance>{alliance}});
-        human_id_ = pm->add(std::move(humanp));
+        auto& halliance = cm_->createAlliance(std::string { humanp->getName()});
+        auto& hcolony = cm_->createColony(*humanp.get(), 0x0000ff, std::optional{std::reference_wrapper<Alliance>{halliance}});
 
-        colonies_.insert({human_id_, std::reference_wrapper<Colony>(colony)});
+        auto dummyp = std::unique_ptr<Player>(new DummyPlayer(*pm, "Dummy Player", 2));
+        auto& dalliance = cm_->createAlliance(std::string { humanp->getName()});
+        auto& dcolony = cm_->createColony(*humanp.get(), 0xff0000, std::optional{std::reference_wrapper<Alliance>{dalliance}});
+        
+        human_id_ = pm->add(std::move(humanp));                
+        auto dummy_id = pm->add(std::move(dummyp));
+        
+        colonies_.insert({human_id_, std::reference_wrapper<Colony>(hcolony)});
+        colonies_.insert({dummy_id, std::reference_wrapper<Colony>(dcolony)});
         gr->add(widgets.lblVersion);
 
         auto& of = LogicService::getObjectFactory();
