@@ -1,3 +1,4 @@
+#include <common/logic/colony.hpp>
 #include <common/logic/player_manager.hpp>
 #include <common/logic/ObjectPathManager.hpp>
 #include <common/logic/logic_service.hpp>
@@ -204,11 +205,9 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
             auto obj = om.get(a.objectID);
             if (this->pl.has_value() && obj.has_value()) {
                 auto player = (*this->pl);
-
-                // TODO: add an action to clear a previous selection
-
+                
                 player->clearSelection();
-                player->pushToSelection(a.objectID, *obj);
+                player->pushToSelection(a.objectID, *obj);                                    
             }
         }
         void operator()(SelectedObjectMoveAction a) {
@@ -220,20 +219,27 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
 
             if (this->pl.has_value()) {
                 auto player = (*this->pl);
-
                 // TODO: add an action to clear a previous selection
                 auto selections = player->getSelections();
                 auto valid_selections = getValidSelections(selections);
 
-                for (auto& s : valid_selections) {
-                    auto path = pf.CreatePath(*s.get(), glm::vec2(a.destX, a.destZ));
-                    glm::vec2 lp = path.back();
-                    log->write("human-player", LogType::Debug,
-                               "moved to %.2fx%.2f", lp.x, lp.y);
+                for (auto &s : valid_selections) {
 
-                    ObjectPathManager::getInstance()->AddPath(s.get(), path);
+                    // Only move components that are of the player.
+                    if (s->getColonyComponent().has_value() &&
+                        s->getColonyComponent()->owner.has_value() &&
+                        s->getColonyComponent()->owner->get().isOfPlayer(
+                            *player)) {
+                      
+                        auto path =
+                            pf.CreatePath(*s.get(), glm::vec2(a.destX, a.destZ));
+                        glm::vec2 lp = path.back();
+                        log->write("human-player", LogType::Debug,
+                                   "moved to %.2fx%.2f", lp.x, lp.y);
+
+                        ObjectPathManager::getInstance()->AddPath(s.get(), path);
+                    }
                 }
-                
             }
 
         }
