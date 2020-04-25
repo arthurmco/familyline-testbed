@@ -11,28 +11,6 @@
 
 using namespace familyline::logic;
 
-/// A basic player that mocks a real player.
-///
-/// It has a custom callback where the player can push actions.
-class DummyPlayer : public Player {
-private:    
-    std::function<std::vector<PlayerInputType>(void)> player_input_cb_;
-    
-public:
-    DummyPlayer(PlayerManager& pm, const char* name, int code,
-                decltype(player_input_cb_) input_cb)
-        : Player(pm, name, code), player_input_cb_(input_cb)
-        {}
-
-    virtual void generateInput() {
-        auto input = player_input_cb_();
-
-        for (auto& i : input) {
-            this->pushAction(i);
-        }
-    }
-};
-
 void stepLogic(PlayerManager& pm, GameContext& gctx) {
     pm.generateInput();
     pm.run(gctx);

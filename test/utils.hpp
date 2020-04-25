@@ -40,3 +40,23 @@ public:
 };
 
 std::shared_ptr<TestObject> make_object(const struct object_init& init);
+
+#include <common/logic/player_manager.hpp>
+#include <common/logic/player.hpp>
+
+
+/// A basic player that mocks a real player.
+///
+/// It has a custom callback where the player can push actions.
+class DummyPlayer : public familyline::logic::Player {
+private:    
+    std::function<std::vector<familyline::logic::PlayerInputType>(void)> player_input_cb_;
+    
+public:
+    DummyPlayer(familyline::logic::PlayerManager& pm, const char* name, int code,
+                decltype(player_input_cb_) input_cb)
+        : familyline::logic::Player(pm, name, code), player_input_cb_(input_cb)
+        {}
+
+    virtual void generateInput();
+};

@@ -33,3 +33,11 @@ std::shared_ptr<TestObject> make_object(const struct object_init& init)
 {
     return std::make_shared<TestObject>(init);
 }
+
+void DummyPlayer::generateInput() {
+    auto input = player_input_cb_();
+    
+    for (auto& i : input) {
+        this->pushAction(i);
+    }
+}
