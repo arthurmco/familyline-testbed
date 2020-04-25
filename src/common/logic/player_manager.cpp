@@ -260,18 +260,27 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                 if (default_action == std::string{"attack"}) {
                     auto attacker_w = (*pl)->getSelections().at(0);
                     auto attackee_o = om.get(a.useWhat);
-
+                    
                     if (!attacker_w.expired() && attackee_o.has_value()) {
+
                         auto attacker = attacker_w.lock();
                         auto attackee = (*attackee_o);
 
-                        auto& atkManager = LogicService::getAttackManager();
-                        atkManager->doRegister(
-                            attacker->getID(), attacker->getAttackComponent().value());
-                        atkManager->doRegister(
-                            attackee->getID(), attackee->getAttackComponent().value());
-                        atkManager->startAttack(
-                            attacker->getID(), attackee->getID());
+                        if (attacker->getColonyComponent().has_value() &&
+                            attacker->getColonyComponent()->owner.has_value() &&
+                            attacker->getColonyComponent()->owner->get().isOfPlayer(
+                                *player)) {
+
+                            auto& atkManager = LogicService::getAttackManager();
+                            atkManager->doRegister(
+                                attacker->getID(), attacker->getAttackComponent().value());
+                            atkManager->doRegister(
+                                attackee->getID(), attackee->getAttackComponent().value());
+                            atkManager->startAttack(
+                                attacker->getID(), attackee->getID());
+
+                        }
+                        
                     }
                     
                 }
