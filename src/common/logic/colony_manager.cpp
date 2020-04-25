@@ -1,4 +1,5 @@
 #include <common/logic/colony_manager.hpp>
+#include <common/logic/player.hpp>
 #include <common/logger.hpp>
 
 using namespace familyline::logic;

@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <common/logic/player.hpp>
 #include <common/logic/alliance.hpp>
+#include <common/logic/player.hpp>
 #include <string_view>
 
 namespace familyline::logic {
@@ -31,14 +31,16 @@ namespace familyline::logic {
          *
          * This is what defines the diplomacy
          */
-        Alliance& alliance_;
-
+        Alliance& alliance_;        
+        
     public:
         Colony(Player& p, unsigned color, Alliance& a);
         
-        Alliance& getAlliance() const { return alliance_; }
+        Alliance& getAlliance() const;
 
-        std::string_view getName() const { return player_.getName(); }
+        std::string_view getName() const;
+
+        bool isOfPlayer(Player& other);
     };
 
 }

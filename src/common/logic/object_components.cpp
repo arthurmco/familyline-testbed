@@ -92,3 +92,6 @@ std::optional<double> AttackComponent::doDirectAttack(const AttackComponent& def
 
 }
 
+ColonyComponent::ColonyComponent() 
+    : owner(std::optional<std::reference_wrapper<Colony>>())
+{}

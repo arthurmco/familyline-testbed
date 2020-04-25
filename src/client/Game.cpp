@@ -8,6 +8,7 @@
 #include <common/logger.hpp>
 #include <common/logic/game_event.hpp>
 #include <common/logic/logic_service.hpp>
+#include <common/logic/colony.hpp>
 
 #include <client/input/input_service.hpp>
 
@@ -182,8 +183,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         auto& hcolony = cm_->createColony(*humanp.get(), 0x0000ff, std::optional{std::reference_wrapper<Alliance>{halliance}});
 
         auto dummyp = std::unique_ptr<Player>(new DummyPlayer(*pm, "Dummy Player", 2));
-        auto& dalliance = cm_->createAlliance(std::string { humanp->getName()});
-        auto& dcolony = cm_->createColony(*humanp.get(), 0xff0000, std::optional{std::reference_wrapper<Alliance>{dalliance}});
+        auto& dalliance = cm_->createAlliance(std::string { dummyp->getName()});
+        auto& dcolony = cm_->createColony(*dummyp.get(), 0xff0000, std::optional{std::reference_wrapper<Alliance>{dalliance}});
         
         human_id_ = pm->add(std::move(humanp));                
         auto dummy_id = pm->add(std::move(dummyp));

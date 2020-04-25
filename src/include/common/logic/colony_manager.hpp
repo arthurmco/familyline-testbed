@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <optional>
 #include <vector>
 #include <memory>
 #include <common/logic/colony.hpp>

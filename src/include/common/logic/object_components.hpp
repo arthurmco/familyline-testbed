@@ -13,7 +13,6 @@
 #include <common/logic/imesh.hpp>
 #include <common/logic/Terrain.hpp>
 
-
 namespace familyline::logic {
     class GameObject;
 
@@ -126,6 +125,7 @@ namespace familyline::logic {
         double speed;
     };
     
+
     class Colony;
     
     /**
@@ -142,9 +142,7 @@ namespace familyline::logic {
     struct ColonyComponent {
         std::optional<std::reference_wrapper<Colony>> owner;
 
-        ColonyComponent() 
-            : owner(std::optional<std::reference_wrapper<Colony>>())
-            {}
+        ColonyComponent();
     };
 
 }
