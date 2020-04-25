@@ -7,7 +7,7 @@
 #include <common/logic/player_manager.hpp>
 #include <common/logic/ObjectPathManager.hpp>
 #include <common/logic/player.hpp>
-#include <common/logic/PathFinder.hpp>
+#include <common/logic/colony_manager.hpp>
 
 using namespace familyline::logic;
 
@@ -205,7 +205,8 @@ TEST(PlayerManager, TestIfPlayerCanMove) {
     LogicService::getObjectFactory()->clear();
     auto t = std::make_unique<Terrain>(30, 30);
     ObjectPathManager::getInstance()->SetTerrain(t.get());
-    
+
+    ColonyManager cm;
     ObjectManager om;
     ObjectLifecycleManager olm{om};
     PathFinder pf{&om};
@@ -220,18 +221,18 @@ TEST(PlayerManager, TestIfPlayerCanMove) {
     auto atkc1 = std::optional<AttackComponent>(
         AttackComponent { nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
             1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
-    auto obj_s1 = make_object(
+    auto obj_s1 = make_ownable_object(
         {"test", "Test Object", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});    
 
     auto atkc2 = std::optional<AttackComponent>(
         AttackComponent { nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
             1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
-    auto obj_s2 = make_object(
+    auto obj_s2 = make_ownable_object(
         {"test2", "Test Object2", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});    
 
     obj_s2->setPosition(glm::vec3(20, 1, 20));
     
-    om.add(obj_s1);
+    auto id_s1 = om.add(obj_s1);
     auto sid = om.add(obj_s2);
 
     GameContext gctx = {&om, 1, 0};
@@ -255,9 +256,20 @@ TEST(PlayerManager, TestIfPlayerCanMove) {
             
         });
 
+    std::map<size_t, std::reference_wrapper<Colony>> colonies;
+    auto& alliance = cm.createAlliance(std::string{"AAAA"});
+    auto& colony = cm.createColony(*d.get(), 0xff0000, std::optional{
+            std::ref(alliance)});
+
+    {
+        (*om.get(id_s1))->getColonyComponent()->owner = std::ref(colony);
+        (*om.get(sid))->getColonyComponent()->owner = std::ref(colony);
+    }
+    
     auto i = pm.add(std::move(d));
     ASSERT_NE(1, i);
 
+    
     int iterated = 0;
 
         {

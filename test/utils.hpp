@@ -25,21 +25,38 @@ struct object_init {
 
 class TestObject : public familyline::logic::GameObject {
 private:
+  std::function<void()> fnUpdate_;
+
+  // Preserve the original init parameters to ease object cloning
+  struct object_init init_params_;
+
+public:
+  TestObject(const struct object_init &init);
+
+  virtual void update();
+
+  CLONE_MACRO_H(TestObject)
+
+};
+
+/// Create an object that can have a colony
+class TestOwnableObject : public familyline::logic::GameObject {
+private:
     std::function<void()> fnUpdate_;
 
     // Preserve the original init parameters to ease object cloning
     struct object_init init_params_;
 
 public:
-    TestObject(const struct object_init& init);
+    TestOwnableObject(const struct object_init& init);
 
     virtual void update();
 
     CLONE_MACRO_H(TestObject)
-
 };
 
 std::shared_ptr<TestObject> make_object(const struct object_init& init);
+std::shared_ptr<TestOwnableObject> make_ownable_object(const struct object_init& init);
 
 #include <common/logic/player_manager.hpp>
 #include <common/logic/player.hpp>

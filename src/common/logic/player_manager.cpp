@@ -172,8 +172,9 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                     assert(ncobj->getPosition().x == buildpos.x);
                     assert(ncobj->getPosition().z == buildpos.z);
 
-                    render_add_cb(ncobj);
                     
+                    render_add_cb(ncobj);
+
                     olm.doRegister(ncobj);
                     colony_add_callback(ncobj, player->getCode());
                     olm.notifyCreation(cobjID);
