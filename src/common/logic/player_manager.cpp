@@ -61,6 +61,8 @@ void PlayerManager::pushAction(unsigned int id, PlayerInputType type)
     auto duration = std::chrono::system_clock::now().time_since_epoch();
 	uint64_t micros = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 
+    printf("push action of player %08x on tick %d\n", id, _tick);
+    
     PlayerInputAction a;
     a.playercode = id;
     a.tick = _tick;

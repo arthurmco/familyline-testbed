@@ -127,6 +127,27 @@ namespace familyline::logic {
         std::optional<ICamera*> camera_;
         std::vector<std::weak_ptr<GameObject>> selected_;
 
+        /**
+         * Get the current tick, as accounted by the player manager
+         *
+         * Since the player manager `run()` and the input generation function
+         * `generateInput()` might not run intertwined (like, for example, 
+         * instead of 1 `run()` and 2 `generateInput()` for one tick, we will
+         * have 20 `generateInput()`s first and then 10 `run()`s), if you want
+         * to keep synchronized with the player manager, you will have to use
+         * this function to get its stored tick count
+         */
+        size_t getTick();
+
+        /**
+         * Check if the logic and input functions are running in synchrony, one after
+         * another. 
+         *
+         * This is a good way to check if the value output by the getTick function is 
+         * trustworthy 
+         */
+        bool isTickValid();
+
     public:
         Player(PlayerManager& pm, const char* name, int code)
             : pm_(pm), name_(name), code_(code)

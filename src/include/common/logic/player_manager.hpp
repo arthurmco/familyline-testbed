@@ -107,6 +107,11 @@ namespace familyline::logic {
          * list
          */
         void iterate(PlayerCallback c);
+
+        /**
+         * Get the current tick, as registered by the player manager
+         */
+        size_t tick() { return _tick; }
     };
     
 }

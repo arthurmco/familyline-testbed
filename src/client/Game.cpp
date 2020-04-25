@@ -36,8 +36,9 @@ public:
 /// It is only temporary, to test attacks in the future.
 class DummyPlayer : public Player {
 private:
-    size_t tick = 0;
     bool done = false;
+    size_t sync_start = 0;
+    size_t input_tick = 0;
     
     void pushActions(std::initializer_list<PlayerInputType> input) {
         for (auto& i : input) {
@@ -53,21 +54,33 @@ public:
     virtual void generateInput() {
         if (done)
             return;
+
+        auto tick = this->getTick();
+
+        if (sync_start == 0) {
+            if (this->isTickValid()) {
+                sync_start = tick;
+                printf("engine is synchronized at tick %d", sync_start);                
+            } else {
+                return;
+            }
+        }        
         
-        if (tick == 2) {
+        if (input_tick == 2) {
             this->pushActions({
                     EnqueueBuildAction{"tent"}
                 });
         }
 
-        if (tick == 3) {
+        if (input_tick == 6) {
             this->pushActions({
                     CommitLastBuildAction{20.0, 20.0, 2.4, true},
                     EnqueueBuildAction{"tent"}
                 });
         }
 
-        if (tick == 4) {
+
+        if (input_tick == 10) {
             this->pushActions({
                     CommitLastBuildAction{30.0, 35.0, 2.4, true},
                 });
@@ -76,7 +89,7 @@ public:
             done = true;
         }        
 
-        tick++;
+        input_tick++;
     }
 
 };

@@ -8,6 +8,17 @@ void Player::pushAction(PlayerInputType type) {
     this->pm_.pushAction(this->code_, type);
 }
 
+size_t Player::getTick() { return pm_.tick(); }
+
+/**
+ * Check if the logic and input functions are running in synchrony, one after
+ * another. 
+ *
+ * This is a good way to check if the value output by the getTick function is 
+ * trustworthy 
+ */
+bool Player::isTickValid() { return pm_.tick() > 0; }
+
 void Player::pushToSelection(unsigned object_id, std::weak_ptr<GameObject> o)
 {
     auto& log = LoggerService::getLogger();
