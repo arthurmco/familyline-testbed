@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <tuple>
+#include <functional>
 
 namespace familyline::graphics::gui {
 
@@ -43,12 +44,17 @@ namespace familyline::graphics::gui {
      */
     class Control {
     private:
-
-
+        unsigned long id_;
+        std::function<void(Control*, size_t, size_t)> resize_cb_;
+        
     protected:
         std::optional<ContainerComponent> cc_ = std::nullopt;
-
+        
     public:
+        Control();
+
+        unsigned long getID() { return id_; }
+        
         /**
          * The parent component calls this if it thinks that this control needs to update
          *
@@ -74,8 +80,18 @@ namespace familyline::graphics::gui {
          */
         virtual std::tuple<cairo_t*, cairo_surface_t*> createChildContext(Control *c);
 
-        std::optional<ContainerComponent>& getControlContainer() { return cc_; }        
+        /**
+         * Set the resize callback, to notify the parent that you resized
+         */
+        void setResizeCallback(std::function<void(Control*, size_t, size_t)> cb) { resize_cb_ = cb; }
 
+        /**
+         * Resize the control
+         */
+        void resize(size_t w, size_t h);
+        
+        std::optional<ContainerComponent>& getControlContainer() { return cc_; }        
+        
         // see https://stackoverflow.com/a/461224
         virtual ~Control() {}
     };

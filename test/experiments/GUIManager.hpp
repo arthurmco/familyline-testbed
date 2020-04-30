@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 
+#include <pango/pangocairo.h>
+
 #include "root_control.hpp"
 
 namespace familyline::graphics::gui {
@@ -17,7 +19,10 @@ namespace familyline::graphics::gui {
         unsigned width_, height_;
         std::string text_;
         cairo_text_extents_t te = {};
-        
+
+        PangoLayout* getLayout(cairo_t* context) const;
+
+        cairo_t* last_context_;        
     public:
         Label(unsigned width, unsigned height, std::string text)
             : width_(width), height_(height), text_(text)  {}
@@ -26,6 +31,7 @@ namespace familyline::graphics::gui {
 
         virtual std::tuple<int, int> getNeededSize(cairo_t* parent_context) const;
 
+        void setText(std::string v);
     };
     
     /**
@@ -47,6 +53,8 @@ namespace familyline::graphics::gui {
         cairo_surface_t* canvas_;
 
         std::unique_ptr<RootControl> root_control_;
+
+        Label* lbl3;
         
     public:
         GUIManager(SDL_Window* win, unsigned width, unsigned height,
@@ -63,8 +71,11 @@ namespace familyline::graphics::gui {
 
                 Label *lbl = new Label{100, 60, "Test"};
                 Label *lbl2 = new Label{100, 60, "AI QUE DELICIA CARA - 家族の人"};
+                
+                lbl3 = new Label{80, 20, "0"};
                 root_control_->getControlContainer()->add(20, 20, std::unique_ptr<Control>(lbl));
                 root_control_->getControlContainer()->add(40, 50, std::unique_ptr<Control>(lbl2));
+                root_control_->getControlContainer()->add(60, 80, std::unique_ptr<Control>(lbl3));
             }
 
 
