@@ -34,6 +34,9 @@ namespace familyline::graphics::gui {
 
         virtual std::tuple<int, int> getNeededSize(cairo_t* parent_context) const { return std::tie(width_, height_); }
 
+        virtual void receiveEvent(const SDL_Event& ev);
+
+
     };
 
 }

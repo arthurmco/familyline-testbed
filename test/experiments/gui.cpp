@@ -51,14 +51,17 @@ int main(int argc, char *argv[])
 
     auto c = 0;
     while (running) {
-        SDL_PollEvent(&e);
-
-        switch (e.type) {
-        case SDL_QUIT:
-            running = false;
-            break;
+        if (SDL_PollEvent(&e)) {
+            switch (e.type) {
+            case SDL_QUIT:
+                running = false;
+                break;
+            default:
+                gm.receiveEvent(e);
+            }
+    
         }
-
+        
         gm.update();
         SDL_RenderPresent(renderer);
 

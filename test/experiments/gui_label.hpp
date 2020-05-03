@@ -17,7 +17,6 @@ namespace familyline::graphics::gui {
     private:
         unsigned width_, height_;
         std::string text_;
-        cairo_text_extents_t te = {};
 
         PangoLayout* getLayout(cairo_t* context) const;
 
@@ -31,6 +30,8 @@ namespace familyline::graphics::gui {
         virtual std::tuple<int, int> getNeededSize(cairo_t *parent_context) const;
 
         void setText(std::string v);
+
+        virtual void receiveEvent(const SDL_Event &e) {}
     };
 
 } // namespace familyline::graphics::gui

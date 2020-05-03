@@ -7,6 +7,8 @@
 #include <tuple>
 #include <functional>
 
+#include <SDL2/SDL.h>
+
 namespace familyline::graphics::gui {
 
     class Control;
@@ -91,6 +93,8 @@ namespace familyline::graphics::gui {
         void resize(size_t w, size_t h);
         
         std::optional<ContainerComponent>& getControlContainer() { return cc_; }        
+
+        virtual void receiveEvent(const SDL_Event& ev) = 0;
         
         // see https://stackoverflow.com/a/461224
         virtual ~Control() {}
