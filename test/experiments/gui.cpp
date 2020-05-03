@@ -1,3 +1,5 @@
+// build command: g++ --std=c++2a -Wall $(sdl2-config --cflags) $(pkg-config pangocairo --cflags) gui.cpp control.cpp root_control.cpp gui_label.cpp gui_button.cpp GUIManager.cpp $(sdl2-config --libs) $(pkg-config cairo --libs) $(pkg-config pangocairo --libs) -lpthread -g -o gui
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <cstdio>
