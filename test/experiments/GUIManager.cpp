@@ -103,7 +103,7 @@ void GUIManager::receiveEvent(const SDL_Event& e)
     case SDL_JOYHATMOTION:
         puts("Joy hat motion");
         break;
-        
+
     default:
         printf("Unknown event: %08x\n", e.type);
         break;

@@ -13,10 +13,13 @@
 #include "root_control.hpp"
 #include "gui_label.hpp"
 #include "gui_button.hpp"
+#include "gui_imageview.hpp"
+
+#include <span>
 
 namespace familyline::graphics::gui {
 
-    
+
     /**
      * Manages the graphical interface state and rendering
      */
@@ -27,6 +30,7 @@ namespace familyline::graphics::gui {
         SDL_Window* win_;
         SDL_Texture* framebuffer_;
         SDL_Renderer* renderer_;
+        std::array<unsigned int, 32*32> ibuf;
 
         unsigned width_, height_;
 
@@ -56,6 +60,33 @@ namespace familyline::graphics::gui {
                 Label *lbl = new Label{100, 60, "Test"};
                 Label *lbl2 = new Label{100, 60, "AI QUE DELICIA CARA - 家族の人"};
                 Button* btn = new Button{200, 40, "Test Button"};
+                ImageView *img = new ImageView{200, 100};
+
+                ImageView *img2 = new ImageView{100, 125, ImageMode::Scaled};
+                ImageView *img3 = new ImageView{150, 100, ImageMode::Scaled};
+                ImageView *img4 = new ImageView{64, 64, ImageMode::Center};
+                ImageView *img5 = new ImageView{16, 16, ImageMode::Center};
+
+                for (auto i = 0; i < 32*32; i++){
+                    if (i%3 == 0)
+                        ibuf[i] = 0xffff0000;
+                    else
+                        ibuf[i] = 0xff00ff00;
+
+                    if (i%5 == 0)
+                        ibuf[i] = 0xff0000ff;
+
+                    if (i < 32)
+                        ibuf[i] = 0xffffffff;
+                }
+               
+                
+                
+                img->loadFromBuffer(32, 32, std::span{ibuf});
+                img2->loadFromBuffer(32, 32, std::span{ibuf});
+                img3->loadFromBuffer(32, 32, std::span{ibuf});
+                img4->loadFromBuffer(32, 32, std::span{ibuf});
+                img5->loadFromBuffer(32, 32, std::span{ibuf});
                 
                 lbl3 = new Label{80, 20, "0"};
                 lbl4 = new Label{80, 20, "0"};
@@ -72,6 +103,11 @@ namespace familyline::graphics::gui {
                 root_control_->getControlContainer()->add(60, 100, std::unique_ptr<Control>(lbl3));
                 root_control_->getControlContainer()->add(260, 100, std::unique_ptr<Control>(lbl4));
                 root_control_->getControlContainer()->add(20, 140, std::unique_ptr<Control>(btn));
+                root_control_->getControlContainer()->add(400, 120, std::unique_ptr<Control>(img));
+                root_control_->getControlContainer()->add(400, 240, std::unique_ptr<Control>(img2));
+                root_control_->getControlContainer()->add(510, 240, std::unique_ptr<Control>(img3));
+                 root_control_->getControlContainer()->add(400, 400, std::unique_ptr<Control>(img4));
+                root_control_->getControlContainer()->add(510, 400, std::unique_ptr<Control>(img5));
             }
 
 
