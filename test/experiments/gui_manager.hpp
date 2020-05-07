@@ -58,7 +58,7 @@ namespace familyline::graphics::gui {
                 root_control_ = std::make_unique<RootControl>(width, height);
 
                 Label *lbl = new Label{100, 60, "Test"};
-                Label *lbl2 = new Label{100, 60, "AI QUE DELICIA CARA - 家族の人"};
+                Label *lbl2 = new Label{100, 60, "AI QUE DELÍCIA CARA - 家族の人"};
                 Button* btn = new Button{200, 40, "Test Button"};
                 ImageView *img = new ImageView{200, 100};
 
@@ -106,7 +106,7 @@ namespace familyline::graphics::gui {
                 root_control_->getControlContainer()->add(400, 120, std::unique_ptr<Control>(img));
                 root_control_->getControlContainer()->add(400, 240, std::unique_ptr<Control>(img2));
                 root_control_->getControlContainer()->add(510, 240, std::unique_ptr<Control>(img3));
-                 root_control_->getControlContainer()->add(400, 400, std::unique_ptr<Control>(img4));
+                root_control_->getControlContainer()->add(400, 400, std::unique_ptr<Control>(img4));
                 root_control_->getControlContainer()->add(510, 400, std::unique_ptr<Control>(img5));
             }
 

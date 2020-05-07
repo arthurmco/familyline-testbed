@@ -1,4 +1,4 @@
-#include "GUIManager.hpp"
+#include "gui_manager.hpp"
 
 using namespace familyline::graphics::gui;
 
@@ -49,63 +49,63 @@ void GUIManager::receiveEvent(const SDL_Event& e)
 {
     switch (e.type) {
     case SDL_KEYDOWN:
-        printf("Key down: state=%s, repeat=%d, key=%08x, mod=%04x\n",
+        fprintf(stderr, "Key down: state=%s, repeat=%d, key=%08x, mod=%04x\n",
                e.key.state == SDL_PRESSED ? "pressed" : "released",
                e.key.repeat, e.key.keysym.sym, e.key.keysym.mod);
         break;
 
     case SDL_KEYUP:
-        printf("Key up: state=%s, repeat=%d, key=%08x, mod=%04x\n",
+        fprintf(stderr, "Key up: state=%s, repeat=%d, key=%08x, mod=%04x\n",
                e.key.state == SDL_PRESSED ? "pressed" : "released",
                e.key.repeat, e.key.keysym.sym, e.key.keysym.mod);
         break;
 
     case SDL_MOUSEBUTTONDOWN:
-        printf("Mouse button down: state=%s, clicks=%d, mouse=%d, button=%04x, x=%d, y=%d\n",
+        fprintf(stderr, "Mouse button down: state=%s, clicks=%d, mouse=%d, button=%04x, x=%d, y=%d\n",
                e.button.state == SDL_PRESSED ? "pressed" : "released",
                e.button.clicks, e.button.which, e.button.button, e.button.x, e.button.y);
         break;
 
     case SDL_MOUSEBUTTONUP:
-        printf("Mouse button up: state=%s, clicks=%d, mouse=%d, button=%04x, x=%d, y=%d\n",
+        fprintf(stderr, "Mouse button up: state=%s, clicks=%d, mouse=%d, button=%04x, x=%d, y=%d\n",
                e.button.state == SDL_PRESSED ? "pressed" : "released",
                e.button.clicks, e.button.which, e.button.button, e.button.x, e.button.y);
         break;
 
     case SDL_MOUSEMOTION:
-        printf("Mouse motion: mouse=%d, state=%04x, x=%d, y=%d, xdir=%d, ydir=%d\n",
+        fprintf(stderr, "Mouse motion: mouse=%d, state=%04x, x=%d, y=%d, xdir=%d, ydir=%d\n",
                e.motion.which, e.motion.state, e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
         break;
 
     case SDL_MOUSEWHEEL:
-        printf("Mouse wheel: mouse=%d, x=%d, y=%d, direction=%s, \n",
+        fprintf(stderr, "Mouse wheel: mouse=%d, x=%d, y=%d, direction=%s, \n",
                e.wheel.which, e.wheel.x, e.wheel.y,
                e.wheel.direction == SDL_MOUSEWHEEL_NORMAL ? "normal" : "flipped");
         break;
 
     case SDL_TEXTEDITING:
-        printf("Text Editing: text='%s', start=%d, length=%d\n",
+        fprintf(stderr, "Text Editing: text='%s', start=%d, length=%d\n",
                e.edit.text, e.edit.start, e.edit.length);
         break;
 
     case SDL_TEXTINPUT:
-        printf("Text Input: text='%s'\n", e.text.text);
+        fprintf(stderr, "Text Input: text='%s'\n", e.text.text);
         break;
 
     case SDL_JOYAXISMOTION:
-        puts("Joy axis motion");
+        fprintf(stderr, "Joy axis motion\n");
         break;
 
     case SDL_JOYBALLMOTION:
-        puts("Joy ball motion");
+        fprintf(stderr, "Joy ball motion\n");
         break;
 
     case SDL_JOYHATMOTION:
-        puts("Joy hat motion");
+        fprintf(stderr, "Joy hat motion\n");
         break;
 
     default:
-        printf("Unknown event: %08x\n", e.type);
+        fprintf(stderr, "Unknown event: %08x\n", e.type);
         break;
     }
 

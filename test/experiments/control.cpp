@@ -1,4 +1,4 @@
-#include "Control.hpp"
+#include "control.hpp"
 #include <ctime>
 
 using namespace familyline::graphics::gui;

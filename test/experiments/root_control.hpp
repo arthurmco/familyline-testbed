@@ -2,7 +2,7 @@
 
 #include <optional>
 
-#include "Control.hpp"
+#include "control.hpp"
 
 namespace familyline::graphics::gui {
     

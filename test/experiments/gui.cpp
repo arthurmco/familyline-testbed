@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 #include <cmath>
 
-#include "GUIManager.hpp"
+#include "gui_manager.hpp"
 
 using namespace familyline::graphics::gui;
 

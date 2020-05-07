@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <tuple>
 
-#include "Control.hpp"
+#include "control.hpp"
 
 namespace familyline::graphics::gui {
         /**
