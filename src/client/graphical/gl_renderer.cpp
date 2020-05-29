@@ -185,7 +185,7 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd, ShaderProgr
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    GLuint vboPos, vboNorm, vboTex;
+    GLuint vboPos = -1, vboNorm = -1, vboTex = -1;
     bool animated = true;
 
     auto fnGetAttrib = [&](const char* name) {

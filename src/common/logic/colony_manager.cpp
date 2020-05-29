@@ -2,6 +2,8 @@
 #include <common/logic/colony_manager.hpp>
 #include <common/logic/player.hpp>
 
+#include <stdexcept>
+
 using namespace familyline::logic;
 
 ColonyManager::ColonyManager()
