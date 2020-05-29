@@ -142,7 +142,7 @@ if (WIN32)
 
   # Copy a stubborn dependent DLLs to the release directory, so the software can be run and packaged.
   # See https://github.com/Microsoft/vcpkg/issues/2630
-  file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+  #file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
   #file(COPY "${CMAKE_TOOLCHAIN_DIR}/../../installed/x86-windows/bin/lcms2.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
 
