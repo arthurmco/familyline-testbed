@@ -189,7 +189,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         pathf->InitPathmap(terr->GetWidth(), terr->GetHeight());
         pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
 
-        widgets.lblVersion = new GUILabel(10, 10, "Familyline " VERSION " commit " COMMIT);
+        widgets.lblVersion = new Label(10, 10, "Familyline " VERSION " commit " COMMIT);
 
         std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());
         auto& halliance = cm_->createAlliance(std::string { humanp->getName()});
@@ -286,13 +286,13 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 }
 
-GUILabel lblBuilding = GUILabel(0.05, 0.1, "!!!");
-GUILabel lblFPS = GUILabel(0.05, 0.9, "0 fps, 0 ms/frame");
-GUILabel lblRange = GUILabel(0.05, 0.13, "--");
-GUILabel lblSelected = GUILabel(0.05, 0.17, "---");
-GUILabel lblTerrainPos = GUILabel(0.05, 0.21, "---");
+Label lblBuilding = Label(0.05, 0.1, "!!!");
+Label lblFPS = Label(0.05, 0.9, "0 fps, 0 ms/frame");
+Label lblRange = Label(0.05, 0.13, "--");
+Label lblSelected = Label(0.05, 0.17, "---");
+Label lblTerrainPos = Label(0.05, 0.21, "---");
 
-GUILabel lblKeys = GUILabel(0.05, 0.05, "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
+Label lblKeys = Label(0.05, 0.05, "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
 
 
 // Run the logic engine at 60 Hz
@@ -320,6 +320,7 @@ int Game::RunLoop()
           pnl.AddPanel(&btnExit); */
 
 
+    /*****
     lblBuilding.format.foreground = glm::vec4(1, 1, 1, 1);
     lblBuilding.format.background = glm::vec4(0, 0, 0, 0.4);
 
@@ -336,7 +337,8 @@ int Game::RunLoop()
     lblKeys.format.background = glm::vec4(0, 0, 0, 0.4);
 
     lblTerrainPos.format.background = glm::vec4(0, 0, 0, 0.4);
-
+    *****/
+    
     gr->add(&lblBuilding);
     gr->add(&lblFPS);
     gr->add(&lblRange);
@@ -513,7 +515,7 @@ void Game::RunGraphical()
 
     fbGUI->startDraw();
     gr->render(0, 0);
-    gr->renderToScreen();
+//    gr->renderToScreen();
 	fbGUI->endDraw();
 
     win->update();

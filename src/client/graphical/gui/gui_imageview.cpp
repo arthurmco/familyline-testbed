@@ -1,4 +1,4 @@
-#include "gui_imageview.hpp"
+#include <client/graphical/gui/gui_imageview.hpp>
 
 using namespace familyline::graphics::gui;
 

@@ -1,4 +1,4 @@
-#include "root_control.hpp"
+#include <client/graphical/gui/root_control.hpp>
 
 using namespace familyline::graphics::gui;
 
@@ -6,7 +6,7 @@ using namespace familyline::graphics::gui;
 bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
 {
     (void)context;
-    
+
     // Clean bg
     cairo_set_source_rgba(context, 0.1, 0.4, 0.8, 1);
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
@@ -25,10 +25,10 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
 }
 
 void RootControl::receiveEvent(const SDL_Event& e)
-{   
+{
     for (auto& cdata : this->cc_->children) {
         auto [width, height] = cdata.control->getNeededSize(nullptr);
-        
+
         switch (e.type) {
         case SDL_KEYDOWN:
 //            printf("Key down: state=%s, repeat=%d, key=%08x, mod=%04x\n",
@@ -53,11 +53,11 @@ void RootControl::receiveEvent(const SDL_Event& e)
                 SDL_Event ev = e;
                 ev.button.x -= cdata.x;
                 ev.button.y -= cdata.y;
-                
+
                 cdata.control->receiveEvent(ev);
                 break;
             }
-            
+
             break;
 
         case SDL_MOUSEMOTION:
@@ -88,9 +88,9 @@ void RootControl::receiveEvent(const SDL_Event& e)
 
         case SDL_JOYHATMOTION:
             break;
-        
+
         }
-       
+
     }
-    
+
 }

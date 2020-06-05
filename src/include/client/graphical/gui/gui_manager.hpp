@@ -10,14 +10,17 @@
 
 #include <pango/pangocairo.h>
 
-#include "root_control.hpp"
-#include "gui_label.hpp"
-#include "gui_button.hpp"
-#include "gui_imageview.hpp"
+#include <client/graphical/gui/root_control.hpp>
+#include <client/graphical/gui/gui_label.hpp>
+#include <client/graphical/gui/gui_button.hpp>
+#include <client/graphical/gui/gui_imageview.hpp>
 
 #include <span>
 
 namespace familyline::graphics::gui {
+
+    /// TODO: use opengl textures for the gui framebuffer instead of
+    ///       sdl2 textures
 
 
     /**
@@ -111,8 +114,13 @@ namespace familyline::graphics::gui {
             }
 
 
+        void add(Control* control);
+
+        void remove(Control* control);
+        
         void update();
 
+        void render(unsigned int x, unsigned int y);
 
         /**
          * Receive an event and act on it

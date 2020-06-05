@@ -7,8 +7,8 @@
 #include <future>
 
 #include <pango/pangocairo.h>
-#include "gui_label.hpp"
-#include "control.hpp"
+#include <client/graphical/gui/gui_label.hpp>
+#include <client/graphical/gui/control.hpp>
 
 namespace familyline::graphics::gui {
 

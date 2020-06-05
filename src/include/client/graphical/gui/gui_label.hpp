@@ -6,7 +6,7 @@
 #include <string>
 
 #include <pango/pangocairo.h>
-#include "control.hpp"
+#include <client/graphical/gui/control.hpp>
 
 namespace familyline::graphics::gui {
 

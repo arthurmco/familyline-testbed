@@ -40,10 +40,10 @@
 #include <client/graphical/framebuffer.hpp>
 
 #include <common/net/NetServer.hpp>
-#include <client/graphical/gui/GUIManager.hpp>
-#include <client/graphical/gui/GUILabel.hpp>
-#include <client/graphical/gui/GUIButton.hpp>
-#include <client/graphical/gui/GUIImageControl.hpp>
+#include <client/graphical/gui/gui_manager.hpp>
+#include <client/graphical/gui/gui_label.hpp>
+#include <client/graphical/gui/gui_button.hpp>
+#include <client/graphical/gui/gui_imageview.hpp>
 
 #include <client/input/input_service.hpp>
 #include <client/input/InputPicker.hpp>
@@ -287,8 +287,8 @@ static int show_starting_menu()
 		Framebuffer fGUI = Framebuffer("fGUI", fwidth, fheight);
 		win->setFramebuffers(&f3D, &fGUI);
 
-        guir = new GUIManager{fwidth, fheight};
-        guir->initShaders(win);
+        guir = new GUIManager{NULL, fwidth, fheight, NULL};
+        //guir->initShaders(win);
 
         double b = SDL_GetTicks();
         int frames = 0;
@@ -314,47 +314,47 @@ static int show_starting_menu()
 		bool r = true;
 		//auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
-		GUILabel l = GUILabel(0.37, 0.03, "FAMILYLINE");
-		l.format.foreground = glm::vec4(1, 1, 1, 1);
+		Label l = Label(0.37, 0.03, "FAMILYLINE");
+		//l.format.foreground = glm::vec4(1, 1, 1, 1);
 
-		GUILabel lv = GUILabel(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
-		lv.format.foreground = glm::vec4(0.2, 0.2, 1, 1);
-		lv.format.background = glm::vec4(1, 1, 1, 0.5);
+		Label lv = Label(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
+		//lv.format.foreground = glm::vec4(0.2, 0.2, 1, 1);
+		//lv.format.background = glm::vec4(1, 1, 1, 0.5);
 
-		GUIButton bnew = GUIButton(0.1, 0.2, 0.8, 0.1, "New Game");
-		GUIButton bquit = GUIButton(0.1, 0.31, 0.8, 0.1, "Exit Game");
+		Button bnew = Button(300, 50, "New Game"); //Button(0.1, 0.2, 0.8, 0.1, "New Game");
+        Button bquit = Button(300, 50, "Exit Game"); //Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
 
-		GUIImageControl ilogo = GUIImageControl(0.2, 0.1, 0.6, 0.9,
-                                                ICONS_DIR "/familyline-logo.png");
-		ilogo.z_index = -100;
+		ImageView ilogo = ImageView(480, 800); //0.2, 0.1, 0.6, 0.9,
+                                      //    ICONS_DIR "/familyline-logo.png");
+            //ilogo.z_index = -100;
 		//ilogo.SetZIndex(0.9);
 		//ilogo.SetOpacity(0.5);
 
-		bquit.onClickHandler = [&r](GUIControl* cc) {
-                                   (void)cc;
-                                   r = false;
-                               };
+        bquit.setClickCallback([&r](Button* cc) {
+            (void)cc;
+            r = false;
+        });
 
-		bnew.onClickHandler = [&](GUIControl* cc) {
-                                  (void)cc;
-                                  guir->remove(&l);
-                                  guir->remove(&lv);
-                                  guir->remove(&bnew);
-                                  guir->remove(&bquit);
-                                  guir->remove(&ilogo);
+	    bnew.setClickCallback([&](Button* cc) {
+            (void)cc;
+            guir->remove(&l);
+            guir->remove(&lv);
+            guir->remove(&bnew);
+            guir->remove(&bquit);
+            guir->remove(&ilogo);
 
-                                  fmt::print("New Game\n");
-                                  if (!pm)
-                                      pm = new PlayerManager();
+            fmt::print("New Game\n");
+            if (!pm)
+                pm = new PlayerManager();
 
-                                  std::unique_ptr<HumanPlayer> hp = std::make_unique<HumanPlayer>(*pm, "Arthur", 0);
+            std::unique_ptr<HumanPlayer> hp = std::make_unique<HumanPlayer>(*pm, "Arthur", 0);
 
-                                  auto g = Game(win, &f3D, &fGUI, guir, pm, std::move(hp));
-                                  auto ret = g.RunLoop();
-                                  delete pm;
-                                  delete win;
-                                  exit(ret);
-                              };
+            auto g = Game(win, &f3D, &fGUI, guir, pm, std::move(hp));
+            auto ret = g.RunLoop();
+            delete pm;
+            delete win;
+            exit(ret);
+        });
 
 		guir->add(&l);
 		guir->add(&lv);
@@ -385,7 +385,7 @@ static int show_starting_menu()
             // Render
             fGUI.startDraw();
             guir->render(0, 0);
-            guir->renderToScreen();
+            //guir->renderToScreen();
             fGUI.endDraw();
 
             win->update();

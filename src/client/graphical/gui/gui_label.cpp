@@ -1,4 +1,4 @@
-#include "gui_label.hpp"
+#include <client/graphical/gui/gui_label.hpp>
 
 using namespace familyline::graphics::gui;
 

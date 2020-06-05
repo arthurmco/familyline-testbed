@@ -5,11 +5,11 @@
 #include <cstddef>
 #include <tuple>
 
-#include "control.hpp"
+#include <client/graphical/gui/control.hpp>
 
 namespace familyline::graphics::gui {
-        /**
-     * How we should draw the image into the imageview?
+    /**
+     * How should we draw the image into the imageview?
      */
     enum ImageMode {
         /// Stretch it and distort it so it fits 100% inside the box?

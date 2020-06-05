@@ -37,9 +37,9 @@
 #include <client/graphical/scene_renderer.hpp>
 #include <client/graphical/GraphicalPlotInterface.hpp>
 #include <client/graphical/gfx_service.hpp>
-#include <client/graphical/gui/GUIManager.hpp>
-#include <client/graphical/gui/GUILabel.hpp>
-#include <client/graphical/gui/GUIButton.hpp>
+#include <client/graphical/gui/gui_manager.hpp>
+#include <client/graphical/gui/gui_label.hpp>
+#include <client/graphical/gui/gui_button.hpp>
 //#include "graphical/gui/ImageControl.hpp"
 
 
@@ -88,10 +88,10 @@ namespace familyline {
         
         struct {
             //  graphics::gui::GUIPanel *p;
-            graphics::gui::GUILabel *lbl;
-            graphics::gui::GUILabel *lblVersion;
+            graphics::gui::Label *lbl;
+            graphics::gui::Label *lblVersion;
             //  graphics::gui::GUIPanel *pnl;
-            graphics::gui::GUIButton* btn;
+            graphics::gui::Button* btn;
         } widgets;
 
 

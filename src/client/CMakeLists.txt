@@ -17,11 +17,12 @@ add_library(
   "graphical/gfx_service.cpp"
   "graphical/gl_renderer.cpp"
   "graphical/GraphicalPlotInterface.cpp"
-  "graphical/gui/GUIButton.cpp"
-  "graphical/gui/GUIControl.cpp"
-  "graphical/gui/GUIImageControl.cpp"
-  "graphical/gui/GUILabel.cpp"
-  "graphical/gui/GUIManager.cpp"
+  "graphical/gui/gui_button.cpp"
+  "graphical/gui/control.cpp"
+  "graphical/gui/root_control.cpp"
+  "graphical/gui/gui_imageview.cpp"
+  "graphical/gui/gui_label.cpp"
+  "graphical/gui/gui_manager.cpp"
   "graphical/Light.cpp"
   "graphical/LightManager.cpp"
   "graphical/material.cpp"
@@ -59,9 +60,15 @@ if (MSVC)
   include(${CMAKE_TOOLCHAIN_FILE})
   target_include_directories(familyline-client PUBLIC ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} `${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
 
+else()
+  find_package(PkgConfig REQUIRED)
+
+  pkg_search_module(PANGOCAIRO REQUIRED pangocairo) # finds pango-cairo
+  target_include_directories(familyline-client PUBLIC ${PANGOCAIRO_INCLUDE_DIRS})
+  
 endif(MSVC)
 
-target_include_directories(familyline-client PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
+target_include_directories(familyline-client PRIVATE "${CMAKE_SOURCE_DIR}/src/include" )
 target_link_libraries(familyline-client familyline-common)
 target_compile_features(familyline-client PRIVATE cxx_std_20)
 

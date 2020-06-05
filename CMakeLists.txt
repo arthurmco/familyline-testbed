@@ -80,6 +80,7 @@ else()
   find_package(PkgConfig REQUIRED)
   find_package(Threads REQUIRED)
   pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
+  pkg_search_module(PANGOCAIRO REQUIRED pangocairo) # finds pango-cairo
   pkg_search_module(GLM REQUIRED glm) # finds glm
   
   
@@ -103,6 +104,7 @@ else()
   target_link_libraries(familyline ${IL_LIBRARIES})
   target_link_libraries(familyline ${ILU_LIBRARIES})
   target_link_libraries(familyline ${CAIRO_LINK_LIBRARIES})
+  target_link_libraries(familyline ${PANGOCAIRO_LINK_LIBRARIES})
   target_link_libraries(familyline ${GLM_LINK_LIBRARIES})
   target_link_libraries(familyline Threads::Threads)
   
@@ -112,6 +114,7 @@ else()
   	target_link_libraries(familyline-tests ${IL_LIBRARIES})
   	target_link_libraries(familyline-tests ${ILU_LIBRARIES})
   	target_link_libraries(familyline-tests ${CAIRO_LIBRARIES})
+    target_link_libraries(familyline-tests ${PANGOCAIRO_LINK_LIBRARIES})
 	target_link_libraries(familyline-tests ${GLM_LIBRARIES})
 	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
     target_link_libraries(familyline-tests Threads::Threads)
@@ -125,7 +128,7 @@ else()
 
   add_compile_options(${SDL2_CFLAGS_OTHER} -Wall -Wextra)
 
-  include_directories(AFTER  ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} `${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
+  include_directories(AFTER  ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} `${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${PANGOCAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
 
 endif(MSVC)
 

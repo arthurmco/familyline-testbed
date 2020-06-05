@@ -1,8 +1,20 @@
-#include "gui_manager.hpp"
+#include <client/graphical/gui/gui_manager.hpp>
 
 using namespace familyline::graphics::gui;
 
 static int vv = 0;
+
+
+void GUIManager::add(Control* control)
+{
+    
+}
+
+void GUIManager::remove(Control* control)
+{
+    
+}
+
 
 void GUIManager::update()
 {
@@ -26,11 +38,14 @@ void GUIManager::update()
     SDL_UnlockTexture(framebuffer_);
 
     // render the updated texture
-    SDL_RenderClear(renderer_);
-    SDL_RenderCopy(renderer_, framebuffer_, nullptr, nullptr);
+//    SDL_RenderClear(renderer_);
+//    SDL_RenderCopy(renderer_, framebuffer_, nullptr, nullptr);
 
 }
 
+void GUIManager::render(unsigned int x, unsigned int y) {
+    
+}
 
 GUIManager::~GUIManager()
 {

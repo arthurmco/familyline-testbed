@@ -1,8 +1,7 @@
 #pragma once
 
 #include <optional>
-
-#include "control.hpp"
+#include <client/graphical/gui/control.hpp>
 
 namespace familyline::graphics::gui {
     
