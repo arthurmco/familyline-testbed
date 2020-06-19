@@ -1,6 +1,9 @@
 #pragma once
 
+#if !(defined(__gl_h_) || defined(__GL_H__) || defined(_GL_H) || defined(__X_GL_H))
 #include <GL/glew.h>
+#endif
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
@@ -18,7 +21,7 @@ namespace familyline::graphics {
      */
     class Window {
     public:
-        virtual void getSize(int&, int&) = 0;
+        virtual void getSize(int&, int&) const = 0;
 
         
         /* Get the window framebuffer size
@@ -62,7 +65,7 @@ namespace familyline::graphics {
         GLWindow(GLDevice* dev, int width = 800, int height = 600);
 
         /* Get the window size, in pixels */
-        virtual void getSize(int& width, int& height);
+        virtual void getSize(int& width, int& height) const;
 
 
         /* Get the window framebuffer size

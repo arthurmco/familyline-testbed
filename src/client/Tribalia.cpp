@@ -287,7 +287,7 @@ static int show_starting_menu()
 		Framebuffer fGUI = Framebuffer("fGUI", fwidth, fheight);
 		win->setFramebuffers(&f3D, &fGUI);
 
-        guir = new GUIManager{NULL, fwidth, fheight, NULL};
+        guir = new GUIManager{*win, (unsigned)fwidth, (unsigned)fheight, NULL};
         //guir->initShaders(win);
 
         double b = SDL_GetTicks();

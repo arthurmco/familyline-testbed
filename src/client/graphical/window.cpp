@@ -45,7 +45,7 @@ GLWindow::GLWindow(GLDevice* dev, int width, int height)
 	}
 }
 
-void GLWindow::getSize(int& width, int& height)
+void GLWindow::getSize(int& width, int& height) const
 {
     width = _width;
     height = _height;

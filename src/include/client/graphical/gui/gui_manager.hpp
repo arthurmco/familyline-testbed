@@ -10,6 +10,11 @@
 
 #include <pango/pangocairo.h>
 
+#include <common/logger.hpp>
+
+#include <client/graphical/window.hpp>
+#include <client/graphical/shader.hpp>
+
 #include <client/graphical/gui/root_control.hpp>
 #include <client/graphical/gui/gui_label.hpp>
 #include <client/graphical/gui/gui_button.hpp>
@@ -28,9 +33,11 @@ namespace familyline::graphics::gui {
      */
     class GUIManager {
     private:
-        // sdl things, just to put on a window
-        // will be changed to opengl things for the real game
-        SDL_Window* win_;
+        familyline::graphics::Window& win_;
+        
+        familyline::graphics::ShaderProgram* sGUI_;
+        GLuint vaoGUI_, attrPos_, vboPos_, attrTex_, vboTex_, texHandle_;
+        
         SDL_Texture* framebuffer_;
         SDL_Renderer* renderer_;
         std::array<unsigned int, 32*32> ibuf;
@@ -46,9 +53,24 @@ namespace familyline::graphics::gui {
 
         Label* lbl3;
         Label* lbl4;
+
+        /**
+         * Initialize shaders and window vertices.
+         *
+         * We render everything to a textured square. This function creates
+         * the said square, the texture plus the shaders that enable the 
+         * rendering there
+         */
+        void init(const familyline::graphics::Window& win);
+
+        /**
+         * Render the cairo canvas to the gui texture
+         */
+        void renderToTexture();
         
     public:
-        GUIManager(SDL_Window* win, unsigned width, unsigned height,
+        GUIManager(familyline::graphics::Window& win,
+                   unsigned width, unsigned height,
                    SDL_Renderer* renderer)
             : win_(win),
               framebuffer_(SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
@@ -57,6 +79,8 @@ namespace familyline::graphics::gui {
               width_(width), height_(height),
               canvas_(cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height))
             {
+                this->init(win);
+                
                 context_ = cairo_create(this->canvas_);
                 root_control_ = std::make_unique<RootControl>(width, height);
 
@@ -112,7 +136,7 @@ namespace familyline::graphics::gui {
                 root_control_->getControlContainer()->add(400, 400, std::unique_ptr<Control>(img4));
                 root_control_->getControlContainer()->add(510, 400, std::unique_ptr<Control>(img5));
             }
-
+        
 
         void add(Control* control);
 

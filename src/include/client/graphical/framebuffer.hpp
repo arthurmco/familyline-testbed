@@ -1,6 +1,10 @@
 #pragma once
 
+
+#if !(defined(__gl_h_) || defined(__GL_H__) || defined(_GL_H) || defined(__X_GL_H))
 #include <GL/glew.h>
+#endif
+
 #include <SDL2/SDL_opengl.h>
 #include <string_view>
 
