@@ -64,3 +64,29 @@ void ContainerComponent::add(int x, int y, std::unique_ptr<Control> c)
     auto [context, canvas] = this->parent->createChildContext(c.get());
     this->children.emplace_back(x, y, context, canvas, std::move(c));
 }
+
+
+void ContainerComponent::add(float x, float y, std::unique_ptr<Control> c)
+{
+    c->setResizeCallback([&](Control* co, size_t w, size_t h) {
+        auto co_it = std::find_if(this->children.begin(), this->children.end(),
+                                  [&](ControlData& cd) {
+                                      return cd.control->getID() == co->getID();
+                                  });
+
+        if (co_it != this->children.end()) {
+            cairo_destroy(co_it->local_context);
+            cairo_surface_destroy(co_it->control_canvas);
+
+            co_it->control_canvas = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
+            co_it->local_context = cairo_create(co_it->control_canvas);
+        }
+    });
+
+    auto [context, canvas] = this->parent->createChildContext(c.get());
+
+    if (x > 1.1 || y > 1.1)
+        this->children.emplace_back((int)x, (int)y, context, canvas, std::move(c));
+    else
+        this->children.emplace_back(x, y, false, context, canvas, std::move(c));        
+}

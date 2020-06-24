@@ -12,12 +12,25 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
 
+    auto w = cairo_image_surface_get_width(canvas);
+    auto h = cairo_image_surface_get_height(canvas);    
+    
     // Paint all children in the correct place
     for (auto& cdata : this->cc_->children) {
         cdata.control->update(cdata.local_context, cdata.control_canvas);
 
         cairo_set_operator(context, CAIRO_OPERATOR_OVER);
-        cairo_set_source_surface(context, cdata.control_canvas, cdata.x, cdata.y);
+        if (cdata.is_absolute) {
+            cairo_set_source_surface(context, cdata.control_canvas, cdata.x,
+                                   cdata.y);
+        } else {
+            auto absx = w * cdata.fx;
+            auto absy = h * cdata.fy;
+            printf("%.2f = %d * %.2f - ", absx, w, cdata.fx);
+            printf("%.2f = %d * %.2f \n ", absy, h, cdata.fy);
+            cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
+        }
+
         cairo_paint(context);
     }
 

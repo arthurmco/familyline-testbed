@@ -14,7 +14,13 @@ namespace familyline::graphics::gui {
     class Control;
 
     struct ControlData {
+        /* Is the position absolute (you specified an integer pixel value)
+         * or not (you specified a float proportional value)?
+         */
+        bool is_absolute;
+        
         int x, y;
+        float fx, fy;
         
         cairo_t* local_context;
         cairo_surface_t* control_canvas;
@@ -22,7 +28,12 @@ namespace familyline::graphics::gui {
 
         ControlData(int x, int y, cairo_t* ctxt,
                     cairo_surface_t* s, std::unique_ptr<Control> c)
-            : x(x), y(y), local_context(ctxt), control_canvas(s), control(std::move(c))
+            : is_absolute(true), x(x), y(y), local_context(ctxt), control_canvas(s), control(std::move(c))
+            {}
+
+        ControlData(float x, float y, bool abs, cairo_t* ctxt,
+                    cairo_surface_t* s, std::unique_ptr<Control> c)
+            : is_absolute(abs), fx(x), fy(y), local_context(ctxt), control_canvas(s), control(std::move(c))
             {}
     };
 
@@ -38,6 +49,10 @@ namespace familyline::graphics::gui {
         std::vector<ControlData> children;
 
         void add(int x, int y, std::unique_ptr<Control>);
+        void add(float x, float y, std::unique_ptr<Control>);
+        void add(double x, double y, std::unique_ptr<Control> c) {
+            this->add((float)x, (float)y, std::move(c));
+        }
     };
 
 

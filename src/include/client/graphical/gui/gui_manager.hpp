@@ -126,8 +126,8 @@ namespace familyline::graphics::gui {
                 });
                 
                 root_control_->getControlContainer()->add(20, 20, std::unique_ptr<Control>(lbl));
-                root_control_->getControlContainer()->add(40, 60, std::unique_ptr<Control>(lbl2));
-                root_control_->getControlContainer()->add(60, 100, std::unique_ptr<Control>(lbl3));
+                root_control_->getControlContainer()->add(0.1, 0.12, std::unique_ptr<Control>(lbl2));
+                root_control_->getControlContainer()->add(0.1, 0.18, std::unique_ptr<Control>(lbl3));
                 root_control_->getControlContainer()->add(260, 100, std::unique_ptr<Control>(lbl4));
                 root_control_->getControlContainer()->add(20, 140, std::unique_ptr<Control>(btn));
                 root_control_->getControlContainer()->add(400, 120, std::unique_ptr<Control>(img));
