@@ -125,20 +125,21 @@ namespace familyline::graphics::gui {
                     lbl4->setText(std::to_string(dvalue));                    
                 });
                 
-                root_control_->getControlContainer()->add(20, 20, std::unique_ptr<Control>(lbl));
-                root_control_->getControlContainer()->add(0.1, 0.12, std::unique_ptr<Control>(lbl2));
-                root_control_->getControlContainer()->add(0.1, 0.18, std::unique_ptr<Control>(lbl3));
-                root_control_->getControlContainer()->add(260, 100, std::unique_ptr<Control>(lbl4));
-                root_control_->getControlContainer()->add(20, 140, std::unique_ptr<Control>(btn));
-                root_control_->getControlContainer()->add(400, 120, std::unique_ptr<Control>(img));
-                root_control_->getControlContainer()->add(400, 240, std::unique_ptr<Control>(img2));
-                root_control_->getControlContainer()->add(510, 240, std::unique_ptr<Control>(img3));
-                root_control_->getControlContainer()->add(400, 400, std::unique_ptr<Control>(img4));
-                root_control_->getControlContainer()->add(510, 400, std::unique_ptr<Control>(img5));
+                //root_control_->getControlContainer()->add(20, 20, std::unique_ptr<Control>(lbl));
+                //root_control_->getControlContainer()->add(0.1, 0.12, std::unique_ptr<Control>(lbl2));
+                //root_control_->getControlContainer()->add(0.1, 0.18, std::unique_ptr<Control>(lbl3));
+                //root_control_->getControlContainer()->add(260, 100, std::unique_ptr<Control>(lbl4));
+                //root_control_->getControlContainer()->add(20, 140, std::unique_ptr<Control>(btn));
+                //root_control_->getControlContainer()->add(400, 120, std::unique_ptr<Control>(img));
+                //root_control_->getControlContainer()->add(400, 240, std::unique_ptr<Control>(img2));
+                //root_control_->getControlContainer()->add(510, 240, std::unique_ptr<Control>(img3));
+                //root_control_->getControlContainer()->add(400, 400, std::unique_ptr<Control>(img4));
+                //root_control_->getControlContainer()->add(510, 400, std::unique_ptr<Control>(img5));
             }
         
 
-        void add(Control* control);
+        void add(int x, int y, Control* control);
+        void add(double x, double y, ControlPositioning cpos, Control* control);
 
         void remove(Control* control);
         

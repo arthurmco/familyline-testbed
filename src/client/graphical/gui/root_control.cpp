@@ -8,27 +8,52 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
     (void)context;
 
     // Clean bg
-    cairo_set_source_rgba(context, 0.1, 0.4, 0.8, 1);
+    cairo_set_source_rgba(context, 0.3, 0.3, 0.3, 1);
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
 
     auto w = cairo_image_surface_get_width(canvas);
-    auto h = cairo_image_surface_get_height(canvas);    
-    
+    auto h = cairo_image_surface_get_height(canvas);
+
     // Paint all children in the correct place
     for (auto& cdata : this->cc_->children) {
         cdata.control->update(cdata.local_context, cdata.control_canvas);
 
         cairo_set_operator(context, CAIRO_OPERATOR_OVER);
-        if (cdata.is_absolute) {
+
+        switch (cdata.pos_type) {
+        case ControlPositioning::Pixel:
             cairo_set_source_surface(context, cdata.control_canvas, cdata.x,
-                                   cdata.y);
-        } else {
+                                     cdata.y);
+            break;
+        case ControlPositioning::Relative: {
             auto absx = w * cdata.fx;
             auto absy = h * cdata.fy;
-            printf("%.2f = %d * %.2f - ", absx, w, cdata.fx);
-            printf("%.2f = %d * %.2f \n ", absy, h, cdata.fy);
             cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
+            break;
+        }
+        case ControlPositioning::CenterX: {
+            auto ctrlw = cairo_image_surface_get_width(cdata.control_canvas);
+            auto absx = (w/2) - (ctrlw/2);
+            auto absy = h * cdata.fy;            
+            cairo_set_source_surface(context, cdata.control_canvas, absx, absy);            
+            break;
+        }
+        case ControlPositioning::CenterY: {
+            auto ctrlh = cairo_image_surface_get_height(cdata.control_canvas);
+            auto absx = w * cdata.fx;
+            auto absy = (h/2) - (ctrlh/2);
+            cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
+            break;
+        }
+        case ControlPositioning::CenterAll: {
+            auto ctrlw = cairo_image_surface_get_width(cdata.control_canvas);
+            auto ctrlh = cairo_image_surface_get_height(cdata.control_canvas);
+            auto absx = (w/2) - (ctrlw/2);
+            auto absy = (h/2) - (ctrlh/2);
+            cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
+            break;
+        }
         }
 
         cairo_paint(context);

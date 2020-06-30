@@ -321,8 +321,8 @@ static int show_starting_menu()
 		//lv.format.foreground = glm::vec4(0.2, 0.2, 1, 1);
 		//lv.format.background = glm::vec4(1, 1, 1, 0.5);
 
-		Button bnew = Button(300, 50, "New Game"); //Button(0.1, 0.2, 0.8, 0.1, "New Game");
-        Button bquit = Button(300, 50, "Exit Game"); //Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
+		Button bnew = Button(400, 50, "New Game"); //Button(0.1, 0.2, 0.8, 0.1, "New Game");
+        Button bquit = Button(400, 50, "Exit Game"); //Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
 
 		ImageView ilogo = ImageView(480, 800); //0.2, 0.1, 0.6, 0.9,
                                       //    ICONS_DIR "/familyline-logo.png");
@@ -356,11 +356,11 @@ static int show_starting_menu()
             exit(ret);
         });
 
-		guir->add(&l);
-		guir->add(&lv);
-		guir->add(&bquit);
-		guir->add(&bnew);
-		guir->add(&ilogo);
+		guir->add(0.37, 0.03, ControlPositioning::CenterX, &l);
+		guir->add(0.32, 0.8, ControlPositioning::Relative, &lv);
+		guir->add(0.1, 0.2, ControlPositioning::CenterX, &bnew);
+		guir->add(0.1, 0.31, ControlPositioning::CenterX, &bquit);
+		guir->add(0.2, 0.1, ControlPositioning::Relative, &ilogo);
 
         ima->addListenerHandler([&](HumanInputAction hia) {
 

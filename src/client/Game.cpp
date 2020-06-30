@@ -204,7 +204,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
         
         colonies_.insert({human_id_, std::reference_wrapper<Colony>(hcolony)});
         colonies_.insert({dummy_id, std::reference_wrapper<Colony>(dcolony)});
-        gr->add(widgets.lblVersion);
+        //gr->add(widgets.lblVersion);
 
         auto& of = LogicService::getObjectFactory();
 
@@ -339,12 +339,12 @@ int Game::RunLoop()
     lblTerrainPos.format.background = glm::vec4(0, 0, 0, 0.4);
     *****/
     
-    gr->add(&lblBuilding);
-    gr->add(&lblFPS);
-    gr->add(&lblRange);
-    gr->add(&lblSelected);
-    gr->add(&lblKeys);
-    gr->add(&lblTerrainPos);
+    //gr->add(&lblBuilding);
+    //gr->add(&lblFPS);
+    //gr->add(&lblRange);
+    //gr->add(&lblSelected);
+    //gr->add(&lblKeys);
+    //gr->add(&lblTerrainPos);
 
     int delta = 1;
     double pms = 0.0;
