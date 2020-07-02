@@ -1,5 +1,7 @@
 #include <client/graphical/gui/control.hpp>
 #include <ctime>
+#include <algorithm>
+#include <numeric> // for std::accumulate
 
 using namespace familyline::graphics::gui;
 
@@ -91,4 +93,66 @@ void ContainerComponent::add(float x, float y, ControlPositioning cpos, std::uni
     } else {
         this->children.emplace_back(x, y, cpos, context, canvas, std::move(c));
     }
+}
+
+/**
+ * Update the absolute (aka the pixel) positions of a control, so we can keep
+ * track of them for box testing, for example
+ *
+ * When you discover the absolute position based on a relative coordinate
+ * (like ControlPositioning::CenterX, or the fractional relative number),
+ * you call this function to update it
+ */
+void ContainerComponent::updateAbsoluteCoord(unsigned long long control_id, int absx, int absy)
+{
+    auto cd = std::find_if(std::begin(this->children), std::end(this->children),
+                           [&](const ControlData& cd) {
+                               return (cd.code == control_id);                               
+                           });
+
+    if (cd != this->children.end()) {
+        cd->x = absx;
+        cd->y = absy;            
+    }
+}
+
+
+/**
+ * Get the control that is at the specified pixel coordinate
+ */
+std::optional<Control*> ContainerComponent::getControlAtPoint(int x, int y)
+{
+    // Use those reference wrapper so we can compile this.
+    //
+    // The use of that unique pointer in the control data structure did not let the code
+    // compile, because unique pointers cannot be copied, which is what the accumulate function
+    // probably did. But this reduce loop receives references to the control data, and the ref
+    // wrapper can keep them. Sinde we do not change the data, we are good.
+    
+    auto cd = std::accumulate(std::begin(this->children), std::end(this->children),
+        std::optional<std::reference_wrapper<ControlData>>(),
+        [&](std::optional<std::reference_wrapper<ControlData>> c,
+            ControlData& val) -> std::optional<std::reference_wrapper<ControlData>> {
+            if (c) {
+                // TODO: check z-indices when they are implemented.
+                return c;
+            }
+                          
+            auto ctrlw = cairo_image_surface_get_width(val.control_canvas);
+            auto ctrlh = cairo_image_surface_get_height(val.control_canvas);
+                          
+            if (x > val.x && x < val.x + ctrlw &&
+                y > val.y && y < val.y + ctrlh) {
+                return std::optional<std::reference_wrapper<ControlData>>(std::ref(val));
+            } else {
+                return std::optional<std::reference_wrapper<ControlData>>();
+            }
+        });
+    
+    if (cd) {
+        return std::optional<Control*>(cd->get().control.get());
+    }
+
+
+    return std::nullopt;
 }

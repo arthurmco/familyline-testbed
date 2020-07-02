@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <queue>
 
 #include <pango/pangocairo.h>
 
@@ -19,6 +20,8 @@
 #include <client/graphical/gui/gui_label.hpp>
 #include <client/graphical/gui/gui_button.hpp>
 #include <client/graphical/gui/gui_imageview.hpp>
+
+#include <client/input/input_manager.hpp>
 
 #include <span>
 
@@ -38,8 +41,6 @@ namespace familyline::graphics::gui {
         familyline::graphics::ShaderProgram* sGUI_;
         GLuint vaoGUI_, attrPos_, vboPos_, attrTex_, vboTex_, texHandle_;
         
-        SDL_Texture* framebuffer_;
-        SDL_Renderer* renderer_;
         std::array<unsigned int, 32*32> ibuf;
 
         unsigned width_, height_;
@@ -54,6 +55,15 @@ namespace familyline::graphics::gui {
         Label* lbl3;
         Label* lbl4;
 
+        // Cached mouse positions, to help check events that do not send the mouse position along them,
+        // like the KeyEvent
+        int hitmousex_ = 1, hitmousey_ = 1;
+        std::queue<familyline::input::HumanInputAction> input_actions_;
+
+        /// TODO: add a way to lock event receiving to the GUI. Probably the text edit control
+        /// will need, to ensure you can type on it when you click and continue to be able to,
+        /// even if you move the mouse out of it.
+        
         /**
          * Initialize shaders and window vertices.
          *
@@ -68,14 +78,25 @@ namespace familyline::graphics::gui {
          */
         void renderToTexture();
         
+        /**
+         * Checks if an event mouse position hits a control or not.
+         * This allows us to ignore events that do not belong to us, and pass them
+         * to the handlers under it, such as the ones that handle game input
+         *
+         * If it did not hit any control, return false, else return true
+         */
+        bool checkIfEventHits(const familyline::input::HumanInputAction&);
+
+        /**
+         * Get the control that is at the specified pixel coordinate
+         */
+        std::optional<Control*> getControlAtPoint(int x, int y);
+        
     public:
         GUIManager(familyline::graphics::Window& win,
                    unsigned width, unsigned height,
-                   SDL_Renderer* renderer)
+                   familyline::input::InputManager& manager)
             : win_(win),
-              framebuffer_(SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
-                                             SDL_TEXTUREACCESS_STREAMING, width, height)),
-              renderer_(renderer),
               width_(width), height_(height),
               canvas_(cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height))
             {
@@ -84,57 +105,16 @@ namespace familyline::graphics::gui {
                 context_ = cairo_create(this->canvas_);
                 root_control_ = std::make_unique<RootControl>(width, height);
 
-                Label *lbl = new Label{100, 60, "Test"};
-                Label *lbl2 = new Label{100, 60, "AI QUE DELÍCIA CARA - 家族の人"};
-                Button* btn = new Button{200, 40, "Test Button"};
-                ImageView *img = new ImageView{200, 100};
+                manager.addListenerHandler([&](familyline::input::HumanInputAction i) {
 
-                ImageView *img2 = new ImageView{100, 125, ImageMode::Scaled};
-                ImageView *img3 = new ImageView{150, 100, ImageMode::Scaled};
-                ImageView *img4 = new ImageView{64, 64, ImageMode::Center};
-                ImageView *img5 = new ImageView{16, 16, ImageMode::Center};
+                    input_actions_.push(i);
+                    if (this->checkIfEventHits(i)) {
+                        return true;
+                    }
 
-                for (auto i = 0; i < 32*32; i++){
-                    if (i%3 == 0)
-                        ibuf[i] = 0xffff0000;
-                    else
-                        ibuf[i] = 0xff00ff00;
-
-                    if (i%5 == 0)
-                        ibuf[i] = 0xff0000ff;
-
-                    if (i < 32)
-                        ibuf[i] = 0xffffffff;
-                }
-               
-                
-                
-                img->loadFromBuffer(32, 32, std::span{ibuf});
-                img2->loadFromBuffer(32, 32, std::span{ibuf});
-                img3->loadFromBuffer(32, 32, std::span{ibuf});
-                img4->loadFromBuffer(32, 32, std::span{ibuf});
-                img5->loadFromBuffer(32, 32, std::span{ibuf});
-                
-                lbl3 = new Label{80, 20, "0"};
-                lbl4 = new Label{80, 20, "0"};
-
-                btn->setClickCallback([&](Button* b) {
-                    static int dvalue = 0;
-                    dvalue++;
-
-                    lbl4->setText(std::to_string(dvalue));                    
+                    return false;
                 });
                 
-                //root_control_->getControlContainer()->add(20, 20, std::unique_ptr<Control>(lbl));
-                //root_control_->getControlContainer()->add(0.1, 0.12, std::unique_ptr<Control>(lbl2));
-                //root_control_->getControlContainer()->add(0.1, 0.18, std::unique_ptr<Control>(lbl3));
-                //root_control_->getControlContainer()->add(260, 100, std::unique_ptr<Control>(lbl4));
-                //root_control_->getControlContainer()->add(20, 140, std::unique_ptr<Control>(btn));
-                //root_control_->getControlContainer()->add(400, 120, std::unique_ptr<Control>(img));
-                //root_control_->getControlContainer()->add(400, 240, std::unique_ptr<Control>(img2));
-                //root_control_->getControlContainer()->add(510, 240, std::unique_ptr<Control>(img3));
-                //root_control_->getControlContainer()->add(400, 400, std::unique_ptr<Control>(img4));
-                //root_control_->getControlContainer()->add(510, 400, std::unique_ptr<Control>(img5));
             }
         
 
@@ -152,7 +132,7 @@ namespace familyline::graphics::gui {
          *
          * (In the game, we will probably use input actions, not sdl events directly)
          */
-        void receiveEvent(const SDL_Event& ev);
+        void receiveEvent();
         
 
         ~GUIManager();

@@ -7,6 +7,8 @@
 #include <tuple>
 #include <functional>
 
+#include <client/input/input_actions.hpp>
+
 #include <SDL2/SDL.h>
 
 namespace familyline::graphics::gui {
@@ -28,22 +30,27 @@ namespace familyline::graphics::gui {
          */
 
         ControlPositioning pos_type; 
-        
+
+        unsigned long long code;
         int x, y;
         float fx, fy;
         
         cairo_t* local_context;
         cairo_surface_t* control_canvas;
         std::unique_ptr<Control> control;
-
+        
         ControlData(int x, int y, ControlPositioning cpos, cairo_t* ctxt,
                     cairo_surface_t* s, std::unique_ptr<Control> c)
-            : pos_type(cpos), x(x), y(y), local_context(ctxt), control_canvas(s), control(std::move(c))
+            : code((unsigned long long)c.get()), pos_type(cpos), x(x),
+              y(y), local_context(ctxt), control_canvas(s),
+              control(std::move(c))
             {}
 
         ControlData(float x, float y, ControlPositioning cpos, cairo_t* ctxt,
                     cairo_surface_t* s, std::unique_ptr<Control> c)
-            : pos_type(cpos), fx(x), fy(y), local_context(ctxt), control_canvas(s), control(std::move(c))
+            : code((unsigned long long)c.get()), pos_type(cpos), fx(x), fy(y),
+              local_context(ctxt), control_canvas(s),
+              control(std::move(c))
             {}
     };
 
@@ -58,6 +65,21 @@ namespace familyline::graphics::gui {
 
         std::vector<ControlData> children;
 
+        /**
+         * Get the control that is at the specified pixel coordinate
+         */
+        std::optional<Control*> getControlAtPoint(int x, int y);
+
+        /**
+         * Update the absolute (aka the pixel) positions of a control, so we can keep
+         * track of them for box testing, for example
+         *
+         * When you discover the absolute position based on a relative coordinate
+         * (like ControlPositioning::CenterX, or the fractional relative number),
+         * you call this function to update it
+         */
+        void updateAbsoluteCoord(unsigned long long control_id, int absx, int absy);
+        
         void add(int x, int y, std::unique_ptr<Control>);
         void add(float x, float y, ControlPositioning, std::unique_ptr<Control>);
         void add(double x, double y, std::unique_ptr<Control> c) {
@@ -119,7 +141,7 @@ namespace familyline::graphics::gui {
         
         std::optional<ContainerComponent>& getControlContainer() { return cc_; }        
 
-        virtual void receiveEvent(const SDL_Event& ev) = 0;
+        virtual void receiveEvent(const familyline::input::HumanInputAction& ev) = 0;
         
         // see https://stackoverflow.com/a/461224
         virtual ~Control() {}

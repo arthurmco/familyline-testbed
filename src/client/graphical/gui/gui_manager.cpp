@@ -5,6 +5,7 @@
 
 using namespace familyline::graphics::gui;
 using namespace familyline::graphics;
+using namespace familyline::input;
 
 static int vv = 0;
 
@@ -125,7 +126,7 @@ void GUIManager::remove(Control* control)
 void GUIManager::renderToTexture()
 {
     auto& log = LoggerService::getLogger();
-
+    
     // Make the GUI texture transparent
     glClearColor(0.0, 0.0, 0.0, 0.0);
     GLint depthf;
@@ -181,11 +182,7 @@ void GUIManager::renderToTexture()
 
 void GUIManager::update()
 {
-    lbl3->setText(std::to_string(vv));
-    vv++;
-
-    root_control_->update(context_, canvas_);
-    
+    root_control_->update(context_, canvas_);    
 }
 
 void GUIManager::render(unsigned int x, unsigned int y) {
@@ -197,16 +194,62 @@ GUIManager::~GUIManager()
     cairo_destroy(context_);
     cairo_surface_destroy(canvas_);
 
-    SDL_DestroyTexture(framebuffer_);
+    // TODO: remove the input handler
+}
+
+
+/**
+ * Get the control that is in the specified pixel coordinate
+ */
+std::optional<Control*> GUIManager::getControlAtPoint(int x, int y)
+{
+    return root_control_->getControlContainer()->getControlAtPoint(x, y);
+}
+
+bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
+{
+    if (std::holds_alternative<GameExit>(hia.type)) {
+        return false;
+    }
+
+    if (std::holds_alternative<ClickAction>(hia.type)) {
+        auto ca = std::get<ClickAction>(hia.type);
+        return this->getControlAtPoint(ca.screenX, ca.screenY).has_value();
+    }
+
+    if (std::holds_alternative<MouseAction>(hia.type)) {
+        auto ma = std::get<MouseAction>(hia.type);
+        hitmousex_ = ma.screenX;
+        hitmousey_ = ma.screenY;
+        return this->getControlAtPoint(ma.screenX, ma.screenY).has_value();
+    }
+    
+    if (std::holds_alternative<KeyAction>(hia.type)) {
+        return this->getControlAtPoint(hitmousex_, hitmousey_).has_value();
+    }
+    
+    if (std::holds_alternative<WheelAction>(hia.type)) {
+        auto wa = std::get<WheelAction>(hia.type);
+        return this->getControlAtPoint(wa.screenX, wa.screenY).has_value();
+    } 
+
+    return false;
 }
 
 /**
- * Receive an event and act on it
+ * Process received input events
  *
- * (In the game, we will probably use input actions, not sdl events directly)
  */
-void GUIManager::receiveEvent(const SDL_Event& e)
+void GUIManager::receiveEvent()
 {
+    while (!input_actions_.empty()) {
+
+        auto& hia = input_actions_.front();
+        root_control_->receiveEvent(hia);
+
+        input_actions_.pop();        
+    }
+    /*
     switch (e.type) {
     case SDL_KEYDOWN:
         fprintf(stderr, "Key down: state=%s, repeat=%d, key=%08x, mod=%04x\n",
@@ -270,6 +313,7 @@ void GUIManager::receiveEvent(const SDL_Event& e)
     }
 
     root_control_->receiveEvent(e);
+    */
 }
 
 

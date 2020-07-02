@@ -31,7 +31,7 @@ namespace familyline::graphics::gui {
 
         void setText(std::string v);
 
-        virtual void receiveEvent(const SDL_Event &e) {}
+        virtual void receiveEvent(const familyline::input::HumanInputAction& ev) {}
     };
 
 } // namespace familyline::graphics::gui

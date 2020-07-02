@@ -21,6 +21,7 @@
 #include <variant>
 #include <SDL2/SDL.h>
 
+namespace familyline::input {
 
 /// Simple Events
 struct ClickAction {
@@ -55,9 +56,9 @@ struct GameExit {
 using HumanInputType = std::variant<ClickAction, MouseAction,
                                     KeyAction, WheelAction, GameExit>;
 
-
 struct HumanInputAction {
-    uint64_t timestamp;
-    HumanInputType type;
+  uint64_t timestamp;
+  HumanInputType type;
 };
 
+} // namespace familyline::input

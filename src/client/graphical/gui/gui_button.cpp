@@ -2,6 +2,7 @@
 #include <client/graphical/gui/gui_button.hpp>
 
 using namespace familyline::graphics::gui;
+using namespace familyline::input;
 
 Button::Button(unsigned width, unsigned height, std::string text)
     : width_(width), height_(height), label_(Label{1, 1, ""}) {
@@ -38,6 +39,7 @@ bool Button::update(cairo_t *context, cairo_surface_t *canvas)
     } else {
         cairo_set_source_rgba(context, 0, 0, 0, 0.5);
     }
+    
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
 
@@ -61,21 +63,17 @@ std::tuple<int, int> Button::getNeededSize(cairo_t *parent_context) const
     return std::tie(width_, height_);
 }
 
-void Button::receiveEvent(const SDL_Event &e)
+void Button::receiveEvent(const familyline::input::HumanInputAction& ev)
 {
-    switch (e.type) {
-    case SDL_MOUSEBUTTONDOWN:
-        clicked_ = true;
-        break;
-
-    case SDL_MOUSEBUTTONUP:
-        clicked_ = false;
-        break;
+    if (std::holds_alternative<ClickAction>(ev.type)) {
+        auto ca = std::get<ClickAction>(ev.type);
+        clicked_ = ca.isPressed;
     }
 
     if (clicked_) {
         click_active_ = true;
         click_fut_ = std::async(this->click_cb_, this);
+        clicked_ = false;
     }
 
     // Separating the click action (the clicked_ variable) from the "is clicked" question
@@ -88,6 +86,7 @@ void Button::receiveEvent(const SDL_Event &e)
             click_active_ = false;
         }
     }
+
 }
 
 

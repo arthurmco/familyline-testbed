@@ -23,6 +23,9 @@ namespace familyline::graphics::gui {
 
         std::function<void(Button*)> click_cb_;
 
+        std::chrono::time_point<std::chrono::steady_clock> last_hover_ = std::chrono::steady_clock::now();
+        bool hovered_ = false;
+        
         bool clicked_ = false;
         bool click_active_ = false;
         
@@ -44,7 +47,7 @@ namespace familyline::graphics::gui {
         
         void setText(std::string v);
 
-        virtual void receiveEvent(const SDL_Event &e);
+        virtual void receiveEvent(const familyline::input::HumanInputAction& ev);
 
     };
     

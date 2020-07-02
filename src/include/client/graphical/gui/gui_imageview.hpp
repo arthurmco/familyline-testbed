@@ -60,7 +60,8 @@ namespace familyline::graphics::gui {
             return std::tie(width_, height_);
         }
 
-        virtual void receiveEvent(const SDL_Event &e) {}
+        virtual void receiveEvent(const familyline::input::HumanInputAction& ev) {}
+
     };
 
 }
