@@ -7,8 +7,7 @@ using namespace familyline::graphics::gui;
 
 Control::Control()
 {
-    id_ = clock();
-    printf("id %08lx \n", id_);
+    id_ = (uintptr_t)this;
 }
 
 /**
@@ -48,6 +47,7 @@ void Control::resize(size_t w, size_t h)
 
 void ContainerComponent::add(int x, int y, std::unique_ptr<Control> c)
 {
+    this->children.reserve(128);
     c->setResizeCallback([&](Control* co, size_t w, size_t h) {
         auto co_it = std::find_if(this->children.begin(), this->children.end(),
                                   [&](ControlData& cd) {
@@ -70,6 +70,7 @@ void ContainerComponent::add(int x, int y, std::unique_ptr<Control> c)
 
 void ContainerComponent::add(float x, float y, ControlPositioning cpos, std::unique_ptr<Control> c)
 {
+    this->children.reserve(128);
     c->setResizeCallback([&](Control* co, size_t w, size_t h) {
         auto co_it = std::find_if(this->children.begin(), this->children.end(),
                                   [&](ControlData& cd) {
@@ -95,6 +96,21 @@ void ContainerComponent::add(float x, float y, ControlPositioning cpos, std::uni
     }
 }
 
+
+void ContainerComponent::remove(unsigned long long control_id)
+{
+    auto cd = std::remove_if(this->children.begin(), this->children.end(),
+                             [&](ControlData& cd) {
+                                 return (cd.control->getID() == control_id);
+                             });
+
+    this->children.erase(cd, this->children.end());
+
+    // TODO: see if the control_id specified is the child of our
+    //       children.
+}
+
+
 /**
  * Update the absolute (aka the pixel) positions of a control, so we can keep
  * track of them for box testing, for example
@@ -107,12 +123,12 @@ void ContainerComponent::updateAbsoluteCoord(unsigned long long control_id, int 
 {
     auto cd = std::find_if(std::begin(this->children), std::end(this->children),
                            [&](const ControlData& cd) {
-                               return (cd.code == control_id);                               
+                               return cd.control && (cd.control->getID() == control_id);
                            });
 
     if (cd != this->children.end()) {
         cd->x = absx;
-        cd->y = absy;            
+        cd->y = absy;
     }
 }
 
@@ -128,7 +144,7 @@ std::optional<Control*> ContainerComponent::getControlAtPoint(int x, int y)
     // compile, because unique pointers cannot be copied, which is what the accumulate function
     // probably did. But this reduce loop receives references to the control data, and the ref
     // wrapper can keep them. Sinde we do not change the data, we are good.
-    
+
     auto cd = std::accumulate(std::begin(this->children), std::end(this->children),
         std::optional<std::reference_wrapper<ControlData>>(),
         [&](std::optional<std::reference_wrapper<ControlData>> c,
@@ -137,10 +153,10 @@ std::optional<Control*> ContainerComponent::getControlAtPoint(int x, int y)
                 // TODO: check z-indices when they are implemented.
                 return c;
             }
-                          
+
             auto ctrlw = cairo_image_surface_get_width(val.control_canvas);
             auto ctrlh = cairo_image_surface_get_height(val.control_canvas);
-                          
+
             if (x > val.x && x < val.x + ctrlw &&
                 y > val.y && y < val.y + ctrlh) {
                 return std::optional<std::reference_wrapper<ControlData>>(std::ref(val));
@@ -148,7 +164,7 @@ std::optional<Control*> ContainerComponent::getControlAtPoint(int x, int y)
                 return std::optional<std::reference_wrapper<ControlData>>();
             }
         });
-    
+
     if (cd) {
         return std::optional<Control*>(cd->get().control.get());
     }
@@ -156,3 +172,5 @@ std::optional<Control*> ContainerComponent::getControlAtPoint(int x, int y)
 
     return std::nullopt;
 }
+
+///////////

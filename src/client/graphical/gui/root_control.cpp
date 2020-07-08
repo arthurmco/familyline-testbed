@@ -9,7 +9,7 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
     (void)context;
 
     // Clean bg
-    cairo_set_source_rgba(context, 0.3, 0.3, 0.3, 1);
+    cairo_set_source_rgba(context, 0.3, 0.3, 0.3, 0.25);
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
 
@@ -31,7 +31,7 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
             auto absx = w * cdata.fx;
             auto absy = h * cdata.fy;
             cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
-            this->cc_->updateAbsoluteCoord(cdata.code, absx, absy);
+            this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
             break;
         }
         case ControlPositioning::CenterX: {
@@ -39,7 +39,7 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
             auto absx = (w/2) - (ctrlw/2);
             auto absy = h * cdata.fy;
             cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
-            this->cc_->updateAbsoluteCoord(cdata.code, absx, absy);
+            this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
             break;
         }
         case ControlPositioning::CenterY: {
@@ -47,7 +47,7 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
             auto absx = w * cdata.fx;
             auto absy = (h/2) - (ctrlh/2);
             cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
-            this->cc_->updateAbsoluteCoord(cdata.code, absx, absy);
+            this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
             break;
         }
         case ControlPositioning::CenterAll: {
@@ -56,7 +56,7 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
             auto absx = (w/2) - (ctrlw/2);
             auto absy = (h/2) - (ctrlh/2);
             cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
-            this->cc_->updateAbsoluteCoord(cdata.code, absx, absy);
+            this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
             break;
         }
         }

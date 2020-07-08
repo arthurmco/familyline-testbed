@@ -314,34 +314,34 @@ static int show_starting_menu()
 		bool r = true;
 		//auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
-		Label l = Label(0.37, 0.03, "FAMILYLINE");
+		Label* l = new Label(0.37, 0.03, "FAMILYLINE");
 		//l.format.foreground = glm::vec4(1, 1, 1, 1);
 
-		Label lv = Label(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
+		Label* lv = new Label(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
 		//lv.format.foreground = glm::vec4(0.2, 0.2, 1, 1);
 		//lv.format.background = glm::vec4(1, 1, 1, 0.5);
 
-		Button bnew = Button(400, 50, "New Game"); //Button(0.1, 0.2, 0.8, 0.1, "New Game");
-        Button bquit = Button(400, 50, "Exit Game"); //Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
+		Button* bnew = new Button(400, 50, "New Game"); //Button(0.1, 0.2, 0.8, 0.1, "New Game");
+        Button* bquit = new Button(400, 50, "Exit Game"); //Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
 
-		ImageView ilogo = ImageView(480, 800); //0.2, 0.1, 0.6, 0.9,
+		ImageView* ilogo = new ImageView(480, 800); //0.2, 0.1, 0.6, 0.9,
                                       //    ICONS_DIR "/familyline-logo.png");
             //ilogo.z_index = -100;
 		//ilogo.SetZIndex(0.9);
 		//ilogo.SetOpacity(0.5);
 
-        bquit.setClickCallback([&r](Button* cc) {
+        bquit->setClickCallback([&r](Button* cc) {
             (void)cc;
             r = false;
         });
 
-	    bnew.setClickCallback([&](Button* cc) {
+	    bnew->setClickCallback([&](Button* cc) {
             (void)cc;
-            guir->remove(&l);
-            guir->remove(&lv);
-            guir->remove(&bnew);
-            guir->remove(&bquit);
-            guir->remove(&ilogo);
+            guir->remove(l);
+            guir->remove(lv);
+            //guir->remove(bnew);
+            //guir->remove(bquit);
+            guir->remove(ilogo);
 
             fmt::print("New Game\n");
             if (!pm)
@@ -356,11 +356,11 @@ static int show_starting_menu()
             exit(ret);
         });
 
-		guir->add(0.37, 0.03, ControlPositioning::CenterX, &l);
-		guir->add(0.32, 0.8, ControlPositioning::Relative, &lv);
-		guir->add(0.1, 0.2, ControlPositioning::CenterX, &bnew);
-		guir->add(0.1, 0.31, ControlPositioning::CenterX, &bquit);
-		//guir->add(0.2, 0.1, ControlPositioning::Relative, &ilogo);
+		guir->add(0.37, 0.03, ControlPositioning::CenterX, l);
+		guir->add(0.32, 0.8, ControlPositioning::Relative, lv);
+		guir->add(0.1, 0.2, ControlPositioning::CenterX, bnew);
+		guir->add(0.1, 0.31, ControlPositioning::CenterX, bquit);
+		//guir->add(0.2, 0.1, ControlPositioning::Relative, ilogo);
 
         ima->addListenerHandler([&](HumanInputAction hia) {
 

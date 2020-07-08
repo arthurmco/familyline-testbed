@@ -72,7 +72,14 @@ void Button::receiveEvent(const familyline::input::HumanInputAction& ev)
 
     if (clicked_) {
         click_active_ = true;
-        click_fut_ = std::async(this->click_cb_, this);
+        this->click_cb_(this);
+        
+        /// BUG: if the line below is uncommented, the game crashes, probably due to some
+        /// cross-thread access.
+        ///
+        /// Maybe make the GUI run in its own thread, and run the callbacks on the main thread.
+        
+        //click_fut_ = std::async(this->click_cb_, this);
         clicked_ = false;
     }
 

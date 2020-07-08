@@ -49,6 +49,7 @@ namespace familyline::graphics::gui {
 
         virtual void receiveEvent(const familyline::input::HumanInputAction& ev);
 
+        virtual ~Button() {}
     };
     
 

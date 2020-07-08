@@ -117,7 +117,8 @@ void GUIManager::add(double x, double y, ControlPositioning cpos, Control* contr
 
 void GUIManager::remove(Control* control)
 {
-    
+    if (control)
+        root_control_->getControlContainer()->remove(control->getID());
 }
 
 /**

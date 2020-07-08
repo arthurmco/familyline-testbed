@@ -27,10 +27,6 @@
 
 namespace familyline::graphics::gui {
 
-    /// TODO: use opengl textures for the gui framebuffer instead of
-    ///       sdl2 textures
-
-
     /**
      * Manages the graphical interface state and rendering
      */
@@ -107,8 +103,8 @@ namespace familyline::graphics::gui {
 
                 manager.addListenerHandler([&](familyline::input::HumanInputAction i) {
 
-                    input_actions_.push(i);
                     if (this->checkIfEventHits(i)) {
+                        input_actions_.push(i);
                         return true;
                     }
 

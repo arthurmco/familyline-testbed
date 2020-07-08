@@ -32,6 +32,10 @@ namespace familyline::graphics::gui {
         void setText(std::string v);
 
         virtual void receiveEvent(const familyline::input::HumanInputAction& ev) {}
+
+        virtual ~Label() {
+            fprintf(stderr, "label ptr=%lp text=%s\n", this, text_.c_str());
+        }
     };
 
 } // namespace familyline::graphics::gui
