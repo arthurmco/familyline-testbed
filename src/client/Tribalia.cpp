@@ -360,7 +360,7 @@ static int show_starting_menu()
 		guir->add(0.32, 0.8, ControlPositioning::Relative, lv);
 		guir->add(0.1, 0.2, ControlPositioning::CenterX, bnew);
 		guir->add(0.1, 0.31, ControlPositioning::CenterX, bquit);
-		//guir->add(0.2, 0.1, ControlPositioning::Relative, ilogo);
+		guir->add(0.2, 0.1, ControlPositioning::Relative, ilogo);
 
         ima->addListenerHandler([&](HumanInputAction hia) {
 

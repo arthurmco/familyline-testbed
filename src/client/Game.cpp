@@ -339,12 +339,12 @@ int Game::RunLoop()
     lblTerrainPos.format.background = glm::vec4(0, 0, 0, 0.4);
     *****/
     
-    //gr->add(&lblBuilding);
-    //gr->add(&lblFPS);
-    //gr->add(&lblRange);
-    //gr->add(&lblSelected);
-    //gr->add(&lblKeys);
-    //gr->add(&lblTerrainPos);
+    gr->add(5, 5, &lblFPS);
+    gr->add(5, 35, &lblTerrainPos);
+    gr->add(5, 65, &lblBuilding);
+    gr->add(5, 95, &lblRange);
+    gr->add(5, 125, &lblSelected);
+    gr->add(5, 155, &lblKeys);
 
     int delta = 1;
     double pms = 0.0;
