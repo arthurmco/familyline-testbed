@@ -67,7 +67,7 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
     return true;
 }
 
-void RootControl::receiveEvent(const HumanInputAction& hia)
+void RootControl::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
 {
     std::optional<Control*> control;
 
@@ -94,7 +94,7 @@ void RootControl::receiveEvent(const HumanInputAction& hia)
     }
 
     if (control.has_value()) {
-        (*control)->receiveEvent(hia);
+        (*control)->receiveEvent(hia, cq);
     }
 
 }

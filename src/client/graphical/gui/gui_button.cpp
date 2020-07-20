@@ -63,7 +63,7 @@ std::tuple<int, int> Button::getNeededSize(cairo_t *parent_context) const
     return std::tie(width_, height_);
 }
 
-void Button::receiveEvent(const familyline::input::HumanInputAction& ev)
+void Button::receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq)
 {
     if (std::holds_alternative<ClickAction>(ev.type)) {
         auto ca = std::get<ClickAction>(ev.type);
@@ -72,7 +72,7 @@ void Button::receiveEvent(const familyline::input::HumanInputAction& ev)
 
     if (clicked_) {
         click_active_ = true;
-        this->click_cb_(this);
+        this->enqueueCallback(cq, click_cb_);
         
         /// BUG: if the line below is uncommented, the game crashes, probably due to some
         /// cross-thread access.

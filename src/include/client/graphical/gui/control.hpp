@@ -6,6 +6,7 @@
 #include <vector>
 #include <tuple>
 #include <functional>
+#include <queue>
 
 #include <client/input/input_actions.hpp>
 
@@ -92,6 +93,26 @@ namespace familyline::graphics::gui {
 
         virtual ~ControlData() {}        
     };
+
+    class Control;
+        
+    typedef std::function<void(Control*)> EventCallbackFn;
+
+    // TODO: make callbacks async?
+    struct CallbackQueueElement {
+        EventCallbackFn fn;
+        Control* owner;
+
+        // We use the owner ID to check if the control still
+        // exists. If it did not exist anymore, we do not run the
+        // callback.
+        unsigned owner_id;
+    };
+    
+    struct CallbackQueue {
+        std::queue<CallbackQueueElement> callbacks;
+    };
+    
 
     /**
      * A container component
@@ -182,7 +203,9 @@ namespace familyline::graphics::gui {
 
         std::optional<ContainerComponent>& getControlContainer() { return cc_; }
 
-        virtual void receiveEvent(const familyline::input::HumanInputAction& ev) = 0;
+        virtual void enqueueCallback(CallbackQueue& cq, EventCallbackFn ec);
+        
+        virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq) = 0;
 
         // see https://stackoverflow.com/a/461224
         virtual ~Control() {}

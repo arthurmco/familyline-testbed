@@ -42,6 +42,13 @@ void Control::resize(size_t w, size_t h)
     resize_cb_(this, w, h);
 }
 
+void Control::enqueueCallback(CallbackQueue& cq, EventCallbackFn ec)
+{
+    CallbackQueueElement cqe(ec, this, this->getID());
+    cq.callbacks.push(cqe);
+}
+
+
 ////////////////////////////////////////////////////
 
 

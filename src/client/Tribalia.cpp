@@ -330,17 +330,17 @@ static int show_starting_menu()
 		//ilogo.SetZIndex(0.9);
 		//ilogo.SetOpacity(0.5);
 
-        bquit->setClickCallback([&r](Button* cc) {
+        bquit->setClickCallback([&r](Control* cc) {
             (void)cc;
             r = false;
         });
 
-	    bnew->setClickCallback([&](Button* cc) {
+	    bnew->setClickCallback([&](Control* cc) {
             (void)cc;
             guir->remove(l);
             guir->remove(lv);
-            //guir->remove(bnew);
-            //guir->remove(bquit);
+            guir->remove(bnew);
+            guir->remove(bquit);
             guir->remove(ilogo);
 
             fmt::print("New Game\n");
@@ -380,6 +380,7 @@ static int show_starting_menu()
             ima->processEvents();
 
             guir->receiveEvent();
+            guir->runCallbacks();
             guir->update();
 
 

@@ -27,6 +27,9 @@
 
 namespace familyline::graphics::gui {
 
+    /// TODO: PLEASE find a way to run the GUI update function always in tribalia.cpp, or
+    ///       familyline.cpp if renamed. It will make things easier.
+
     /**
      * Manages the graphical interface state and rendering
      */
@@ -56,6 +59,8 @@ namespace familyline::graphics::gui {
         int hitmousex_ = 1, hitmousey_ = 1;
         std::queue<familyline::input::HumanInputAction> input_actions_;
 
+        CallbackQueue cb_queue_;
+        
         /// TODO: add a way to lock event receiving to the GUI. Probably the text edit control
         /// will need, to ensure you can type on it when you click and continue to be able to,
         /// even if you move the mouse out of it.
@@ -73,7 +78,7 @@ namespace familyline::graphics::gui {
          * Render the cairo canvas to the gui texture
          */
         void renderToTexture();
-        
+
         /**
          * Checks if an event mouse position hits a control or not.
          * This allows us to ignore events that do not belong to us, and pass them
@@ -129,7 +134,18 @@ namespace familyline::graphics::gui {
          * (In the game, we will probably use input actions, not sdl events directly)
          */
         void receiveEvent();
-        
+
+        /**
+         * Check if we have any pending callbacks
+         *
+         * If we have, run them
+         *
+         * Note that this function needs to be ran in the main thread, because the game loop
+         * runs in one of those callbacks, the new game button. This can cause some race
+         * conditions and crash the game.
+         *
+         */
+        void runCallbacks();                
 
         ~GUIManager();
 

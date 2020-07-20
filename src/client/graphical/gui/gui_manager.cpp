@@ -82,7 +82,7 @@ void GUIManager::init(const Window& win)
 
     LOGDEBUG(LoggerService::getLogger(), "gui-manager",
              "gui size: %dx%d", width_, height_);
-    
+
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_BGRA,
                  GL_UNSIGNED_BYTE,
                  (void*)cairo_image_surface_get_data(this->canvas_));
@@ -91,7 +91,7 @@ void GUIManager::init(const Window& win)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     glBindTexture(GL_TEXTURE_2D, 0);
-	
+
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
         char e[128];
@@ -100,10 +100,10 @@ void GUIManager::init(const Window& win)
         throw graphical_exception(std::string(e));
     }
 }
-        
+
 void GUIManager::add(int x, int y, Control* control)
 {
-    root_control_->getControlContainer()->add(x, y, std::unique_ptr<Control>(control));    
+    root_control_->getControlContainer()->add(x, y, std::unique_ptr<Control>(control));
 }
 
 void GUIManager::add(double x, double y, ControlPositioning cpos, Control* control)
@@ -127,7 +127,7 @@ void GUIManager::remove(Control* control)
 void GUIManager::renderToTexture()
 {
     auto& log = LoggerService::getLogger();
-    
+
     // Make the GUI texture transparent
     glClearColor(0.0, 0.0, 0.0, 0.0);
     GLint depthf;
@@ -183,11 +183,11 @@ void GUIManager::renderToTexture()
 
 void GUIManager::update()
 {
-    root_control_->update(context_, canvas_);    
+    root_control_->update(context_, canvas_);
 }
 
 void GUIManager::render(unsigned int x, unsigned int y) {
-    this->renderToTexture();    
+    this->renderToTexture();
 }
 
 GUIManager::~GUIManager()
@@ -224,15 +224,15 @@ bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
         hitmousey_ = ma.screenY;
         return this->getControlAtPoint(ma.screenX, ma.screenY).has_value();
     }
-    
+
     if (std::holds_alternative<KeyAction>(hia.type)) {
         return this->getControlAtPoint(hitmousex_, hitmousey_).has_value();
     }
-    
+
     if (std::holds_alternative<WheelAction>(hia.type)) {
         auto wa = std::get<WheelAction>(hia.type);
         return this->getControlAtPoint(wa.screenX, wa.screenY).has_value();
-    } 
+    }
 
     return false;
 }
@@ -246,76 +246,23 @@ void GUIManager::receiveEvent()
     while (!input_actions_.empty()) {
 
         auto& hia = input_actions_.front();
-        root_control_->receiveEvent(hia);
+        root_control_->receiveEvent(hia, cb_queue_);
 
-        input_actions_.pop();        
+        input_actions_.pop();
     }
-    /*
-    switch (e.type) {
-    case SDL_KEYDOWN:
-        fprintf(stderr, "Key down: state=%s, repeat=%d, key=%08x, mod=%04x\n",
-               e.key.state == SDL_PRESSED ? "pressed" : "released",
-               e.key.repeat, e.key.keysym.sym, e.key.keysym.mod);
-        break;
-
-    case SDL_KEYUP:
-        fprintf(stderr, "Key up: state=%s, repeat=%d, key=%08x, mod=%04x\n",
-               e.key.state == SDL_PRESSED ? "pressed" : "released",
-               e.key.repeat, e.key.keysym.sym, e.key.keysym.mod);
-        break;
-
-    case SDL_MOUSEBUTTONDOWN:
-        fprintf(stderr, "Mouse button down: state=%s, clicks=%d, mouse=%d, button=%04x, x=%d, y=%d\n",
-               e.button.state == SDL_PRESSED ? "pressed" : "released",
-               e.button.clicks, e.button.which, e.button.button, e.button.x, e.button.y);
-        break;
-
-    case SDL_MOUSEBUTTONUP:
-        fprintf(stderr, "Mouse button up: state=%s, clicks=%d, mouse=%d, button=%04x, x=%d, y=%d\n",
-               e.button.state == SDL_PRESSED ? "pressed" : "released",
-               e.button.clicks, e.button.which, e.button.button, e.button.x, e.button.y);
-        break;
-
-    case SDL_MOUSEMOTION:
-        fprintf(stderr, "Mouse motion: mouse=%d, state=%04x, x=%d, y=%d, xdir=%d, ydir=%d\n",
-               e.motion.which, e.motion.state, e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
-        break;
-
-    case SDL_MOUSEWHEEL:
-        fprintf(stderr, "Mouse wheel: mouse=%d, x=%d, y=%d, direction=%s, \n",
-               e.wheel.which, e.wheel.x, e.wheel.y,
-               e.wheel.direction == SDL_MOUSEWHEEL_NORMAL ? "normal" : "flipped");
-        break;
-
-    case SDL_TEXTEDITING:
-        fprintf(stderr, "Text Editing: text='%s', start=%d, length=%d\n",
-               e.edit.text, e.edit.start, e.edit.length);
-        break;
-
-    case SDL_TEXTINPUT:
-        fprintf(stderr, "Text Input: text='%s'\n", e.text.text);
-        break;
-
-    case SDL_JOYAXISMOTION:
-        fprintf(stderr, "Joy axis motion\n");
-        break;
-
-    case SDL_JOYBALLMOTION:
-        fprintf(stderr, "Joy ball motion\n");
-        break;
-
-    case SDL_JOYHATMOTION:
-        fprintf(stderr, "Joy hat motion\n");
-        break;
-
-    default:
-        fprintf(stderr, "Unknown event: %08x\n", e.type);
-        break;
-    }
-
-    root_control_->receiveEvent(e);
-    */
 }
 
+
+void GUIManager::runCallbacks()
+{
+    if (!cb_queue_.callbacks.empty()) {
+        // Run one callback per call.
+        auto cb = cb_queue_.callbacks.front();
+        cb_queue_.callbacks.pop();
+
+        // TODO: check if the owner exists.
+        cb.fn(cb.owner);
+    }
+}
 
 ////////////////////////////////////////////////

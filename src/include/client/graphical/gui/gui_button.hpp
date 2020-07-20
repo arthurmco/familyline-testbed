@@ -20,8 +20,7 @@ namespace familyline::graphics::gui {
         unsigned label_width_, label_height_;
         cairo_t *l_context_ = nullptr;
         cairo_surface_t *l_canvas_ = nullptr;
-
-        std::function<void(Button*)> click_cb_;
+        EventCallbackFn click_cb_;
 
         std::chrono::time_point<std::chrono::steady_clock> last_hover_ = std::chrono::steady_clock::now();
         bool hovered_ = false;
@@ -43,11 +42,11 @@ namespace familyline::graphics::gui {
 
         virtual std::tuple<int, int> getNeededSize(cairo_t *parent_context) const;
 
-        void setClickCallback(std::function<void(Button*)> c) { click_cb_ = c; }
+        void setClickCallback(EventCallbackFn c) { click_cb_ = c; }
         
         void setText(std::string v);
 
-        virtual void receiveEvent(const familyline::input::HumanInputAction& ev);
+        virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq);
 
         virtual ~Button() {}
     };
