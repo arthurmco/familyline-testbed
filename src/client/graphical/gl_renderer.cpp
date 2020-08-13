@@ -61,9 +61,9 @@ void GLRenderer::render(Camera* c)
 	auto viewMatrix = c->GetViewMatrix();
 	auto projMatrix = c->GetProjectionMatrix();
 
-    
 
-	for (auto& vh : _vhandle_list) {        
+
+	for (auto& vh : _vhandle_list) {
 		ShaderProgram* shader = vh->vinfo.shaderState.shader;
 		shaderManager->use(*shader);
         shader->setUniform("lightCount", 0);
@@ -76,7 +76,7 @@ void GLRenderer::render(Camera* c)
 		shader->setUniform("mvp", projMatrix * viewMatrix * glm::mat4(1.0));
 
         if (vh->vinfo.materialID >= 0) {
-  
+
             Material* m = GFXService::getMaterialManager()->getMaterial(vh->vinfo.materialID);
             MaterialData md = m->getData();
 
@@ -105,7 +105,7 @@ void GLRenderer::render(Camera* c)
             shader->setUniform("diffuse_color", glm::vec3(0.5));
             shader->setUniform("ambient_color", glm::vec3(0.1));
             shader->setUniform("diffuse_intensity", 0.0f);
-            shader->setUniform("ambient_intensity", 0.0f);            
+            shader->setUniform("ambient_intensity", 0.0f);
         }
 
         vh->vinfo.shaderState.updateShader();
@@ -129,7 +129,7 @@ void GLRenderer::render(Camera* c)
             };
 
 
-        
+
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vh->vboPos);
@@ -163,7 +163,7 @@ void GLRenderer::render(Camera* c)
 		}
 
         auto glFormat = vh->vinfo.renderStyle == VertexRenderStyle::Triangles ?
-            GL_TRIANGLES : GL_LINE_STRIP;        
+            GL_TRIANGLES : GL_LINE_STRIP;
 		glDrawArrays(glFormat, 0, vh->vsize);
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -212,7 +212,7 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(
 
             return r;
         };
-    
+
 	glGenBuffers(1, &vboPos);
 	glBindBuffer(GL_ARRAY_BUFFER, vboPos);
 	glBufferData(GL_ARRAY_BUFFER, vd.position.size() * sizeof(glm::vec3),

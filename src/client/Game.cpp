@@ -60,7 +60,7 @@ public:
         if (sync_start == 0) {
             if (this->isTickValid()) {
                 sync_start = tick;
-                printf("engine is synchronized at tick %d", sync_start);                
+                printf("engine is synchronized at tick %zu", sync_start);                
             } else {
                 return;
             }
@@ -286,13 +286,13 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI,
 
 }
 
-Label lblBuilding = Label(0.05, 0.1, "!!!");
-Label lblFPS = Label(0.05, 0.9, "0 fps, 0 ms/frame");
-Label lblRange = Label(0.05, 0.13, "--");
-Label lblSelected = Label(0.05, 0.17, "---");
-Label lblTerrainPos = Label(0.05, 0.21, "---");
+Label lblBuilding = Label(0.05*640, 0.1*480, "!!!");
+Label lblFPS = Label(0.05*640, 0.9*480, "0 fps, 0 ms/frame");
+Label lblRange = Label(0.05*640, 0.13*480, "--");
+Label lblSelected = Label(0.05*640, 0.17*480, "---");
+Label lblTerrainPos = Label(0.05*640, 0.21*480, "---");
 
-Label lblKeys = Label(0.05, 0.05, "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
+Label lblKeys = Label(0.05*640, 0.05*480, "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
 
 
 // Run the logic engine at 60 Hz
@@ -345,7 +345,7 @@ int Game::RunLoop()
     gr->add(5, 95, &lblRange);
     gr->add(5, 125, &lblSelected);
     gr->add(5, 155, &lblKeys);
-
+    
     int delta = 1;
     double pms = 0.0;
 

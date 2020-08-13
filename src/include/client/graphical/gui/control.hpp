@@ -80,9 +80,9 @@ namespace familyline::graphics::gui {
             this->fy = other.fy;
             this->local_context = other.local_context;
             this->control_canvas = other.control_canvas;
-            
+
             this->control = std::move(other.control);
-            
+
             puts("PCC");
 
             other.local_context = nullptr;
@@ -91,11 +91,11 @@ namespace familyline::graphics::gui {
             return *this;
         }
 
-        virtual ~ControlData() {}        
+        virtual ~ControlData() {}
     };
 
     class Control;
-        
+
     typedef std::function<void(Control*)> EventCallbackFn;
 
     // TODO: make callbacks async?
@@ -108,11 +108,11 @@ namespace familyline::graphics::gui {
         // callback.
         unsigned owner_id;
     };
-    
+
     struct CallbackQueue {
         std::queue<CallbackQueueElement> callbacks;
     };
-    
+
 
     /**
      * A container component
@@ -204,7 +204,7 @@ namespace familyline::graphics::gui {
         std::optional<ContainerComponent>& getControlContainer() { return cc_; }
 
         virtual void enqueueCallback(CallbackQueue& cq, EventCallbackFn ec);
-        
+
         virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq) = 0;
 
         // see https://stackoverflow.com/a/461224

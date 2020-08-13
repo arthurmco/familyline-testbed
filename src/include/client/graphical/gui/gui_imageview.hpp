@@ -29,10 +29,11 @@ namespace familyline::graphics::gui {
     private:
         unsigned width_, height_;
         double image_width_, image_height_;
-        
+        std::vector<unsigned char> file_data_;
+
         cairo_surface_t *image_surf_ = nullptr;
         ImageMode image_mode_ = ImageMode::Stretch;
-        
+
     public:
         ImageView(unsigned width, unsigned height, ImageMode im = ImageMode::Stretch)
             : width_(width), height_(height), image_mode_(im) {}
@@ -40,7 +41,7 @@ namespace familyline::graphics::gui {
         /**
          * Load the image content from a file
          */
-        void loadFromFile(FILE *f) {}
+        void loadFromFile(std::string_view path);
 
         /**
          * Load the image content from a color buffer
@@ -52,7 +53,8 @@ namespace familyline::graphics::gui {
          * *image*, not the ones you set for the control!
          */
         void loadFromBuffer(ssize_t width, ssize_t height,
-                            std::span<unsigned int> data);
+                            std::span<unsigned char> data,
+                            int format = CAIRO_FORMAT_ARGB32);
 
         virtual bool update(cairo_t *context, cairo_surface_t *canvas);
 

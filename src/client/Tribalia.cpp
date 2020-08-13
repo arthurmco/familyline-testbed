@@ -324,8 +324,9 @@ static int show_starting_menu()
 		Button* bnew = new Button(400, 50, "New Game"); //Button(0.1, 0.2, 0.8, 0.1, "New Game");
         Button* bquit = new Button(400, 50, "Exit Game"); //Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
 
-		ImageView* ilogo = new ImageView(480, 800); //0.2, 0.1, 0.6, 0.9,
-                                      //    ICONS_DIR "/familyline-logo.png");
+		ImageView* ilogo = new ImageView(300, 450); //0.2, 0.1, 0.6, 0.9,
+        ilogo->loadFromFile(ICONS_DIR "/familyline-logo.png");
+        
             //ilogo.z_index = -100;
 		//ilogo.SetZIndex(0.9);
 		//ilogo.SetOpacity(0.5);
@@ -360,7 +361,7 @@ static int show_starting_menu()
 		guir->add(0.32, 0.8, ControlPositioning::Relative, lv);
 		guir->add(0.1, 0.2, ControlPositioning::CenterX, bnew);
 		guir->add(0.1, 0.31, ControlPositioning::CenterX, bquit);
-		guir->add(0.2, 0.1, ControlPositioning::Relative, ilogo);
+		guir->add(0.2, 0.01, ControlPositioning::CenterX, ilogo);
 
         ima->addListenerHandler([&](HumanInputAction hia) {
 
