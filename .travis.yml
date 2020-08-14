@@ -1,5 +1,5 @@
 language: cpp
-dist: bionic
+dist: focal
 compiler:
   - gcc
 
@@ -12,11 +12,12 @@ addons:
       - ubuntu-toolchain-r-test
 
     packages:
-      - g++-8
+      - g++-10
       - libglm-dev
-      - libglew2.0
+      - libglew2.1
       - libglew-dev
       - libsdl2-2.0.0
+      - libfmt-dev
       - libsdl2-dev
       - libdevil1c2
       - libdevil-dev
@@ -24,13 +25,14 @@ addons:
       - libcairo2-dev
       - libyaml-0-2
       - libyaml-dev
+      - libpango-1.0-0
+      - libpango1.0-dev
+      - libpangocairo-1.0-0
       
 env:
-  - CXX=g++-8
+  - CXX=g++-10
 
 script:
-  - wget -c http://mirrors.kernel.org/ubuntu/pool/universe/f/fmtlib/libfmt-dev_5.2.1+ds-2_amd64.deb
-  - sudo dpkg -i libfmt-dev_5.2.1+ds-2_amd64.deb
   - ${CXX} --version
   - mkdir build && cd build
   - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
