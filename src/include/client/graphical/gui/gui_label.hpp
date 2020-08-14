@@ -23,7 +23,12 @@ namespace familyline::graphics::gui {
         cairo_t* last_context_;        
     public:
         Label(unsigned width, unsigned height, std::string text)
-            : width_(width), height_(height), text_(text) {}
+            : width_(width), height_(height), text_(text) {
+
+            this->appearance_.fontFace = "Arial";
+            this->appearance_.fontSize = 14;
+            
+        }
 
         virtual bool update(cairo_t *context, cairo_surface_t *canvas);
 

@@ -319,25 +319,34 @@ int Game::RunLoop()
           });
           pnl.AddPanel(&btnExit); */
 
-
-    /*****
-    lblBuilding.format.foreground = glm::vec4(1, 1, 1, 1);
-    lblBuilding.format.background = glm::vec4(0, 0, 0, 0.4);
-
-    lblFPS.format.foreground = glm::vec4(1, 1, 1, 1);
-    lblFPS.format.background = glm::vec4(0, 0, 0, 0.4);
-
-    lblRange.format.foreground = glm::vec4(1, 1, 1, 1);
-    lblRange.format.background = glm::vec4(0, 0, 0, 0.4);
-
-    lblSelected.format.foreground = glm::vec4(1, 1, 1, 1);
-    lblSelected.format.background = glm::vec4(0, 0, 0, 0.4);
-
-    lblKeys.format.foreground = glm::vec4(0.9, 0.8, 1, 1);
-    lblKeys.format.background = glm::vec4(0, 0, 0, 0.4);
-
-    lblTerrainPos.format.background = glm::vec4(0, 0, 0, 0.4);
-    *****/
+    lblBuilding.modifyAppearance([](ControlAppearance& ca) {
+        ca.foreground = {1, 1, 1, 1};
+        ca.background = {0, 0, 0, 0.4};
+    });
+    
+    lblFPS.modifyAppearance([](ControlAppearance& ca) {
+        ca.foreground = {1, 1, 1, 1};
+        ca.background = {0, 0, 0, 0.4};
+    });
+    
+    lblRange.modifyAppearance([](ControlAppearance& ca) {
+        ca.foreground = {1, 1, 1, 1};
+        ca.background = {0, 0, 0, 0.4}; 
+    });
+    
+    lblSelected.modifyAppearance([](ControlAppearance& ca) {
+        ca.foreground = {1, 1, 1, 1};
+        ca.background = {0, 0, 0, 0.4};
+    });
+    
+    lblKeys.modifyAppearance([](ControlAppearance& ca) {
+        ca.foreground = {0.9, 0.8, 1, 1};
+        ca.background = {0, 0, 0, 0.4};
+    });
+    
+    lblTerrainPos.modifyAppearance([](ControlAppearance& ca) {
+        ca.background = {0, 0, 0, 0.4};
+    });
     
     gr->add(5, 5, &lblFPS);
     gr->add(5, 35, &lblTerrainPos);

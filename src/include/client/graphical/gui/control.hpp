@@ -120,12 +120,12 @@ namespace familyline::graphics::gui {
         Control* parent;
 
 
-        
+
         /**
          * Sort the controls by their z-index values
          */
         void sortZIndex();
-        
+
         std::vector<ControlData> children;
 
         /**
@@ -154,6 +154,21 @@ namespace familyline::graphics::gui {
 
 
     /**
+     * Defines the visual appearance of the controls
+     *
+     * In this structure are all types of visual customization I could think of.
+     * Not all customizations will apply to all controls.
+     */
+    struct ControlAppearance {
+        std::string fontFace;
+        int fontSize;                        /// font size, in points
+
+        std::array<double, 4> foreground = {1.0, 1.0, 1.0, 1.0};
+        std::array<double, 4> background = {0.0, 0.0, 0.0, 0.0};
+    };
+
+
+    /**
      * Base control class
      */
     class Control {
@@ -163,12 +178,22 @@ namespace familyline::graphics::gui {
 
     protected:
         std::optional<ContainerComponent> cc_ = std::nullopt;
-        
+        ControlAppearance appearance_;
+
     public:
         Control();
 
         unsigned long getID() { return id_; }
 
+        const ControlAppearance& getAppearance() { return appearance_; }
+        virtual void setAppearance(ControlAppearance& a) { appearance_ = a; }
+
+        void modifyAppearance(std::function<void(ControlAppearance&)> fn) {
+            auto a = this->getAppearance();
+            fn(a);
+            this->setAppearance(a);
+        }
+        
         /**
          * The control z-index value
          *
@@ -176,7 +201,7 @@ namespace familyline::graphics::gui {
          * else it will appear
          */
         int z_index = 1;
-        
+
         /**
          * The parent component calls this if it thinks that this control needs to update
          *

@@ -21,6 +21,16 @@ Button::Button(unsigned width, unsigned height, std::string text)
 
     });
 
+    ControlAppearance ca = label_.getAppearance();
+    ca.fontFace = "Arial";
+    ca.fontSize = 20;
+    ca.foreground = {1.0, 1.0, 1.0, 1.0};
+    
+    label_.setAppearance(ca);
+
+    ca.background = {0.0, 0.0, 0.0, 0.5};
+    appearance_ = ca;
+
     l_canvas_ = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     l_context_ = cairo_create(l_canvas_);
     label_.update(l_context_, l_canvas_);
@@ -33,13 +43,15 @@ bool Button::update(cairo_t *context, cairo_surface_t *canvas)
     size_t label_x = width_/2 - label_width_/2;
     size_t label_y = height_/2 - label_height_/2;
 
+    auto [br, bg, bb, ba] = this->appearance_.background;
+    
     // draw the background
     if (clicked_ || std::chrono::steady_clock::now()-last_click_ < std::chrono::milliseconds(100)) {
-        cairo_set_source_rgba(context, 0, 0, 0, 1.0);
+        cairo_set_source_rgba(context, br, bg, bb, ba*2);
     } else {
-        cairo_set_source_rgba(context, 0, 0, 0, 0.5);
+        cairo_set_source_rgba(context, br, bg, bb, ba);
     }
-    
+
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
 
@@ -73,12 +85,12 @@ void Button::receiveEvent(const familyline::input::HumanInputAction& ev, Callbac
     if (clicked_) {
         click_active_ = true;
         this->enqueueCallback(cq, click_cb_);
-        
+
         /// BUG: if the line below is uncommented, the game crashes, probably due to some
         /// cross-thread access.
         ///
         /// Maybe make the GUI run in its own thread, and run the callbacks on the main thread.
-        
+
         //click_fut_ = std::async(this->click_cb_, this);
         clicked_ = false;
     }

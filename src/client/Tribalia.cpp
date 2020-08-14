@@ -315,11 +315,16 @@ static int show_starting_menu()
 		//auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
 		Label* l = new Label(0.37, 0.03, "FAMILYLINE");
-		//l.format.foreground = glm::vec4(1, 1, 1, 1);
+        l->modifyAppearance([](ControlAppearance& ca) {
+            ca.fontSize = 32;
+            ca.foreground = {1, 1, 1, 1};
+        });
 
 		Label* lv = new Label(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
-		//lv.format.foreground = glm::vec4(0.2, 0.2, 1, 1);
-		//lv.format.background = glm::vec4(1, 1, 1, 0.5);
+        lv->modifyAppearance([](ControlAppearance& ca) {
+            ca.foreground = {0.2, 0.2, 1, 1};
+            ca.background = {1, 1, 1, 0.5};
+        });
 
 		Button* bnew = new Button(400, 50, "New Game"); //Button(0.1, 0.2, 0.8, 0.1, "New Game");
         Button* bquit = new Button(400, 50, "Exit Game"); //Button(0.1, 0.31, 0.8, 0.1, "Exit Game");

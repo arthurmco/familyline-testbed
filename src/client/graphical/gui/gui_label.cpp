@@ -8,8 +8,10 @@ PangoLayout* Label::getLayout(cairo_t* context) const
     PangoFontDescription *font_description = nullptr;
 
     font_description = pango_font_description_new ();
-    pango_font_description_set_family (font_description, "Arial");
-    pango_font_description_set_absolute_size (font_description, 20 * PANGO_SCALE);
+    pango_font_description_set_family(
+        font_description, this->appearance_.fontFace.c_str());
+    pango_font_description_set_absolute_size(
+        font_description, this->appearance_.fontSize * PANGO_SCALE);
 
     layout = pango_cairo_create_layout (context);
     pango_layout_set_font_description (layout, font_description);
@@ -21,13 +23,16 @@ PangoLayout* Label::getLayout(cairo_t* context) const
 
 bool Label::update(cairo_t* context, cairo_surface_t* canvas)
 {
+    auto [fr, fg, fb, fa] = this->appearance_.foreground;
+    auto [br, bg, bb, ba] = this->appearance_.background;
+
     PangoLayout* layout = this->getLayout(context);
 
-    cairo_set_source_rgba(context, 0, 0, 0, 0);
+    cairo_set_source_rgba(context, br, bg, bb, ba);
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
 
-    cairo_set_source_rgba(context, 1, 1, 1, 1);
+    cairo_set_source_rgba(context, fr, fg, fb, fa);
     cairo_move_to(context, 0, 0);
     pango_cairo_show_layout (context, layout);
 

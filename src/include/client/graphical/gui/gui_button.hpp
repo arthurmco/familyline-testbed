@@ -36,6 +36,12 @@ namespace familyline::graphics::gui {
         std::future<void> click_fut_;
         
     public:
+        virtual void setAppearance(ControlAppearance& a) {
+            appearance_ = a;
+            a.background = {0, 0, 0, 0};
+            label_.setAppearance(a);
+        }
+            
         Button(unsigned width, unsigned height, std::string text);
 
         virtual bool update(cairo_t *context, cairo_surface_t *canvas);
