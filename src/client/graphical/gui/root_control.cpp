@@ -4,6 +4,9 @@ using namespace familyline::graphics::gui;
 using namespace familyline::input;
 
 
+
+        
+
 bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
 {
     (void)context;
@@ -16,6 +19,8 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
     auto w = cairo_image_surface_get_width(canvas);
     auto h = cairo_image_surface_get_height(canvas);
 
+    this->cc_->sortZIndex();
+    
     // Paint all children in the correct place
     for (auto& cdata : this->cc_->children) {
         cdata.control->update(cdata.local_context, cdata.control_canvas);

@@ -117,6 +117,17 @@ void ContainerComponent::remove(unsigned long long control_id)
     //       children.
 }
 
+/**
+ * Sort the controls by their z-index values
+ */
+void ContainerComponent::sortZIndex()
+{
+    std::sort(this->children.begin(), this->children.end(),
+              [](ControlData& a, ControlData& b) {
+                  return a.control->z_index < b.control->z_index;
+              });
+}
+
 
 /**
  * Update the absolute (aka the pixel) positions of a control, so we can keep
@@ -145,14 +156,22 @@ void ContainerComponent::updateAbsoluteCoord(unsigned long long control_id, int 
  */
 std::optional<Control*> ContainerComponent::getControlAtPoint(int x, int y)
 {
+
+    // Sort the controls by the z-index.
+    // Since, now, the lower z-index control will come first, we need to
+    // use the std::rbegin, that will get the iterator from the end,
+    // and not from the start.
+    this->sortZIndex();
+
+    
     // Use those reference wrapper so we can compile this.
     //
     // The use of that unique pointer in the control data structure did not let the code
     // compile, because unique pointers cannot be copied, which is what the accumulate function
     // probably did. But this reduce loop receives references to the control data, and the ref
     // wrapper can keep them. Sinde we do not change the data, we are good.
-
-    auto cd = std::accumulate(std::begin(this->children), std::end(this->children),
+    
+    auto cd = std::accumulate(std::rbegin(this->children), std::rend(this->children),
         std::optional<std::reference_wrapper<ControlData>>(),
         [&](std::optional<std::reference_wrapper<ControlData>> c,
             ControlData& val) -> std::optional<std::reference_wrapper<ControlData>> {

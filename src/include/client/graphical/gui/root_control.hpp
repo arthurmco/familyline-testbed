@@ -23,6 +23,11 @@ namespace familyline::graphics::gui {
 
         int mousex_ = 1, mousey_ = 1;
 
+        /**
+         * Sort the controls by their z-index values
+         */
+        void sortZIndex();
+        
     public:
         RootControl(unsigned width, unsigned height)
             : width_(width), height_(height)

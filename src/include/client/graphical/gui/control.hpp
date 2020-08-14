@@ -66,8 +66,6 @@ namespace familyline::graphics::gui {
             {
                 this->control = std::move(other.control);
 
-                puts("CV");
-
                 other.local_context = nullptr;
                 other.control_canvas = nullptr;
             }
@@ -82,8 +80,6 @@ namespace familyline::graphics::gui {
             this->control_canvas = other.control_canvas;
 
             this->control = std::move(other.control);
-
-            puts("PCC");
 
             other.local_context = nullptr;
             other.control_canvas = nullptr;
@@ -123,6 +119,13 @@ namespace familyline::graphics::gui {
     struct ContainerComponent {
         Control* parent;
 
+
+        
+        /**
+         * Sort the controls by their z-index values
+         */
+        void sortZIndex();
+        
         std::vector<ControlData> children;
 
         /**
@@ -160,12 +163,20 @@ namespace familyline::graphics::gui {
 
     protected:
         std::optional<ContainerComponent> cc_ = std::nullopt;
-
+        
     public:
         Control();
 
         unsigned long getID() { return id_; }
 
+        /**
+         * The control z-index value
+         *
+         * Bigger the number, more priority it has, more on front of anything
+         * else it will appear
+         */
+        int z_index = 1;
+        
         /**
          * The parent component calls this if it thinks that this control needs to update
          *

@@ -327,7 +327,7 @@ static int show_starting_menu()
 		ImageView* ilogo = new ImageView(300, 450); //0.2, 0.1, 0.6, 0.9,
         ilogo->loadFromFile(ICONS_DIR "/familyline-logo.png");
         
-            //ilogo.z_index = -100;
+        ilogo->z_index = -100;
 		//ilogo.SetZIndex(0.9);
 		//ilogo.SetOpacity(0.5);
 
