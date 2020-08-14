@@ -29,6 +29,7 @@ Button::Button(unsigned width, unsigned height, std::string text)
     label_.setAppearance(ca);
 
     ca.background = {0.0, 0.0, 0.0, 0.5};
+    ca.borderColor = {0.0, 0.0, 0.0, 1.0};
     appearance_ = ca;
 
     l_canvas_ = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
@@ -44,6 +45,7 @@ bool Button::update(cairo_t *context, cairo_surface_t *canvas)
     size_t label_y = height_/2 - label_height_/2;
 
     auto [br, bg, bb, ba] = this->appearance_.background;
+    auto [bor, bog, bob, boa] = this->appearance_.borderColor;
     
     // draw the background
     if (clicked_ || std::chrono::steady_clock::now()-last_click_ < std::chrono::milliseconds(100)) {
@@ -57,7 +59,7 @@ bool Button::update(cairo_t *context, cairo_surface_t *canvas)
 
     // draw a border
     cairo_set_line_width (context, 6);
-    cairo_set_source_rgba (context, 0, 0, 0, 1);
+    cairo_set_source_rgba (context, bor, bog, bob, boa);
     cairo_rectangle (context, 0, 0, width_, height_);
     cairo_stroke (context);
 

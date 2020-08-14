@@ -1,6 +1,52 @@
+#include "pango/pango-font.h"
 #include <client/graphical/gui/gui_label.hpp>
 
 using namespace familyline::graphics::gui;
+
+PangoWeight Label::getPangoWeightFromAppearance(FontWeight fw) const
+{
+    switch (fw) {
+    case Thin:
+        return PANGO_WEIGHT_THIN;
+        break;
+    case Ultralight:
+        return PANGO_WEIGHT_ULTRALIGHT;
+        break;
+    case Light:
+        return PANGO_WEIGHT_LIGHT;
+        break;
+    case Semilight:
+        return PANGO_WEIGHT_SEMILIGHT;
+        break;
+    case Book:
+        return PANGO_WEIGHT_BOOK;
+        break;
+    case Normal:
+        return PANGO_WEIGHT_NORMAL;
+        break;
+    case Medium:
+        return PANGO_WEIGHT_MEDIUM;
+        break;
+    case Semibold:
+        return PANGO_WEIGHT_SEMIBOLD;
+        break;
+    case Bold:
+        return PANGO_WEIGHT_BOLD;
+        break;
+    case Ultrabold:
+        return PANGO_WEIGHT_ULTRABOLD;
+        break;
+    case Heavy:
+        return PANGO_WEIGHT_HEAVY;
+        break;
+    case Ultraheavy:
+        return PANGO_WEIGHT_ULTRAHEAVY;
+        break;
+    }
+
+    return PANGO_WEIGHT_NORMAL;
+}
+
 
 PangoLayout* Label::getLayout(cairo_t* context) const
 {
@@ -12,6 +58,12 @@ PangoLayout* Label::getLayout(cairo_t* context) const
         font_description, this->appearance_.fontFace.c_str());
     pango_font_description_set_absolute_size(
         font_description, this->appearance_.fontSize * PANGO_SCALE);
+    pango_font_description_set_weight(
+        font_description, getPangoWeightFromAppearance(appearance_.fontWeight));
+    pango_font_description_set_style(
+        font_description,
+        appearance_.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
+
 
     layout = pango_cairo_create_layout (context);
     pango_layout_set_font_description (layout, font_description);

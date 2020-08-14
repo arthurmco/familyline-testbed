@@ -19,8 +19,9 @@ namespace familyline::graphics::gui {
         std::string text_;
 
         PangoLayout* getLayout(cairo_t* context) const;
-
-        cairo_t* last_context_;        
+        PangoWeight getPangoWeightFromAppearance(FontWeight fw) const;
+        
+        cairo_t* last_context_;
     public:
         Label(unsigned width, unsigned height, std::string text)
             : width_(width), height_(height), text_(text) {
@@ -29,7 +30,7 @@ namespace familyline::graphics::gui {
             this->appearance_.fontSize = 14;
             
         }
-
+        
         virtual bool update(cairo_t *context, cairo_surface_t *canvas);
 
         virtual std::tuple<int, int> getNeededSize(cairo_t *parent_context) const;

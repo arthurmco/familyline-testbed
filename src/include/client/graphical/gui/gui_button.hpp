@@ -39,6 +39,7 @@ namespace familyline::graphics::gui {
         virtual void setAppearance(ControlAppearance& a) {
             appearance_ = a;
             a.background = {0, 0, 0, 0};
+            a.borderColor = {0, 0, 0, 0};
             label_.setAppearance(a);
         }
             

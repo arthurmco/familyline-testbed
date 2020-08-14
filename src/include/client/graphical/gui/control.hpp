@@ -152,6 +152,28 @@ namespace familyline::graphics::gui {
         void remove(unsigned long long control_id);
     };
 
+    /**
+     * Font weight.
+     *
+     * Those font weight values mimic those of Pango
+     * \see https://developer.gnome.org/pango/stable/pango-Fonts.html#PangoWeight
+     *
+     * Note that not all weight values might be available for all fonts.
+     */
+    enum FontWeight {
+        Thin,
+        Ultralight,
+        Light,
+        Semilight,
+        Book,
+        Normal,
+        Medium,
+        Semibold,
+        Bold,
+        Ultrabold,
+        Heavy,
+        Ultraheavy
+    };
 
     /**
      * Defines the visual appearance of the controls
@@ -162,9 +184,13 @@ namespace familyline::graphics::gui {
     struct ControlAppearance {
         std::string fontFace;
         int fontSize;                        /// font size, in points
-
+        FontWeight fontWeight = FontWeight::Normal;
+        bool italic = false;
+        
         std::array<double, 4> foreground = {1.0, 1.0, 1.0, 1.0};
         std::array<double, 4> background = {0.0, 0.0, 0.0, 0.0};
+
+        std::array<double, 4> borderColor = {0.0, 0.0, 0.0, 0.0};
     };
 
 
