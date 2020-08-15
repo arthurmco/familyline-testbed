@@ -1,0 +1,16 @@
+﻿---
+BasedOnStyle: Google
+AccessModifierOffset: 0
+AlignAfterOpenBracket: AlwaysBreak
+AlignConsecutiveAssignments: 'true'
+AlignEscapedNewlines: Left
+AlignTrailingComments: 'true'
+BreakBeforeBraces: Linux
+ColumnLimit: 100
+Cpp11BracedListStyle: 'true'
+Language: Cpp
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+...
