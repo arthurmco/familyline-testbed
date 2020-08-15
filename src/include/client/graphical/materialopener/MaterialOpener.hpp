@@ -7,23 +7,24 @@
 
 #include <vector>
 
-#include "../material.hpp"
-#include "../exceptions.hpp"
 #include "../TextureOpener.hpp"
+#include "../exceptions.hpp"
+#include "../material.hpp"
 
 #ifndef MATERIALOPENER_HPP
 #define MATERIALOPENER_HPP
 
-namespace familyline::graphics {
-
+namespace familyline::graphics
+{
 class MaterialOpener
 {
 protected:
     Material* _material;
+
 public:
     virtual std::vector<Material*> Open(const char* file) = 0;
 };
 
-}
+}  // namespace familyline::graphics
 
 #endif /* end of include guard: MATERIALOPENER_HPP */

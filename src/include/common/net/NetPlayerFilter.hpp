@@ -1,5 +1,5 @@
 /**
- * Filters the received messages from the client, putting them into its 
+ * Filters the received messages from the client, putting them into its
  * own queues
  *
  * Copyright (C) 2018 Arthur M
@@ -11,7 +11,8 @@
 #include <common/NetMessageQueue.hpp>
 #include <map>
 
-namespace familyline::Net {}  // Familyline::Net
-
+namespace familyline::Net
+{
+}  // namespace familyline::Net
 
 #endif /* NETPLAYERFILTER_HPP */

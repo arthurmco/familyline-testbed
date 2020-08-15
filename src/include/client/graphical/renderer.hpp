@@ -4,30 +4,30 @@
  * Mesh renderer class
  */
 
-#include "vertexdata.hpp"
-#include "camera.hpp"
 #include <memory>
 
-namespace familyline::graphics {
+#include "camera.hpp"
+#include "vertexdata.hpp"
 
+namespace familyline::graphics
+{
 struct VertexHandle {
-	VertexInfo vinfo;
+    VertexInfo vinfo;
 
-	VertexHandle(VertexInfo& vinfo)
-		: vinfo(vinfo)
-	{}
+    VertexHandle(VertexInfo& vinfo) : vinfo(vinfo) {}
 
-	virtual bool update(VertexData& vd) = 0;
-	virtual bool remove() = 0;
-	virtual bool recreate(VertexData& vd, VertexInfo& vi) = 0;
+    virtual bool update(VertexData& vd)                   = 0;
+    virtual bool remove()                                 = 0;
+    virtual bool recreate(VertexData& vd, VertexInfo& vi) = 0;
 };
 
-class Renderer {
+class Renderer
+{
 public:
-	virtual VertexHandle* createVertex(VertexData& vd, VertexInfo& vi) = 0;
-    virtual void removeVertex(VertexHandle* vh) = 0;
-	virtual void render(Camera* c) = 0;
-	//virtual LightHandle createLight(LightData& ld) = 0;
+    virtual VertexHandle* createVertex(VertexData& vd, VertexInfo& vi) = 0;
+    virtual void removeVertex(VertexHandle* vh)                        = 0;
+    virtual void render(Camera* c)                                     = 0;
+    // virtual LightHandle createLight(LightData& ld) = 0;
 };
 
-}
+}  // namespace familyline::graphics

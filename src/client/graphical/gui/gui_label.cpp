@@ -1,77 +1,73 @@
-#include "pango/pango-font.h"
 #include <client/graphical/gui/gui_label.hpp>
+
+#include "pango/pango-font.h"
 
 using namespace familyline::graphics::gui;
 
 PangoWeight Label::getPangoWeightFromAppearance(FontWeight fw) const
 {
     switch (fw) {
-    case Thin:
-        return PANGO_WEIGHT_THIN;
-        break;
-    case Ultralight:
-        return PANGO_WEIGHT_ULTRALIGHT;
-        break;
-    case Light:
-        return PANGO_WEIGHT_LIGHT;
-        break;
-    case Semilight:
-        return PANGO_WEIGHT_SEMILIGHT;
-        break;
-    case Book:
-        return PANGO_WEIGHT_BOOK;
-        break;
-    case Normal:
-        return PANGO_WEIGHT_NORMAL;
-        break;
-    case Medium:
-        return PANGO_WEIGHT_MEDIUM;
-        break;
-    case Semibold:
-        return PANGO_WEIGHT_SEMIBOLD;
-        break;
-    case Bold:
-        return PANGO_WEIGHT_BOLD;
-        break;
-    case Ultrabold:
-        return PANGO_WEIGHT_ULTRABOLD;
-        break;
-    case Heavy:
-        return PANGO_WEIGHT_HEAVY;
-        break;
-    case Ultraheavy:
-        return PANGO_WEIGHT_ULTRAHEAVY;
-        break;
+        case Thin:
+            return PANGO_WEIGHT_THIN;
+            break;
+        case Ultralight:
+            return PANGO_WEIGHT_ULTRALIGHT;
+            break;
+        case Light:
+            return PANGO_WEIGHT_LIGHT;
+            break;
+        case Semilight:
+            return PANGO_WEIGHT_SEMILIGHT;
+            break;
+        case Book:
+            return PANGO_WEIGHT_BOOK;
+            break;
+        case Normal:
+            return PANGO_WEIGHT_NORMAL;
+            break;
+        case Medium:
+            return PANGO_WEIGHT_MEDIUM;
+            break;
+        case Semibold:
+            return PANGO_WEIGHT_SEMIBOLD;
+            break;
+        case Bold:
+            return PANGO_WEIGHT_BOLD;
+            break;
+        case Ultrabold:
+            return PANGO_WEIGHT_ULTRABOLD;
+            break;
+        case Heavy:
+            return PANGO_WEIGHT_HEAVY;
+            break;
+        case Ultraheavy:
+            return PANGO_WEIGHT_ULTRAHEAVY;
+            break;
     }
 
     return PANGO_WEIGHT_NORMAL;
 }
 
-
 PangoLayout* Label::getLayout(cairo_t* context) const
 {
-    PangoLayout *layout = nullptr;
-    PangoFontDescription *font_description = nullptr;
+    PangoLayout* layout                    = nullptr;
+    PangoFontDescription* font_description = nullptr;
 
-    font_description = pango_font_description_new ();
-    pango_font_description_set_family(
-        font_description, this->appearance_.fontFace.c_str());
+    font_description = pango_font_description_new();
+    pango_font_description_set_family(font_description, this->appearance_.fontFace.c_str());
     pango_font_description_set_absolute_size(
         font_description, this->appearance_.fontSize * PANGO_SCALE);
     pango_font_description_set_weight(
         font_description, getPangoWeightFromAppearance(appearance_.fontWeight));
     pango_font_description_set_style(
-        font_description,
-        appearance_.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
+        font_description, appearance_.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
 
-
-    layout = pango_cairo_create_layout (context);
-    pango_layout_set_font_description (layout, font_description);
-    pango_layout_set_text (layout, this->text_.c_str(), -1);
+    layout = pango_cairo_create_layout(context);
+    pango_layout_set_font_description(layout, font_description);
+    pango_layout_set_text(layout, this->text_.c_str(), -1);
 
     return layout;
 }
-
 
 bool Label::update(cairo_t* context, cairo_surface_t* canvas)
 {
@@ -86,7 +82,7 @@ bool Label::update(cairo_t* context, cairo_surface_t* canvas)
 
     cairo_set_source_rgba(context, fr, fg, fb, fa);
     cairo_move_to(context, 0, 0);
-    pango_cairo_show_layout (context, layout);
+    pango_cairo_show_layout(context, layout);
 
     last_context_ = context;
 
@@ -95,7 +91,7 @@ bool Label::update(cairo_t* context, cairo_surface_t* canvas)
 
 std::tuple<int, int> Label::getNeededSize(cairo_t* parent_context) const
 {
-    auto width = 1;
+    auto width  = 1;
     auto height = 1;
 
     if (!parent_context) {
@@ -111,13 +107,13 @@ std::tuple<int, int> Label::getNeededSize(cairo_t* parent_context) const
     return std::tie(width, height);
 }
 
-
-void Label::setText(std::string v) {
+void Label::setText(std::string v)
+{
     if (this->text_ != v) {
         this->text_ = v;
 
         if (last_context_) {
-            auto width = 1;
+            auto width  = 1;
             auto height = 1;
 
             PangoLayout* layout = this->getLayout(last_context_);
@@ -128,4 +124,3 @@ void Label::setText(std::string v) {
         }
     }
 }
-

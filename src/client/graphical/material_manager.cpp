@@ -8,20 +8,19 @@ MaterialManager* MaterialManager::_mm = nullptr;
 /* Add material, return its ID */
 int MaterialManager::addMaterial(Material* m)
 {
-    int id = _materials.size();
-    m->_ID = id;
+    int id    = _materials.size();
+    m->_ID    = id;
     auto& log = LoggerService::getLogger();
 
-    log->write("material-manager", LogType::Debug,
-               "Added material %s (id %d) [diffuse (%.2f %.2f %.2f) ambient (%.2f %.2f %.2f) ]",
-        m->getName(), m->getID(),
-        m->getData().diffuseColor.r, m->getData().diffuseColor.g,
-        m->getData().diffuseColor.b,
-        m->getData().ambientColor.r, m->getData().ambientColor.g,
+    log->write(
+        "material-manager", LogType::Debug,
+        "Added material %s (id %d) [diffuse (%.2f %.2f %.2f) ambient (%.2f %.2f %.2f) ]",
+        m->getName(), m->getID(), m->getData().diffuseColor.r, m->getData().diffuseColor.g,
+        m->getData().diffuseColor.b, m->getData().ambientColor.r, m->getData().ambientColor.g,
         m->getData().ambientColor.b);
 
     _materials.push_back(*m);
-	return id;
+    return id;
 }
 
 /* Add materials */

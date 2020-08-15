@@ -1,5 +1,5 @@
 /*
-  Represents a server in the client Familyline 
+  Represents a server in the client Familyline
 
   Copyright (C) 2017, 2018 Arthur M
 */
@@ -7,102 +7,100 @@
 #ifndef NETSERVER_HPP
 #define NETSERVER_HPP
 
-#include <vector>
-#include <stdexcept>
-#include "socket.h"
-#include "NetPlayerManager.hpp"
-
-#include <common/NetMessageQueue.hpp>
-
-#include <cstring>
-#include <cstdlib>
 #include <sys/types.h>
 
+#include <common/NetMessageQueue.hpp>
+#include <cstdlib>
+#include <cstring>
+#include <stdexcept>
+#include <vector>
+
+#include "NetPlayerManager.hpp"
+#include "socket.h"
+
 #ifdef _WIN32
-#include <WinSock2.h>
 #include <WS2tcpip.h>
+#include <WinSock2.h>
 
-
-#define SHUT_RDWR SD_BOTH // I think Microsoft does these things on purpose...
+#define SHUT_RDWR SD_BOTH  // I think Microsoft does these things on purpose...
 
 #else
+#include <arpa/inet.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <arpa/inet.h>
 #endif
 
-namespace familyline::Net {
+namespace familyline::Net
+{
+/* Any error that can occur on the server */
+class ServerException : public std::runtime_error
+{
+public:
+    explicit ServerException(const char* err) : std::runtime_error(err) {}
+};
 
-    /* Any error that can occur on the server */
-    class ServerException : public std::runtime_error {
-    public:
-	explicit ServerException(const char* err):
-	    std::runtime_error(err)
-	    {}
-    };
+/* Server communication class
 
-    /* Server communication class
-       
-       Any communication to the server goes on this class
+   Any communication to the server goes on this class
 
-       It also abstracts different clients, receiving messages from different
-       clients from one place (the server) and putting them on the clients
+   It also abstracts different clients, receiving messages from different
+   clients from one place (the server) and putting them on the clients
+*/
+class Server
+{
+private:
+    socket_t _serversock = -1;
+    struct sockaddr_in _serveraddr;
+
+    /* Receive a message */
+    familyline::Server::NetMessageQueue* cmq = nullptr;
+
+public:
+    const char* Receive(size_t maxlen = 1024);
+
+    familyline::Server::NetMessageQueue* GetQueue() { return this->cmq; }
+
+    Server(const char* ipaddr, int port = 12000);
+
+    /* Do the initial communications with the server
+       Throws an exception if the server is not valid
     */
-    class Server {
-    private:
-	socket_t _serversock = -1;
-	struct sockaddr_in _serveraddr;
+    void InitCommunications();
 
-	/* Receive a message */
-	familyline::Server::NetMessageQueue* cmq = nullptr;
-	
-    public:
-	const char* Receive(size_t maxlen = 1024);
+    /* Receive messages and put them in the client message queue */
+    void GetMessages();
 
-	familyline::Server::NetMessageQueue* GetQueue() { return this->cmq; }
-	
-	Server(const char* ipaddr, int port = 12000);
+    /**
+     * @brief Retrieves a player manager based on the player information
+     *
+     * Gets the player ID from the server. With this ID, it can know
+     * what messages come from the server and what ones come from the
+     * client.
+     * Then, with this ID, it constructs the player manager
+     *
+     * @param playername The local player name
+     */
 
-	/* Do the initial communications with the server
-	   Throws an exception if the server is not valid
-	*/
-	void InitCommunications();
+    logic::PlayerManager* GetPlayerManager(const char* playername);
 
-	/* Receive messages and put them in the client message queue */
-	void GetMessages();
+    /**
+     * Notify to the server that you're ready, or not
+     * If 'v' is true, the ready status is set, else it's cleared
+     */
+    void SetReady(bool v);
 
-	/**
-	 * @brief Retrieves a player manager based on the player information
-	 *
-	 * Gets the player ID from the server. With this ID, it can know
-	 * what messages come from the server and what ones come from the
-	 * client. 
-	 * Then, with this ID, it constructs the player manager
-	 * 
-	 * @param playername The local player name
-	 */
+    /**
+     * Check if the server will start the game.
+     *
+     * If this returns true, that means all clients are ready, if returns
+     * false, some client isn't, and it won't start the game
+     */
+    bool IsGameStarting() const;
 
-        logic::PlayerManager* GetPlayerManager(const char* playername);
+    /* Destroy the connection */
+    ~Server();
+};
 
-	/**
-	 * Notify to the server that you're ready, or not
-	 * If 'v' is true, the ready status is set, else it's cleared
-	 */
-	void SetReady(bool v);
-
-	/**
-	 * Check if the server will start the game.
-	 *
-	 * If this returns true, that means all clients are ready, if returns
-	 * false, some client isn't, and it won't start the game
-	 */
-	bool IsGameStarting() const;
-		
-	/* Destroy the connection */
-	~Server();
-    };
-
-}
+}  // namespace familyline::Net
 
 #endif /* NETSERVER_HPP */
-

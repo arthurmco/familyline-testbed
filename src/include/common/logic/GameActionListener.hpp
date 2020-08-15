@@ -8,10 +8,11 @@
 #define GAMEACTIONLISTENER_HPP
 
 #include <string>
+
 #include "GameAction.hpp"
 
-namespace familyline::logic {
-
+namespace familyline::logic
+{
 /*
  *  Abstract class that implements a listener for actions
  *
@@ -23,13 +24,14 @@ namespace familyline::logic {
  *
  */
 
-class GameActionListener {
+class GameActionListener
+{
 protected:
     std::string _name;
-    
+
 public:
     GameActionListener(const char* name) : _name(name) {}
-    
+
     virtual void OnListen(GameAction&) = 0;
 
     virtual ~GameActionListener() {}
@@ -37,6 +39,6 @@ public:
     const char* GetName() const { return _name.c_str(); }
 };
 
-}
+}  // namespace familyline::logic
 
 #endif /* GAMEACTIONLISTENER_HPP */

@@ -6,34 +6,33 @@
 
 #pragma once
 
-#include <vector>
 #include <glm/glm.hpp>
+#include <vector>
 
-namespace familyline::logic {
+namespace familyline::logic
+{
+/**
+ * A debug drawer interface, so we can draw some lines and paths from the logic
+ * system without being acoplated to it
+ *
+ * Will be useful to show the user values from the logic engine directly where
+ * it matters (for exemple, rotation or size of an object in a form of cube),
+ * instead of showing a lot of numbers in the screen
+ */
+class DebugDrawer
+{
+private:
+public:
+    virtual void drawLine(glm::vec3 start, glm::vec3 end, glm::vec4 color) = 0;
+    virtual void drawSquare(
+        glm::vec3 start, glm::vec3 end, glm::vec4 foreground, glm::vec4 background) = 0;
+    virtual void drawCircle(
+        glm::vec3 point, glm::vec3 radius, glm::vec4 foreground, glm::vec4 background) = 0;
 
-    /**
-     * A debug drawer interface, so we can draw some lines and paths from the logic
-     * system without being acoplated to it
-     *
-     * Will be useful to show the user values from the logic engine directly where
-     * it matters (for exemple, rotation or size of an object in a form of cube),
-     * instead of showing a lot of numbers in the screen
-     */
-    class DebugDrawer {
-    private:
+    void drawPath(std::vector<glm::vec3> points, glm::vec4 color);
 
-    public:
-        virtual void drawLine(glm::vec3 start, glm::vec3 end, glm::vec4 color) = 0;
-        virtual void drawSquare(glm::vec3 start, glm::vec3 end,
-                                glm::vec4 foreground, glm::vec4 background) = 0;
-        virtual void drawCircle(glm::vec3 point, glm::vec3 radius,
-                                glm::vec4 foreground, glm::vec4 background) = 0;
-	
-        void drawPath(std::vector<glm::vec3> points, glm::vec4 color);
+    /// Update some internal structure
+    virtual void update() = 0;
+};
 
-        /// Update some internal structure
-        virtual void update() = 0;
-
-    };
-
-}
+}  // namespace familyline::logic

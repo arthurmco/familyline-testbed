@@ -11,14 +11,14 @@
 #ifndef MTLOPENER_HPP
 #define MTLOPENER_HPP
 
-namespace familyline::graphics {
+namespace familyline::graphics
+{
+class MTLOpener : public MaterialOpener
+{
+public:
+    virtual std::vector<Material*> Open(const char* file);
+};
 
-    class MTLOpener : public MaterialOpener
-    {
-    public:
-        virtual std::vector<Material*> Open(const char* file);
-    };
-
-}
+}  // namespace familyline::graphics
 
 #endif /* end of include guard: MTLOPENER_HPP */

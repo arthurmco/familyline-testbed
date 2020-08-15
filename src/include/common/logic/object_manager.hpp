@@ -1,94 +1,92 @@
 #pragma once
 
-#include <vector>
 #include <memory>
 #include <optional>
+#include <vector>
 
-#include "game_object.hpp"
 #include "action_queue.hpp"
+#include "game_object.hpp"
 
 /// TODO: add event creation on object add/delete
 
-namespace familyline::logic {
+namespace familyline::logic
+{
+/**
+ * Basic object event emitter
+ */
+class ObjectEventEmitter : public EventEmitter
+{
+private:
+    std::string _name;
+
+public:
+    ObjectEventEmitter();
 
     /**
-     * Basic object event emitter
+     * Notify the creation start
+     *
+     * The creation end (when we will send the Created event) will be sent when
+     * the object gets rendered for the first time, or when the object gets fully
+     * built
      */
-    class ObjectEventEmitter : public EventEmitter {
-    private:
-        std::string _name;
+    void notifyCreationStart(object_id_t id, const std::string& name);
 
-    public:
-        ObjectEventEmitter();
+    /**
+     * Notify the removal
+     *
+     * This is when the object gets fully removed.
+     * No more operations with it will be executed.
+     */
+    void notifyRemoval(object_id_t id, const std::string& name);
 
-        /**
-         * Notify the creation start
-         *
-         * The creation end (when we will send the Created event) will be sent when
-         * the object gets rendered for the first time, or when the object gets fully
-         * built
-         */
-        void notifyCreationStart(object_id_t id, const std::string& name);
+    virtual const std::string getName();
+};
 
-        /**
-         * Notify the removal
-         *
-         * This is when the object gets fully removed.
-         * No more operations with it will be executed.
-         */
-        void notifyRemoval(object_id_t id, const std::string& name);
+class ObjectEventReceiver : public EventReceiver
+{
+public:
+    virtual const std::string getName() { return "object-event-receiver"; }
+};
 
-        virtual const std::string getName();
-    };
+class ObjectManager
+{
+private:
+    std::vector<std::shared_ptr<GameObject>> _objects;
+    int _lastID                      = 0;
+    ObjectEventEmitter* eventEmitter = nullptr;
 
-    class ObjectEventReceiver : public EventReceiver {
-    public:
+public:
+    ObjectManager();
 
-      virtual const std::string getName() {
-          return "object-event-receiver";
-      }
-    };
+    /**
+     * Add an object to the manager.
+     *
+     * Adding means only getting the object an ID (therefore making
+     * it valid) and adding it to the manager, so it can be updated
+     * automatically at each game engine iteration
+     *
+     * Returns the ID
+     */
+    object_id_t add(std::shared_ptr<GameObject>&& o);
 
-    class ObjectManager {
-    private:
-        std::vector<std::shared_ptr<GameObject>> _objects;
-        int _lastID = 0;
-        ObjectEventEmitter* eventEmitter = nullptr;
+    /**
+     * Removes an object from the manager
+     */
+    void remove(object_id_t id);
 
-    public:
+    /**
+     * Update every object registered into the manager
+     *
+     * TODO: update in a certain order?
+     */
+    void update();
 
-
-        ObjectManager();
-
-        /**
-         * Add an object to the manager.
-         *
-         * Adding means only getting the object an ID (therefore making
-         * it valid) and adding it to the manager, so it can be updated
-         * automatically at each game engine iteration
-         *
-         * Returns the ID
-         */
-        object_id_t add(std::shared_ptr<GameObject>&& o);
-
-        /**
-         * Removes an object from the manager
-         */
-        void remove(object_id_t id);
-
-        /**
-         * Update every object registered into the manager
-         *
-         * TODO: update in a certain order?
-         */
-        void update();
-
-        /**
-         * Gets an object from its ID
-         *
-         * Returns an optional filled with the object if found, or an empty one if
-         * not
-         */
-        std::optional<std::shared_ptr<GameObject>> get(object_id_t id);
-    };
-}
+    /**
+     * Gets an object from its ID
+     *
+     * Returns an optional filled with the object if found, or an empty one if
+     * not
+     */
+    std::optional<std::shared_ptr<GameObject>> get(object_id_t id);
+};
+}  // namespace familyline::logic

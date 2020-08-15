@@ -10,9 +10,11 @@
 #define NETPLAYERMANAGER_HPP
 
 #include <client/HumanPlayer.hpp>
+
 #include "NetPlayerFilter.hpp"
 
-namespace familyline::Net {}
+namespace familyline::Net
+{
+}
 
 #endif /* NETPLAYERMANAGER_HPP */
-  

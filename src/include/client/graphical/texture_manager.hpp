@@ -6,26 +6,27 @@
 ***/
 #pragma once
 
+#include <cstring>  //strcmp()
 #include <map>
 #include <string>
-#include <cstring> //strcmp()
+
 #include "Texture.hpp"
 
-namespace familyline::graphics {
+namespace familyline::graphics
+{
+class TextureManager
+{
+private:
+    std::map<std::string, Texture*> _textures;
 
-    class TextureManager
-    {
-    private:
-        std::map<std::string, Texture*> _textures;
+    static TextureManager* _tm;
 
-        static TextureManager* _tm;
+public:
+    /* Add texture, return its ID */
+    int AddTexture(const char* name, Texture*);
 
-    public:
-        /* Add texture, return its ID */
-        int AddTexture(const char* name, Texture*);
+    Texture* GetTexture(int ID);
+    Texture* GetTexture(const char* name);
+};
 
-        Texture* GetTexture(int ID);
-        Texture* GetTexture(const char* name);
-    };
-
-}
+}  // namespace familyline::graphics

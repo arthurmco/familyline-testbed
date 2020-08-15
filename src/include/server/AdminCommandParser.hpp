@@ -9,19 +9,21 @@
 #ifndef ADMINCOMMANDPARSER_HPP
 #define ADMINCOMMANDPARSER_HPP
 
-#include "ChatLogger.hpp"
 #include <ServerPlayerManager.hpp>
+
+#include "ChatLogger.hpp"
 
 #ifdef _WIN32
 #include "win_poll.h"
 
 #endif
 
-namespace familyline::Server {
-    constexpr int SERVER_PORT = 12100;
+namespace familyline::Server
+{
+constexpr int SERVER_PORT = 12100;
 
 /**
- * Information about the connected server interface 
+ * Information about the connected server interface
  */
 struct ServerInterface {
     socket_t clisock;
@@ -36,12 +38,13 @@ struct ServerInterface {
  *
  * TODO: Maybe support Unix sockets too?
  */
-class AdminCommandParser {
+class AdminCommandParser
+{
 private:
-    socket_t sock = -1; // The socket
+    socket_t sock = -1;  // The socket
 
     std::list<ServerInterface> interface_lists;
-    
+
     PlayerManager* _spm;
     ChatLogger* _lm;
 
@@ -63,31 +66,26 @@ private:
      * Receive it from the admin socket and send it to the clients
      */
     bool SendChat(socket_t clisocket);
-    
+
 public:
-    AdminCommandParser(PlayerManager* spm, ChatLogger* lm)
-	: _spm(spm), _lm{lm}
-	{}
+    AdminCommandParser(PlayerManager* spm, ChatLogger* lm) : _spm(spm), _lm{lm} {}
 
     /**
      * Start listening for connections from the interface
      */
     bool Listen();
 
-
     /**
-     * Main loop. It receives requests from interfaces, processes them and 
+     * Main loop. It receives requests from interfaces, processes them and
      * return the results
      *
      * It also manages the connections to the same clients.
      */
     void ProcessRequests();
 
-   
     ~AdminCommandParser();
 };
 
-
-}
+}  // namespace familyline::Server
 
 #endif /* ADMINCOMMANDPARSER_HPP */

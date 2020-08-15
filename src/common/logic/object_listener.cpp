@@ -11,27 +11,19 @@ void ObjectListener::updateObjects()
 
     while (this->pollEvent(e)) {
         switch (e.type) {
-        case EventType::ObjectCreated:
-            this->_objects.insert(e.object.id);
-            break;
+            case EventType::ObjectCreated:
+                this->_objects.insert(e.object.id);
+                break;
 
-        case EventType::ObjectDestroyed:
-            this->_objects.erase(e.object.id);
-            break;
+            case EventType::ObjectDestroyed:
+                this->_objects.erase(e.object.id);
+                break;
         }
-        
     }
 }
 
-std::set<object_id_t> ObjectListener::getAliveObjects() const
-{
-    return _objects;
-}
+std::set<object_id_t> ObjectListener::getAliveObjects() const { return _objects; }
 
 #include <common/logic/logic_service.hpp>
 
-ObjectListener::~ObjectListener()
-{
-    LogicService::getActionQueue()->removeReceiver(this);
-}
-
+ObjectListener::~ObjectListener() { LogicService::getActionQueue()->removeReceiver(this); }

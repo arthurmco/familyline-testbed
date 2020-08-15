@@ -7,31 +7,33 @@
  */
 #pragma once
 
-#include "Light.hpp"
 #include <glm/glm.hpp>
 #include <list>
 
-namespace familyline::graphics {
+#include "Light.hpp"
 
-	class LightManager {
-	private:
-		static std::list<Light*> _lights;
+namespace familyline::graphics
+{
+class LightManager
+{
+private:
+    static std::list<Light*> _lights;
 
-	public:
-		/* Adds a light to the manager */
-		static void AddLight(Light* l);
+public:
+    /* Adds a light to the manager */
+    static void AddLight(Light* l);
 
-		/* Removes a light */
-		static void Remove(Light* l);
+    /* Removes a light */
+    static void Remove(Light* l);
 
-		/* Removes all lights */
-		static void RemoveAll();
+    /* Removes all lights */
+    static void RemoveAll();
 
-		/* 
-		 * Get the best lights, the strongest ones, from a circle that 
-		 * has the center in 'çenter' and radius 'radius'
-		 */
-		static std::list<Light*> GetBestLights(glm::vec3 center, double radius, const int max_lights);
-	};
+    /*
+     * Get the best lights, the strongest ones, from a circle that
+     * has the center in 'çenter' and radius 'radius'
+     */
+    static std::list<Light*> GetBestLights(glm::vec3 center, double radius, const int max_lights);
+};
 
-}
+}  // namespace familyline::graphics

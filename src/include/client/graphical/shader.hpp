@@ -5,68 +5,63 @@
 #endif
 #include <glm/glm.hpp>
 
-enum ShaderType {
-    Vertex,
-    Fragment,
-    Geometry,
-    Compute
-};
-
-#include <vector>
-#include <utility>
-#include <unordered_map>
+enum ShaderType { Vertex, Fragment, Geometry, Compute };
 
 #include <string>
 #include <string_view>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
-namespace familyline::graphics {
-
+namespace familyline::graphics
+{
 /**
  * Represents a shader file
  *
  * We unite those shader files in a shader program.
  * @see ShaderProgram
  */
-    class Shader {
-    private:
-        const char* _file;
-        ShaderType _type;
-        int _handle;
-    
-        std::string readFile(const char* file);
-    
-    public:
-        Shader(const char* file, ShaderType type);
-        void compile();
+class Shader
+{
+private:
+    const char* _file;
+    ShaderType _type;
+    int _handle;
 
-        int getHandle() const { return this->_handle; }
-        ShaderType getType() const { return this->_type; }
-    };
+    std::string readFile(const char* file);
 
-    class ShaderProgram {
-    private:
-        std::string_view _name;
-        std::vector<std::pair<ShaderType, Shader>> _files;
-        int _handle;
-        std::unordered_map<std::string, GLint> _uniform_cache;
+public:
+    Shader(const char* file, ShaderType type);
+    void compile();
 
-        GLint getUniformLocation(std::string_view name);
+    int getHandle() const { return this->_handle; }
+    ShaderType getType() const { return this->_type; }
+};
 
-    public:
-        ShaderProgram(std::string_view name, std::initializer_list<Shader> shaders);
-        void link();
+class ShaderProgram
+{
+private:
+    std::string_view _name;
+    std::vector<std::pair<ShaderType, Shader>> _files;
+    int _handle;
+    std::unordered_map<std::string, GLint> _uniform_cache;
 
-        int getHandle() const { return this->_handle; }
-        std::string_view getName() const { return _name;  }
+    GLint getUniformLocation(std::string_view name);
 
-        void setUniform(std::string_view name, glm::vec3 val);
-        void setUniform(std::string_view name, glm::vec4 val);
-        void setUniform(std::string_view name, glm::mat4 val);
-        void setUniform(std::string_view name, int val);
-        void setUniform(std::string_view name, float val);
+public:
+    ShaderProgram(std::string_view name, std::initializer_list<Shader> shaders);
+    void link();
 
+    int getHandle() const { return this->_handle; }
+    std::string_view getName() const { return _name; }
 
-        // TODO: Move this to a shader manager?
-        // void use();
-    };
-}
+    void setUniform(std::string_view name, glm::vec3 val);
+    void setUniform(std::string_view name, glm::vec4 val);
+    void setUniform(std::string_view name, glm::mat4 val);
+    void setUniform(std::string_view name, int val);
+    void setUniform(std::string_view name, float val);
+
+    // TODO: Move this to a shader manager?
+    // void use();
+};
+}  // namespace familyline::graphics

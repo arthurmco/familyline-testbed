@@ -16,13 +16,14 @@
  * Copyright (C) 2020 Arthur Mendes
  */
 
+#include <SDL2/SDL.h>
+
 #include <cstdint>
 #include <optional>
 #include <variant>
-#include <SDL2/SDL.h>
 
-namespace familyline::input {
-
+namespace familyline::input
+{
 /// Simple Events
 struct ClickAction {
     int screenX, screenY;
@@ -53,12 +54,11 @@ struct GameExit {
 
 ////
 
-using HumanInputType = std::variant<ClickAction, MouseAction,
-                                    KeyAction, WheelAction, GameExit>;
+using HumanInputType = std::variant<ClickAction, MouseAction, KeyAction, WheelAction, GameExit>;
 
 struct HumanInputAction {
-  uint64_t timestamp;
-  HumanInputType type;
+    uint64_t timestamp;
+    HumanInputType type;
 };
 
-} // namespace familyline::input
+}  // namespace familyline::input

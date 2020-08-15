@@ -4,17 +4,16 @@ using namespace familyline::logic;
 
 void BuildQueue::Add(std::shared_ptr<GameObject> o)
 {
-    if (o)
-        this->_objects.push(o);
+    if (o) this->_objects.push(o);
 }
-     
+
 std::shared_ptr<GameObject> BuildQueue::BuildNext(glm::vec3 pos)
 {
     auto o = this->_objects.front();
 
     auto opos = o->getPosition();
-    opos.x = pos.x;
-    opos.z = pos.z;
+    opos.x    = pos.x;
+    opos.z    = pos.z;
     o->setPosition(opos);
 
     this->_objects.pop();
@@ -30,14 +29,15 @@ std::optional<std::shared_ptr<GameObject>> BuildQueue::getNext() const
     }
 }
 
-void BuildQueue::Clear() {
-    while(!this->_objects.empty())
-        this->_objects.pop();
+void BuildQueue::Clear()
+{
+    while (!this->_objects.empty()) this->_objects.pop();
 }
 
-bool DefaultBuildHandler(Action* ac, ActionData data, GameObject* built) {
+bool DefaultBuildHandler(Action* ac, ActionData data, GameObject* built)
+{
     (void)ac;
-    
+
     if (!built) built = data.actionOrigin;
 
     BuildQueue::GetInstance()->Add(std::shared_ptr<GameObject>(built));

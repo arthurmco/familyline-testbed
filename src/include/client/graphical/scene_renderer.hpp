@@ -1,23 +1,24 @@
 #pragma once
 
 #include <memory>
+
+#include "camera.hpp"
 #include "renderer.hpp"
 #include "scene_object.hpp"
-#include "camera.hpp"
 #include "vertexdata.hpp"
 
-namespace familyline::graphics {
-
+namespace familyline::graphics
+{
 struct SceneObjectInfo {
-	std::shared_ptr<SceneObject> object;
-	int id;
-	std::vector<VertexHandle*> handles;
-	bool visible = true;
+    std::shared_ptr<SceneObject> object;
+    int id;
+    std::vector<VertexHandle*> handles;
+    bool visible = true;
 
-	SceneObjectInfo(std::shared_ptr<SceneObject> o, int id,
-		std::vector<VertexHandle*> h)
-		: object(o), id(id), handles(h)
-	{}
+    SceneObjectInfo(std::shared_ptr<SceneObject> o, int id, std::vector<VertexHandle*> h)
+        : object(o), id(id), handles(h)
+    {
+    }
 };
 
 class Mesh;
@@ -27,29 +28,28 @@ class Mesh;
  *
  * Gets scene object raw vertex and light handles and updates them, accordingly to
  * some variables.
- * For example, if the scene object is destroyed, we remove the vertex handle (and, therefore, the data) 
- * from the video card
+ * For example, if the scene object is destroyed, we remove the vertex handle (and, therefore, the
+ * data) from the video card
  */
-class SceneRenderer {
+class SceneRenderer
+{
 private:
-	Renderer* _renderer;
+    Renderer* _renderer;
 
-	std::vector<SceneObjectInfo> _sceneObjects;
+    std::vector<SceneObjectInfo> _sceneObjects;
 
-	int nextID = 1;
+    int nextID = 1;
 
-	void updateVisibleObjects();
-	void changeVertexStatusOnRenderer();
+    void updateVisibleObjects();
+    void changeVertexStatusOnRenderer();
 
 public:
-	Camera& camera;
+    Camera& camera;
 
-	SceneRenderer(Renderer* renderer, Camera& camera)
-		: _renderer(renderer), camera(camera)
-	{}
+    SceneRenderer(Renderer* renderer, Camera& camera) : _renderer(renderer), camera(camera) {}
 
-	int add(std::shared_ptr<SceneObject> so);
-	void remove(int meshHandle);
-	void update();
+    int add(std::shared_ptr<SceneObject> so);
+    void remove(int meshHandle);
+    void update();
 };
-}
+}  // namespace familyline::graphics

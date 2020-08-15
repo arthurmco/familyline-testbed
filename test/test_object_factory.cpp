@@ -1,21 +1,20 @@
 #include <gtest/gtest.h>
-#include "utils.hpp"
 
 #include <common/logic/logic_service.hpp>
 #include <common/logic/object_factory.hpp>
 
+#include "utils.hpp"
+
 using namespace familyline::logic;
 
-TEST(ObjectFactoryOps, ObjectTestCreate) {
-
-    auto component1 = make_object({
-        "test-obj-one", "Test Object 1", glm::vec2(3, 3), 100, 100, false,
-        []() {}, std::optional<AttackComponent>()
-    });
-    auto component2 = make_object({
-        "test-obj-two", "Test Object 2", glm::vec2(3, 3), 300, 300, false,
-        []() {}, std::optional<AttackComponent>()
-    });
+TEST(ObjectFactoryOps, ObjectTestCreate)
+{
+    auto component1 = make_object(
+        {"test-obj-one", "Test Object 1", glm::vec2(3, 3), 100, 100, false, []() {},
+         std::optional<AttackComponent>()});
+    auto component2 = make_object(
+        {"test-obj-two", "Test Object 2", glm::vec2(3, 3), 300, 300, false, []() {},
+         std::optional<AttackComponent>()});
 
     ObjectFactory of;
     of.addObject(component1.get());
@@ -28,16 +27,14 @@ TEST(ObjectFactoryOps, ObjectTestCreate) {
     EXPECT_EQ(300, o2->getHealth());
 }
 
-TEST(ObjectFactoryOps, ObjectNotRepeat) {
-
-    auto component1 = make_object({
-        "test-obj-one", "Test Object 1", glm::vec2(3, 3), 100, 100, false,
-        []() {}, std::optional<AttackComponent>()
-    });
-    auto component2 = make_object({
-        "test-obj-two", "Test Object 2", glm::vec2(3, 3), 300, 300, false,
-        []() {}, std::optional<AttackComponent>()
-    });
+TEST(ObjectFactoryOps, ObjectNotRepeat)
+{
+    auto component1 = make_object(
+        {"test-obj-one", "Test Object 1", glm::vec2(3, 3), 100, 100, false, []() {},
+         std::optional<AttackComponent>()});
+    auto component2 = make_object(
+        {"test-obj-two", "Test Object 2", glm::vec2(3, 3), 300, 300, false, []() {},
+         std::optional<AttackComponent>()});
 
     ObjectFactory of;
     of.addObject(component1.get());

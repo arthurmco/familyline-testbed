@@ -10,26 +10,29 @@
 #ifndef CURSOR_HPP
 #define CURSOR_HPP
 
-namespace familyline::input {
+namespace familyline::input
+{
+class Cursor
+{
+private:
+    static Cursor* cursor;
 
-    class Cursor {
-    private:
-        static Cursor* cursor;
+    HumanListenerHandler _listener;
 
-        HumanListenerHandler _listener;
+    int _x, _y;
 
-        int _x, _y;
-    public:
-        static Cursor* GetInstance() {
-            if (!cursor) cursor = new Cursor{};
+public:
+    static Cursor* GetInstance()
+    {
+        if (!cursor) cursor = new Cursor{};
 
-            return cursor;
-        }
+        return cursor;
+    }
 
-        Cursor();
-        void GetPositions(int& x, int& y);
-    };
+    Cursor();
+    void GetPositions(int& x, int& y);
+};
 
-}
+}  // namespace familyline::input
 
 #endif /* end of include guard: CURSOR_HPP */

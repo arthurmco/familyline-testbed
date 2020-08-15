@@ -9,11 +9,12 @@
 #ifndef CHATLOGGER_HPP
 #define CHATLOGGER_HPP
 
-namespace familyline::Server {
-
+namespace familyline::Server
+{
 struct ChatMessage;
 
-class ChatLogger {
+class ChatLogger
+{
 private:
     std::list<ChatMessage*> _messages;
 
@@ -27,13 +28,8 @@ public:
      * Get messages that have been received only after a certain timestamp
      */
     std::list<ChatMessage*> GetMessagesNewerThan(unsigned long long epoch) const;
-    
 };
 
-
-
-}  // Familyline::Server
-
-
+}  // namespace familyline::Server
 
 #endif /* CHATLOGGER_HPP */

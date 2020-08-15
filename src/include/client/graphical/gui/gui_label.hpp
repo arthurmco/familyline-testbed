@@ -1,47 +1,46 @@
 #pragma once
 
 #include <cairo/cairo.h>
-#include <memory>
-#include <vector>
-#include <string>
-
 #include <pango/pangocairo.h>
+
 #include <client/graphical/gui/control.hpp>
+#include <memory>
+#include <string>
+#include <vector>
 
-namespace familyline::graphics::gui {
+namespace familyline::graphics::gui
+{
+/**
+ * The label GUI control
+ */
+class Label : public Control
+{
+private:
+    unsigned width_, height_;
+    std::string text_;
 
-    /**
-     * The label GUI control
-     */
-    class Label : public Control {
-    private:
-        unsigned width_, height_;
-        std::string text_;
+    PangoLayout* getLayout(cairo_t* context) const;
+    PangoWeight getPangoWeightFromAppearance(FontWeight fw) const;
 
-        PangoLayout* getLayout(cairo_t* context) const;
-        PangoWeight getPangoWeightFromAppearance(FontWeight fw) const;
-        
-        cairo_t* last_context_;
-    public:
-        Label(unsigned width, unsigned height, std::string text)
-            : width_(width), height_(height), text_(text) {
+    cairo_t* last_context_;
 
-            this->appearance_.fontFace = "Arial";
-            this->appearance_.fontSize = 14;
-            
-        }
-        
-        virtual bool update(cairo_t *context, cairo_surface_t *canvas);
+public:
+    Label(unsigned width, unsigned height, std::string text)
+        : width_(width), height_(height), text_(text)
+    {
+        this->appearance_.fontFace = "Arial";
+        this->appearance_.fontSize = 14;
+    }
 
-        virtual std::tuple<int, int> getNeededSize(cairo_t *parent_context) const;
+    virtual bool update(cairo_t* context, cairo_surface_t* canvas);
 
-        void setText(std::string v);
+    virtual std::tuple<int, int> getNeededSize(cairo_t* parent_context) const;
 
-        virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq) {}
+    void setText(std::string v);
 
-        virtual ~Label() {
-            fprintf(stderr, "label ptr=%lp text=%s\n", this, text_.c_str());
-        }
-    };
+    virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq) {}
 
-} // namespace familyline::graphics::gui
+    virtual ~Label() {}
+};
+
+}  // namespace familyline::graphics::gui

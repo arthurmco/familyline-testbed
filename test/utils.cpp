@@ -3,23 +3,18 @@
 using namespace familyline::logic;
 
 TestObject::TestObject(const struct object_init& init)
-    : GameObject(init.type, init.name, init.size, init.health,
-                 init.maxHealth, init.showHealth),
+    : GameObject(init.type, init.name, init.size, init.health, init.maxHealth, init.showHealth),
       init_params_(init)
 {
     this->fnUpdate_ = init.fnUpdate;
 
     if (init.atkComponent) {
-        this->cAttack = init.atkComponent;
+        this->cAttack                = init.atkComponent;
         this->cAttack.value().object = this;
     }
-    
 }
 
-void TestObject::update()
-{
-    fnUpdate_();
-}
+void TestObject::update() { fnUpdate_(); }
 
 std::shared_ptr<GameObject> TestObject::create()
 {
@@ -35,24 +30,20 @@ std::shared_ptr<TestObject> make_object(const struct object_init& init)
 }
 
 TestOwnableObject::TestOwnableObject(const struct object_init& init)
-    : GameObject(init.type, init.name, init.size, init.health,
-                 init.maxHealth, init.showHealth),
+    : GameObject(init.type, init.name, init.size, init.health, init.maxHealth, init.showHealth),
       init_params_(init)
 {
     this->fnUpdate_ = init.fnUpdate;
 
     if (init.atkComponent) {
-        this->cAttack = init.atkComponent;
+        this->cAttack                = init.atkComponent;
         this->cAttack.value().object = this;
     }
 
-    this->cColony = std::make_optional(ColonyComponent());   
+    this->cColony = std::make_optional(ColonyComponent());
 }
 
-void TestOwnableObject::update()
-{
-    fnUpdate_();
-}
+void TestOwnableObject::update() { fnUpdate_(); }
 
 std::shared_ptr<GameObject> TestOwnableObject::create()
 {
@@ -67,9 +58,10 @@ std::shared_ptr<TestOwnableObject> make_ownable_object(const struct object_init&
     return std::make_shared<TestOwnableObject>(init);
 }
 
-void DummyPlayer::generateInput() {
+void DummyPlayer::generateInput()
+{
     auto input = player_input_cb_();
-    
+
     for (auto& i : input) {
         this->pushAction(i);
     }

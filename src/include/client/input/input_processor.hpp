@@ -1,72 +1,69 @@
 #pragma once
 
 /**
- * Input processor 
+ * Input processor
  * Processes SDL inputs, and convert them to actions, so
  * we do not have to fill the code with SDL-specific functions.
  *
- * However, we retain SDL keycode constants, because it is easier 
+ * However, we retain SDL keycode constants, because it is easier
  *
  * Copyright (C) 2020 Arthur Mendes
  */
 
-#include <thread>
 #include <queue>
+#include <thread>
 
 #include "input_actions.hpp"
 
-namespace familyline::input {
+namespace familyline::input
+{
+/**
+ * Processes input from SDL and generate input actions
+ *
+ * Usually will not generate events that have something to do with game
+ * objects, like BuildAction or ObjectClickAction, but you can enable
+ * it when the game starts
+ */
+class InputProcessor
+{
+private:
+    //        InputPicker& _ip;
+
+    std::queue<HumanInputAction> _actions;
+
+    std::thread _runThread;
+    bool _isRunning = false;
+
+    void enqueueEvent(const SDL_Event& e, int& lastX, int& lastY);
+
+public:
+    //        InputProcessor(InputPicker& ip)
+    //            : _ip(ip)
+    //            {}
 
     /**
-     * Processes input from SDL and generate input actions
+     * Starts a thread to receive input, so we do not lose input
+     * even if the primary thread hangs
      *
-     * Usually will not generate events that have something to do with game
-     * objects, like BuildAction or ObjectClickAction, but you can enable
-     * it when the game starts
+     * We might not be able to process it, but the system will never
+     * treat this game as non-responding.
      */
-    class InputProcessor {
-    private:
-//        InputPicker& _ip;
+    void startInputReceiver();
 
-        std::queue<HumanInputAction> _actions;
+    /**
+     * Stops the input receiver thread
+     */
+    void stopInputReceiver();
 
-        std::thread _runThread;
-        bool _isRunning = false;
+    /**
+     * Get the next action
+     *
+     * Return true if we have a next action, false if the action queue is
+     * empty
+     */
+    bool pollAction(HumanInputAction& a);
 
+    ~InputProcessor() { this->stopInputReceiver(); }
+};
 
-		void enqueueEvent(const SDL_Event& e, int& lastX, int& lastY);
-    public:
-
-//        InputProcessor(InputPicker& ip)
-//            : _ip(ip)
-//            {}
-
-        /**
-         * Starts a thread to receive input, so we do not lose input
-         * even if the primary thread hangs
-         *
-         * We might not be able to process it, but the system will never
-         * treat this game as non-responding.
-         */
-        void startInputReceiver();
-
-
-        /**
-         * Stops the input receiver thread
-         */
-        void stopInputReceiver();
-
-
-        /**
-         * Get the next action
-         *
-         * Return true if we have a next action, false if the action queue is
-         * empty
-         */
-        bool pollAction(HumanInputAction& a);
-
-        ~InputProcessor() { this->stopInputReceiver(); }
-    };
-    
-
-}  // familyline::input
+}  // namespace familyline::input

@@ -15,18 +15,16 @@ static std::vector<glm::vec3> ConvertTo3DPath(std::vector<glm::vec2>* path)
     return v3;
 }
 
-
-/*  Adds a path from object 'o' to the path manager 
-    Returns true if added successfully, or false if there's already a path 
+/*  Adds a path from object 'o' to the path manager
+    Returns true if added successfully, or false if there's already a path
     there for the same object
 */
-bool ObjectPathManager::AddPath(GameObject* o, 
-                                std::vector<glm::vec2> path)
+bool ObjectPathManager::AddPath(GameObject* o, std::vector<glm::vec2> path)
 {
     for (auto& ref : _pathrefs) {
         if (ref.lc->getID() == o->getID()) {
             /* If we had some object following a path and set a new
-               path for that object, interrupt the path for this one 
+               path for that object, interrupt the path for this one
                and make it follow the new path
 
                This is the default behavior of all RTS games
@@ -35,16 +33,16 @@ bool ObjectPathManager::AddPath(GameObject* o,
         }
     }
 
-    std::remove_if(_pathrefs.begin(), _pathrefs.end(), [](ObjectPathRef& r)
-    { return r.interrupted; });
+    std::remove_if(
+        _pathrefs.begin(), _pathrefs.end(), [](ObjectPathRef& r) { return r.interrupted; });
 
     std::vector<glm::vec2>* ppath = new std::vector<glm::vec2>(path);
-    
-    _pathrefs.emplace_back(maxpathID++, o, ppath, 0);   
+
+    _pathrefs.emplace_back(maxpathID++, o, ppath, 0);
     return true;
 }
 
-/*  Removes a path from object 'oid'. 
+/*  Removes a path from object 'oid'.
     Returns true if path removed, or false if path didn't exist there */
 bool ObjectPathManager::RemovePath(long oid)
 {
@@ -80,38 +78,33 @@ void ObjectPathManager::UpdatePaths(unsigned ms_frame)
         it->current_time += ms_frame;
 
         auto lcpos = it->lc->getPosition();
-        lcpos.x = (px);
-        lcpos.y = (_terr->GetHeightFromPoint(px, pz));
-        lcpos.z = (pz);
+        lcpos.x    = (px);
+        lcpos.y    = (_terr->GetHeightFromPoint(px, pz));
+        lcpos.z    = (pz);
         it->lc->setPosition(lcpos);
 
-         // 1 step = 0.1 second
-        if (it->path_ptr < it->path->size()-1) {
+        // 1 step = 0.1 second
+        if (it->path_ptr < it->path->size() - 1) {
             const unsigned timedelta = it->current_time - it->last_step_time;
 
             unsigned cptr = it->path_ptr;
             for (unsigned i = 0; i < timedelta; i += 100) {
-                if ((cptr+1) < it->path->size())
-                    cptr++;
+                if ((cptr + 1) < it->path->size()) cptr++;
             }
 
-            it->path_ptr = cptr;
-            it->path_point = (*it->path)[cptr];
+            it->path_ptr       = cptr;
+            it->path_point     = (*it->path)[cptr];
             it->last_step_time = it->current_time;
         }
     }
 
-    
     /* Delete the reserved iterators */
     for (auto& pathid : compl_pathids) {
         //      DebugPlotter::pinterface->RemovePath(it->dbg_path_plot);
-        _pathrefs.erase(
-            std::remove_if(_pathrefs.begin(), _pathrefs.end(),
-                           [&](const ObjectPathRef& ref) {
-                               return (ref.pathid == pathid);
-                           }));
+        _pathrefs.erase(std::remove_if(
+            _pathrefs.begin(), _pathrefs.end(),
+            [&](const ObjectPathRef& ref) { return (ref.pathid == pathid); }));
     }
 }
 
 void ObjectPathManager::SetTerrain(Terrain* t) { _terr = t; }
-

@@ -12,18 +12,15 @@
 #ifndef GAMECONTEXT_HPP
 #define GAMECONTEXT_HPP
 
-namespace familyline::logic {
+namespace familyline::logic
+{
+struct GameContext {
+    ObjectManager* om;
+    unsigned long long game_tick;
 
-    struct GameContext {
-        ObjectManager* om;
-        unsigned long long game_tick;
-        
-        double elapsed_seconds;
-    };
+    double elapsed_seconds;
+};
 
-
-}
-
-
+}  // namespace familyline::logic
 
 #endif /* end of include guard: GAMECONTEXT_HPP */

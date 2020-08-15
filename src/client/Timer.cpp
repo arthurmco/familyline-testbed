@@ -9,12 +9,11 @@ Timer::Timer()
     ms_sum = 0;
 }
 
-
-/* Add a function to be run every 'ms' miliseconds. 
+/* Add a function to be run every 'ms' miliseconds.
    opt_inst is the class instance of that function, can be set to nullptr if the function is
    static, lambda or a C function
-   opt_arg is some optional argument you want to pass 
-   
+   opt_arg is some optional argument you want to pass
+
    Returns the timer event ID.
    */
 int Timer::AddFunctionCall(double ms, TimerFunction f, void* opt_inst, void* opt_arg)
@@ -22,16 +21,15 @@ int Timer::AddFunctionCall(double ms, TimerFunction f, void* opt_inst, void* opt
     auto& log = LoggerService::getLogger();
 
     auto it_evt = _function_events.find(ms);
-    log->write("timer", LogType::Debug,
-               "Added function @%#p with instance %#p, arg %#p at each %.1f ms",
-               f, opt_inst, opt_arg, ms);
-
+    log->write(
+        "timer", LogType::Debug, "Added function @%#p with instance %#p, arg %#p at each %.1f ms",
+        f, opt_inst, opt_arg, ms);
 
     TimerFunctionStruct tfs;
-    tfs.eid = max_id++;
+    tfs.eid      = max_id++;
     tfs.opt_inst = opt_inst;
-    tfs.opt_arg = opt_arg;
-    tfs.func = f;
+    tfs.opt_arg  = opt_arg;
+    tfs.func     = f;
 
     if (it_evt != _function_events.end()) {
         it_evt->second.funcs.push_back(tfs);
@@ -43,7 +41,6 @@ int Timer::AddFunctionCall(double ms, TimerFunction f, void* opt_inst, void* opt
     return tfs.eid;
 }
 
-
 void Timer::RunTimers(double msdelta)
 {
     ms_sum += msdelta;
@@ -53,7 +50,7 @@ void Timer::RunTimers(double msdelta)
             tevs.second.was_run = false;
         }
 
-        // printf("global: %.3f ms, local (%.2f) : %.3f ms\n", 
+        // printf("global: %.3f ms, local (%.2f) : %.3f ms\n",
         //     ms_sum, tevs.first, tevs.second.ms_sum);
         tevs.second.ms_sum += msdelta;
 
@@ -63,13 +60,12 @@ void Timer::RunTimers(double msdelta)
         */
         if (tevs.second.ms_sum >= tevs.first) {
             for (auto& funcs : tevs.second.funcs) {
-                // printf("\t calling function %#p (args %#x %.3f %#x)\n", funcs.func, 
+                // printf("\t calling function %#p (args %#x %.3f %#x)\n", funcs.func,
                 //     funcs.opt_inst, tevs.second.ms_sum, funcs.opt_arg);
                 funcs.func(funcs.opt_inst, tevs.second.ms_sum, funcs.opt_arg);
             }
-            tevs.second.ms_sum = 0;
+            tevs.second.ms_sum  = 0;
             tevs.second.was_run = true;
         }
-        
     }
 }

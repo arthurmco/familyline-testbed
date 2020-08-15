@@ -1,7 +1,6 @@
-#include <common/logic/object_manager.hpp>
-#include <common/logic/logic_service.hpp>
-
 #include <algorithm>
+#include <common/logic/logic_service.hpp>
+#include <common/logic/object_manager.hpp>
 
 using namespace familyline::logic;
 
@@ -9,10 +8,9 @@ using namespace familyline::logic;
  * Basic object event emitter
  */
 
-ObjectEventEmitter::ObjectEventEmitter()
-	: _name("object-event-emitter")
+ObjectEventEmitter::ObjectEventEmitter() : _name("object-event-emitter")
 {
-	LogicService::getActionQueue()->addEmitter((EventEmitter*)this);
+    LogicService::getActionQueue()->addEmitter((EventEmitter*)this);
 }
 
 /**
@@ -22,15 +20,15 @@ ObjectEventEmitter::ObjectEventEmitter()
  * the object gets rendered for the first time, or when the object gets fully
  * built
  */
-void ObjectEventEmitter::notifyCreationStart(object_id_t id, const std::string& name) {
-	Event e{ EventType::ObjectCreated };
-	e.emitter = this;
-	e.object.id = id;
-	e.object.name = std::string{ name };
-	e.object.objectState = ObjectState::Creating;
-	this->pushEvent(e);
+void ObjectEventEmitter::notifyCreationStart(object_id_t id, const std::string& name)
+{
+    Event e{EventType::ObjectCreated};
+    e.emitter            = this;
+    e.object.id          = id;
+    e.object.name        = std::string{name};
+    e.object.objectState = ObjectState::Creating;
+    this->pushEvent(e);
 }
-
 
 /**
  * Notify the removal
@@ -38,26 +36,20 @@ void ObjectEventEmitter::notifyCreationStart(object_id_t id, const std::string& 
  * This is when the object gets fully removed.
  * No more operations with it will be executed.
  */
-void ObjectEventEmitter::notifyRemoval(object_id_t id, const std::string& name) {
-    (void)name;
-    
-	Event e{ ObjectDestroyed };
-	e.emitter = this;
-	e.object.id = id;
-	//e.object.name = std::string{ name };
-	this->pushEvent(e);
-}
-
-const std::string ObjectEventEmitter::getName() {
-	return _name;
-}
-
-
-
-ObjectManager::ObjectManager()
+void ObjectEventEmitter::notifyRemoval(object_id_t id, const std::string& name)
 {
-	eventEmitter = new ObjectEventEmitter{};
+    (void)name;
+
+    Event e{ObjectDestroyed};
+    e.emitter   = this;
+    e.object.id = id;
+    // e.object.name = std::string{ name };
+    this->pushEvent(e);
 }
+
+const std::string ObjectEventEmitter::getName() { return _name; }
+
+ObjectManager::ObjectManager() { eventEmitter = new ObjectEventEmitter{}; }
 
 /**
  * Add an object to the manager.
@@ -70,13 +62,13 @@ ObjectManager::ObjectManager()
  */
 object_id_t ObjectManager::add(std::shared_ptr<GameObject>&& o)
 {
-	auto nextID = ++_lastID;
-	o->_id = nextID;
-	_objects.push_back(o);
+    auto nextID = ++_lastID;
+    o->_id      = nextID;
+    _objects.push_back(o);
 
-	eventEmitter->notifyCreationStart(o->_id, o->getName());
+    eventEmitter->notifyCreationStart(o->_id, o->getName());
 
-	return nextID;
+    return nextID;
 }
 
 /**
@@ -84,14 +76,13 @@ object_id_t ObjectManager::add(std::shared_ptr<GameObject>&& o)
  */
 void ObjectManager::remove(object_id_t id)
 {
-	auto rit = std::remove_if(_objects.begin(), _objects.end(),
-		[id](std::shared_ptr<GameObject> v) {
-		return v->getID() == id;
-	});
-	
-	eventEmitter->notifyRemoval(id, (*rit)->getName());
+    auto rit = std::remove_if(
+        _objects.begin(), _objects.end(),
+        [id](std::shared_ptr<GameObject> v) { return v->getID() == id; });
 
-	_objects.erase(rit);
+    eventEmitter->notifyRemoval(id, (*rit)->getName());
+
+    _objects.erase(rit);
 }
 
 /**
@@ -101,22 +92,20 @@ void ObjectManager::remove(object_id_t id)
  */
 void ObjectManager::update()
 {
-	for (auto& o : _objects) {
-		o->update();
-	}
-    
+    for (auto& o : _objects) {
+        o->update();
+    }
 }
 
 std::optional<std::shared_ptr<GameObject>> ObjectManager::get(object_id_t id)
 {
-	auto r = std::find_if(_objects.begin(), _objects.end(), 
-		[id](std::shared_ptr<GameObject> v) {
-		return v->getID() == id;
-	});
+    auto r = std::find_if(_objects.begin(), _objects.end(), [id](std::shared_ptr<GameObject> v) {
+        return v->getID() == id;
+    });
 
-	if (r == _objects.end()) {
-		return std::optional<std::shared_ptr<GameObject>>();
-	}
+    if (r == _objects.end()) {
+        return std::optional<std::shared_ptr<GameObject>>();
+    }
 
-	return std::make_optional(*r);
+    return std::make_optional(*r);
 }

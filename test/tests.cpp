@@ -7,13 +7,14 @@
 #include <gtest/gtest.h>
 
 #include <common/logger.hpp>
+
 #include "utils.hpp"
 
-int main(int argc, char* argv[]) {    
+int main(int argc, char* argv[])
+{
     ::testing::InitGoogleTest(&argc, argv);
 
-    familyline::LoggerService::createLogger(
-        stderr, familyline::LogType::Error);
-    
+    familyline::LoggerService::createLogger(stderr, familyline::LogType::Error);
+
     return RUN_ALL_TESTS();
 }

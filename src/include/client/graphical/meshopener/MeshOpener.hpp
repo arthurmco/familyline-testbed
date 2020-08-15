@@ -21,59 +21,58 @@
 #ifndef MESHOPENER_HPP
 #define MESHOPENER_HPP
 
-#include <unordered_map>
-#include <string>
 #include <memory>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "../mesh.hpp"
 
-namespace familyline::graphics {
-
+namespace familyline::graphics
+{
 // Call this in the constructor
-#define OPENER_REGISTER(extension)              \
-    this->RegisterExtension(extension, this)
+#define OPENER_REGISTER(extension) this->RegisterExtension(extension, this)
 
-    class MeshOpener;
+class MeshOpener;
 
-    struct MeshOpenerRef {
-        int ref = 0;
-        MeshOpener* m;
-    };
+struct MeshOpenerRef {
+    int ref = 0;
+    MeshOpener* m;
+};
 
-    class MeshOpener {
-    private:
+class MeshOpener
+{
+private:
+    /* We maintain a list of mesh openers, so we can use this class itself to open it,
+     * independent of extension
+     */
+    static std::unordered_map<std::string /* extension */, MeshOpenerRef /*opener*/> openers;
 
-        /* We maintain a list of mesh openers, so we can use this class itself to open it,
-         * independent of extension
-         */
-        static std::unordered_map<std::string /* extension */,
-                                  MeshOpenerRef /*opener*/> openers;
+protected:
+    /* Register the extension into the main class.
+     * The extension is without the dot
+     */
+    void RegisterExtension(const char* extension, MeshOpener* opener);
 
-    protected:
-        /* Register the extension into the main class.
-         * The extension is without the dot
-         */
-        void RegisterExtension(const char* extension, MeshOpener* opener);
+    /* Unregister the extension into the main class */
+    void UnregisterExtension(const char* extension);
 
-        /* Unregister the extension into the main class */
-        void UnregisterExtension(const char* extension);
-    public:
-        /* Open any file */
-        static std::vector<Mesh*> Open(const char* file);
+public:
+    /* Open any file */
+    static std::vector<Mesh*> Open(const char* file);
 
-        /* Open only the file for that extension
-         * (i.e, this method in a .obj file opener will only open .obj files
-         */
-        virtual std::vector<Mesh*> OpenSpecialized(const char* file);
+    /* Open only the file for that extension
+     * (i.e, this method in a .obj file opener will only open .obj files
+     */
+    virtual std::vector<Mesh*> OpenSpecialized(const char* file);
 
-        virtual ~MeshOpener() {};
+    virtual ~MeshOpener(){};
 
-        /* Remove the other constructors. They are not needed, this class will be instanciated only once */
-        MeshOpener& operator=(const MeshOpener &other) = delete;
-        MeshOpener& operator=(MeshOpener &&other) = delete;
-
-    };
-}
+    /* Remove the other constructors. They are not needed, this class will be instanciated only once
+     */
+    MeshOpener& operator=(const MeshOpener& other) = delete;
+    MeshOpener& operator=(MeshOpener&& other) = delete;
+};
+}  // namespace familyline::graphics
 
 #endif /* MESHOPENER_HPP */

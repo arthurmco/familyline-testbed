@@ -1,8 +1,7 @@
-#include <client/graphical/gl_renderer.hpp>
 #include <client/graphical/exceptions.hpp>
-#include <client/graphical/shader_manager.hpp>
 #include <client/graphical/gfx_service.hpp>
-
+#include <client/graphical/gl_renderer.hpp>
+#include <client/graphical/shader_manager.hpp>
 #include <common/logger.hpp>
 
 using namespace familyline;
@@ -10,19 +9,17 @@ using namespace familyline::graphics;
 
 GLRenderer::GLRenderer()
 {
-	_sForward = new ShaderProgram("forward", {
-		Shader("shaders/Forward.vert", ShaderType::Vertex),
-		Shader("shaders/Forward.frag", ShaderType::Fragment)
-	});
+    _sForward = new ShaderProgram(
+        "forward", {Shader("shaders/Forward.vert", ShaderType::Vertex),
+                    Shader("shaders/Forward.frag", ShaderType::Fragment)});
 
-	_sForward->link();
+    _sForward->link();
 
-    _sLines = new ShaderProgram("lines", {
-		Shader("shaders/Lines.vert", ShaderType::Vertex),
-		Shader("shaders/Lines.frag", ShaderType::Fragment)
-	});
+    _sLines = new ShaderProgram(
+        "lines", {Shader("shaders/Lines.vert", ShaderType::Vertex),
+                  Shader("shaders/Lines.frag", ShaderType::Fragment)});
 
-	_sLines->link();
+    _sLines->link();
     glLineWidth(4.0f);
 }
 
@@ -30,54 +27,51 @@ VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
 {
     auto& log = LoggerService::getLogger();
 
-	if (!vi.shaderState.shader)
-		throw graphical_exception("Invalid shader detected while creating vertex");
+    if (!vi.shaderState.shader)
+        throw graphical_exception("Invalid shader detected while creating vertex");
 
-	auto [vao, vboPos, vboNorm, vboTex] = this->createRaw(vd, *vi.shaderState.shader);
-	auto vhandle = std::make_unique<GLVertexHandle>(vao, *this, vi);
-	vhandle->vsize = vd.position.size();
+    auto [vao, vboPos, vboNorm, vboTex] = this->createRaw(vd, *vi.shaderState.shader);
+    auto vhandle                        = std::make_unique<GLVertexHandle>(vao, *this, vi);
+    vhandle->vsize                      = vd.position.size();
 
-    log->write("gl-renderer", LogType::Debug,
-		"created vertex handle: vao=%#x, vsize=%zu",
-		vao, vhandle->vsize);
+    log->write(
+        "gl-renderer", LogType::Debug, "created vertex handle: vao=%#x, vsize=%zu", vao,
+        vhandle->vsize);
 
-	vhandle->vboPos = vboPos;
-	vhandle->vboNorm = vboNorm;
-	vhandle->vboTex = vboTex;
+    vhandle->vboPos  = vboPos;
+    vhandle->vboNorm = vboNorm;
+    vhandle->vboTex  = vboTex;
 
-	_vhandle_list.push_back(std::move(vhandle));
+    _vhandle_list.push_back(std::move(vhandle));
 
-	return _vhandle_list.back().get();
+    return _vhandle_list.back().get();
 }
 
 void GLRenderer::render(Camera* c)
 {
-	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
+    // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
 
-	auto& shaderManager = GFXService::getShaderManager();
-    auto& log = LoggerService::getLogger();
+    auto& shaderManager = GFXService::getShaderManager();
+    auto& log           = LoggerService::getLogger();
 
-	auto viewMatrix = c->GetViewMatrix();
-	auto projMatrix = c->GetProjectionMatrix();
+    auto viewMatrix = c->GetViewMatrix();
+    auto projMatrix = c->GetProjectionMatrix();
 
-
-
-	for (auto& vh : _vhandle_list) {
-		ShaderProgram* shader = vh->vinfo.shaderState.shader;
-		shaderManager->use(*shader);
+    for (auto& vh : _vhandle_list) {
+        ShaderProgram* shader = vh->vinfo.shaderState.shader;
+        shaderManager->use(*shader);
         shader->setUniform("lightCount", 0);
-//        shader->setUniform("lights[0].position", glm::vec3(30, 50, 30));
-//        shader->setUniform("lights[0].color", glm::vec3(1, 1, 1));
-//        shader->setUniform("lights[0].strength", 100.0f);
+        //        shader->setUniform("lights[0].position", glm::vec3(30, 50, 30));
+        //        shader->setUniform("lights[0].color", glm::vec3(1, 1, 1));
+        //        shader->setUniform("lights[0].strength", 100.0f);
 
         shader->setUniform("mView", viewMatrix);
-		shader->setUniform("mProjection", projMatrix);
-		shader->setUniform("mvp", projMatrix * viewMatrix * glm::mat4(1.0));
+        shader->setUniform("mProjection", projMatrix);
+        shader->setUniform("mvp", projMatrix * viewMatrix * glm::mat4(1.0));
 
         if (vh->vinfo.materialID >= 0) {
-
-            Material* m = GFXService::getMaterialManager()->getMaterial(vh->vinfo.materialID);
+            Material* m     = GFXService::getMaterialManager()->getMaterial(vh->vinfo.materialID);
             MaterialData md = m->getData();
 
             shader->setUniform("diffuse_color", md.diffuseColor);
@@ -85,7 +79,7 @@ void GLRenderer::render(Camera* c)
             shader->setUniform("diffuse_intensity", 1.0f);
             shader->setUniform("ambient_intensity", 1.0f);
 
-            if (Texture *t = m->getTexture(); t) {
+            if (Texture* t = m->getTexture(); t) {
                 glBindTexture(GL_TEXTURE_2D, t->GetHandle());
                 shader->setUniform("tex_amount", 1.0f);
 
@@ -94,10 +88,10 @@ void GLRenderer::render(Camera* c)
                 shader->setUniform("tex_amount", 0.0f);
             }
 
-//            printf("<<<< %d dif=%.2f,%.2f,%.2f amb=%.2f,%.2f,%.2f  >>>>",
-//                   vh->vinfo.materialID,
-//                   md.diffuseColor.x, md.diffuseColor.y, md.diffuseColor.z,
-//                   md.ambientColor.x, md.ambientColor.y, md.ambientColor.z);
+            //            printf("<<<< %d dif=%.2f,%.2f,%.2f amb=%.2f,%.2f,%.2f  >>>>",
+            //                   vh->vinfo.materialID,
+            //                   md.diffuseColor.x, md.diffuseColor.y, md.diffuseColor.z,
+            //                   md.ambientColor.x, md.ambientColor.y, md.ambientColor.z);
 
         } else {
             glBindTexture(GL_TEXTURE_2D, 0);
@@ -110,75 +104,72 @@ void GLRenderer::render(Camera* c)
 
         vh->vinfo.shaderState.updateShader();
 
-		bool hasTexture = vh->vinfo.hasTexCoords;
+        bool hasTexture = vh->vinfo.hasTexCoords;
 
-		glBindVertexArray(vh->vao);
+        glBindVertexArray(vh->vao);
 
-        auto fnGetAttrib =
-            [&](const char* name) {
-                glGetError();
-                auto r = glGetAttribLocation(shader->getHandle(), name);
+        auto fnGetAttrib = [&](const char* name) {
+            glGetError();
+            auto r = glGetAttribLocation(shader->getHandle(), name);
 
-                GLenum err = glGetError();
-                if (err != GL_NO_ERROR) {
-                    log->write("gl-renderer", LogType::Error,
-                               "OpenGL error %#x while searching for shader attribute %s (shader is invalid)", err, name);
-                }
+            GLenum err = glGetError();
+            if (err != GL_NO_ERROR) {
+                log->write(
+                    "gl-renderer", LogType::Error,
+                    "OpenGL error %#x while searching for shader attribute %s (shader is invalid)",
+                    err, name);
+            }
 
-                return r;
-            };
+            return r;
+        };
 
+        // 1rst attribute buffer : vertices
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vh->vboPos);
+        glVertexAttribPointer(
+            fnGetAttrib("position"),
+            3,         // size
+            GL_FLOAT,  // type
+            GL_FALSE,  // normalized?
+            0,         // stride
+            (void*)0   // array buffer offset
+        );
 
-
-		// 1rst attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vh->vboPos);
-		glVertexAttribPointer(
-			fnGetAttrib("position"),
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
-
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, vh->vboNorm);
-		glVertexAttribPointer(
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, vh->vboNorm);
+        glVertexAttribPointer(
             fnGetAttrib(shader->getName() == std::string_view{"lines"} ? "color" : "normal"),
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
+            3,         // size
+            GL_FLOAT,  // type
+            GL_FALSE,  // normalized?
+            0,         // stride
+            (void*)0   // array buffer offset
+        );
 
-		if (hasTexture && fnGetAttrib("texcoord") >= 0) {
-			glEnableVertexAttribArray(2);
-			glBindBuffer(GL_ARRAY_BUFFER, vh->vboTex);
-			glVertexAttribPointer(
-				fnGetAttrib("texcoord"),
-				2,					// size
-				GL_FLOAT, GL_FALSE, 0, (void*)0);
-		}
+        if (hasTexture && fnGetAttrib("texcoord") >= 0) {
+            glEnableVertexAttribArray(2);
+            glBindBuffer(GL_ARRAY_BUFFER, vh->vboTex);
+            glVertexAttribPointer(
+                fnGetAttrib("texcoord"),
+                2,  // size
+                GL_FLOAT, GL_FALSE, 0, (void*)0);
+        }
 
-        auto glFormat = vh->vinfo.renderStyle == VertexRenderStyle::Triangles ?
-            GL_TRIANGLES : GL_LINE_STRIP;
-		glDrawArrays(glFormat, 0, vh->vsize);
-		GLenum err = glGetError();
-		if (err != GL_NO_ERROR) {
-		    log->write("gl-renderer", LogType::Error,
-                       "OpenGL error %#x", err);
+        auto glFormat =
+            vh->vinfo.renderStyle == VertexRenderStyle::Triangles ? GL_TRIANGLES : GL_LINE_STRIP;
+        glDrawArrays(glFormat, 0, vh->vsize);
+        GLenum err = glGetError();
+        if (err != GL_NO_ERROR) {
+            log->write("gl-renderer", LogType::Error, "OpenGL error %#x", err);
             glBindTexture(GL_TEXTURE_2D, 0);
             glBindVertexArray(0);
 
-			return;
-		}
-
-	}
+            return;
+        }
+    }
 
     glBindTexture(GL_TEXTURE_2D, 0);
-	glBindVertexArray(0);
+    glBindVertexArray(0);
 }
 
 /**
@@ -186,120 +177,118 @@ void GLRenderer::render(Camera* c)
  *
  * Useful when we need to only retrieve the basic elements VAO, without an object
  */
-std::tuple<int, int, int, int> GLRenderer::createRaw(
-    VertexData& vd, ShaderProgram& shader)
+std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd, ShaderProgram& shader)
 {
     auto& log = LoggerService::getLogger();
 
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
-	GLuint vboPos, vboNorm, vboTex;
-	bool animated = true;
+    GLuint vboPos, vboNorm, vboTex;
+    bool animated = true;
 
+    auto fnGetAttrib = [&](const char* name) {
+        glGetError();
+        auto r = glGetAttribLocation(shader.getHandle(), name);
 
-    auto fnGetAttrib =
-        [&](const char* name) {
-            glGetError();
-            auto r = glGetAttribLocation(shader.getHandle(), name);
+        GLenum err = glGetError();
+        if (err != GL_NO_ERROR) {
+            log->write(
+                "gl-renderer", LogType::Error,
+                "OpenGL error %#x while searching for shader attribute %s on vertex set addition "
+                "(shader is invalid)",
+                err, name);
+        }
 
-            GLenum err = glGetError();
-            if (err != GL_NO_ERROR) {
-                log->write("gl-renderer", LogType::Error,
-                           "OpenGL error %#x while searching for shader attribute %s on vertex set addition (shader is invalid)", err, name);
-            }
+        return r;
+    };
 
-            return r;
-        };
+    glGenBuffers(1, &vboPos);
+    glBindBuffer(GL_ARRAY_BUFFER, vboPos);
+    glBufferData(
+        GL_ARRAY_BUFFER, vd.position.size() * sizeof(glm::vec3), vd.position.data(),
+        (animated ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
+    glVertexAttribPointer(fnGetAttrib("position"), 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
 
-	glGenBuffers(1, &vboPos);
-	glBindBuffer(GL_ARRAY_BUFFER, vboPos);
-	glBufferData(GL_ARRAY_BUFFER, vd.position.size() * sizeof(glm::vec3),
-		vd.position.data(), (animated ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW));
-	glVertexAttribPointer(fnGetAttrib("position"), 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
+    glGenBuffers(1, &vboNorm);
+    glBindBuffer(GL_ARRAY_BUFFER, vboNorm);
+    glBufferData(
+        GL_ARRAY_BUFFER, vd.normals.size() * sizeof(glm::vec3), vd.normals.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(
+        fnGetAttrib(shader.getName() == std::string_view{"lines"} ? "color" : "normal"), 3,
+        GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
 
-	glGenBuffers(1, &vboNorm);
-	glBindBuffer(GL_ARRAY_BUFFER, vboNorm);
-	glBufferData(GL_ARRAY_BUFFER, vd.normals.size() * sizeof(glm::vec3),
-		vd.normals.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(fnGetAttrib(shader.getName() == std::string_view{"lines"} ? "color" : "normal"), 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(1);
+    if (vd.texcoords.size() > 0 && fnGetAttrib("texcoord") >= 0) {
+        glGenBuffers(1, &vboTex);
+        glBindBuffer(GL_ARRAY_BUFFER, vboTex);
+        glBufferData(
+            GL_ARRAY_BUFFER, vd.texcoords.size() * sizeof(glm::vec2), vd.texcoords.data(),
+            GL_STATIC_DRAW);
+        glVertexAttribPointer(fnGetAttrib("texcoord"), 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(2);
+    }
 
-	if (vd.texcoords.size() > 0 && fnGetAttrib("texcoord") >= 0) {
-		glGenBuffers(1, &vboTex);
-		glBindBuffer(GL_ARRAY_BUFFER, vboTex);
-		glBufferData(GL_ARRAY_BUFFER, vd.texcoords.size() * sizeof(glm::vec2),
-			vd.texcoords.data(), GL_STATIC_DRAW);
-		glVertexAttribPointer(fnGetAttrib("texcoord"), 2, GL_FLOAT, GL_FALSE, 0, 0);
-		glEnableVertexAttribArray(2);
-	}
+    glBindVertexArray(0);
 
-	glBindVertexArray(0);
+    log->write(
+        "gl-renderer", LogType::Debug, "created vertex set: vao=%#x, vbos=%#x,%#x,%#x", vao, vboPos,
+        vboNorm, vboTex);
 
-
-    log->write("gl-renderer", LogType::Debug,
-               "created vertex set: vao=%#x, vbos=%#x,%#x,%#x",
-               vao, vboPos, vboNorm, vboTex);
-
-	return std::tie(vao, vboPos, vboNorm, vboTex);
+    return std::tie(vao, vboPos, vboNorm, vboTex);
 }
 
 void GLRenderer::removeVertex(VertexHandle* vh)
 {
     GLVertexHandle* gvh = dynamic_cast<GLVertexHandle*>(vh);
-    if (!gvh)
-        return;
+    if (!gvh) return;
 
     glDeleteVertexArrays(1, (GLuint*)&gvh->vao);
     glDeleteBuffers(1, (GLuint*)&gvh->vboPos);
     glDeleteBuffers(1, (GLuint*)&gvh->vboNorm);
 
-    if (gvh->vboTex > 0)
-		glDeleteBuffers(1, (GLuint*)&gvh->vboTex);
+    if (gvh->vboTex > 0) glDeleteBuffers(1, (GLuint*)&gvh->vboTex);
 
-    _vhandle_list
-        .erase(std::remove_if(_vhandle_list.begin(), _vhandle_list.end(),
-                              [gvh](std::unique_ptr<GLVertexHandle> &handle) {
-                                  return (handle->vao == gvh->vao);
-                              }));
-
+    _vhandle_list.erase(std::remove_if(
+        _vhandle_list.begin(), _vhandle_list.end(),
+        [gvh](std::unique_ptr<GLVertexHandle>& handle) { return (handle->vao == gvh->vao); }));
 }
 
-bool GLVertexHandle::update(VertexData & vd)
+bool GLVertexHandle::update(VertexData& vd)
 {
-	glBindVertexArray(this->vao);
-	glBindBuffer(GL_ARRAY_BUFFER, this->vboPos);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, vd.position.size() * sizeof(glm::vec3), vd.position.data());
+    glBindVertexArray(this->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, this->vboPos);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vd.position.size() * sizeof(glm::vec3), vd.position.data());
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
-	return true;
+    return true;
 }
 
 bool GLVertexHandle::remove()
 {
     this->_renderer.removeVertex(this);
-	return true;
+    return true;
 }
 
-bool GLVertexHandle::recreate(VertexData & vd, VertexInfo& vi)
+bool GLVertexHandle::recreate(VertexData& vd, VertexInfo& vi)
 {
-	auto [vao, vboPos, vboNorm, vboTex] = this->_renderer.createRaw(vd, *vi.shaderState.shader);
-	auto err = glGetError();
+    auto [vao, vboPos, vboNorm, vboTex] = this->_renderer.createRaw(vd, *vi.shaderState.shader);
+    auto err                            = glGetError();
 
-	if (err == GL_NO_ERROR) {
-		this->vao = vao;
+    if (err == GL_NO_ERROR) {
+        this->vao = vao;
 
-		this->vboPos = vboPos;
-		this->vboNorm = vboNorm;
-		this->vboTex = vboTex;
-		this->vinfo = vi;
+        this->vboPos  = vboPos;
+        this->vboNorm = vboNorm;
+        this->vboTex  = vboTex;
+        this->vinfo   = vi;
 
-		return true;
-	}
+        return true;
+    }
 
-	return false;
+    return false;
 }

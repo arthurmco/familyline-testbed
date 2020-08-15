@@ -149,4 +149,3 @@ Every file in this game is licensed under the MIT license, the best in
 existence.
 
 Copyright (C) 2016-2018 Arthur Mendes.
-n

@@ -1,5 +1,5 @@
 /*  Represents an object factory
- 
+
     Copyright (C) 2016, 2018, 2020 Arthur M
 */
 #pragma once
@@ -9,37 +9,36 @@
 
 #include "game_object.hpp"
 
-namespace familyline::logic {
+namespace familyline::logic
+{
+/**
+ * \brief Helper class to instantiate an object without knowing its class
+ *
+ * Since we will support a lot of objects, objects loaded from files,
+ * lua script files, and might support even loading objects from
+ * shared libraries (.dll, .so), we need to load them without knowing
+ * its class, so the code that use it might use an object without
+ * really knowing who it is, only its base class.
+ */
+class ObjectFactory
+{
+private:
+    std::map<std::string /*type*/, GameObject*> _objects;
 
+public:
+    /**
+     * Gets an instance of object with type 'typeID', or
+     * nullptr if given object wasn't added to the factory
+     * i.e, doesn't exist
+     */
+    std::shared_ptr<GameObject> getObject(const char* type, float x, float y, float z);
 
     /**
-     * \brief Helper class to instantiate an object without knowing its class
-     *
-     * Since we will support a lot of objects, objects loaded from files,
-     * lua script files, and might support even loading objects from
-     * shared libraries (.dll, .so), we need to load them without knowing
-     * its class, so the code that use it might use an object without
-     * really knowing who it is, only its base class.
+     * Adds an object to the factory
      */
-    class ObjectFactory {
-    private:
-        std::map<std::string /*type*/, GameObject*> _objects;
+    void addObject(GameObject* object);
 
-    public:
-        /** 
-         * Gets an instance of object with type 'typeID', or
-         * nullptr if given object wasn't added to the factory
-         * i.e, doesn't exist 
-         */
-        std::shared_ptr<GameObject> getObject(
-            const char* type, float x, float y, float z);
+    void clear() { _objects.clear(); }
+};
 
-        /** 
-         * Adds an object to the factory 
-         */
-        void addObject(GameObject* object);
-
-        void clear() { _objects.clear(); }
-    };
-
-}
+}  // namespace familyline::logic

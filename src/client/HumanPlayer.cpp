@@ -1,15 +1,13 @@
 #include <client/HumanPlayer.hpp>
 #include <client/graphical/meshopener/OBJOpener.hpp>
-#include <common/logic/logic_service.hpp>
-#include <common/logger.hpp>
-
 #include <client/input/input_service.hpp>
+#include <common/logger.hpp>
+#include <common/logic/logic_service.hpp>
 
 using namespace familyline;
 using namespace familyline::graphics;
 using namespace familyline::logic;
 using namespace familyline::input;
-
 
 #include <cstdio>
 
@@ -17,17 +15,16 @@ bool front = false, back = false;
 bool left = false, right = false;
 bool rotate_left = false, rotate_right = false;
 bool mouse_click = false;
-bool exit_game = false;
+bool exit_game   = false;
 
 bool attack_set = false, attack_ready = false;
 
-
 bool remove_object = false;
 
-bool zoom_in = false;
-bool zoom_out = false;
-double zoom_factor = 0;
-bool zoom_mouse = false;
+bool zoom_in         = false;
+bool zoom_out        = false;
+double zoom_factor   = 0;
+bool zoom_mouse      = false;
 bool build_something = false;
 bool build_tent = false, build_tower = false;
 
@@ -35,109 +32,96 @@ bool do_something = false;
 
 std::weak_ptr<GameObject> attacker, attackee;
 
-
-HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
-     : Player(pm, name, code)
+HumanPlayer::HumanPlayer(PlayerManager& pm, const char* name, int code) : Player(pm, name, code)
 {
     /* Initialize input subsystems */
-	srand((size_t)name*code);
+    srand((size_t)name * code);
     auto& log = LoggerService::getLogger();
 
     _listener = [&](HumanInputAction hia) {
-
         if (std::holds_alternative<KeyAction>(hia.type)) {
             auto event = std::get<KeyAction>(hia.type);
 
             switch (event.keycode) {
-            case SDLK_w:
-                if (event.isPressed)
-                    front = true;
-                else
-                    front = false;
-                break;
-            case SDLK_s:
-                if (event.isPressed)
-                    back = true;
-                else
-                    back = false;
-                break;
-            case SDLK_a:
-                if (event.isPressed)
-                    left = true;
-                else
-                    left = false;
-                break;
-            case SDLK_d:
-                if (event.isPressed)
-                    right = true;
-                else
-                    right = false;
-                break;
-            case SDLK_LEFT:
-                if (event.isPressed)
-                    rotate_left = true;
-                else
-                    rotate_left = false;
-                break;
-            case SDLK_RIGHT:
-                if (event.isPressed)
-                    rotate_right = true;
-                else
-                    rotate_right = false;
-                break;
+                case SDLK_w:
+                    if (event.isPressed)
+                        front = true;
+                    else
+                        front = false;
+                    break;
+                case SDLK_s:
+                    if (event.isPressed)
+                        back = true;
+                    else
+                        back = false;
+                    break;
+                case SDLK_a:
+                    if (event.isPressed)
+                        left = true;
+                    else
+                        left = false;
+                    break;
+                case SDLK_d:
+                    if (event.isPressed)
+                        right = true;
+                    else
+                        right = false;
+                    break;
+                case SDLK_LEFT:
+                    if (event.isPressed)
+                        rotate_left = true;
+                    else
+                        rotate_left = false;
+                    break;
+                case SDLK_RIGHT:
+                    if (event.isPressed)
+                        rotate_right = true;
+                    else
+                        rotate_right = false;
+                    break;
 
-            case SDLK_c:
-            {
-                if (!event.isPressed)
-                    return false;
+                case SDLK_c: {
+                    if (!event.isPressed) return false;
 
-                build_tent = true;
-            }
-            break;
-            case SDLK_e:
-            {
-                if (!event.isPressed)
-                    return false;
+                    build_tent = true;
+                } break;
+                case SDLK_e: {
+                    if (!event.isPressed) return false;
 
-                build_tower = true;
-            }
-            break;
-            case SDLK_r:
-            {
-                if (!event.isPressed)
-                    return false;
+                    build_tower = true;
+                } break;
+                case SDLK_r: {
+                    if (!event.isPressed) return false;
 
-                remove_object = true;
-            }
-            break;
+                    remove_object = true;
+                } break;
 
-            case SDLK_b: {
-                if (!event.isPressed)
-                    return false;
+                case SDLK_b: {
+                    if (!event.isPressed) return false;
 
-                this->renderBBs = !this->renderBBs;
-            } break;
+                    this->renderBBs = !this->renderBBs;
+                } break;
 
-//            case SDLK_k:
-//                attack_set = true;
-//                break;
+                    //            case SDLK_k:
+                    //                attack_set = true;
+                    //                break;
 
-            case SDLK_PLUS:
-            case SDLK_KP_PLUS:
-                if (!event.isPressed)
-                    zoom_in = false;
-                else
-                    zoom_in = true;
+                case SDLK_PLUS:
+                case SDLK_KP_PLUS:
+                    if (!event.isPressed)
+                        zoom_in = false;
+                    else
+                        zoom_in = true;
 
-                break;
+                    break;
 
-            case SDLK_MINUS:
-            case SDLK_KP_MINUS:
-                if (!event.isPressed)
-                    zoom_out = false;
-                else
-                    zoom_out = true;
-                break;
+                case SDLK_MINUS:
+                case SDLK_KP_MINUS:
+                    if (!event.isPressed)
+                        zoom_out = false;
+                    else
+                        zoom_out = true;
+                    break;
             }
             return true;
 
@@ -155,7 +139,7 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
                 else
                     mouse_click = false;
 
-				return true;
+                return true;
             }
 
             if (event.buttonCode == SDL_BUTTON_RIGHT) {
@@ -173,16 +157,16 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
             auto event = std::get<WheelAction>(hia.type);
 
             if (event.scrollY > 0) {
-                zoom_in = true;
-                zoom_out = false;
-                zoom_mouse = true;
+                zoom_in     = true;
+                zoom_out    = false;
+                zoom_mouse  = true;
                 zoom_factor = event.scrollY;
             }
 
             if (event.scrollY <= 0) {
-                zoom_out = true;
-                zoom_in = false;
-                zoom_mouse = true;
+                zoom_out    = true;
+                zoom_in     = false;
+                zoom_mouse  = true;
                 zoom_factor = -event.scrollY;
             }
 
@@ -192,16 +176,14 @@ HumanPlayer::HumanPlayer(PlayerManager &pm, const char *name, int code)
             return true;
         }
 
-
         return false;
-
     };
 
     input::InputService::getInputManager()->addListenerHandler(_listener, 10);
-
 }
 
-void HumanPlayer::setCamera(familyline::graphics::Camera* c) {
+void HumanPlayer::setCamera(familyline::graphics::Camera* c)
+{
     camera_ = std::optional(dynamic_cast<ICamera*>(c));
 }
 
@@ -215,11 +197,11 @@ void HumanPlayer::SetPicker(familyline::input::InputPicker* ip) { _ip = ip; }
 void HumanPlayer::generateInput()
 {
     double camera_speed = 0.1;
-    double zoom_speed = 0.01;
+    double zoom_speed   = 0.01;
 
     glm::vec2 cameraSpeedVec = glm::vec2(0, 0);
-    bool isCameraMove = front || back || left || right || zoom_mouse;
-    double zoom_val = 0;
+    bool isCameraMove        = front || back || left || right || zoom_mouse;
+    double zoom_val          = 0;
 
     if (front) {
         cameraSpeedVec.y -= camera_speed;
@@ -238,11 +220,9 @@ void HumanPlayer::generateInput()
     }
 
     if (zoom_mouse) {
-        if (zoom_in)
-            zoom_val = +(zoom_speed * zoom_factor);
+        if (zoom_in) zoom_val = +(zoom_speed * zoom_factor);
 
-        if (zoom_out)
-            zoom_val = -(zoom_speed * zoom_factor);
+        if (zoom_out) zoom_val = -(zoom_speed * zoom_factor);
 
         zoom_mouse = false;
     }
@@ -254,15 +234,15 @@ void HumanPlayer::generateInput()
 
     if (build_tent) {
         this->pushAction(EnqueueBuildAction{"tent"});
-        build_tent = false;
-        mouse_click = false;
+        build_tent      = false;
+        mouse_click     = false;
         build_something = true;
     }
 
     if (build_tower) {
         this->pushAction(EnqueueBuildAction{"watchtower"});
-        build_tower = false;
-        mouse_click = false;
+        build_tower     = false;
+        mouse_click     = false;
         build_something = true;
     }
 
@@ -271,11 +251,11 @@ void HumanPlayer::generateInput()
     if (build_something && mouse_click) {
         // Something is queued to be built.
         glm::vec2 to = _ip->GetGameProjectedPosition();
-        glm::vec3 p = ::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
+        glm::vec3 p  = ::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
 
         this->pushAction(CommitLastBuildAction{to.x, to.y, p.y, true});
         build_something = false;
-        mouse_click = false;
+        mouse_click     = false;
     } else if (has_selection && mouse_click) {
         // Individual object selection, click-based
         // TODO: do multiple object selection, drag-based
@@ -305,20 +285,14 @@ void HumanPlayer::generateInput()
             this->pushAction(SelectedObjectMoveAction{to.x, to.y});
         }
 
-
         do_something = false;
     }
-
 }
-
 
 /**
  * Does this player requested game exit?
  */
-bool HumanPlayer::exitRequested()
-{
-    return exit_game;
-}
+bool HumanPlayer::exitRequested() { return exit_game; }
 
 /*
 bool HumanPlayer::HasUpdatedObject()
@@ -327,7 +301,4 @@ bool HumanPlayer::HasUpdatedObject()
 }
 */
 
-HumanPlayer::~HumanPlayer()
-{
-
-}
+HumanPlayer::~HumanPlayer() {}

@@ -6,53 +6,46 @@
  * Copyright (C) 2020 Arthur Mendes
  */
 
-#include <cstdio>
 #include <chrono>
+#include <cstdio>
 #include <memory>
 
-namespace familyline {
-
+namespace familyline
+{
 #define LOGDEBUG(log, tag, format, ...) log->write(tag, LogType::Debug, format, __VA_ARGS__)
-    
-    enum LogType {
-        Debug,
-        Info,
-        Warning,
-        Error,
-        Fatal
-    };
 
-    class Logger {
+enum LogType { Debug, Info, Warning, Error, Fatal };
 
-    private:
-        FILE* _out = nullptr;
-        LogType _minlog;
-        
-        std::chrono::steady_clock::time_point _start;
-        double getDelta();
+class Logger
+{
+private:
+    FILE* _out = nullptr;
+    LogType _minlog;
 
-    public:
-        Logger(FILE* out = stderr, LogType minlog = LogType::Info)
-            : _out(out), _minlog(minlog), _start(std::chrono::steady_clock::now())
-            {}
+    std::chrono::steady_clock::time_point _start;
+    double getDelta();
 
-        void write(const char* tag, LogType type, const char* format, ...);
-    };
+public:
+    Logger(FILE* out = stderr, LogType minlog = LogType::Info)
+        : _out(out), _minlog(minlog), _start(std::chrono::steady_clock::now())
+    {
+    }
 
-    class LoggerService {
-    private:
-        static std::unique_ptr<Logger> _logger;
+    void write(const char* tag, LogType type, const char* format, ...);
+};
 
-    public: 
-        static void createLogger(FILE* out = stderr, LogType minlog = LogType::Debug)
-            {
-                _logger = std::make_unique<Logger>(out, minlog);
-            }
+class LoggerService
+{
+private:
+    static std::unique_ptr<Logger> _logger;
 
-        static std::unique_ptr<Logger>& getLogger()
-            {
-                return _logger;
-            }
-    };
+public:
+    static void createLogger(FILE* out = stderr, LogType minlog = LogType::Debug)
+    {
+        _logger = std::make_unique<Logger>(out, minlog);
+    }
 
-}
+    static std::unique_ptr<Logger>& getLogger() { return _logger; }
+};
+
+}  // namespace familyline

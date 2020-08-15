@@ -1,129 +1,128 @@
 #pragma once
 
+#include <common/logic/object_components.hpp>
+#include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
-#include <optional>
 
-#include <memory>
-#include <common/logic/object_components.hpp>
+namespace familyline::logic
+{
+typedef unsigned int object_id_t;
 
-namespace familyline::logic {
-    typedef unsigned int object_id_t;
+/**
+ * Game object type
+ *
+ * We can use the absence or presence of certain components to guess type,
+ * but is easier to the human and to the computer if we could explicitly say
+ * this.
+ *
+ * The human would not have to guess and think much, and the computer would
+ * have to compare only one value. It would also remove ambiguity
+ */
+enum ObjectCategory { CommonUnit, Building, ResourceDepot, SiegeUnit, NavalUnit };
+
+/**
+ * Our beloved base game object
+ */
+class GameObject
+{
+    friend class ObjectManager;
+
+private:
+protected:
+    std::string _type;
+    std::string _name;
+
+    object_id_t _id = -1;
 
     /**
-     * Game object type
+     * Object hitbox width and length, in game units
+     * The X position is the width, the Y position is the length
      *
-     * We can use the absence or presence of certain components to guess type,
-     * but is easier to the human and to the computer if we could explicitly say
-     * this.
-     *
-     * The human would not have to guess and think much, and the computer would
-     * have to compare only one value. It would also remove ambiguity
+     * The hitbox center is at the object location
      */
-    enum ObjectCategory {
-        CommonUnit,
-        Building,
-        ResourceDepot,
-        SiegeUnit,
-        NavalUnit
-    };
-
+    glm::vec2 _size;
 
     /**
-     * Our beloved base game object
+     * Current and maximum health
      */
-    class GameObject {
-        friend class ObjectManager;
+    double _health;
+    int _maxHealth;
 
-    private:
-       
-    protected:
-        std::string _type;
-        std::string _name;
+    /**
+     * Show health on interface. Might be useful, for example, for trees,
+     * or decoration items
+     */
+    bool _showHealth;
 
-        object_id_t _id = -1;
+    /**
+     * Logic engine position
+     *
+     * X and Z coordinates are mapped to the X and Y axis on the terrain.
+     * Y coordinate is the "height".
+     */
+    glm::vec3 _position;
 
-        /**
-         * Object hitbox width and length, in game units
-         * The X position is the width, the Y position is the length
-         *
-         * The hitbox center is at the object location
-         */
-        glm::vec2 _size;
+protected:
+    std::optional<LocationComponent> cLocation;
+    std::optional<AttackComponent> cAttack;
+    std::optional<ContainerComponent> cContainer;
+    std::optional<MovementComponent> cMovement;
+    std::optional<ColonyComponent> cColony;
 
-        /**
-         * Current and maximum health
-         */
-        double _health;
-        int _maxHealth;
+    ObjectCategory category;
 
-        /**
-         * Show health on interface. Might be useful, for example, for trees,
-         * or decoration items
-         */
-        bool _showHealth;
+public:
+    object_id_t getID() const { return _id; }
+    const std::string& getType() const { return _type; }
+    const std::string& getName() const { return _name; }
 
-        /**
-         * Logic engine position
-         *
-         * X and Z coordinates are mapped to the X and Y axis on the terrain.
-         * Y coordinate is the "height".
-         */
-        glm::vec3 _position;
-        
-    protected:
-        
-        std::optional<LocationComponent> cLocation;
-        std::optional<AttackComponent> cAttack;
-        std::optional<ContainerComponent> cContainer;
-        std::optional<MovementComponent> cMovement;
-        std::optional<ColonyComponent> cColony;
+    double getHealth() const { return _health; }
+    int getMaxHealth() const { return _maxHealth; }
+    bool isShowingHealth() const { return _showHealth; }
 
-        ObjectCategory category;
+    double addHealth(double v)
+    {
+        _health += v;
+        return _health;
+    }
 
-    public:
-        object_id_t getID() const { return _id; }
-        const std::string& getType() const { return _type; }
-        const std::string& getName() const { return _name; }
+    glm::vec2 getSize() const { return _size; }
 
-        double getHealth() const { return _health; }
-        int getMaxHealth() const { return _maxHealth; }
-        bool isShowingHealth() const { return _showHealth; }
+    glm::vec3 getPosition() const { return _position; }
+    glm::vec3 setPosition(glm::vec3 v)
+    {
+        _position = v;
+        return _position;
+    }
 
-        double addHealth(double v) { _health += v; return _health; }
-	
-        glm::vec2 getSize() const { return _size; }
+    GameObject(
+        std::string type, std::string name, glm::vec2 size, int health, int maxHealth,
+        bool showHealth = true);
 
-        glm::vec3 getPosition() const { return _position; }
-        glm::vec3 setPosition(glm::vec3 v) { _position = v; return _position; }
+    /**
+     * Function to be called by the ObjectFactory, so it can
+     * create a game object without knowing its class name,
+     * considering you registered it
+     *
+     * \see ObjectFactory
+     */
+    virtual std::shared_ptr<GameObject> create();
 
-        GameObject(std::string type, std::string name, glm::vec2 size, int health,
-                   int maxHealth, bool showHealth = true);
+    /**
+     * Update internal object logic
+     */
+    virtual void update();
 
-        /**
-         * Function to be called by the ObjectFactory, so it can 
-         * create a game object without knowing its class name,
-         * considering you registered it
-         *
-         * \see ObjectFactory
-         */
-        virtual std::shared_ptr<GameObject> create();
+    std::optional<LocationComponent>& getLocationComponent() { return cLocation; }
+    std::optional<AttackComponent>& getAttackComponent() { return cAttack; }
+    std::optional<ContainerComponent>& getContainerComponent() { return cContainer; }
+    std::optional<MovementComponent>& getMovementComponent() { return cMovement; }
+    std::optional<ColonyComponent>& getColonyComponent() { return cColony; }
 
-        /**
-         * Update internal object logic
-         */
-        virtual void update();
+    ObjectCategory getCategory() { return this->category; }
 
-        std::optional<LocationComponent>& getLocationComponent() { return cLocation; }
-        std::optional<AttackComponent>& getAttackComponent() { return cAttack; }
-        std::optional<ContainerComponent>& getContainerComponent() { return cContainer; }
-        std::optional<MovementComponent>& getMovementComponent() { return cMovement; }
-        std::optional<ColonyComponent>& getColonyComponent() { return cColony; }
-
-        ObjectCategory getCategory() { return this->category; }
-
-        virtual ~GameObject() {}
-
-
-    };
-}
+    virtual ~GameObject() {}
+};
+}  // namespace familyline::logic

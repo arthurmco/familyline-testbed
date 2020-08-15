@@ -1,17 +1,13 @@
+#include <algorithm>
+#include <client/graphical/exceptions.hpp>
+#include <client/graphical/gfx_service.hpp>
+#include <client/graphical/material_manager.hpp>
 #include <client/graphical/meshopener/OBJOpener.hpp>
+#include <client/graphical/shader_manager.hpp>
+#include <client/graphical/static_animator.hpp>
+#include <common/logger.hpp>
 #include <cstdio>
 #include <cstring>
-#include <algorithm>
-
-#include <common/logger.hpp>
-#include <client/graphical/material_manager.hpp>
-#include <client/graphical/static_animator.hpp>
-
-#include <client/graphical/shader_manager.hpp>
-#include <client/graphical/exceptions.hpp>
-
-#include <client/graphical/gfx_service.hpp>
-
 #include <glm/glm.hpp>
 
 using namespace familyline::graphics;
@@ -27,28 +23,26 @@ struct FaceIndex {
  */
 struct UniqueVertex {
     unsigned idx = -1;
-    
+
     int idxVertex = -1, idxNormal = -1, idxTexcoord = -1;
 
-    bool inline operator==(const UniqueVertex& b) {
-        return (this->idxVertex == b.idxVertex &&
-                this->idxNormal == b.idxNormal &&
-                this->idxTexcoord == b.idxTexcoord);
+    bool inline operator==(const UniqueVertex& b)
+    {
+        return (
+            this->idxVertex == b.idxVertex && this->idxNormal == b.idxNormal &&
+            this->idxTexcoord == b.idxTexcoord);
     }
 };
-
 
 // The vertex list
 // Represented by the mesh object (the 'o' marker)
 struct VertexList {
-
     // The indices used for building each one of the faces
     // Each element in the face index is a 3-element array
     std::vector<FaceIndex> indices;
 
     char* mtlname = nullptr;
 };
-
 
 // The vertex group, aka the mesh
 // Represents a mesh group in the file (thie 'g' marker)
@@ -60,9 +54,7 @@ struct VertexGroup {
     bool hasTexture = false, hasNormal = false;
     std::vector<VertexList> vertices;
 
-    VertexGroup(const char* name) {
-        this->name = name;
-    }
+    VertexGroup(const char* name) { this->name = name; }
 };
 
 std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
@@ -78,12 +70,11 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> texcoords;
 
-
     FILE* fObj = fopen(file, "r");
     if (!fObj) {
         char s[512];
         snprintf(s, 511, "Failure to open mesh %s (%d)", file, errno);
-            
+
         throw asset_exception(s, AssetError::AssetOpenError);
     }
 
@@ -102,8 +93,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
     while (!feof(fObj)) {
         auto l = fgets(line, 255, fObj);
         if (!l) {
-            if (feof(fObj))
-                break;
+            if (feof(fObj)) break;
 
             throw std::runtime_error{"Error while reading the file"};
         }
@@ -114,11 +104,11 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
         // Empty line
         if (l[0] == '\0') continue;
 
-        if (l[0] == '#') // Comment
+        if (l[0] == '#')  // Comment
             continue;
 
         // Remove the newline
-        l[strlen(l)-1] = '\0';
+        l[strlen(l) - 1] = '\0';
 
         // Vertex
         if (l[0] == 'v' && l[1] == ' ') {
@@ -126,7 +116,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
             char vs;
             auto i = sscanf(l, "%c %f %f %f", &vs, &v3.x, &v3.y, &v3.z);
 
-            if (i < 4) // Not enough parameters for the vertex.
+            if (i < 4)  // Not enough parameters for the vertex.
                 continue;
 
             // Since OBJ files indexes vertices by appearance order, no problem in pushing them
@@ -140,7 +130,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
             char vs[8];
             auto i = sscanf(l, "%s %f %f %f", vs, &v3.x, &v3.y, &v3.z);
 
-            if (i < 4) // Not enough parameters for the vertex.
+            if (i < 4)  // Not enough parameters for the vertex.
                 continue;
 
             v3 = glm::normalize(v3);
@@ -156,20 +146,19 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
             char vs[8];
             auto i = sscanf(l, "%s %f %f", vs, &v2.x, &v2.y);
 
-            if (i < 3) // Not enough parameters for the vertex.
+            if (i < 3)  // Not enough parameters for the vertex.
                 continue;
 
             texcoords.push_back(std::move(v2));
             current_group->hasTexture = true;
             continue;
         }
-    
+
         // TODO: Support line elements?
         // They might be a mesh with a line shader
 
         // Vertex list changed
         if (l[0] == 'o') {
-
             current_group->vertices.push_back(VertexList{});
             current_vert = &current_group->vertices.back();
             continue;
@@ -179,11 +168,10 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
         // Vertex group changed
         if (l[0] == 'g') {
             char gs;
-            char* gname = new char[ strlen(l) ];
+            char* gname = new char[strlen(l)];
 
             auto i = sscanf(l, "%c %s", &gs, gname);
-            if (i < 2)
-                continue;
+            if (i < 2) continue;
 
             verts.push_back(VertexGroup{gname});
             current_group = &verts.back();
@@ -199,54 +187,47 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
         // Material
         if (l[0] == 'u' && l[1] == 's' && l[2] == 'e') {
-        
             if (!strncmp(l, "usemtl", 6)) {
                 char* mtlname = strdup(&l[7]);
 
-                log->write("meshopener::obj", LogType::Debug,
-                         "group %s: found material '%s'",
-                         current_group->name, mtlname);
-                // switch vertex list       
+                log->write(
+                    "meshopener::obj", LogType::Debug, "group %s: found material '%s'",
+                    current_group->name, mtlname);
+                // switch vertex list
                 current_group->vertices.push_back(VertexList{});
-                current_vert = &current_group->vertices.back();
+                current_vert          = &current_group->vertices.back();
                 current_vert->mtlname = mtlname;
 
                 continue;
             }
         }
-    
+
         // Face assembling
         if (l[0] == 'f') {
             FaceIndex fi;
             char fs;
 
             if (current_group->hasNormal && !current_group->hasTexture) {
-                auto i = sscanf(l, "%c %d//%d %d//%d %d//%d", &fs,
-                                &fi.idxVertex[0], &fi.idxNormal[0],
-                                &fi.idxVertex[1], &fi.idxNormal[1],
-                                &fi.idxVertex[2], &fi.idxNormal[2]);
+                auto i = sscanf(
+                    l, "%c %d//%d %d//%d %d//%d", &fs, &fi.idxVertex[0], &fi.idxNormal[0],
+                    &fi.idxVertex[1], &fi.idxNormal[1], &fi.idxVertex[2], &fi.idxNormal[2]);
 
-                if (i < (2*3)+1)
-                    continue;
+                if (i < (2 * 3) + 1) continue;
 
             } else if (!current_group->hasNormal && current_group->hasTexture) {
-                auto i = sscanf(l, "%c %d/%d %d/%d %d/%d", &fs,
-                                &fi.idxVertex[0], &fi.idxTex[0],
-                                &fi.idxVertex[1], &fi.idxTex[1],
-                                &fi.idxVertex[2], &fi.idxTex[2]);
+                auto i = sscanf(
+                    l, "%c %d/%d %d/%d %d/%d", &fs, &fi.idxVertex[0], &fi.idxTex[0],
+                    &fi.idxVertex[1], &fi.idxTex[1], &fi.idxVertex[2], &fi.idxTex[2]);
 
-                if (i < (2*3)+1)
-                    continue;
-
+                if (i < (2 * 3) + 1) continue;
 
             } else if (current_group->hasNormal && current_group->hasTexture) {
-                auto i = sscanf(l, "%c %d/%d/%d %d/%d/%d %d/%d/%d", &fs,
-                                &fi.idxVertex[0], &fi.idxTex[0], &fi.idxNormal[0],
-                                &fi.idxVertex[1], &fi.idxTex[1], &fi.idxNormal[1],
-                                &fi.idxVertex[2], &fi.idxTex[2], &fi.idxNormal[2]);
+                auto i = sscanf(
+                    l, "%c %d/%d/%d %d/%d/%d %d/%d/%d", &fs, &fi.idxVertex[0], &fi.idxTex[0],
+                    &fi.idxNormal[0], &fi.idxVertex[1], &fi.idxTex[1], &fi.idxNormal[1],
+                    &fi.idxVertex[2], &fi.idxTex[2], &fi.idxNormal[2]);
 
-                if (i < (3*3)+1)
-                    continue;
+                if (i < (3 * 3) + 1) continue;
 
             } else {
                 fprintf(stderr, "error: unsupported face configuration (%s)\n", l);
@@ -256,7 +237,6 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
             current_vert->indices.push_back(fi);
             continue;
         }
-
     }
     delete[] line;
 
@@ -271,28 +251,29 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
     // Convert those vertex groups in meshes and vertex data objects
     // Ensure that every index references an unique combination of vertex, normal and texcoords
     for (const auto& vg : verts) {
-        if (!vg.hasNormal && !vg.hasTexture) continue; // No normal and no texture? Unsupported
-        log->write("meshopener::obj", LogType::Debug,
-                 "mesh %s, %zu vertex lists, normals=%s, textures=%s",
-                 vg.name, vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
-                 (vg.hasTexture ? "true" : "false"));
+        if (!vg.hasNormal && !vg.hasTexture) continue;  // No normal and no texture? Unsupported
+        log->write(
+            "meshopener::obj", LogType::Debug, "mesh %s, %zu vertex lists, normals=%s, textures=%s",
+            vg.name, vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
+            (vg.hasTexture ? "true" : "false"));
 
         VertexDataGroup vdlist;
         std::vector<VertexInfo> vinfo;
-    
+
         unsigned idx = 0;
         for (const auto& vl : vg.vertices) {
-            if (vl.indices.size() == 0) continue; // Remove null vertex lists
+            if (vl.indices.size() == 0) continue;  // Remove null vertex lists
 
-            std::vector<UniqueVertex> uvs;             // The unique combinations of n+v+t
+            std::vector<UniqueVertex> uvs;  // The unique combinations of n+v+t
             std::vector<unsigned int> index_list;
 
             uvs.reserve(vl.indices.size());
             index_list.reserve(vl.indices.size());
 
             unsigned uvidx = 0;
-            log->write("meshopener::obj", LogType::Debug,
-                     "\tvertex list %u, %zu edges", idx, vl.indices.size());
+            log->write(
+                "meshopener::obj", LogType::Debug, "\tvertex list %u, %zu edges", idx,
+                vl.indices.size());
 
             /* The obj file creates a index unique for each normal, vertex or texcoords.
              *
@@ -304,18 +285,15 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
              * unique for the combination of the three
              */
             for (const auto& idx : vl.indices) {
-
                 for (auto fi = 0; fi < 3; fi++) {
                     UniqueVertex iuv;
-                    iuv.idxVertex = idx.idxVertex[fi]-1;
-                    iuv.idxNormal = idx.idxNormal[fi]-1;
-                    iuv.idxTexcoord = idx.idxTex[fi]-1;
-            
-            
-                    auto founduv = std::find_if(uvs.begin(), uvs.end(),
-                                                [&iuv](const UniqueVertex& fuv) {
-                                                    return iuv == fuv;
-                                                });
+                    iuv.idxVertex   = idx.idxVertex[fi] - 1;
+                    iuv.idxNormal   = idx.idxNormal[fi] - 1;
+                    iuv.idxTexcoord = idx.idxTex[fi] - 1;
+
+                    auto founduv = std::find_if(
+                        uvs.begin(), uvs.end(),
+                        [&iuv](const UniqueVertex& fuv) { return iuv == fuv; });
                     if (founduv == std::end(uvs)) {
                         iuv.idx = uvidx++;
                         index_list.push_back(iuv.idx);
@@ -327,39 +305,36 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
                 }
             }
 
-            log->write("meshopener::obj", LogType::Debug,
-                     "%zu unique vert/texcoord/normal combinations detected, %zu indices\n",
-                     uvs.size(), index_list.size());
+            log->write(
+                "meshopener::obj", LogType::Debug,
+                "%zu unique vert/texcoord/normal combinations detected, %zu indices\n", uvs.size(),
+                index_list.size());
 
             // Build the vertex data
             VertexData vdata;
             Material* mtl = nullptr;
-        
+
             // Make groups of 3 vertices, so the vga knows this is a triangle
             // TODO: Support vertex indices, and modify this loop
             for (const auto& idxitem : index_list) {
                 auto uv = uvs[idxitem];
 
-                const auto uvv = (uv.idxVertex < 0) ? (vertices.size() + uv.idxVertex) :
-                    uv.idxVertex;
-                const auto uvn = (uv.idxNormal < 0) ? (normals.size() + uv.idxNormal) :
-                    uv.idxNormal;
-                const auto uvt = (uv.idxTexcoord < 0) ? (texcoords.size() + uv.idxTexcoord) :
-                    uv.idxTexcoord;
-        
-            
+                const auto uvv =
+                    (uv.idxVertex < 0) ? (vertices.size() + uv.idxVertex) : uv.idxVertex;
+                const auto uvn =
+                    (uv.idxNormal < 0) ? (normals.size() + uv.idxNormal) : uv.idxNormal;
+                const auto uvt =
+                    (uv.idxTexcoord < 0) ? (texcoords.size() + uv.idxTexcoord) : uv.idxTexcoord;
+
                 vdata.position.push_back(vertices[uvv]);
 
-                if (vg.hasNormal)
-                    vdata.normals.push_back(normals[uvn]);
+                if (vg.hasNormal) vdata.normals.push_back(normals[uvn]);
 
-                if (vg.hasTexture)
-                    vdata.texcoords.push_back(texcoords[uvt]);
+                if (vg.hasTexture) vdata.texcoords.push_back(texcoords[uvt]);
 
-                if (vl.mtlname && !mtl) {                    
+                if (vl.mtlname && !mtl) {
                     mtl = GFXService::getMaterialManager()->getMaterial(vl.mtlname);
                 }
-
             }
 
             auto fshader = GFXService::getShaderManager()->getShader("forward");
@@ -369,25 +344,24 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
                 vi.hasTexCoords = vg.hasTexture;
                 vinfo.push_back(vi);
                 mtl = nullptr;
-            
+
             } else {
-                log->write("meshopener::obj", LogType::Warning,
-                         "cannot load material %s for %s",
-                         vl.mtlname, vg.name);
+                log->write(
+                    "meshopener::obj", LogType::Warning, "cannot load material %s for %s",
+                    vl.mtlname, vg.name);
 
                 VertexInfo vi(idx, -1, fshader, VertexRenderStyle::Triangles);
                 vi.hasTexCoords = vg.hasTexture;
                 vinfo.push_back(vi);
 
-                log->write("meshopener::obj", LogType::Warning,
-                         "\ta default material is being used");
-
+                log->write(
+                    "meshopener::obj", LogType::Warning, "\ta default material is being used");
             }
 
             vdlist.push_back(std::move(vdata));
             idx++;
         }
-    
+
         auto mesh = new Mesh{vg.name, new StaticAnimator{vdlist}, vinfo};
         mesh_ret.push_back(mesh);
     }

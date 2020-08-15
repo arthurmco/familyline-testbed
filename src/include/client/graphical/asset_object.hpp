@@ -11,31 +11,24 @@
 
 #include <vector>
 
-namespace familyline::graphics {
+namespace familyline::graphics
+{
+enum AssetType { MeshAsset, MaterialAsset, TextureAsset, UnknownAsset };
 
-    enum AssetType {
-        MeshAsset,
-        MaterialAsset,
-        TextureAsset,
-        UnknownAsset
-    };
+/**
+ * An opaque interface. Represents an asset
+ *
+ * Everything that is considered an asset, such as a mesh or a texture, should
+ * inherit from this class
+ */
+class AssetObject
+{
+public:
+    virtual AssetType getAssetType() const = 0;
 
-    /**
-     * An opaque interface. Represents an asset
-     *
-     * Everything that is considered an asset, such as a mesh or a texture, should
-     * inherit from this class
-     */
-    class AssetObject {
-    public:
-        virtual AssetType getAssetType() const = 0;
+    virtual ~AssetObject() {}
+};
 
-        virtual ~AssetObject() {}
-
-    };
-
-
-}
-
+}  // namespace familyline::graphics
 
 #endif /* ASSETOBJECT_HPP */

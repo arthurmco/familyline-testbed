@@ -1,25 +1,23 @@
 #pragma once
 
 #include <memory>
+
 #include "input_manager.hpp"
 
 /**
  * Input service class
  */
 
-namespace familyline::input {
+namespace familyline::input
+{
+class InputService
+{
+private:
+    static std::unique_ptr<InputManager> _input_manager;
 
-    class InputService {
-    private:
-        static std::unique_ptr<InputManager> _input_manager;
+public:
+    static std::unique_ptr<InputManager>& getInputManager();
+    static void setInputManager(std::unique_ptr<InputManager> v);
+};
 
-
-    public:
-        static std::unique_ptr<InputManager>& getInputManager();
-        static void setInputManager(std::unique_ptr<InputManager> v);
-        
-    };    
-    
-}
-
-
+}  // namespace familyline::input

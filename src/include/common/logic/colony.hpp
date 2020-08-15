@@ -10,37 +10,38 @@
 #include <common/logic/player.hpp>
 #include <string_view>
 
-namespace familyline::logic {
+namespace familyline::logic
+{
+/*
+ * The colony is the owner of the game entities
+ *
+ * It is the colony that defines colors and diplomacies
+ */
+class Colony
+{
+private:
+    Player& player_;
 
-    /*
-     * The colony is the owner of the game entities
-     *
-     * It is the colony that defines colors and diplomacies
+    /**
+     * The color of the buildings
      */
-    class Colony {
-    private:
-        Player& player_;
+    unsigned color_;
 
-        /**
-         * The color of the buildings
-         */
-        unsigned color_;
+    /**
+     * The colony's alliance.
+     *
+     * This is what defines the diplomacy
+     */
+    Alliance& alliance_;
 
-        /**
-         * The colony's alliance.
-         *
-         * This is what defines the diplomacy
-         */
-        Alliance& alliance_;        
-        
-    public:
-        Colony(Player& p, unsigned color, Alliance& a);
-        
-        Alliance& getAlliance() const;
+public:
+    Colony(Player& p, unsigned color, Alliance& a);
 
-        std::string_view getName() const;
+    Alliance& getAlliance() const;
 
-        bool isOfPlayer(Player& other);
-    };
+    std::string_view getName() const;
 
-}
+    bool isOfPlayer(Player& other);
+};
+
+}  // namespace familyline::logic

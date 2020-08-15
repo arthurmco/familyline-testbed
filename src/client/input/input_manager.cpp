@@ -2,12 +2,7 @@
 
 using namespace familyline::input;
 
-InputManager::InputManager(InputProcessor& ip)
-    : _ip(ip)
-{
-    ip.startInputReceiver();
-}
-
+InputManager::InputManager(InputProcessor& ip) : _ip(ip) { ip.startInputReceiver(); }
 
 /**
  * Process input events, human inputs and player inputs
@@ -22,18 +17,15 @@ void InputManager::processEvents()
     HumanInputAction hia;
 
     while (_ip.pollAction(hia)) {
-        for (const auto& v: _human_input_fns) {
+        for (const auto& v : _human_input_fns) {
             auto ret = v.handler(hia);
 
             if (ret) {
                 break;
             }
         }
-        
     }
-    
 }
-
 
 int generateHandlerNumber()
 {
@@ -49,24 +41,20 @@ int generateHandlerNumber()
 listener_handler_t InputManager::addListenerHandler(HumanListenerHandler h, int zorder)
 {
     auto id = generateHandlerNumber();
-	auto ho = HandlerOrder<HumanListenerHandler>{ h, id, zorder };
+    auto ho = HandlerOrder<HumanListenerHandler>{h, id, zorder};
 
-	int insertidx = 0;
-	for (int i = 0; i < _human_input_fns.size(); i++) {
-		if (_human_input_fns[i].zindex < zorder) {
-			break;
-		}
-		
+    int insertidx = 0;
+    for (int i = 0; i < _human_input_fns.size(); i++) {
+        if (_human_input_fns[i].zindex < zorder) {
+            break;
+        }
 
-		insertidx++;
-	}
+        insertidx++;
+    }
 
-	_human_input_fns.insert(_human_input_fns.begin() + insertidx, ho);
+    _human_input_fns.insert(_human_input_fns.begin() + insertidx, ho);
 
     return id;
 }
 
-void InputManager::removeListenerHandler(listener_handler_t id)
-{
-    
-}
+void InputManager::removeListenerHandler(listener_handler_t id) {}

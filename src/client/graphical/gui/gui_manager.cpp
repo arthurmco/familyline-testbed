@@ -1,7 +1,8 @@
 #include <GL/glew.h>
-#include <client/graphical/gui/gui_manager.hpp>
+
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/gfx_service.hpp>
+#include <client/graphical/gui/gui_manager.hpp>
 
 using namespace familyline::graphics::gui;
 using namespace familyline::graphics;
@@ -9,13 +10,11 @@ using namespace familyline::input;
 
 static int vv = 0;
 
-
 /* The panel vertex square coordinates.
    It's a big rectangle, that fills the entire screen  */
-static const float window_pos_coord[][3] =
-{
-    {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1},
-    {-1, 1, 1}, {1, 1, 1}, {1, -1, 1}
+static const float window_pos_coord[][3] = {
+    {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1}, {-1, 1, 1},
+    {1, 1, 1},  {1, -1, 1}
 
     //  {-1, -1, 1}, { 1, -1, 1}, { 1, 1, 1},
     //  {-1, -1, 1}, {-1,  1, 1}, { 1, 1, 1}
@@ -26,10 +25,8 @@ static const float window_pos_coord[][3] =
    texture coordinates
    Also send the y coordinate inverted, because in OpenGL, Y positive is down, not up
 */
-static const float window_texture_coord[][2] =
-{ {-1, 1}, {-1, -1}, {1, -1},
-  {-1, 1}, {1, 1}, {1, -1} };
-
+static const float window_texture_coord[][2] = {{-1, 1}, {-1, -1}, {1, -1},
+                                                {-1, 1}, {1, 1},   {1, -1}};
 
 /* Initialize shaders and window vertices.
  *
@@ -43,18 +40,17 @@ void GUIManager::init(const Window& win)
     /* Get window size */
     win.getSize(win_w, win_h);
 
-    sGUI_ = new ShaderProgram("gui", {
-            Shader("shaders/GUI.vert", ShaderType::Vertex),
-            Shader("shaders/GUI.frag", ShaderType::Fragment)
-        });
+    sGUI_ = new ShaderProgram(
+        "gui", {Shader("shaders/GUI.vert", ShaderType::Vertex),
+                Shader("shaders/GUI.frag", ShaderType::Fragment)});
 
     sGUI_->link();
 
-    attrPos_ = 0; //sGUI->GetAttributeLocation("position");
-    attrTex_ = 1; //sGUI->GetAttributeLocation("in_uv");
+    attrPos_ = 0;  // sGUI->GetAttributeLocation("position");
+    attrTex_ = 1;  // sGUI->GetAttributeLocation("in_uv");
 
-    width_ = (unsigned) win_w;
-    height_ = (unsigned) win_h;
+    width_  = (unsigned)win_w;
+    height_ = (unsigned)win_h;
 
     // Create the vertices
     glGenVertexArrays(1, &(this->vaoGUI_));
@@ -75,17 +71,15 @@ void GUIManager::init(const Window& win)
 
     glBindVertexArray(0);
 
-
     /* Create texture where we'll render the canvas */
     glGenTextures(1, &texHandle_);
     glBindTexture(GL_TEXTURE_2D, texHandle_);
 
-    LOGDEBUG(LoggerService::getLogger(), "gui-manager",
-             "gui size: %dx%d", width_, height_);
+    LOGDEBUG(LoggerService::getLogger(), "gui-manager", "gui size: %dx%d", width_, height_);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_BGRA,
-                 GL_UNSIGNED_BYTE,
-                 (void*)cairo_image_surface_get_data(this->canvas_));
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_BGRA, GL_UNSIGNED_BYTE,
+        (void*)cairo_image_surface_get_data(this->canvas_));
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -95,8 +89,7 @@ void GUIManager::init(const Window& win)
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
         char e[128];
-        snprintf(e, 127, "error %#x while setting texture for GUI content",
-                 err);
+        snprintf(e, 127, "error %#x while setting texture for GUI content", err);
         throw graphical_exception(std::string(e));
     }
 }
@@ -108,17 +101,14 @@ void GUIManager::add(int x, int y, Control* control)
 
 void GUIManager::add(double x, double y, ControlPositioning cpos, Control* control)
 {
-    if (x > 1.1 || y > 1.1)
-        this->add((int)x, (int)y, control);
+    if (x > 1.1 || y > 1.1) this->add((int)x, (int)y, control);
 
     root_control_->getControlContainer()->add(x, y, cpos, std::unique_ptr<Control>(control));
 }
 
-
 void GUIManager::remove(Control* control)
 {
-    if (control)
-        root_control_->getControlContainer()->remove(control->getID());
+    if (control) root_control_->getControlContainer()->remove(control->getID());
 }
 
 /**
@@ -160,8 +150,9 @@ void GUIManager::renderToTexture()
     glVertexAttribPointer(attrTex_, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindTexture(GL_TEXTURE_2D, this->texHandle_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, this->width_, this->height_, 0, GL_BGRA,
-                 GL_UNSIGNED_BYTE, canvas_data);
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA8, this->width_, this->height_, 0, GL_BGRA, GL_UNSIGNED_BYTE,
+        canvas_data);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -180,15 +171,9 @@ void GUIManager::renderToTexture()
     glClearColor(0.0, 0.0, 0.0, 1.0);
 }
 
+void GUIManager::update() { root_control_->update(context_, canvas_); }
 
-void GUIManager::update()
-{
-    root_control_->update(context_, canvas_);
-}
-
-void GUIManager::render(unsigned int x, unsigned int y) {
-    this->renderToTexture();
-}
+void GUIManager::render(unsigned int x, unsigned int y) { this->renderToTexture(); }
 
 GUIManager::~GUIManager()
 {
@@ -197,7 +182,6 @@ GUIManager::~GUIManager()
 
     // TODO: remove the input handler
 }
-
 
 /**
  * Get the control that is in the specified pixel coordinate
@@ -219,7 +203,7 @@ bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
     }
 
     if (std::holds_alternative<MouseAction>(hia.type)) {
-        auto ma = std::get<MouseAction>(hia.type);
+        auto ma    = std::get<MouseAction>(hia.type);
         hitmousex_ = ma.screenX;
         hitmousey_ = ma.screenY;
         return this->getControlAtPoint(ma.screenX, ma.screenY).has_value();
@@ -244,14 +228,12 @@ bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
 void GUIManager::receiveEvent()
 {
     while (!input_actions_.empty()) {
-
         auto& hia = input_actions_.front();
         root_control_->receiveEvent(hia, cb_queue_);
 
         input_actions_.pop();
     }
 }
-
 
 void GUIManager::runCallbacks()
 {

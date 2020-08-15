@@ -11,13 +11,10 @@ std::shared_ptr<GameObject> ObjectFactory::getObject(const char* type, float x, 
         auto newo = _objects[type]->create();
         newo->setPosition(glm::vec3(x, y, z));
         return newo;
-    }   
+    }
 
     return nullptr;
 }
 
 /* Adds an object to the factory */
-void ObjectFactory::addObject(GameObject* object)
-{
-    _objects[object->getType()] = object;
-}
+void ObjectFactory::addObject(GameObject* object) { _objects[object->getType()] = object; }

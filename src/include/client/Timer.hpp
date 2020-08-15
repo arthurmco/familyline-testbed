@@ -12,8 +12,8 @@
 #ifndef TIMER_HPP
 #define TIMER_HPP
 
-namespace familyline {
-
+namespace familyline
+{
 /* The function pointer for a timer event
     - opt_inst is the optional instance argument, automatically used for C++
     when you call some class function. If you are calling a class function, you
@@ -36,7 +36,8 @@ struct TimerEvent {
     bool was_run = false;
 };
 
-class Timer {
+class Timer
+{
 private:
     int max_id;
     std::map<double /*milisecond*/, TimerEvent> _function_events;
@@ -46,25 +47,25 @@ private:
 public:
     Timer();
 
-
-    /* Add a function to be run every 'ms' miliseconds. 
+    /* Add a function to be run every 'ms' miliseconds.
         opt_inst is the class instance of that function, can be set to nullptr if the function is
         static, lambda or a C function
-        opt_arg is some optional argument you want to pass 
-        
+        opt_arg is some optional argument you want to pass
+
         Returns the timer event ID.
         */
     int AddFunctionCall(double ms, TimerFunction f, void* opt_inst, void* opt_arg);
 
     void RunTimers(double msdelta);
 
-    static Timer* getInstance() {
+    static Timer* getInstance()
+    {
         static Timer* t = nullptr;
         if (!t) t = new Timer;
 
         return t;
     }
 };
-}
+}  // namespace familyline
 
 #endif

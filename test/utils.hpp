@@ -4,11 +4,11 @@
  * Copyright (C) 2020 Arthur Mendes
  */
 
-#include <memory>
-#include <functional>
+#include <common/objects/ObjectMacros.h>
 
 #include <common/logic/game_object.hpp>
-#include <common/objects/ObjectMacros.h>
+#include <functional>
+#include <memory>
 
 struct object_init {
     std::string type;
@@ -23,24 +23,25 @@ struct object_init {
     std::optional<familyline::logic::AttackComponent> atkComponent;
 };
 
-class TestObject : public familyline::logic::GameObject {
+class TestObject : public familyline::logic::GameObject
+{
 private:
-  std::function<void()> fnUpdate_;
+    std::function<void()> fnUpdate_;
 
-  // Preserve the original init parameters to ease object cloning
-  struct object_init init_params_;
+    // Preserve the original init parameters to ease object cloning
+    struct object_init init_params_;
 
 public:
-  TestObject(const struct object_init &init);
+    TestObject(const struct object_init& init);
 
-  virtual void update();
+    virtual void update();
 
-  CLONE_MACRO_H(TestObject)
-
+    CLONE_MACRO_H(TestObject)
 };
 
 /// Create an object that can have a colony
-class TestOwnableObject : public familyline::logic::GameObject {
+class TestOwnableObject : public familyline::logic::GameObject
+{
 private:
     std::function<void()> fnUpdate_;
 
@@ -58,22 +59,24 @@ public:
 std::shared_ptr<TestObject> make_object(const struct object_init& init);
 std::shared_ptr<TestOwnableObject> make_ownable_object(const struct object_init& init);
 
-#include <common/logic/player_manager.hpp>
 #include <common/logic/player.hpp>
-
+#include <common/logic/player_manager.hpp>
 
 /// A basic player that mocks a real player.
 ///
 /// It has a custom callback where the player can push actions.
-class DummyPlayer : public familyline::logic::Player {
-private:    
+class DummyPlayer : public familyline::logic::Player
+{
+private:
     std::function<std::vector<familyline::logic::PlayerInputType>(void)> player_input_cb_;
-    
+
 public:
-    DummyPlayer(familyline::logic::PlayerManager& pm, const char* name, int code,
-                decltype(player_input_cb_) input_cb)
+    DummyPlayer(
+        familyline::logic::PlayerManager& pm, const char* name, int code,
+        decltype(player_input_cb_) input_cb)
         : familyline::logic::Player(pm, name, code), player_input_cb_(input_cb)
-        {}
+    {
+    }
 
     virtual void generateInput();
 };

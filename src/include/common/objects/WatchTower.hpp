@@ -10,16 +10,17 @@
 #ifndef WATCHTOWER_H
 #define WATCHTOWER_H
 
-namespace familyline {
-
+namespace familyline
+{
 // TODO: how to fit this in the new logic system?
-    
+
 /*  A watch tower is a basic watch building */
-class WatchTower : public logic::GameObject {
+class WatchTower : public logic::GameObject
+{
 private:
     static const int TID = 3;
+
 public:
-	
     WatchTower();
 
     /* Called on object initialization */
@@ -29,11 +30,9 @@ public:
     virtual bool DoAction(void);
 
     CLONE_MACRO_H(WatchTower)
-//    ADD_CLONE_MACRO(WatchTower, NULL)
+    //    ADD_CLONE_MACRO(WatchTower, NULL)
 };
 
-}
-
-
+}  // namespace familyline
 
 #endif /* end of include guard: WATCHTOWER_H */

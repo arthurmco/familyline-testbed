@@ -1,13 +1,13 @@
-#include <client/graphical/materialopener/MTLOpener.hpp>
 #include <client/graphical/materialopener/../gfx_service.hpp>
 #include <client/graphical/materialopener/../texture_manager.hpp>
+#include <client/graphical/materialopener/MTLOpener.hpp>
 #include <common/logger.hpp>
 
 using namespace familyline::graphics;
 
 std::vector<Material*> MTLOpener::Open(const char* file)
 {
-    auto& log = LoggerService::getLogger();
+    auto& log  = LoggerService::getLogger();
     FILE* fMat = fopen(file, "r");
 
     if (!fMat) {
@@ -32,23 +32,22 @@ std::vector<Material*> MTLOpener::Open(const char* file)
         }
 
         if (cind > 255) {
-            continue; //avoid buffer overflows.
+            continue;  // avoid buffer overflows.
         }
 
         fline = &fline[cind];
 
-        if (fline[0] == '#')
-            continue; //Discard comment
+        if (fline[0] == '#') continue;  // Discard comment
 
         if (!strncmp(fline, "newmtl", 6)) {
             /* New material declared */
             if (matname) {
                 /* Add the last processed material and discard it */
                 MaterialData md;
-                md.diffuseColor = diffuse;
+                md.diffuseColor  = diffuse;
                 md.specularColor = specular;
-                md.ambientColor = diffuse * 0.1f;
-                Material* m = new Material{(int)mats.size(), matname, md};
+                md.ambientColor  = diffuse * 0.1f;
+                Material* m      = new Material{(int)mats.size(), matname, md};
                 mats.push_back(m);
             }
 
@@ -57,10 +56,9 @@ std::vector<Material*> MTLOpener::Open(const char* file)
 
             int i = 7;
             while (fline[i] != '\n') {
-                matname[i-7] = fline[i];
+                matname[i - 7] = fline[i];
                 i++;
-                if (i > 256)
-                    break;
+                if (i > 256) break;
             }
 
             continue;
@@ -75,7 +73,6 @@ std::vector<Material*> MTLOpener::Open(const char* file)
             fline += 2;
             sscanf(fline, "%f %f %f", &diffuse.x, &diffuse.y, &diffuse.z);
             continue;
-
         }
         if (!strncmp(fline, "Ks", 2)) {
             fline += 2;
@@ -97,22 +94,20 @@ std::vector<Material*> MTLOpener::Open(const char* file)
             if (t) {
                 GFXService::getTextureManager()->AddTexture(texname.c_str(), t);
             } else {
-                log->write("material-opener::mtl", LogType::Warning,
-                           "Texture %s failed to load", texpath);
+                log->write(
+                    "material-opener::mtl", LogType::Warning, "Texture %s failed to load", texpath);
             }
-
 
             continue;
         }
-
     }
 
     /* Add the last material */
     MaterialData md;
-    md.diffuseColor = diffuse;
+    md.diffuseColor  = diffuse;
     md.specularColor = specular;
-    md.ambientColor = diffuse * 0.1f;
-    Material* m = new Material{(int)mats.size(), matname, md};
+    md.ambientColor  = diffuse * 0.1f;
+    Material* m      = new Material{(int)mats.size(), matname, md};
     mats.push_back(m);
 
     fclose(fMat);

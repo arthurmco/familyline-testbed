@@ -6,75 +6,67 @@
  * (C) 2020 Arthur Mendes
  */
 
-#include "input_processor.hpp"
 #include <common/logic/player_actions.hpp>
-
 #include <functional>
-#include <vector>
 #include <queue>
+#include <vector>
 
-namespace familyline::input {
+#include "input_processor.hpp"
 
-    using HumanListenerHandler = std::function<bool(HumanInputAction)>;
-    using PlayerListenerHandler = std::function<bool(familyline::logic::PlayerInputAction)>;
+namespace familyline::input
+{
+using HumanListenerHandler  = std::function<bool(HumanInputAction)>;
+using PlayerListenerHandler = std::function<bool(familyline::logic::PlayerInputAction)>;
 
+using listener_handler_t = int;
 
-	using listener_handler_t = int;
+/**
+ * Struct used to implement ordering to the handlers, so we can call them
+ * in the correct order, like first the GUI, and then the 3d area, since we
+ * do not want to, instead of typing something into the chat, we build some
+ * random buildings
+ *
+ * It is templated so we can use one for both the human and player input listeners
+ */
+template <typename T>
+struct HandlerOrder {
+    T handler;
+    listener_handler_t id;
+    int zindex;
+};
 
-	/**
-	 * Struct used to implement ordering to the handlers, so we can call them
-	 * in the correct order, like first the GUI, and then the 3d area, since we
-	 * do not want to, instead of typing something into the chat, we build some
-	 * random buildings
-	 *
-	 * It is templated so we can use one for both the human and player input listeners
-	 */
-	template <typename T>
-	struct HandlerOrder {
-		T handler;
-		listener_handler_t id;
-		int zindex;
-	};
+/**
+ * Manages user input, and forward it to the listeners via a
+ * callback
+ */
+class InputManager
+{
+private:
+    InputProcessor& _ip;
+
+    unsigned _tick = 0;
+
+    std::vector<HandlerOrder<HumanListenerHandler>> _human_input_fns;
+
+    std::queue<familyline::logic::PlayerInputAction> _input_actions;
+
+public:
+    InputManager(InputProcessor& ip);
 
     /**
-     * Manages user input, and forward it to the listeners via a
-     * callback
+     * Process input events, human inputs and player inputs
+     *
+     * The human inputs come from the input processor
+     * The player input come from the player who call `queuePlayerInput`
      */
-    class InputManager {
-    private:
-        InputProcessor& _ip;
+    void processEvents();
 
-        unsigned _tick = 0;
+    /**
+     * Adds a listener handler, returns an ID
+     */
+    listener_handler_t addListenerHandler(HumanListenerHandler h, int zorder = 0);
 
-        std::vector<HandlerOrder<HumanListenerHandler>> _human_input_fns;
+    void removeListenerHandler(listener_handler_t);
+};
 
-        std::queue<familyline::logic::PlayerInputAction> _input_actions;
-
-    public:
-        InputManager(InputProcessor& ip);
-
-
-        /**
-         * Process input events, human inputs and player inputs
-         *
-         * The human inputs come from the input processor
-         * The player input come from the player who call `queuePlayerInput`
-         */
-        void processEvents();
-
-
-        /**
-         * Adds a listener handler, returns an ID
-         */
-        listener_handler_t addListenerHandler(HumanListenerHandler h, int zorder=0);
-
-
-        void removeListenerHandler(listener_handler_t);
-
-
-
-    };
-
-
-
-}  // familyline::input
+}  // namespace familyline::input

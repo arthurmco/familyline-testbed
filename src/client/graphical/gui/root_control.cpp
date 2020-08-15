@@ -3,10 +3,6 @@
 using namespace familyline::graphics::gui;
 using namespace familyline::input;
 
-
-
-        
-
 bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
 {
     (void)context;
@@ -20,7 +16,7 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
     auto h = cairo_image_surface_get_height(canvas);
 
     this->cc_->sortZIndex();
-    
+
     // Paint all children in the correct place
     for (auto& cdata : this->cc_->children) {
         cdata.control->update(cdata.local_context, cdata.control_canvas);
@@ -28,42 +24,41 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
         cairo_set_operator(context, CAIRO_OPERATOR_OVER);
 
         switch (cdata.pos_type) {
-        case ControlPositioning::Pixel:
-            cairo_set_source_surface(context, cdata.control_canvas, cdata.x,
-                                     cdata.y);
-            break;
-        case ControlPositioning::Relative: {
-            auto absx = w * cdata.fx;
-            auto absy = h * cdata.fy;
-            cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
-            this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
-            break;
-        }
-        case ControlPositioning::CenterX: {
-            auto ctrlw = cairo_image_surface_get_width(cdata.control_canvas);
-            auto absx = (w/2) - (ctrlw/2);
-            auto absy = h * cdata.fy;
-            cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
-            this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
-            break;
-        }
-        case ControlPositioning::CenterY: {
-            auto ctrlh = cairo_image_surface_get_height(cdata.control_canvas);
-            auto absx = w * cdata.fx;
-            auto absy = (h/2) - (ctrlh/2);
-            cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
-            this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
-            break;
-        }
-        case ControlPositioning::CenterAll: {
-            auto ctrlw = cairo_image_surface_get_width(cdata.control_canvas);
-            auto ctrlh = cairo_image_surface_get_height(cdata.control_canvas);
-            auto absx = (w/2) - (ctrlw/2);
-            auto absy = (h/2) - (ctrlh/2);
-            cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
-            this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
-            break;
-        }
+            case ControlPositioning::Pixel:
+                cairo_set_source_surface(context, cdata.control_canvas, cdata.x, cdata.y);
+                break;
+            case ControlPositioning::Relative: {
+                auto absx = w * cdata.fx;
+                auto absy = h * cdata.fy;
+                cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
+                this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
+                break;
+            }
+            case ControlPositioning::CenterX: {
+                auto ctrlw = cairo_image_surface_get_width(cdata.control_canvas);
+                auto absx  = (w / 2) - (ctrlw / 2);
+                auto absy  = h * cdata.fy;
+                cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
+                this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
+                break;
+            }
+            case ControlPositioning::CenterY: {
+                auto ctrlh = cairo_image_surface_get_height(cdata.control_canvas);
+                auto absx  = w * cdata.fx;
+                auto absy  = (h / 2) - (ctrlh / 2);
+                cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
+                this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
+                break;
+            }
+            case ControlPositioning::CenterAll: {
+                auto ctrlw = cairo_image_surface_get_width(cdata.control_canvas);
+                auto ctrlh = cairo_image_surface_get_height(cdata.control_canvas);
+                auto absx  = (w / 2) - (ctrlw / 2);
+                auto absy  = (h / 2) - (ctrlh / 2);
+                cairo_set_source_surface(context, cdata.control_canvas, absx, absy);
+                this->cc_->updateAbsoluteCoord(cdata.control->getID(), absx, absy);
+                break;
+            }
         }
 
         cairo_paint(context);
@@ -101,5 +96,4 @@ void RootControl::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
     if (control.has_value()) {
         (*control)->receiveEvent(hia, cq);
     }
-
 }

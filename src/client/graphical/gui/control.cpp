@@ -1,24 +1,21 @@
+#include <algorithm>
 #include <client/graphical/gui/control.hpp>
 #include <ctime>
-#include <algorithm>
-#include <numeric> // for std::accumulate
+#include <numeric>  // for std::accumulate
 
 using namespace familyline::graphics::gui;
 
-Control::Control()
-{
-    id_ = (uintptr_t)this;
-}
+Control::Control() { id_ = (uintptr_t)this; }
 
 /**
  * This is called by the control component when an object is added to it, so
  * you can create a context for it
  */
-std::tuple<cairo_t*, cairo_surface_t*> Control::createChildContext(Control *c)
+std::tuple<cairo_t*, cairo_surface_t*> Control::createChildContext(Control* c)
 {
-    auto [w, h] = c->getNeededSize(nullptr);
+    auto [w, h]             = c->getNeededSize(nullptr);
     cairo_surface_t* canvas = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
-    cairo_t* context = cairo_create(canvas);
+    cairo_t* context        = cairo_create(canvas);
 
     if (w <= 1 || h <= 1) {
         auto [w, h] = c->getNeededSize(context);
@@ -26,21 +23,17 @@ std::tuple<cairo_t*, cairo_surface_t*> Control::createChildContext(Control *c)
         cairo_destroy(context);
         cairo_surface_destroy(canvas);
 
-        canvas = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
+        canvas  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
         context = cairo_create(canvas);
     }
 
     return std::tie(context, canvas);
 }
 
-
 /**
  * Resize the control
  */
-void Control::resize(size_t w, size_t h)
-{
-    resize_cb_(this, w, h);
-}
+void Control::resize(size_t w, size_t h) { resize_cb_(this, w, h); }
 
 void Control::enqueueCallback(CallbackQueue& cq, EventCallbackFn ec)
 {
@@ -48,25 +41,22 @@ void Control::enqueueCallback(CallbackQueue& cq, EventCallbackFn ec)
     cq.callbacks.push(cqe);
 }
 
-
 ////////////////////////////////////////////////////
-
 
 void ContainerComponent::add(int x, int y, std::unique_ptr<Control> c)
 {
     this->children.reserve(128);
     c->setResizeCallback([&](Control* co, size_t w, size_t h) {
-        auto co_it = std::find_if(this->children.begin(), this->children.end(),
-                                  [&](ControlData& cd) {
-                                      return cd.control->getID() == co->getID();
-                                  });
+        auto co_it = std::find_if(
+            this->children.begin(), this->children.end(),
+            [&](ControlData& cd) { return cd.control->getID() == co->getID(); });
 
         if (co_it != this->children.end()) {
             cairo_destroy(co_it->local_context);
             cairo_surface_destroy(co_it->control_canvas);
 
             co_it->control_canvas = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
-            co_it->local_context = cairo_create(co_it->control_canvas);
+            co_it->local_context  = cairo_create(co_it->control_canvas);
         }
     });
 
@@ -74,42 +64,38 @@ void ContainerComponent::add(int x, int y, std::unique_ptr<Control> c)
     this->children.emplace_back(x, y, ControlPositioning::Pixel, context, canvas, std::move(c));
 }
 
-
 void ContainerComponent::add(float x, float y, ControlPositioning cpos, std::unique_ptr<Control> c)
 {
     this->children.reserve(128);
     c->setResizeCallback([&](Control* co, size_t w, size_t h) {
-        auto co_it = std::find_if(this->children.begin(), this->children.end(),
-                                  [&](ControlData& cd) {
-                                      return cd.control->getID() == co->getID();
-                                  });
+        auto co_it = std::find_if(
+            this->children.begin(), this->children.end(),
+            [&](ControlData& cd) { return cd.control->getID() == co->getID(); });
 
         if (co_it != this->children.end()) {
             cairo_destroy(co_it->local_context);
             cairo_surface_destroy(co_it->control_canvas);
 
             co_it->control_canvas = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
-            co_it->local_context = cairo_create(co_it->control_canvas);
+            co_it->local_context  = cairo_create(co_it->control_canvas);
         }
     });
 
     auto [context, canvas] = this->parent->createChildContext(c.get());
 
     if (x > 1.1 || y > 1.1 || cpos == ControlPositioning::Pixel) {
-        this->children.emplace_back((int)x, (int)y, ControlPositioning::Pixel,
-                                    context, canvas, std::move(c));
+        this->children.emplace_back(
+            (int)x, (int)y, ControlPositioning::Pixel, context, canvas, std::move(c));
     } else {
         this->children.emplace_back(x, y, cpos, context, canvas, std::move(c));
     }
 }
 
-
 void ContainerComponent::remove(unsigned long long control_id)
 {
-    auto cd = std::remove_if(this->children.begin(), this->children.end(),
-                             [&](ControlData& cd) {
-                                 return (cd.control->getID() == control_id);
-                             });
+    auto cd = std::remove_if(this->children.begin(), this->children.end(), [&](ControlData& cd) {
+        return (cd.control->getID() == control_id);
+    });
 
     this->children.erase(cd, this->children.end());
 
@@ -122,12 +108,10 @@ void ContainerComponent::remove(unsigned long long control_id)
  */
 void ContainerComponent::sortZIndex()
 {
-    std::sort(this->children.begin(), this->children.end(),
-              [](ControlData& a, ControlData& b) {
-                  return a.control->z_index < b.control->z_index;
-              });
+    std::sort(this->children.begin(), this->children.end(), [](ControlData& a, ControlData& b) {
+        return a.control->z_index < b.control->z_index;
+    });
 }
-
 
 /**
  * Update the absolute (aka the pixel) positions of a control, so we can keep
@@ -139,10 +123,9 @@ void ContainerComponent::sortZIndex()
  */
 void ContainerComponent::updateAbsoluteCoord(unsigned long long control_id, int absx, int absy)
 {
-    auto cd = std::find_if(std::begin(this->children), std::end(this->children),
-                           [&](const ControlData& cd) {
-                               return cd.control && (cd.control->getID() == control_id);
-                           });
+    auto cd = std::find_if(
+        std::begin(this->children), std::end(this->children),
+        [&](const ControlData& cd) { return cd.control && (cd.control->getID() == control_id); });
 
     if (cd != this->children.end()) {
         cd->x = absx;
@@ -150,28 +133,26 @@ void ContainerComponent::updateAbsoluteCoord(unsigned long long control_id, int 
     }
 }
 
-
 /**
  * Get the control that is at the specified pixel coordinate
  */
 std::optional<Control*> ContainerComponent::getControlAtPoint(int x, int y)
 {
-
     // Sort the controls by the z-index.
     // Since, now, the lower z-index control will come first, we need to
     // use the std::rbegin, that will get the iterator from the end,
     // and not from the start.
     this->sortZIndex();
 
-    
     // Use those reference wrapper so we can compile this.
     //
     // The use of that unique pointer in the control data structure did not let the code
     // compile, because unique pointers cannot be copied, which is what the accumulate function
     // probably did. But this reduce loop receives references to the control data, and the ref
     // wrapper can keep them. Sinde we do not change the data, we are good.
-    
-    auto cd = std::accumulate(std::rbegin(this->children), std::rend(this->children),
+
+    auto cd = std::accumulate(
+        std::rbegin(this->children), std::rend(this->children),
         std::optional<std::reference_wrapper<ControlData>>(),
         [&](std::optional<std::reference_wrapper<ControlData>> c,
             ControlData& val) -> std::optional<std::reference_wrapper<ControlData>> {
@@ -183,8 +164,7 @@ std::optional<Control*> ContainerComponent::getControlAtPoint(int x, int y)
             auto ctrlw = cairo_image_surface_get_width(val.control_canvas);
             auto ctrlh = cairo_image_surface_get_height(val.control_canvas);
 
-            if (x > val.x && x < val.x + ctrlw &&
-                y > val.y && y < val.y + ctrlh) {
+            if (x > val.x && x < val.x + ctrlw && y > val.y && y < val.y + ctrlh) {
                 return std::optional<std::reference_wrapper<ControlData>>(std::ref(val));
             } else {
                 return std::optional<std::reference_wrapper<ControlData>>();
@@ -194,7 +174,6 @@ std::optional<Control*> ContainerComponent::getControlAtPoint(int x, int y)
     if (cd) {
         return std::optional<Control*>(cd->get().control.get());
     }
-
 
     return std::nullopt;
 }

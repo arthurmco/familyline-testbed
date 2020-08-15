@@ -1,49 +1,49 @@
 #pragma once
 
-#include <optional>
 #include <client/graphical/gui/control.hpp>
+#include <optional>
 
-namespace familyline::graphics::gui {
+namespace familyline::graphics::gui
+{
+/**
+ * The root control
+ *
+ * Every single control in the interface is a child of it
+ *
+ * Manages GUI-specific things on the interface, like caring about
+ * repainting children controls, and control ordering, so that
+ * the GUI manager do not need to.
+ *
+ */
+class RootControl : public Control
+{
+    // TODO: define how controls will be positioned: pixel-based, vbox-based (like GTK)?
+
+private:
+    unsigned width_, height_;
+
+    int mousex_ = 1, mousey_ = 1;
 
     /**
-     * The root control
-     *
-     * Every single control in the interface is a child of it
-     *
-     * Manages GUI-specific things on the interface, like caring about
-     * repainting children controls, and control ordering, so that
-     * the GUI manager do not need to.
-     *
+     * Sort the controls by their z-index values
      */
-    class RootControl : public Control {
-        // TODO: define how controls will be positioned: pixel-based, vbox-based (like GTK)?
+    void sortZIndex();
 
-    private:
-        unsigned width_, height_;
+public:
+    RootControl(unsigned width, unsigned height) : width_(width), height_(height)
+    {
+        cc_         = std::make_optional<ContainerComponent>();
+        cc_->parent = dynamic_cast<Control*>(this);
+    }
 
-        int mousex_ = 1, mousey_ = 1;
+    virtual bool update(cairo_t* context, cairo_surface_t* canvas);
 
-        /**
-         * Sort the controls by their z-index values
-         */
-        void sortZIndex();
-        
-    public:
-        RootControl(unsigned width, unsigned height)
-            : width_(width), height_(height)
-            {
-                cc_ = std::make_optional<ContainerComponent>();
-                cc_->parent = dynamic_cast<Control*>(this);
+    virtual std::tuple<int, int> getNeededSize(cairo_t* parent_context) const
+    {
+        return std::tie(width_, height_);
+    }
 
-            }
+    virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq);
+};
 
-        virtual bool update(cairo_t* context, cairo_surface_t* canvas);
-
-        virtual std::tuple<int, int> getNeededSize(cairo_t* parent_context) const { return std::tie(width_, height_); }
-
-
-        virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq);
-
-    };
-
-}
+}  // namespace familyline::graphics::gui

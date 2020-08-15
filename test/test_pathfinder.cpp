@@ -1,29 +1,29 @@
 #include <gtest/gtest.h>
-#include "utils.hpp"
 
-#include <common/logic/logic_service.hpp>
 #include <common/logic/PathFinder.hpp>
+#include <common/logic/logic_service.hpp>
+
+#include "utils.hpp"
 
 using namespace familyline::logic;
 
-TEST(Pathfinder, CanWalkStraightLine) {
+TEST(Pathfinder, CanWalkStraightLine)
+{
     ObjectManager om;
 
-    auto atkComp = std::optional<AttackComponent>();
-    struct object_init objParams = {
-        "test-obj", "Test Object", glm::vec2(3, 3), 100, 100, false,
-        [&]() {}, atkComp
-    };
+    auto atkComp                 = std::optional<AttackComponent>();
+    struct object_init objParams = {"test-obj", "Test Object", glm::vec2(3, 3), 100,
+                                    100,        false,         [&]() {},        atkComp};
 
     auto component = make_object(objParams);
     component->setPosition(glm::vec3(10, 1, 10));
 
     auto id = om.add(std::move(component));
-    
+
     PathFinder pf(&om);
     pf.InitPathmap(100, 100);
     pf.UpdatePathmap(100, 100);
-    
+
     auto path = pf.CreatePath(*om.get(id).value().get(), glm::vec2(20, 10));
 
     EXPECT_EQ(11, path.size());
@@ -38,17 +38,15 @@ TEST(Pathfinder, CanWalkStraightLine) {
     ASSERT_EQ(glm::vec2(18, 10), path[8]);
     ASSERT_EQ(glm::vec2(19, 10), path[9]);
     ASSERT_EQ(glm::vec2(20, 10), path[10]);
-
 }
 
-TEST(Pathfinder, CanWalkDiagonalLine) {
+TEST(Pathfinder, CanWalkDiagonalLine)
+{
     ObjectManager om;
 
-    auto atkComp = std::optional<AttackComponent>();
-    struct object_init objParams = {
-        "test-obj", "Test Object", glm::vec2(3, 3), 100, 100, false,
-        [&]() {}, atkComp
-    };
+    auto atkComp                 = std::optional<AttackComponent>();
+    struct object_init objParams = {"test-obj", "Test Object", glm::vec2(3, 3), 100,
+                                    100,        false,         [&]() {},        atkComp};
 
     auto component = make_object(objParams);
     component->setPosition(glm::vec3(10, 1, 10));
@@ -77,22 +75,21 @@ TEST(Pathfinder, CanWalkDiagonalLine) {
     ASSERT_EQ(glm::vec2(22, 22), path[12]);
 }
 
-TEST(Pathfinder, CanWalkAroundObstacle) {
+TEST(Pathfinder, CanWalkAroundObstacle)
+{
     auto& actionQueue = LogicService::getActionQueue();
     actionQueue->clearEvents();
 
     const auto& olist = familyline::logic::LogicService::getObjectListener();
-    
+
     ObjectManager om;
 
-    auto atkComp = std::optional<AttackComponent>();
-    struct object_init objParams = {
-        "test-obj", "Test Object", glm::vec2(3, 3), 100, 100, false,
-        [&]() {}, atkComp
-    };
+    auto atkComp                 = std::optional<AttackComponent>();
+    struct object_init objParams = {"test-obj", "Test Object", glm::vec2(3, 3), 100,
+                                    100,        false,         [&]() {},        atkComp};
 
     auto component = make_object(objParams);
-    auto obstacle = make_object(objParams);
+    auto obstacle  = make_object(objParams);
 
     component->setPosition(glm::vec3(10, 1, 10));
     obstacle->setPosition(glm::vec3(16, 1, 16));
@@ -102,7 +99,7 @@ TEST(Pathfinder, CanWalkAroundObstacle) {
 
     actionQueue->processEvents();
     olist->updateObjects();
-    
+
     PathFinder pf(&om);
     pf.InitPathmap(100, 100);
     pf.UpdatePathmap(100, 100);
@@ -122,20 +119,18 @@ TEST(Pathfinder, CanWalkAroundObstacle) {
     ASSERT_NE(glm::vec2(19, 19), path[9]);
 
     ASSERT_EQ(glm::vec2(22, 22), path[path.size() - 1]);
-    
 }
-
 
 /// TODO: need to implement this later, because it does not redo the
 /// pathing for each iteration like it should.
-//TEST(ObjectPathManager, CanWalkAroundMovingObstacles) {
-//    
+// TEST(ObjectPathManager, CanWalkAroundMovingObstacles) {
+//
 //}
 
-//TEST(ObjectPathManager, CanPathfindTwoObjectsSimultaneously) {
-//    
+// TEST(ObjectPathManager, CanPathfindTwoObjectsSimultaneously) {
+//
 //}
 
-//TEST(ObjectPathManager, CanStopMovingOnImpossiblePath) {
-//    
+// TEST(ObjectPathManager, CanStopMovingOnImpossiblePath) {
+//
 //}

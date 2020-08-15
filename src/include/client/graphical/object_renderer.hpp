@@ -6,52 +6,52 @@
  * It is a "bridge" class between the logic and the graphical engine
  */
 
-#include <vector>
+#include <common/logic/Terrain.hpp>
+#include <common/logic/game_object.hpp>
+#include <common/logic/object_components.hpp>
 #include <map>
 #include <memory>
-#include <common/logic/object_components.hpp>
-#include <common/logic/game_object.hpp>
-#include <common/logic/Terrain.hpp>
+#include <vector>
+
 #include "scene_renderer.hpp"
 
-namespace familyline::graphics {
+namespace familyline::graphics
+{
+/**
+ * This struct exists because C++ does not lets you create a map
+ * with references, because references are, basically, constant pointers
+ * (you can change the thing it points to, but you can't change it to
+ * point to something else after you set its value)
+ */
+struct RendererSlot {
+    familyline::logic::object_id_t id;
+    std::weak_ptr<familyline::logic::GameObject> component;
+    int meshHandle = 0;
+
+    RendererSlot(familyline::logic::object_id_t id, std::weak_ptr<familyline::logic::GameObject> c)
+        : id(id), component(c)
+    {
+    }
+};
+
+class ObjectRenderer
+{
+private:
+    std::vector<RendererSlot> components;
+    const familyline::logic::Terrain& _terrain;
+    SceneRenderer& _sr;
+
+public:
+    ObjectRenderer(const familyline::logic::Terrain& t, SceneRenderer& sr) : _terrain(t), _sr(sr) {}
+
+    void add(std::shared_ptr<familyline::logic::GameObject> o);
+    void remove(familyline::logic::object_id_t id);
+
     /**
-     * This struct exists because C++ does not lets you create a map
-     * with references, because references are, basically, constant pointers
-     * (you can change the thing it points to, but you can't change it to 
-     * point to something else after you set its value)
+     * Check if we need to update the meshes
      */
-    struct RendererSlot {
-        familyline::logic::object_id_t id;
-        std::weak_ptr<familyline::logic::GameObject> component;
-        int meshHandle = 0;
+    bool willUpdate() { return true; }
 
-        RendererSlot(familyline::logic::object_id_t id,
-                     std::weak_ptr<familyline::logic::GameObject> c)
-            : id(id), component(c)
-        {}
-    };
-
-    class ObjectRenderer {
-    private:
-        std::vector<RendererSlot> components;
-        const familyline::logic::Terrain& _terrain;
-        SceneRenderer& _sr;
-        
-    public:
-        ObjectRenderer(const familyline::logic::Terrain& t,
-                       SceneRenderer& sr)
-            : _terrain(t), _sr(sr)
-        {}
-
-        void add(std::shared_ptr<familyline::logic::GameObject> o);
-        void remove(familyline::logic::object_id_t id);
-
-        /**
-         * Check if we need to update the meshes
-         */
-        bool willUpdate() { return true; }
-        
-        void update();
-    };
-}
+    void update();
+};
+}  // namespace familyline::graphics

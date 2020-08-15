@@ -12,12 +12,8 @@
 #include "renderer.hpp"
 //#include "logic/debug_drawer.hpp"
 
-namespace familyline::graphics {
-
-
-}  // familyline::graphics
-
-
-
+namespace familyline::graphics
+{
+}  // namespace familyline::graphics
 
 #endif /* GRAPHICALPLOTINTERFACE_HPP */
