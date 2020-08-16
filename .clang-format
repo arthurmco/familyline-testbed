@@ -4,6 +4,7 @@ AccessModifierOffset: -4
 AlignAfterOpenBracket: AlwaysBreak
 AlignConsecutiveAssignments: 'true'
 AlignEscapedNewlines: Left
+AllowShortCaseLabelsOnASingleLine: 'true'
 AlignTrailingComments: 'true'
 BreakBeforeBraces: Linux
 ColumnLimit: 100

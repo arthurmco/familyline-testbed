@@ -7,6 +7,7 @@
 option(DO_TESTS "Set if you want to enable unit tests, unset if you don't" ON)
 
 if (DO_TESTS)
+ 
   enable_testing()
   
   configure_file(${CMAKE_SOURCE_DIR}/test/unit-tests.cmake.in googletest-download/CMakeLists.txt)
@@ -75,6 +76,11 @@ if (DO_TESTS)
       gtest gtest_main)
   endif()
 
+
+  target_compile_definitions(familyline-tests PUBLIC
+    TESTS_DIR="${CMAKE_SOURCE_DIR}/test"
+  )
+  
   add_test(NAME general-test COMMAND familyline-tests)
 endif(DO_TESTS)
 

@@ -148,4 +148,4 @@ Aside from issues, there are things I would like to do very soon
 Every file in this game is licensed under the MIT license, the best in
 existence.
 
-Copyright (C) 2016-2018 Arthur Mendes.
+Copyright (C) 2016-2020 Arthur Mendes.
