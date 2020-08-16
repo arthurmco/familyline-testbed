@@ -12,6 +12,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <tuple>
 
 namespace familyline::logic
 {
@@ -47,6 +48,7 @@ private:
     std::string name_;
     std::string description_;
     std::vector<std::string> authors_;
+    std::tuple<uint32_t, uint32_t> size_;
 
     /**
      * Read the file header, return the offset to the terrain header.
@@ -108,5 +110,10 @@ public:
     std::string_view getName() const { return name_; }
     std::string_view getDescription() const { return description_; }
     const std::vector<std::string>& getAuthors() const { return authors_; }
+    std::tuple<uint32_t, uint32_t> getSize() const { return size_; }
+
+    const std::vector<uint16_t>& getHeightData() { return height_data; }
+    const std::vector<uint16_t>& getTypeData() { return type_data; }
+
 };
 }  // namespace familyline::logic

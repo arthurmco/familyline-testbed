@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 
 #include <common/logger.hpp>
+#include <glm/glm.hpp>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 #include "terrain_file.hpp"
 #include "utils.hpp"
@@ -10,13 +12,101 @@
 using namespace familyline;
 using namespace familyline::logic;
 
+#include <algorithm>
+
+/**
+ * A nice way to bind additional data into the terrain, usually data
+ * that has a value per slot, like pathfinding data, fog of war or, in
+ * some other games, data like crime, pollution...
+ *
+ * The only difference is that the terrain owns this data instead of you,
+ * so is one less thing to worry about.
+ */
 class TerrainOverlay
 {
+private:
+    std::vector<uint16_t> data_;
+
+public:
+    TerrainOverlay(size_t size);
+
+    decltype(data_)& getData() { return data_; }
 };
+
+TerrainOverlay::TerrainOverlay(size_t size) : data_(std::vector<uint16_t>(size, 0)) {}
+
+///////////////////////////////////
+
+/**
+ * Terrain types.
+ *
+ * Under development
+ */
+enum TerrainType { Grass = 0, Dirt = 10, Water = 20, Mountain = 30 };
 
 class Terrain
 {
+private:
+    TerrainFile& tf_;
+
+    double xzscale_ = 0.50;
+    double yscale_  = 0.01;
+
+    std::unordered_map<std::string, std::unique_ptr<TerrainOverlay>> overlays_;
+
+public:
+    Terrain(TerrainFile& tf) : tf_(tf) {}
+
+    /**
+     * Convert game engine coordinates to opengl coordinates
+     */
+    glm::vec3 gameToGraphical(glm::vec3 gameCoords)
+    {
+        return glm::vec3(gameCoords.x * xzscale_, gameCoords.y * yscale_, gameCoords.z * xzscale_);
+    }
+
+    /**
+     * Get height coords from a set of X and Y coords in the map
+     */
+    unsigned getHeightFromCoords(glm::vec2 coords);
+
+    /**
+     * Convert opengl coordinates to game engine coordinates
+     */
+    glm::vec3 graphicalToGame(glm::vec3 gfxcoords)
+    {
+        return glm::vec3(gfxcoords.x / xzscale_, gfxcoords.y / yscale_, gfxcoords.z / xzscale_);
+    }
+
+    std::tuple<uint32_t, uint32_t> getSize() { return tf_.getSize(); }
+
+    TerrainOverlay* createOverlay(const char* name);
 };
+
+/**
+ * Get height coords from a set of X and Y coords in the map
+ */
+unsigned ::Terrain::getHeightFromCoords(glm::vec2 coords)
+{
+    auto [w, h] = tf_.getSize();
+    auto idx    = coords.y * w + coords.x;
+
+    auto& data = tf_.getHeightData();
+    return data[idx];
+}
+
+TerrainOverlay* ::Terrain::createOverlay(const char* name)
+{
+    std::string n{name};
+    auto [w, h] = tf_.getSize();
+
+    overlays_[n] = std::make_unique<TerrainOverlay>(w * h);
+
+    auto& log = LoggerService::getLogger();
+    log->write("terrain", LogType::Debug, "overlay '%s' created", name);
+
+    return overlays_[n].get();
+}
 
 ///////////////////////////////////
 
@@ -166,7 +256,7 @@ std::string TerrainFile::readPascalString(FILE* f)
     auto len = fgetc(f);
 
     char s[len + 1];
-    
+
     fread(s, sizeof(s[0]), len, f);
     s[len] = '\0';
     return std::string{s};
@@ -182,7 +272,6 @@ std::string TerrainFile::readName(FILE* f, const TerrainHeader& th)
     return readPascalString(f);
 }
 
-
 std::string TerrainFile::readDescription(FILE* f, const TerrainHeader& th)
 {
     if (th.desc_off < sizeof(TerrainFileHeader)) {
@@ -192,7 +281,7 @@ std::string TerrainFile::readDescription(FILE* f, const TerrainHeader& th)
     fseek(f, th.desc_off, SEEK_SET);
     auto len = fgetc(f);
     len |= (fgetc(f) << 8);
-   
+
     char s[len + 1];
     fread(s, sizeof(s[0]), len, f);
     s[len] = '\0';
@@ -207,7 +296,7 @@ std::vector<std::string> TerrainFile::readAuthors(FILE* f, const TerrainHeader& 
     }
 
     fseek(f, th.author_off, SEEK_SET);
-    
+
     std::vector<std::string> auths;
     auto authcount = fgetc(f);
     for (auto i = 0; i < authcount; i++) {
@@ -247,6 +336,7 @@ bool TerrainFile::open(std::string_view path)
     name_        = readName(fTerrain_, *th);
     description_ = readDescription(fTerrain_, *th);
     authors_     = readAuthors(fTerrain_, *th);
+    size_        = std::make_tuple(th->width, th->height);
 
     if (!this->readTerrainData(fTerrain_, *th)) {
         log->write(
@@ -255,6 +345,7 @@ bool TerrainFile::open(std::string_view path)
         name_.clear();
         description_.clear();
         authors_.clear();
+        size_ = std::make_tuple(0, 0);
         return false;
     }
 
@@ -297,6 +388,10 @@ TEST(TerrainTest, TestTerrainOpen)
     ASSERT_STREQ("Test terrain", tf.getDescription().data());
     ASSERT_EQ(1, tf.getAuthors().size());
     ASSERT_STREQ("Arthur Mendes <arthurmco@gmail.com>", tf.getAuthors()[0].c_str());
+
+    auto [width, height] = tf.getSize();
+    ASSERT_EQ(512, width);
+    ASSERT_EQ(512, height);
 }
 
 TEST(TerrainTest, TestTerrainDoNotOpenBrokenCRC)
@@ -317,4 +412,62 @@ TEST(TerrainTest, TestTerrainDoNotOpenBrokenTerrain)
     ASSERT_EQ(0, tf.getName().size());
 }
 
+TEST(TerrainTest, TestTerrainCoordConversion)
+{
+    LoggerService::createLogger();
 
+    TerrainFile tf;
+    tf.open(TESTS_DIR "/terrain_test.flte");
+
+    ::Terrain t{tf};
+    glm::vec3 c0(32.0, 16.0, 32.0);
+    auto gc0 = t.gameToGraphical(c0);
+
+    ASSERT_FLOAT_EQ(16.0, gc0.x);
+    ASSERT_FLOAT_EQ(0.16, gc0.y);
+    ASSERT_FLOAT_EQ(16.0, gc0.z);
+
+    auto rgc0 = t.graphicalToGame(gc0);
+    ASSERT_FLOAT_EQ(32.0, rgc0.x);
+    ASSERT_FLOAT_EQ(16.0, rgc0.y);
+    ASSERT_FLOAT_EQ(32.0, rgc0.z);
+
+    ASSERT_FLOAT_EQ(c0.x, rgc0.x);
+    ASSERT_FLOAT_EQ(c0.y, rgc0.y);
+    ASSERT_FLOAT_EQ(c0.z, rgc0.z);
+}
+
+TEST(TerrainTest, TestOverlayCreation)
+{
+    LoggerService::createLogger();
+
+    TerrainFile tf;
+    tf.open(TESTS_DIR "/terrain_test.flte");
+
+    ::Terrain t{tf};
+    auto [width, height] = t.getSize();
+
+    auto ovl = t.createOverlay("testoverlay");
+    ASSERT_EQ(width * height, ovl->getData().size());
+}
+
+TEST(TerrainTest, TestHeightRetrieve)
+{
+    LoggerService::createLogger();
+
+    TerrainFile tf;
+    tf.open(TESTS_DIR "/terrain_test.flte");
+
+    ::Terrain t{tf};
+    auto [width, height] = t.getSize();
+
+    ASSERT_EQ(48, t.getHeightFromCoords(glm::vec2(10, 10)));
+    ASSERT_EQ(48, t.getHeightFromCoords(glm::vec2(10, 15)));
+    ASSERT_EQ(51, t.getHeightFromCoords(glm::vec2(315, 10)));
+    ASSERT_EQ(48, t.getHeightFromCoords(glm::vec2(15, 10)));
+    ASSERT_EQ(48, t.getHeightFromCoords(glm::vec2(20, 20)));
+    ASSERT_EQ(49, t.getHeightFromCoords(glm::vec2(120, 23)));
+    ASSERT_EQ(0xfd, t.getHeightFromCoords(glm::vec2(240, 240)));
+    ASSERT_EQ(0xfd, t.getHeightFromCoords(glm::vec2(250, 234)));
+    ASSERT_EQ(0x5f, t.getHeightFromCoords(glm::vec2(508, 505)));
+}

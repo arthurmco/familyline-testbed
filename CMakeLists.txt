@@ -32,12 +32,14 @@ find_package(Yaml REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
+find_package(ZLIB REQUIRED)
 
-include_directories(AFTER ${GLEW_INCLUDE_DIRS} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR})
+include_directories(AFTER ${GLEW_INCLUDE_DIRS} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 target_include_directories(familyline PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
 target_link_libraries(familyline ${OPENGL_LIBRARIES})
 target_link_libraries(familyline ${YAML_LIBRARIES}) # You need to build YAML as a dll (use -DBUILD_SHARED_LIBS)
+target_link_libraries(familyline ${ZLIB_LIBRARIES})
 
 if (MSVC)
 	
@@ -71,6 +73,7 @@ if (MSVC)
 	target_link_libraries(familyline-tests glm)
 	target_link_libraries(familyline-tests wsock32 ws2_32)
 	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
+    target_link_libraries(familyline-tests ${ZLIB_LIBRARIES})
   #endif(DO_TESTS)
 
   add_compile_options(/EHsc /GR /W4)
@@ -117,7 +120,8 @@ else()
     target_link_libraries(familyline-tests ${PANGOCAIRO_LINK_LIBRARIES})
 	target_link_libraries(familyline-tests ${GLM_LIBRARIES})
 	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
-    target_link_libraries(familyline-tests Threads::Threads)
+    target_link_libraries(familyline-tests Threads::Threads)    
+    target_link_libraries(familyline-tests ${ZLIB_LIBRARIES})
   endif(DO_TESTS)
 
   # if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
