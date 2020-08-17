@@ -49,9 +49,10 @@ private:
      * The indices make each of those squares go to the video card
      * in a clockwise order
      */
-    std::vector<unsigned int> createIndices(std::vector<glm::vec3> vertices, int width) const;
+    std::vector<unsigned int> createIndices(
+        const std::vector<glm::vec3>& vertices, int width) const;
 
-    std::vector<glm::vec3> createNormals(std::vector<glm::vec3> vertices, int width) const;
+    std::vector<glm::vec3> createNormals(const std::vector<glm::vec3>& vertices, int width) const;
 
     std::vector<TerrainTexInfo> terrain_data_;
 

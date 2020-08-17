@@ -1,10 +1,8 @@
-#include <client/graphical/terrain_renderer.hpp>
-
 #include <algorithm>
-#include <cmath>
-
 #include <client/graphical/TextureOpener.hpp>
 #include <client/graphical/gfx_service.hpp>
+#include <client/graphical/terrain_renderer.hpp>
+#include <cmath>
 #include <common/logger.hpp>
 
 using namespace familyline::graphics;
@@ -29,13 +27,20 @@ using namespace familyline::logic;
 ***/
 
 std::vector<glm::vec3> TerrainRenderer::createNormals(
-    std::vector<glm::vec3> vertices, int width) const
+    const std::vector<glm::vec3>& vertices, int width) const
 {
     std::vector<glm::vec3> normals;
 
-    /// TODO: do a real normal calculation
-    normals.push_back(glm::vec3(0, 1, 0));
+    auto [w, h] = terr_.getSize();
 
+    for (auto y = 0; y < h; y++) {
+        for (auto x = 0; x < w; x++) {
+
+            /// TODO: do a real normal calculation
+            normals.push_back(glm::vec3(0, 1, 0));
+        }
+    }
+    
     return normals;
 }
 
@@ -46,7 +51,7 @@ std::vector<glm::vec3> TerrainRenderer::createNormals(
  * in a clockwise order
  */
 std::vector<unsigned int> TerrainRenderer::createIndices(
-    std::vector<glm::vec3> vertices, int width) const
+    const std::vector<glm::vec3>& vertices, int width) const
 {
     auto height = vertices.size() / width;
 
@@ -93,6 +98,7 @@ TerrainRenderInfo TerrainRenderer::createTerrainData()
         }
     }
 
+    tri.normals = this->createNormals(tri.vertices, w);
     tri.indices = this->createIndices(tri.vertices, w);
 
     return tri;
@@ -185,7 +191,7 @@ void TerrainRenderer::buildTextures()
     }
 
     auto fnGetTexCoordFromPos = [&](double val, double scale) {
-        return 0.5 * (M_PI / 10) * asin(sin(((2 * M_PI) / (2 * scale)) * (val - 2)));
+        return 0.5 + ((M_PI / 10) * asin(sin(((2 * M_PI) / (2 * scale)) * (val - (scale / 2)))));
     };
 
     auto idx = 0;
@@ -199,13 +205,14 @@ void TerrainRenderer::buildTextures()
 
         idx++;
     }
-}
 
-void TerrainRenderer::buildVertexData()
-{
-    tri_  = this->createTerrainData();
+    auto& log = LoggerService::getLogger();
+    log->write("terrain-renderer", LogType::Info, "Terrain textures built");
+
     tvao_ = this->createTerrainDataVAO();
 }
+
+void TerrainRenderer::buildVertexData() { tri_ = this->createTerrainData(); }
 
 /**
  * Render the terrain
@@ -232,7 +239,7 @@ void TerrainRenderer::render()
 
     glBindTexture(GL_TEXTURE_2D, terrain_data_[0].tex->GetHandle());
     glBindVertexArray(tvao_);
-    glDrawElements(GL_TRIANGLES, tri_.vertices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, tri_.indices.size(), GL_UNSIGNED_INT, 0);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
