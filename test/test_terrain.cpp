@@ -17,8 +17,6 @@ class TerrainService
 
 TEST(TerrainTest, TestTerrainOpen)
 {
-    LoggerService::createLogger();
-
     TerrainFile tf;
     ASSERT_TRUE(tf.open(TESTS_DIR "/terrain_test.flte"));
 
@@ -34,16 +32,12 @@ TEST(TerrainTest, TestTerrainOpen)
 
 TEST(TerrainTest, TestTerrainDoNotOpenBrokenCRC)
 {
-    LoggerService::createLogger();
-
     TerrainFile tf;
     ASSERT_FALSE(tf.open(TESTS_DIR "/terrain_test_brokencrc.flte"));
 }
 
 TEST(TerrainTest, TestTerrainDoNotOpenBrokenTerrain)
 {
-    LoggerService::createLogger();
-
     TerrainFile tf;
     ASSERT_FALSE(tf.open(TESTS_DIR "/terrain_test_brokenterrain.flte"));
 
@@ -52,8 +46,6 @@ TEST(TerrainTest, TestTerrainDoNotOpenBrokenTerrain)
 
 TEST(TerrainTest, TestTerrainCoordConversion)
 {
-    LoggerService::createLogger();
-
     TerrainFile tf;
     tf.open(TESTS_DIR "/terrain_test.flte");
 
@@ -77,8 +69,6 @@ TEST(TerrainTest, TestTerrainCoordConversion)
 
 TEST(TerrainTest, TestOverlayCreation)
 {
-    LoggerService::createLogger();
-
     TerrainFile tf;
     tf.open(TESTS_DIR "/terrain_test.flte");
 
@@ -91,8 +81,6 @@ TEST(TerrainTest, TestOverlayCreation)
 
 TEST(TerrainTest, TestHeightRetrieve)
 {
-    LoggerService::createLogger();
-
     TerrainFile tf;
     tf.open(TESTS_DIR "/terrain_test.flte");
 

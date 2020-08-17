@@ -91,7 +91,7 @@ protected:
 public:
     explicit logic_exception(std::string_view message) : std::runtime_error(message.data())
     {
-        msg_ = fmt::format("Logic error {}", this->_message.data());
+        msg_ = fmt::format("Logic error {}", message.data());
     }
 
     virtual const char* what() const noexcept { return msg_.c_str(); }

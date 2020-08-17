@@ -160,7 +160,9 @@ Game::Game(
         //      LightManager::AddLight(l);
 
         terr_rend = new TerrainRenderer{*terr, *cam};
-
+        terr_rend->buildVertexData();
+        terr_rend->buildTextures();
+        
         objrend = new ObjectRenderer(*terr, *scenernd);
 
         pm->render_add_callback = [&](std::shared_ptr<GameObject> o) { objrend->add(o); };
