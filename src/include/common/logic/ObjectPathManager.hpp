@@ -9,7 +9,7 @@
 #include <map>
 #include <vector>
 
-#include "Terrain.hpp"
+#include <common/logic/terrain.hpp>
 #include "game_object.hpp"
 
 #ifndef OBJECTPATHMANAGER_HPP

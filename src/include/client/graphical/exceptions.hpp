@@ -11,14 +11,12 @@ class graphical_exception : public std::runtime_error
 {
 protected:
     std::string_view _message;
+    std::string msg_;
 
 public:
     explicit graphical_exception(std::string_view message);
 
-    virtual const char* what() const noexcept
-    {
-        return fmt::format("Graphical error {}", this->_message.data()).c_str();
-    }
+    virtual const char* what() const noexcept { return msg_.c_str(); }
 };
 
 class renderer_exception : public graphical_exception
@@ -79,4 +77,24 @@ public:
 
     virtual const char* what() const noexcept { return _msg.c_str(); }
 };
+
 }  // namespace familyline::graphics
+
+namespace familyline::logic
+{
+class logic_exception : public std::runtime_error
+{
+protected:
+    std::string_view _message;
+    std::string msg_;
+
+public:
+    explicit logic_exception(std::string_view message) : std::runtime_error(message.data())
+    {
+        msg_ = fmt::format("Logic error {}", this->_message.data());
+    }
+
+    virtual const char* what() const noexcept { return msg_.c_str(); }
+};
+
+}  // namespace familyline::logic

@@ -32,7 +32,8 @@ bool do_something = false;
 
 std::weak_ptr<GameObject> attacker, attackee;
 
-HumanPlayer::HumanPlayer(PlayerManager& pm, const char* name, int code) : Player(pm, name, code)
+HumanPlayer::HumanPlayer(PlayerManager& pm, const Terrain& t, const char* name, int code)
+    : Player(pm, t, name, code)
 {
     /* Initialize input subsystems */
     srand((size_t)name * code);
@@ -251,7 +252,7 @@ void HumanPlayer::generateInput()
     if (build_something && mouse_click) {
         // Something is queued to be built.
         glm::vec2 to = _ip->GetGameProjectedPosition();
-        glm::vec3 p  = ::GraphicalToGameSpace(_ip->GetTerrainProjectedPosition());
+        glm::vec3 p  = terr_.graphicalToGame(_ip->GetTerrainProjectedPosition());
 
         this->pushAction(CommitLastBuildAction{to.x, to.y, p.y, true});
         build_something = false;

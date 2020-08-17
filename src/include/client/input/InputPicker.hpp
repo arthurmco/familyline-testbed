@@ -8,11 +8,11 @@
 #ifndef INPUTPICKER_HPP
 #define INPUTPICKER_HPP
 
-#include <client/graphical/TerrainRenderer.hpp>
 #include <client/graphical/camera.hpp>
 #include <client/graphical/mesh.hpp>
 #include <client/graphical/scene_renderer.hpp>
 #include <client/graphical/window.hpp>
+#include <common/logic/terrain.hpp>
 #include <common/logic/game_event.hpp>
 #include <common/logic/object_components.hpp>
 #include <common/logic/object_manager.hpp>
@@ -53,7 +53,7 @@ struct PickerObjectInfo {
 class InputPicker
 {
 private:
-    familyline::graphics::TerrainRenderer* _terrain;
+    familyline::logic::Terrain* _terrain;
     familyline::graphics::Window* _win;
     familyline::graphics::SceneRenderer* _sm;
     familyline::graphics::Camera* _cam;
@@ -71,7 +71,7 @@ private:
 
 public:
     InputPicker(
-        familyline::graphics::TerrainRenderer* terrain, familyline::graphics::Window* win,
+        familyline::logic::Terrain* terrain, familyline::graphics::Window* win,
         familyline::graphics::SceneRenderer* sm, familyline::graphics::Camera* cam,
         familyline::logic::ObjectManager* om);
 

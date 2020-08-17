@@ -11,6 +11,8 @@
 #include <common/logic/game_event.hpp>
 #include <common/logic/logic_service.hpp>
 
+#include "client/graphical/exceptions.hpp"
+
 using namespace familyline;
 using namespace familyline::logic;
 using namespace familyline::input;
@@ -50,7 +52,7 @@ private:
     }
 
 public:
-    DummyPlayer(PlayerManager& pm, const char* name, int code) : Player(pm, name, code) {}
+    DummyPlayer(PlayerManager& pm, const Terrain& t, const char* name, int code) : Player(pm, t, name, code) {}
 
     virtual void generateInput()
     {
@@ -92,10 +94,10 @@ public:
 /// TODO: rewrite this and Tribalia.cpp!!!
 
 Game::Game(
-    Window* w, Framebuffer* fb3D, Framebuffer* fbGUI, GUIManager* gr, PlayerManager* pm,
-    std::unique_ptr<HumanPlayer> hp)
+    Window* w, Framebuffer* fb3D, Framebuffer* fbGUI, GUIManager* gr, PlayerManager* pm)
     : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm)
 {
+
     //    DebugPlotter::Init();
     auto& log = LoggerService::getLogger();
 
@@ -121,8 +123,13 @@ Game::Game(
         gam.AddListener(new GameActionListenerImpl());
         // hp->SetGameActionManager(&gam);
 
-        terrFile = new TerrainFile(ASSET_FILE_DIR "terrain_test.trtb");
-        terr     = terrFile->GetTerrain();
+        terrFile = new TerrainFile();
+        if (!terrFile->open(ASSET_FILE_DIR "terrain_test.flte")) {
+            throw new logic_exception{
+                fmt::format("Could not open terrain " ASSET_FILE_DIR " terrain_test.flte")};
+        }
+
+        terr = new Terrain{*terrFile};
 
         AssetFile f;
         f.loadFile("assets.yml");
@@ -136,6 +143,7 @@ Game::Game(
         scenernd = new SceneRenderer((Renderer*)rndr, *cam);
 
         //      scenernd->SetCamera(cam);
+        std::unique_ptr<HumanPlayer> hp = std::make_unique<HumanPlayer>(*pm, *terr, "Arthur", 0);
         hp->setCamera(cam);
 
         //      rndr->SetSceneManager(scenernd);
@@ -144,16 +152,14 @@ Game::Game(
 
         //      Light* l = new Light{"mainLight", glm::vec3(16, 16, 16), 0x0, 0x0, 0xff, 200 };
         std::vector<glm::vec3> p = {
-            glm::vec3(0, terr->GetHeightFromPoint(0, 0) + 16, 0),
-            glm::vec3(10, terr->GetHeightFromPoint(10, 10) + 16, 10),
-            glm::vec3(10, terr->GetHeightFromPoint(10, 0) + 16, 0)};
+            glm::vec3(0, terr->getHeightFromCoords(glm::vec2(0, 0)) + 16, 0),
+            glm::vec3(10, terr->getHeightFromCoords(glm::vec2(10, 10)) + 16, 10),
+            glm::vec3(10, terr->getHeightFromCoords(glm::vec2(10, 0)) + 16, 0)};
 
         //        DebugPlotter::pinterface->AddPath(p, glm::vec3(1, 0, 0));
         //      LightManager::AddLight(l);
 
-        terr_rend = new TerrainRenderer{};
-        terr_rend->SetTerrain(terr);
-        terr_rend->SetCamera(cam);
+        terr_rend = new TerrainRenderer{*terr, *cam};
 
         objrend = new ObjectRenderer(*terr, *scenernd);
 
@@ -173,13 +179,17 @@ Game::Game(
 
         //        InputManager::GetInstance()->Initialize();
 
-        ip = new InputPicker{terr_rend, win, scenernd, cam, om};
+        ip = new InputPicker{terr, win, scenernd, cam, om};
         hp->SetPicker(ip);
 
         pathf = new PathFinder(om);
-        pathf->InitPathmap(terr->GetWidth(), terr->GetHeight());
-        pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
 
+        {
+            auto [w, h] = terr->getSize();
+            pathf->InitPathmap(w, h);
+            pathf->UpdatePathmap(w, h);
+        }
+        
         widgets.lblVersion = new Label(10, 10, "Familyline " VERSION " commit " COMMIT);
 
         std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());
@@ -187,7 +197,7 @@ Game::Game(
         auto& hcolony                  = cm_->createColony(
             *humanp.get(), 0x0000ff, std::optional{std::reference_wrapper<Alliance>{halliance}});
 
-        auto dummyp     = std::unique_ptr<Player>(new DummyPlayer(*pm, "Dummy Player", 2));
+        auto dummyp     = std::unique_ptr<Player>(new DummyPlayer(*pm, *terr, "Dummy Player", 2));
         auto& dalliance = cm_->createAlliance(std::string{dummyp->getName()});
         auto& dcolony   = cm_->createColony(
             *dummyp.get(), 0xff0000, std::optional{std::reference_wrapper<Alliance>{dalliance}});
@@ -207,7 +217,7 @@ Game::Game(
 
         ObjectPathManager::getInstance()->SetTerrain(terr);
 
-        LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr));
+        LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr, *terr));
 
         pm->olm = olm;
         pm->pf  = pathf;
@@ -352,7 +362,7 @@ int Game::RunLoop()
 
     // Update the terrain first, so the terrain textures can load
     // TODO: generate the terrain textures before? in another function?
-    terr_rend->Update();
+    terr_rend->render();
 
     unsigned int ticks = SDL_GetTicks();
     unsigned int frame = 0;
@@ -464,7 +474,7 @@ void Game::RunLogic()
 
     /* Logic & graphical processing */
     gam.ProcessListeners();
-    terr_rend->Update();
+    // terr_rend->Update();
     om->update();
 
     LogicService::getActionQueue()->processEvents();
@@ -472,7 +482,8 @@ void Game::RunLogic()
     bool objupdate = objrend->willUpdate();
     if (objupdate) {
         objrend->update();
-        pathf->UpdatePathmap(terr->GetWidth(), terr->GetHeight());
+        auto [w, h] = terr->getSize();
+        pathf->UpdatePathmap(w, h);
     }
 
     LogicService::getAttackManager()->processAttacks(*olm);
@@ -486,8 +497,7 @@ void Game::RunGraphical()
     /* Rendering */
 
     fb3D->startDraw();
-    terr_rend->Update();
-    terr_rend->Render();
+    terr_rend->render();
 
     //  rndr->SetBoundingBox(hp->renderBBs);
 

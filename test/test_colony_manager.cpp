@@ -15,12 +15,15 @@ TEST(ColonyManager, TestIfColonyAdds)
     ColonyManager cm;
     PlayerManager pm;
 
+    TerrainFile tf{1,1};
+    Terrain t{tf};
+
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
 
     Colony& c1 = cm.createColony(*p1.get(), 0xffff00ff, std::nullopt);
     Colony& c2 = cm.createColony(*p2.get(), 0xff0000ff, std::nullopt);
@@ -36,12 +39,15 @@ TEST(ColonyManager, TestIfAllianceAdds)
     ColonyManager cm;
     PlayerManager pm;
 
+    TerrainFile tf{1,1};
+    Terrain t{tf};
+
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
 
     Alliance& a1 = cm.createAlliance("Alliance1");
     Alliance& a2 = cm.createAlliance("ANewAlliance2");
@@ -66,12 +72,16 @@ TEST(ColonyManager, TestIfAllianceChangesOneSideAlly)
     ColonyManager cm;
     PlayerManager pm;
 
+    TerrainFile tf;
+    tf.open(TESTS_DIR "/minimal_terrain.flte");
+    Terrain t{tf};
+
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
 
     Alliance& a1 = cm.createAlliance("Alliance1");
     Alliance& a2 = cm.createAlliance("Alliance2");
@@ -93,12 +103,15 @@ TEST(ColonyManager, TestIfAllianceChangesOneSideEnemy)
     ColonyManager cm;
     PlayerManager pm;
 
+    TerrainFile tf{1,1};
+    Terrain t{tf};
+
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
 
     Alliance& a1 = cm.createAlliance("Alliance1");
     Alliance& a2 = cm.createAlliance("Alliance2");
@@ -120,12 +133,15 @@ TEST(ColonyManager, TestIfAllianceChangesBoth)
     ColonyManager cm;
     PlayerManager pm;
 
+    TerrainFile tf{1,1};
+    Terrain t{tf};
+
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
 
     Alliance& a1 = cm.createAlliance("Alliance1");
     Alliance& a2 = cm.createAlliance("Alliance2");
@@ -148,12 +164,15 @@ TEST(ColonyManager, TestIfAllianceChangesAndChangesBack)
     ColonyManager cm;
     PlayerManager pm;
 
+    TerrainFile tf{1,1};
+    Terrain t{tf};
+
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
 
     Alliance& a1 = cm.createAlliance("Alliance1");
     Alliance& a2 = cm.createAlliance("Alliance2");

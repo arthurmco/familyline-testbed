@@ -6,7 +6,7 @@
  * It is a "bridge" class between the logic and the graphical engine
  */
 
-#include <common/logic/Terrain.hpp>
+#include <common/logic/terrain.hpp>
 #include <common/logic/game_object.hpp>
 #include <common/logic/object_components.hpp>
 #include <map>

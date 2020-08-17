@@ -1,7 +1,6 @@
 #include <algorithm>  //for std::max
-#include <client/graphical/TerrainRenderer.hpp>
 #include <cmath>
-#include <common/logic/Terrain.hpp>
+#include <common/logic/terrain.hpp>
 #include <common/logic/game_object.hpp>
 #include <common/logic/object_components.hpp>
 
@@ -15,10 +14,10 @@ void LocationComponent::updateMesh(const Terrain& t)
 {
     glm::vec3 pos = this->object->getPosition();
 
-    auto height = t.GetHeightFromPoint(pos.x, pos.z);
+    auto height = t.getHeightFromCoords(glm::vec2(pos.x, pos.z));
 
     //	this->mesh->setPosition(t.renderer->convertToModelSpace(glm::vec3(pos.x, height, pos.y)));
-    this->mesh->setLogicPosition(graphics::GameToGraphicalSpace(glm::vec3(pos.x, height, pos.z)));
+    this->mesh->setLogicPosition(t.gameToGraphical(glm::vec3(pos.x, height, pos.z)));
 }
 
 /**

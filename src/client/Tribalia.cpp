@@ -282,8 +282,7 @@ static int show_starting_menu()
             log->write("init", LogType::Info, "Network game detected, going direct to it");
 
             //      guir->InitInput();
-            std::unique_ptr<HumanPlayer> hp;
-            auto g = Game(win, &f3D, &fGUI, guir, pm, std::move(hp));
+            auto g = Game(win, &f3D, &fGUI, guir, pm);
             g.RunLoop();
             if (pm) delete pm;
         }
@@ -334,9 +333,7 @@ static int show_starting_menu()
             fmt::print("New Game\n");
             if (!pm) pm = new PlayerManager();
 
-            std::unique_ptr<HumanPlayer> hp = std::make_unique<HumanPlayer>(*pm, "Arthur", 0);
-
-            auto g   = Game(win, &f3D, &fGUI, guir, pm, std::move(hp));
+            auto g   = Game(win, &f3D, &fGUI, guir, pm);
             auto ret = g.RunLoop();
             delete pm;
             delete win;
@@ -473,51 +470,23 @@ static void enable_gl_debug()
         /* Handle message parsing and display */
         const char *ssource, *stype, *sseverity;
         switch (source) {
-            case GL_DEBUG_SOURCE_API:
-                ssource = "gl-debug-opengl-api";
-                break;
-            case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-                ssource = "gl-debug-window-system";
-                break;
-            case GL_DEBUG_SOURCE_SHADER_COMPILER:
-                ssource = "gl-debug-shader-compiler";
-                break;
-            case GL_DEBUG_SOURCE_THIRD_PARTY:
-                ssource = "gl-debug-third-party";
-                break;
-            case GL_DEBUG_SOURCE_APPLICATION:
-                ssource = "gl-debug-application";
-                break;
-            case GL_DEBUG_SOURCE_OTHER:
-                ssource = "gl-debug-other";
-                break;
-            default:
-                ssource = "gl-debug";
-                break;
+            case GL_DEBUG_SOURCE_API: ssource = "gl-debug-opengl-api"; break;
+            case GL_DEBUG_SOURCE_WINDOW_SYSTEM: ssource = "gl-debug-window-system"; break;
+            case GL_DEBUG_SOURCE_SHADER_COMPILER: ssource = "gl-debug-shader-compiler"; break;
+            case GL_DEBUG_SOURCE_THIRD_PARTY: ssource = "gl-debug-third-party"; break;
+            case GL_DEBUG_SOURCE_APPLICATION: ssource = "gl-debug-application"; break;
+            case GL_DEBUG_SOURCE_OTHER: ssource = "gl-debug-other"; break;
+            default: ssource = "gl-debug"; break;
         }
 
         switch (type) {
-            case GL_DEBUG_TYPE_ERROR:
-                stype = "error";
-                break;
-            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-                stype = "deprecated behavior";
-                break;
-            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-                stype = "undefined behavior";
-                break;
-            case GL_DEBUG_TYPE_PORTABILITY:
-                stype = "portability issue";
-                break;
-            case GL_DEBUG_TYPE_PERFORMANCE:
-                stype = "performance";
-                break;
-            case GL_DEBUG_TYPE_OTHER:
-                stype = "other";
-                break;
-            default:
-                stype = "unknown";
-                break;
+            case GL_DEBUG_TYPE_ERROR: stype = "error"; break;
+            case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: stype = "deprecated behavior"; break;
+            case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: stype = "undefined behavior"; break;
+            case GL_DEBUG_TYPE_PORTABILITY: stype = "portability issue"; break;
+            case GL_DEBUG_TYPE_PERFORMANCE: stype = "performance"; break;
+            case GL_DEBUG_TYPE_OTHER: stype = "other"; break;
+            default: stype = "unknown"; break;
         }
 
         LogType ltype = LogType::Info;
@@ -539,9 +508,7 @@ static void enable_gl_debug()
                 ltype     = LogType::Debug;
                 sseverity = "";
                 break;
-            default:
-                sseverity = " PRIO: ????";
-                break;
+            default: sseverity = " PRIO: ????"; break;
         }
 
         char* smsg = new char[length + 2];

@@ -2,6 +2,7 @@
 #include <client/graphical/mesh.hpp>
 #include <client/graphical/object_renderer.hpp>
 #include <common/logic/logic_service.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::logic;
 using namespace familyline::graphics;
@@ -31,7 +32,7 @@ void ObjectRenderer::remove(object_id_t id)
     this->components.erase(iter);
 }
 
-#include <client/graphical/TerrainRenderer.hpp>
+#include <client/graphical/terrain_renderer.hpp>
 
 void ObjectRenderer::update()
 {
@@ -57,8 +58,8 @@ void ObjectRenderer::update()
             glm::vec4 vmin = glm::vec4(bb.minX, bb.minY, bb.minZ, 1);
             glm::vec4 vmax = glm::vec4(bb.maxX, bb.maxY, bb.maxZ, 1);
 
-            glm::vec3 vmin3 = GraphicalToGameSpace(glm::vec3(gmesh->getWorldMatrix() * vmin));
-            glm::vec3 vmax3 = GraphicalToGameSpace(glm::vec3(gmesh->getWorldMatrix() * vmax));
+            glm::vec3 vmin3 = _terrain.graphicalToGame(glm::vec3(gmesh->getWorldMatrix() * vmin));
+            glm::vec3 vmax3 = _terrain.graphicalToGame(glm::vec3(gmesh->getWorldMatrix() * vmax));
 
             vmin3.y = pstart.y;
             vmax3.y = pend.y;

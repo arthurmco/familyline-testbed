@@ -5,7 +5,7 @@
 // Building    = location attack container?
 // Transporter = location attack container  movement
 
-#include <common/logic/Terrain.hpp>
+#include <common/logic/terrain.hpp>
 #include <common/logic/imesh.hpp>
 #include <glm/glm.hpp>
 #include <memory>

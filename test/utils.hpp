@@ -72,9 +72,9 @@ private:
 
 public:
     DummyPlayer(
-        familyline::logic::PlayerManager& pm, const char* name, int code,
-        decltype(player_input_cb_) input_cb)
-        : familyline::logic::Player(pm, name, code), player_input_cb_(input_cb)
+        familyline::logic::PlayerManager& pm, const familyline::logic::Terrain& t, const char* name,
+        int code, decltype(player_input_cb_) input_cb)
+        : familyline::logic::Player(pm, t, name, code), player_input_cb_(input_cb)
     {
     }
 

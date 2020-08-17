@@ -9,6 +9,9 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+#include <common/logic/terrain.hpp>
+
+
 namespace familyline::logic
 {
 /**
@@ -21,7 +24,8 @@ namespace familyline::logic
  */
 class DebugDrawer
 {
-private:
+protected:
+    const Terrain& terr_;
 public:
     virtual void drawLine(glm::vec3 start, glm::vec3 end, glm::vec4 color) = 0;
     virtual void drawSquare(
@@ -33,6 +37,10 @@ public:
 
     /// Update some internal structure
     virtual void update() = 0;
+
+    DebugDrawer(const Terrain& terr)
+        : terr_(terr)
+        {}
 };
 
 }  // namespace familyline::logic

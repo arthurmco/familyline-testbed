@@ -7,6 +7,8 @@
 #include <common/logic/logic_service.hpp>
 #include <common/logic/player.hpp>
 #include <common/logic/player_manager.hpp>
+#include <common/logic/terrain.hpp>
+#include <common/logic/terrain_file.hpp>
 
 #include "utils.hpp"
 
@@ -43,7 +45,10 @@ TEST(PlayerManager, TestIfPlayerCanBuild)
         make_object({"test", "Test Object", glm::vec2(0, 0), 200, 200, true, []() {}, atkc1});
     LogicService::getObjectFactory()->addObject(obj_s.get());
 
-    auto d = std::make_unique<DummyPlayer>(pm, "Test", 1, [&]() -> std::vector<PlayerInputType> {
+    TerrainFile tf{1,1};
+    Terrain t{tf};
+
+    auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
         return {EnqueueBuildAction{"test"}, CommitLastBuildAction{10.0, 12.0, 1.0, true}};
     });
 
@@ -93,7 +98,10 @@ TEST(PlayerManager, TestIfPlayerCanSelect)
     auto sid = om.add(obj_s1);
     om.add(obj_s2);
 
-    auto d = std::make_unique<DummyPlayer>(pm, "Test", 1, [&]() -> std::vector<PlayerInputType> {
+    TerrainFile tf{1,1};
+    Terrain t{tf};
+    
+    auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
         return {
             ObjectSelectAction{sid},
         };
@@ -149,8 +157,11 @@ TEST(PlayerManager, TestIfPlayerCanDeselect)
     om.add(obj_s2);
 
     GameContext gctx = {&om, 1, 0};
-
-    auto d = std::make_unique<DummyPlayer>(pm, "Test", 1, [&]() -> std::vector<PlayerInputType> {
+    
+    TerrainFile tf{1,1};
+    Terrain t{tf};
+    
+    auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
         switch (gctx.tick) {
             case 1:
                 return {
@@ -193,8 +204,9 @@ TEST(PlayerManager, TestIfPlayerCanDeselect)
 TEST(PlayerManager, TestIfPlayerCannotMoveNotOwnedObject)
 {
     LogicService::getObjectFactory()->clear();
-    auto t = std::make_unique<Terrain>(30, 30);
-    ObjectPathManager::getInstance()->SetTerrain(t.get());
+    auto tf = std::make_unique<TerrainFile>(30, 30);
+    Terrain t{*tf};
+    ObjectPathManager::getInstance()->SetTerrain(&t);
 
     ColonyManager cm;
     ObjectManager om;
@@ -225,7 +237,8 @@ TEST(PlayerManager, TestIfPlayerCannotMoveNotOwnedObject)
 
     GameContext gctx = {&om, 1, 0};
 
-    auto d = std::make_unique<DummyPlayer>(pm, "Test", 1, [&]() -> std::vector<PlayerInputType> {
+    
+    auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
         switch (gctx.tick) {
             case 1:
                 return {
@@ -291,8 +304,9 @@ TEST(PlayerManager, TestIfPlayerCannotMoveNotOwnedObject)
 TEST(PlayerManager, TestIfPlayerCanMove)
 {
     LogicService::getObjectFactory()->clear();
-    auto t = std::make_unique<Terrain>(30, 30);
-    ObjectPathManager::getInstance()->SetTerrain(t.get());
+    auto tf = std::make_unique<TerrainFile>(30, 30);
+    Terrain t{*tf};
+    ObjectPathManager::getInstance()->SetTerrain(&t);
 
     ColonyManager cm;
     ObjectManager om;
@@ -323,7 +337,8 @@ TEST(PlayerManager, TestIfPlayerCanMove)
 
     GameContext gctx = {&om, 1, 0};
 
-    auto d = std::make_unique<DummyPlayer>(pm, "Test", 1, [&]() -> std::vector<PlayerInputType> {
+    
+    auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
         switch (gctx.tick) {
             case 1:
                 return {

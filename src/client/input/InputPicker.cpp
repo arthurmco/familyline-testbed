@@ -8,7 +8,7 @@ using namespace familyline::graphics;
 using namespace familyline::logic;
 
 InputPicker::InputPicker(
-    TerrainRenderer* terrain, Window* win, SceneRenderer* sm, Camera* cam, ObjectManager* om)
+    Terrain* terrain, Window* win, SceneRenderer* sm, Camera* cam, ObjectManager* om)
 {
     this->_terrain = terrain;
     this->_win     = win;
@@ -85,7 +85,8 @@ void InputPicker::UpdateTerrainProjectedPosition()
     float prolong_now = prolong_near + ((prolong_far - prolong_near) / 2.0f);
 
     glm::vec3 pHalf = glm::vec3(64, 0, 64);
-
+    auto [width, height] = _terrain->getSize();
+    
     //  printf("near: %.3f %.3f %.3f, far: %.3f %.3f %.3f, prolongs: { ",
     //         pNear.x, pNear.y, pNear.z, pFar.x, pFar.y, pFar.z);
     for (int i = 0; i < MAX_PICK_ITERATIONS; i++) {
@@ -108,21 +109,22 @@ void InputPicker::UpdateTerrainProjectedPosition()
         // printf("%.2f (%.2f %.2f %.2f), ", prolong_now, pHalf.x, pHalf.y, pHalf.z);
     }
 
-    glm::vec3 collide = GraphicalToGameSpace(pHalf);
+    glm::vec3 collide = _terrain->graphicalToGame(pHalf);
 
     /* Clamp collide to the terrain area */
-    if (collide.x >= _terrain->GetTerrain()->GetWidth())
-        collide.x = _terrain->GetTerrain()->GetWidth() - 1;
+    if (collide.x >= width)
+        collide.x = width - 1;
 
-    if (collide.z >= _terrain->GetTerrain()->GetHeight())
-        collide.z = _terrain->GetTerrain()->GetHeight() - 1;
+    if (collide.z >= height)
+        collide.z = height - 1;
 
     if (collide.x < 0) collide.x = 0;
 
     if (collide.z < 0) collide.z = 0;
 
+    auto pointHeight = _terrain->getHeightFromCoords(glm::vec2(collide.x, collide.z));
     if (collide.x > 0 && collide.z > 0)
-        collide.y = _terrain->GetTerrain()->GetHeightFromPoint(collide.x, collide.z);
+        collide.y = pointHeight;
     // printf(" }\nprol: %.2f, pos: %.3f %.3f %.3f, gamespace: %.3f %.3f %.3f\n\n",
     //  1.0f, pHalf.x, pHalf.y, pHalf.z, collide.x, collide.y, collide.z);
 
@@ -252,7 +254,7 @@ void InputPicker::UpdateIntersectedObject()
     terrain, in render coordinates */
 glm::vec3 InputPicker::GetTerrainProjectedPosition()
 {
-    return GameToGraphicalSpace(_intersectedPosition);
+    return _terrain->gameToGraphical(_intersectedPosition);
 }
 
 /*  Get position where the cursor collides with the

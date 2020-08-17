@@ -10,6 +10,7 @@
 #include <common/logic/icamera.hpp>
 #include <common/logic/object_manager.hpp>
 #include <common/logic/player_actions.hpp>
+#include <common/logic/terrain.hpp>
 #include <functional>
 #include <map>
 #include <queue>
@@ -118,6 +119,8 @@ private:
     std::optional<std::string> nextBuilding_;
 
 protected:
+    const Terrain& terr_;
+
     void pushAction(PlayerInputType type);
 
     std::optional<ICamera*> camera_;
@@ -145,7 +148,10 @@ protected:
     bool isTickValid();
 
 public:
-    Player(PlayerManager& pm, const char* name, int code) : pm_(pm), name_(name), code_(code) {}
+    Player(PlayerManager& pm, const Terrain& terr, const char* name, int code)
+        : pm_(pm), terr_(terr), name_(name), code_(code)
+    {
+    }
 
     unsigned int getCode() { return (unsigned)code_; }
 

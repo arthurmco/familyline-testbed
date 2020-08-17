@@ -6,13 +6,11 @@
  * Copyright (C) 2020 Arthur Mendes
  */
 
-#include <zlib.h>
-
 #include <cstdint>
 #include <optional>
 #include <string>
-#include <vector>
 #include <tuple>
+#include <vector>
 
 namespace familyline::logic
 {
@@ -94,12 +92,26 @@ private:
      * The name and each one of the authors are stored this way
      */
     std::string readPascalString(FILE* f);
-    
+
     std::string readName(FILE* f, const TerrainHeader& th);
     std::string readDescription(FILE* f, const TerrainHeader& th);
     std::vector<std::string> readAuthors(FILE* f, const TerrainHeader& th);
-    
+
 public:
+
+    TerrainFile()
+        {}
+    
+    /**
+     * Create an empty terrain file
+     */
+    TerrainFile(size_t w, size_t h)
+        : size_(std::make_tuple(w, h)),
+          height_data(std::vector<uint16_t>(w * h, 0)),
+          type_data(std::vector<uint16_t>(w * h, 0))
+    {
+    }
+
     /**
      * Open the terrain
      *
@@ -114,6 +126,5 @@ public:
 
     const std::vector<uint16_t>& getHeightData() { return height_data; }
     const std::vector<uint16_t>& getTypeData() { return type_data; }
-
 };
 }  // namespace familyline::logic

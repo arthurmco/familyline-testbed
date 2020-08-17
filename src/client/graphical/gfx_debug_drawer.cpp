@@ -1,4 +1,4 @@
-#include <client/graphical/TerrainRenderer.hpp>
+#include <client/graphical/terrain_renderer.hpp>
 #include <client/graphical/gfx_debug_drawer.hpp>
 #include <client/graphical/gfx_service.hpp>
 #include <client/graphical/vertexdata.hpp>
@@ -41,7 +41,7 @@ uint64_t hashPath(glm::vec3 start, glm::vec3 end)
     return hash_fnv1(posval);
 }
 
-#define Game2GFX GameToGraphicalSpace
+#define Game2GFX terr_.gameToGraphical
 
 void GFXDebugDrawer::drawLine(glm::vec3 start, glm::vec3 end, glm::vec4 color)
 {

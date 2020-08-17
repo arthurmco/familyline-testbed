@@ -5,11 +5,11 @@
  */
 #pragma once
 
-#include <common/logic/debug_drawer.hpp>
 #include <cstdint>
 #include <unordered_map>
 
-#include "renderer.hpp"
+#include <client/graphical/renderer.hpp>
+#include <common/logic/debug_drawer.hpp>
 
 namespace familyline::graphics
 {
@@ -26,7 +26,9 @@ private:
     std::unordered_map<uint64_t, VHData> _vhandles;
 
 public:
-    GFXDebugDrawer(Renderer &r) : _renderer(r) {}
+    GFXDebugDrawer(Renderer &r, const familyline::logic::Terrain &terr)
+        : _renderer(r), DebugDrawer(terr)
+    {}
 
     virtual void drawLine(glm::vec3 start, glm::vec3 end, glm::vec4 color);
     virtual void drawSquare(

@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Terrain.hpp"
+#include <common/logic/terrain.hpp>
 #include "game_event.hpp"
 #include "object_components.hpp"
 #include "object_manager.hpp"

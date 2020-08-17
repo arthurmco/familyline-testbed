@@ -11,7 +11,7 @@
 //#include "logic/ObjectRenderer.hpp"
 #include <client/graphical/GraphicalPlotInterface.hpp>
 #include <client/graphical/Light.hpp>
-#include <client/graphical/TerrainRenderer.hpp>
+#include <client/graphical/terrain_renderer.hpp>
 #include <client/graphical/TextureOpener.hpp>
 #include <client/graphical/asset_file.hpp>
 #include <client/graphical/asset_manager.hpp>
@@ -33,7 +33,7 @@
 #include <common/logic/GameActionManager.hpp>
 #include <common/logic/ObjectPathManager.hpp>
 #include <common/logic/PathFinder.hpp>
-#include <common/logic/TerrainFile.hpp>
+#include <common/logic/terrain_file.hpp>
 #include <common/logic/colony_manager.hpp>
 #include <common/logic/debug_drawer.hpp>
 #include <common/logic/lifecycle_manager.hpp>
@@ -112,7 +112,7 @@ private:
 public:
     Game(
         graphics::Window* w, graphics::Framebuffer* fb3D, graphics::Framebuffer* fbGUI,
-        graphics::gui::GUIManager* gr, logic::PlayerManager* pm, std::unique_ptr<HumanPlayer> hp);
+        graphics::gui::GUIManager* gr, logic::PlayerManager* pm);
 
     int RunLoop();
 };

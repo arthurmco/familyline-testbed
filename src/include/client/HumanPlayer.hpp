@@ -12,8 +12,8 @@
 #include <GL/glew.h>
 #endif
 
-#include <client/graphical/TerrainRenderer.hpp>
 #include <client/graphical/camera.hpp>
+#include <client/graphical/terrain_renderer.hpp>
 #include <common/logic/BuildQueue.hpp>
 #include <common/logic/attack_manager.hpp>
 #include <common/logic/object_factory.hpp>
@@ -40,7 +40,9 @@ private:
 public:
     bool renderBBs = false;
 
-    HumanPlayer(familyline::logic::PlayerManager& pm, const char* name, int code);
+    HumanPlayer(
+        familyline::logic::PlayerManager& pm, const familyline::logic::Terrain& t, const char* name,
+        int code);
 
     /**
      * Generate the input actions.

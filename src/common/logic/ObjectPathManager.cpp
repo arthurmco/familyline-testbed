@@ -79,7 +79,7 @@ void ObjectPathManager::UpdatePaths(unsigned ms_frame)
 
         auto lcpos = it->lc->getPosition();
         lcpos.x    = (px);
-        lcpos.y    = (_terr->GetHeightFromPoint(px, pz));
+        lcpos.y    = (_terr->getHeightFromCoords(glm::vec2(px, pz)));
         lcpos.z    = (pz);
         it->lc->setPosition(lcpos);
 
