@@ -10,7 +10,7 @@ using namespace familyline::logic;
 unsigned Terrain::getHeightFromCoords(glm::vec2 coords) const
 {
     auto [w, h] = tf_.getSize();
-    auto idx    = coords.y * w + coords.x;
+    auto idx    = int(coords.y) * w + int(coords.x);
 
     auto& data = tf_.getHeightData();
     return data[idx];

@@ -25,22 +25,91 @@ using namespace familyline::logic;
     +----+----+----+----+
 
 ***/
+#include <cmath>
 
 std::vector<glm::vec3> TerrainRenderer::createNormals(
     const std::vector<glm::vec3>& vertices, int width) const
 {
-    std::vector<glm::vec3> normals;
-
     auto [w, h] = terr_.getSize();
+    std::vector<glm::vec3> normals(w*h, glm::vec3(0, 0, 0));
+
+    /* Calculate the normals
+       Calculate the normal of every triangle that is part of a single vertex and sum them
+         /|\           The vertex we need to calculate the normal is the 'O'.
+        / | \          If possible, we need to get the normals of all four triangles there.
+       /  |  \
+      *---O---*        This might mean that no rough edges will be possible, but a "cliff" terrain
+       \  |  /         type will exist (like in AoE2)
+        \ | /
+         \|/
+    */
 
     for (auto y = 0; y < h; y++) {
         for (auto x = 0; x < w; x++) {
+            const auto idx = (y * w + x);
 
-            /// TODO: do a real normal calculation
-            normals.push_back(glm::vec3(0, 1, 0));
+            glm::vec3 norms[4];
+            int q = 0;
+            
+            norms[q++] = vertices[idx];
+            
+            if (y > 0) {
+                const auto topidx = (y-1) * w + x;
+                norms[q++] = vertices[topidx];
+            }
+
+            if (x < w-1) {
+                const auto rightidx = y * w + x+1;
+                norms[q++] = vertices[rightidx];               
+            }
+            
+            if (y < w-1) {
+                const auto bottomidx = (y+1) * w + x;
+                norms[q++] = vertices[bottomidx];
+            }
+
+            if (x > 0) {
+                const auto leftidx = y * w + x-1;
+                norms[q++] = vertices[leftidx];
+            }
+
+
+
+            auto vnormal = glm::vec3(0, 0, 0);
+            for (auto i = 0; i < q; i++) {
+                auto current = norms[i];
+                auto next = norms[(i+1)%q];
+
+                vnormal = glm::vec3(
+                    vnormal.x + ((current.y - next.y) * (current.z + next.z)),
+                    vnormal.y + ((current.z - next.z) * (current.x + next.x)),
+                    vnormal.z + ((current.x - next.x) * (current.y + next.y))                    
+                );
+
+            }
+
+            vnormal = -glm::normalize(vnormal);
+            
+            if (std::isnan(vnormal.x) || std::isnan(vnormal.y) || std::isnan(vnormal.z)) {
+                LoggerService::getLogger()->write(
+                    "terrain-renderer",
+                    LogType::Error,
+                    "normal of (%.3f, %.3f, %.3f) [  (%.3f, %.3f, %.3f) ]"
+                    "gave NaN", vertices[idx].x, vertices[idx].y, vertices[idx].z,
+                    vnormal.x, vnormal.y, vnormal.z);
+            } else if (vnormal.x != 0 && vnormal.z != 0){
+                LoggerService::getLogger()->write(
+                    "terrain-renderer",
+                    LogType::Debug,
+                    "normal of (%.3f, %.3f, %.3f) [  (%.3f, %.3f, %.3f) ]"
+                    "", vertices[idx].x, vertices[idx].y, vertices[idx].z,
+                    vnormal.x, vnormal.y, vnormal.z);
+            }
+
+            normals[idx] = vnormal;
         }
     }
-    
+
     return normals;
 }
 
