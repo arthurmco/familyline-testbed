@@ -45,12 +45,16 @@ void GUIManager::init(const Window& win)
                 Shader("shaders/GUI.frag", ShaderType::Fragment)});
 
     sGUI_->link();
+    
+    auto fnGetAttrib = [&](const char* name) {
+        return glGetAttribLocation(sGUI_->getHandle(), name);
+    };
 
-    attrPos_ = 0;  // sGUI->GetAttributeLocation("position");
-    attrTex_ = 1;  // sGUI->GetAttributeLocation("in_uv");
+    attrPos_ = fnGetAttrib("position");
+    attrTex_ = fnGetAttrib("in_uv");
 
-    width_  = (unsigned)win_w;
-    height_ = (unsigned)win_h;
+    //width_  = (unsigned)win_w;
+    //height_ = (unsigned)win_h;
 
     // Create the vertices
     glGenVertexArrays(1, &(this->vaoGUI_));
@@ -77,6 +81,7 @@ void GUIManager::init(const Window& win)
 
     LOGDEBUG(LoggerService::getLogger(), "gui-manager", "gui size: %dx%d", width_, height_);
 
+    cairo_surface_flush(this->canvas_);
     glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_BGRA, GL_UNSIGNED_BYTE,
         (void*)cairo_image_surface_get_data(this->canvas_));

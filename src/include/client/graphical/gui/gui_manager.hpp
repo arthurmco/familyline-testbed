@@ -97,9 +97,9 @@ public:
           height_(height),
           canvas_(cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height))
     {
+        context_      = cairo_create(this->canvas_);
         this->init(win);
 
-        context_      = cairo_create(this->canvas_);
         root_control_ = std::make_unique<RootControl>(width, height);
 
         manager.addListenerHandler([&](familyline::input::HumanInputAction i) {
