@@ -52,28 +52,21 @@ std::vector<glm::vec3> TerrainRenderer::createNormals(
             int q = 0;
             
             norms[q++] = vertices[idx];
-            
-            if (y > 0) {
-                const auto topidx = (y-1) * w + x;
-                norms[q++] = vertices[topidx];
-            }
 
-            if (x < w-1) {
-                const auto rightidx = y * w + x+1;
-                norms[q++] = vertices[rightidx];               
+            if (x <= w-1) {
+                const auto v2idx = y * w + x+1;
+                norms[q++] = vertices[v2idx];
             }
             
-            if (y < w-1) {
-                const auto bottomidx = (y+1) * w + x;
-                norms[q++] = vertices[bottomidx];
+            if (x <= w-1 && y <= h-1) {
+                const auto v3idx = (y+1) * w + (x+1);
+                norms[q++] = vertices[v3idx];               
+            }            
+
+            if (y <= h-1) {
+                const auto v4idx = (y+1) * w + x;
+                norms[q++] = vertices[v4idx];
             }
-
-            if (x > 0) {
-                const auto leftidx = y * w + x-1;
-                norms[q++] = vertices[leftidx];
-            }
-
-
 
             auto vnormal = glm::vec3(0, 0, 0);
             for (auto i = 0; i < q; i++) {
@@ -88,25 +81,17 @@ std::vector<glm::vec3> TerrainRenderer::createNormals(
 
             }
 
-            vnormal = -glm::normalize(vnormal);
-            
-            if (std::isnan(vnormal.x) || std::isnan(vnormal.y) || std::isnan(vnormal.z)) {
+            vnormal = glm::normalize(vnormal);
+           
+            if (std::isnan(vnormal.x) || std::isnan(vnormal.y))
                 LoggerService::getLogger()->write(
                     "terrain-renderer",
                     LogType::Error,
                     "normal of (%.3f, %.3f, %.3f) [  (%.3f, %.3f, %.3f) ]"
                     "gave NaN", vertices[idx].x, vertices[idx].y, vertices[idx].z,
                     vnormal.x, vnormal.y, vnormal.z);
-            } else if (vnormal.x != 0 && vnormal.z != 0){
-                LoggerService::getLogger()->write(
-                    "terrain-renderer",
-                    LogType::Debug,
-                    "normal of (%.3f, %.3f, %.3f) [  (%.3f, %.3f, %.3f) ]"
-                    "", vertices[idx].x, vertices[idx].y, vertices[idx].z,
-                    vnormal.x, vnormal.y, vnormal.z);
-            }
 
-            normals[idx] = vnormal;
+            normals[idx] = glm::vec3(vnormal.x, -vnormal.y, vnormal.z);
         }
     }
 

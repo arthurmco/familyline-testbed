@@ -30,7 +30,7 @@ in LightOut outlights[4];
 // into the object
 vec3 get_light_color(vec3 diffusecolor, vec3 lightColor, float lightPower,
     vec3 lightDirection) {
-    
+
     //Cosine of angle between normal and light direction
     vec3 n = normalize(norm_Model);
 
@@ -44,7 +44,7 @@ vec3 get_light_color(vec3 diffusecolor, vec3 lightColor, float lightPower,
 // into the object
 vec3 get_directional_light_color(vec3 diffusecolor, vec3 lightColor, float lightPower,
     vec3 lightDirection) {
-    
+
     //Cosine of angle between normal and light direction
     vec3 n = normalize(norm_Model);
 
@@ -68,7 +68,7 @@ vec3 get_point_light_color() {
 
 	vec3 lightColor = get_light_color(finalColor, outlights[i].color,
 					  outlights[i].strength, outlights[i].ldirection);
-	
+
 	finalColor += (lightColor / lightPower);
     }
 
@@ -80,13 +80,14 @@ void main() {
   vec3 texel = vec3(1,0,0);
 
   texel = texture(tex_sam, tex_coords).rgb;
-  vcolor = mix(diffuse_color, texel, tex_amount);  
+  vcolor = mix(diffuse_color, texel * 0.9, tex_amount);
+  vec3 vambient = mix(ambient_color, texel * 0.4, tex_amount);
 
   vec3 directional_color = get_directional_light_color(vcolor, vec3(1, 1, 1), 1,
-        vec3(80, 200, 80));
+        vec3(60, 200, 240));
   vec3 point_color = get_point_light_color();
-  
-  vec3 finalColor = (ambient_color) + directional_color + point_color;
 
-  ocolor = vec4(finalColor, 1.0);  
+  vec3 finalColor = (vambient) + directional_color + point_color;
+
+  ocolor = vec4(finalColor, 1.0);
 }

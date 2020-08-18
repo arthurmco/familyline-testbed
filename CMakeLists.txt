@@ -185,7 +185,7 @@ file(COPY "${CMAKE_SOURCE_DIR}/icons" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 file(COPY "${CMAKE_SOURCE_DIR}/materials" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 file(COPY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 file(COPY "${CMAKE_SOURCE_DIR}/textures" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.trtb" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.flte" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
 
@@ -199,5 +199,5 @@ install(DIRECTORY icons DESTINATION share/familyline)
 install(DIRECTORY materials DESTINATION share/familyline)
 install(DIRECTORY models DESTINATION share/familyline)
 install(FILES assets.yml DESTINATION share/familyline)
-install(FILES terrain_test.trtb DESTINATION share/familyline)
+install(FILES terrain_test.flte DESTINATION share/familyline)
 
