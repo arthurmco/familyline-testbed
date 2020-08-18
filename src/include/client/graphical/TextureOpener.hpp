@@ -24,7 +24,7 @@ class TextureFile : public AssetObject
 private:
     ILuint _handle;
     GLenum _format;
-
+    
 public:
     ILuint GetHandle() const;
     GLenum GetFormat() const;

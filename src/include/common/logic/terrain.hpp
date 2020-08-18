@@ -42,7 +42,7 @@ public:
  *
  * Under development
  */
-enum TerrainType { Grass = 0, Dirt = 10, Water = 20, Mountain = 30 };
+enum TerrainType { Grass = 0, Sand = 10, Water = 20, Mountain = 30, Dirt = 40 };
 
 class Terrain
 {

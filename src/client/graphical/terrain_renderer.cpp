@@ -4,6 +4,7 @@
 #include <client/graphical/terrain_renderer.hpp>
 #include <cmath>
 #include <common/logger.hpp>
+#include <iterator>
 
 using namespace familyline::graphics;
 using namespace familyline::logic;
@@ -50,18 +51,18 @@ std::vector<glm::vec3> TerrainRenderer::createNormals(
 
             glm::vec3 norms[4];
             int q = 0;
-            
+
             norms[q++] = vertices[idx];
 
             if (x <= w-1) {
                 const auto v2idx = y * w + x+1;
                 norms[q++] = vertices[v2idx];
             }
-            
+
             if (x <= w-1 && y <= h-1) {
                 const auto v3idx = (y+1) * w + (x+1);
-                norms[q++] = vertices[v3idx];               
-            }            
+                norms[q++] = vertices[v3idx];
+            }
 
             if (y <= h-1) {
                 const auto v4idx = (y+1) * w + x;
@@ -76,13 +77,13 @@ std::vector<glm::vec3> TerrainRenderer::createNormals(
                 vnormal = glm::vec3(
                     vnormal.x + ((current.y - next.y) * (current.z + next.z)),
                     vnormal.y + ((current.z - next.z) * (current.x + next.x)),
-                    vnormal.z + ((current.x - next.x) * (current.y + next.y))                    
+                    vnormal.z + ((current.x - next.x) * (current.y + next.y))
                 );
 
             }
 
             vnormal = glm::normalize(vnormal);
-           
+
             if (std::isnan(vnormal.x) || std::isnan(vnormal.y))
                 LoggerService::getLogger()->write(
                     "terrain-renderer",
@@ -148,7 +149,6 @@ TerrainRenderInfo TerrainRenderer::createTerrainData()
             auto idx    = y * w + x;
             auto height = tdata[idx];
             tri.vertices.push_back(terr_.gameToGraphical(glm::vec3(x, height, y)));
-            tri.texture_ids.push_back(0);
         }
     }
 
@@ -160,9 +160,6 @@ TerrainRenderInfo TerrainRenderer::createTerrainData()
 
 GLuint TerrainRenderer::createTerrainDataVAO()
 {
-    auto& sm     = GFXService::getShaderManager();
-    auto forward = sm->getShader("forward");
-
     auto err = glGetError();
 
     GLuint vao;
@@ -170,10 +167,10 @@ GLuint TerrainRenderer::createTerrainDataVAO()
     glBindVertexArray(vao);
 
     auto fnGetAttrib = [&](const char* name) {
-        return glGetAttribLocation(forward->getHandle(), name);
+        return glGetAttribLocation(sTerrain_->getHandle(), name);
     };
 
-    GLuint vboVertices, vboNormals, vboTextures, vboElement;
+    GLuint vboVertices, vboNormals, vboTextures, vboTexIndices, vboElement;
     glGenBuffers(1, &vboVertices);
     glBindBuffer(GL_ARRAY_BUFFER, vboVertices);
     glBufferData(
@@ -198,6 +195,14 @@ GLuint TerrainRenderer::createTerrainDataVAO()
     glVertexAttribPointer(fnGetAttrib("texcoord"), 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(2);
 
+    glGenBuffers(1, &vboTexIndices);
+    glBindBuffer(GL_ARRAY_BUFFER, vboTexIndices);
+    glBufferData(
+        GL_ARRAY_BUFFER, tri_.texture_ids.size() * sizeof(unsigned int), tri_.texture_ids.data(),
+        GL_STATIC_DRAW);
+    glVertexAttribPointer(fnGetAttrib("texidx"), 1, GL_UNSIGNED_INT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(3);
+
     glGenBuffers(1, &vboElement);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboElement);
     glBufferData(
@@ -216,12 +221,15 @@ GLuint TerrainRenderer::createTerrainDataVAO()
 // TODO: load only terrains that the terrain file uses
 std::vector<TerrainTexInfo> loadTerrainData()
 {
-    return {{TextureOpener::OpenTexture(TEXTURES_DIR "/terrain/grass.png"), 16, 16}};
+    return {{"grass", 16, 16},
+            {"sand", 16, 16},
+    };
 }
 
 std::unordered_map<TerrainType, unsigned int> loadTerrainTypes()
 {
-    return {{TerrainType::Grass, 0}};
+    return {{TerrainType::Grass, 0},
+            {TerrainType::Sand, 1}};
 }
 
 /**
@@ -233,6 +241,8 @@ std::unordered_map<TerrainType, unsigned int> loadTerrainTypes()
  */
 void TerrainRenderer::buildTextures()
 {
+    tatlas_ = TextureOpener::OpenTexture(TEXTURES_DIR "/terrain/texatlas.png");
+
     terrain_data_     = loadTerrainData();
     terr_type_to_idx_ = loadTerrainTypes();
 
@@ -268,6 +278,8 @@ void TerrainRenderer::buildTextures()
 
 void TerrainRenderer::buildVertexData() { tri_ = this->createTerrainData(); }
 
+const int slot_texture_size = 16;
+
 /**
  * Render the terrain
  */
@@ -279,20 +291,20 @@ void TerrainRenderer::render()
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // we're not using the stencil buffer now
 
-    auto& sm     = GFXService::getShaderManager();
-    auto forward = sm->getShader("forward");
-    sm->use(*forward);
+    auto& sm = GFXService::getShaderManager();
+    sm->use(*sTerrain_);
 
-    forward->setUniform("mWorld", glm::mat4(1.0));
-    forward->setUniform("mView", cam_.GetViewMatrix());
-    forward->setUniform("mProjection", cam_.GetProjectionMatrix());
-    forward->setUniform("diffuse_color", glm::vec3(0.5, 0.5, 0.5));
-    forward->setUniform("ambient_color", glm::vec3(0.1, 0.1, 0.1));
+    sTerrain_->setUniform("mWorld", glm::mat4(1.0));
+    sTerrain_->setUniform("mView", cam_.GetViewMatrix());
+    sTerrain_->setUniform("mProjection", cam_.GetProjectionMatrix());
+    sTerrain_->setUniform("diffuse_color", glm::vec3(0.5, 0.5, 0.5));
+    sTerrain_->setUniform("ambient_color", glm::vec3(0.1, 0.1, 0.1));
 
-    forward->setUniform("tex_amount", 1.0f);
+    sTerrain_->setUniform("tex_amount", 1.0f);
 
-    glBindTexture(GL_TEXTURE_2D, terrain_data_[0].tex->GetHandle());
     glBindVertexArray(tvao_);
+
+    glBindTexture(GL_TEXTURE_2D, tatlas_->GetHandle());
     glDrawElements(GL_TRIANGLES, tri_.indices.size(), GL_UNSIGNED_INT, 0);
 
     glBindTexture(GL_TEXTURE_2D, 0);

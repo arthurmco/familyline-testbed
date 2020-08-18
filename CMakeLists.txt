@@ -175,8 +175,6 @@ SET(CPACK_RPM_PACKAGE_LICENSE "MIT")
   
 INCLUDE(CPack)
 
-
-
 # Copy the asset folders to the build folder
 # This means that we have to make a separate build directory.
 # Usually this is the case.
@@ -189,8 +187,6 @@ file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.flte" DESTINATION "${CMAKE_CURRENT_B
 file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
 
-
-
 # Install locations
 install(TARGETS familyline DESTINATION bin)
 install(DIRECTORY shaders DESTINATION share/familyline)
@@ -200,4 +196,3 @@ install(DIRECTORY materials DESTINATION share/familyline)
 install(DIRECTORY models DESTINATION share/familyline)
 install(FILES assets.yml DESTINATION share/familyline)
 install(FILES terrain_test.flte DESTINATION share/familyline)
-

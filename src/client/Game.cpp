@@ -124,7 +124,7 @@ Game::Game(
         // hp->SetGameActionManager(&gam);
 
         terrFile = new TerrainFile();
-        if (!terrFile->open(ASSET_FILE_DIR "dickmap.flte")) {
+        if (!terrFile->open(ASSET_FILE_DIR "terrain_test.flte")) {
             throw new logic_exception{
                 fmt::format("Could not open terrain " ASSET_FILE_DIR " terrain_test.flte")};
         }

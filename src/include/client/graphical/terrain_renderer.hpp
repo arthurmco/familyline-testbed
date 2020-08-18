@@ -8,6 +8,7 @@
 
 #include <client/graphical/Texture.hpp>
 #include <client/graphical/camera.hpp>
+#include <client/graphical/shader.hpp>
 #include <common/logic/terrain.hpp>
 #include <glm/glm.hpp>
 #include <unordered_map>
@@ -18,8 +19,9 @@ struct TerrainRenderInfo {
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> texcoords;
-    std::vector<unsigned int> indices;
     std::vector<unsigned int> texture_ids;
+
+    std::vector<unsigned int> indices;
 };
 
 /**
@@ -30,7 +32,7 @@ struct TerrainRenderInfo {
  * occupy, in the X or Y direction.
  */
 struct TerrainTexInfo {
-    Texture* tex;
+    std::string name;
     int xscale, yscale;
 };
 
@@ -42,6 +44,8 @@ private:
     glm::mat4 _wmatrix = glm::mat4(1.0f);
     TerrainRenderInfo tri_;
     GLuint tvao_;
+
+    Texture* tatlas_;
 
     /**
      * Create the indices.
@@ -70,9 +74,17 @@ private:
      * Create VAO from terrain data
      */
     GLuint createTerrainDataVAO();
+    ShaderProgram* sTerrain_;
 
 public:
-    TerrainRenderer(familyline::logic::Terrain& terr, Camera& cam) : terr_(terr), cam_(cam) {}
+    TerrainRenderer(familyline::logic::Terrain& terr, Camera& cam) : terr_(terr), cam_(cam)
+    {
+        sTerrain_ = new ShaderProgram(
+            "terrain", {Shader("shaders/Terrain.vert", ShaderType::Vertex),
+                        Shader("shaders/Terrain.frag", ShaderType::Fragment)});
+
+        sTerrain_->link();
+    }
 
     /**
      * Build the terrain textures

@@ -121,8 +121,8 @@ bool TerrainFile::readTerrainData(FILE* f, TerrainHeader& th)
     auto& log = LoggerService::getLogger();
 
     auto gridsize = th.width * th.height;
-    height_data.reserve(gridsize);
-    type_data.reserve(gridsize);
+    height_data = std::vector<uint16_t>(gridsize, 0);
+    type_data = std::vector<uint16_t>(gridsize, 0);
 
     fseek(f, th.terrain_data_off, SEEK_SET);
     auto heightsize = fread(height_data.data(), sizeof(uint16_t), gridsize, f);
