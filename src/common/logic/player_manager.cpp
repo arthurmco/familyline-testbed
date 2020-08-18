@@ -58,7 +58,7 @@ void PlayerManager::pushAction(unsigned int id, PlayerInputType type)
     auto& log = LoggerService::getLogger();
     log->write("player-manager",
                LogType::Debug,
-               "push action of player %08x on tick %d\n", id, _tick);
+               "push action of player %08x on tick %d", id, _tick);
 
     PlayerInputAction a;
     a.playercode = id;

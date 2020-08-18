@@ -91,7 +91,7 @@ std::vector<glm::vec3> TerrainRenderer::createNormals(
                     "gave NaN", vertices[idx].x, vertices[idx].y, vertices[idx].z,
                     vnormal.x, vnormal.y, vnormal.z);
 
-            normals[idx] = glm::vec3(vnormal.x, -vnormal.y, vnormal.z);
+            normals[idx] = -vnormal;
         }
     }
 
