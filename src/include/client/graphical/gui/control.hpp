@@ -10,6 +10,7 @@
 #include <queue>
 #include <tuple>
 #include <vector>
+#include <string>
 
 namespace familyline::graphics::gui
 {
@@ -113,6 +114,10 @@ struct CallbackQueueElement {
     // exists. If it did not exist anymore, we do not run the
     // callback.
     unsigned owner_id;
+
+    CallbackQueueElement(EventCallbackFn fn, Control* o, unsigned oid)
+	: fn(fn), owner(o), owner_id(oid)
+	{}
 };
 
 struct CallbackQueue {

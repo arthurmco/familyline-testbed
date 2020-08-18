@@ -67,7 +67,12 @@ void Framebuffer::setupTexture(int width, int height)
         throw graphical_exception(std::string(e));
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    // Allocate an empty buffer to use as the framebuffer texture.
+    // Other operating systems do not need this, but MacOS seems to need
+    // or the framebuffer will preserve the content from the last run,
+    // leading to bugs such as this: https://imgur.com/3HpjD7W
+    char* c = new char[width*height*4];
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, c);
     err = glGetError();
     if (err != GL_NO_ERROR) {
         char e[128];

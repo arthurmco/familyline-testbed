@@ -31,7 +31,7 @@ GLWindow::GLWindow(GLDevice* dev, int width, int height) : _dev(dev), _width(wid
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, fflags);
     _win = SDL_CreateWindow(
         "Familyline", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI);
+        SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
 
     if (!_win) {
         auto err = std::string("OpenGL context creation error: ");
