@@ -36,9 +36,9 @@ bool AttackComponent::isInAttackRange(const AttackComponent& other)
  */
 std::optional<double> AttackComponent::doDirectAttack(const AttackComponent& defender)
 {
-    if (!this->object->getLocationComponent()) return std::make_optional(0.0);
-
-    if (!this->object->getLocationComponent()) return std::make_optional(0.0);
+    if (!this->object->getLocationComponent()) return std::nullopt;
+    
+    if (!this->object->getLocationComponent()) return std::nullopt;
 
     const auto atkpos = this->object->getPosition();
     const auto defpos = defender.object->getPosition();
@@ -50,7 +50,7 @@ std::optional<double> AttackComponent::doDirectAttack(const AttackComponent& def
 
     // convert the calculations to attacker
     // it's easier to do the calculations if we assume the attacker angle
-    // is always 0deg
+    // is always 0deg, and adjust the attacked angle
     const double defAngle = atan2(distY, distX) - this->rotation;
 
     const double arcUpper = this->range / 2;
@@ -62,11 +62,11 @@ std::optional<double> AttackComponent::doDirectAttack(const AttackComponent& def
     bool all360     = (arcUpper >= M_PI);
     bool validAngle = all360 || (sin(arcUpper) > sin_defAngle && cos(arcUpper) < cos_defAngle);
 
-    if (validAngle && this->atkDistance > defDistance) {
-        // printf("sin (atk/def): %.2f %.2f\t", sin(arcUpper), sin_defAngle);
-        // printf("cos (atk/def): %.2f %.2f\t", cos(arcUpper), cos_defAngle);
-        // printf("distance (atk/def): %.2f %.2f\n", this->atkDistance, defDistance);
+    //printf("sin (atk/def): %.2f %.2f\t", sin(arcUpper), sin_defAngle);
+    //printf("cos (atk/def): %.2f %.2f\t", cos(arcUpper), cos_defAngle);
+    //printf("distance (atk/def): %.2f %.2f\n", this->atkDistance, defDistance);
 
+    if (validAngle && this->atkDistance > defDistance) {
         const double factor = (1 - std::abs(sin_defAngle / arcUpper));
 
         // TODO: Occasionally, the armor points will not be considered
