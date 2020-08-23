@@ -25,6 +25,8 @@ public:
 
     void addShader(ShaderProgram* s);
     ShaderProgram* getShader(std::string_view name);
+
+    void clear() { _shaders.clear(); }
 };
 
 }  // namespace familyline::graphics

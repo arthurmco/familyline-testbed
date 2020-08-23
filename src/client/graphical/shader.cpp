@@ -88,7 +88,9 @@ void Shader::compile()
 ShaderProgram::ShaderProgram(std::string_view name, std::initializer_list<Shader> shaders)
 {
     this->_name   = name;
-    this->_handle = glCreateProgram();
+
+    if (shaders.size() > 0)
+        this->_handle = glCreateProgram();
 
     for (auto& s : shaders) {
         _files.push_back(std::make_pair(s.getType(), s));
