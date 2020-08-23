@@ -13,7 +13,6 @@ typedef int socket_t;
 #define NOMINMAX //prevents Windows from redefining std::min
 #include <winsock2.h>
 typedef SOCKET socket_t;
-typedef SSIZE_T ssize_t;
 #endif
 
 
