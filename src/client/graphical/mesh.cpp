@@ -39,7 +39,8 @@ BoundingBox Mesh::getBoundingBox()
     std::vector<BoundingBox> binit;
     std::transform(vdx.begin(), vdx.end(), std::back_inserter(binit), [](VertexData vd) {
         BoundingBox b;
-        b.minX = b.minY = b.minZ = 99999999;
+        b.minX = b.minY = b.minZ = 99999999.0f;
+        b.maxX = b.maxY = b.maxZ = -99999999.0f;
         return std::accumulate(
             vd.position.begin(), vd.position.end(), b, [](BoundingBox bit, glm::vec3 v) {
                 bit.maxX = glm::max(v.x, bit.maxX);
@@ -54,7 +55,8 @@ BoundingBox Mesh::getBoundingBox()
     });
 
     BoundingBox b;
-    b.minX = b.minY = b.minZ = 99999999;
+    b.minX = b.minY = b.minZ = 99999999.0f;
+    b.maxX = b.maxY = b.maxZ = -99999999.0f;
     return std::accumulate(binit.begin(), binit.end(), b, [](BoundingBox cur, BoundingBox prev) {
         cur.maxX = glm::max(prev.maxX, cur.maxX);
         cur.maxY = glm::max(prev.maxY, cur.maxY);
