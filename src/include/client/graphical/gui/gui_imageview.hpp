@@ -9,6 +9,11 @@
 
 namespace familyline::graphics::gui
 {
+    
+#ifdef WIN32
+#define ssize_t intptr_t
+#endif
+
 /**
  * How should we draw the image into the imageview?
  */

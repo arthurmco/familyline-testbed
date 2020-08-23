@@ -11,6 +11,7 @@ using namespace familyline::graphics::gui;
 #include <common/logger.hpp>
 #include <cstdio>
 
+
 /**
  * Load the image content from a file
  */

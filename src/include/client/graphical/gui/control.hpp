@@ -6,6 +6,7 @@
 #include <client/input/input_actions.hpp>
 #include <functional>
 #include <memory>
+#include <array>
 #include <optional>
 #include <queue>
 #include <tuple>
