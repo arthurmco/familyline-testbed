@@ -17,9 +17,11 @@ TEST(ObjectAttack, TestMeleeAttack)
         nullptr, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
 
     auto atker = make_object({"obj1", "Object 1", glm::vec2(5, 5), 200, 200, true, []() {}, atkc1});
-
     auto defer = make_object({"obj2", "Object 2", glm::vec2(5, 5), 200, 200, true, []() {}, defc1});
 
+    atker->setPosition(glm::vec3(1, 0, 1));
+    defer->setPosition(glm::vec3(1, 0, 1));
+    
     ASSERT_TRUE(atker->getAttackComponent()->isInAttackRange(defer->getAttackComponent().value()));
 
     auto res = atker->getAttackComponent()->doDirectAttack(defer->getAttackComponent().value());
@@ -46,6 +48,9 @@ TEST(ObjectAttack, TestDeathNotification)
 
     ObjectManager om;
     ObjectLifecycleManager olm{om};
+
+    atker_s->setPosition(glm::vec3(1, 0, 1));
+    defer_s->setPosition(glm::vec3(1, 0, 1));
 
     auto atkerid = om.add(std::move(atker_s));
     auto deferid = om.add(std::move(defer_s));
