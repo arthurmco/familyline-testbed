@@ -54,17 +54,17 @@ std::vector<glm::vec3> TerrainRenderer::createNormals(
 
             norms[q++] = vertices[idx];
 
-            if (x <= w-1) {
+            if (x < w-1) {
                 const auto v2idx = y * w + x+1;
                 norms[q++] = vertices[v2idx];
             }
 
-            if (x <= w-1 && y <= h-1) {
+            if (x < w-1 && y < h-1) {
                 const auto v3idx = (y+1) * w + (x+1);
                 norms[q++] = vertices[v3idx];
             }
 
-            if (y <= h-1) {
+            if (y < h-1) {
                 const auto v4idx = (y+1) * w + x;
                 norms[q++] = vertices[v4idx];
             }
