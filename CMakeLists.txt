@@ -48,7 +48,7 @@ if (MSVC)
   # Set include directories
   find_package(GLM CONFIG REQUIRED)
   find_package(unofficial-cairo CONFIG REQUIRED)
- 
+
   # SDL, GLM and cairo includes will be made available via vcpkg and put in a default path.
   # We don't really need to put them here'
   include_directories(AFTER ${YAML_INCLUDE_DIR})
