@@ -8,7 +8,7 @@
 
 namespace familyline::logic
 {
-typedef unsigned int object_id_t;
+typedef unsigned long object_id_t;
 
 /**
  * Game object type

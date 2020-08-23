@@ -262,7 +262,7 @@ void HumanPlayer::generateInput()
         // TODO: do multiple object selection, drag-based
         //       this can be started by adding a DragAction on input_actions.hpp
         auto l = _ip->GetIntersectedObject().lock();
-        this->pushAction(ObjectSelectAction{l->getID()});
+        this->pushAction(ObjectSelectAction{(unsigned long int)l->getID()});
         mouse_click = false;
     } else if (!has_selection && mouse_click) {
         // Object deselection, aka click on anything.
@@ -278,7 +278,7 @@ void HumanPlayer::generateInput()
             // Requested to run the default action on the selected object
             // Can be harvest or attack.
             auto l = _ip->GetIntersectedObject().lock();
-            this->pushAction(ObjectUseAction{l->getID()});
+            this->pushAction(ObjectUseAction{(long int)l->getID()});
 
             // TODO: how to treat things when the object is too far from the
             // destination to perform an action?

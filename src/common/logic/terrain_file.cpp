@@ -121,8 +121,8 @@ bool TerrainFile::readTerrainData(FILE* f, TerrainHeader& th)
     auto& log = LoggerService::getLogger();
 
     auto gridsize = th.width * th.height;
-    height_data = std::vector<uint16_t>(gridsize, 0);
-    type_data = std::vector<uint16_t>(gridsize, 0);
+    height_data   = std::vector<uint16_t>(gridsize, 0);
+    type_data     = std::vector<uint16_t>(gridsize, 0);
 
     fseek(f, th.terrain_data_off, SEEK_SET);
     auto heightsize = fread(height_data.data(), sizeof(uint16_t), gridsize, f);
@@ -151,11 +151,15 @@ std::string TerrainFile::readPascalString(FILE* f)
 {
     auto len = fgetc(f);
 
-    char s[len + 1];
+    // Allocate on the heap because VS do not allow variable-sized arrays, for some reason
+    char* s = new char[len + 1];
 
     fread(s, sizeof(s[0]), len, f);
     s[len] = '\0';
-    return std::string{s};
+    auto ret = std::string{s};
+
+    delete[] s;
+    return ret;
 }
 
 std::string TerrainFile::readName(FILE* f, const TerrainHeader& th)
@@ -178,11 +182,15 @@ std::string TerrainFile::readDescription(FILE* f, const TerrainHeader& th)
     auto len = fgetc(f);
     len |= (fgetc(f) << 8);
 
-    char s[len + 1];
+    char* s = new char[len + 1];
+
     fread(s, sizeof(s[0]), len, f);
     s[len] = '\0';
 
-    return std::string{s};
+    auto ret = std::string{s};
+    delete[] s;
+
+    return ret;
 }
 
 std::vector<std::string> TerrainFile::readAuthors(FILE* f, const TerrainHeader& th)

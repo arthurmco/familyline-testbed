@@ -42,22 +42,9 @@ struct CommitLastBuildAction {
  * Select an object
  */
 struct ObjectSelectAction {
-    long int objectID;
+    unsigned long int objectID;
 };
-/**
- * Commit the last build, starts building it at the specified game
- * position.
- * The server should verify that the build position is valid, that is
- * it is inside the camera vision range
- *
- * last_build value means, if false, that we should expect more
- * commits
- */
-struct CommitLastBuildAction {
-    double destX, destZ;
-    double destY;  // do not serialize this value, it can be determined automatically
-    bool last_build;
-};
+
 
 /**
  * Clear object selection
@@ -84,7 +71,6 @@ struct ObjectUseAction {
     long int useWhat;
 };
 
-<<<<<<< HEAD
 /**
  * Make the selected object run the specified action
  *
@@ -94,18 +80,6 @@ struct ObjectUseAction {
 struct ObjectRunAction {
     std::string actionName;
 };
-== == == =
-             /**
-              * Make the selected object do the 'use' action in some other object.
-              * This action varies from object to object. It can be harvest, attack
-              * or trade
-              *
-              * It is the action you run when you right-click.
-              */
-    struct ObjectUseAction {
-    size_t useWhat;
-};
->>>>>>> e96e95d... Fix build errors on Windows
 
 /**
  * Controls camera positioning

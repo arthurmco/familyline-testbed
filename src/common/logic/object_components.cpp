@@ -6,6 +6,10 @@
 
 using namespace familyline::logic;
 
+#ifdef WIN32
+#define M_PI 3.1415
+#endif
+
 /**
  * Updates a mesh by getting a coordinate in the logic space, converting it to
  * the graphical/OpenGL space and then setting it as the mesh position
