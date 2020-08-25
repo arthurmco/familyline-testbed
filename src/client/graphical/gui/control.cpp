@@ -66,7 +66,6 @@ void ContainerComponent::add(int x, int y, std::unique_ptr<Control> c)
 
 void ContainerComponent::add(float x, float y, ControlPositioning cpos, std::unique_ptr<Control> c)
 {
-    this->children.reserve(128);
     c->setResizeCallback([&](Control* co, size_t w, size_t h) {
         auto co_it = std::find_if(
             this->children.begin(), this->children.end(),

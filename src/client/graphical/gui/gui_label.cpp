@@ -1,3 +1,4 @@
+
 #include <client/graphical/gui/gui_label.hpp>
 
 #include "pango/pango-font.h"
@@ -50,7 +51,10 @@ bool Label::update(cairo_t* context, cairo_surface_t* canvas)
     auto [fr, fg, fb, fa] = this->appearance_.foreground;
     auto [br, bg, bb, ba] = this->appearance_.background;
 
-    PangoLayout* layout = this->getLayout(context);
+    if (layout_)
+        g_object_unref(layout_);
+    
+    layout_ = this->getLayout(context);    
 
     cairo_set_source_rgba(context, br, bg, bb, ba);
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
@@ -58,7 +62,7 @@ bool Label::update(cairo_t* context, cairo_surface_t* canvas)
 
     cairo_set_source_rgba(context, fr, fg, fb, fa);
     cairo_move_to(context, 0, 0);
-    pango_cairo_show_layout(context, layout);
+    pango_cairo_show_layout(context, layout_);
 
     last_context_ = context;
 
@@ -80,6 +84,8 @@ std::tuple<int, int> Label::getNeededSize(cairo_t* parent_context) const
     width /= PANGO_SCALE;
     height /= PANGO_SCALE;
 
+    g_object_unref(layout);
+    
     return std::tie(width, height);
 }
 
@@ -97,6 +103,7 @@ void Label::setText(std::string v)
 
             last_context_ = nullptr;
             this->resize(width / PANGO_SCALE, height / PANGO_SCALE);
+            g_object_unref(layout);
         }
     }
 }

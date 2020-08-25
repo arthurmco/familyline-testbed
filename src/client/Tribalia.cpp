@@ -383,6 +383,7 @@ static int show_starting_menu()
             frames++;
         }
 
+        delete guir;
         delete win;
         fmt::print("\nExited. ({:d} frames)\n", frames);
 

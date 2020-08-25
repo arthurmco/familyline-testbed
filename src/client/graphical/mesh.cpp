@@ -8,6 +8,8 @@ using namespace familyline::graphics;
 
 void Mesh::update()
 {
+    _ani->advance(1);
+        
     auto translMatrix = glm::mat4(1.0);
     translMatrix      = glm::translate(translMatrix, this->worldPosition);
 

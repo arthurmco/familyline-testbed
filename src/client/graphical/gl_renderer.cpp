@@ -34,9 +34,9 @@ VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
     auto vhandle                        = std::make_unique<GLVertexHandle>(vao, *this, vi);
     vhandle->vsize                      = vd.position.size();
 
-    log->write(
-        "gl-renderer", LogType::Debug, "created vertex handle: vao=%#x, vsize=%zu", vao,
-        vhandle->vsize);
+//    log->write(
+//        "gl-renderer", LogType::Debug, "created vertex handle: vao=%#x, vsize=%zu", vao,
+//        vhandle->vsize);
 
     vhandle->vboPos  = vboPos;
     vhandle->vboNorm = vboNorm;
@@ -233,9 +233,9 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd, ShaderProgr
 
     glBindVertexArray(0);
 
-    log->write(
-        "gl-renderer", LogType::Debug, "created vertex set: vao=%#x, vbos=%#x,%#x,%#x", vao, vboPos,
-        vboNorm, vboTex);
+//    log->write(
+//        "gl-renderer", LogType::Debug, "created vertex set: vao=%#x, vbos=%#x,%#x,%#x", vao, vboPos,
+//        vboNorm, vboTex);
 
     return std::tie(vao, vboPos, vboNorm, vboTex);
 }

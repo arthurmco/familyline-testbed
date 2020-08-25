@@ -75,6 +75,7 @@ void Framebuffer::setupTexture(int width, int height)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, c);
     err = glGetError();
     if (err != GL_NO_ERROR) {
+        delete[] c;
         char e[128];
         snprintf(e, 127, "error %#x while setting up framebuffer texture", err);
         throw graphical_exception(std::string(e));
@@ -83,6 +84,7 @@ void Framebuffer::setupTexture(int width, int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
+    delete[] c;
 }
 
 void Framebuffer::startDraw()
@@ -99,4 +101,7 @@ void Framebuffer::endDraw()
 
 int Framebuffer::getTextureHandle() { return _textureHandle; }
 
-Framebuffer::~Framebuffer() { glDeleteFramebuffers(1, &_handle); }
+Framebuffer::~Framebuffer() {
+    glDeleteFramebuffers(1, &_handle);
+    glDeleteTextures(1, &_textureHandle);
+}

@@ -3,15 +3,15 @@
 #include <SDL2/SDL.h>
 #include <cairo/cairo.h>
 
+#include <array>
 #include <client/input/input_actions.hpp>
 #include <functional>
 #include <memory>
-#include <array>
 #include <optional>
 #include <queue>
+#include <string>
 #include <tuple>
 #include <vector>
-#include <string>
 
 namespace familyline::graphics::gui
 {
@@ -45,7 +45,14 @@ struct ControlData {
     ControlData(
         int x, int y, ControlPositioning cpos, cairo_t* ctxt, cairo_surface_t* s,
         std::unique_ptr<Control> c)
-        : pos_type(cpos), x(x), y(y), local_context(ctxt), control_canvas(s), control(std::move(c))
+        : pos_type(cpos),
+          x(x),
+          y(y),
+          fx(0.0f),
+          fy(0.0f),
+          local_context(ctxt),
+          control_canvas(s),
+          control(std::move(c))
     {
     }
 
@@ -55,6 +62,8 @@ struct ControlData {
         : pos_type(cpos),
           fx(x),
           fy(y),
+          x(0),
+          y(0),
           local_context(ctxt),
           control_canvas(s),
           control(std::move(c))
@@ -117,8 +126,9 @@ struct CallbackQueueElement {
     unsigned owner_id;
 
     CallbackQueueElement(EventCallbackFn fn, Control* o, unsigned oid)
-	: fn(fn), owner(o), owner_id(oid)
-	{}
+        : fn(fn), owner(o), owner_id(oid)
+    {
+    }
 };
 
 struct CallbackQueue {

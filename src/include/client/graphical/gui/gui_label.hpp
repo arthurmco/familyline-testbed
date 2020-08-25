@@ -18,7 +18,8 @@ class Label : public Control
 private:
     unsigned width_, height_;
     std::string text_;
-
+    PangoLayout* layout_ = nullptr;;
+    
     PangoLayout* getLayout(cairo_t* context) const;
     PangoWeight getPangoWeightFromAppearance(FontWeight fw) const;
 
@@ -40,7 +41,10 @@ public:
 
     virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq) {}
 
-    virtual ~Label() {}
+    virtual ~Label() {
+        if (layout_)
+            g_object_unref(layout_);
+    }
 };
 
 }  // namespace familyline::graphics::gui
