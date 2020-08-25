@@ -59,9 +59,10 @@ if (MSVC)
   include(${CMAKE_TOOLCHAIN_FILE})
   find_library(PANGO_LIB pango-1.0)
   find_library(PANGOCAIRO_LIB pangocairo-1.0)
+  find_library(GOBJECT_LIB gobject-2.0)
   find_path(PANGO_INCLUDE pango/pango.h)
 
-  target_link_libraries(familyline-client PUBLIC ${PANGO_LIB} ${PANGOCAIRO_LIB})
+  target_link_libraries(familyline-client PUBLIC ${PANGO_LIB} ${PANGOCAIRO_LIB} ${GOBJECT_LIB})
   target_include_directories(familyline-client PUBLIC ${PANGO_INCLUDE} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
 
 else()
