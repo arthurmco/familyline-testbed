@@ -336,10 +336,10 @@ static int show_starting_menu()
             if (!pm) pm = new PlayerManager();
 
             auto g   = Game(win, &f3D, &fGUI, guir, pm);
-            auto ret = g.RunLoop();
-            delete pm;
-            delete win;
-            exit(ret);
+            //auto ret = g.RunLoop();
+            //delete pm;
+            //delete win;
+            //exit(ret);
         });
 
         guir->add(0.37, 0.03, ControlPositioning::CenterX, l);
@@ -349,6 +349,7 @@ static int show_starting_menu()
         guir->add(0.2, 0.01, ControlPositioning::CenterX, ilogo);
 
         ima->addListenerHandler([&](HumanInputAction hia) {
+
             /* Only listen for game exit events, because you sure want to
                close the window The others will be handled by the GUI listener */
             if (std::holds_alternative<GameExit>(hia.type)) {

@@ -400,7 +400,7 @@ int Game::RunLoop()
         frame++;
 
         unsigned int elapsed = SDL_GetTicks();
-        delta                = elapsed - ticks;
+        delta                = 0.001 + elapsed - ticks;
 
         ticks = SDL_GetTicks();
         Timer::getInstance()->RunTimers(delta);
@@ -453,16 +453,13 @@ int Game::RunLoop()
 bool Game::RunInput()
 {
     /* Input processing  */
-
-    InputService::getInputManager()->processEvents();
-
     ip->UpdateIntersectedObject();
     ip->UpdateTerrainProjectedPosition();
 
     gctx.elapsed_seconds = INPUT_DELTA / 1000.0;
 
     pm->generateInput();
-    gr->update();
+    //gr->update();
 
     return !pm->exitRequested();
 }
@@ -513,12 +510,12 @@ void Game::RunGraphical()
 
     fb3D->endDraw();
 
-    fbGUI->startDraw();
-    gr->render(0, 0);
+    //fbGUI->startDraw();
+    //gr->render(0, 0);
     //    gr->renderToScreen();
-    fbGUI->endDraw();
+    //fbGUI->endDraw();
 
-    win->update();
+    //win->update();
 }
 
 void Game::showHumanPlayerInfo(Player* hp)
