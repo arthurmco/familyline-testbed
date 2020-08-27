@@ -18,6 +18,7 @@
 #include <span>
 #include <string>
 #include <vector>
+#include <mutex>
 
 namespace familyline::graphics::gui
 {
@@ -55,10 +56,13 @@ private:
     std::queue<familyline::input::HumanInputAction> input_actions_;
 
     CallbackQueue cb_queue_;
+    std::vector<std::future<void>> running_cbs_;
 
+    std::mutex update_lock_;
+    
     /// TODO: add a way to lock event receiving to the GUI. Probably the text edit control
     /// will need, to ensure you can type on it when you click and continue to be able to,
-    /// even if you move the mouse out of it.
+    /// even if you move the mouse out of it.    
 
     /**
      * Initialize shaders and window vertices.

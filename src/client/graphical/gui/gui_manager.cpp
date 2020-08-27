@@ -45,7 +45,7 @@ void GUIManager::init(const Window& win)
                 Shader("shaders/GUI.frag", ShaderType::Fragment)});
 
     sGUI_->link();
-    
+
     auto fnGetAttrib = [&](const char* name) {
         return glGetAttribLocation(sGUI_->getHandle(), name);
     };
@@ -53,8 +53,8 @@ void GUIManager::init(const Window& win)
     attrPos_ = fnGetAttrib("position");
     attrTex_ = fnGetAttrib("in_uv");
 
-    //width_  = (unsigned)win_w;
-    //height_ = (unsigned)win_h;
+    // width_  = (unsigned)win_w;
+    // height_ = (unsigned)win_h;
 
     // Create the vertices
     glGenVertexArrays(1, &(this->vaoGUI_));
@@ -101,11 +101,15 @@ void GUIManager::init(const Window& win)
 
 void GUIManager::add(int x, int y, Control* control)
 {
+    const std::lock_guard<std::mutex> lock(update_lock_);
+
     root_control_->getControlContainer()->add(x, y, std::unique_ptr<Control>(control));
 }
 
 void GUIManager::add(double x, double y, ControlPositioning cpos, Control* control)
 {
+    const std::lock_guard<std::mutex> lock(update_lock_);
+
     if (x > 1.1 || y > 1.1) this->add((int)x, (int)y, control);
 
     root_control_->getControlContainer()->add(x, y, cpos, std::unique_ptr<Control>(control));
@@ -113,6 +117,7 @@ void GUIManager::add(double x, double y, ControlPositioning cpos, Control* contr
 
 void GUIManager::remove(Control* control)
 {
+    const std::lock_guard<std::mutex> lock(update_lock_);
     if (control) root_control_->getControlContainer()->remove(control->getID());
 }
 
@@ -176,7 +181,11 @@ void GUIManager::renderToTexture()
     glClearColor(0.0, 0.0, 0.0, 1.0);
 }
 
-void GUIManager::update() { root_control_->update(context_, canvas_); }
+void GUIManager::update()
+{
+    const std::lock_guard<std::mutex> lock(update_lock_);
+    root_control_->update(context_, canvas_);
+}
 
 void GUIManager::render(unsigned int x, unsigned int y) { this->renderToTexture(); }
 
@@ -198,6 +207,8 @@ std::optional<Control*> GUIManager::getControlAtPoint(int x, int y)
 
 bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
 {
+    const std::lock_guard<std::mutex> lock(update_lock_);
+
     if (std::holds_alternative<GameExit>(hia.type)) {
         return false;
     }
@@ -232,24 +243,46 @@ bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
  */
 void GUIManager::receiveEvent()
 {
+    update_lock_.lock();
+
     while (!input_actions_.empty()) {
         auto& hia = input_actions_.front();
         root_control_->receiveEvent(hia, cb_queue_);
 
         input_actions_.pop();
     }
+
+    update_lock_.unlock();
 }
 
 void GUIManager::runCallbacks()
 {
+    update_lock_.lock();
+
     if (!cb_queue_.callbacks.empty()) {
         // Run one callback per call.
         auto cb = cb_queue_.callbacks.front();
         cb_queue_.callbacks.pop();
 
         // TODO: check if the owner exists.
-        cb.fn(cb.owner);
+        running_cbs_.push_back(std::async(std::launch::async, cb.fn, cb.owner));
     }
+
+    /// remove callbacks that were completed
+    auto cbend = std::remove_if(std::begin(running_cbs_), std::end(running_cbs_), [](auto& cb_future) {
+        auto status = cb_future.wait_for(std::chrono::nanoseconds(1));
+        
+        if (status == std::future_status::ready) {
+            cb_future.get();
+            return true;
+        }
+
+        return false;
+    });
+
+    running_cbs_.erase(cbend, running_cbs_.end());
+    
+    update_lock_.unlock();
 }
 
 ////////////////////////////////////////////////

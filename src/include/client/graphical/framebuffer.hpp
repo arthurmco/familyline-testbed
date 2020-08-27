@@ -6,6 +6,7 @@
 
 #include <SDL2/SDL_opengl.h>
 
+#include <mutex>
 #include <string_view>
 
 namespace familyline::graphics
@@ -31,6 +32,7 @@ private:
     GLuint _rboHandle;
 
     void setupTexture(int width, int height);
+    std::mutex draw_mtx;
 
 public:
     Framebuffer(std::string_view name, int width, int height);
@@ -41,7 +43,7 @@ public:
     /// Call this after you end drawing data
     void endDraw();
 
-    int getTextureHandle();
+    int getTextureHandle() const;
 
     ~Framebuffer();
 };

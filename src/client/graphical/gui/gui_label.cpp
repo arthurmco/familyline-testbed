@@ -48,6 +48,8 @@ PangoLayout* Label::getLayout(cairo_t* context) const
 
 bool Label::update(cairo_t* context, cairo_surface_t* canvas)
 {
+    std::lock_guard<std::mutex> mguard(text_mtx_);
+
     auto [fr, fg, fb, fa] = this->appearance_.foreground;
     auto [br, bg, bb, ba] = this->appearance_.background;
 
@@ -91,6 +93,7 @@ std::tuple<int, int> Label::getNeededSize(cairo_t* parent_context) const
 
 void Label::setText(std::string v)
 {
+    std::lock_guard<std::mutex> mguard(text_mtx_);
     if (this->text_ != v) {
         this->text_ = v;
 

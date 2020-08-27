@@ -71,7 +71,7 @@ void Framebuffer::setupTexture(int width, int height)
     // Other operating systems do not need this, but MacOS seems to need
     // or the framebuffer will preserve the content from the last run,
     // leading to bugs such as this: https://imgur.com/3HpjD7W
-    char* c = new char[width*height*4];
+    char* c = new char[width * height * 4];
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, c);
     err = glGetError();
     if (err != GL_NO_ERROR) {
@@ -89,6 +89,7 @@ void Framebuffer::setupTexture(int width, int height)
 
 void Framebuffer::startDraw()
 {
+    draw_mtx.lock();
     glBindRenderbuffer(GL_RENDERBUFFER, _rboHandle);
     glBindFramebuffer(GL_FRAMEBUFFER, _handle);
 }
@@ -97,11 +98,13 @@ void Framebuffer::endDraw()
 {
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    draw_mtx.unlock();
 }
 
-int Framebuffer::getTextureHandle() { return _textureHandle; }
+int Framebuffer::getTextureHandle() const { return _textureHandle; }
 
-Framebuffer::~Framebuffer() {
+Framebuffer::~Framebuffer()
+{
     glDeleteFramebuffers(1, &_handle);
     glDeleteTextures(1, &_textureHandle);
 }

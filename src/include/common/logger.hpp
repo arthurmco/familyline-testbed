@@ -9,6 +9,7 @@
 #include <chrono>
 #include <cstdio>
 #include <memory>
+#include <mutex>
 
 namespace familyline
 {
@@ -24,6 +25,8 @@ private:
 
     std::chrono::steady_clock::time_point _start;
     double getDelta();
+
+    std::mutex log_mtx;
 
 public:
     Logger(FILE* out = stderr, LogType minlog = LogType::Info)

@@ -48,8 +48,8 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
 
         } break;
 
-        case SDL_QUIT:
-            LOGDEBUG(log, "input-processor", "event: GameExit %d", 0);
+        case SDL_QUIT:            
+            LOGDEBUG(log, "input-processor", "event: GameExit", "");
             _actions.push({millis, GameExit{0}});
             _isRunning = false;
             break;

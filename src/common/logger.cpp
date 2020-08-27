@@ -7,10 +7,8 @@ using namespace std::chrono;
 
 std::unique_ptr<Logger> LoggerService::_logger;
 
-std::mutex mtx;
-
 void Logger::write(const char* tag, LogType type, const char* format, ...)
-{
+{   
     if (type < _minlog) return;
 
     const char* prefix;
@@ -52,7 +50,7 @@ void Logger::write(const char* tag, LogType type, const char* format, ...)
 
     va_end(vl);
 
-    mtx.lock();
+    std::lock_guard<std::mutex> guard(log_mtx);
 
     if (!tag || tag[0] == '\0') {
         fprintf(_out, "[%13.4f] %s%s%s%s\n", this->getDelta(), prefix, colorstart, msg, colorend);
@@ -64,8 +62,6 @@ void Logger::write(const char* tag, LogType type, const char* format, ...)
             _out, "[%13.4f] %s%s: %s%s%s\n", this->getDelta(), prefix, stag, colorstart, msg,
             colorend);
     }
-
-    mtx.unlock();
 }
 
 double Logger::getDelta()

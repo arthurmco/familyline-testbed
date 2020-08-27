@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <mutex>
 
 namespace familyline::graphics::gui
 {
@@ -25,6 +26,8 @@ private:
 
     cairo_t* last_context_;
 
+    std::mutex text_mtx_;
+    
 public:
     Label(unsigned width, unsigned height, std::string text)
         : width_(width), height_(height), text_(text)
