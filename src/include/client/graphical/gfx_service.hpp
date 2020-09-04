@@ -1,5 +1,7 @@
 #pragma once
 
+#include <client/graphical/device.hpp>
+
 #include "asset_manager.hpp"
 #include "material_manager.hpp"
 #include "shader_manager.hpp"
@@ -14,6 +16,7 @@ private:
     static std::unique_ptr<AssetManager> _assetm;
     static std::unique_ptr<MaterialManager> _materialm;
     static std::unique_ptr<TextureManager> _texturem;
+    static std::unique_ptr<Device> _devicem;
 
 public:
     static std::unique_ptr<ShaderManager>& getShaderManager()
@@ -51,6 +54,9 @@ public:
 
         return _texturem;
     }
+
+    static std::unique_ptr<Device>& getDevice() { return _devicem; }
+    static void setDevice(std::unique_ptr<Device>&& d) { _devicem = std::move(d); }
 };
 
 }  // namespace familyline::graphics

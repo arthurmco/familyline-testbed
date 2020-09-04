@@ -77,14 +77,7 @@ private:
     ShaderProgram* sTerrain_;
 
 public:
-    TerrainRenderer(familyline::logic::Terrain& terr, Camera& cam) : terr_(terr), cam_(cam)
-    {
-        sTerrain_ = new ShaderProgram(
-            "terrain", {Shader("shaders/Terrain.vert", ShaderType::Vertex),
-                        Shader("shaders/Terrain.frag", ShaderType::Fragment)});
-
-        sTerrain_->link();
-    }
+    TerrainRenderer(familyline::logic::Terrain& terr, Camera& cam);
 
     /**
      * Build the terrain textures

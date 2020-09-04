@@ -248,13 +248,14 @@ static int show_starting_menu()
                 "main", LogType::Warning, "no default device available, choosing the first one");
             defaultdev = devs[0];
         }
+        GFXService::setDevice(std::unique_ptr<Device>(defaultdev));
 
         InputProcessor* ipr = new InputProcessor;
         InputService::setInputManager(std::make_unique<InputManager>(*ipr));
         auto& ima = InputService::getInputManager();
 
         //        InputManager::GetInstance()->Initialize();
-        win = defaultdev->createWindow(winW, winH);
+        win = GFXService::getDevice()->createWindow(winW, winH);
 
         win->show();
         enable_gl_debug();

@@ -28,11 +28,23 @@ using namespace familyline::logic;
 ***/
 #include <cmath>
 
+TerrainRenderer::TerrainRenderer(familyline::logic::Terrain& terr, Camera& cam)
+    : terr_(terr), cam_(cam)
+{
+    auto& d = GFXService::getDevice();
+
+    sTerrain_ = d->createShaderProgram(
+        "terrain", {d->createShader("shaders/Terrain.vert", ShaderType::Vertex),
+                    d->createShader("shaders/Terrain.frag", ShaderType::Fragment)});
+
+    sTerrain_->link();
+}
+
 std::vector<glm::vec3> TerrainRenderer::createNormals(
     const std::vector<glm::vec3>& vertices, int width) const
 {
     auto [w, h] = terr_.getSize();
-    std::vector<glm::vec3> normals(w*h, glm::vec3(0, 0, 0));
+    std::vector<glm::vec3> normals(w * h, glm::vec3(0, 0, 0));
 
     /* Calculate the normals
        Calculate the normal of every triangle that is part of a single vertex and sum them
@@ -54,43 +66,41 @@ std::vector<glm::vec3> TerrainRenderer::createNormals(
 
             norms[q++] = vertices[idx];
 
-            if (x < w-1) {
-                const auto v2idx = y * w + x+1;
-                norms[q++] = vertices[v2idx];
+            if (x < w - 1) {
+                const auto v2idx = y * w + x + 1;
+                norms[q++]       = vertices[v2idx];
             }
 
-            if (x < w-1 && y < h-1) {
-                const auto v3idx = (y+1) * w + (x+1);
-                norms[q++] = vertices[v3idx];
+            if (x < w - 1 && y < h - 1) {
+                const auto v3idx = (y + 1) * w + (x + 1);
+                norms[q++]       = vertices[v3idx];
             }
 
-            if (y < h-1) {
-                const auto v4idx = (y+1) * w + x;
-                norms[q++] = vertices[v4idx];
+            if (y < h - 1) {
+                const auto v4idx = (y + 1) * w + x;
+                norms[q++]       = vertices[v4idx];
             }
 
             auto vnormal = glm::vec3(0, 0, 0);
             for (auto i = 0; i < q; i++) {
                 auto current = norms[i];
-                auto next = norms[(i+1)%q];
+                auto next    = norms[(i + 1) % q];
 
                 vnormal = glm::vec3(
                     vnormal.x + ((current.y - next.y) * (current.z + next.z)),
                     vnormal.y + ((current.z - next.z) * (current.x + next.x)),
-                    vnormal.z + ((current.x - next.x) * (current.y + next.y))
-                );
-
+                    vnormal.z + ((current.x - next.x) * (current.y + next.y)));
             }
 
             vnormal = glm::normalize(vnormal);
 
             if (std::isnan(vnormal.x) || std::isnan(vnormal.y))
                 LoggerService::getLogger()->write(
-                    "terrain-renderer",
-                    LogType::Error,
+                    "terrain-renderer", LogType::Error,
                     "normal of (%.3f, %.3f, %.3f) [  (%.3f, %.3f, %.3f) ]"
-                    "gave NaN", vertices[idx].x, vertices[idx].y, vertices[idx].z,
-                    vnormal.x, vnormal.y, vnormal.z);
+                    "gave NaN",
+                    vertices[idx].x, vertices[idx].y, vertices[idx].z, vnormal.x, vnormal.y,
+                    vnormal.z);
 
             normals[idx] = -vnormal;
         }
@@ -221,15 +231,15 @@ GLuint TerrainRenderer::createTerrainDataVAO()
 // TODO: load only terrains that the terrain file uses
 std::vector<TerrainTexInfo> loadTerrainData()
 {
-    return {{"grass", 16, 16},
-            {"sand", 16, 16},
+    return {
+        {"grass", 16, 16},
+        {"sand", 16, 16},
     };
 }
 
 std::unordered_map<TerrainType, unsigned int> loadTerrainTypes()
 {
-    return {{TerrainType::Grass, 0},
-            {TerrainType::Sand, 1}};
+    return {{TerrainType::Grass, 0}, {TerrainType::Sand, 1}};
 }
 
 /**

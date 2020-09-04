@@ -1,6 +1,8 @@
 #include <SDL2/SDL_opengl.h>
-#include <client/graphical/window.hpp>
+
 #include <client/graphical/device.hpp>
+#include <client/graphical/window.hpp>
+#include <client/graphical/shader.hpp>
 
 using namespace familyline::graphics;
 
@@ -63,8 +65,14 @@ bool GLDevice::isDefault() { return _default; }
 
 std::any GLDevice::getCustomData() { return _data; }
 
+Window* GLDevice::createWindow(size_t w, size_t h) { return new GLWindow(this, w, h); }
 
-Window* GLDevice::createWindow(size_t w, size_t h)
+Shader GLDevice::createShader(const char* file, ShaderType type) {
+    return Shader{file, type};
+}
+
+ShaderProgram* GLDevice::createShaderProgram(
+    std::string_view name, std::initializer_list<Shader> shaders)
 {
-    return new GLWindow(this, w, h);
+    return new ShaderProgram{name, shaders};
 }

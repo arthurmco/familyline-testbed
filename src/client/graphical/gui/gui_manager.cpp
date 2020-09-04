@@ -40,9 +40,11 @@ void GUIManager::init(const Window& win)
     /* Get window size */
     win.getSize(win_w, win_h);
 
-    sGUI_ = new ShaderProgram(
-        "gui", {Shader("shaders/GUI.vert", ShaderType::Vertex),
-                Shader("shaders/GUI.frag", ShaderType::Fragment)});
+    auto& d = GFXService::getDevice();
+
+    sGUI_ = d->createShaderProgram(
+        "gui", {d->createShader("shaders/GUI.vert", ShaderType::Vertex),
+                d->createShader("shaders/GUI.frag", ShaderType::Fragment)});
 
     sGUI_->link();
     

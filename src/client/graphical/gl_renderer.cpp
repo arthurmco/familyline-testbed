@@ -9,15 +9,17 @@ using namespace familyline::graphics;
 
 GLRenderer::GLRenderer()
 {
-    _sForward = new ShaderProgram(
-        "forward", {Shader("shaders/Forward.vert", ShaderType::Vertex),
-                    Shader("shaders/Forward.frag", ShaderType::Fragment)});
+    auto& d = GFXService::getDevice();
+    
+    _sForward = d->createShaderProgram(
+        "forward", {d->createShader("shaders/Forward.vert", ShaderType::Vertex),
+                    d->createShader("shaders/Forward.frag", ShaderType::Fragment)});
 
     _sForward->link();
 
-    _sLines = new ShaderProgram(
-        "lines", {Shader("shaders/Lines.vert", ShaderType::Vertex),
-                  Shader("shaders/Lines.frag", ShaderType::Fragment)});
+    _sLines = d->createShaderProgram(
+        "lines", {d->createShader("shaders/Lines.vert", ShaderType::Vertex),
+                  d->createShader("shaders/Lines.frag", ShaderType::Fragment)});
 
     _sLines->link();
     glLineWidth(4.0f);
