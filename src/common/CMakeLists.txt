@@ -26,10 +26,6 @@ add_library(
   "logic/player_manager.cpp"
   "logic/terrain.cpp"
   "logic/terrain_file.cpp"
-  "NetMessageQueue.cpp"
-  "net/NetPlayerFilter.cpp"
-  "net/NetPlayerManager.cpp"
-  "net/NetServer.cpp"
   "objects/Tent.cpp"
   "objects/WatchTower.cpp"
   )

@@ -38,7 +38,6 @@
 #include <client/input/InputPicker.hpp>
 #include <client/input/input_service.hpp>
 #include <common/logger.hpp>
-#include <common/net/NetServer.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -113,7 +112,6 @@ static int check_size(int i, int argc, char const* argv[])
     return 0;
 }
 
-Net::Server* nserver = nullptr;
 PlayerManager* pm    = nullptr;
 
 int main(int argc, char const* argv[])
@@ -256,7 +254,7 @@ static int show_starting_menu()
         auto& ima = InputService::getInputManager();
 
         //        InputManager::GetInstance()->Initialize();
-        win = new GLWindow((GLDevice*)defaultdev, winW, winH);
+        win = defaultdev->createWindow(winW, winH);
 
         win->show();
         enable_gl_debug();
@@ -280,14 +278,6 @@ static int show_starting_menu()
         int frames = 0;
 
         /* If we have a networked game ready, don't even show the main menu. */
-        if (nserver) {
-            log->write("init", LogType::Info, "Network game detected, going direct to it");
-
-            //      guir->InitInput();
-            auto g = Game(win, &f3D, &fGUI, guir, pm);
-            g.RunLoop();
-            if (pm) delete pm;
-        }
         log->write(
             "texture", LogType::Info, "maximum tex size: %zu x %zu", Texture::GetMaximumSize(),
             Texture::GetMaximumSize());
@@ -307,7 +297,7 @@ static int show_starting_menu()
             ca.foreground = {0.2, 0.2, 1, 1};
             ca.background = {1, 1, 1, 0.5};
         });
-
+        
         Button* bnew = new Button(400, 50, "New Game");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
         Button* bquit =
             new Button(400, 50, "Exit Game");  // Button(0.1, 0.31, 0.8, 0.1, "Exit Game");

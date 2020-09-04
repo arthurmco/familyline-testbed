@@ -1,5 +1,7 @@
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/gfx_service.hpp>
+#include <client/graphical/gl_renderer.hpp>
+#include <client/graphical/renderer.hpp>
 #include <client/graphical/shader_manager.hpp>
 #include <client/graphical/window.hpp>
 #include <common/logger.hpp>
@@ -181,8 +183,7 @@ void GLWindow::update()
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
         switch (err) {
-            case GL_OUT_OF_MEMORY:
-                throw graphical_exception("Out of memory while rendering");
+            case GL_OUT_OF_MEMORY: throw graphical_exception("Out of memory while rendering");
             default:
                 LoggerService::getLogger()->write("window", LogType::Error, "GL error %#x\n", err);
         }
@@ -198,3 +199,10 @@ void GLWindow::update()
 
     glEnable(GL_DEPTH_TEST);
 }
+
+Renderer* GLWindow::createRenderer()
+{
+    renderer_ = std::unique_ptr<Renderer>((Renderer*)new GLRenderer{});
+    return (GLRenderer*)renderer_.get();
+}
+Renderer* GLWindow::getRenderer() { return (GLRenderer*)renderer_.get(); }

@@ -11,8 +11,11 @@
 #include "framebuffer.hpp"
 #include "shader.hpp"
 
+
 namespace familyline::graphics
 {
+    class Renderer;
+    
 /**
  * The window
  *
@@ -37,8 +40,12 @@ public:
     virtual void update()                                             = 0;
 
     virtual ~Window() {}
+
+    virtual Renderer* createRenderer() = 0;
+    virtual Renderer* getRenderer() = 0;
 };
 
+    
 class GLWindow : public Window
 {
 private:
@@ -46,8 +53,7 @@ private:
 
     SDL_Window* _win      = nullptr;
     SDL_GLContext _glctxt = nullptr;
-    int _width;
-    int _height;
+    int _width, _height;
     int _fwidth, _fheight;
 
     ShaderProgram* winShader = nullptr;
@@ -58,6 +64,8 @@ private:
 
     void createWindowSquare();
 
+    std::unique_ptr<Renderer> renderer_;
+    
 public:
     GLWindow(GLDevice* dev, int width = 800, int height = 600);
 
@@ -76,6 +84,11 @@ public:
     virtual void setFramebuffers(Framebuffer* f3D, Framebuffer* fGUI);
     virtual void show();
     virtual void update();
+
+    virtual Renderer* createRenderer();
+    virtual Renderer* getRenderer();
+
+    virtual ~GLWindow() {}
 };
 
 }  // namespace familyline::graphics

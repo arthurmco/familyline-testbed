@@ -115,7 +115,7 @@ Game::Game(
         olm               = new ObjectLifecycleManager{*om};
         auto& atk_manager = LogicService::getAttackManager();
 
-        rndr = new GLRenderer{};
+        rndr = w->createRenderer();
         // DebugPlotter::pinterface = std::unique_ptr<DebugPlotInterface>
         //    (new GraphicalPlotInterface(rndr));
 

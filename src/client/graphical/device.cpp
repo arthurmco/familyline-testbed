@@ -1,5 +1,5 @@
 #include <SDL2/SDL_opengl.h>
-
+#include <client/graphical/window.hpp>
 #include <client/graphical/device.hpp>
 
 using namespace familyline::graphics;
@@ -62,3 +62,9 @@ std::string_view GLDevice::getVendor()
 bool GLDevice::isDefault() { return _default; }
 
 std::any GLDevice::getCustomData() { return _data; }
+
+
+Window* GLDevice::createWindow(size_t w, size_t h)
+{
+    return new GLWindow(this, w, h);
+}

@@ -14,8 +14,12 @@
 #include <string_view>
 #include <vector>
 
+#include <client/graphical/renderer.hpp>
+
 namespace familyline::graphics
 {
+class Window;
+
 class Device
 {
 public:
@@ -30,6 +34,9 @@ public:
     /// window (ex: a GLDevice data will only make sense to a GLWindow,
     /// a VulkanDevice to a Vulkan Window...)
     virtual std::any getCustomData() = 0;
+
+
+    virtual Window* createWindow(size_t w, size_t h) = 0;
 };
 
 class GLDevice : public Device
@@ -50,6 +57,8 @@ public:
     virtual bool isDefault();
 
     virtual std::any getCustomData();
+
+    virtual Window* createWindow(size_t w, size_t h);
 };
 
 /**
