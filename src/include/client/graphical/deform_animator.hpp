@@ -40,13 +40,20 @@ public:
      * Advance animation by 'ms' milisseconds.
      * If ms is not the frametime of this animation, interpolate
      */
-    virtual void advance(int ms);
+    virtual void advance(double ms);
 
     /**
      * Run some predefined animation named 'name'.
      * Set the internal pointer to the first frame of that animation
      */
     virtual void runAnimation(const char* name);
+
+        /**
+     * Get the current time, in ms, of the current animation
+     */
+    virtual double getCurrentTime() {  return (_frameptr * 1000.0) / _framerate; }
+    
+    
 };
 
 }  // namespace familyline::graphics

@@ -37,7 +37,7 @@ public:
      *
      * If ms is not the frametime of this animation, interpolate
      */
-    virtual void advance(int ms) = 0;
+    virtual void advance(double ms) = 0;
 
     /**
      * Run some predefined animation named 'name'
@@ -46,6 +46,11 @@ public:
      */
     virtual void runAnimation(const char* name) = 0;
 
+    /**
+     * Get the current time, in ms, of the current animation
+     */
+    virtual double getCurrentTime() { return 0.0; }
+    
     bool isDirty() { return this->dirtyFrame; }
 };
 }  // namespace familyline::graphics

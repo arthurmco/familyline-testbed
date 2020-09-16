@@ -3,6 +3,7 @@
 #include <client/graphical/mesh.hpp>
 #include <client/graphical/camera.hpp>
 #include <client/graphical/meshopener/OBJOpener.hpp>
+#include <client/graphical/meshopener/MD2Opener.hpp>
 #include <common/logic/logic_service.hpp>
 #include <common/logic/object_factory.hpp>
 #include <common/logger.hpp>
@@ -24,7 +25,7 @@ using namespace familyline::graphics;
 class SceneObjectBase {
 public:
     virtual void update() = 0;
-    virtual void stepAnimation(unsigned int ms) = 0;
+    virtual void stepAnimation(double ms) = 0;
 
     virtual std::string_view getName() const = 0;
     virtual glm::vec3 getPosition() const    = 0;
@@ -52,7 +53,7 @@ public:
     SceneObject(T& ref) { static_assert("SceneObject trait not supported for this type");  }
 
     virtual void update() {}
-    virtual void stepAnimation(unsigned int ms) {}
+    virtual void stepAnimation(double ms) {}
 
     virtual std::string_view getName() const { return ""; }
     virtual glm::vec3 getPosition() const    { return glm::vec3(-1, -1, -1); }
@@ -86,7 +87,7 @@ public:
         ref_.update();
     }
 
-    virtual void stepAnimation(unsigned int ms) {
+    virtual void stepAnimation(double ms) {
         ref_.getAnimator()->advance(ms);
     }
 
@@ -347,3 +348,31 @@ TEST(SceneManager, TestMeshRemove) {
 
     ASSERT_EQ(5, renderer.getVertexListCount());
 }
+
+
+TEST(SceneManager, TestSceneManagerAnimate) {
+    ShaderProgram s{"forward", {}};
+    GFXService::getShaderManager()->addShader(&s);
+
+    TestRenderer renderer;
+    Camera camera(glm::vec3(-30, 30, -30), 16/9.0f, glm::vec3(0, 0, 0));
+    SceneManager sm(renderer, camera);
+
+    OBJOpener oo;
+    MD2Opener om;
+    std::vector<Mesh*> meshes = oo.OpenSpecialized(TESTS_DIR "/assets/test.obj");
+    std::vector<Mesh*> meshes2 = om.OpenSpecialized(TESTS_DIR "/assets/anim_test.md2");
+    Mesh* animmesh = meshes2[0];
+    
+    sm.add(make_scene_object(*meshes[0]));
+    sm.add(make_scene_object(*animmesh));
+
+    ASSERT_FLOAT_EQ(0.0, animmesh->getAnimator()->getCurrentTime());
+
+    for (auto i = 0; i < 120; i++) {
+        sm.update(15);
+    }
+
+    ASSERT_FLOAT_EQ(1800.0, animmesh->getAnimator()->getCurrentTime());
+}
+

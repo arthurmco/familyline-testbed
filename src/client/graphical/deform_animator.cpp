@@ -10,7 +10,7 @@ DeformAnimator::DeformAnimator(
 {
 }
 
-void DeformAnimator::advance(int ms)
+void DeformAnimator::advance(double ms)
 {
     const double frametime = 1000.0 / _framerate;
 
