@@ -18,6 +18,13 @@ void DeformAnimator::advance(double ms)
     auto maxframe = unsigned(avector.size()) - 1;
     if (_frameptr >= maxframe) {
         // Cannot advance anymore.
+
+        // If the animation is the default animation, loop back.
+        // (We might need to define the 'loopable' bit somewhere)
+        if (_animation_name == "default") {
+            _frameptr = 0;
+        }
+        
         return;
     }
 
