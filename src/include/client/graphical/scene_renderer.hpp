@@ -7,26 +7,28 @@
 #include "scene_object.hpp"
 #include "vertexdata.hpp"
 
+
 namespace familyline::graphics
 {
+class Mesh;
+
 struct SceneObjectInfo {
-    std::shared_ptr<SceneObject> object;
+    std::shared_ptr<Mesh> object;
     int id;
     std::vector<VertexHandle*> handles;
     bool visible = true;
 
-    SceneObjectInfo(std::shared_ptr<SceneObject> o, int id, std::vector<VertexHandle*> h)
+    SceneObjectInfo(std::shared_ptr<Mesh> o, int id, std::vector<VertexHandle*> h)
         : object(o), id(id), handles(h)
     {
     }
 };
 
-class Mesh;
 
 /**
  * Manages scene object rendering
  *
- * Gets scene object raw vertex and light handles and updates them, accordingly to
+ * Gets scene object raw vertex and light dles and updates them, accordingly to
  * some variables.
  * For example, if the scene object is destroyed, we remove the vertex handle (and, therefore, the
  * data) from the video card
@@ -48,7 +50,7 @@ public:
 
     SceneRenderer(Renderer* renderer, Camera& camera) : _renderer(renderer), camera(camera) {}
 
-    int add(std::shared_ptr<SceneObject> so);
+    int add(std::shared_ptr<Mesh> so);
     void remove(int meshHandle);
     void update();
 };

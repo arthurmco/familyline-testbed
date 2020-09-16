@@ -25,6 +25,8 @@ public:
     virtual bool update(VertexData& vd);
     virtual bool remove();
     virtual bool recreate(VertexData& vd, VertexInfo& vi);
+
+    virtual ~GLVertexHandle() {};
 };
 
 class GLRenderer : public Renderer
@@ -51,5 +53,9 @@ public:
     virtual void removeVertex(VertexHandle* vh);
 
     // virtual LightHandle createLight(LightData& ld) = 0;
+
+    virtual ~GLRenderer() {};
+
+
 };
 }  // namespace familyline::graphics

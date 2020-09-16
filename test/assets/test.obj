@@ -2,6 +2,7 @@
 # www.blender.org
 mtllib test.mtl
 g TestCube_Cube
+o Cube
 v 3.991889 -1.000000 -3.991889
 v 3.991889 -1.000000 3.991889
 v -3.991889 -1.000000 3.991888

@@ -10,7 +10,7 @@ using namespace familyline::graphics;
 // TODO: put vertex info into the vertex handle to make
 //       getting the world matrix easier (and can solve texture anim too)
 
-int SceneRenderer::add(std::shared_ptr<SceneObject> so)
+int SceneRenderer::add(std::shared_ptr<Mesh> so)
 {
     auto& log = LoggerService::getLogger();
     int id    = nextID++;
