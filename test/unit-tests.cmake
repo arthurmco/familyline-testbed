@@ -37,12 +37,13 @@ if (DO_TESTS)
     ${CMAKE_BINARY_DIR}/googletest-build)
   
   file( GLOB SRC_TEST_FILES "${CMAKE_SOURCE_DIR}/test/*.cpp" )
+  file( GLOB SRC_UTIL_FILES "${CMAKE_SOURCE_DIR}/test/utils/test_renderer.cpp" )
 
   message("${SRC_SERVER_TEST}")
 
   find_package(OpenGL REQUIRED)
   
-  add_executable(familyline-tests ${SRC_TEST_FILES})
+  add_executable(familyline-tests ${SRC_TEST_FILES} ${SRC_UTIL_FILES})
   target_link_libraries(familyline-tests familyline-common)
   target_link_libraries(familyline-tests familyline-client)
   target_link_libraries(familyline-tests ${OPENGL_LIBRARIES})
