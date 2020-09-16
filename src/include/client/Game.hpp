@@ -11,7 +11,6 @@
 //#include "logic/ObjectRenderer.hpp"
 #include <client/graphical/GraphicalPlotInterface.hpp>
 #include <client/graphical/Light.hpp>
-#include <client/graphical/terrain_renderer.hpp>
 #include <client/graphical/TextureOpener.hpp>
 #include <client/graphical/asset_file.hpp>
 #include <client/graphical/asset_manager.hpp>
@@ -26,19 +25,20 @@
 #include <client/graphical/meshopener/OBJOpener.hpp>
 #include <client/graphical/object_renderer.hpp>
 #include <client/graphical/renderer.hpp>
-#include <client/graphical/scene_renderer.hpp>
+#include <client/graphical/scene_manager.hpp>
+#include <client/graphical/terrain_renderer.hpp>
 #include <client/graphical/texture_manager.hpp>
 #include <client/graphical/window.hpp>
 #include <common/logic/BuildQueue.hpp>
 #include <common/logic/GameActionManager.hpp>
 #include <common/logic/ObjectPathManager.hpp>
 #include <common/logic/PathFinder.hpp>
-#include <common/logic/terrain_file.hpp>
 #include <common/logic/colony_manager.hpp>
 #include <common/logic/debug_drawer.hpp>
 #include <common/logic/lifecycle_manager.hpp>
 #include <common/logic/object_factory.hpp>
 #include <common/logic/player_manager.hpp>
+#include <common/logic/terrain_file.hpp>
 //#include "graphical/gui/ImageControl.hpp"
 
 //#include <client/input/InputPicker.hpp>
@@ -55,9 +55,9 @@ class Game
 private:
     unsigned human_id_;
 
-    graphics::Window* win             = nullptr;
-    graphics::Renderer* rndr          = nullptr;
-    graphics::SceneRenderer* scenernd = nullptr;
+    graphics::Window* win            = nullptr;
+    graphics::Renderer* rndr         = nullptr;
+    graphics::SceneManager* scenernd = nullptr;
     graphics::Framebuffer *fbGUI = nullptr, *fb3D = nullptr;
     graphics::gui::GUIManager* gr = nullptr;
     logic::PlayerManager* pm      = nullptr;
@@ -98,7 +98,7 @@ private:
     bool RunInput();
 
     void RunLogic();
-    void RunGraphical();
+    void RunGraphical(double framems);
 
     /* Show on-screen debug info
      * (aka the words in monospaced font you see in-game)

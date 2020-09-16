@@ -8,7 +8,7 @@ using namespace familyline::graphics;
 using namespace familyline::logic;
 
 InputPicker::InputPicker(
-    Terrain* terrain, Window* win, SceneRenderer* sm, Camera* cam, ObjectManager* om)
+    Terrain* terrain, Window* win, SceneManager* sm, Camera* cam, ObjectManager* om)
 {
     this->_terrain = terrain;
     this->_win     = win;

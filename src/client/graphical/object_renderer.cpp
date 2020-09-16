@@ -3,6 +3,7 @@
 #include <client/graphical/object_renderer.hpp>
 #include <common/logic/logic_service.hpp>
 #include <common/logger.hpp>
+#include "client/graphical/scene_object.hpp"
 
 using namespace familyline::logic;
 using namespace familyline::graphics;
@@ -14,9 +15,9 @@ void ObjectRenderer::add(std::shared_ptr<GameObject> o)
     }
 
     RendererSlot rs(o->getID(), o);
-    std::shared_ptr<Mesh> m =
-        std::dynamic_pointer_cast<Mesh>(o->getLocationComponent().value().mesh);
-    rs.meshHandle = _sr.add(m);
+    rs.meshHandle = _sr.add(
+        make_scene_object(*((Mesh*)o->getLocationComponent().value().mesh.get()))
+    );
 
     this->components.push_back(rs);
     printf("added mesh handle %x\n", rs.meshHandle);

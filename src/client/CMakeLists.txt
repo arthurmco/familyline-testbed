@@ -33,7 +33,7 @@ add_library(
   "graphical/meshopener/MeshOpener.cpp"
   "graphical/meshopener/OBJOpener.cpp"
   "graphical/object_renderer.cpp"
-  "graphical/scene_renderer.cpp"
+  "graphical/scene_manager.cpp"
   "graphical/shader.cpp"
   "graphical/shader_manager.cpp"
   "graphical/static_animator.cpp"

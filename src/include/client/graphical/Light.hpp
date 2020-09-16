@@ -15,7 +15,7 @@
 
 namespace familyline::graphics
 {
-class Light : public SceneObject
+class Light
 {
 private:
     std::string _name;

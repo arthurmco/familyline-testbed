@@ -10,7 +10,7 @@
 
 #include <client/graphical/camera.hpp>
 #include <client/graphical/mesh.hpp>
-#include <client/graphical/scene_renderer.hpp>
+#include <client/graphical/scene_manager.hpp>
 #include <client/graphical/window.hpp>
 #include <common/logic/terrain.hpp>
 #include <common/logic/game_event.hpp>
@@ -55,7 +55,7 @@ class InputPicker
 private:
     familyline::logic::Terrain* _terrain;
     familyline::graphics::Window* _win;
-    familyline::graphics::SceneRenderer* _sm;
+    familyline::graphics::SceneManager* _sm;
     familyline::graphics::Camera* _cam;
     familyline::logic::ObjectManager* _om;
 
@@ -72,7 +72,7 @@ private:
 public:
     InputPicker(
         familyline::logic::Terrain* terrain, familyline::graphics::Window* win,
-        familyline::graphics::SceneRenderer* sm, familyline::graphics::Camera* cam,
+        familyline::graphics::SceneManager* sm, familyline::graphics::Camera* cam,
         familyline::logic::ObjectManager* om);
 
     /**

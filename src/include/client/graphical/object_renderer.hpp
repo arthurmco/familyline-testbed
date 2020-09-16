@@ -13,7 +13,7 @@
 #include <memory>
 #include <vector>
 
-#include "scene_renderer.hpp"
+#include <client/graphical/scene_manager.hpp>
 
 namespace familyline::graphics
 {
@@ -39,10 +39,10 @@ class ObjectRenderer
 private:
     std::vector<RendererSlot> components;
     const familyline::logic::Terrain& _terrain;
-    SceneRenderer& _sr;
+    SceneManager& _sr;
 
 public:
-    ObjectRenderer(const familyline::logic::Terrain& t, SceneRenderer& sr) : _terrain(t), _sr(sr) {}
+    ObjectRenderer(const familyline::logic::Terrain& t, SceneManager& sr) : _terrain(t), _sr(sr) {}
 
     void add(std::shared_ptr<familyline::logic::GameObject> o);
     void remove(familyline::logic::object_id_t id);

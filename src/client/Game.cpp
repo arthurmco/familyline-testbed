@@ -140,7 +140,7 @@ Game::Game(
 
         cam =
             new Camera{glm::vec3(6.0f, 36.0f, 6.0f), (float)winW / (float)winH, glm::vec3(0, 0, 0)};
-        scenernd = new SceneRenderer((Renderer*)rndr, *cam);
+        scenernd = new SceneManager(*(Renderer*)rndr, *cam);
 
         //      scenernd->SetCamera(cam);
         std::unique_ptr<HumanPlayer> hp = std::make_unique<HumanPlayer>(*pm, *terr, "Arthur", 0);
@@ -394,8 +394,8 @@ int Game::RunLoop()
 
         if (frame > 1) limax = std::max(li, limax);
 
-        this->ShowDebugInfo();
-        this->RunGraphical();
+        this->ShowDebugInfo();        
+        this->RunGraphical(double(delta));
 
         frame++;
 
@@ -494,7 +494,7 @@ void Game::RunLogic()
     LogicService::getDebugDrawer()->update();
 }
 
-void Game::RunGraphical()
+void Game::RunGraphical(double framems)
 {
     /* Rendering */
 
@@ -503,9 +503,8 @@ void Game::RunGraphical()
 
     //  rndr->SetBoundingBox(hp->renderBBs);
 
-    scenernd->update();
+    scenernd->update(framems);
 
-    //    Animator::runAllAnimations(16); // TODO: get correct frame time
     //    rndr->UpdateObjects();
 
     //    rndr->UpdateFrames();

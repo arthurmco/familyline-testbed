@@ -25,5 +25,5 @@ void Light::setPosition(glm::vec3 pos) { this->_position = pos; }
 Light::Light(const char* name, glm::vec3 pos, int r, int g, int b, float strength)
     : _name(name), _position(pos), _lightColor(r, g, b), _lightStrength(strength)
 {
-    type = SceneObjectType::SceneLight;
+    //type = SceneObjectType::SceneLight;
 }
