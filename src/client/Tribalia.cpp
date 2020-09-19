@@ -397,6 +397,10 @@ static int show_starting_menu()
             fGUI.endDraw();
 
             win->update();
+
+            double e = SDL_GetTicks();
+            if ((e - b) < 1000 / 60.0) SDL_Delay((unsigned int)(1000 / 60.0 - (e - b)));
+            b = SDL_GetTicks();
             return r;
         });
 
@@ -404,12 +408,6 @@ static int show_starting_menu()
             if (!lr.run()) {
                 break;
             }
-
-            double e = SDL_GetTicks();
-
-            if ((e - b) < 1000 / 60.0) SDL_Delay((unsigned int)(1000 / 60.0 - (e - b)));
-
-            b = SDL_GetTicks();
 
             frames++;
         }

@@ -1,4 +1,5 @@
 #include <GL/glew.h>
+#include <SDL2/SDL_timer.h>
 
 #include <client/Game.hpp>
 #include <client/graphical/LightManager.hpp>
@@ -162,7 +163,7 @@ Game::Game(
         terr_rend = new TerrainRenderer{*terr, *cam};
         terr_rend->buildVertexData();
         terr_rend->buildTextures();
-        
+
         objrend = new ObjectRenderer(*terr, *scenernd);
 
         pm->render_add_callback = [&](std::shared_ptr<GameObject> o) { objrend->add(o); };
@@ -191,7 +192,7 @@ Game::Game(
             pathf->InitPathmap(w, h);
             pathf->UpdatePathmap(w, h);
         }
-        
+
         widgets.lblVersion = new Label(10, 10, "Familyline " VERSION " commit " COMMIT);
 
         std::unique_ptr<Player> humanp = std::unique_ptr<Player>(hp.release());
@@ -312,7 +313,7 @@ void Game::initLoopData()
     lblKeys = new Label(
         0.05 * 640, 0.05 * 480,
         "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
-    
+
     lblBuilding->modifyAppearance([](ControlAppearance& ca) {
         ca.foreground = {1, 1, 1, 1};
         ca.background = {0, 0, 0, 0.4};
@@ -348,6 +349,8 @@ void Game::initLoopData()
     gr->add(5, 155, lblKeys);
 
     started_ = true;
+
+    ticks = std::chrono::high_resolution_clock::now();
 }
 
 Game::~Game() {
@@ -364,6 +367,7 @@ Game::~Game() {
 
 bool Game::runLoop()
 {
+    rendertime = std::chrono::high_resolution_clock::now();
     player = true;
 
     /* Runs the input code at fixed steps, like the logic one below */
@@ -390,20 +394,23 @@ bool Game::runLoop()
 
     if (frame > 1) limax = std::max(li, limax);
 
-    this->ShowDebugInfo();        
-    this->RunGraphical(double(delta));
+    this->ShowDebugInfo();
+    this->RunGraphical(double(delta.count()));
+    Timer::getInstance()->RunTimers(delta.count());
 
     frame++;
 
-    unsigned int elapsed = SDL_GetTicks();
+    ////////////////////////
+
+    auto elapsed = std::chrono::high_resolution_clock::now();
     delta                = elapsed - ticks;
-
-    ticks = SDL_GetTicks();
-    Timer::getInstance()->RunTimers(delta);
-
+    decltype(delta) renderdelta = std::chrono::high_resolution_clock::now() - rendertime;
+    
     if (frame % 15 == 0) {
-        pms = delta * 1.0;
+        pms = delta.count() * 1.0;
     }
+
+    ticks = elapsed;
 
     char sfps[128];
     sprintf(sfps, "%.3f fps, %.3f ms/frame", float(1000 / pms), float(pms));
@@ -413,22 +420,27 @@ bool Game::runLoop()
 #define FPS_LOCK 120.0
 
     // Locked in ~120 fps
-    if (delta < 1000 / FPS_LOCK) {
-        auto sleepdelta = int((1000 / FPS_LOCK) - delta);
-        SDL_Delay(sleepdelta);
+    if (renderdelta.count() < (1000.0 / FPS_LOCK)) {
+        auto sleepdelta = (1000.0 / FPS_LOCK) - 5;
+        SDL_Delay(unsigned(sleepdelta));
     }
+
+
 
     // Make the mininum and maximum frame calculation more fair
     // because usually the first frame is when we load things, and
     // its the slowest.
 
-    if (delta < mindelta && frame > 2) mindelta = delta;
+    if (delta.count() > 0) {
+        if (delta.count() < mindelta && frame > 2) mindelta = delta.count();
 
-    if (delta > maxdelta && frame > 2) maxdelta = delta;
+        if (delta.count() > maxdelta && frame > 2) maxdelta = delta.count();
 
-    sumfps += (1000 / delta);
-    logicTime += delta;
-    inputTime += delta;
+        sumfps += (1000 / delta.count());
+    }
+
+    logicTime += delta.count();
+    inputTime += delta.count();
 
     return true;
 }

@@ -116,9 +116,8 @@ private:
     graphics::gui::Label* lblSelected   = nullptr;
     graphics::gui::Label* lblTerrainPos = nullptr;
     graphics::gui::Label* lblKeys = nullptr;
-
-
-    int delta  = 1;
+    
+    std::chrono::duration<double, std::milli> delta;
     double pms = 0.0;
 
     double maxdelta = 0, mindelta = 99, sumfps = 0;
@@ -130,11 +129,12 @@ private:
     // and the input engine at 120 Hz
 #define INPUT_DELTA 8
     
-    int logicTime = LOGIC_DELTA;
-    int inputTime = INPUT_DELTA;
+    double logicTime = LOGIC_DELTA;
+    double  inputTime = INPUT_DELTA;
     int limax     = 0;
 
-    unsigned int ticks = SDL_GetTicks();
+    std::chrono::high_resolution_clock::time_point ticks;
+    std::chrono::high_resolution_clock::time_point rendertime;
     unsigned int frame = 0;
 
 public:
