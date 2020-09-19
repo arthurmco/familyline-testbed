@@ -44,6 +44,8 @@ public:
     }
 
     virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq);
+
+    virtual ~RootControl() {}
 };
 
 }  // namespace familyline::graphics::gui

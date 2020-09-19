@@ -109,12 +109,54 @@ private:
 
     std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>> colonies_;
 
+    /// Variables used between initLoopData() and runLoop()
+    graphics::gui::Label* lblBuilding   = nullptr;
+    graphics::gui::Label* lblFPS        = nullptr;
+    graphics::gui::Label* lblRange      = nullptr;
+    graphics::gui::Label* lblSelected   = nullptr;
+    graphics::gui::Label* lblTerrainPos = nullptr;
+    graphics::gui::Label* lblKeys = nullptr;
+
+
+    int delta  = 1;
+    double pms = 0.0;
+
+    double maxdelta = 0, mindelta = 99, sumfps = 0;
+    bool started_ = false;
+
+    // Run the logic engine at 60 Hz
+#define LOGIC_DELTA 16
+
+    // and the input engine at 120 Hz
+#define INPUT_DELTA 8
+    
+    int logicTime = LOGIC_DELTA;
+    int inputTime = INPUT_DELTA;
+    int limax     = 0;
+
+    unsigned int ticks = SDL_GetTicks();
+    unsigned int frame = 0;
+
 public:
     Game(
         graphics::Window* w, graphics::Framebuffer* fb3D, graphics::Framebuffer* fbGUI,
         graphics::gui::GUIManager* gr, logic::PlayerManager* pm);
 
-    int RunLoop();
+    void initLoopData();
+    
+    bool runLoop();
+
+    /// Return maximum, minimum and average fps
+    auto getStatisticInfo() {
+         // less delta, more fps
+        
+        if (frame > 0 && started_)
+            return std::make_tuple(1000 / mindelta, 1000 / maxdelta, sumfps / frame);
+        else
+            return std::make_tuple(0.0, 0.0, 0.0);
+    }
+
+    ~Game();
 };
 
 }  // namespace familyline

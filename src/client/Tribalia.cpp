@@ -61,6 +61,40 @@ using namespace familyline::input;
 
 #endif
 
+/**
+ * This function allows us to run different functions
+ * in the game loop, without the loop itself needing to
+ * know it
+ */
+class LoopRunner
+{
+private:
+    /**
+     * The function we need to run
+     *
+     * If this function returns false, the loop must be stopped
+     */
+    std::function<bool()> fn_;
+
+    /**
+     * The function we loaded
+     *
+     * We first store them, and swap them before running, so
+     * that we do not crash because we loaded a loop run
+     * function in the middle of another loop run function
+     */
+    std::function<bool()> loadedfn_;
+
+public:
+    void load(std::function<bool()> fn) { loadedfn_ = fn; }
+
+    bool run()
+    {
+        fn_ = loadedfn_;
+        return fn_();
+    }
+};
+
 static int show_starting_menu();
 
 static int get_arg_index(const char* name, int argc, char const* argv[])
@@ -112,7 +146,7 @@ static int check_size(int i, int argc, char const* argv[])
     return 0;
 }
 
-PlayerManager* pm    = nullptr;
+PlayerManager* pm = nullptr;
 
 int main(int argc, char const* argv[])
 {
@@ -176,7 +210,7 @@ int main(int argc, char const* argv[])
         }
     }
 
-    LoggerService::createLogger(fLog);
+    LoggerService::createLogger(fLog, LogType::Info);
 
     // int winW = 640, winH = 480;
     if (get_arg_index("--version", argc, argv) >= 0) {
@@ -223,9 +257,11 @@ static void enable_gl_debug();
 static int show_starting_menu()
 {
     auto& log = LoggerService::getLogger();
+    LoopRunner lr;
 
     graphics::Window* win = nullptr;
     GUIManager* guir      = nullptr;
+    Game* g               = nullptr;
     try {
         auto devs          = graphics::getDeviceList();
         Device* defaultdev = nullptr;
@@ -275,9 +311,6 @@ static int show_starting_menu()
         guir = new GUIManager(*win, (unsigned)gwidth, (unsigned)gheight, *ima.get());
         // guir->initShaders(win);
 
-        double b   = SDL_GetTicks();
-        int frames = 0;
-
         /* If we have a networked game ready, don't even show the main menu. */
         log->write(
             "texture", LogType::Info, "maximum tex size: %zu x %zu", Texture::GetMaximumSize(),
@@ -298,7 +331,7 @@ static int show_starting_menu()
             ca.foreground = {0.2, 0.2, 1, 1};
             ca.background = {1, 1, 1, 0.5};
         });
-        
+
         Button* bnew = new Button(400, 50, "New Game");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
         Button* bquit =
             new Button(400, 50, "Exit Game");  // Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
@@ -323,14 +356,11 @@ static int show_starting_menu()
             guir->remove(bquit);
             guir->remove(ilogo);
 
-            fmt::print("New Game\n");
             if (!pm) pm = new PlayerManager();
 
-            auto g   = Game(win, &f3D, &fGUI, guir, pm);
-            auto ret = g.RunLoop();
-            delete pm;
-            delete win;
-            exit(ret);
+            g = new Game(win, &f3D, &fGUI, guir, pm);
+            g->initLoopData();
+            lr.load([&]() { return g->runLoop(); });
         });
 
         guir->add(0.37, 0.03, ControlPositioning::CenterX, l);
@@ -344,13 +374,15 @@ static int show_starting_menu()
                close the window The others will be handled by the GUI listener */
             if (std::holds_alternative<GameExit>(hia.type)) {
                 r = false;
-                return false;
             }
 
             return false;
         });
 
-        while (r) {
+        double b   = SDL_GetTicks();
+        int frames = 0;
+
+        lr.load([&]() {
             // Input
             ima->processEvents();
 
@@ -365,6 +397,14 @@ static int show_starting_menu()
             fGUI.endDraw();
 
             win->update();
+            return r;
+        });
+
+        while (true) {
+            if (!lr.run()) {
+                break;
+            }
+
             double e = SDL_GetTicks();
 
             if ((e - b) < 1000 / 60.0) SDL_Delay((unsigned int)(1000 / 60.0 - (e - b)));
@@ -373,6 +413,9 @@ static int show_starting_menu()
 
             frames++;
         }
+
+        if (g) delete g;
+        if (pm) delete pm;
 
         delete guir;
         delete win;

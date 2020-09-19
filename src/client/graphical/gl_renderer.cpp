@@ -22,7 +22,6 @@ GLRenderer::GLRenderer()
                   d->createShader("shaders/Lines.frag", ShaderType::Fragment)});
 
     _sLines->link();
-    glLineWidth(4.0f);
 }
 
 VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)

@@ -285,23 +285,8 @@ Game::Game(
     }
 }
 
-Label lblBuilding   = Label(0.05 * 640, 0.1 * 480, "!!!");
-Label lblFPS        = Label(0.05 * 640, 0.9 * 480, "0 fps, 0 ms/frame");
-Label lblRange      = Label(0.05 * 640, 0.13 * 480, "--");
-Label lblSelected   = Label(0.05 * 640, 0.17 * 480, "---");
-Label lblTerrainPos = Label(0.05 * 640, 0.21 * 480, "---");
 
-Label lblKeys = Label(
-    0.05 * 640, 0.05 * 480,
-    "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
-
-// Run the logic engine at 60 Hz
-#define LOGIC_DELTA 16
-
-// and the input engine at 120 Hz
-#define INPUT_DELTA 8
-
-int Game::RunLoop()
+void Game::initLoopData()
 {
     auto& log = LoggerService::getLogger();
 
@@ -319,132 +304,133 @@ int Game::RunLoop()
           });
           pnl.AddPanel(&btnExit); */
 
-    lblBuilding.modifyAppearance([](ControlAppearance& ca) {
+    lblBuilding = new Label(0.05 * 640, 0.1 * 480, "!!!");
+    lblFPS = new Label(0.05 * 640, 0.9 * 480, "0 fps, 0 ms/frame");
+    lblRange = new Label(0.05 * 640, 0.13 * 480, "--");
+    lblSelected = new Label(0.05 * 640, 0.17 * 480, "---");
+    lblTerrainPos = new Label(0.05 * 640, 0.21 * 480, "---");
+    lblKeys = new Label(
+        0.05 * 640, 0.05 * 480,
+        "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
+    
+    lblBuilding->modifyAppearance([](ControlAppearance& ca) {
         ca.foreground = {1, 1, 1, 1};
         ca.background = {0, 0, 0, 0.4};
     });
 
-    lblFPS.modifyAppearance([](ControlAppearance& ca) {
+    lblFPS->modifyAppearance([](ControlAppearance& ca) {
         ca.foreground = {1, 1, 1, 1};
         ca.background = {0, 0, 0, 0.4};
     });
 
-    lblRange.modifyAppearance([](ControlAppearance& ca) {
+    lblRange->modifyAppearance([](ControlAppearance& ca) {
         ca.foreground = {1, 1, 1, 1};
         ca.background = {0, 0, 0, 0.4};
     });
 
-    lblSelected.modifyAppearance([](ControlAppearance& ca) {
+    lblSelected->modifyAppearance([](ControlAppearance& ca) {
         ca.foreground = {1, 1, 1, 1};
         ca.background = {0, 0, 0, 0.4};
     });
 
-    lblKeys.modifyAppearance([](ControlAppearance& ca) {
+    lblKeys->modifyAppearance([](ControlAppearance& ca) {
         ca.foreground = {0.9, 0.8, 1, 1};
         ca.background = {0, 0, 0, 0.4};
     });
 
-    lblTerrainPos.modifyAppearance([](ControlAppearance& ca) { ca.background = {0, 0, 0, 0.4}; });
+    lblTerrainPos->modifyAppearance([](ControlAppearance& ca) { ca.background = {0, 0, 0, 0.4}; });
 
-    gr->add(5, 5, &lblFPS);
-    gr->add(5, 35, &lblTerrainPos);
-    gr->add(5, 65, &lblBuilding);
-    gr->add(5, 95, &lblRange);
-    gr->add(5, 125, &lblSelected);
-    gr->add(5, 155, &lblKeys);
+    gr->add(5, 5, lblFPS);
+    gr->add(5, 35, lblTerrainPos);
+    gr->add(5, 65, lblBuilding);
+    gr->add(5, 95, lblRange);
+    gr->add(5, 125, lblSelected);
+    gr->add(5, 155, lblKeys);
 
-    int delta  = 1;
-    double pms = 0.0;
+    started_ = true;
+}
 
-    double maxdelta = 0, mindelta = 99, sumfps = 0;
+Game::~Game() {
+    if (started_) {
+        gr->remove(lblFPS);
+        gr->remove(lblTerrainPos);
+        gr->remove(lblBuilding);
+        gr->remove(lblRange);
+        gr->remove(lblSelected);
+        gr->remove(lblKeys);
+    }
+}
 
-    int logicTime = LOGIC_DELTA;
-    int inputTime = INPUT_DELTA;
-    int limax     = 0;
 
-    // Update the terrain first, so the terrain textures can load
-    // TODO: generate the terrain textures before? in another function?
-    terr_rend->render();
+bool Game::runLoop()
+{
+    player = true;
 
-    unsigned int ticks = SDL_GetTicks();
-    unsigned int frame = 0;
-
-    do {
-        player = true;
-
-        /* Runs the input code at fixed steps, like the logic one below */
-        while (inputTime >= INPUT_DELTA) {
-            player = this->RunInput();
-            if (!player) break;
-
-            inputTime -= INPUT_DELTA;
+    /* Runs the input code at fixed steps, like the logic one below */
+    while (inputTime >= INPUT_DELTA) {
+        player = this->RunInput();
+        if (!player) {
+            return false;
         }
 
-        /* Run the logic code in steps of fixed blocks
-         * This is called fixed timestep, and will ensure game consistency
-         * on multiplayer games
-         */
-        int li = 0;
-        while (logicTime >= LOGIC_DELTA) {
-            this->RunLogic();
-            logicTime -= LOGIC_DELTA;
-            li++;
-            gctx.tick++;
-        }
+        inputTime -= INPUT_DELTA;
+    }
 
-        if (frame > 1) limax = std::max(li, limax);
+    /* Run the logic code in steps of fixed blocks
+     * This is called fixed timestep, and will ensure game consistency
+     * on multiplayer games
+     */
+    int li = 0;
+    while (logicTime >= LOGIC_DELTA) {
+        this->RunLogic();
+        logicTime -= LOGIC_DELTA;
+        li++;
+        gctx.tick++;
+    }
 
-        this->ShowDebugInfo();        
-        this->RunGraphical(double(delta));
+    if (frame > 1) limax = std::max(li, limax);
 
-        frame++;
+    this->ShowDebugInfo();        
+    this->RunGraphical(double(delta));
 
-        unsigned int elapsed = SDL_GetTicks();
-        delta                = elapsed - ticks;
+    frame++;
 
-        ticks = SDL_GetTicks();
-        Timer::getInstance()->RunTimers(delta);
+    unsigned int elapsed = SDL_GetTicks();
+    delta                = elapsed - ticks;
 
-        if (frame % 15 == 0) {
-            pms = delta * 1.0;
-        }
+    ticks = SDL_GetTicks();
+    Timer::getInstance()->RunTimers(delta);
 
-        char sfps[128];
-        sprintf(sfps, "%.3f fps, %.3f ms/frame", float(1000 / pms), float(pms));
-        lblFPS.setText(sfps);
-        //      gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
+    if (frame % 15 == 0) {
+        pms = delta * 1.0;
+    }
+
+    char sfps[128];
+    sprintf(sfps, "%.3f fps, %.3f ms/frame", float(1000 / pms), float(pms));
+    lblFPS->setText(sfps);
+    //      gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
 #define FPS_LOCK 120.0
 
-        // Locked in ~120 fps
-        if (delta < 1000 / FPS_LOCK) {
-            auto sleepdelta = int((1000 / FPS_LOCK) - delta);
-            SDL_Delay(sleepdelta);
-        }
+    // Locked in ~120 fps
+    if (delta < 1000 / FPS_LOCK) {
+        auto sleepdelta = int((1000 / FPS_LOCK) - delta);
+        SDL_Delay(sleepdelta);
+    }
 
-        // Make the mininum and maximum frame calculation more fair
-        // because usually the first frame is when we load things, and
-        // its the slowest.
+    // Make the mininum and maximum frame calculation more fair
+    // because usually the first frame is when we load things, and
+    // its the slowest.
 
-        if (delta < mindelta && frame > 2) mindelta = delta;
+    if (delta < mindelta && frame > 2) mindelta = delta;
 
-        if (delta > maxdelta && frame > 2) maxdelta = delta;
+    if (delta > maxdelta && frame > 2) maxdelta = delta;
 
-        sumfps += (1000 / delta);
-        logicTime += delta;
-        inputTime += delta;
-    } while (player);
+    sumfps += (1000 / delta);
+    logicTime += delta;
+    inputTime += delta;
 
-    double maxfps = 1000 / mindelta;  // less delta, more fps
-    double minfps = 1000 / maxdelta;
-    double avgfps = sumfps / frame;
-    log->write(
-        "game", LogType::Info, "fps max: %.3f (%.3f ms), min: %.3f (%.3f ms), avg: %.3f", maxfps,
-        mindelta, minfps, maxdelta, avgfps);
-
-    log->write("game", LogType::Info, "Total frames: %d", frame);
-
-    return 0;
+    return true;
 }
 
 /* Run input-related code
@@ -531,9 +517,9 @@ void Game::showHumanPlayerInfo(Player* hp)
         sprintf(
             s, "Click to build %s",
             BuildQueue::GetInstance()->getNext().value()->getName().c_str());
-        lblBuilding.setText(s);
+        lblBuilding->setText(s);
     } else {
-        lblBuilding.setText("");
+        lblBuilding->setText("");
     }
 
     auto locc = ip->GetIntersectedObject().lock();
@@ -547,7 +533,7 @@ void Game::showHumanPlayerInfo(Player* hp)
             auto inRange = selected->getAttackComponent()->isInAttackRange(
                 alocc->getAttackComponent().value());
 
-            lblRange.setText(inRange ? "In range" : "Not in range");
+            lblRange->setText(inRange ? "In range" : "Not in range");
         }
     }
 
@@ -557,7 +543,7 @@ void Game::showHumanPlayerInfo(Player* hp)
     //       gr->DebugWrite(10, 160, "Camera quadrant: %d x %d", qx, qy);
     //   }
 
-    lblSelected.setText("");
+    lblSelected->setText("");
     if (selected) {
         char s[150];
         auto& acomp = selected->getAttackComponent();
@@ -570,7 +556,7 @@ void Game::showHumanPlayerInfo(Player* hp)
             sprintf(s, "Selected object: '%s'", selected->getName().c_str());
         }
 
-        lblSelected.setText(s);
+        lblSelected->setText(s);
     }
 
     glm::vec3 p = ip->GetTerrainProjectedPosition();
@@ -582,7 +568,7 @@ void Game::showHumanPlayerInfo(Player* hp)
         "Terrain pos: "
         "(ogl: %.3f,%.3f,%.3f | Game: %.2f, %.2f), rotation %.1f",
         p.x, p.y, p.z, q.x, q.y, cam->GetRotation() * 180 / M_PI);
-    lblTerrainPos.setText(texs);
+    lblTerrainPos->setText(texs);
     // gr->DebugWrite(10, 65, "Bounding box: %s", hp->renderBBs ?
     //  "Enabled" : "Disabled");
 }
