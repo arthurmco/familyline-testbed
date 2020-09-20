@@ -224,11 +224,14 @@ class Control
 {
 private:
     unsigned long long id_;
-    std::function<void(Control*, size_t, size_t)> resize_cb_;
-
+    std::function<void(Control*, size_t, size_t)> resize_cb_;    
+    
 protected:
     std::optional<ContainerComponent> cc_ = std::nullopt;
     ControlAppearance appearance_;
+
+    int x_;
+    int y_;
 
 public:
     Control();
@@ -245,6 +248,8 @@ public:
         this->setAppearance(a);
     }
 
+    void updatePosition(int x, int y) { x_ = x; y_ = y;}
+    
     /**
      * The control z-index value
      *

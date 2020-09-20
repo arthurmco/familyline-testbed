@@ -61,6 +61,7 @@ void ContainerComponent::add(int x, int y, std::unique_ptr<Control> c)
     });
 
     auto [context, canvas] = this->parent->createChildContext(c.get());
+    c->updatePosition(x, y);
     this->children.emplace_back(x, y, ControlPositioning::Pixel, context, canvas, std::move(c));
 }
 
@@ -83,11 +84,12 @@ void ContainerComponent::add(float x, float y, ControlPositioning cpos, std::uni
     auto [context, canvas] = this->parent->createChildContext(c.get());
 
     if (x > 1.1 || y > 1.1 || cpos == ControlPositioning::Pixel) {
+        c->updatePosition(x, y);
         this->children.emplace_back(
             (int)x, (int)y, ControlPositioning::Pixel, context, canvas, std::move(c));
     } else {
         this->children.emplace_back(x, y, cpos, context, canvas, std::move(c));
-    }
+    }    
 }
 
 void ContainerComponent::remove(unsigned long long control_id)
@@ -129,6 +131,7 @@ void ContainerComponent::updateAbsoluteCoord(unsigned long long control_id, int 
     if (cd != this->children.end()) {
         cd->x = absx;
         cd->y = absy;
+        cd->control->updatePosition(absx, absy);
     }
 }
 

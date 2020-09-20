@@ -31,6 +31,7 @@
 #include <client/graphical/gui/gui_button.hpp>
 #include <client/graphical/gui/gui_imageview.hpp>
 #include <client/graphical/gui/gui_label.hpp>
+#include <client/graphical/gui/gui_window.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
 #include <client/graphical/renderer.hpp>
 #include <client/graphical/shader_manager.hpp>
@@ -320,6 +321,9 @@ static int show_starting_menu()
         bool r = true;
         // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
+        GUIWindow* gwin = new GUIWindow(gwidth, gheight);
+                
+        
         Label* l = new Label(0.37, 0.03, "FAMILYLINE");
         l->modifyAppearance([](ControlAppearance& ca) {
             ca.fontSize   = 32;
@@ -350,11 +354,7 @@ static int show_starting_menu()
 
         bnew->setClickCallback([&](Control* cc) {
             (void)cc;
-            guir->remove(l);
-            guir->remove(lv);
-            guir->remove(bnew);
-            guir->remove(bquit);
-            guir->remove(ilogo);
+            guir->remove(gwin);
 
             if (!pm) pm = new PlayerManager();
 
@@ -363,11 +363,12 @@ static int show_starting_menu()
             lr.load([&]() { return g->runLoop(); });
         });
 
-        guir->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)l));
-        guir->add(0.32, 0.8, ControlPositioning::Relative, std::unique_ptr<Control>((Control*)lv));
-        guir->add(0.1, 0.2, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bnew));
-        guir->add(0.1, 0.31, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
-        guir->add(0.2, 0.01, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)ilogo));
+        gwin->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)l));
+        gwin->add(0.32, 0.8, ControlPositioning::Relative, std::unique_ptr<Control>((Control*)lv));
+        gwin->add(0.1, 0.2, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bnew));
+        gwin->add(0.1, 0.31, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
+        gwin->add(0.2, 0.01, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)ilogo));
+        guir->add(0, 0, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)gwin));
 
         ima->addListenerHandler([&](HumanInputAction hia) {
             /* Only listen for game exit events, because you sure want to

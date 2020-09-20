@@ -63,6 +63,7 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
                     winevent = "SDL_WINDOWEVENT_SHOWN";
                     break;
                 case SDL_WINDOWEVENT_HIDDEN:
+                    // TODO: add some sort of pause event?
                     winevent = "SDL_WINDOWEVENT_HIDDEN";
                     break;
                 case SDL_WINDOWEVENT_EXPOSED:

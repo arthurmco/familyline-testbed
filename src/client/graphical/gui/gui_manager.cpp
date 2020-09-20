@@ -108,8 +108,6 @@ void GUIManager::add(int x, int y, std::unique_ptr<Control> control)
 
 void GUIManager::add(double x, double y, ControlPositioning cpos, std::unique_ptr<Control> control)
 {
-    if (x > 1.1 || y > 1.1) this->add((int)x, (int)y, std::move(control));
-
     root_control_->getControlContainer()->add(x, y, cpos, std::move(control));
 }
 
