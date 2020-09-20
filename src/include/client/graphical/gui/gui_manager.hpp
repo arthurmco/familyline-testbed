@@ -112,8 +112,8 @@ public:
         });
     }
 
-    void add(int x, int y, Control* control);
-    void add(double x, double y, ControlPositioning cpos, Control* control);
+    void add(int x, int y, std::unique_ptr<Control> control);
+    void add(double x, double y, ControlPositioning cpos, std::unique_ptr<Control> control);
 
     void remove(Control* control);
 

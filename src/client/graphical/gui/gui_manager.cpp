@@ -101,16 +101,16 @@ void GUIManager::init(const Window& win)
     }
 }
 
-void GUIManager::add(int x, int y, Control* control)
+void GUIManager::add(int x, int y, std::unique_ptr<Control> control)
 {
-    root_control_->getControlContainer()->add(x, y, std::unique_ptr<Control>(control));
+    root_control_->getControlContainer()->add(x, y, std::move(control));
 }
 
-void GUIManager::add(double x, double y, ControlPositioning cpos, Control* control)
+void GUIManager::add(double x, double y, ControlPositioning cpos, std::unique_ptr<Control> control)
 {
-    if (x > 1.1 || y > 1.1) this->add((int)x, (int)y, control);
+    if (x > 1.1 || y > 1.1) this->add((int)x, (int)y, std::move(control));
 
-    root_control_->getControlContainer()->add(x, y, cpos, std::unique_ptr<Control>(control));
+    root_control_->getControlContainer()->add(x, y, cpos, std::move(control));
 }
 
 void GUIManager::remove(Control* control)

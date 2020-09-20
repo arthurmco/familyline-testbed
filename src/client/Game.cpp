@@ -341,12 +341,12 @@ void Game::initLoopData()
 
     lblTerrainPos->modifyAppearance([](ControlAppearance& ca) { ca.background = {0, 0, 0, 0.4}; });
 
-    gr->add(5, 5, lblFPS);
-    gr->add(5, 35, lblTerrainPos);
-    gr->add(5, 65, lblBuilding);
-    gr->add(5, 95, lblRange);
-    gr->add(5, 125, lblSelected);
-    gr->add(5, 155, lblKeys);
+    gr->add(5, 5, std::unique_ptr<Control>(lblFPS));
+    gr->add(5, 35, std::unique_ptr<Control>((Control*)lblTerrainPos));
+    gr->add(5, 65, std::unique_ptr<Control>((Control*)lblBuilding));
+    gr->add(5, 95, std::unique_ptr<Control>((Control*)lblRange));
+    gr->add(5, 125, std::unique_ptr<Control>((Control*)lblSelected));
+    gr->add(5, 155, std::unique_ptr<Control>((Control*)lblKeys));
 
     started_ = true;
 

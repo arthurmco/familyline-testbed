@@ -363,11 +363,11 @@ static int show_starting_menu()
             lr.load([&]() { return g->runLoop(); });
         });
 
-        guir->add(0.37, 0.03, ControlPositioning::CenterX, l);
-        guir->add(0.32, 0.8, ControlPositioning::Relative, lv);
-        guir->add(0.1, 0.2, ControlPositioning::CenterX, bnew);
-        guir->add(0.1, 0.31, ControlPositioning::CenterX, bquit);
-        guir->add(0.2, 0.01, ControlPositioning::CenterX, ilogo);
+        guir->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)l));
+        guir->add(0.32, 0.8, ControlPositioning::Relative, std::unique_ptr<Control>((Control*)lv));
+        guir->add(0.1, 0.2, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bnew));
+        guir->add(0.1, 0.31, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
+        guir->add(0.2, 0.01, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)ilogo));
 
         ima->addListenerHandler([&](HumanInputAction hia) {
             /* Only listen for game exit events, because you sure want to
