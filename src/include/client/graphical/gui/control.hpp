@@ -236,7 +236,7 @@ protected:
 public:
     Control();
 
-    unsigned long getID() { return id_; }
+    unsigned long getID() const { return id_; }
 
     const ControlAppearance& getAppearance() { return appearance_; }
     virtual void setAppearance(ControlAppearance& a) { appearance_ = a; }

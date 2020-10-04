@@ -49,8 +49,12 @@ public:
         if (control)
             rc_.getControlContainer()->remove(control->getID());
     }
+
+    std::function<void(GUIWindow&)> event_onDelete;
     
-    virtual ~GUIWindow() {}
+    virtual ~GUIWindow() {
+        event_onDelete(*this);
+    }
 };
 
 }  // namespace familyline::graphics::gui

@@ -101,20 +101,33 @@ void GUIManager::init(const Window& win)
     }
 }
 
-void GUIManager::add(int x, int y, std::unique_ptr<Control> control)
+/**
+ * Show the window you pass
+ *
+ * Since the window have a "hidden" delete event, you do not need to remove the
+ * window from the gui, deallocating it will be sufficient
+ */
+void GUIManager::showWindow(GUIWindow* win)
 {
-    root_control_->getControlContainer()->add(x, y, std::move(control));
+    win->event_onDelete = [&](GUIWindow& w) {
+        this->closeWindow(w);
+    };
+
+    auto [w, h] = win->getNeededSize(context_);
+    
+    auto* canvas  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
+    auto* context = cairo_create(canvas);
+    windowstack_.push_back(GUIWindowInfo{win, context, canvas});
 }
 
-void GUIManager::add(double x, double y, ControlPositioning cpos, std::unique_ptr<Control> control)
+void GUIManager::closeWindow(const GUIWindow& w)
 {
-    root_control_->getControlContainer()->add(x, y, cpos, std::move(control));
+    auto itend = std::remove_if(windowstack_.begin(), windowstack_.end(), [&](GUIWindowInfo& wi) {
+        return (wi.win->getID() == w.getID()); 
+    });
+    windowstack_.erase(itend, windowstack_.end());   
 }
 
-void GUIManager::remove(Control* control)
-{
-    if (control) root_control_->getControlContainer()->remove(control->getID());
-}
 
 /**
  * Render the cairo canvas to the gui texture
@@ -176,7 +189,32 @@ void GUIManager::renderToTexture()
     glClearColor(0.0, 0.0, 0.0, 1.0);
 }
 
-void GUIManager::update() { root_control_->update(context_, canvas_); }
+void GUIManager::update() {
+    root_control_->update(context_, canvas_);
+
+    // Clean bg
+    cairo_set_source_rgba(context_, 0.3, 0.3, 0.3, 0.25);
+    cairo_set_operator(context_, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(context_);
+
+    auto w = cairo_image_surface_get_width(canvas_);
+    auto h = cairo_image_surface_get_height(canvas_);
+    
+    for (auto& win : windowstack_) {
+        win.win->update(win.context, win.canvas);
+        cairo_set_operator(context_, CAIRO_OPERATOR_OVER);
+
+        auto absx = 0;
+        auto absy = 0;
+        
+        cairo_set_source_surface(context_, win.canvas, absx, absy);
+        win.win->updatePosition(absx, absy);
+    }
+
+    cairo_paint(context_);
+
+
+}
 
 void GUIManager::render(unsigned int x, unsigned int y) { this->renderToTexture(); }
 
@@ -190,10 +228,15 @@ GUIManager::~GUIManager()
 
 /**
  * Get the control that is in the specified pixel coordinate
+ *
+ * Since we only need to worry about windows, we can simplify this.
  */
 std::optional<Control*> GUIManager::getControlAtPoint(int x, int y)
 {
-    return root_control_->getControlContainer()->getControlAtPoint(x, y);
+    if (windowstack_.empty())
+        return std::nullopt;
+    else
+        return std::optional<Control*>((Control*) windowstack_.front().win);
 }
 
 bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
@@ -226,6 +269,9 @@ bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
     return false;
 }
 
+auto mousex_ = 0;
+auto mousey_ = 0;
+
 /**
  * Process received input events
  *
@@ -234,8 +280,35 @@ void GUIManager::receiveEvent()
 {
     while (!input_actions_.empty()) {
         auto& hia = input_actions_.front();
-        root_control_->receiveEvent(hia, cb_queue_);
 
+        std::optional<Control*> control;
+
+        if (std::holds_alternative<ClickAction>(hia.type)) {
+            auto ca = std::get<ClickAction>(hia.type);
+            control = this->getControlAtPoint(ca.screenX, ca.screenY);
+        }
+
+        if (std::holds_alternative<MouseAction>(hia.type)) {
+            auto ma = std::get<MouseAction>(hia.type);
+            mousex_ = ma.screenX;
+            mousey_ = ma.screenY;
+            control = this->getControlAtPoint(ma.screenX, ma.screenY);
+        }
+
+        if (std::holds_alternative<KeyAction>(hia.type)) {
+            auto ka = std::get<KeyAction>(hia.type);
+            control = this->getControlAtPoint(mousex_, mousey_);
+        }
+
+        if (std::holds_alternative<WheelAction>(hia.type)) {
+            auto wa = std::get<WheelAction>(hia.type);
+            control = this->getControlAtPoint(wa.screenX, wa.screenY);
+        }
+
+        if (control.has_value()) {
+            (*control)->receiveEvent(hia, cb_queue_);
+        }
+            
         input_actions_.pop();
     }
 }

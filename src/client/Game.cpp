@@ -341,12 +341,12 @@ void Game::initLoopData()
 
     lblTerrainPos->modifyAppearance([](ControlAppearance& ca) { ca.background = {0, 0, 0, 0.4}; });
 
-    gr->add(5, 5, std::unique_ptr<Control>(lblFPS));
-    gr->add(5, 35, std::unique_ptr<Control>((Control*)lblTerrainPos));
-    gr->add(5, 65, std::unique_ptr<Control>((Control*)lblBuilding));
-    gr->add(5, 95, std::unique_ptr<Control>((Control*)lblRange));
-    gr->add(5, 125, std::unique_ptr<Control>((Control*)lblSelected));
-    gr->add(5, 155, std::unique_ptr<Control>((Control*)lblKeys));
+    //gr->add(5, 5, std::unique_ptr<Control>(lblFPS));
+    //gr->add(5, 35, std::unique_ptr<Control>((Control*)lblTerrainPos));
+    //gr->add(5, 65, std::unique_ptr<Control>((Control*)lblBuilding));
+    //gr->add(5, 95, std::unique_ptr<Control>((Control*)lblRange));
+    //gr->add(5, 125, std::unique_ptr<Control>((Control*)lblSelected));
+    //gr->add(5, 155, std::unique_ptr<Control>((Control*)lblKeys));
 
     started_ = true;
 
@@ -355,12 +355,12 @@ void Game::initLoopData()
 
 Game::~Game() {
     if (started_) {
-        gr->remove(lblFPS);
-        gr->remove(lblTerrainPos);
-        gr->remove(lblBuilding);
-        gr->remove(lblRange);
-        gr->remove(lblSelected);
-        gr->remove(lblKeys);
+        //gr->remove(lblFPS);
+        //gr->remove(lblTerrainPos);
+        //gr->remove(lblBuilding);
+        //gr->remove(lblRange);
+        //gr->remove(lblSelected);
+        //gr->remove(lblKeys);
     }
 }
 

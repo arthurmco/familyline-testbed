@@ -354,7 +354,7 @@ static int show_starting_menu()
 
         bnew->setClickCallback([&](Control* cc) {
             (void)cc;
-            guir->remove(gwin);
+            guir->closeWindow(*gwin);
 
             if (!pm) pm = new PlayerManager();
 
@@ -368,7 +368,9 @@ static int show_starting_menu()
         gwin->add(0.1, 0.2, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bnew));
         gwin->add(0.1, 0.31, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
         gwin->add(0.2, 0.01, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)ilogo));
-        guir->add(0, 0, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)gwin));
+
+        guir->showWindow(gwin);
+        //guir->add(0, 0, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)gwin));
 
         ima->addListenerHandler([&](HumanInputAction hia) {
             /* Only listen for game exit events, because you sure want to

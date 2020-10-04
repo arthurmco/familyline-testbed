@@ -8,6 +8,7 @@
 #include <client/graphical/gui/gui_button.hpp>
 #include <client/graphical/gui/gui_imageview.hpp>
 #include <client/graphical/gui/gui_label.hpp>
+#include <client/graphical/gui/gui_window.hpp>
 #include <client/graphical/gui/root_control.hpp>
 #include <client/graphical/shader.hpp>
 #include <client/graphical/window.hpp>
@@ -18,6 +19,7 @@
 #include <span>
 #include <string>
 #include <vector>
+#include <deque>
 
 namespace familyline::graphics::gui
 {
@@ -88,6 +90,41 @@ private:
      */
     std::optional<Control*> getControlAtPoint(int x, int y);
 
+    struct GUIWindowInfo {
+        GUIWindow* win;
+        cairo_t* context;
+        cairo_surface_t* canvas;
+
+        GUIWindowInfo(GUIWindow* w, cairo_t* ctxt, cairo_surface_t* s)
+            : win(w), context(ctxt), canvas(s)
+            {}
+        
+        ~GUIWindowInfo() {
+            cairo_surface_destroy(canvas);
+            cairo_destroy(context);                
+        }
+
+        GUIWindowInfo(const GUIWindowInfo& other) = delete;
+
+        GUIWindowInfo(GUIWindowInfo&& other) noexcept
+            : win(std::exchange(other.win, nullptr)),
+              context(std::exchange(other.context, nullptr)),
+              canvas(std::exchange(other.canvas, nullptr))
+            {}
+
+        GUIWindowInfo& operator=(const GUIWindowInfo& other) = delete;
+
+        GUIWindowInfo& operator=(GUIWindowInfo&& other) noexcept {
+            std::swap(win, other.win);
+            std::swap(context, other.context);
+            std::swap(canvas, other.canvas);
+            return *this;
+        }
+           
+    };
+    
+    std::deque<GUIWindowInfo> windowstack_;
+    
 public:
     GUIManager(
         familyline::graphics::Window& win, unsigned width, unsigned height,
@@ -112,10 +149,20 @@ public:
         });
     }
 
-    void add(int x, int y, std::unique_ptr<Control> control);
-    void add(double x, double y, ControlPositioning cpos, std::unique_ptr<Control> control);
+    /**
+     * Show the window you pass
+     *
+     * Since the window have a "hidden" delete event, you do not need to remove the
+     * window from the gui, deallocating it will be sufficient
+     */    
+    void showWindow(GUIWindow* w);
 
-    void remove(Control* control);
+    void closeWindow(const GUIWindow& w);
+    
+    //void add(int x, int y, std::unique_ptr<Control> control);
+    //void add(double x, double y, ControlPositioning cpos, std::unique_ptr<Control> control);
+
+    //void remove(Control* control);
 
     void update();
 

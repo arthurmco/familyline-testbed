@@ -23,7 +23,7 @@ private:
     PangoLayout* getLayout(cairo_t* context) const;
     PangoWeight getPangoWeightFromAppearance(FontWeight fw) const;
 
-    cairo_t* last_context_;
+    cairo_t* last_context_ = nullptr;
 
 public:
     Label(unsigned width, unsigned height, std::string text)
