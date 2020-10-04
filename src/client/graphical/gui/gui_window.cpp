@@ -5,7 +5,9 @@ using namespace familyline::input;
 
 bool GUIWindow::update(cairo_t* context, cairo_surface_t* canvas)
 {
-    cairo_set_source_rgba(context, 0, 0, 0, 0);
+    auto [br, bg, bb, ba] = this->appearance_.background;
+
+    cairo_set_source_rgba(context, br, bg, bb, ba);
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
 

@@ -21,7 +21,7 @@ private:
     unsigned label_width_, label_height_;
     cairo_t *l_context_        = nullptr;
     cairo_surface_t *l_canvas_ = nullptr;
-    EventCallbackFn click_cb_;
+    EventCallbackFn click_cb_ = [](void* cc){};
 
     std::chrono::time_point<std::chrono::steady_clock> last_hover_ =
         std::chrono::steady_clock::now();

@@ -244,7 +244,7 @@ std::optional<Control*> GUIManager::getControlAtPoint(int x, int y)
     if (windowstack_.empty())
         return std::nullopt;
     else
-        return std::optional<Control*>((Control*) windowstack_.front().win);
+        return std::optional<Control*>((Control*) windowstack_.back().win);
 }
 
 bool GUIManager::checkIfEventHits(const HumanInputAction& hia)

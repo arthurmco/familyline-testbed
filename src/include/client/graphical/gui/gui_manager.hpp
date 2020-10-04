@@ -154,6 +154,9 @@ public:
 
         auto* canvas  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
         auto* context = cairo_create(canvas);
+        debug_window_.modifyAppearance([](ControlAppearance& ca) {
+            ca.background = {0, 0, 0, 0.0};
+        });
         debug_window_.event_onDelete = [](auto& o) {};  // set the delete callback to avoid a
                                                         // bad function call exception on the
                                                         // destructor       

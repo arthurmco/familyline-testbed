@@ -31,6 +31,8 @@ public:
     {
         rc_canvas_  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width_, height_);
         rc_context_ = cairo_create(rc_canvas_);
+
+        this->appearance_.background = {0.0, 0.0, 0.0, 0.8};
     }
 
     virtual std::tuple<int, int> getNeededSize(cairo_t* parent_context) const

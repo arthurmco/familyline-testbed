@@ -322,7 +322,29 @@ static int show_starting_menu()
         // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
         GUIWindow* gwin = new GUIWindow(gwidth, gheight);
-                
+        GUIWindow* gsettings = new GUIWindow(gwidth, gheight);
+        // TODO: copy label?
+        Label* lb = new Label(0.37, 0.03, "FAMILYLINE");
+        lb->modifyAppearance([](ControlAppearance& ca) {
+            ca.fontSize   = 32;
+            ca.foreground = {1, 1, 1, 1};
+        });
+
+        Label* header = new Label(0.37, 0.03, "Settings");
+        header->modifyAppearance([](ControlAppearance& ca) {
+            ca.fontSize   = 24;
+            ca.foreground = {1, 1, 1, 0.9};
+        });
+
+        Button* bret = new Button(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
+        bret->setClickCallback([&](auto* c) {
+            guir->closeWindow(*gsettings);
+        });
+        
+        gsettings->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)lb));
+        gsettings->add(0.37, 0.13, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)header));
+        gsettings->add(0.37, 0.9, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bret));
+
         
         Label* l = new Label(0.37, 0.03, "FAMILYLINE");
         l->modifyAppearance([](ControlAppearance& ca) {
@@ -337,6 +359,7 @@ static int show_starting_menu()
         });
 
         Button* bnew = new Button(400, 50, "New Game");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
+        Button* bsettings = new Button(400, 50, "Settings");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
         Button* bquit =
             new Button(400, 50, "Exit Game");  // Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
 
@@ -350,6 +373,11 @@ static int show_starting_menu()
         bquit->setClickCallback([&r](Control* cc) {
             (void)cc;
             r = false;
+        });
+
+        bsettings->setClickCallback([&](auto* cc) {
+            guir->showWindow(gsettings);
+            
         });
 
         bnew->setClickCallback([&](Control* cc) {
@@ -366,7 +394,8 @@ static int show_starting_menu()
         gwin->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)l));
         gwin->add(0.32, 0.8, ControlPositioning::Relative, std::unique_ptr<Control>((Control*)lv));
         gwin->add(0.1, 0.2, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bnew));
-        gwin->add(0.1, 0.31, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
+        gwin->add(0.1, 0.305, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bsettings));
+        gwin->add(0.1, 0.410, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
         gwin->add(0.2, 0.01, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)ilogo));
 
         guir->showWindow(gwin);
