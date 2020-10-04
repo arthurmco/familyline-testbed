@@ -30,6 +30,12 @@ struct SceneObjectInfo {
     /// The vertex handles, represent data on the video card
     /// about this object
     std::vector<VertexHandle*> handles;
+
+    SceneObjectInfo(
+        std::shared_ptr<SceneObjectBase> o, int id, bool visible, std::vector<VertexHandle*> hs)
+        : object(std::move(o)), id(id), visible(visible), handles(hs)
+    {
+    }
 };
 
 typedef int scene_object_handle_t;
