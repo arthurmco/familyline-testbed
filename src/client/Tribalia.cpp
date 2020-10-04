@@ -10,8 +10,10 @@
 
 #ifdef __linux__
 #include <GL/glxew.h>
-#include <unistd.h>
+#endif
 
+#ifndef _WIN32
+#include <unistd.h>
 #endif
 
 #ifdef _WIN32
