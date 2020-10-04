@@ -14,12 +14,12 @@
 #include <client/graphical/window.hpp>
 #include <client/input/input_manager.hpp>
 #include <common/logger.hpp>
+#include <deque>
 #include <memory>
 #include <queue>
 #include <span>
 #include <string>
 #include <vector>
-#include <deque>
 
 namespace familyline::graphics::gui
 {
@@ -97,11 +97,13 @@ private:
 
         GUIWindowInfo(GUIWindow* w, cairo_t* ctxt, cairo_surface_t* s)
             : win(w), context(ctxt), canvas(s)
-            {}
-        
-        ~GUIWindowInfo() {
+        {
+        }
+
+        ~GUIWindowInfo()
+        {
             cairo_surface_destroy(canvas);
-            cairo_destroy(context);                
+            cairo_destroy(context);
         }
 
         GUIWindowInfo(const GUIWindowInfo& other) = delete;
@@ -110,21 +112,32 @@ private:
             : win(std::exchange(other.win, nullptr)),
               context(std::exchange(other.context, nullptr)),
               canvas(std::exchange(other.canvas, nullptr))
-            {}
+        {
+        }
 
         GUIWindowInfo& operator=(const GUIWindowInfo& other) = delete;
 
-        GUIWindowInfo& operator=(GUIWindowInfo&& other) noexcept {
+        GUIWindowInfo& operator=(GUIWindowInfo&& other) noexcept
+        {
             std::swap(win, other.win);
             std::swap(context, other.context);
             std::swap(canvas, other.canvas);
             return *this;
         }
-           
     };
-    
+
+    /**
+     * We need a location to plot text debug information (like fps, diagnostic information, tick
+     * number) as we are playing the game.
+     *
+     * This debug window serves as a way to do this.
+     * It will not receive any input events, but it will be the topmost window any time
+     */
+    GUIWindow debug_window_;
+    GUIWindowInfo debug_window_info_;
+
     std::deque<GUIWindowInfo> windowstack_;
-    
+
 public:
     GUIManager(
         familyline::graphics::Window& win, unsigned width, unsigned height,
@@ -132,10 +145,19 @@ public:
         : win_(win),
           width_(width),
           height_(height),
+          debug_window_(width, height),
+          debug_window_info_(&debug_window_, nullptr, nullptr),
           canvas_(cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height))
     {
-        context_      = cairo_create(this->canvas_);
+        context_ = cairo_create(this->canvas_);
         this->init(win);
+
+        auto* canvas  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+        auto* context = cairo_create(canvas);
+        debug_window_.event_onDelete = [](auto& o) {};  // set the delete callback to avoid a
+                                                        // bad function call exception on the
+                                                        // destructor       
+        debug_window_info_ = GUIWindowInfo(&debug_window_, context, canvas);
 
         root_control_ = std::make_unique<RootControl>(width, height);
 
@@ -154,15 +176,17 @@ public:
      *
      * Since the window have a "hidden" delete event, you do not need to remove the
      * window from the gui, deallocating it will be sufficient
-     */    
+     */
     void showWindow(GUIWindow* w);
 
     void closeWindow(const GUIWindow& w);
-    
-    //void add(int x, int y, std::unique_ptr<Control> control);
-    //void add(double x, double y, ControlPositioning cpos, std::unique_ptr<Control> control);
 
-    //void remove(Control* control);
+    // void add(int x, int y, std::unique_ptr<Control> control);
+    // void add(double x, double y, ControlPositioning cpos, std::unique_ptr<Control> control);
+
+    // void remove(Control* control);
+
+    GUIWindow& getDebugWindow() { return debug_window_; }
 
     void update();
 

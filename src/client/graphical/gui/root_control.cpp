@@ -8,7 +8,7 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
     (void)context;
 
     // Clean bg
-    cairo_set_source_rgba(context, 0.3, 0.3, 0.3, 0.25);
+    cairo_set_source_rgba(context, 0.0, 0.0, 0.0, 0.0);
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
 

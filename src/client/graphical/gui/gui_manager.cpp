@@ -193,12 +193,16 @@ void GUIManager::update() {
     root_control_->update(context_, canvas_);
 
     // Clean bg
-    cairo_set_source_rgba(context_, 0.3, 0.3, 0.3, 0.25);
+    cairo_set_source_rgba(context_, 0.0, 0.0, 0.0, 0.0);
     cairo_set_operator(context_, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context_);
 
     auto w = cairo_image_surface_get_width(canvas_);
     auto h = cairo_image_surface_get_height(canvas_);
+
+    auto dabsx = 0;
+    auto dabsy = 0;
+    debug_window_info_.win->update(debug_window_info_.context, debug_window_info_.canvas);
     
     for (auto& win : windowstack_) {
         win.win->update(win.context, win.canvas);
@@ -209,11 +213,15 @@ void GUIManager::update() {
         
         cairo_set_source_surface(context_, win.canvas, absx, absy);
         win.win->updatePosition(absx, absy);
+        cairo_paint(context_);
+        
     }
 
+    cairo_set_operator(context_, CAIRO_OPERATOR_OVER);
+    cairo_set_source_surface(context_, debug_window_info_.canvas, dabsx, dabsy);
+    debug_window_info_.win->updatePosition(dabsx, dabsy);
+        
     cairo_paint(context_);
-
-
 }
 
 void GUIManager::render(unsigned int x, unsigned int y) { this->renderToTexture(); }

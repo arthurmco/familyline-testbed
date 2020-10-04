@@ -53,7 +53,10 @@ private:
     }
 
 public:
-    DummyPlayer(PlayerManager& pm, const Terrain& t, const char* name, int code) : Player(pm, t, name, code) {}
+    DummyPlayer(PlayerManager& pm, const Terrain& t, const char* name, int code)
+        : Player(pm, t, name, code)
+    {
+    }
 
     virtual void generateInput()
     {
@@ -94,11 +97,9 @@ public:
 
 /// TODO: rewrite this and Tribalia.cpp!!!
 
-Game::Game(
-    Window* w, Framebuffer* fb3D, Framebuffer* fbGUI, GUIManager* gr, PlayerManager* pm)
+Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI, GUIManager* gr, PlayerManager* pm)
     : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm)
 {
-
     //    DebugPlotter::Init();
     auto& log = LoggerService::getLogger();
 
@@ -286,7 +287,6 @@ Game::Game(
     }
 }
 
-
 void Game::initLoopData()
 {
     auto& log = LoggerService::getLogger();
@@ -305,12 +305,12 @@ void Game::initLoopData()
           });
           pnl.AddPanel(&btnExit); */
 
-    lblBuilding = new Label(0.05 * 640, 0.1 * 480, "!!!");
-    lblFPS = new Label(0.05 * 640, 0.9 * 480, "0 fps, 0 ms/frame");
-    lblRange = new Label(0.05 * 640, 0.13 * 480, "--");
-    lblSelected = new Label(0.05 * 640, 0.17 * 480, "---");
+    lblBuilding   = new Label(0.05 * 640, 0.1 * 480, "!!!");
+    lblFPS        = new Label(0.05 * 640, 0.9 * 480, "0 fps, 0 ms/frame");
+    lblRange      = new Label(0.05 * 640, 0.13 * 480, "--");
+    lblSelected   = new Label(0.05 * 640, 0.17 * 480, "---");
     lblTerrainPos = new Label(0.05 * 640, 0.21 * 480, "---");
-    lblKeys = new Label(
+    lblKeys       = new Label(
         0.05 * 640, 0.05 * 480,
         "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
 
@@ -341,34 +341,36 @@ void Game::initLoopData()
 
     lblTerrainPos->modifyAppearance([](ControlAppearance& ca) { ca.background = {0, 0, 0, 0.4}; });
 
-    //gr->add(5, 5, std::unique_ptr<Control>(lblFPS));
-    //gr->add(5, 35, std::unique_ptr<Control>((Control*)lblTerrainPos));
-    //gr->add(5, 65, std::unique_ptr<Control>((Control*)lblBuilding));
-    //gr->add(5, 95, std::unique_ptr<Control>((Control*)lblRange));
-    //gr->add(5, 125, std::unique_ptr<Control>((Control*)lblSelected));
-    //gr->add(5, 155, std::unique_ptr<Control>((Control*)lblKeys));
+    GUIWindow& gw = gr->getDebugWindow();
+    gw.add(5, 5, ControlPositioning::Pixel, std::unique_ptr<Control>(lblFPS));
+    gw.add(5, 35, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)lblTerrainPos));
+    gw.add(5, 65, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)lblBuilding));
+    gw.add(5, 95, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)lblRange));
+    gw.add(5, 125, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)lblSelected));
+    gw.add(5, 155, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)lblKeys));
 
     started_ = true;
 
     ticks = std::chrono::high_resolution_clock::now();
 }
 
-Game::~Game() {
+Game::~Game()
+{
     if (started_) {
-        //gr->remove(lblFPS);
-        //gr->remove(lblTerrainPos);
-        //gr->remove(lblBuilding);
-        //gr->remove(lblRange);
-        //gr->remove(lblSelected);
-        //gr->remove(lblKeys);
+        GUIWindow& gw = gr->getDebugWindow();
+        gw.remove(lblFPS);
+        gw.remove(lblTerrainPos);
+        gw.remove(lblBuilding);
+        gw.remove(lblRange);
+        gw.remove(lblSelected);
+        gw.remove(lblKeys);
     }
 }
-
 
 bool Game::runLoop()
 {
     rendertime = std::chrono::high_resolution_clock::now();
-    player = true;
+    player     = true;
 
     /* Runs the input code at fixed steps, like the logic one below */
     while (inputTime >= INPUT_DELTA) {
@@ -402,10 +404,10 @@ bool Game::runLoop()
 
     ////////////////////////
 
-    auto elapsed = std::chrono::high_resolution_clock::now();
-    delta                = elapsed - ticks;
+    auto elapsed                = std::chrono::high_resolution_clock::now();
+    delta                       = elapsed - ticks;
     decltype(delta) renderdelta = std::chrono::high_resolution_clock::now() - rendertime;
-    
+
     if (frame % 15 == 0) {
         pms = delta.count() * 1.0;
     }
@@ -424,8 +426,6 @@ bool Game::runLoop()
         auto sleepdelta = (1000.0 / FPS_LOCK) - 5;
         SDL_Delay(unsigned(sleepdelta));
     }
-
-
 
     // Make the mininum and maximum frame calculation more fair
     // because usually the first frame is when we load things, and
