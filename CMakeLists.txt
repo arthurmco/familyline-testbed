@@ -1,7 +1,7 @@
 ####
 # Familyline makelist
 #
-# Copyright (C) 2016 Arthur M
+# Copyright (C) 2016-2020 Arthur M
 ####
 cmake_minimum_required(VERSION 3.12)
 
