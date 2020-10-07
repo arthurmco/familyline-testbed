@@ -449,6 +449,9 @@ static int show_starting_menu()
         if (g) delete g;
         if (pm) delete pm;
 
+        delete gsettings;
+        delete gwin;
+        
         delete guir;
         delete win;
         fmt::print("\nExited. ({:d} frames)\n", frames);

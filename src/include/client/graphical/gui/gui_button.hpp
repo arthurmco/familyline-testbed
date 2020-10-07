@@ -59,7 +59,7 @@ public:
 
     virtual void receiveEvent(const familyline::input::HumanInputAction &ev, CallbackQueue &cq);
 
-    virtual ~Button() {}
+    virtual ~Button();
 };
 
 }  // namespace familyline::graphics::gui

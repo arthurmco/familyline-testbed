@@ -10,7 +10,7 @@ using namespace familyline::graphics;
 GLRenderer::GLRenderer()
 {
     auto& d = GFXService::getDevice();
-    
+
     _sForward = d->createShaderProgram(
         "forward", {d->createShader("shaders/Forward.vert", ShaderType::Vertex),
                     d->createShader("shaders/Forward.frag", ShaderType::Fragment)});
@@ -35,9 +35,9 @@ VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
     auto vhandle                        = std::make_unique<GLVertexHandle>(vao, *this, vi);
     vhandle->vsize                      = vd.position.size();
 
-//    log->write(
-//        "gl-renderer", LogType::Debug, "created vertex handle: vao=%#x, vsize=%zu", vao,
-//        vhandle->vsize);
+    //    log->write(
+    //        "gl-renderer", LogType::Debug, "created vertex handle: vao=%#x, vsize=%zu", vao,
+    //        vhandle->vsize);
 
     vhandle->vboPos  = vboPos;
     vhandle->vboNorm = vboNorm;
@@ -182,7 +182,7 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd, ShaderProgr
 {
     auto& log = LoggerService::getLogger();
 
-    GLuint vao;
+    GLuint vao = -1;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
@@ -234,9 +234,9 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd, ShaderProgr
 
     glBindVertexArray(0);
 
-//    log->write(
-//        "gl-renderer", LogType::Debug, "created vertex set: vao=%#x, vbos=%#x,%#x,%#x", vao, vboPos,
-//        vboNorm, vboTex);
+    //    log->write(
+    //        "gl-renderer", LogType::Debug, "created vertex set: vao=%#x, vbos=%#x,%#x,%#x", vao,
+    //        vboPos, vboNorm, vboTex);
 
     return std::tie(vao, vboPos, vboNorm, vboTex);
 }
@@ -246,15 +246,19 @@ void GLRenderer::removeVertex(VertexHandle* vh)
     GLVertexHandle* gvh = dynamic_cast<GLVertexHandle*>(vh);
     if (!gvh) return;
 
+    auto r = std::remove_if(
+        _vhandle_list.begin(), _vhandle_list.end(),
+        [gvh](const std::unique_ptr<GLVertexHandle>& handle) { return (handle->vao == gvh->vao); });
+
+    _vhandle_list.erase(r, _vhandle_list.end());
+
+    
     glDeleteVertexArrays(1, (GLuint*)&gvh->vao);
     glDeleteBuffers(1, (GLuint*)&gvh->vboPos);
     glDeleteBuffers(1, (GLuint*)&gvh->vboNorm);
 
-    if (gvh->vboTex > 0) glDeleteBuffers(1, (GLuint*)&gvh->vboTex);
-
-    _vhandle_list.erase(std::remove_if(
-        _vhandle_list.begin(), _vhandle_list.end(),
-        [gvh](std::unique_ptr<GLVertexHandle>& handle) { return (handle->vao == gvh->vao); }));
+    if (gvh->vboTex >= 0)
+        glDeleteBuffers(1, (GLuint*)&gvh->vboTex);
 }
 
 bool GLVertexHandle::update(VertexData& vd)

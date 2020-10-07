@@ -19,12 +19,13 @@ private:
 
     HumanListenerHandler _listener;
 
-    int _x, _y;
+    int _x = -1, _y = -1;
 
 public:
     static Cursor* GetInstance()
     {
-        if (!cursor) cursor = new Cursor{};
+        if (!cursor)
+            cursor = new Cursor{};
 
         return cursor;
     }

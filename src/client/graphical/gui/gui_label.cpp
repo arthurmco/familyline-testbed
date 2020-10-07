@@ -27,10 +27,7 @@ PangoWeight Label::getPangoWeightFromAppearance(FontWeight fw) const
 
 PangoLayout* Label::getLayout(cairo_t* context) const
 {
-    PangoLayout* layout                    = nullptr;
-    PangoFontDescription* font_description = nullptr;
-
-    font_description = pango_font_description_new();
+    PangoFontDescription* font_description = pango_font_description_new();
     pango_font_description_set_family(font_description, this->appearance_.fontFace.c_str());
     pango_font_description_set_absolute_size(
         font_description, this->appearance_.fontSize * PANGO_SCALE);
@@ -39,7 +36,7 @@ PangoLayout* Label::getLayout(cairo_t* context) const
     pango_font_description_set_style(
         font_description, appearance_.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
 
-    layout = pango_cairo_create_layout(context);
+    PangoLayout* layout = pango_cairo_create_layout(context);
     pango_layout_set_font_description(layout, font_description);
     pango_layout_set_text(layout, this->text_.c_str(), -1);
 
@@ -51,8 +48,10 @@ bool Label::update(cairo_t* context, cairo_surface_t* canvas)
     auto [fr, fg, fb, fa] = this->appearance_.foreground;
     auto [br, bg, bb, ba] = this->appearance_.background;
 
-    if (layout_)
+    if (layout_) {
+        pango_layout_set_font_description(layout_, nullptr);
         g_object_unref(layout_);
+    }
     
     layout_ = this->getLayout(context);    
 
@@ -84,6 +83,7 @@ std::tuple<int, int> Label::getNeededSize(cairo_t* parent_context) const
     width /= PANGO_SCALE;
     height /= PANGO_SCALE;
 
+    pango_layout_set_font_description(layout, nullptr);
     g_object_unref(layout);
     
     return std::tie(width, height);

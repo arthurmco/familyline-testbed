@@ -115,8 +115,8 @@ void GFXDebugDrawer::update()
     }
 
     for (auto [ehash, edata] : erase_handles) {
-        _vhandles.erase(ehash);
         edata.handle->remove();
+        _vhandles.erase(ehash);
     }
 
     this->last_tick++;

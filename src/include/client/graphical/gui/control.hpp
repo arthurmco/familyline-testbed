@@ -36,6 +36,8 @@ struct ControlData {
         : pos_type(ControlPositioning::Pixel),
           x(0),
           y(0),
+          fx(0.0f),
+          fy(0.0f),
           local_context(nullptr),
           control_canvas(nullptr),
           control(std::unique_ptr<Control>())
@@ -108,7 +110,10 @@ struct ControlData {
         return *this;
     }
 
-    virtual ~ControlData() {}
+    virtual ~ControlData() {
+        cairo_surface_destroy(control_canvas);
+        cairo_destroy(local_context);
+    }
 };
 
 class Control;
@@ -142,7 +147,7 @@ struct CallbackQueue {
  * controls under it
  */
 struct ContainerComponent {
-    Control* parent;
+    Control* parent = nullptr;
 
     /**
      * Sort the controls by their z-index values

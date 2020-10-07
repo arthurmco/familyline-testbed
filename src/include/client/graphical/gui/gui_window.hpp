@@ -55,7 +55,11 @@ public:
     std::function<void(GUIWindow&)> event_onDelete;
     
     virtual ~GUIWindow() {
-        event_onDelete(*this);
+        if (event_onDelete)
+            event_onDelete(*this);
+
+        cairo_surface_destroy(rc_canvas_);
+        cairo_destroy(rc_context_);
     }
 };
 

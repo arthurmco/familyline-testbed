@@ -109,3 +109,9 @@ void Button::receiveEvent(const familyline::input::HumanInputAction& ev, Callbac
 }
 
 void Button::setText(std::string v) { label_.setText(v); }
+
+Button::~Button()
+{
+    cairo_surface_destroy(l_canvas_);
+    cairo_destroy(l_context_);
+}

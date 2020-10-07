@@ -49,6 +49,9 @@ Texture::Texture(int width, int height, GLenum format, void* data)
     // Unbind texture
     glBindTexture(GL_TEXTURE_2D, 0);
     _tex_handle = tex_handle;
+
+    char* cdata = (char*)data;
+    delete[] cdata;
 }
 
 GLint Texture::GetHandle() const { return _tex_handle; }

@@ -20,8 +20,8 @@ std::tuple<cairo_t*, cairo_surface_t*> Control::createChildContext(Control* c)
     if (w <= 1 || h <= 1) {
         auto [w, h] = c->getNeededSize(context);
 
-        cairo_destroy(context);
         cairo_surface_destroy(canvas);
+        cairo_destroy(context);
 
         canvas  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
         context = cairo_create(canvas);
@@ -169,7 +169,7 @@ std::optional<Control*> ContainerComponent::getControlAtPoint(int x, int y)
             if (x > val.x && x < val.x + ctrlw && y > val.y && y < val.y + ctrlh) {
                 return std::optional<std::reference_wrapper<ControlData>>(std::ref(val));
             } else {
-                return std::optional<std::reference_wrapper<ControlData>>();
+                return std::nullopt;
             }
         });
 

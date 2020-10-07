@@ -277,8 +277,8 @@ bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
     return false;
 }
 
-auto mousex_ = 0;
-auto mousey_ = 0;
+auto mousex_ = -1;
+auto mousey_ = -1;
 
 /**
  * Process received input events
@@ -289,7 +289,7 @@ void GUIManager::receiveEvent()
     while (!input_actions_.empty()) {
         auto& hia = input_actions_.front();
 
-        std::optional<Control*> control;
+        std::optional<Control*> control = std::nullopt;
 
         if (std::holds_alternative<ClickAction>(hia.type)) {
             auto ca = std::get<ClickAction>(hia.type);
@@ -305,7 +305,8 @@ void GUIManager::receiveEvent()
 
         if (std::holds_alternative<KeyAction>(hia.type)) {
             auto ka = std::get<KeyAction>(hia.type);
-            control = this->getControlAtPoint(mousex_, mousey_);
+            if (mousex_ >= 0)
+                control = this->getControlAtPoint(mousex_, mousey_);
         }
 
         if (std::holds_alternative<WheelAction>(hia.type)) {

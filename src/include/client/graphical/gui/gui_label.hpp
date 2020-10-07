@@ -18,7 +18,7 @@ class Label : public Control
 private:
     unsigned width_, height_;
     std::string text_;
-    PangoLayout* layout_ = nullptr;;
+    PangoLayout* layout_ = nullptr;
     
     PangoLayout* getLayout(cairo_t* context) const;
     PangoWeight getPangoWeightFromAppearance(FontWeight fw) const;

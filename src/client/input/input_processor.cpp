@@ -133,7 +133,11 @@ void InputProcessor::startInputReceiver()
 
 void InputProcessor::stopInputReceiver() { _isRunning = false; }
 
-int lx, ly;
+/**
+ * Last X and Y positions, used for sending mouse events for events
+ * that need them but SDL does not send a mouse event
+ */
+int lx = -1, ly = -1;
 
 bool InputProcessor::pollAction(HumanInputAction& a)
 {

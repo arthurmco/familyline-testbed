@@ -106,6 +106,8 @@ TextureFile* TextureOpener::TextureOpenBMP(FILE* f, const char* path)
     t = new TextureFile(handle, iformat);
     ilBindImage(0);
 
+    delete[] image_grid;
+    
     fclose(f);
     return t;
 }
