@@ -29,7 +29,7 @@ void DeformAnimator::advance(double ms)
     }
 
     this->dirtyFrame = true;
-    _frameptr += (ms / frametime);
+    _frameptr = std::min(_frameptr + (ms / frametime), double(avector.size() - 1));
 }
 void DeformAnimator::runAnimation(const char* name)
 {
@@ -40,7 +40,6 @@ void DeformAnimator::runAnimation(const char* name)
 
 VertexDataGroup DeformAnimator::getCurrentFrame()
 {
-    // TODO: interpolate
     auto& avector = _animation_frames[_animation_name];
 
     auto currptr = unsigned(_frameptr);
@@ -49,6 +48,7 @@ VertexDataGroup DeformAnimator::getCurrentFrame()
     /* No frame after here? Return the last one */
     if (nextptr >= _frameptr + 1) return avector[int(_frameptr)];
 
+    /// Interpolate frames
     auto vdcurrent = avector[int(_frameptr)];
     auto vdnext    = avector[int(nextptr)];
     auto framemix  = double(_frameptr - currptr);
