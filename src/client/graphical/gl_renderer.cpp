@@ -245,13 +245,6 @@ void GLRenderer::removeVertex(VertexHandle* vh)
 {
     GLVertexHandle* gvh = dynamic_cast<GLVertexHandle*>(vh);
     if (!gvh) return;
-
-    auto r = std::remove_if(
-        _vhandle_list.begin(), _vhandle_list.end(),
-        [gvh](const std::unique_ptr<GLVertexHandle>& handle) { return (handle->vao == gvh->vao); });
-
-    _vhandle_list.erase(r, _vhandle_list.end());
-
     
     glDeleteVertexArrays(1, (GLuint*)&gvh->vao);
     glDeleteBuffers(1, (GLuint*)&gvh->vboPos);
@@ -259,6 +252,14 @@ void GLRenderer::removeVertex(VertexHandle* vh)
 
     if (gvh->vboTex >= 0)
         glDeleteBuffers(1, (GLuint*)&gvh->vboTex);
+    
+    auto r = std::remove_if(
+        _vhandle_list.begin(), _vhandle_list.end(),
+        [gvh](const std::unique_ptr<GLVertexHandle>& handle) { return (handle->vao == gvh->vao); });
+
+    _vhandle_list.erase(r, _vhandle_list.end());
+    
+   
 }
 
 bool GLVertexHandle::update(VertexData& vd)
@@ -275,7 +276,7 @@ bool GLVertexHandle::update(VertexData& vd)
 
 bool GLVertexHandle::remove()
 {
-    this->_renderer.removeVertex(this);
+    this->_renderer.removeVertex((VertexHandle*) this);
     return true;
 }
 
