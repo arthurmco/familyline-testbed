@@ -221,7 +221,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI, GUIManager* gr, Pla
 
         ObjectPathManager::getInstance()->SetTerrain(terr);
 
-        LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr, *terr));
+        LogicService::initDebugDrawer(new DummyDebugDrawer(*terr));
+        //LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr, *terr));
 
         pm->olm = olm;
         pm->pf  = pathf;
