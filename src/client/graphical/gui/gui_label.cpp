@@ -40,6 +40,8 @@ PangoLayout* Label::getLayout(cairo_t* context) const
     pango_layout_set_font_description(layout, font_description);
     pango_layout_set_text(layout, this->text_.c_str(), -1);
 
+    pango_font_description_free(font_description);
+    
     return layout;
 }
 
@@ -100,6 +102,7 @@ void Label::setText(std::string v)
 
             PangoLayout* layout = this->getLayout(last_context_);
             pango_layout_get_size(layout, &width, &height);
+            pango_layout_set_font_description(layout, nullptr);
 
             last_context_ = nullptr;
             this->resize(width / PANGO_SCALE, height / PANGO_SCALE);

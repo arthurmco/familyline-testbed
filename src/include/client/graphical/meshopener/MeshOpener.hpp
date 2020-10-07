@@ -66,7 +66,13 @@ public:
      */
     virtual std::vector<Mesh*> OpenSpecialized(const char* file);
 
-    virtual ~MeshOpener(){};
+    virtual ~MeshOpener(){
+        for (auto& [ext, ref] : MeshOpener::openers) {
+            delete ref.m;
+        }
+        
+        openers.clear();
+    };
 
     /* Remove the other constructors. They are not needed, this class will be instanciated only once
      */

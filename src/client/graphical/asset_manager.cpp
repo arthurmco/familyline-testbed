@@ -71,6 +71,8 @@ std::vector<std::shared_ptr<AssetObject>> loadMeshAsset(Asset& asset)
             Material* meshMaterial = GFXService::getMaterialManager()->getMaterial(materialID);
             meshMaterial->setTexture(texMaterial->getTexture());
         }
+
+        delete[] matname;
     }
 
     return {std::shared_ptr<Mesh>(ms[0])};
