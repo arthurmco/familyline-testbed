@@ -103,7 +103,7 @@ if len(tags) == 0:
     print("or if you are in the correct repository")
     sys.exit(1)
 
-current_ver = tags[0]
+current_ver = tags[0].replace("v", "")
 next_ver = advance_version(current_ver, bumprule)
 
 print("\t", current_ver, "->", next_ver)
@@ -127,7 +127,7 @@ update_cmakelists(current_ver, next_ver)
 ####################
 
 os.system("git add CMakeLists.txt")
-os.system("git commit -m \"Bump version\"")
+os.system("git commit -m \"Bump version (v{} -> v{})\"".format(current_ver, next_ver))
 
 ####################
 

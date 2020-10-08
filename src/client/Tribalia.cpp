@@ -14,6 +14,7 @@
 
 #ifndef _WIN32
 #include <unistd.h>
+#include <sys/utsname.h>
 #endif
 
 #ifdef _WIN32
@@ -33,8 +34,8 @@
 #include <client/graphical/gui/gui_button.hpp>
 #include <client/graphical/gui/gui_imageview.hpp>
 #include <client/graphical/gui/gui_label.hpp>
-#include <client/graphical/gui/gui_window.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
+#include <client/graphical/gui/gui_window.hpp>
 #include <client/graphical/renderer.hpp>
 #include <client/graphical/shader_manager.hpp>
 #include <client/graphical/window.hpp>
@@ -116,6 +117,7 @@ static void show_version()
     fmt::print("Familyline " VERSION "\n");
     fmt::print("Compiled in " __DATE__ "\n");
     fmt::print("Commit hash " COMMIT "\n");
+    fmt::print("Running on {}", SDL_GetPlatform());
     fmt::print("\n");
 }
 
@@ -150,6 +152,106 @@ static int check_size(int i, int argc, char const* argv[])
 }
 
 PlayerManager* pm = nullptr;
+
+#ifdef _WIN32
+std::string get_windows_version(const OSVERSIONINFO& osvi)
+{
+    if (osvi.dwMajorVersion < 6) {
+        return fmt::format("version {}.{} (Unsupported)", osvi.dwMajorVersion, osvi.dwMinorVersion);
+    }
+
+    std::string version;
+    if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 &&
+        OSVERSIONINFOEX.wProductType == VER_NT_WORKSTATION)
+        version = "Windows Vista";
+    else if (
+        osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 &&
+        OSVERSIONINFOEX.wProductType != VER_NT_WORKSTATION)
+        version = "Windows Server 2008";
+    else if (
+        osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1 &&
+        OSVERSIONINFOEX.wProductType == VER_NT_WORKSTATION)
+        version = "Windows 7";
+    else if (
+        osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1 &&
+        OSVERSIONINFOEX.wProductType != VER_NT_WORKSTATION)
+        version = "Windows Server 2008 R2";
+    else if (
+        osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 2 &&
+        OSVERSIONINFOEX.wProductType == VER_NT_WORKSTATION)
+        version = "Windows 8";
+    else if (
+        osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 2 &&
+        OSVERSIONINFOEX.wProductType != VER_NT_WORKSTATION)
+        version = "Windows Server 2012";
+    else if (
+        osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 3 &&
+        OSVERSIONINFOEX.wProductType == VER_NT_WORKSTATION)
+        version = "Windows 8.1";
+    else if (
+        osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 3 &&
+        OSVERSIONINFOEX.wProductType != VER_NT_WORKSTATION)
+        version = "Windows Server 2012 R2";
+    else if (
+        osvi.dwMajorVersion == 10 && osvi.dwMinorVersion == 0 &&
+        OSVERSIONINFOEX.wProductType == VER_NT_WORKSTATION)
+        version = "Windows 10";
+    else if (
+        osvi.dwMajorVersion == 10 && osvi.dwMinorVersion == 0 &&
+        OSVERSIONINFOEX.wProductType != VER_NT_WORKSTATION)
+        version = "Windows Server 2016";
+    else
+        version = fmt::format("Windows {}.{}", osvi.dwMajorVersion, osvi.dwMinorVersion);
+
+    return fmt::format("{} {}", version, osvi.szCSDVersion);
+}
+#endif
+
+/**
+ * Get current system name
+ *
+ * The first string of the tuple returns the system name, in a more basic way
+ * The second returns the version
+ * The third returns more information:
+ *    - On Linux, it returns the distro name and version
+ *    - On Windows, it returns the kernel version (like 2004)
+ *
+ * This is only useful to diagnostics, and to do telemetry in the future
+ */
+std::tuple<std::string, std::string, std::string> get_system_name()
+{
+    std::string sysname = std::string{SDL_GetPlatform()};
+
+#ifdef _WIN32
+
+    /* Microsoft wants to get rid of GetVersionEx because other people
+     * use them to determine features
+     *
+     * I only need to get the current version, so please, have mercy :)
+     */
+    OSVERSIONINFO osvi;
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+
+    GetVersionEx(&osvi);
+
+    std::string version = get_windows_version(osvi);
+    std::string sysinfo = fmt::format("Build {}".osvi.dwBuildNumber);
+#else
+    // all others probably are unix
+    std::string version;
+    std::string sysinfo;
+    
+    struct utsname uts;
+    if (uname(&uts) == 0) {
+        version = fmt::format("{} {}", uts.sysname, uts.release);
+        sysinfo = fmt::format("{}", uts.version);
+    }
+    
+#endif
+
+    return std::tie(sysname, version, sysinfo);
+}
 
 int main(int argc, char const* argv[])
 {
@@ -235,11 +337,16 @@ int main(int argc, char const* argv[])
 
     auto& log = LoggerService::getLogger();
 
+    auto [sysname, sysversion, sysinfo] = get_system_name();
+    
     log->write("", LogType::Info, "Familyline " VERSION);
     log->write("", LogType::Info, "built on " __DATE__ " by " USERNAME);
 #if defined(COMMIT)
     log->write("", LogType::Info, "git commit is " COMMIT);
 #endif
+    log->write("", LogType::Info, "Running on OS %s", sysname.c_str());
+    log->write("", LogType::Info, "  version: %s (%s)",
+               sysversion.c_str(), sysinfo.c_str());
 
     char timestr[32];
 
@@ -323,7 +430,7 @@ static int show_starting_menu()
         bool r = true;
         // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
-        GUIWindow* gwin = new GUIWindow(gwidth, gheight);
+        GUIWindow* gwin      = new GUIWindow(gwidth, gheight);
         GUIWindow* gsettings = new GUIWindow(gwidth, gheight);
         // TODO: copy label?
         Label* lb = new Label(0.37, 0.03, "FAMILYLINE");
@@ -339,15 +446,15 @@ static int show_starting_menu()
         });
 
         Button* bret = new Button(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
-        bret->setClickCallback([&](auto* c) {
-            guir->closeWindow(*gsettings);
-        });
-        
-        gsettings->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)lb));
-        gsettings->add(0.37, 0.13, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)header));
-        gsettings->add(0.37, 0.9, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bret));
+        bret->setClickCallback([&](auto* c) { guir->closeWindow(*gsettings); });
 
-        
+        gsettings->add(
+            0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)lb));
+        gsettings->add(
+            0.37, 0.13, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)header));
+        gsettings->add(
+            0.37, 0.9, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bret));
+
         Label* l = new Label(0.37, 0.03, "FAMILYLINE");
         l->modifyAppearance([](ControlAppearance& ca) {
             ca.fontSize   = 32;
@@ -361,7 +468,8 @@ static int show_starting_menu()
         });
 
         Button* bnew = new Button(400, 50, "New Game");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
-        Button* bsettings = new Button(400, 50, "Settings");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
+        Button* bsettings =
+            new Button(400, 50, "Settings");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
         Button* bquit =
             new Button(400, 50, "Exit Game");  // Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
 
@@ -379,7 +487,6 @@ static int show_starting_menu()
 
         bsettings->setClickCallback([&](auto* cc) {
             guir->showWindow(gsettings);
-            
         });
 
         bnew->setClickCallback([&](Control* cc) {
@@ -396,12 +503,15 @@ static int show_starting_menu()
         gwin->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)l));
         gwin->add(0.32, 0.8, ControlPositioning::Relative, std::unique_ptr<Control>((Control*)lv));
         gwin->add(0.1, 0.2, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bnew));
-        gwin->add(0.1, 0.305, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bsettings));
-        gwin->add(0.1, 0.410, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
-        gwin->add(0.2, 0.01, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)ilogo));
+        gwin->add(
+            0.1, 0.305, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bsettings));
+        gwin->add(
+            0.1, 0.410, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
+        gwin->add(
+            0.2, 0.01, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)ilogo));
 
         guir->showWindow(gwin);
-        //guir->add(0, 0, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)gwin));
+        // guir->add(0, 0, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)gwin));
 
         ima->addListenerHandler([&](HumanInputAction hia) {
             /* Only listen for game exit events, because you sure want to
@@ -451,7 +561,7 @@ static int show_starting_menu()
 
         delete gsettings;
         delete gwin;
-        
+
         delete guir;
         delete win;
         fmt::print("\nExited. ({:d} frames)\n", frames);
