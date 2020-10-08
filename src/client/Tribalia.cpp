@@ -154,7 +154,7 @@ static int check_size(int i, int argc, char const* argv[])
 PlayerManager* pm = nullptr;
 
 #ifdef _WIN32
-std::string get_windows_version(const OSVERSIONINFO& osvi)
+std::string get_windows_version(const OSVERSIONINFOEX& osvi)
 {
     if (osvi.dwMajorVersion < 6) {
         return fmt::format("version {}.{} (Unsupported)", osvi.dwMajorVersion, osvi.dwMinorVersion);
@@ -162,43 +162,43 @@ std::string get_windows_version(const OSVERSIONINFO& osvi)
 
     std::string version;
     if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 &&
-        OSVERSIONINFOEX.wProductType == VER_NT_WORKSTATION)
+        osvi.wProductType == VER_NT_WORKSTATION)
         version = "Windows Vista";
     else if (
         osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0 &&
-        OSVERSIONINFOEX.wProductType != VER_NT_WORKSTATION)
+        osvi.wProductType != VER_NT_WORKSTATION)
         version = "Windows Server 2008";
     else if (
         osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1 &&
-        OSVERSIONINFOEX.wProductType == VER_NT_WORKSTATION)
+        osvi.wProductType == VER_NT_WORKSTATION)
         version = "Windows 7";
     else if (
         osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1 &&
-        OSVERSIONINFOEX.wProductType != VER_NT_WORKSTATION)
+        osvi.wProductType != VER_NT_WORKSTATION)
         version = "Windows Server 2008 R2";
     else if (
         osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 2 &&
-        OSVERSIONINFOEX.wProductType == VER_NT_WORKSTATION)
+        osvi.wProductType == VER_NT_WORKSTATION)
         version = "Windows 8";
     else if (
         osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 2 &&
-        OSVERSIONINFOEX.wProductType != VER_NT_WORKSTATION)
+        osvi.wProductType != VER_NT_WORKSTATION)
         version = "Windows Server 2012";
     else if (
         osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 3 &&
-        OSVERSIONINFOEX.wProductType == VER_NT_WORKSTATION)
+        osvi.wProductType == VER_NT_WORKSTATION)
         version = "Windows 8.1";
     else if (
         osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 3 &&
-        OSVERSIONINFOEX.wProductType != VER_NT_WORKSTATION)
+        osvi.wProductType != VER_NT_WORKSTATION)
         version = "Windows Server 2012 R2";
     else if (
         osvi.dwMajorVersion == 10 && osvi.dwMinorVersion == 0 &&
-        OSVERSIONINFOEX.wProductType == VER_NT_WORKSTATION)
+        osvi.wProductType == VER_NT_WORKSTATION)
         version = "Windows 10";
     else if (
         osvi.dwMajorVersion == 10 && osvi.dwMinorVersion == 0 &&
-        OSVERSIONINFOEX.wProductType != VER_NT_WORKSTATION)
+        osvi.wProductType != VER_NT_WORKSTATION)
         version = "Windows Server 2016";
     else
         version = fmt::format("Windows {}.{}", osvi.dwMajorVersion, osvi.dwMinorVersion);
@@ -227,16 +227,18 @@ std::tuple<std::string, std::string, std::string> get_system_name()
     /* Microsoft wants to get rid of GetVersionEx because other people
      * use them to determine features
      *
-     * I only need to get the current version, so please, have mercy :)
+     * I only need to get the current version to show to people, so please, have mercy :)
+     * 
+     * YES, I know it is deprecated.
      */
-    OSVERSIONINFO osvi;
-    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
-    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    OSVERSIONINFOEX osvi;
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 
-    GetVersionEx(&osvi);
+    GetVersionEx((LPOSVERSIONINFO) &osvi);
 
     std::string version = get_windows_version(osvi);
-    std::string sysinfo = fmt::format("Build {}".osvi.dwBuildNumber);
+    std::string sysinfo = fmt::format("Build {}", osvi.dwBuildNumber);
 #else
     // all others probably are unix
     std::string version;
@@ -305,8 +307,8 @@ int main(int argc, char const* argv[])
         } else {
             errno = 0;  // no need to worry
             /* Tries to create tribalia.log, fallback to stderr if it can't */
-            fLog = fopen("tribalia.log", "a");
-            fputs("\n\n", fLog);
+            fLog = fopen("familyline.log", "a");
+            fputs("\n\n\n\n\n\n\n\n\n\n\n", fLog);
             if (!fLog) {
                 perror("Could not create log file: ");
                 fmt::print(stderr, "Falling back to stderr");
