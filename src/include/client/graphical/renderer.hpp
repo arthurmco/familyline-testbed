@@ -4,8 +4,9 @@
  * Mesh renderer class
  */
 
-#include <memory>
 #include <client/graphical/light.hpp>
+#include <memory>
+
 #include "camera.hpp"
 #include "vertexdata.hpp"
 
@@ -23,9 +24,11 @@ struct VertexHandle {
     virtual ~VertexHandle() {}
 };
 
-    struct LightHandle {
-        Light& light;
-    };
+struct LightHandle {
+    Light& light;
+
+    LightHandle(Light& l) : light(l) {}
+};
 
 class Renderer
 {
@@ -36,7 +39,7 @@ public:
     // virtual LightHandle createLight(LightData& ld) = 0;
 
     virtual LightHandle* createLight(Light& light) = 0;
-    virtual void removeLight(LightHandle* lh) = 0;
+    virtual void removeLight(LightHandle* lh)      = 0;
 
     virtual ~Renderer() {}
 };
