@@ -2,10 +2,10 @@
 #include <SDL2/SDL_timer.h>
 
 #include <client/Game.hpp>
-#include <client/graphical/LightManager.hpp>
 #include <client/graphical/animator.hpp>
 #include <client/graphical/gfx_debug_drawer.hpp>
 #include <client/graphical/gl_renderer.hpp>
+#include <client/graphical/light.hpp>
 #include <client/input/input_service.hpp>
 #include <common/logger.hpp>
 #include <common/logic/colony.hpp>
@@ -97,6 +97,9 @@ public:
 
 /// TODO: rewrite this and Tribalia.cpp!!!
 
+auto sunlight = std::make_unique<Light>(
+    SunLightType{glm::vec3(-0.2, -1.0, -0.2)}, 0.8f, glm::vec3(0, 0.1, 0.5), "sunlight");
+
 Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI, GUIManager* gr, PlayerManager* pm)
     : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm)
 {
@@ -137,12 +140,12 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI, GUIManager* gr, Pla
         f.loadFile("assets.yml");
         am->loadFile(f);
 
-        //      scenemng = new SceneManager(terr->GetWidth() * SEC_SIZE, terr->GetHeight() *
-        //      SEC_SIZE);
-
         cam =
             new Camera{glm::vec3(6.0f, 36.0f, 6.0f), (float)winW / (float)winH, glm::vec3(0, 0, 0)};
         scenernd = new SceneManager(*(Renderer*)rndr, *cam);
+        scenernd->add(std::make_shared<SceneObject<Light>>(*sunlight.get()));
+
+        //        scenernd->add()
 
         //      scenernd->SetCamera(cam);
         std::unique_ptr<HumanPlayer> hp = std::make_unique<HumanPlayer>(*pm, *terr, "Arthur", 0);
@@ -221,7 +224,7 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI, GUIManager* gr, Pla
 
         ObjectPathManager::getInstance()->SetTerrain(terr);
 
-        //LogicService::initDebugDrawer(new DummyDebugDrawer(*terr));
+        // LogicService::initDebugDrawer(new DummyDebugDrawer(*terr));
         LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr, *terr));
 
         pm->olm = olm;
@@ -498,7 +501,7 @@ void Game::RunGraphical(double framems)
     /* Rendering */
 
     fb3D->startDraw();
-    terr_rend->render();
+    terr_rend->render(*scenernd);
 
     //  rndr->SetBoundingBox(hp->renderBBs);
 

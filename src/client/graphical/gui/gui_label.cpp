@@ -8,18 +8,18 @@ using namespace familyline::graphics::gui;
 PangoWeight Label::getPangoWeightFromAppearance(FontWeight fw) const
 {
     switch (fw) {
-        case Thin: return PANGO_WEIGHT_THIN; break;
-        case Ultralight: return PANGO_WEIGHT_ULTRALIGHT; break;
-        case Light: return PANGO_WEIGHT_LIGHT; break;
-        case Semilight: return PANGO_WEIGHT_SEMILIGHT; break;
-        case Book: return PANGO_WEIGHT_BOOK; break;
-        case Normal: return PANGO_WEIGHT_NORMAL; break;
-        case Medium: return PANGO_WEIGHT_MEDIUM; break;
-        case Semibold: return PANGO_WEIGHT_SEMIBOLD; break;
-        case Bold: return PANGO_WEIGHT_BOLD; break;
-        case Ultrabold: return PANGO_WEIGHT_ULTRABOLD; break;
-        case Heavy: return PANGO_WEIGHT_HEAVY; break;
-        case Ultraheavy: return PANGO_WEIGHT_ULTRAHEAVY; break;
+    case FontWeight::Thin: return PANGO_WEIGHT_THIN; break;
+    case FontWeight::Ultralight: return PANGO_WEIGHT_ULTRALIGHT; break;
+    case FontWeight::Light: return PANGO_WEIGHT_LIGHT; break;
+    case FontWeight::Semilight: return PANGO_WEIGHT_SEMILIGHT; break;
+    case FontWeight::Book: return PANGO_WEIGHT_BOOK; break;
+    case FontWeight::Normal: return PANGO_WEIGHT_NORMAL; break;
+    case FontWeight::Medium: return PANGO_WEIGHT_MEDIUM; break;
+    case FontWeight::Semibold: return PANGO_WEIGHT_SEMIBOLD; break;
+    case FontWeight::Bold: return PANGO_WEIGHT_BOLD; break;
+    case FontWeight::Ultrabold: return PANGO_WEIGHT_ULTRABOLD; break;
+    case FontWeight::Heavy: return PANGO_WEIGHT_HEAVY; break;
+    case FontWeight::Ultraheavy: return PANGO_WEIGHT_ULTRAHEAVY; break;
     }
 
     return PANGO_WEIGHT_NORMAL;

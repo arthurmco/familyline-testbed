@@ -1,6 +1,7 @@
 #pragma once
 
 #include <client/graphical/mesh.hpp>
+#include <client/graphical/light.hpp>
 #include <client/graphical/vertexdata.hpp>
 
 /**
@@ -12,12 +13,16 @@
 
 namespace familyline::graphics
 {
+enum class SceneObjectType { Mesh, Light, Invalid, Other };
+
 /**
  * Base class for the scene object trait
  */
 class SceneObjectBase
 {
 public:
+    virtual constexpr SceneObjectType getType() { return SceneObjectType::Invalid; }
+
     virtual void update()                 = 0;
     virtual void stepAnimation(double ms) = 0;
 
@@ -44,6 +49,8 @@ template <typename T>
 class SceneObject : public SceneObjectBase
 {
 public:
+    virtual constexpr SceneObjectType getType() { return SceneObjectType::Other; }
+
     SceneObject(T& ref) { static_assert("SceneObject trait not supported for this type"); }
 
     virtual void update() {}
@@ -58,6 +65,8 @@ public:
 
     virtual std::vector<VertexData> getVertexData() { return std::vector<VertexData>(); }
     virtual bool isVertexDataDirty() { return false; }
+
+    virtual T& getInner() = 0;
 
     virtual ~SceneObject() {}
 };
@@ -75,6 +84,8 @@ protected:
     Mesh& ref_;
 
 public:
+    virtual constexpr SceneObjectType getType() { return SceneObjectType::Mesh; }
+
     SceneObject(Mesh& ref) : ref_(ref) {}
 
     virtual void update() { ref_.update(); }
@@ -91,15 +102,47 @@ public:
     virtual std::vector<VertexData> getVertexData() { return ref_.getVertexData(); }
     virtual bool isVertexDataDirty() { return ref_.isVertexDataDirty(); }
 
+    virtual Mesh& getInner() { return ref_; }
+
     virtual ~SceneObject() {}
 };
 
+template <>
+class SceneObject<Light> : public SceneObjectBase
+{
+protected:
+    Light& ref_;
+
+public:
+    virtual constexpr SceneObjectType getType() { return SceneObjectType::Light; }
+
+    SceneObject(Light& ref) : ref_(ref) {}
+
+    virtual void update() {  }
+
+    virtual void stepAnimation(double ms) {  }
+
+    virtual std::string_view getName() const { return ref_.getName(); }
+    virtual glm::vec3 getPosition() const { return glm::vec3(0, 0, 0); }
+    virtual glm::mat4 getWorldMatrix() const { return glm::mat4(1.0); }
+
+    virtual std::vector<VertexInfo> getVertexInfo() const { return std::vector<VertexInfo>(); }
+    virtual void setVertexInfo(std::vector<VertexInfo>&& v) {  }
+
+    virtual std::vector<VertexData> getVertexData() { return std::vector<VertexData>(); }
+    virtual bool isVertexDataDirty() { return true; }
+
+    virtual Light& getInner() { return ref_; }
+
+    virtual ~SceneObject() {}
+
+};
 
 template <typename T>
-std::shared_ptr<SceneObjectBase> make_scene_object(T& obj) {
-    SceneObjectBase* pobj = (SceneObjectBase*) new SceneObject<T>(obj);
+std::shared_ptr<SceneObjectBase> make_scene_object(T& obj)
+{
+    SceneObjectBase* pobj = (SceneObjectBase*)new SceneObject<T>(obj);
     return std::shared_ptr<SceneObjectBase>(pobj);
 }
 
-    
 }  // namespace familyline::graphics

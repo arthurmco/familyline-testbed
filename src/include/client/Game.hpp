@@ -10,7 +10,6 @@
 
 //#include "logic/ObjectRenderer.hpp"
 #include <client/graphical/GraphicalPlotInterface.hpp>
-#include <client/graphical/Light.hpp>
 #include <client/graphical/TextureOpener.hpp>
 #include <client/graphical/asset_file.hpp>
 #include <client/graphical/asset_manager.hpp>

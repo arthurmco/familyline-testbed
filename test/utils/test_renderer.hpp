@@ -7,6 +7,7 @@
  */
 
 #include <client/graphical/camera.hpp>
+#include <client/graphical/light.hpp>
 #include <client/graphical/renderer.hpp>
 
 class TestRenderer;
@@ -47,6 +48,10 @@ public:
     virtual void removeVertex(familyline::graphics::VertexHandle* vh);
     virtual void render(familyline::graphics::Camera* c);
 
+    virtual familyline::graphics::LightHandle* createLight(familyline::graphics::Light& light) {}
+    virtual void removeLight(familyline::graphics::LightHandle* lh) {}
+
+    
     size_t getVertexListCount();
     virtual ~TestRenderer() {}
 };

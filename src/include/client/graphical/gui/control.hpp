@@ -110,7 +110,8 @@ struct ControlData {
         return *this;
     }
 
-    virtual ~ControlData() {
+    virtual ~ControlData()
+    {
         cairo_surface_destroy(control_canvas);
         cairo_destroy(local_context);
     }
@@ -189,7 +190,8 @@ struct ContainerComponent {
  *
  * Note that not all weight values might be available for all fonts.
  */
-enum FontWeight {
+enum class FontWeight
+{
     Thin,
     Ultralight,
     Light,
@@ -229,8 +231,8 @@ class Control
 {
 private:
     unsigned long long id_;
-    std::function<void(Control*, size_t, size_t)> resize_cb_;    
-    
+    std::function<void(Control*, size_t, size_t)> resize_cb_;
+
 protected:
     std::optional<ContainerComponent> cc_ = std::nullopt;
     ControlAppearance appearance_;
@@ -253,8 +255,12 @@ public:
         this->setAppearance(a);
     }
 
-    void updatePosition(int x, int y) { x_ = x; y_ = y;}
-    
+    void updatePosition(int x, int y)
+    {
+        x_ = x;
+        y_ = y;
+    }
+
     /**
      * The control z-index value
      *
