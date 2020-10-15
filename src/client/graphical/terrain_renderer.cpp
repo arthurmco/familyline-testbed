@@ -293,7 +293,7 @@ const int slot_texture_size = 16;
 /**
  * Render the terrain
  */
-void TerrainRenderer::render()
+void TerrainRenderer::render(SceneManager& sceneman)
 {
     auto& log = LoggerService::getLogger();
     auto err  = glGetError();
@@ -309,7 +309,11 @@ void TerrainRenderer::render()
     sTerrain_->setUniform("mProjection", cam_.GetProjectionMatrix());
     sTerrain_->setUniform("diffuse_color", glm::vec3(0.5, 0.5, 0.5));
     sTerrain_->setUniform("ambient_color", glm::vec3(0.1, 0.1, 0.1));
-
+    
+    sTerrain_->setUniform("dirColor", sceneman.getDirectionalLight().getColor());
+    sTerrain_->setUniform("dirPower", sceneman.getDirectionalLight().getPower());
+    sTerrain_->setUniform("dirDirection", std::get<SunLightType>(sceneman.getDirectionalLight().getType()).direction);
+    
     sTerrain_->setUniform("tex_amount", 1.0f);
 
     glBindVertexArray(tvao_);

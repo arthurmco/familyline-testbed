@@ -34,6 +34,11 @@ class GLRenderer : public Renderer
 private:
     std::vector<std::unique_ptr<GLVertexHandle>> _vhandle_list;
 
+    std::vector<std::unique_ptr<LightHandle>> vlight_list_;
+
+    /// Current-used directional light
+    LightHandle* directionalLight_ = nullptr;
+    
     ShaderProgram* _sForward = nullptr;
     ShaderProgram* _sLines   = nullptr;
 
@@ -52,7 +57,8 @@ public:
 
     virtual void removeVertex(VertexHandle* vh);
 
-    // virtual LightHandle createLight(LightData& ld) = 0;
+    virtual LightHandle* createLight(Light& light);
+    virtual void removeLight(LightHandle* lh);
 
     virtual ~GLRenderer(){};
 };

@@ -5,7 +5,7 @@
  */
 
 #include <memory>
-
+#include <client/graphical/light.hpp>
 #include "camera.hpp"
 #include "vertexdata.hpp"
 
@@ -23,6 +23,10 @@ struct VertexHandle {
     virtual ~VertexHandle() {}
 };
 
+    struct LightHandle {
+        Light& light;
+    };
+
 class Renderer
 {
 public:
@@ -30,6 +34,9 @@ public:
     virtual void removeVertex(VertexHandle* vh)                        = 0;
     virtual void render(Camera* c)                                     = 0;
     // virtual LightHandle createLight(LightData& ld) = 0;
+
+    virtual LightHandle* createLight(Light& light) = 0;
+    virtual void removeLight(LightHandle* lh) = 0;
 
     virtual ~Renderer() {}
 };

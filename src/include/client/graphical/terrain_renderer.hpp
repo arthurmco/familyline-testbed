@@ -9,6 +9,7 @@
 #include <client/graphical/Texture.hpp>
 #include <client/graphical/camera.hpp>
 #include <client/graphical/shader.hpp>
+#include <client/graphical/scene_manager.hpp>
 #include <common/logic/terrain.hpp>
 #include <glm/glm.hpp>
 #include <unordered_map>
@@ -88,7 +89,10 @@ public:
 
     /**
      * Render the terrain
+     *
+     * We use the scene manager to query the lights, so we can render them in the
+     * terrain shaders too
      */
-    void render();
+    void render(SceneManager& sm);
 };
 }  // namespace familyline::graphics

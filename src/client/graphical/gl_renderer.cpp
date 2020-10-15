@@ -62,6 +62,14 @@ void GLRenderer::render(Camera* c)
     for (auto& vh : _vhandle_list) {
         ShaderProgram* shader = vh->vinfo.shaderState.shader;
         shaderManager->use(*shader);
+
+        if (directionalLight_) {
+            Light& li = directionalLight_->light;
+            shader->setUniform("dirColor", li.getColor());
+            shader->setUniform("dirPower", li.getPower());
+            shader->setUniform("dirDirection", std::get<SunLightType>(li.getType()).direction);
+        }
+
         shader->setUniform("lightCount", 0);
         //        shader->setUniform("lights[0].position", glm::vec3(30, 50, 30));
         //        shader->setUniform("lights[0].color", glm::vec3(1, 1, 1));
@@ -245,22 +253,49 @@ void GLRenderer::removeVertex(VertexHandle* vh)
 {
     GLVertexHandle* gvh = dynamic_cast<GLVertexHandle*>(vh);
     if (!gvh) return;
-    
+
     glDeleteVertexArrays(1, (GLuint*)&gvh->vao);
     glDeleteBuffers(1, (GLuint*)&gvh->vboPos);
     glDeleteBuffers(1, (GLuint*)&gvh->vboNorm);
 
     if (gvh->vboTex >= 0)
         glDeleteBuffers(1, (GLuint*)&gvh->vboTex);
-    
+
     auto r = std::remove_if(
         _vhandle_list.begin(), _vhandle_list.end(),
         [gvh](const std::unique_ptr<GLVertexHandle>& handle) { return (handle->vao == gvh->vao); });
 
     _vhandle_list.erase(r, _vhandle_list.end());
-    
-   
+
+
 }
+
+LightHandle* GLRenderer::createLight(Light& light)
+{
+    auto lhandle = std::make_unique<LightHandle>(light);
+    auto ret = lhandle.get();
+    vlight_list_.push_back(std::move(lhandle));
+
+    if (std::holds_alternative<SunLightType>(ret->light.getType()))
+        directionalLight_ = ret;
+    
+    return ret;
+}
+
+void GLRenderer::removeLight(LightHandle* lh)
+{
+    if (directionalLight_ == lh)
+        directionalLight_ = nullptr;
+    
+    auto r = std::remove_if(
+        vlight_list_.begin(), vlight_list_.end(),
+        [lh](const std::unique_ptr<LightHandle>& handle) {
+            return (handle->light.getName() == lh->light.getName());
+        });
+
+    vlight_list_.erase(r, vlight_list_.end());
+}
+
 
 bool GLVertexHandle::update(VertexData& vd)
 {
