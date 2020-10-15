@@ -28,6 +28,7 @@ private:
     ShaderType _type;
     int _handle;
 
+    std::string readAndProcessFile(const char* file);    
     std::string readFile(const char* file);
 
 public:

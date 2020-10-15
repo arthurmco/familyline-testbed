@@ -4,6 +4,8 @@
 #include <client/graphical/shader_manager.hpp>
 #include <cstdio>
 
+#include <regex>
+
 using namespace familyline::graphics;
 
 // Open the shader file and compile it
@@ -38,9 +40,19 @@ Shader::Shader(const char* file, ShaderType type)
     this->compile();
 }
 
-std::string Shader::readFile(const char* file)
+std::regex regInclude(R"(\#include\s*\"(.*)\")");
+
+/**
+ * Read and process files
+ *
+ * Deal with the include files here, too
+ */
+std::string Shader::readAndProcessFile(const char* file)
 {
     std::string data;
+
+    std::string_view svfile(file);
+    std::string_view basePath = svfile.substr(0, svfile.find_last_of('/'));
 
     FILE* f = fopen(file, "r");
     if (!f) {
@@ -56,10 +68,34 @@ std::string Shader::readFile(const char* file)
         memset(s, 0, 1024);
         fgets(s, 1023, f);
 
-        data.append(s);
+        std::string sview(s);
+
+        auto words_begin =
+            std::sregex_iterator(sview.begin(), sview.end(), regInclude);
+        auto words_end = std::sregex_iterator();
+
+        for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
+            std::smatch match = *i;
+            std::string includeFile = match[1].str();
+
+            std::string fullInclude{basePath};
+            fullInclude.append("/");
+            fullInclude.append(includeFile);
+
+            sview = Shader::readAndProcessFile(fullInclude.c_str());
+            break;
+        }
+
+        data.append(sview);
     }
 
     return data;
+}
+
+
+std::string Shader::readFile(const char* file)
+{
+    return this->readAndProcessFile(file);
 }
 
 void Shader::compile()
