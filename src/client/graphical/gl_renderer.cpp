@@ -70,10 +70,10 @@ void GLRenderer::render(Camera* c)
             shader->setUniform("dirDirection", std::get<SunLightType>(li.getType()).direction);
         }
 
-        shader->setUniform("lightCount", 0);
-        //        shader->setUniform("lights[0].position", glm::vec3(30, 50, 30));
-        //        shader->setUniform("lights[0].color", glm::vec3(1, 1, 1));
-        //        shader->setUniform("lights[0].strength", 100.0f);
+        shader->setUniform("lightCount", 1);
+        shader->setUniform("lights[0].position", glm::vec3(30, 20, 30));
+        shader->setUniform("lights[0].color", glm::vec3(1, 0, 0));
+        shader->setUniform("lights[0].strength", 100.0f);
 
         shader->setUniform("mView", viewMatrix);
         shader->setUniform("mProjection", projMatrix);

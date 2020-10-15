@@ -313,6 +313,11 @@ void TerrainRenderer::render(SceneManager& sceneman)
     sTerrain_->setUniform("dirColor", sceneman.getDirectionalLight().getColor());
     sTerrain_->setUniform("dirPower", sceneman.getDirectionalLight().getPower());
     sTerrain_->setUniform("dirDirection", std::get<SunLightType>(sceneman.getDirectionalLight().getType()).direction);
+
+    sTerrain_->setUniform("lightCount", 1);
+    sTerrain_->setUniform("lights[0].position", glm::vec3(30, 20, 30));
+    sTerrain_->setUniform("lights[0].color", glm::vec3(1, 0, 0));
+    sTerrain_->setUniform("lights[0].strength", 100.0f);
     
     sTerrain_->setUniform("tex_amount", 1.0f);
 

@@ -39,8 +39,8 @@ vec3 get_point_light_color(LightInfo[4] lights, int lightCount, vec4 vertexPos) 
     for (int i = 0; i < lightCount; i++) {
         vec3 ldirection = lights[i].position - vertexPos.xyz;
         
-        float attenConstant = 0;
-	    float attenLinear = 0;
+        float attenConstant = 4;
+	    float attenLinear = 2;
         float attenExp = 1;
         float dist = length(ldirection);
 

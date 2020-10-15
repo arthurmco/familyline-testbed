@@ -176,10 +176,10 @@ GLint ShaderProgram::getUniformLocation(std::string_view name)
         // Not found. Adds to the cache
         auto uniformVal = glGetUniformLocation(this->_handle, sname.c_str());
 
-        // printf("%s => %d", sname.c_str(), uniformVal);
-        return uniformVal;
+        if (uniformVal >= 0)
+            _uniform_cache[sname] = uniformVal;
 
-        if (uniformVal >= 0) _uniform_cache[sname] = uniformVal;
+        return uniformVal;
     }
 
     return _uniform_cache[sname];

@@ -29,12 +29,11 @@ uniform vec3 dirColor;
 uniform float dirPower;
 uniform vec3 dirDirection;
 
-int lightCount = 1;
-in vec4 outPosition;
-
-//uniform LightInfo lights[4];
-
 #include "lights.inc"
+
+uniform LightInfo lights[4];
+uniform int lightCount;
+in vec4 outPosition;
 
 void main() {
   vec3 vcolor = diffuse_color;
@@ -48,11 +47,6 @@ void main() {
 
   vec3 directional_color = get_directional_light_color(vcolor, dirColor, dirPower,
         -dirDirection);
-
-  LightInfo lights[4];
-  lights[0].position = vec3(20, 56, 20);
-  lights[0].color = vec3(0, 0, 1);
-  lights[0].strength = 1000;
 
   vec3 point_color = get_point_light_color(lights, lightCount, outPosition);
 
