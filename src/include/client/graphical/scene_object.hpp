@@ -21,7 +21,7 @@ enum class SceneObjectType { Mesh, Light, Invalid, Other };
 class SceneObjectBase
 {
 public:
-    virtual constexpr SceneObjectType getType() { return SceneObjectType::Invalid; }
+    virtual SceneObjectType getType() { return SceneObjectType::Invalid; }
 
     virtual void update()                 = 0;
     virtual void stepAnimation(double ms) = 0;
@@ -49,7 +49,7 @@ template <typename T>
 class SceneObject : public SceneObjectBase
 {
 public:
-    virtual constexpr SceneObjectType getType() { return SceneObjectType::Other; }
+    virtual SceneObjectType getType() { return SceneObjectType::Other; }
 
     SceneObject(T& ref) { static_assert("SceneObject trait not supported for this type"); }
 
@@ -84,7 +84,7 @@ protected:
     Mesh& ref_;
 
 public:
-    virtual constexpr SceneObjectType getType() { return SceneObjectType::Mesh; }
+    virtual SceneObjectType getType() { return SceneObjectType::Mesh; }
 
     SceneObject(Mesh& ref) : ref_(ref) {}
 
@@ -114,7 +114,7 @@ protected:
     Light& ref_;
 
 public:
-    virtual constexpr SceneObjectType getType() { return SceneObjectType::Light; }
+    virtual SceneObjectType getType() { return SceneObjectType::Light; }
 
     SceneObject(Light& ref) : ref_(ref) {}
 
