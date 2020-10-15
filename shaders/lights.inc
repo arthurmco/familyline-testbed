@@ -1,7 +1,14 @@
+
+struct LightInfo {
+    vec3 position;
+    vec3 color;
+    float strength;
+};
+
 // Get the color resulted by the main directional light refleting
 // into the object
 vec3 get_light_color(vec3 diffusecolor, vec3 lightColor, float lightPower,
-    vec3 lightDirection) {
+                     vec3 lightDirection) {
 
     //Cosine of angle between normal and light direction
     vec3 n = normalize(norm_Model);
@@ -15,7 +22,7 @@ vec3 get_light_color(vec3 diffusecolor, vec3 lightColor, float lightPower,
 // Get the color resulted by the main directional light refleting
 // into the object
 vec3 get_directional_light_color(vec3 diffusecolor, vec3 lightColor, float lightPower,
-    vec3 lightDirection) {
+                                 vec3 lightDirection) {
 
     //Cosine of angle between normal and light direction
     vec3 n = normalize(norm_Model);
@@ -26,22 +33,24 @@ vec3 get_directional_light_color(vec3 diffusecolor, vec3 lightColor, float light
     return (diffusecolor * cosTheta * lightPower * lightColor);
 }
 
-vec3 get_point_light_color() {
+vec3 get_point_light_color(LightInfo[4] lights, int lightCount, vec4 vertexPos) {
     vec3 finalColor = vec3(0, 0, 0);
 
     for (int i = 0; i < lightCount; i++) {
-	float attenConstant = 0;
-	float attenLinear = 0;
-	float attenExp = 1;
-	float dist = length(outlights[i].ldirection);
+        vec3 ldirection = lights[i].position - vertexPos.xyz;
+        
+        float attenConstant = 0;
+	    float attenLinear = 0;
+        float attenExp = 1;
+        float dist = length(ldirection);
 
-	float lightPower =  (attenConstant + attenLinear * dist +
-			     attenExp * dist * dist);
+        float lightPower =  (attenConstant + attenLinear * dist +
+                             attenExp * dist * dist);
 
-	vec3 lightColor = get_light_color(finalColor, outlights[i].color,
-					  outlights[i].strength, outlights[i].ldirection);
+        vec3 lightColor = get_light_color(finalColor, lights[i].color,
+                                          lights[i].strength, ldirection);
 
-	finalColor += (lightColor / lightPower);
+	    finalColor += (lightColor / lightPower);
     }
 
     return finalColor;
