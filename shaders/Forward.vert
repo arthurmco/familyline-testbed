@@ -13,6 +13,7 @@ out vec3 norm_Model;
 //out vec3 norm_Camera;
 
 out vec4 outPosition;
+out vec3 pos_View;
 
 void main() {    
   mat4 mvp = mProjection * mView * mWorld;

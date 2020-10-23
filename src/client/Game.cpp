@@ -77,14 +77,14 @@ public:
             this->pushActions({EnqueueBuildAction{"tent"}});
         }
 
-        if (input_tick == 6) {
+        if (input_tick == 16) {
             this->pushActions(
-                {CommitLastBuildAction{20.0, 20.0, 2.4, true}, EnqueueBuildAction{"tent"}});
+                {CommitLastBuildAction{20.0, 20.0, 2.41, true}, EnqueueBuildAction{"tent"}});
         }
 
-        if (input_tick == 10) {
+        if (input_tick == 310) {
             this->pushActions({
-                CommitLastBuildAction{30.0, 35.0, 2.4, true},
+                CommitLastBuildAction{30.0, 35.0, 2.41, true},
             });
 
             puts("Dummy player built everything it needed");
@@ -98,7 +98,7 @@ public:
 /// TODO: rewrite this and Tribalia.cpp!!!
 
 auto sunlight = std::make_unique<Light>(
-    SunLightType{glm::vec3(-0.2, -1.0, -0.2)}, 1.5f, glm::vec3(0, 0.1, 0.5), "sunlight");
+    SunLightType{glm::vec3(-0.2, -1.0, -0.2)}, 0.5f, glm::vec3(0.9, 0.8, 0.1), "sunlight");
 
 auto pointlight = std::make_unique<Light>(
     PointLightType{glm::vec3(30.0, 10.0, 30.0)}, 5.8f, glm::vec3(0, 0.8, 0.2), "greenishlight");

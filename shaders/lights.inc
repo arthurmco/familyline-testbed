@@ -6,6 +6,15 @@ struct LightInfo {
     float strength;
 };
 
+vec3 get_specular_color(vec3 specColor, vec3 normal, vec3 ldirection) {
+    vec3 incidenceVector = normalize(ldirection);
+    vec3 reflectionVector = reflect(incidenceVector, norm_Model);
+
+    vec3 
+    
+}
+
+
 // Get the color resulted by the light refleting into the object
 vec3 get_light_color(vec3 diffusecolor, vec3 lightColor, float lightPower,
                      vec3 lightDirection) {
