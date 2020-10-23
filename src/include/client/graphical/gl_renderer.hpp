@@ -60,6 +60,11 @@ public:
     virtual LightHandle* createLight(Light& light);
     virtual void removeLight(LightHandle* lh);
 
+    /**
+     * Set a shader to draw the available lights on
+     */
+    void drawLights(ShaderProgram& sp);
+    
     virtual ~GLRenderer(){};
 };
 }  // namespace familyline::graphics

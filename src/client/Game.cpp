@@ -98,7 +98,14 @@ public:
 /// TODO: rewrite this and Tribalia.cpp!!!
 
 auto sunlight = std::make_unique<Light>(
-    SunLightType{glm::vec3(-0.2, -1.0, -0.2)}, 0.8f, glm::vec3(0, 0.1, 0.5), "sunlight");
+    SunLightType{glm::vec3(-0.2, -1.0, -0.2)}, 1.5f, glm::vec3(0, 0.1, 0.5), "sunlight");
+
+auto pointlight = std::make_unique<Light>(
+    PointLightType{glm::vec3(30.0, 10.0, 30.0)}, 5.8f, glm::vec3(0, 0.8, 0.2), "greenishlight");
+
+auto pointlight2 = std::make_unique<Light>(
+    PointLightType{glm::vec3(50.0, 10.0, 10.0)}, 9.8f, glm::vec3(0.8, 0.2, 0.0), "redishlight");
+
 
 Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI, GUIManager* gr, PlayerManager* pm)
     : win(w), fbGUI(fbGUI), fb3D(fb3D), gr(gr), pm(pm)
@@ -144,6 +151,8 @@ Game::Game(Window* w, Framebuffer* fb3D, Framebuffer* fbGUI, GUIManager* gr, Pla
             new Camera{glm::vec3(6.0f, 36.0f, 6.0f), (float)winW / (float)winH, glm::vec3(0, 0, 0)};
         scenernd = new SceneManager(*(Renderer*)rndr, *cam);
         scenernd->add(std::make_shared<SceneObject<Light>>(*sunlight.get()));
+        scenernd->add(std::make_shared<SceneObject<Light>>(*pointlight.get()));
+        scenernd->add(std::make_shared<SceneObject<Light>>(*pointlight2.get()));
 
         //        scenernd->add()
 
@@ -501,7 +510,7 @@ void Game::RunGraphical(double framems)
     /* Rendering */
 
     fb3D->startDraw();
-    terr_rend->render(*scenernd);
+    terr_rend->render(*rndr);
 
     //  rndr->SetBoundingBox(hp->renderBBs);
 

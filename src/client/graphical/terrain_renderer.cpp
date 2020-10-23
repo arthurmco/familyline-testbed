@@ -292,9 +292,14 @@ const int slot_texture_size = 16;
 
 /**
  * Render the terrain
+ *
+ * We use the GL renderer to let it render the lights itself, and
+ * so we do not duplicate code to render lights here
  */
-void TerrainRenderer::render(SceneManager& sceneman)
+void TerrainRenderer::render(Renderer& r)
 {
+    GLRenderer& rnd = dynamic_cast<GLRenderer&>(r);
+    
     auto& log = LoggerService::getLogger();
     auto err  = glGetError();
 
@@ -309,15 +314,8 @@ void TerrainRenderer::render(SceneManager& sceneman)
     sTerrain_->setUniform("mProjection", cam_.GetProjectionMatrix());
     sTerrain_->setUniform("diffuse_color", glm::vec3(0.5, 0.5, 0.5));
     sTerrain_->setUniform("ambient_color", glm::vec3(0.1, 0.1, 0.1));
-    
-    sTerrain_->setUniform("dirColor", sceneman.getDirectionalLight().getColor());
-    sTerrain_->setUniform("dirPower", sceneman.getDirectionalLight().getPower());
-    sTerrain_->setUniform("dirDirection", std::get<SunLightType>(sceneman.getDirectionalLight().getType()).direction);
 
-    sTerrain_->setUniform("lightCount", 1);
-    sTerrain_->setUniform("lights[0].position", glm::vec3(30, 20, 30));
-    sTerrain_->setUniform("lights[0].color", glm::vec3(1, 0, 0));
-    sTerrain_->setUniform("lights[0].strength", 100.0f);
+    rnd.drawLights(*sTerrain_);
     
     sTerrain_->setUniform("tex_amount", 1.0f);
 

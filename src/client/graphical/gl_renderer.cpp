@@ -70,10 +70,7 @@ void GLRenderer::render(Camera* c)
             shader->setUniform("dirDirection", std::get<SunLightType>(li.getType()).direction);
         }
 
-        shader->setUniform("lightCount", 1);
-        shader->setUniform("lights[0].position", glm::vec3(30, 20, 30));
-        shader->setUniform("lights[0].color", glm::vec3(1, 0, 0));
-        shader->setUniform("lights[0].strength", 100.0f);
+        this->drawLights(*shader);
 
         shader->setUniform("mView", viewMatrix);
         shader->setUniform("mProjection", projMatrix);
@@ -181,6 +178,50 @@ void GLRenderer::render(Camera* c)
     glBindVertexArray(0);
 }
 
+
+/**
+ * Set a shader to draw the available lights on
+ */
+void GLRenderer::drawLights(ShaderProgram& sp)
+{
+    sp.setUniform("dirColor", directionalLight_->light.getColor());
+    sp.setUniform("dirPower", directionalLight_->light.getPower());
+    sp.setUniform("dirDirection", std::get<SunLightType>(directionalLight_->light.getType()).direction);
+
+    int idx = 0;
+    const int maxLights = 4;
+
+    char posstr[32];
+    char colorstr[32];
+    char strenstr[32];
+
+    /// TODO: maybe order by the distance from the camera
+    /// and render lights close to it first?
+    for (auto& l : this->vlight_list_) {
+        if (idx == maxLights)
+            break;
+
+        if (l.get() == this->directionalLight_)
+            continue;
+
+        sprintf(posstr, "lights[%d].position", idx);
+        sprintf(colorstr, "lights[%d].color", idx);
+        sprintf(strenstr, "lights[%d].strength", idx);
+
+        auto type = l->light.getType();
+        if (auto pl = std::get_if<PointLightType>(&type)) {
+            sp.setUniform(posstr, pl->position);
+        }
+
+        sp.setUniform(colorstr, l->light.getColor());
+        sp.setUniform(strenstr, l->light.getPower());
+        idx++;
+    }
+
+    sp.setUniform("lightCount", idx);
+}
+
+
 /**
  * Create a raw VAO, with the vbox for position, normal and texture.
  *
@@ -278,7 +319,7 @@ LightHandle* GLRenderer::createLight(Light& light)
 
     if (std::holds_alternative<SunLightType>(ret->light.getType()))
         directionalLight_ = ret;
-    
+
     return ret;
 }
 
@@ -286,7 +327,7 @@ void GLRenderer::removeLight(LightHandle* lh)
 {
     if (directionalLight_ == lh)
         directionalLight_ = nullptr;
-    
+
     auto r = std::remove_if(
         vlight_list_.begin(), vlight_list_.end(),
         [lh](const std::unique_ptr<LightHandle>& handle) {

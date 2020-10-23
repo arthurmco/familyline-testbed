@@ -1,3 +1,4 @@
+//  -*- mode: glsl-mode;-*-
 
 struct LightInfo {
     vec3 position;
@@ -5,8 +6,7 @@ struct LightInfo {
     float strength;
 };
 
-// Get the color resulted by the main directional light refleting
-// into the object
+// Get the color resulted by the light refleting into the object
 vec3 get_light_color(vec3 diffusecolor, vec3 lightColor, float lightPower,
                      vec3 lightDirection) {
 
@@ -39,9 +39,9 @@ vec3 get_point_light_color(LightInfo[4] lights, int lightCount, vec4 vertexPos) 
     for (int i = 0; i < lightCount; i++) {
         vec3 ldirection = lights[i].position - vertexPos.xyz;
         
-        float attenConstant = 4;
-	    float attenLinear = 2;
-        float attenExp = 1;
+        float attenConstant = 1;
+	    float attenLinear = 0.5;
+        float attenExp = 0.25;
         float dist = length(ldirection);
 
         float lightPower =  (attenConstant + attenLinear * dist +
