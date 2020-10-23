@@ -42,5 +42,6 @@ void main() {
 
   vec3 finalColor = (vambient) + directional_color + point_color;
 
-  ocolor = vec4(finalColor, 1.0);
+  vec3 gamma = vec3(1.0/2.2);  
+  ocolor = vec4(pow(finalColor, gamma), 1.0);
 }

@@ -26,9 +26,9 @@ Texture::Texture(int width, int height, GLenum format, void* data)
             tex_handle);
     }
 
-    GLenum dest_format = GL_RGB;
+    GLenum dest_format = GL_SRGB;
     if (format == GL_RGBA || format == GL_BGRA) {
-        dest_format = GL_RGBA;
+        dest_format = GL_SRGB_ALPHA;
     }
 
     glTexImage2D(GL_TEXTURE_2D, 0, dest_format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
