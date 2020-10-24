@@ -98,7 +98,7 @@ public:
 /// TODO: rewrite this and Tribalia.cpp!!!
 
 auto sunlight = std::make_unique<Light>(
-    SunLightType{glm::vec3(-0.2, -1.0, -0.2)}, 0.5f, glm::vec3(0.9, 0.8, 0.1), "sunlight");
+    SunLightType{glm::vec3(-0.2, -1.0, -0.2)}, 2.5f, glm::vec3(0.1, 0.2, 0.8), "sunlight");
 
 auto pointlight = std::make_unique<Light>(
     PointLightType{glm::vec3(30.0, 10.0, 30.0)}, 5.8f, glm::vec3(0, 0.8, 0.2), "greenishlight");

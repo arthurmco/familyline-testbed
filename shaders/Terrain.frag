@@ -43,7 +43,7 @@ void main() {
 
   texel = texture(tex_sam, uvcoords).rgb;
   vcolor = mix(diffuse_color, texel * 0.9, tex_amount);
-  vec3 vambient = mix(ambient_color, texel * 0.4, tex_amount);
+  vec3 vambient = mix(ambient_color, texel * 0.001, tex_amount);
 
   vec3 directional_color = get_directional_light_color(vcolor, dirColor, dirPower,
         -dirDirection);
