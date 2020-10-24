@@ -22,7 +22,7 @@ bool GUIWindow::update(cairo_t* context, cairo_surface_t* canvas)
 void GUIWindow::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
 {
     HumanInputAction ev = hia;
-
+    
     if (std::holds_alternative<ClickAction>(ev.type)) {
         auto ca = std::get<ClickAction>(ev.type);
         ca.screenX -= x_;
@@ -37,11 +37,11 @@ void GUIWindow::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
         auto ma = std::get<MouseAction>(ev.type);
         ma.screenX -= x_;
         ma.screenY -= y_;
-        ev.type = ma;
+        ev.type = ma;       
 
         rc_.receiveEvent(ev, cq);
         return;
     }
-    
+
     rc_.receiveEvent(hia, cq);
 }

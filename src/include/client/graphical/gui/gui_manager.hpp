@@ -58,6 +58,11 @@ private:
 
     CallbackQueue cb_queue_;
 
+
+    /// Hovered control
+    std::optional<Control*> hovered_ = std::nullopt;
+
+    
     /// TODO: add a way to lock event receiving to the GUI. Probably the text edit control
     /// will need, to ensure you can type on it when you click and continue to be able to,
     /// even if you move the mouse out of it.

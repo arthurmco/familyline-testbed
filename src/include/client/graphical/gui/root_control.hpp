@@ -24,6 +24,9 @@ private:
 
     int mousex_ = 1, mousey_ = 1;
 
+    /// Control we are hovering at
+    std::optional<Control*> hovered_ = std::nullopt;
+    
     /**
      * Sort the controls by their z-index values
      */
@@ -45,6 +48,8 @@ public:
 
     virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq);
 
+    virtual void onFocusLost();
+    
     virtual ~RootControl() {}
 };
 

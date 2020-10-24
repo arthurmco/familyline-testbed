@@ -24,7 +24,7 @@ private:
     RootControl rc_;
     cairo_t *rc_context_        = nullptr;
     cairo_surface_t *rc_canvas_ = nullptr;
-
+    
 public:
     GUIWindow(unsigned width, unsigned height)
         : width_(width), height_(height), rc_(width_, height_)
@@ -53,6 +53,9 @@ public:
     }
 
     std::function<void(GUIWindow&)> event_onDelete;
+
+    virtual void onFocusLost() { rc_.onFocusLost(); }
+
     
     virtual ~GUIWindow() {
         if (event_onDelete)

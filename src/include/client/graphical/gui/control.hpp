@@ -310,6 +310,9 @@ public:
 
     virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq) = 0;
 
+    virtual void onFocusEnter() {}
+    virtual void onFocusLost() {}
+    
     // see https://stackoverflow.com/a/461224
     virtual ~Control() {}
 };

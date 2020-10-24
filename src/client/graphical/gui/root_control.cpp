@@ -67,10 +67,20 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
     return true;
 }
 
+void RootControl::onFocusLost()
+{
+    printf("\tcontrol id %#lx out of focus\n", (*hovered_)->getID());
+    (*hovered_)->onFocusLost();
+
+    hovered_ = std::nullopt;
+}
+
+
 void RootControl::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
 {
     std::optional<Control*> control;
-
+    bool is_mouse_event = false;
+    
     if (std::holds_alternative<ClickAction>(hia.type)) {
         auto ca = std::get<ClickAction>(hia.type);
         control = this->cc_->getControlAtPoint(ca.screenX, ca.screenY);
@@ -80,6 +90,7 @@ void RootControl::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
         auto ma = std::get<MouseAction>(hia.type);
         mousex_ = ma.screenX;
         mousey_ = ma.screenY;
+        is_mouse_event = true;
         control = this->cc_->getControlAtPoint(ma.screenX, ma.screenY);
     }
 
@@ -94,6 +105,27 @@ void RootControl::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
     }
 
     if (control.has_value()) {
+        if (is_mouse_event) {
+            if (hovered_) {
+                // a control was already focused
+                if ((*hovered_)->getID() != (*control)->getID()) {
+                    printf("\tcontrol id %#lx out of focus\n", (*hovered_)->getID());
+                    (*hovered_)->onFocusLost();
+                        
+                    printf("\tcontrol id %#lx focused\n", (*control)->getID());
+                    (*control)->onFocusEnter();
+                    hovered_ = control;
+                }
+                
+            } else {
+                // no control focused yet
+                printf("\tcontrol id %#lx focused \n", (*control)->getID());
+                (*control)->onFocusEnter();
+                hovered_ = control;
+            }
+            
+        }
+        
         (*control)->receiveEvent(hia, cq);
     }
 }

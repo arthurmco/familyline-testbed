@@ -482,16 +482,6 @@ void Game::RunLogic()
 {
     pm->run(gctx);
     olm->update();
-
-    auto pos = std::get<PointLightType>(pointlight->getType()).position;
-    if (pos.x < 0 || pos.x > 100)
-        pos -= glm::vec3(-0.01, 0, -0.01);
-    else
-        pos += glm::vec3(0.01, 0, 0.01);
-
-    printf("%.3f %.3f %.3f\n", pos.x, pos.y, pos.z);
-    std::get<PointLightType>(pointlight->getType()).position = std::move(pos);
-           
         
     LogicService::getObjectListener()->updateObjects();
 

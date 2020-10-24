@@ -47,7 +47,7 @@ void GUIManager::init(const Window& win)
                 d->createShader("shaders/GUI.frag", ShaderType::Fragment)});
 
     sGUI_->link();
-    
+
     auto fnGetAttrib = [&](const char* name) {
         return glGetAttribLocation(sGUI_->getHandle(), name);
     };
@@ -114,7 +114,7 @@ void GUIManager::showWindow(GUIWindow* win)
     };
 
     auto [w, h] = win->getNeededSize(context_);
-    
+
     auto* canvas  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
     auto* context = cairo_create(canvas);
     windowstack_.push_back(GUIWindowInfo{win, context, canvas});
@@ -123,9 +123,9 @@ void GUIManager::showWindow(GUIWindow* win)
 void GUIManager::closeWindow(const GUIWindow& w)
 {
     auto itend = std::remove_if(windowstack_.begin(), windowstack_.end(), [&](GUIWindowInfo& wi) {
-        return (wi.win->getID() == w.getID()); 
+        return (wi.win->getID() == w.getID());
     });
-    windowstack_.erase(itend, windowstack_.end());   
+    windowstack_.erase(itend, windowstack_.end());
 }
 
 
@@ -203,24 +203,24 @@ void GUIManager::update() {
     auto dabsx = 0;
     auto dabsy = 0;
     debug_window_info_.win->update(debug_window_info_.context, debug_window_info_.canvas);
-    
+
     for (auto& win : windowstack_) {
         win.win->update(win.context, win.canvas);
         cairo_set_operator(context_, CAIRO_OPERATOR_OVER);
 
         auto absx = 0;
         auto absy = 0;
-        
+
         cairo_set_source_surface(context_, win.canvas, absx, absy);
         win.win->updatePosition(absx, absy);
         cairo_paint(context_);
-        
+
     }
 
     cairo_set_operator(context_, CAIRO_OPERATOR_OVER);
     cairo_set_source_surface(context_, debug_window_info_.canvas, dabsx, dabsy);
     debug_window_info_.win->updatePosition(dabsx, dabsy);
-        
+
     cairo_paint(context_);
 }
 
@@ -288,6 +288,7 @@ void GUIManager::receiveEvent()
 {
     while (!input_actions_.empty()) {
         auto& hia = input_actions_.front();
+        bool is_mouse_event = false;
 
         std::optional<Control*> control = std::nullopt;
 
@@ -300,6 +301,7 @@ void GUIManager::receiveEvent()
             auto ma = std::get<MouseAction>(hia.type);
             mousex_ = ma.screenX;
             mousey_ = ma.screenY;
+            is_mouse_event = true;
             control = this->getControlAtPoint(ma.screenX, ma.screenY);
         }
 
@@ -315,9 +317,30 @@ void GUIManager::receiveEvent()
         }
 
         if (control.has_value()) {
+
+            if (is_mouse_event) {
+                if (hovered_) {
+                    // a control was already focused
+                    if ((*hovered_)->getID() != (*control)->getID()) {
+                        printf("control id %#lx out of focus\n", (*hovered_)->getID());
+                        (*hovered_)->onFocusLost();
+                        
+                        printf("control id %#lx focused\n", (*control)->getID());
+                        (*control)->onFocusEnter();
+                        hovered_ = control;
+                    }
+
+                } else {
+                    // no control focused yet
+                    printf("control id %#lx focused \n", (*control)->getID());
+                    (*control)->onFocusEnter();
+                    hovered_ = control;
+                }
+            }
+
             (*control)->receiveEvent(hia, cb_queue_);
-        }
-            
+        } 
+
         input_actions_.pop();
     }
 }
