@@ -48,6 +48,8 @@ bool Button::update(cairo_t* context, cairo_surface_t* canvas)
     // draw the background
     if (clicked_ ||
         std::chrono::steady_clock::now() - last_click_ < std::chrono::milliseconds(100)) {
+        cairo_set_source_rgba(context, br, bg, bb, ba * 4);
+    } else if (hovered_) {
         cairo_set_source_rgba(context, br, bg, bb, ba * 2);
     } else {
         cairo_set_source_rgba(context, br, bg, bb, ba);

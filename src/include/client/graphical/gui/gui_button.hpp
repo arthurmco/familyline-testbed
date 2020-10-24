@@ -25,6 +25,7 @@ private:
 
     std::chrono::time_point<std::chrono::steady_clock> last_hover_ =
         std::chrono::steady_clock::now();
+
     bool hovered_ = false;
 
     bool clicked_      = false;
@@ -57,6 +58,10 @@ public:
 
     void setText(std::string v);
 
+    virtual void onFocusEnter() { hovered_ = true; }
+    virtual void onFocusLost() { hovered_ = false; }
+
+    
     virtual void receiveEvent(const familyline::input::HumanInputAction &ev, CallbackQueue &cq);
 
     virtual ~Button();
