@@ -109,17 +109,14 @@ void RootControl::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
             if (hovered_) {
                 // a control was already focused
                 if ((*hovered_)->getID() != (*control)->getID()) {
-                    printf("\tcontrol id %#lx out of focus\n", (*hovered_)->getID());
                     (*hovered_)->onFocusLost();
                         
-                    printf("\tcontrol id %#lx focused\n", (*control)->getID());
                     (*control)->onFocusEnter();
                     hovered_ = control;
                 }
                 
             } else {
                 // no control focused yet
-                printf("\tcontrol id %#lx focused \n", (*control)->getID());
                 (*control)->onFocusEnter();
                 hovered_ = control;
             }

@@ -20,6 +20,7 @@ add_library(
   "graphical/gui/gui_button.cpp"
   "graphical/gui/control.cpp"
   "graphical/gui/root_control.cpp"
+  "graphical/gui/gui_container_component.cpp"
   "graphical/gui/gui_imageview.cpp"
   "graphical/gui/gui_label.cpp"
   "graphical/gui/gui_manager.cpp"
