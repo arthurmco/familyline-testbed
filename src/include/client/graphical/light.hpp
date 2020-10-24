@@ -58,7 +58,7 @@ public:
     {
     }
 
-    LightType getType() const { return type_; }
+    LightType& getType() { return type_; }
 
     float getPower() const { return power_; }
     glm::vec3 getColor() const { return color_; }
