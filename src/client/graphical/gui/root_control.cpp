@@ -127,5 +127,12 @@ void RootControl::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
         }
         
         (*control)->receiveEvent(hia, cq);
+    } else {
+        if (hovered_) {
+            // a control was already focused
+            printf("\tcontrol id %#lx out of focus\n", (*hovered_)->getID());
+            (*hovered_)->onFocusLost();
+            hovered_ = std::nullopt;
+        }
     }
 }
