@@ -16,7 +16,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_subdirectory(src/common)
 add_subdirectory(src/client)
 
-add_executable(familyline "src/client/Tribalia.cpp" "src/client/familyline.exe.manifest")
+add_executable(familyline "src/client/familyline.cpp" "src/client/familyline.exe.manifest")
 target_link_libraries(familyline familyline-client)
 
 target_compile_features(familyline PUBLIC cxx_std_20)
