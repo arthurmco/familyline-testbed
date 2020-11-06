@@ -1,9 +1,13 @@
+
+#include <fmt/core.h>
+
 #include <SDL2/SDL_opengl.h>
 
 #include <client/graphical/device.hpp>
-#include <client/graphical/window.hpp>
 #include <client/graphical/shader.hpp>
+#include <client/graphical/window.hpp>
 
+using namespace familyline;
 using namespace familyline::graphics;
 
 /**
@@ -65,11 +69,12 @@ bool GLDevice::isDefault() { return _default; }
 
 std::any GLDevice::getCustomData() { return _data; }
 
-Window* GLDevice::createWindow(size_t w, size_t h) { return new GLWindow(this, w, h); }
-
-Shader GLDevice::createShader(const char* file, ShaderType type) {
-    return Shader{file, type};
+familyline::graphics::Window* GLDevice::createWindow(size_t w, size_t h)
+{
+    return new GLWindow(this, w, h);
 }
+
+Shader GLDevice::createShader(const char* file, ShaderType type) { return Shader{file, type}; }
 
 ShaderProgram* GLDevice::createShaderProgram(
     std::string_view name, std::initializer_list<Shader> shaders)

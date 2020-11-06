@@ -15,8 +15,8 @@
 #endif
 
 #ifndef _WIN32
-#include <unistd.h>
 #include <sys/utsname.h>
+#include <unistd.h>
 #endif
 
 #ifdef _WIN32
@@ -43,15 +43,14 @@
 #include <client/graphical/window.hpp>
 #include <client/input/InputPicker.hpp>
 #include <client/input/input_service.hpp>
+#include <client/loop_runner.hpp>
+#include <client/params.hpp>
 #include <common/logger.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <glm/gtc/matrix_transform.hpp>  //glm::lookAt()
-
-#include <client/loop_runner.hpp>
-#include <client/params.hpp>
 
 using namespace familyline;
 using namespace familyline::logic;
@@ -75,14 +74,13 @@ using namespace familyline::input;
  *
  * On other operating systems, this is a noop
  */
-void enable_console_color(FILE* f) {
+void enable_console_color(FILE* f)
+{
 #ifdef _WIN32
     if (f == stdout || f == stderr) {
-        
         // Set output mode to handle virtual terminal sequences, so the
         // color escape sequences can work on Windows
-        HANDLE hOut = GetStdHandle(f == stderr ? STD_ERROR_HANDLE :
-                                   STD_OUTPUT_HANDLE);
+        HANDLE hOut = GetStdHandle(f == stderr ? STD_ERROR_HANDLE : STD_OUTPUT_HANDLE);
         if (hOut == INVALID_HANDLE_VALUE) {
             return GetLastError();
         }
@@ -99,8 +97,6 @@ void enable_console_color(FILE* f) {
     }
 #endif
 }
-
-
 
 #ifdef _WIN32
 std::string get_windows_version(const OSVERSIONINFOEX& osvi)
@@ -177,14 +173,14 @@ std::tuple<std::string, std::string, std::string> get_system_name()
      * use them to determine features
      *
      * I only need to get the current version to show to people, so please, have mercy :)
-     * 
+     *
      * YES, I know it is deprecated.
      */
     OSVERSIONINFOEX osvi;
     ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
     osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 
-    GetVersionEx((LPOSVERSIONINFO) &osvi);
+    GetVersionEx((LPOSVERSIONINFO)&osvi);
 
     std::string version = get_windows_version(osvi);
     std::string sysinfo = fmt::format("Build {}", osvi.dwBuildNumber);
@@ -192,25 +188,25 @@ std::tuple<std::string, std::string, std::string> get_system_name()
     // all others probably are unix
     std::string version;
     std::string sysinfo;
-    
+
     struct utsname uts;
     if (uname(&uts) == 0) {
         version = fmt::format("{} {}", uts.sysname, uts.release);
         sysinfo = fmt::format("{}", uts.version);
     }
-    
+
 #endif
 
     return std::tie(sysname, version, sysinfo);
 }
 
 static int show_starting_menu(const ParamInfo& pi);
-    
+
 int main(int argc, char const* argv[])
 {
-    auto pi = parse_params(std::vector<std::string>{argv+1, argv+argc});
+    auto pi = parse_params(std::vector<std::string>{argv + 1, argv + argc});
     enable_console_color(pi.log_device);
-    
+
     fmt::print("Using resolution {} x {} \n", pi.width, pi.height);
 
     LoggerService::createLogger(pi.log_device, LogType::Info);
@@ -218,15 +214,14 @@ int main(int argc, char const* argv[])
     auto& log = LoggerService::getLogger();
 
     auto [sysname, sysversion, sysinfo] = get_system_name();
-    
+
     log->write("", LogType::Info, "Familyline " VERSION);
     log->write("", LogType::Info, "built on " __DATE__ " by " USERNAME);
 #if defined(COMMIT)
     log->write("", LogType::Info, "git commit is " COMMIT);
 #endif
     log->write("", LogType::Info, "Running on OS %s", sysname.c_str());
-    log->write("", LogType::Info, "  version: %s (%s)",
-               sysversion.c_str(), sysinfo.c_str());
+    log->write("", LogType::Info, "  version: %s (%s)", sysversion.c_str(), sysinfo.c_str());
 
     char timestr[32];
 
@@ -239,11 +234,8 @@ int main(int argc, char const* argv[])
     log->write("", LogType::Info, "Default texture directory is " TEXTURES_DIR);
     log->write("", LogType::Info, "Default material directory is " MATERIALS_DIR);
 
-    
     return show_starting_menu(pi);
 }
-
-PlayerManager* pm = nullptr;
 
 static int show_starting_menu(const ParamInfo& pi)
 {
@@ -252,6 +244,7 @@ static int show_starting_menu(const ParamInfo& pi)
 
     graphics::Window* win = nullptr;
     GUIManager* guir      = nullptr;
+    PlayerManager* pm     = nullptr;
     Game* g               = nullptr;
     try {
         auto devs          = graphics::getDeviceList();
@@ -285,7 +278,7 @@ static int show_starting_menu(const ParamInfo& pi)
         win = GFXService::getDevice()->createWindow(pi.width, pi.height);
 
         win->show();
-        //enable_gl_debug();
+        // enable_gl_debug();
 
         log->write("", LogType::Info, "Device name: %s", defaultdev->getName().data());
         log->write("", LogType::Info, "Device vendor: %s ", defaultdev->getVendor().data());
@@ -366,9 +359,7 @@ static int show_starting_menu(const ParamInfo& pi)
             r = false;
         });
 
-        bsettings->setClickCallback([&](auto* cc) {
-            guir->showWindow(gsettings);
-        });
+        bsettings->setClickCallback([&](auto* cc) { guir->showWindow(gsettings); });
 
         bnew->setClickCallback([&](Control* cc) {
             (void)cc;
