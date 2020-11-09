@@ -200,7 +200,50 @@ std::tuple<std::string, std::string, std::string> get_system_name()
     return std::tie(sysname, version, sysinfo);
 }
 
-static int show_starting_menu(const ParamInfo& pi);
+static int show_starting_menu(
+    const ParamInfo& pi,
+    Framebuffer* f3D,
+    Framebuffer* fGUI,
+    graphics::Window* win,
+    GUIManager* guir,
+    size_t gwidth,
+    size_t gheight,
+    LoopRunner& lr
+    );
+
+
+
+Game* start_game(
+    Framebuffer* f3D,
+    Framebuffer* fGUI,
+    graphics::Window* win,
+    GUIManager* guir,
+    LoopRunner& lr
+)
+{
+    auto* pm = new PlayerManager();
+    Game* g = new Game(win, f3D, fGUI, guir, pm);
+    g->initLoopData();
+
+    return g;
+}
+
+
+void run_game_loop(LoopRunner& lr, int& framecount)
+{
+    while (true) {
+        if (!lr.run()) {
+            break;
+        }
+
+        framecount++;
+    }
+}
+
+
+/////////
+/////////
+/////////
 
 int main(int argc, char const* argv[])
 {
@@ -234,19 +277,15 @@ int main(int argc, char const* argv[])
     log->write("", LogType::Info, "Default texture directory is " TEXTURES_DIR);
     log->write("", LogType::Info, "Default material directory is " MATERIALS_DIR);
 
-    return show_starting_menu(pi);
-}
-
-static int show_starting_menu(const ParamInfo& pi)
-{
-    auto& log = LoggerService::getLogger();
     LoopRunner lr;
 
     graphics::Window* win = nullptr;
     GUIManager* guir      = nullptr;
     PlayerManager* pm     = nullptr;
     Game* g               = nullptr;
+
     try {
+
         auto devs          = graphics::getDeviceList();
         Device* defaultdev = nullptr;
 
@@ -299,6 +338,83 @@ static int show_starting_menu(const ParamInfo& pi)
         log->write(
             "texture", LogType::Info, "maximum tex size: %zu x %zu", Texture::GetMaximumSize(),
             Texture::GetMaximumSize());
+
+
+        if (pi.mapFile) {
+            int frames = 0;
+            Game* g = start_game(&f3D, &fGUI, win, guir, lr);
+            lr.load([&]() { return g->runLoop(); });
+
+            run_game_loop(lr, frames);
+
+            if (g) delete g;
+
+            delete guir;
+            delete win;
+            fmt::print("\nExited. ({:d} frames)\n", frames);
+            
+        } else {
+            return show_starting_menu(pi, &f3D, &fGUI, win, guir, gwidth, gheight, lr);
+        }        
+
+    } catch (shader_exception& se) {
+        log->write("init", LogType::Fatal, "Shader error: %s [d]", se.what());
+
+        if (win) {
+            //            fmt::memory_buffer out;
+            //            format_to(out,
+            //                "Familyline found an error in a shader\n"
+            //                "\n"
+            //                "Error: {:s}\n"
+            //                "File: {:s}, type: {:d}, code: {:d}",
+            //                se.what(), se.file.c_str(), se.type, se.code);
+            //            w->showMessageBox(out.data(), "Error", MessageBoxInfo::Error);
+        }
+
+        exit(EXIT_FAILURE);
+    } catch (graphical_exception& we) {
+        log->write("init", LogType::Fatal, "Window creation error: %s (d)", we.what());
+
+        fmt::print(stderr, "Error while creating the window: {:s}\n", we.what());
+
+        exit(EXIT_FAILURE);
+    } catch (std::bad_alloc& be) {
+        log->write("init", LogType::Fatal, "Allocation error: %s", be.what());
+
+        log->write("init", LogType::Fatal, "Probably out of memory");
+
+        if (win) {
+            //            fmt::memory_buffer out;
+            //            format_to(out,
+            //                "Insufficient memory\n"
+            //                "\n"
+            //                "Error: {:s}",
+            //                be.what());
+            //            w->ShowMessageBox(out.data(), "Error", MessageBoxInfo::Error);
+        }
+
+        exit(EXIT_FAILURE);
+    }
+
+}
+
+
+
+static int show_starting_menu(
+    const ParamInfo& pi,
+    Framebuffer* f3D,
+    Framebuffer* fGUI,
+    graphics::Window* win,
+    GUIManager* guir,
+    size_t gwidth,
+    size_t gheight,
+    LoopRunner& lr
+    )
+{
+    auto& log = LoggerService::getLogger();
+    Game* g = nullptr;
+    auto& ima = InputService::getInputManager();
+    try {
 
         /* Render the menu */
         bool r = true;
@@ -364,11 +480,7 @@ static int show_starting_menu(const ParamInfo& pi)
         bnew->setClickCallback([&](Control* cc) {
             (void)cc;
             guir->closeWindow(*gwin);
-
-            if (!pm) pm = new PlayerManager();
-
-            g = new Game(win, &f3D, &fGUI, guir, pm);
-            g->initLoopData();
+            g = start_game(f3D, fGUI, win, guir, lr);
             lr.load([&]() { return g->runLoop(); });
         });
 
@@ -407,10 +519,10 @@ static int show_starting_menu(const ParamInfo& pi)
             guir->update();
 
             // Render
-            fGUI.startDraw();
+            fGUI->startDraw();
             guir->render(0, 0);
             // guir->renderToScreen();
-            fGUI.endDraw();
+            fGUI->endDraw();
 
             win->update();
 
@@ -420,16 +532,10 @@ static int show_starting_menu(const ParamInfo& pi)
             return r;
         });
 
-        while (true) {
-            if (!lr.run()) {
-                break;
-            }
 
-            frames++;
-        }
+        run_game_loop(lr, frames);
 
         if (g) delete g;
-        if (pm) delete pm;
 
         delete gsettings;
         delete gwin;

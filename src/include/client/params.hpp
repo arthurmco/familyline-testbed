@@ -17,6 +17,8 @@ struct ParamInfo {
     int height = 480;
 
     FILE* log_device = stderr;
+
+    std::optional<std::string> mapFile;
 };
 
 /**

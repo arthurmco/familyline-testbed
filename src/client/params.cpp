@@ -14,7 +14,7 @@ static void show_help()
     fmt::print("--version:\t\tPrint version and, if compiled inside a Git repo, commit hash\n");
     fmt::print("--help:\t\t\tPrint this help information\n");
     fmt::print("--size <W>x<H>:\t\tChanges the game resolution to <W>x<H> pixels\n");
-    fmt::print("--connect <ipaddr>:\tConnects to a game server whose IP is ipaddr\n");
+    fmt::print("--file <path>:\t\tLoad a map in the specified path (currently only loads the default)\n");
     fmt::print(
         "--log [<filename>|screen]: Logs to filename 'filename', or screen to log to screen, or "
         "wherever stderr is bound to\n");
@@ -64,6 +64,7 @@ ParamInfo parse_params(const std::vector<std::string>& params)
     ParamInfo pi;
     bool next_is_size = false;
     bool next_is_log = false;
+    bool next_is_file = false;
     
     for (auto& p : params) {
         ////// parse values
@@ -76,6 +77,13 @@ ParamInfo parse_params(const std::vector<std::string>& params)
         if (next_is_log) {
             pi.log_device = get_log_device(p);
             next_is_log = false;
+            continue;
+        }
+
+        
+        if (next_is_file) {
+            pi.mapFile = p;
+            next_is_file = false;
             continue;
         }
         
@@ -97,6 +105,11 @@ ParamInfo parse_params(const std::vector<std::string>& params)
             continue;
         }
 
+        if (p == "--file") {
+            next_is_file = true;
+            continue;
+        }
+        
         if (p == "--log") {
             next_is_log = true;
             continue;

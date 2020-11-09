@@ -609,3 +609,7 @@ void Game::ShowDebugInfo()
         }
     });
 }
+
+
+//// TODO: make the main class pass the player manager somehow, the
+//// game class should not generate it.
