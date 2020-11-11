@@ -205,7 +205,8 @@ static int show_starting_menu(
     GUIManager* guir, size_t gwidth, size_t gheight, LoopRunner& lr);
 
 Game* start_game(
-    Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win, GUIManager* guir, LoopRunner& lr)
+    Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win, GUIManager* guir, LoopRunner& lr,
+    std::string_view mapFile)
 {
     auto pm = std::make_unique<PlayerManager>();
 
@@ -218,7 +219,7 @@ Game* start_game(
     
     
     Game* g = new Game(gi);
-    g->initMap(ASSET_FILE_DIR "terrain_test.flte");
+    g->initMap(mapFile);
     g->initPlayers(std::move(pm));
     g->initObjects();    
     g->initLoopData();
@@ -336,7 +337,7 @@ int main(int argc, char const* argv[])
 
         if (pi.mapFile) {
             int frames = 0;
-            Game* g    = start_game(&f3D, &fGUI, win, guir, lr);
+            Game* g    = start_game(&f3D, &fGUI, win, guir, lr, *pi.mapFile);
             lr.load([&]() { return g->runLoop(); });
 
             run_game_loop(lr, frames);
@@ -459,7 +460,7 @@ static int show_starting_menu(
     bnew->setClickCallback([&](Control* cc) {
         (void)cc;
         guir->closeWindow(*gwin);
-        g = start_game(f3D, fGUI, win, guir, lr);
+        g = start_game(f3D, fGUI, win, guir, lr, ASSET_FILE_DIR "terrain_test.flte");
         lr.load([&]() { return g->runLoop(); });
     });
 
