@@ -30,7 +30,7 @@
 
 #include <fmt/format.h>
 
-#include <client/Game.hpp>
+#include <client/game.hpp>
 #include <client/graphical/device.hpp>
 #include <client/graphical/framebuffer.hpp>
 #include <client/graphical/gui/gui_button.hpp>
@@ -201,33 +201,30 @@ std::tuple<std::string, std::string, std::string> get_system_name()
 }
 
 static int show_starting_menu(
-    const ParamInfo& pi,
-    Framebuffer* f3D,
-    Framebuffer* fGUI,
-    graphics::Window* win,
-    GUIManager* guir,
-    size_t gwidth,
-    size_t gheight,
-    LoopRunner& lr
-    );
-
-
+    const ParamInfo& pi, Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win,
+    GUIManager* guir, size_t gwidth, size_t gheight, LoopRunner& lr);
 
 Game* start_game(
-    Framebuffer* f3D,
-    Framebuffer* fGUI,
-    graphics::Window* win,
-    GUIManager* guir,
-    LoopRunner& lr
-)
+    Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win, GUIManager* guir, LoopRunner& lr)
 {
-    auto* pm = new PlayerManager();
-    Game* g = new Game(win, f3D, fGUI, guir, pm);
+    auto pm = std::make_unique<PlayerManager>();
+
+    GFXGameInit gi{
+        std::unique_ptr<graphics::Window>{win},
+        std::unique_ptr<Framebuffer>{f3D},
+        std::unique_ptr<Framebuffer>{fGUI},
+        std::unique_ptr<GUIManager>{guir},        
+    };
+    
+    
+    Game* g = new Game(gi);
+    g->initMap(ASSET_FILE_DIR "terrain_test.flte");
+    g->initPlayers(std::move(pm));
+    g->initObjects();    
     g->initLoopData();
 
     return g;
 }
-
 
 void run_game_loop(LoopRunner& lr, int& framecount)
 {
@@ -239,7 +236,6 @@ void run_game_loop(LoopRunner& lr, int& framecount)
         framecount++;
     }
 }
-
 
 /////////
 /////////
@@ -285,7 +281,6 @@ int main(int argc, char const* argv[])
     Game* g               = nullptr;
 
     try {
-
         auto devs          = graphics::getDeviceList();
         Device* defaultdev = nullptr;
 
@@ -339,10 +334,9 @@ int main(int argc, char const* argv[])
             "texture", LogType::Info, "maximum tex size: %zu x %zu", Texture::GetMaximumSize(),
             Texture::GetMaximumSize());
 
-
         if (pi.mapFile) {
             int frames = 0;
-            Game* g = start_game(&f3D, &fGUI, win, guir, lr);
+            Game* g    = start_game(&f3D, &fGUI, win, guir, lr);
             lr.load([&]() { return g->runLoop(); });
 
             run_game_loop(lr, frames);
@@ -352,10 +346,10 @@ int main(int argc, char const* argv[])
             delete guir;
             delete win;
             fmt::print("\nExited. ({:d} frames)\n", frames);
-            
+
         } else {
             return show_starting_menu(pi, &f3D, &fGUI, win, guir, gwidth, gheight, lr);
-        }        
+        }
 
     } catch (shader_exception& se) {
         log->write("init", LogType::Fatal, "Shader error: %s [d]", se.what());
@@ -395,193 +389,136 @@ int main(int argc, char const* argv[])
 
         exit(EXIT_FAILURE);
     }
-
 }
 
-
-
 static int show_starting_menu(
-    const ParamInfo& pi,
-    Framebuffer* f3D,
-    Framebuffer* fGUI,
-    graphics::Window* win,
-    GUIManager* guir,
-    size_t gwidth,
-    size_t gheight,
-    LoopRunner& lr
-    )
+    const ParamInfo& pi, Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win,
+    GUIManager* guir, size_t gwidth, size_t gheight, LoopRunner& lr)
 {
     auto& log = LoggerService::getLogger();
-    Game* g = nullptr;
+    Game* g   = nullptr;
     auto& ima = InputService::getInputManager();
-    try {
+    /* Render the menu */
+    bool r = true;
+    // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
-        /* Render the menu */
-        bool r = true;
-        // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
+    GUIWindow* gwin      = new GUIWindow(gwidth, gheight);
+    GUIWindow* gsettings = new GUIWindow(gwidth, gheight);
+    // TODO: copy label?
+    Label* lb = new Label(0.37, 0.03, "FAMILYLINE");
+    lb->modifyAppearance([](ControlAppearance& ca) {
+        ca.fontSize   = 32;
+        ca.foreground = {1, 1, 1, 1};
+    });
 
-        GUIWindow* gwin      = new GUIWindow(gwidth, gheight);
-        GUIWindow* gsettings = new GUIWindow(gwidth, gheight);
-        // TODO: copy label?
-        Label* lb = new Label(0.37, 0.03, "FAMILYLINE");
-        lb->modifyAppearance([](ControlAppearance& ca) {
-            ca.fontSize   = 32;
-            ca.foreground = {1, 1, 1, 1};
-        });
+    Label* header = new Label(0.37, 0.03, "Settings");
+    header->modifyAppearance([](ControlAppearance& ca) {
+        ca.fontSize   = 24;
+        ca.foreground = {1, 1, 1, 0.9};
+    });
 
-        Label* header = new Label(0.37, 0.03, "Settings");
-        header->modifyAppearance([](ControlAppearance& ca) {
-            ca.fontSize   = 24;
-            ca.foreground = {1, 1, 1, 0.9};
-        });
+    Button* bret = new Button(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
+    bret->setClickCallback([&](auto* c) { guir->closeWindow(*gsettings); });
 
-        Button* bret = new Button(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
-        bret->setClickCallback([&](auto* c) { guir->closeWindow(*gsettings); });
+    gsettings->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)lb));
+    gsettings->add(
+        0.37, 0.13, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)header));
+    gsettings->add(
+        0.37, 0.9, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bret));
 
-        gsettings->add(
-            0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)lb));
-        gsettings->add(
-            0.37, 0.13, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)header));
-        gsettings->add(
-            0.37, 0.9, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bret));
+    Label* l = new Label(0.37, 0.03, "FAMILYLINE");
+    l->modifyAppearance([](ControlAppearance& ca) {
+        ca.fontSize   = 32;
+        ca.foreground = {1, 1, 1, 1};
+    });
 
-        Label* l = new Label(0.37, 0.03, "FAMILYLINE");
-        l->modifyAppearance([](ControlAppearance& ca) {
-            ca.fontSize   = 32;
-            ca.foreground = {1, 1, 1, 1};
-        });
+    Label* lv = new Label(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
+    lv->modifyAppearance([](ControlAppearance& ca) {
+        ca.foreground = {0.2, 0.2, 1, 1};
+        ca.background = {1, 1, 1, 0.5};
+    });
 
-        Label* lv = new Label(0.32, 0.8, "Version " VERSION ", commit " COMMIT);
-        lv->modifyAppearance([](ControlAppearance& ca) {
-            ca.foreground = {0.2, 0.2, 1, 1};
-            ca.background = {1, 1, 1, 0.5};
-        });
+    Button* bnew      = new Button(400, 50, "New Game");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
+    Button* bsettings = new Button(400, 50, "Settings");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
+    Button* bquit = new Button(400, 50, "Exit Game");  // Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
 
-        Button* bnew = new Button(400, 50, "New Game");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
-        Button* bsettings =
-            new Button(400, 50, "Settings");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
-        Button* bquit =
-            new Button(400, 50, "Exit Game");  // Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
+    ImageView* ilogo = new ImageView(300, 450);  // 0.2, 0.1, 0.6, 0.9,
+    ilogo->loadFromFile(ICONS_DIR "/familyline-logo.png");
 
-        ImageView* ilogo = new ImageView(300, 450);  // 0.2, 0.1, 0.6, 0.9,
-        ilogo->loadFromFile(ICONS_DIR "/familyline-logo.png");
+    ilogo->z_index = -100;
+    // ilogo.SetZIndex(0.9);
+    // ilogo.SetOpacity(0.5);
 
-        ilogo->z_index = -100;
-        // ilogo.SetZIndex(0.9);
-        // ilogo.SetOpacity(0.5);
+    bquit->setClickCallback([&r](Control* cc) {
+        (void)cc;
+        r = false;
+    });
 
-        bquit->setClickCallback([&r](Control* cc) {
-            (void)cc;
+    bsettings->setClickCallback([&](auto* cc) { guir->showWindow(gsettings); });
+
+    bnew->setClickCallback([&](Control* cc) {
+        (void)cc;
+        guir->closeWindow(*gwin);
+        g = start_game(f3D, fGUI, win, guir, lr);
+        lr.load([&]() { return g->runLoop(); });
+    });
+
+    gwin->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)l));
+    gwin->add(0.32, 0.8, ControlPositioning::Relative, std::unique_ptr<Control>((Control*)lv));
+    gwin->add(0.1, 0.2, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bnew));
+    gwin->add(
+        0.1, 0.305, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bsettings));
+    gwin->add(0.1, 0.410, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
+    gwin->add(0.2, 0.01, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)ilogo));
+
+    guir->showWindow(gwin);
+    // guir->add(0, 0, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)gwin));
+
+    ima->addListenerHandler([&](HumanInputAction hia) {
+        /* Only listen for game exit events, because you sure want to
+           close the window The others will be handled by the GUI listener */
+        if (std::holds_alternative<GameExit>(hia.type)) {
             r = false;
-        });
-
-        bsettings->setClickCallback([&](auto* cc) { guir->showWindow(gsettings); });
-
-        bnew->setClickCallback([&](Control* cc) {
-            (void)cc;
-            guir->closeWindow(*gwin);
-            g = start_game(f3D, fGUI, win, guir, lr);
-            lr.load([&]() { return g->runLoop(); });
-        });
-
-        gwin->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)l));
-        gwin->add(0.32, 0.8, ControlPositioning::Relative, std::unique_ptr<Control>((Control*)lv));
-        gwin->add(0.1, 0.2, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bnew));
-        gwin->add(
-            0.1, 0.305, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bsettings));
-        gwin->add(
-            0.1, 0.410, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
-        gwin->add(
-            0.2, 0.01, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)ilogo));
-
-        guir->showWindow(gwin);
-        // guir->add(0, 0, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)gwin));
-
-        ima->addListenerHandler([&](HumanInputAction hia) {
-            /* Only listen for game exit events, because you sure want to
-               close the window The others will be handled by the GUI listener */
-            if (std::holds_alternative<GameExit>(hia.type)) {
-                r = false;
-            }
-
-            return false;
-        });
-
-        double b   = SDL_GetTicks();
-        int frames = 0;
-
-        lr.load([&]() {
-            // Input
-            ima->processEvents();
-
-            guir->receiveEvent();
-            guir->runCallbacks();
-            guir->update();
-
-            // Render
-            fGUI->startDraw();
-            guir->render(0, 0);
-            // guir->renderToScreen();
-            fGUI->endDraw();
-
-            win->update();
-
-            double e = SDL_GetTicks();
-            if ((e - b) < 1000 / 60.0) SDL_Delay((unsigned int)(1000 / 60.0 - (e - b)));
-            b = SDL_GetTicks();
-            return r;
-        });
-
-
-        run_game_loop(lr, frames);
-
-        if (g) delete g;
-
-        delete gsettings;
-        delete gwin;
-
-        delete guir;
-        delete win;
-        fmt::print("\nExited. ({:d} frames)\n", frames);
-
-    } catch (shader_exception& se) {
-        log->write("init", LogType::Fatal, "Shader error: %s [d]", se.what());
-
-        if (win) {
-            //            fmt::memory_buffer out;
-            //            format_to(out,
-            //                "Familyline found an error in a shader\n"
-            //                "\n"
-            //                "Error: {:s}\n"
-            //                "File: {:s}, type: {:d}, code: {:d}",
-            //                se.what(), se.file.c_str(), se.type, se.code);
-            //            w->showMessageBox(out.data(), "Error", MessageBoxInfo::Error);
         }
 
-        exit(EXIT_FAILURE);
-    } catch (graphical_exception& we) {
-        log->write("init", LogType::Fatal, "Window creation error: %s (d)", we.what());
+        return false;
+    });
 
-        fmt::print(stderr, "Error while creating the window: {:s}\n", we.what());
+    double b   = SDL_GetTicks();
+    int frames = 0;
 
-        exit(EXIT_FAILURE);
-    } catch (std::bad_alloc& be) {
-        log->write("init", LogType::Fatal, "Allocation error: %s", be.what());
+    lr.load([&]() {
+        // Input
+        ima->processEvents();
 
-        log->write("init", LogType::Fatal, "Probably out of memory");
+        guir->receiveEvent();
+        guir->runCallbacks();
+        guir->update();
 
-        if (win) {
-            //            fmt::memory_buffer out;
-            //            format_to(out,
-            //                "Insufficient memory\n"
-            //                "\n"
-            //                "Error: {:s}",
-            //                be.what());
-            //            w->ShowMessageBox(out.data(), "Error", MessageBoxInfo::Error);
-        }
+        // Render
+        fGUI->startDraw();
+        guir->render(0, 0);
+        // guir->renderToScreen();
+        fGUI->endDraw();
 
-        exit(EXIT_FAILURE);
-    }
+        win->update();
+
+        double e = SDL_GetTicks();
+        if ((e - b) < 1000 / 60.0) SDL_Delay((unsigned int)(1000 / 60.0 - (e - b)));
+        b = SDL_GetTicks();
+        return r;
+    });
+
+    run_game_loop(lr, frames);
+
+    if (g) delete g;
+
+    delete gsettings;
+    delete gwin;
+
+    delete guir;
+    delete win;
+    fmt::print("\nExited. ({:d} frames)\n", frames);
 
     return 0;
 }

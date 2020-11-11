@@ -1,0 +1,194 @@
+#pragma once
+
+/**
+ * Familyline game loop class
+ */
+
+#include <memory>
+
+//#include "logic/ObjectRenderer.hpp"
+#include <client/graphical/GraphicalPlotInterface.hpp>
+#include <client/graphical/TextureOpener.hpp>
+#include <client/graphical/asset_file.hpp>
+#include <client/graphical/asset_manager.hpp>
+#include <client/graphical/camera.hpp>
+#include <client/graphical/framebuffer.hpp>
+#include <client/graphical/gfx_service.hpp>
+#include <client/graphical/gui/gui_button.hpp>
+#include <client/graphical/gui/gui_label.hpp>
+#include <client/graphical/gui/gui_manager.hpp>
+#include <client/graphical/material_manager.hpp>
+#include <client/graphical/materialopener/MTLOpener.hpp>
+#include <client/graphical/meshopener/OBJOpener.hpp>
+#include <client/graphical/object_renderer.hpp>
+#include <client/graphical/renderer.hpp>
+#include <client/graphical/scene_manager.hpp>
+#include <client/graphical/terrain_renderer.hpp>
+#include <client/graphical/texture_manager.hpp>
+#include <client/graphical/window.hpp>
+#include <common/logic/BuildQueue.hpp>
+#include <common/logic/GameActionManager.hpp>
+#include <common/logic/ObjectPathManager.hpp>
+#include <common/logic/PathFinder.hpp>
+#include <common/logic/colony_manager.hpp>
+#include <common/logic/debug_drawer.hpp>
+#include <common/logic/lifecycle_manager.hpp>
+#include <common/logic/object_factory.hpp>
+#include <common/logic/player_manager.hpp>
+#include <common/logic/terrain_file.hpp>
+//#include "graphical/gui/ImageControl.hpp"
+
+//#include <client/input/InputPicker.hpp>
+#include <client/HumanPlayer.hpp>
+#include <client/Timer.hpp>
+#include <client/input/input_manager.hpp>
+#include <common/objects/Tent.hpp>
+#include <common/objects/WatchTower.hpp>
+
+
+namespace familyline
+{
+
+    struct GFXGameInit {
+        std::unique_ptr<graphics::Window> window;
+        std::unique_ptr<graphics::Framebuffer> fb3D;
+        std::unique_ptr<graphics::Framebuffer> fbGUI;
+        std::unique_ptr<graphics::gui::GUIManager> gui;        
+    };
+
+
+    class Game
+    {
+    public:
+        Game(GFXGameInit& gi)
+            : terrFile_(std::make_unique<logic::TerrainFile>()),
+              window_(std::move(gi.window)),
+              fb3D_(std::move(gi.fb3D)),
+              fbGUI_(std::move(gi.fbGUI)),
+              gui_(std::move(gi.gui)),
+              camera_(std::make_unique<graphics::Camera>(
+                          glm::vec3(6.0, 36.0, 6.0), 16.0/9.0f, glm::vec3(0)))
+            {}
+
+        ~Game();
+
+        /**
+         * Initialize a map
+         *
+         * Be aware that this will not reset anything related to
+         * objects, so you should call `initObjects`, or you will
+         * be screwed
+         */
+        void initMap(std::string_view path);
+
+        /**
+         * Pass the player manager to the game
+         *
+         * Please add all starting clients to the player manager before starting the
+         * game.
+         *
+         * When we support spectators (of course we will), the add/removal of the
+         * spectators need to happen outside
+         */
+        void initPlayers(std::unique_ptr<logic::PlayerManager> pm);
+
+        /**
+         * Initialize the object manager and the object factory
+         */
+        void initObjects();
+        
+        void initLoopData();
+
+        bool runLoop();
+
+        /// Return maximum, minimum and average fps
+        std::tuple<double, double, double> getStatisticInfo();
+
+    private:
+        ///////////////////// logic
+        std::unique_ptr<logic::TerrainFile> terrFile_;
+        std::unique_ptr<logic::Terrain> terrain_;
+        
+        std::unique_ptr<logic::PlayerManager> pm_;
+        std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>> colonies_;
+
+        std::unique_ptr<logic::ObjectManager> om_;
+        std::unique_ptr<logic::ObjectLifecycleManager> olm_;
+        std::unique_ptr<logic::ColonyManager> cm_;
+        std::unique_ptr<logic::PathFinder> pathf_;
+
+
+        std::chrono::duration<double, std::milli> delta;
+        double pms = 0.0;
+
+        double maxdelta = 0, mindelta = 99, sumfps = 0;
+        bool started_ = false;
+
+        // Run the logic engine at 60 Hz
+#define LOGIC_DELTA 16
+
+        // and the input engine at 120 Hz
+#define INPUT_DELTA 8
+    
+        double logicTime = LOGIC_DELTA;
+        double  inputTime = INPUT_DELTA;
+        int limax     = 0;
+        std::chrono::high_resolution_clock::time_point ticks_;
+        std::chrono::high_resolution_clock::time_point rendertime_;
+
+        
+        // todo: probably will be removed?
+        logic::GameActionManager gam;
+        logic::GameContext gctx = {};
+        
+        ////////////////////// gfx
+        std::unique_ptr<graphics::Window> window_;
+        std::unique_ptr<graphics::Framebuffer> fb3D_;
+        std::unique_ptr<graphics::Framebuffer> fbGUI_;
+        std::unique_ptr<graphics::gui::GUIManager> gui_;
+        std::unique_ptr<graphics::ObjectRenderer> objrend_;
+
+        std::unique_ptr<graphics::Renderer> rndr_;
+
+        ////////////////////// more or less both
+        std::unique_ptr<graphics::Camera> camera_;
+        std::unique_ptr<graphics::TerrainRenderer> terr_rend_;
+        std::unique_ptr<graphics::AssetManager>& am = graphics::GFXService::getAssetManager();
+        std::unique_ptr<graphics::SceneManager> scenernd_;
+
+        ////////////////////////// input
+        std::unique_ptr<input::InputPicker> ip_;
+            
+        /////////////////////// statistical + debug information
+        struct {
+            //  graphics::gui::GUIPanel *p;
+            graphics::gui::Label* lbl;
+            graphics::gui::Label* lblVersion;
+            //  graphics::gui::GUIPanel *pnl;
+            graphics::gui::Button* btn;
+
+            graphics::gui::Label* lblBuilding   = nullptr;
+            graphics::gui::Label* lblFPS        = nullptr;
+            graphics::gui::Label* lblRange      = nullptr;
+            graphics::gui::Label* lblSelected   = nullptr;
+            graphics::gui::Label* lblTerrainPos = nullptr;
+            graphics::gui::Label* lblKeys = nullptr;
+        } widgets;
+
+        int frame_;
+
+
+
+        bool runInput();
+
+        void runLogic();
+        void runGraphical(double framems);
+
+        /* Show on-screen debug info
+         * (aka the words in monospaced font you see in-game)
+         */
+        void showDebugInfo();
+
+        void showHumanPlayerInfo(logic::Player*);
+    };
+}

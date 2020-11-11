@@ -5,7 +5,7 @@
 add_library(
   familyline-client
   "params.cpp"
-  "Game.cpp"
+  "game.cpp"
   "graphical/asset_file.cpp"
   "graphical/asset_manager.cpp"
   "graphical/asset_object.cpp"
