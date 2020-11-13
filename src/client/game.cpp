@@ -11,6 +11,7 @@
 #include <common/logic/colony.hpp>
 #include <common/logic/game_event.hpp>
 #include <common/logic/logic_service.hpp>
+#include <exception>
 
 #include "client/graphical/exceptions.hpp"
 #include "common/logic/PathFinder.hpp"
@@ -27,7 +28,7 @@ using namespace familyline::graphics::gui;
  * objects, so you should call `initObjects`, or you will
  * be screwed
  */
-void Game::initMap(std::string_view path)
+logic::Terrain& Game::initMap(std::string_view path)
 {
     auto& log = LoggerService::getLogger();
 
@@ -53,6 +54,8 @@ void Game::initMap(std::string_view path)
     terr_rend_->buildTextures();
 
     log->write("game", LogType::Info, "map '%s' loaded", path.data());
+
+    return *terrain_.get();
 }
 
 /**
@@ -64,15 +67,19 @@ void Game::initMap(std::string_view path)
  * When we support spectators (of course we will), the add/removal of the
  * spectators need to happen outside
  */
-void Game::initPlayers(std::unique_ptr<logic::PlayerManager> pm)
+void Game::initPlayers(
+    std::unique_ptr<logic::PlayerManager> pm, std::unique_ptr<logic::ColonyManager> cm,
+    decltype(colonies_) player_colony_map, int human_id)
 {
     auto& log = LoggerService::getLogger();
     log->write("game", LogType::Info, "configuring player manager");
 
+    cm_.swap(cm);
     pm_.swap(pm);
     pm_->render_add_callback = [&](std::shared_ptr<GameObject> o) {
         if (objrend_) objrend_->add(o);
     };
+    colonies_ = player_colony_map;
 
     pm_->colony_add_callback = [&](std::shared_ptr<GameObject> o, unsigned player_id) {
         auto& col = o->getColonyComponent();
@@ -84,8 +91,12 @@ void Game::initPlayers(std::unique_ptr<logic::PlayerManager> pm)
         }
     };
 
-    log->write("game", LogType::Info, "player manager configured");
+    if (human_id >= 0) {
+        HumanPlayer* hp = (HumanPlayer*)*pm_->get(human_id);
+        hp->setCamera(camera_.get());
+    }
 
+    log->write("game", LogType::Info, "player manager configured");
 }
 
 void Game::initObjects()
@@ -93,14 +104,14 @@ void Game::initObjects()
     auto& log = LoggerService::getLogger();
     log->write("game", LogType::Info, "configuring game objects");
 
-    rndr_ = std::unique_ptr<Renderer>(window_->createRenderer());
-    
+    rndr_ = window_->createRenderer();
+
     // TODO: move this outside?
     AssetFile f;
     f.loadFile("assets.yml");
     am->loadFile(f);
 
-    om_ = std::make_unique<ObjectManager>();
+    om_  = std::make_unique<ObjectManager>();
     olm_ = std::make_unique<ObjectLifecycleManager>(*om_.get());
 
     auto& of = LogicService::getObjectFactory();
@@ -117,7 +128,8 @@ void Game::initObjects()
         pathf_->UpdatePathmap(w, h);
     }
 
-    pm_->pf = pathf_.get();
+    pm_->olm = olm_.get();
+    pm_->pf  = pathf_.get();
 
     log->write("game", LogType::Info, "game objects configured");
 }
@@ -131,19 +143,19 @@ auto pointlight = std::make_unique<Light>(
 auto pointlight2 = std::make_unique<Light>(
     PointLightType{glm::vec3(50.0, 10.0, 10.0)}, 9.8f, glm::vec3(0.8, 0.2, 0.0), "redishlight");
 
-void Game::initLoopData()
+void Game::initLoopData(int human_id)
 {
     auto& log = LoggerService::getLogger();
 
-    LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr_.get(), *terrain_.get()));
-    
+    LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr_, *terrain_.get()));
+
     //// Initialize some graphical data
 
     gctx    = {};
     gctx.om = om_.get();
-    //gam.AddListener(new GameActionListenerImpl());
+    // gam.AddListener(new GameActionListenerImpl());
 
-    scenernd_ = std::make_unique<SceneManager>(*rndr_.get(), *camera_.get());
+    scenernd_ = std::make_unique<SceneManager>(*rndr_, *camera_.get());
     scenernd_->add(std::make_shared<SceneObject<Light>>(*sunlight.get()));
     scenernd_->add(std::make_shared<SceneObject<Light>>(*pointlight.get()));
     scenernd_->add(std::make_shared<SceneObject<Light>>(*pointlight2.get()));
@@ -152,7 +164,15 @@ void Game::initLoopData()
 
     ///// Initialize input
 
-    ip_ = std::make_unique<input::InputPicker>(terrain_.get(), window_.get(), scenernd_.get(), camera_.get(), om_.get());
+    ip_ = std::make_unique<input::InputPicker>(
+        terrain_.get(), window_, scenernd_.get(), camera_.get(), om_.get());
+
+    if (human_id >= 0) {
+        HumanPlayer* hp = (HumanPlayer*)*pm_->get(human_id);
+        hp->SetPicker(ip_.get());
+    }
+
+    ObjectPathManager::getInstance()->SetTerrain(terrain_.get());
 
     /// add the labels
     widgets.lblBuilding   = new Label(0.05 * 640, 0.1 * 480, "!!!");

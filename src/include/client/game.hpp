@@ -45,150 +45,149 @@
 #include <common/objects/Tent.hpp>
 #include <common/objects/WatchTower.hpp>
 
-
 namespace familyline
 {
+struct GFXGameInit {
+    graphics::Window* window;
+    graphics::Framebuffer* fb3D;
+    graphics::Framebuffer* fbGUI;
+    graphics::gui::GUIManager* gui;
+};
 
-    struct GFXGameInit {
-        std::unique_ptr<graphics::Window> window;
-        std::unique_ptr<graphics::Framebuffer> fb3D;
-        std::unique_ptr<graphics::Framebuffer> fbGUI;
-        std::unique_ptr<graphics::gui::GUIManager> gui;        
-    };
-
-
-    class Game
+class Game
+{
+public:
+    Game(GFXGameInit& gi)
+        : terrFile_(std::make_unique<logic::TerrainFile>()),
+          window_(gi.window),
+          fb3D_(gi.fb3D),
+          fbGUI_(gi.fbGUI),
+          gui_(gi.gui),
+          camera_(std::make_unique<graphics::Camera>(
+              glm::vec3(6.0, 36.0, 6.0), 16.0 / 9.0f, glm::vec3(0)))
     {
-    public:
-        Game(GFXGameInit& gi)
-            : terrFile_(std::make_unique<logic::TerrainFile>()),
-              window_(std::move(gi.window)),
-              fb3D_(std::move(gi.fb3D)),
-              fbGUI_(std::move(gi.fbGUI)),
-              gui_(std::move(gi.gui)),
-              camera_(std::make_unique<graphics::Camera>(
-                          glm::vec3(6.0, 36.0, 6.0), 16.0/9.0f, glm::vec3(0)))
-            {}
+    }
 
-        ~Game();
+    ~Game();
 
-        /**
-         * Initialize a map
-         *
-         * Be aware that this will not reset anything related to
-         * objects, so you should call `initObjects`, or you will
-         * be screwed
-         */
-        void initMap(std::string_view path);
+    /**
+     * Initialize a map
+     *
+     * Be aware that this will not reset anything related to
+     * objects, so you should call `initObjects`, or you will
+     * be screwed
+     */
+    logic::Terrain& initMap(std::string_view path);
 
-        /**
-         * Pass the player manager to the game
-         *
-         * Please add all starting clients to the player manager before starting the
-         * game.
-         *
-         * When we support spectators (of course we will), the add/removal of the
-         * spectators need to happen outside
-         */
-        void initPlayers(std::unique_ptr<logic::PlayerManager> pm);
+    /**
+     * Pass the player manager to the game
+     *
+     * Please add all starting clients to the player manager before starting the
+     * game.
+     *
+     * When we support spectators (of course we will), the add/removal of the
+     * spectators need to happen outside
+     */
+    void initPlayers(
+        std::unique_ptr<logic::PlayerManager> pm, std::unique_ptr<logic::ColonyManager> cm,
+        std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>>
+            player_colony_map,
+        int human_id);
 
-        /**
-         * Initialize the object manager and the object factory
-         */
-        void initObjects();
-        
-        void initLoopData();
+    /**
+     * Initialize the object manager and the object factory
+     */
+    void initObjects();
 
-        bool runLoop();
+    void initLoopData(int human_id);
 
-        /// Return maximum, minimum and average fps
-        std::tuple<double, double, double> getStatisticInfo();
+    bool runLoop();
 
-    private:
-        ///////////////////// logic
-        std::unique_ptr<logic::TerrainFile> terrFile_;
-        std::unique_ptr<logic::Terrain> terrain_;
-        
-        std::unique_ptr<logic::PlayerManager> pm_;
-        std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>> colonies_;
+    /// Return maximum, minimum and average fps
+    std::tuple<double, double, double> getStatisticInfo();
 
-        std::unique_ptr<logic::ObjectManager> om_;
-        std::unique_ptr<logic::ObjectLifecycleManager> olm_;
-        std::unique_ptr<logic::ColonyManager> cm_;
-        std::unique_ptr<logic::PathFinder> pathf_;
+private:
+    ///////////////////// logic
+    std::unique_ptr<logic::TerrainFile> terrFile_;
+    std::unique_ptr<logic::Terrain> terrain_;
 
+    std::unique_ptr<logic::PlayerManager> pm_;
 
-        std::chrono::duration<double, std::milli> delta;
-        double pms = 0.0;
+    std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>> colonies_;
 
-        double maxdelta = 0, mindelta = 99, sumfps = 0;
-        bool started_ = false;
+    std::unique_ptr<logic::ObjectManager> om_;
+    std::unique_ptr<logic::ObjectLifecycleManager> olm_;
+    std::unique_ptr<logic::ColonyManager> cm_;
+    std::unique_ptr<logic::PathFinder> pathf_;
 
-        // Run the logic engine at 60 Hz
+    std::chrono::duration<double, std::milli> delta;
+    double pms = 0.0;
+
+    double maxdelta = 0, mindelta = 99, sumfps = 0;
+    bool started_ = false;
+
+    // Run the logic engine at 60 Hz
 #define LOGIC_DELTA 16
 
-        // and the input engine at 120 Hz
+    // and the input engine at 120 Hz
 #define INPUT_DELTA 8
-    
-        double logicTime = LOGIC_DELTA;
-        double  inputTime = INPUT_DELTA;
-        int limax     = 0;
-        std::chrono::high_resolution_clock::time_point ticks_;
-        std::chrono::high_resolution_clock::time_point rendertime_;
 
-        
-        // todo: probably will be removed?
-        logic::GameActionManager gam;
-        logic::GameContext gctx = {};
-        
-        ////////////////////// gfx
-        std::unique_ptr<graphics::Window> window_;
-        std::unique_ptr<graphics::Framebuffer> fb3D_;
-        std::unique_ptr<graphics::Framebuffer> fbGUI_;
-        std::unique_ptr<graphics::gui::GUIManager> gui_;
-        std::unique_ptr<graphics::ObjectRenderer> objrend_;
+    double logicTime = LOGIC_DELTA;
+    double inputTime = INPUT_DELTA;
+    int limax        = 0;
+    std::chrono::high_resolution_clock::time_point ticks_;
+    std::chrono::high_resolution_clock::time_point rendertime_;
 
-        std::unique_ptr<graphics::Renderer> rndr_;
+    // todo: probably will be removed?
+    logic::GameActionManager gam;
+    logic::GameContext gctx = {};
 
-        ////////////////////// more or less both
-        std::unique_ptr<graphics::Camera> camera_;
-        std::unique_ptr<graphics::TerrainRenderer> terr_rend_;
-        std::unique_ptr<graphics::AssetManager>& am = graphics::GFXService::getAssetManager();
-        std::unique_ptr<graphics::SceneManager> scenernd_;
+    ////////////////////// gfx
+    graphics::Window* window_;
+    graphics::Framebuffer* fb3D_;
+    graphics::Framebuffer* fbGUI_;
+    graphics::gui::GUIManager* gui_;
+    std::unique_ptr<graphics::ObjectRenderer> objrend_;
 
-        ////////////////////////// input
-        std::unique_ptr<input::InputPicker> ip_;
-            
-        /////////////////////// statistical + debug information
-        struct {
-            //  graphics::gui::GUIPanel *p;
-            graphics::gui::Label* lbl;
-            graphics::gui::Label* lblVersion;
-            //  graphics::gui::GUIPanel *pnl;
-            graphics::gui::Button* btn;
+    graphics::Renderer* rndr_ = nullptr;
 
-            graphics::gui::Label* lblBuilding   = nullptr;
-            graphics::gui::Label* lblFPS        = nullptr;
-            graphics::gui::Label* lblRange      = nullptr;
-            graphics::gui::Label* lblSelected   = nullptr;
-            graphics::gui::Label* lblTerrainPos = nullptr;
-            graphics::gui::Label* lblKeys = nullptr;
-        } widgets;
+    ////////////////////// more or less both
+    std::unique_ptr<graphics::Camera> camera_;
+    std::unique_ptr<graphics::TerrainRenderer> terr_rend_;
+    std::unique_ptr<graphics::AssetManager>& am = graphics::GFXService::getAssetManager();
+    std::unique_ptr<graphics::SceneManager> scenernd_;
 
-        int frame_;
+    ////////////////////////// input
+    std::unique_ptr<input::InputPicker> ip_;
 
+    /////////////////////// statistical + debug information
+    struct {
+        //  graphics::gui::GUIPanel *p;
+        graphics::gui::Label* lbl;
+        graphics::gui::Label* lblVersion;
+        //  graphics::gui::GUIPanel *pnl;
+        graphics::gui::Button* btn;
 
+        graphics::gui::Label* lblBuilding   = nullptr;
+        graphics::gui::Label* lblFPS        = nullptr;
+        graphics::gui::Label* lblRange      = nullptr;
+        graphics::gui::Label* lblSelected   = nullptr;
+        graphics::gui::Label* lblTerrainPos = nullptr;
+        graphics::gui::Label* lblKeys       = nullptr;
+    } widgets;
 
-        bool runInput();
+    int frame_;
 
-        void runLogic();
-        void runGraphical(double framems);
+    bool runInput();
 
-        /* Show on-screen debug info
-         * (aka the words in monospaced font you see in-game)
-         */
-        void showDebugInfo();
+    void runLogic();
+    void runGraphical(double framems);
 
-        void showHumanPlayerInfo(logic::Player*);
-    };
-}
+    /* Show on-screen debug info
+     * (aka the words in monospaced font you see in-game)
+     */
+    void showDebugInfo();
+
+    void showHumanPlayerInfo(logic::Player*);
+};
+}  // namespace familyline

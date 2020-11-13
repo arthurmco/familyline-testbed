@@ -14,6 +14,7 @@
 #include <memory>
 #include <queue>
 #include <vector>
+#include <map>
 
 namespace familyline::logic
 {
@@ -71,6 +72,22 @@ public:
     int add(std::unique_ptr<Player> p, bool allocate_id = true);
 
     /**
+     * Get a player from the player manager
+     *
+     * Returns the player object.
+     * Remember that this object is owned by the player manager.
+     * In C++, you are the borrow checker.
+     */
+    std::optional<Player*> get(int id);
+
+    /**
+     * Gets a multimap of ID=>playername, so you can easily discover the
+     * ID of a certain player name, or a name of a player who has a
+     * certain ID
+     */
+    std::multimap<int, std::string> getPlayerNames();
+    
+    /**
      * Push an action
      */
     void pushAction(unsigned int id, PlayerInputType type);
@@ -109,7 +126,7 @@ public:
     /**
      * Get the current tick, as registered by the player manager
      */
-    size_t tick() { return _tick; }
+    size_t tick() const { return _tick; }
 };
 
 }  // namespace familyline::logic

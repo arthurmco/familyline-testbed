@@ -26,6 +26,19 @@ int PlayerManager::add(std::unique_ptr<Player> p, bool allocate_id)
     return pi.id;
 }
 
+/**
+ * Get a player from the player manager
+ *
+ * Returns the player object.
+ * Remember that this object is owned by the player manager.
+ * In C++, you are the borrow checker.
+ */
+std::optional<Player*> PlayerManager::get(int id)
+{
+    return this->getPlayerFromID(id);
+}
+
+
 std::optional<Player*> PlayerManager::getPlayerFromID(int id)
 {
     auto p =
@@ -331,6 +344,24 @@ void PlayerManager::generateInput()
     for (auto& p : players_) {
         p.player->generateInput();
     }
+}
+
+
+
+/**
+ * Gets a multimap of ID=>playername, so you can easily discover the
+ * ID of a certain player name, or a name of a player who has a
+ * certain ID
+ */
+std::multimap<int, std::string> PlayerManager::getPlayerNames()
+{
+    std::multimap<int, std::string> r;
+
+    std::for_each(players_.begin(), players_.end(),
+                   [&r](PlayerInfo& i) {
+                       r.emplace(i.id, std::string{i.player->getName()});                       
+                   });
+    return r;    
 }
 
 /**

@@ -31,6 +31,7 @@
 #include <fmt/format.h>
 
 #include <client/game.hpp>
+#include <client/player_enumerator.hpp>
 #include <client/graphical/device.hpp>
 #include <client/graphical/framebuffer.hpp>
 #include <client/graphical/gui/gui_button.hpp>
@@ -208,21 +209,29 @@ Game* start_game(
     Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win, GUIManager* guir, LoopRunner& lr,
     std::string_view mapFile)
 {
-    auto pm = std::make_unique<PlayerManager>();
-
     GFXGameInit gi{
-        std::unique_ptr<graphics::Window>{win},
-        std::unique_ptr<Framebuffer>{f3D},
-        std::unique_ptr<Framebuffer>{fGUI},
-        std::unique_ptr<GUIManager>{guir},        
+        win,
+        f3D,
+        fGUI,
+        guir,
     };
-    
-    
+
+
     Game* g = new Game(gi);
-    g->initMap(mapFile);
-    g->initPlayers(std::move(pm));
-    g->initObjects();    
-    g->initLoopData();
+    auto& map = g->initMap(mapFile);
+    auto pinfo = InitPlayerInfo{"Arthur", -1};
+    auto session = initSinglePlayerSession(map, pinfo);
+
+    auto pm = std::move(session.players);
+    auto cm = std::move(session.colonies);
+    
+    if (pinfo.id == -1) {
+        throw std::runtime_error{"Could not create the human player"};
+    }
+
+    g->initPlayers(std::move(pm), std::move(cm), session.player_colony, pinfo.id);
+    g->initObjects();
+    g->initLoopData(pinfo.id);
 
     return g;
 }

@@ -6,6 +6,7 @@ add_library(
   familyline-client
   "params.cpp"
   "game.cpp"
+  "player_enumerator.cpp"
   "graphical/asset_file.cpp"
   "graphical/asset_manager.cpp"
   "graphical/asset_object.cpp"

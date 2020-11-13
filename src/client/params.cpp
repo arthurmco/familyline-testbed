@@ -14,7 +14,7 @@ static void show_help()
     fmt::print("--version:\t\tPrint version and, if compiled inside a Git repo, commit hash\n");
     fmt::print("--help:\t\t\tPrint this help information\n");
     fmt::print("--size <W>x<H>:\t\tChanges the game resolution to <W>x<H> pixels\n");
-    fmt::print("--file <path>:\t\tLoad a map in the specified path\n");
+    fmt::print("--file <path>:\t\tLoad a map from the specified path\n");
     fmt::print(
         "--log [<filename>|screen]: Logs to filename 'filename', or screen to log to screen, or "
         "wherever stderr is bound to\n");
