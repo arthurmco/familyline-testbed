@@ -56,15 +56,16 @@ struct GFXGameInit {
 
 class Game
 {
-public:
+public:    
     Game(GFXGameInit& gi)
         : terrFile_(std::make_unique<logic::TerrainFile>()),
           window_(gi.window),
           fb3D_(gi.fb3D),
           fbGUI_(gi.fbGUI),
-          gui_(gi.gui),
+          gui_(gi.gui),          
           camera_(std::make_unique<graphics::Camera>(
-              glm::vec3(6.0, 36.0, 6.0), 16.0 / 9.0f, glm::vec3(0)))
+                      glm::vec3(6.0, 36.0, 6.0), 16.0 / 9.0f, glm::vec3(0))),
+          am(graphics::GFXService::getAssetManager())
     {
     }
 
@@ -154,7 +155,7 @@ private:
     ////////////////////// more or less both
     std::unique_ptr<graphics::Camera> camera_;
     std::unique_ptr<graphics::TerrainRenderer> terr_rend_;
-    std::unique_ptr<graphics::AssetManager>& am = graphics::GFXService::getAssetManager();
+    std::unique_ptr<graphics::AssetManager>& am;
     std::unique_ptr<graphics::SceneManager> scenernd_;
 
     ////////////////////////// input
@@ -176,7 +177,7 @@ private:
         graphics::gui::Label* lblKeys       = nullptr;
     } widgets;
 
-    int frame_;
+    int frame_ = 0;
 
     bool runInput();
 

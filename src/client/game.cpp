@@ -91,7 +91,7 @@ void Game::initPlayers(
         }
     };
 
-    if (human_id >= 0) {
+    if (human_id != -1) {
         HumanPlayer* hp = (HumanPlayer*)*pm_->get(human_id);
         hp->setCamera(camera_.get());
     }
@@ -144,8 +144,9 @@ auto pointlight2 = std::make_unique<Light>(
     PointLightType{glm::vec3(50.0, 10.0, 10.0)}, 9.8f, glm::vec3(0.8, 0.2, 0.0), "redishlight");
 
 void Game::initLoopData(int human_id)
-{
+{        
     auto& log = LoggerService::getLogger();
+    log->write("game", LogType::Info, "initializing other data needed by the game");
 
     LogicService::initDebugDrawer(new GFXDebugDrawer(*rndr_, *terrain_.get()));
 
@@ -167,7 +168,7 @@ void Game::initLoopData(int human_id)
     ip_ = std::make_unique<input::InputPicker>(
         terrain_.get(), window_, scenernd_.get(), camera_.get(), om_.get());
 
-    if (human_id >= 0) {
+    if (human_id != -1) {
         HumanPlayer* hp = (HumanPlayer*)*pm_->get(human_id);
         hp->SetPicker(ip_.get());
     }
@@ -228,6 +229,9 @@ void Game::initLoopData(int human_id)
     started_ = true;
 
     ticks_ = std::chrono::high_resolution_clock::now();
+
+    log->write("game", LogType::Info, "game class ready");
+
 }
 
 Game::~Game()
@@ -256,7 +260,7 @@ bool Game::runLoop()
         }
 
         inputTime -= INPUT_DELTA;
-    }
+    } 
 
     /* Run the logic code in steps of fixed blocks
      * This is called fixed timestep, and will ensure game consistency

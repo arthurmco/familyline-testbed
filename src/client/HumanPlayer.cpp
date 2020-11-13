@@ -219,7 +219,7 @@ void HumanPlayer::generateInput()
     if (right) {
         cameraSpeedVec.x += camera_speed;
     }
-
+    
     if (zoom_mouse) {
         if (zoom_in) zoom_val = +(zoom_speed * zoom_factor);
 

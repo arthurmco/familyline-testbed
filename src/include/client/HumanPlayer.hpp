@@ -58,7 +58,7 @@ public:
 
     void setCamera(familyline::graphics::Camera*);
     void SetPicker(familyline::input::InputPicker* ip);
-    void SetInputManager(familyline::input::InputManager*);
+    void SetInputManager(familyline::input::InputManager*) {};
     //	void SetGameActionManager(familyline::logic::GameActionManager* );
 
     virtual ~HumanPlayer();
