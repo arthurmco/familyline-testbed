@@ -9,6 +9,7 @@
 #include <vector>
 #include <string>
 #include <cstdio>
+#include <optional>
 
 #include <fmt/format.h>
 
