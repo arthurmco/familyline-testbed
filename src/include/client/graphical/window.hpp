@@ -3,11 +3,12 @@
 #include <client/graphical/device.hpp>
 #include <client/graphical/framebuffer.hpp>
 #include <client/graphical/shader.hpp>
-
+#include <client/graphical/gui/gui_manager.hpp>
+#include <memory>
 
 namespace familyline::graphics
 {
-    class Renderer;
+    class Renderer;    
     
 /**
  * The window
@@ -36,6 +37,8 @@ public:
 
     virtual Renderer* createRenderer() = 0;
     virtual Renderer* getRenderer() = 0;
+
+    virtual gui::GUIManager* createGUIManager() = 0;
 };
 
     

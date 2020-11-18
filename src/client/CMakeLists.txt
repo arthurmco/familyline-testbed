@@ -45,6 +45,7 @@ add_library(
   "graphical/opengl/gl_window.cpp"
   "graphical/opengl/gl_renderer.cpp"
   "graphical/opengl/gl_terrain_renderer.cpp"
+  "graphical/opengl/gl_gui_manager.cpp"
   "graphical/opengl/gl_shader.cpp"
   "HumanPlayer.cpp"
   "input/Cursor.cpp"

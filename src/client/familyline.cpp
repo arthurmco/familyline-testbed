@@ -333,7 +333,8 @@ int main(int argc, char const* argv[])
         Framebuffer fGUI = Framebuffer("fGUI", gwidth, gheight);
         win->setFramebuffers(&f3D, &fGUI);
 
-        guir = new GUIManager(*win, (unsigned)gwidth, (unsigned)gheight, *ima.get());
+        guir = win->createGUIManager();
+        guir->initialize(*win);
         // guir->initShaders(win);
 
         /* If we have a networked game ready, don't even show the main menu. */
@@ -350,7 +351,6 @@ int main(int argc, char const* argv[])
 
             if (g) delete g;
 
-            delete guir;
             delete win;
             fmt::print("\nExited. ({:d} frames)\n", frames);
 
@@ -523,7 +523,6 @@ static int show_starting_menu(
     delete gsettings;
     delete gwin;
 
-    delete guir;
     delete win;
     fmt::print("\nExited. ({:d} frames)\n", frames);
 
