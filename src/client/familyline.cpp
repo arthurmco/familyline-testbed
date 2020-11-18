@@ -8,11 +8,6 @@
 
 #include <fmt/core.h>
 #define GLM_FORCE_RADIANS
-#include <GL/glew.h>
-
-#ifdef __linux__
-#include <GL/glxew.h>
-#endif
 
 #ifndef _WIN32
 #include <sys/utsname.h>
@@ -272,6 +267,8 @@ int main(int argc, char const* argv[])
     log->write("", LogType::Info, "Running on OS %s", sysname.c_str());
     log->write("", LogType::Info, "  version: %s (%s)", sysversion.c_str(), sysinfo.c_str());
 
+    log->write("", LogType::Info, "Using renderer '%s'", pi.renderer.c_str());
+
     char timestr[32];
 
     auto tm     = time(NULL);
@@ -290,8 +287,8 @@ int main(int argc, char const* argv[])
     PlayerManager* pm     = nullptr;
     Game* g               = nullptr;
 
-    try {
-        auto devs          = graphics::getDeviceList();
+    try {       
+        auto devs          = pi.devices;
         Device* defaultdev = nullptr;
 
         if (devs.size() == 0) {

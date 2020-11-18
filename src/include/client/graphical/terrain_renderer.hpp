@@ -9,7 +9,7 @@
 #include <client/graphical/Texture.hpp>
 #include <client/graphical/camera.hpp>
 #include <client/graphical/shader.hpp>
-#include <client/graphical/gl_renderer.hpp>
+#include <client/graphical/opengl/gl_renderer.hpp>
 #include <common/logic/terrain.hpp>
 #include <glm/glm.hpp>
 #include <unordered_map>

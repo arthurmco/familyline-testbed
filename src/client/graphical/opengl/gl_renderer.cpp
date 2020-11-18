@@ -1,6 +1,9 @@
+#include <client/graphical/opengl/gl_renderer.hpp>
+
+#ifdef RENDERER_OPENGL
+
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/gfx_service.hpp>
-#include <client/graphical/gl_renderer.hpp>
 #include <client/graphical/shader_manager.hpp>
 #include <common/logger.hpp>
 
@@ -374,3 +377,5 @@ bool GLVertexHandle::recreate(VertexData& vd, VertexInfo& vi)
 
     return false;
 }
+
+#endif

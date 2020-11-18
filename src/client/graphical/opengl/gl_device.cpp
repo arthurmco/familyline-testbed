@@ -1,11 +1,12 @@
+#include <client/graphical/opengl/gl_device.hpp>
+
+#ifdef RENDERER_OPENGL
 
 #include <fmt/core.h>
-
 #include <SDL2/SDL_opengl.h>
 
-#include <client/graphical/device.hpp>
+#include <client/graphical/opengl/gl_window.hpp>
 #include <client/graphical/shader.hpp>
-#include <client/graphical/window.hpp>
 
 using namespace familyline;
 using namespace familyline::graphics;
@@ -13,7 +14,7 @@ using namespace familyline::graphics;
 /**
  * Get a list of devices in the machine
  */
-std::vector<Device*> familyline::graphics::getDeviceList()
+std::vector<Device*> GLDevice::getDeviceList()
 {
     // TODO: make this a static method of each device?
     std::vector<Device*> devs;
@@ -81,3 +82,6 @@ ShaderProgram* GLDevice::createShaderProgram(
 {
     return new ShaderProgram{name, shaders};
 }
+
+
+#endif
