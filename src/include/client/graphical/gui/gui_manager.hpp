@@ -11,7 +11,6 @@
 #include <client/graphical/gui/gui_window.hpp>
 #include <client/graphical/gui/root_control.hpp>
 #include <client/graphical/shader.hpp>
-#include <client/graphical/window.hpp>
 #include <client/input/input_manager.hpp>
 #include <common/logger.hpp>
 #include <deque>
@@ -21,21 +20,23 @@
 #include <string>
 #include <vector>
 
+namespace familyline::graphics {
+    class Window;
+}
+
 namespace familyline::graphics::gui
 {
 /// TODO: PLEASE find a way to run the GUI update function always in tribalia.cpp, or
 ///       familyline.cpp if renamed. It will make things easier.
 
+    
 /**
  * Manages the graphical interface state and rendering
  */
 class GUIManager
 {
-private:
+protected:
     familyline::graphics::Window& win_;
-
-    familyline::graphics::ShaderProgram* sGUI_;
-    GLuint vaoGUI_, attrPos_, vboPos_, attrTex_, vboTex_, texHandle_;
 
     std::array<unsigned int, 32 * 32> ibuf;
 
@@ -74,12 +75,12 @@ private:
      * the said square, the texture plus the shaders that enable the
      * rendering there
      */
-    void init(const familyline::graphics::Window& win);
+    virtual void init(const familyline::graphics::Window& win) = 0;
 
     /**
      * Render the cairo canvas to the gui texture
      */
-    void renderToTexture();
+    virtual void renderToTexture() = 0;
 
     /**
      * Checks if an event mouse position hits a control or not.
@@ -155,7 +156,6 @@ public:
           canvas_(cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height))
     {
         context_ = cairo_create(this->canvas_);
-        this->init(win);
 
         auto* canvas  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
         auto* context = cairo_create(canvas);
@@ -179,6 +179,8 @@ public:
         });
     }
 
+    void initialize(const Window& win) { this->init(win); }
+    
     /**
      * Show the window you pass
      *
@@ -219,7 +221,7 @@ public:
      */
     void runCallbacks();
 
-    ~GUIManager();
+    virtual ~GUIManager();
 };
 
 }  // namespace familyline::graphics::gui

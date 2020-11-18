@@ -9,7 +9,7 @@
 #include <client/graphical/opengl/gl_device.hpp>
 #include <client/graphical/framebuffer.hpp>
 #include <client/graphical/shader.hpp>
-
+#include <client/graphical/opengl/gl_gui_manager.hpp>
 
 namespace familyline::graphics
 {
@@ -33,6 +33,7 @@ namespace familyline::graphics
         void createWindowSquare();
 
         std::unique_ptr<Renderer> renderer_;
+        std::unique_ptr<gui::GLGUIManager> guim_;
     
     public:
         GLWindow(GLDevice* dev, int width = 800, int height = 600);
@@ -56,6 +57,8 @@ namespace familyline::graphics
         virtual Renderer* createRenderer();
         virtual Renderer* getRenderer();
 
+        virtual gui::GUIManager* createGUIManager();
+        
         virtual ~GLWindow() {}
     };
 

@@ -1,4 +1,5 @@
 #include <client/graphical/opengl/gl_window.hpp>
+#include "client/graphical/gui/gui_manager.hpp"
 
 #ifdef RENDERER_OPENGL
 
@@ -9,6 +10,8 @@
 #include <client/graphical/opengl/gl_shader.hpp>
 #include <client/graphical/shader_manager.hpp>
 #include <common/logger.hpp>
+
+#include <client/input/input_service.hpp>
 
 using namespace familyline::graphics;
 
@@ -340,6 +343,22 @@ void GLWindow::update()
 
     glEnable(GL_DEPTH_TEST);
 }
+
+gui::GUIManager* GLWindow::createGUIManager()
+{
+    if (!guim_.get()) {
+        int gwidth, gheight;
+        this->getFramebufferSize(gwidth, gheight);
+
+        auto& ima = input::InputService::getInputManager();
+
+        guim_ = std::make_unique<gui::GLGUIManager>(*this, gwidth, gheight, *ima.get());
+    }
+
+    return (gui::GUIManager*)guim_.get();
+    
+}
+
 
 Renderer* GLWindow::createRenderer()
 {
