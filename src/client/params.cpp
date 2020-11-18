@@ -70,19 +70,19 @@ std::vector<familyline::graphics::Device*> get_device_list(std::string_view rend
     auto rs = get_available_renderers();
 
     if (rs.empty()) {
-        fmt::print("no renderers available!");
-        fmt::print("You probably did not compile the game right!");
-        std::terminate();
+        fmt::print("no renderers available!\n");
+        fmt::print("You probably did not compile the game right!\n");
+        std::exit(1);
     }
 
     if (std::find(rs.begin(), rs.end(), renderer) == rs.end()) {
-        fmt::print("renderer {} is invalid!", renderer);
+        fmt::print("renderer {} is invalid!\n", renderer);
         fmt::print("Valid renderers are: ");
         for (auto& r : rs) {
             fmt::print("{}", r);
         }
         fmt::print("\n");
-        std::terminate();
+        std::exit(1);
     }
 
 #ifdef RENDERER_OPENGL

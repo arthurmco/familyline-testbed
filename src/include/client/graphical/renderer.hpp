@@ -7,11 +7,13 @@
 #include <client/graphical/light.hpp>
 #include <memory>
 
-#include "camera.hpp"
+#include <client/graphical/camera.hpp>
 #include "vertexdata.hpp"
 
 namespace familyline::graphics
 {
+    class TerrainRenderer;
+    
 struct VertexHandle {
     VertexInfo vinfo;
 
@@ -41,6 +43,8 @@ public:
     virtual LightHandle* createLight(Light& light) = 0;
     virtual void removeLight(LightHandle* lh)      = 0;
 
+    virtual TerrainRenderer* createTerrainRenderer(Camera& camera) = 0;
+    
     virtual ~Renderer() {}
 };
 

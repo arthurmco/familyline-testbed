@@ -2,6 +2,7 @@
 
 #ifdef RENDERER_OPENGL
 
+#include <client/graphical/opengl/gl_terrain_renderer.hpp>
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/gfx_service.hpp>
 #include <client/graphical/shader_manager.hpp>
@@ -341,6 +342,11 @@ void GLRenderer::removeLight(LightHandle* lh)
 }
 
 
+TerrainRenderer* GLRenderer::createTerrainRenderer(Camera& camera)
+{
+    return new GLTerrainRenderer{camera};
+}
+
 bool GLVertexHandle::update(VertexData& vd)
 {
     glBindVertexArray(this->vao);
@@ -377,5 +383,6 @@ bool GLVertexHandle::recreate(VertexData& vd, VertexInfo& vi)
 
     return false;
 }
+
 
 #endif

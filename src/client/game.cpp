@@ -48,10 +48,6 @@ logic::Terrain& Game::initMap(std::string_view path)
     float aspectRatio         = float(winW) / float(winH);
     camera_ = std::make_unique<Camera>(position + directionOffset, aspectRatio, position);
 
-    terr_rend_ = std::make_unique<TerrainRenderer>(*terrain_.get(), *camera_.get());
-    terr_rend_->buildVertexData();
-    terr_rend_->buildTextures();
-
     log->write("game", LogType::Info, "map '%s' loaded", path.data());
 
     return *terrain_.get();
@@ -104,6 +100,13 @@ void Game::initObjects()
     log->write("game", LogType::Info, "configuring game objects");
 
     rndr_ = window_->createRenderer();
+    if (terr_rend_)
+        delete terr_rend_;
+    
+    terr_rend_ = rndr_->createTerrainRenderer(*camera_.get());
+    terr_rend_->setTerrain(terrain_.get());
+    terr_rend_->buildVertexData();
+    terr_rend_->buildTextures();
 
     // TODO: move this outside?
     AssetFile f;
