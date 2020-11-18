@@ -35,9 +35,9 @@ public:
     /// a VulkanDevice to a Vulkan Window...)
     virtual std::any getCustomData() = 0;
 
-    virtual Shader createShader(const char* file, ShaderType type) = 0;
+    virtual Shader* createShader(const char* file, ShaderType type) = 0;
     virtual ShaderProgram* createShaderProgram(std::string_view name,
-                                               std::initializer_list<Shader> shaders) = 0;
+                                               std::initializer_list<Shader*> shaders) = 0;
 
     virtual Window* createWindow(size_t w, size_t h) = 0;
 

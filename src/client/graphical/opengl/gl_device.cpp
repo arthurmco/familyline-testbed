@@ -6,7 +6,7 @@
 #include <SDL2/SDL_opengl.h>
 
 #include <client/graphical/opengl/gl_window.hpp>
-#include <client/graphical/shader.hpp>
+#include <client/graphical/opengl/gl_shader.hpp>
 
 using namespace familyline;
 using namespace familyline::graphics;
@@ -75,12 +75,17 @@ familyline::graphics::Window* GLDevice::createWindow(size_t w, size_t h)
     return new GLWindow(this, w, h);
 }
 
-Shader GLDevice::createShader(const char* file, ShaderType type) { return Shader{file, type}; }
+Shader* GLDevice::createShader(const char* file, ShaderType type) { return new GLShader{file, type}; }
 
 ShaderProgram* GLDevice::createShaderProgram(
-    std::string_view name, std::initializer_list<Shader> shaders)
+    std::string_view name, std::initializer_list<Shader*> shaders)
 {
-    return new ShaderProgram{name, shaders};
+    std::vector<GLShader*> glsh;
+    std::transform(shaders.begin(), shaders.end(), std::back_inserter(glsh), [](Shader* s) {
+        return dynamic_cast<GLShader*>(s);
+    });
+
+    return new GLShaderProgram{name, glsh};
 }
 
 

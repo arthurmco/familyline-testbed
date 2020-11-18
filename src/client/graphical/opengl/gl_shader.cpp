@@ -1,6 +1,9 @@
+#include <client/graphical/opengl/gl_shader.hpp>
+
+#ifdef RENDERER_OPENGL
+
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/gfx_service.hpp>
-#include <client/graphical/shader.hpp>
 #include <client/graphical/shader_manager.hpp>
 #include <cstdio>
 
@@ -9,7 +12,8 @@
 using namespace familyline::graphics;
 
 // Open the shader file and compile it
-Shader::Shader(const char* file, ShaderType type)
+GLShader::GLShader(const char* file, ShaderType type)
+    : Shader(file, type)
 {
     auto content = this->readFile(file);
 
@@ -47,7 +51,7 @@ std::regex regInclude(R"(\#include\s*\"(.*)\")");
  *
  * Deal with the include files here, too
  */
-std::string Shader::readAndProcessFile(const char* file)
+std::string GLShader::readAndProcessFile(const char* file)
 {
     std::string data;
 
@@ -82,7 +86,7 @@ std::string Shader::readAndProcessFile(const char* file)
             fullInclude.append("/");
             fullInclude.append(includeFile);
 
-            sview = Shader::readAndProcessFile(fullInclude.c_str());
+            sview = GLShader::readAndProcessFile(fullInclude.c_str());
             break;
         }
 
@@ -93,12 +97,12 @@ std::string Shader::readAndProcessFile(const char* file)
 }
 
 
-std::string Shader::readFile(const char* file)
+std::string GLShader::readFile(const char* file)
 {
     return this->readAndProcessFile(file);
 }
 
-void Shader::compile()
+void GLShader::compile()
 {
     glCompileShader(this->_handle);
 
@@ -121,20 +125,19 @@ void Shader::compile()
     }
 }
 
-ShaderProgram::ShaderProgram(std::string_view name, std::initializer_list<Shader> shaders)
+GLShaderProgram::GLShaderProgram(std::string_view name, const std::vector<GLShader*>& shaders)
+    : ShaderProgram(name)
 {
-    this->_name   = name;
-
     if (shaders.size() > 0)
         this->_handle = glCreateProgram();
 
-    for (auto& s : shaders) {
-        _files.push_back(std::make_pair(s.getType(), s));
-        glAttachShader(_handle, s.getHandle());
+    for (auto s : shaders) {        
+        _files.push_back(std::make_pair(s->getType(), s));
+        glAttachShader(_handle, s->getHandle());
     }
 }
 
-void ShaderProgram::link()
+void GLShaderProgram::link()
 {
     glLinkProgram(this->_handle);
 
@@ -169,7 +172,7 @@ void ShaderProgram::link()
  * slow, because of the PCI bus.
  * Even if you are using an APU, because APUs use the PCI bus to communicate with the processor
  */
-GLint ShaderProgram::getUniformLocation(std::string_view name)
+GLint GLShaderProgram::getUniformLocation(std::string_view name)
 {
     std::string sname{name};
     if (_uniform_cache.find(sname) == _uniform_cache.end()) {
@@ -185,27 +188,34 @@ GLint ShaderProgram::getUniformLocation(std::string_view name)
     return _uniform_cache[sname];
 }
 
-void ShaderProgram::setUniform(std::string_view name, glm::vec3 val)
+void GLShaderProgram::setUniform(std::string_view name, glm::vec3 val)
 {
     glUniform3fv(this->getUniformLocation(name), 1, (const GLfloat*)&val[0]);
 }
 
-void ShaderProgram::setUniform(std::string_view name, glm::vec4 val)
+void GLShaderProgram::setUniform(std::string_view name, glm::vec4 val)
 {
     glUniform4fv(this->getUniformLocation(name), 1, (const GLfloat*)&val[0]);
 }
 
-void ShaderProgram::setUniform(std::string_view name, glm::mat4 val)
+void GLShaderProgram::setUniform(std::string_view name, glm::mat4 val)
 {
     glUniformMatrix4fv(this->getUniformLocation(name), 1, GL_FALSE, (const GLfloat*)&val[0][0]);
 }
 
-void ShaderProgram::setUniform(std::string_view name, int val)
+void GLShaderProgram::setUniform(std::string_view name, int val)
 {
     glUniform1i(this->getUniformLocation(name), val);
 }
 
-void ShaderProgram::setUniform(std::string_view name, float val)
+void GLShaderProgram::setUniform(std::string_view name, float val)
 {
     glUniform1f(this->getUniformLocation(name), val);
 }
+
+void GLShaderProgram::use()
+{
+    glUseProgram(this->_handle);
+}
+
+#endif

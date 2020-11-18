@@ -6,6 +6,7 @@
 #include <client/graphical/gfx_service.hpp>
 #include <client/graphical/renderer.hpp>
 #include <client/graphical/opengl/gl_renderer.hpp>
+#include <client/graphical/opengl/gl_shader.hpp>
 #include <client/graphical/shader_manager.hpp>
 #include <common/logger.hpp>
 
@@ -249,9 +250,9 @@ void GLWindow::createWindowSquare()
 {
     /* Compile the shader */
     if (!winShader) {
-        winShader = new ShaderProgram(
-            "window", {Shader("shaders/Window.vert", ShaderType::Vertex),
-                       Shader("shaders/Window.frag", ShaderType::Fragment)});
+        winShader = new GLShaderProgram(
+            "window", {new GLShader("shaders/Window.vert", ShaderType::Vertex),
+                       new GLShader("shaders/Window.frag", ShaderType::Fragment)});
 
         winShader->link();
     }

@@ -40,9 +40,9 @@ public:
 
     virtual Window* createWindow(size_t w, size_t h);
 
-    virtual Shader createShader(const char* file, ShaderType type);
+    virtual Shader* createShader(const char* file, ShaderType type);
     virtual ShaderProgram* createShaderProgram(std::string_view name,
-                                               std::initializer_list<Shader> shaders);
+                                               std::initializer_list<Shader*> shaders);
 
     /**
      * Get a list of devices in the machine
