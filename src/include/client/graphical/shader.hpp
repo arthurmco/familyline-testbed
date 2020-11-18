@@ -9,9 +9,6 @@ enum ShaderType { Vertex, Fragment, Geometry, Compute };
 
 #include <string>
 #include <string_view>
-#include <unordered_map>
-#include <utility>
-#include <vector>
 
 namespace familyline::graphics
 {
@@ -23,46 +20,47 @@ namespace familyline::graphics
  */
 class Shader
 {
-private:
+protected:
     const char* _file;
     ShaderType _type;
-    int _handle;
-
-    std::string readAndProcessFile(const char* file);    
-    std::string readFile(const char* file);
 
 public:
-    Shader(const char* file, ShaderType type);
-    void compile();
+    Shader(const char* file, ShaderType type)
+        : _file(file), _type(type)
+        {}
+        
+    virtual void compile() = 0;
 
-    int getHandle() const { return this->_handle; }
+    virtual int getHandle() const = 0;
+    
     ShaderType getType() const { return this->_type; }
+
+    virtual ~Shader() {}
 };
 
 class ShaderProgram
 {
-private:
+protected:
     std::string_view _name;
-    std::vector<std::pair<ShaderType, Shader>> _files;
-    int _handle;
-    std::unordered_map<std::string, GLint> _uniform_cache;
-
-    GLint getUniformLocation(std::string_view name);
-
 public:
-    ShaderProgram(std::string_view name, std::initializer_list<Shader> shaders);
-    void link();
+    ShaderProgram(std::string_view name)
+        : _name(name)
+        {}
+    
+    virtual void link() = 0;
 
-    int getHandle() const { return this->_handle; }
+    virtual int getHandle() const = 0;
+    
     std::string_view getName() const { return _name; }
 
-    void setUniform(std::string_view name, glm::vec3 val);
-    void setUniform(std::string_view name, glm::vec4 val);
-    void setUniform(std::string_view name, glm::mat4 val);
-    void setUniform(std::string_view name, int val);
-    void setUniform(std::string_view name, float val);
+    virtual void setUniform(std::string_view name, glm::vec3 val) = 0;
+    virtual void setUniform(std::string_view name, glm::vec4 val) = 0;
+    virtual void setUniform(std::string_view name, glm::mat4 val) = 0;
+    virtual void setUniform(std::string_view name, int val) = 0;
+    virtual void setUniform(std::string_view name, float val) = 0;
 
-    // TODO: Move this to a shader manager?
-    // void use();
+    virtual ~ShaderProgram() {}
+
+    virtual void use() = 0;
 };
 }  // namespace familyline::graphics

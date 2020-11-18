@@ -8,12 +8,8 @@ void ShaderManager::use(ShaderProgram& s)
 {
     if (lastShader == s.getHandle()) return;
 
-    auto handle = s.getHandle();
-    // LoggerService::getLogger()->write(
-    //	"shader-manager", LogType::Debug, "shader %#x is in use now", handle);
-
-    glUseProgram(handle);
-    lastShader = handle;
+    s.use();
+    lastShader = s.getHandle();
 }
 
 void ShaderManager::addShader(ShaderProgram* s) { _shaders[std::string{s->getName()}] = s; }
