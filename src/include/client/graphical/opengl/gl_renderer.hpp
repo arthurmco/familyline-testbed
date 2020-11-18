@@ -2,7 +2,9 @@
 
 #include <vector>
 
-#include "renderer.hpp"
+#include <client/graphical/opengl/gl_headers.hpp>
+#include <client/graphical/renderer.hpp>
+#ifdef RENDERER_OPENGL
 
 namespace familyline::graphics
 {
@@ -68,3 +70,5 @@ public:
     virtual ~GLRenderer(){};
 };
 }  // namespace familyline::graphics
+
+#endif

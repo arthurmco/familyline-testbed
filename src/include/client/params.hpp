@@ -11,6 +11,8 @@
 #include <cstdio>
 #include <optional>
 
+#include <client/graphical/device.hpp>
+
 #include <fmt/format.h>
 
 struct ParamInfo {
@@ -19,6 +21,9 @@ struct ParamInfo {
 
     FILE* log_device = stderr;
 
+    std::string renderer = "opengl";
+    std::vector<familyline::graphics::Device*> devices;
+    
     std::optional<std::string> mapFile;
 };
 

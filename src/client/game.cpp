@@ -1,10 +1,9 @@
-#include <GL/glew.h>
 #include <SDL2/SDL_timer.h>
 
 #include <client/game.hpp>
 #include <client/graphical/animator.hpp>
 #include <client/graphical/gfx_debug_drawer.hpp>
-#include <client/graphical/gl_renderer.hpp>
+//#include <client/graphical/gl_renderer.hpp>
 #include <client/graphical/light.hpp>
 #include <client/input/input_service.hpp>
 #include <common/logger.hpp>

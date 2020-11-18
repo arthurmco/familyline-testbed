@@ -1,9 +1,12 @@
+#include <client/graphical/opengl/gl_window.hpp>
+
+#ifdef RENDERER_OPENGL
+
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/gfx_service.hpp>
-#include <client/graphical/gl_renderer.hpp>
 #include <client/graphical/renderer.hpp>
+#include <client/graphical/opengl/gl_renderer.hpp>
 #include <client/graphical/shader_manager.hpp>
-#include <client/graphical/window.hpp>
 #include <common/logger.hpp>
 
 using namespace familyline::graphics;
@@ -343,3 +346,5 @@ Renderer* GLWindow::createRenderer()
     return (GLRenderer*)renderer_.get();
 }
 Renderer* GLWindow::getRenderer() { return (GLRenderer*)renderer_.get(); }
+
+#endif

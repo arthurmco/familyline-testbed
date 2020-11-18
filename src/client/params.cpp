@@ -2,11 +2,8 @@
 #include <client/params.hpp>
 #include <cstdlib>
 
-#if !(defined(__gl_h_) || defined(__GL_H__) || defined(_GL_H) || defined(__X_GL_H))
-#include <GL/glew.h>
-#endif
-
-#include <SDL2/SDL.h>
+#include <client/graphical/opengl/gl_device.hpp>
+#include "client/graphical/device.hpp"
 
 static void show_help()
 {
@@ -59,13 +56,51 @@ FILE* get_log_device(std::string_view s) {
     return f;
 }
 
+std::vector<std::string> get_available_renderers() {
+    std::vector<std::string> rs;
+
+    #ifdef RENDERER_OPENGL
+    rs.push_back("opengl");
+    #endif
+
+    return rs;
+}
+
+std::vector<familyline::graphics::Device*> get_device_list(std::string_view renderer) {
+    auto rs = get_available_renderers();
+
+    if (rs.empty()) {
+        fmt::print("no renderers available!");
+        fmt::print("You probably did not compile the game right!");
+        std::terminate();
+    }
+
+    if (std::find(rs.begin(), rs.end(), renderer) == rs.end()) {
+        fmt::print("renderer {} is invalid!", renderer);
+        fmt::print("Valid renderers are: ");
+        for (auto& r : rs) {
+            fmt::print("{}", r);
+        }
+        fmt::print("\n");
+        std::terminate();
+    }
+
+#ifdef RENDERER_OPENGL
+    if (renderer == "opengl") {
+        return familyline::graphics::GLDevice::getDeviceList();
+    }
+#endif
+
+    return std::vector<familyline::graphics::Device*>{};
+}
+
 ParamInfo parse_params(const std::vector<std::string>& params)
 {
     ParamInfo pi;
     bool next_is_size = false;
     bool next_is_log = false;
     bool next_is_file = false;
-    
+
     for (auto& p : params) {
         ////// parse values
         if (next_is_size) {
@@ -80,16 +115,16 @@ ParamInfo parse_params(const std::vector<std::string>& params)
             continue;
         }
 
-        
+
         if (next_is_file) {
             pi.mapFile = p;
             next_is_file = false;
             continue;
         }
-        
+
 
         ////// parse params
-        
+
         if (p == "--help") {
             show_help();
             exit(0);
@@ -109,13 +144,13 @@ ParamInfo parse_params(const std::vector<std::string>& params)
             next_is_file = true;
             continue;
         }
-        
+
         if (p == "--log") {
             next_is_log = true;
             continue;
         }
-        
-        
+
+
         fmt::print("\t param: {}\n", p);
     }
 
@@ -131,5 +166,7 @@ ParamInfo parse_params(const std::vector<std::string>& params)
         exit(1);
     }
 
+    pi.devices = get_device_list(pi.renderer);
+    
     return pi;
 }
