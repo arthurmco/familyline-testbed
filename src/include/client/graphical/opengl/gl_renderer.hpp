@@ -4,6 +4,8 @@
 
 #include <client/graphical/opengl/gl_headers.hpp>
 #include <client/graphical/renderer.hpp>
+#include <client/graphical/terrain_renderer.hpp>
+
 #ifdef RENDERER_OPENGL
 
 namespace familyline::graphics
@@ -62,6 +64,9 @@ public:
     virtual LightHandle* createLight(Light& light);
     virtual void removeLight(LightHandle* lh);
 
+    virtual TerrainRenderer* createTerrainRenderer(Camera& camera);
+
+    
     /**
      * Set a shader to draw the available lights on
      */

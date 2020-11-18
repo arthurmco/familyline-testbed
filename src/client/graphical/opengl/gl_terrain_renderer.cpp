@@ -1,7 +1,9 @@
+#include <client/graphical/opengl/gl_terrain_renderer.hpp>
 #include <algorithm>
+#include <cassert>
 #include <client/graphical/TextureOpener.hpp>
+#include <client/graphical/opengl/gl_renderer.hpp>
 #include <client/graphical/gfx_service.hpp>
-#include <client/graphical/terrain_renderer.hpp>
 #include <cmath>
 #include <common/logger.hpp>
 #include <iterator>
@@ -28,8 +30,8 @@ using namespace familyline::logic;
 ***/
 #include <cmath>
 
-TerrainRenderer::TerrainRenderer(familyline::logic::Terrain& terr, Camera& cam)
-    : terr_(terr), cam_(cam)
+GLTerrainRenderer::GLTerrainRenderer(Camera& cam)
+    : TerrainRenderer(cam)
 {
     auto& d = GFXService::getDevice();
 
@@ -40,10 +42,10 @@ TerrainRenderer::TerrainRenderer(familyline::logic::Terrain& terr, Camera& cam)
     sTerrain_->link();
 }
 
-std::vector<glm::vec3> TerrainRenderer::createNormals(
+std::vector<glm::vec3> GLTerrainRenderer::createNormals(
     const std::vector<glm::vec3>& vertices, int width) const
 {
-    auto [w, h] = terr_.getSize();
+    auto [w, h] = terr_->getSize();
     std::vector<glm::vec3> normals(w * h, glm::vec3(0, 0, 0));
 
     /* Calculate the normals
@@ -115,7 +117,7 @@ std::vector<glm::vec3> TerrainRenderer::createNormals(
  * The indices make each of those squares go to the video card
  * in a clockwise order
  */
-std::vector<unsigned int> TerrainRenderer::createIndices(
+std::vector<unsigned int> GLTerrainRenderer::createIndices(
     const std::vector<glm::vec3>& vertices, int width) const
 {
     auto height = vertices.size() / width;
@@ -147,18 +149,18 @@ std::vector<unsigned int> TerrainRenderer::createIndices(
     return indices;
 }
 
-TerrainRenderInfo TerrainRenderer::createTerrainData()
+TerrainRenderInfo GLTerrainRenderer::createTerrainData()
 {
     TerrainRenderInfo tri;
 
-    auto& tdata = terr_.getHeightData();
-    auto [w, h] = terr_.getSize();
+    auto& tdata = terr_->getHeightData();
+    auto [w, h] = terr_->getSize();
 
     for (auto y = 0; y < h; y++) {
         for (auto x = 0; x < w; x++) {
             auto idx    = y * w + x;
             auto height = tdata[idx];
-            tri.vertices.push_back(terr_.gameToGraphical(glm::vec3(x, height, y)));
+            tri.vertices.push_back(terr_->gameToGraphical(glm::vec3(x, height, y)));
         }
     }
 
@@ -168,7 +170,7 @@ TerrainRenderInfo TerrainRenderer::createTerrainData()
     return tri;
 }
 
-GLuint TerrainRenderer::createTerrainDataVAO()
+GLuint GLTerrainRenderer::createTerrainDataVAO()
 {
     auto err = glGetError();
 
@@ -249,15 +251,15 @@ std::unordered_map<TerrainType, unsigned int> loadTerrainTypes()
  * decrease to 0 until it is scale*2, increase again to 1 until scale*3, and et cetera,
  * more or less like a sine wave.
  */
-void TerrainRenderer::buildTextures()
+void GLTerrainRenderer::buildTextures()
 {
     tatlas_ = TextureOpener::OpenTexture(TEXTURES_DIR "/terrain/texatlas.png");
 
     terrain_data_     = loadTerrainData();
     terr_type_to_idx_ = loadTerrainTypes();
 
-    auto& typedata = terr_.getTypeData();
-    auto [w, h]    = terr_.getSize();
+    auto& typedata = terr_->getTypeData();
+    auto [w, h]    = terr_->getSize();
 
     for (auto td : typedata) {
         TerrainType terraintype = (TerrainType)td;
@@ -286,7 +288,7 @@ void TerrainRenderer::buildTextures()
     tvao_ = this->createTerrainDataVAO();
 }
 
-void TerrainRenderer::buildVertexData() { tri_ = this->createTerrainData(); }
+void GLTerrainRenderer::buildVertexData() { tri_ = this->createTerrainData(); }
 
 const int slot_texture_size = 16;
 
@@ -296,10 +298,11 @@ const int slot_texture_size = 16;
  * We use the GL renderer to let it render the lights itself, and
  * so we do not duplicate code to render lights here
  */
-void TerrainRenderer::render(Renderer& r)
+void GLTerrainRenderer::render(Renderer& r)
 {
+    assert(terr_ != nullptr);
     GLRenderer& rnd = dynamic_cast<GLRenderer&>(r);
-    
+
     auto& log = LoggerService::getLogger();
     auto err  = glGetError();
 
@@ -316,7 +319,7 @@ void TerrainRenderer::render(Renderer& r)
     sTerrain_->setUniform("ambient_color", glm::vec3(0.1, 0.1, 0.1));
 
     rnd.drawLights(*sTerrain_);
-    
+
     sTerrain_->setUniform("tex_amount", 1.0f);
 
     glBindVertexArray(tvao_);

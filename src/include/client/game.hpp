@@ -154,7 +154,7 @@ private:
 
     ////////////////////// more or less both
     std::unique_ptr<graphics::Camera> camera_;
-    std::unique_ptr<graphics::TerrainRenderer> terr_rend_;
+    graphics::TerrainRenderer* terr_rend_ = nullptr;
     std::unique_ptr<graphics::AssetManager>& am;
     std::unique_ptr<graphics::SceneManager> scenernd_;
 
