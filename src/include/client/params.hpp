@@ -9,6 +9,7 @@
 #include <vector>
 #include <string>
 #include <cstdio>
+#include <optional>
 
 #include <client/graphical/device.hpp>
 
