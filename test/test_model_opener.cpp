@@ -4,13 +4,13 @@
 #include <client/graphical/gfx_service.hpp>
 #include <client/graphical/meshopener/OBJOpener.hpp>
 #include <client/graphical/meshopener/MD2Opener.hpp>
-#include "client/graphical/shader.hpp"
+#include "utils/test_shader.hpp"
 
 using namespace familyline::graphics;
 
 
 TEST(ModelOpener, TestIfOBJOpens) {
-    ShaderProgram s{"forward", {}};
+    TestShaderProgram s{"forward"};
     GFXService::getShaderManager()->addShader(&s);
 
     OBJOpener o;
@@ -50,7 +50,7 @@ TEST(ModelOpener, TestIfOBJOpens) {
 
 
 TEST(ModelOpener, TestIfStaticMD2Opens) {
-    ShaderProgram s{"forward", {}};
+    TestShaderProgram s{"forward"};
     GFXService::getShaderManager()->addShader(&s);
 
     MD2Opener o;
@@ -89,7 +89,7 @@ TEST(ModelOpener, TestIfStaticMD2Opens) {
 }
 
 TEST(ModelOpener, TestIfDynamicMD2Opens) {
-    ShaderProgram s{"forward", {}};
+    TestShaderProgram s{"forward"};
     GFXService::getShaderManager()->addShader(&s);
 
     MD2Opener o;

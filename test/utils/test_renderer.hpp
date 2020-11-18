@@ -9,6 +9,7 @@
 #include <client/graphical/camera.hpp>
 #include <client/graphical/light.hpp>
 #include <client/graphical/renderer.hpp>
+#include <unordered_map>
 
 class TestRenderer;
 
@@ -51,6 +52,9 @@ public:
     virtual familyline::graphics::LightHandle* createLight(familyline::graphics::Light& light) {}
     virtual void removeLight(familyline::graphics::LightHandle* lh) {}
 
+    virtual familyline::graphics::TerrainRenderer* createTerrainRenderer(
+        familyline::graphics::Camera& camera) { return nullptr; }
+    
     
     size_t getVertexListCount();
     virtual ~TestRenderer() {}

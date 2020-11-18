@@ -11,6 +11,7 @@
 
 #include "utils.hpp"
 #include "utils/test_renderer.hpp"
+#include "utils/test_shader.hpp"
 
 
 using namespace familyline;
@@ -18,7 +19,7 @@ using namespace familyline::graphics;
 
 
 TEST(SceneManager, TestMeshAdd) {
-    ShaderProgram s{"forward", {}};
+    TestShaderProgram s{"forward"};
     GFXService::getShaderManager()->addShader(&s);
 
     TestRenderer renderer;
@@ -39,7 +40,7 @@ TEST(SceneManager, TestMeshAdd) {
 
 
 TEST(SceneManager, Test2MeshAdd) {
-    ShaderProgram s{"forward", {}};
+    TestShaderProgram s{"forward"};
     GFXService::getShaderManager()->addShader(&s);
 
     TestRenderer renderer;
@@ -62,7 +63,7 @@ TEST(SceneManager, Test2MeshAdd) {
 }
 
 TEST(SceneManager, TestMeshPlot) {
-    ShaderProgram s{"forward", {}};
+    TestShaderProgram s{"forward"};
     GFXService::getShaderManager()->addShader(&s);
 
     TestRenderer renderer;
@@ -84,7 +85,7 @@ TEST(SceneManager, TestMeshPlot) {
 
 
 TEST(SceneManager, TestMeshRemove) {
-    ShaderProgram s{"forward", {}};
+    TestShaderProgram s{"forward"};
     GFXService::getShaderManager()->addShader(&s);
 
     TestRenderer renderer;
@@ -113,7 +114,7 @@ TEST(SceneManager, TestMeshRemove) {
 
 
 TEST(SceneManager, TestSceneManagerAnimate) {
-    ShaderProgram s{"forward", {}};
+    TestShaderProgram s{"forward"};
     GFXService::getShaderManager()->addShader(&s);
 
     TestRenderer renderer;
@@ -140,7 +141,7 @@ TEST(SceneManager, TestSceneManagerAnimate) {
 
 
 TEST(SceneManager, TestSceneManagerAnimateTwo) {
-    ShaderProgram s{"forward", {}};
+    TestShaderProgram s{"forward"};
     GFXService::getShaderManager()->addShader(&s);
 
     TestRenderer renderer;
