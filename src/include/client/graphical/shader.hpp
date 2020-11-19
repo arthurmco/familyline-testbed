@@ -1,8 +1,5 @@
 #pragma once
 
-#if !(defined(__gl_h_) || defined(__GL_H__) || defined(_GL_H) || defined(__X_GL_H))
-#include <GL/glew.h>
-#endif
 #include <glm/glm.hpp>
 
 enum ShaderType { Vertex, Fragment, Geometry, Compute };

@@ -1,6 +1,7 @@
 #include <client/graphical/scene_manager.hpp>
 #include <common/logger.hpp>
 #include <memory>
+#include <algorithm>
 
 using namespace familyline::graphics;
 

@@ -80,7 +80,7 @@ void ImageView::loadFromFile(std::string_view path)
  * (first byte is alpha channel, then red, then green, then blue)
  */
 void ImageView::loadFromBuffer(
-    ssize_t width, ssize_t height, std::span<unsigned char> buffer, int format)
+    ssize_t width, ssize_t height, tcb::span<unsigned char> buffer, int format)
 {
     if (!image_surf_) {
         cairo_surface_destroy(image_surf_);

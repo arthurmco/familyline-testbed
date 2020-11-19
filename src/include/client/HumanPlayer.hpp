@@ -8,10 +8,6 @@
 #ifndef HUMAN_PLAYER
 #define HUMAN_PLAYER
 
-#ifndef __gl_h_
-#include <GL/glew.h>
-#endif
-
 #include <client/graphical/camera.hpp>
 #include <client/graphical/terrain_renderer.hpp>
 #include <common/logic/BuildQueue.hpp>

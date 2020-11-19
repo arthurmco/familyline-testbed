@@ -67,7 +67,7 @@ void Listbox::selectItem(std::string code)
 {
     std::lock_guard<std::mutex> guard(list_mtx_);
 
-    if (items_.contains(code)) {
+    if (items_.find(code) != items_.end()) {
         if (selected_item_ != "")
             items_[selected_item_].selected = false;
         

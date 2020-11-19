@@ -15,7 +15,9 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+
 #include <span>
+
 #include <tl/expected.hpp>
 
 namespace familyline::graphics
@@ -89,6 +91,10 @@ enum class TextureError {
 
     /// You are removing a texture that is currently bound.
     TextureIsBound,
+
+    /// The texture format isnt supported and could not be converted
+    /// to a supported format.
+    BadTextureFormat,
 
     UnknownError
 };

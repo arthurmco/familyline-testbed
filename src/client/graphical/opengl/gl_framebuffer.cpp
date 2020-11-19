@@ -21,10 +21,21 @@ GLFramebuffer::GLFramebuffer(std::string_view name, int width, int height) :
 
     glGenRenderbuffers(1, &_rboHandle);
     glBindRenderbuffer(GL_RENDERBUFFER, _rboHandle);
+    
+#ifdef USE_GLES
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+#else
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+#endif
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+#ifdef USE_GLES
+    glFramebufferRenderbuffer(
+        GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _rboHandle);
+#else
     glFramebufferRenderbuffer(
         GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _rboHandle);
+#endif
 
     this->setupTexture(width, height);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureHandle, 0);

@@ -220,13 +220,14 @@ std::optional<ServerInfo> parseDiscoverInformation(std::string_view data)
     std::string version;
 
     for (auto& l : lines) {
-        if (l.starts_with("HTTP") && l.ends_with("200 OK")) {
+      /// RPI C++ compiler does not support C++20 :(
+      if (l.find("HTTP") == 0 && l.find("200 OK") != std::string::npos && l.find("200 OK") > 4) {
             http_message   = true;
             content_starts = false;
             si             = {};
         }
 
-        if (l.starts_with("Location")) {
+        if (l.find("Location") == 0) {
             if (auto midx = l.find_first_of(' '); midx != std::string::npos) {
                 auto lval = l.substr(midx + 1);
 
@@ -255,11 +256,11 @@ std::optional<ServerInfo> parseDiscoverInformation(std::string_view data)
             continue;
         }
 
-        if (l.starts_with("Server")) {
+        if (l.find("Server") == 0) {
             if (auto midx = l.find_first_of(' '); midx != std::string::npos) {
                 auto lval = l.substr(midx + 1);
 
-                if (lval.starts_with("familyline-server")) {
+                if (lval.find("familyline-server") == 0) {
                     int versionval = strlen("familyline-server") + 1;
 
                     version = lval.substr(versionval);
@@ -373,7 +374,7 @@ void ServerFinder::startDiscover(discovery_cb callback)
                 log->write("server-finder", LogType::Info, "received something");
 
                 auto data = parseDiscoverInformation(std::string_view{buf, 4096});
-                if (data && !servers.contains(data->ip_addr)) {
+                if (data && servers.find(data->ip_addr) == servers.end()) {
                     cb(*data);
                     servers[data->ip_addr] = *data;
                 }

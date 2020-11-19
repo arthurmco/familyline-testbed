@@ -707,7 +707,7 @@ void start_networked_game_cmdline(GraphicalInfo ginfo, std::string addr, ConfigD
                 fmt::print("{}: {}\n", msg, fmt::format("Could not connect to address {}", addr));
                 break;
             case NetResult::WrongPassword:
-                fmt::print("{}: {}", fmt::format("Server {} has a password", addr));
+                fmt::print("{}: {}", msg, fmt::format("Server {} has a password", addr));
                 break;
             case NetResult::LoginFailure:
                 fmt::print(

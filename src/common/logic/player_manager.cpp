@@ -1,6 +1,7 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <vector>
 #include <cassert>
 #include <chrono>
 #include <cinttypes>

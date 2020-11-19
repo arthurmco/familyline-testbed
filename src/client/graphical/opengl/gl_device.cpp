@@ -3,7 +3,6 @@
 #ifdef RENDERER_OPENGL
 
 #include <fmt/core.h>
-#include <SDL2/SDL_opengl.h>
 
 #include <client/graphical/opengl/gl_window.hpp>
 #include <client/graphical/opengl/gl_shader.hpp>

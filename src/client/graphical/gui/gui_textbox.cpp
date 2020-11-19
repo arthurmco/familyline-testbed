@@ -3,6 +3,7 @@
 #include <client/graphical/gui/gui_textbox.hpp>
 #include <client/input/input_service.hpp>
 #include <mutex>
+#include <algorithm>
 
 #include "pango/pango-font.h"
 
@@ -192,7 +193,9 @@ void Textbox::receiveEvent(const familyline::input::HumanInputAction& ev, Callba
             case SDLK_v:
                 if ((ka.modifiers & KMOD_CTRL) > 0) {
                     auto clipboard = InputService::getInputManager()->getClipboardText();
-                    std::erase_if(clipboard, [](char v) { return v == '\n' || v == '\r'; });
+                    auto nend = std::remove_if(clipboard.begin(), clipboard.end(),
+					       [](char v) { return v == '\n' || v == '\r'; });
+		    clipboard.erase(nend, clipboard.end());
                     auto text32 = this->convertUTF8ToUTF32(clipboard);
                     text_.insert(cursorpos_, text32);
                     cursorpos_ += text32.size();

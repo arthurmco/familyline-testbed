@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
 #include <cairo/cairo.h>
 #include <pango/pangocairo.h>
 
@@ -16,7 +14,8 @@
 #include <deque>
 #include <memory>
 #include <queue>
-#include <span>
+#include <span.hpp>
+#include <unordered_map>
 #include <string>
 #include <unordered_map>
 #include <vector>

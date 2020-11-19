@@ -26,12 +26,20 @@ GLShader::GLShader(const char* file, ShaderType type)
         case ShaderType::Fragment:
             gltype = GL_FRAGMENT_SHADER;
             break;
-        case ShaderType::Geometry:
+#ifndef USE_GLES
+        /// core OpenGL ES 3.0 does not support geopetry nor compute shaders
+	case ShaderType::Geometry:
             gltype = GL_GEOMETRY_SHADER;
             break;
         case ShaderType::Compute:
             gltype = GL_COMPUTE_SHADER;
             break;
+#endif
+	default:
+            std::string e = "Unsupported shader type for file '";
+            e.append(file);
+            e.append("' ");
+            throw shader_exception(e, -1);
     }
 
     this->_handle     = glCreateShader(gltype);
@@ -72,6 +80,17 @@ std::string GLShader::readAndProcessFile(const char* file)
 
         std::string sview(s);
 
+#ifdef USE_GLES
+	// In OpenGL ES, we use version 3.0 of the GLSL ES shading
+	// language, which has more or less the same features as the
+	// GLSL 1.5
+	if (sview.find("#version 150") != std::string::npos) {
+            data.append("#version 300 es\n");
+
+	    continue;
+	}
+#endif
+
         auto words_begin =
             std::sregex_iterator(sview.begin(), sview.end(), regInclude);
         auto words_end = std::sregex_iterator();
@@ -111,7 +130,7 @@ void GLShader::compile()
     GLint logsize = 0;
     glGetShaderiv(this->_handle, GL_INFO_LOG_LENGTH, &logsize);
 
-    if (res == GL_TRUE && logsize > 1) {
+    if (res != GL_TRUE && logsize > 1) {
         char* logdata = new char[logsize];
 
         glGetShaderInfoLog(this->_handle, logsize, NULL, logdata);

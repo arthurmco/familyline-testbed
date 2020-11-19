@@ -362,6 +362,7 @@ bool Game::runLoop()
     return true;
 }
 
+int inputruns = 0;
 bool Game::runInput()
 {
     /* Input processing  */
@@ -370,12 +371,15 @@ bool Game::runInput()
 
     ip_->UpdateIntersectedObject();
     ip_->UpdateTerrainProjectedPosition();
-
+    
     gctx.elapsed_seconds = INPUT_DELTA / 1000.0;
 
     pm_->generateInput();
-    gui_->update();
 
+    if (inputruns % 20 == 0)
+        gui_->update();
+
+    inputruns++;
     return !pm_->exitRequested();
 }
 

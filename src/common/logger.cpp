@@ -1,6 +1,7 @@
 #include <common/logger.hpp>
 #include <cstdarg>
 #include <mutex>
+#include <algorithm>
 
 using namespace familyline;
 using namespace std::chrono;

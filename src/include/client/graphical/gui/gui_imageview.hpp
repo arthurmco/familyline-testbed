@@ -4,7 +4,9 @@
 
 #include <client/graphical/gui/control.hpp>
 #include <cstddef>
-#include <span>
+
+#include <span.hpp>
+
 #include <tuple>
 
 namespace familyline::graphics::gui
@@ -62,7 +64,7 @@ public:
      * *image*, not the ones you set for the control!
      */
     void loadFromBuffer(
-        ssize_t width, ssize_t height, std::span<unsigned char> data,
+        ssize_t width, ssize_t height, tcb::span<unsigned char> data,
         int format = CAIRO_FORMAT_ARGB32);
 
     virtual bool update(cairo_t *context, cairo_surface_t *canvas);

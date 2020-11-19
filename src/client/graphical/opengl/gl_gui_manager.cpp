@@ -1,5 +1,3 @@
-#include <GL/glew.h>
-
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/window.hpp>
 #include <client/graphical/gfx_service.hpp>
@@ -76,6 +74,8 @@ void GLGUIManager::init(const Window& win)
 
     glBindVertexArray(0);
 
+    glGetError();
+
     /* Create texture where we'll render the canvas */
     glGenTextures(1, &texHandle_);
     glBindTexture(GL_TEXTURE_2D, texHandle_);
@@ -83,8 +83,11 @@ void GLGUIManager::init(const Window& win)
     LOGDEBUG(LoggerService::getLogger(), "gui-manager", "gui size: %dx%d", width_, height_);
 
     cairo_surface_flush(this->canvas_);
+    //glTexImage2D(
+    //    GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_BGRA, GL_UNSIGNED_BYTE,
+    //    (void*)cairo_image_surface_get_data(this->canvas_));
     glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA8, width_, height_, 0, GL_BGRA, GL_UNSIGNED_BYTE,
+        GL_TEXTURE_2D, 0, GL_RGBA, width_, height_, 0, GL_BGRA, GL_UNSIGNED_BYTE,
         (void*)cairo_image_surface_get_data(this->canvas_));
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -140,7 +143,7 @@ void GLGUIManager::renderToTexture()
 
     glBindTexture(GL_TEXTURE_2D, this->texHandle_);
     glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA8, this->width_, this->height_, 0, GL_BGRA, GL_UNSIGNED_BYTE,
+        GL_TEXTURE_2D, 0, GL_RGBA, this->width_, this->height_, 0, GL_BGRA, GL_UNSIGNED_BYTE,
         canvas_data);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);

@@ -48,9 +48,12 @@ add_dependencies(familyline-common input-flatbuffer input-ser-flatbuffer network
  
 find_package(fmt CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(nlohmann_json REQUIRED)
 find_package(tl-expected CONFIG REQUIRED)
 find_package(SDL2 CONFIG)
+#find_package(nlohmann_json REQUIRED)
+#
+# for some reason, nlohmann::json CMake file cannot be found on the RPI.
+# Need to investigate
 
 if (WIN32)
 	
@@ -70,10 +73,10 @@ else()
   pkg_search_module(GLM REQUIRED glm) # finds glm
   pkg_search_module(CURLPP REQUIRED curlpp)
   target_link_libraries(familyline-common PUBLIC fmt::fmt ${GLM_LIBRARIES} ${ZLIB_LIBRARIES})
-  target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
   target_link_libraries(familyline-common PUBLIC tl::expected)
   target_link_libraries(familyline-common PUBLIC ${CURLPP_LDFLAGS}) 
   target_link_libraries(familyline-common PUBLIC ${SDL2_LIBRARIES})
+ # target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
   target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIR} ${INPUT_FLATBUFFER_INCLUDE} ${CURLPP_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
 endif(WIN32)

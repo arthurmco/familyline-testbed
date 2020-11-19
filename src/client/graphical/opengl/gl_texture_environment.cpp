@@ -35,6 +35,13 @@ bool GLTextureEnvironment::initialize()
         "gl-texture-env", LogType::Info, "opengl texture environment initialized (envcount %d)",
         initref);
 
+    #ifdef USE_GLES
+    log->write(
+        "gl-texture-env", LogType::Info, "running under OpenGL ES. Texture options might be limited",
+        initref);
+
+    #endif
+
     started_ = true;
     return true;
 }
@@ -166,7 +173,19 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::uploadTexture(Textur
 
     t.renderer_handle = std::make_optional((uintptr_t)tex_handle);
     SDL_Surface *data = t.data.get();
+
+    glGetError();
     this->updateBoundTextureData(*data);
+
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        switch (err) {
+        case GL_INVALID_OPERATION:
+            log->write("gl-texture-env", LogType::Info, "setting texture handle %08x data returned a GL_INVALID_OPERATION. The texture format might be unsupported  ", tex_handle);
+            return tl::make_unexpected(TextureError::BadTextureFormat);
+
+        }
+    }
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -183,12 +202,18 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::uploadTexture(Textur
 /**
  * Update byte data of the current bound texture with the contents of
  * the passed SDL_Surface
+ *
+ * The surface is not a const reference because we lock it, and locking it might change
+ * some data structures there.
  */
 void GLTextureEnvironment::updateBoundTextureData(SDL_Surface &data)
 {
     auto &log             = LoggerService::getLogger();
     std::string formatstr = "";
     GLenum format         = GL_RGB;
+
+    SDL_Surface* converted_surf = nullptr;
+
     switch (data.format->format) {
         case SDL_PIXELFORMAT_RGBA32:
             formatstr = "RGBA32";
@@ -202,29 +227,60 @@ void GLTextureEnvironment::updateBoundTextureData(SDL_Surface &data)
             formatstr = "RGB24";
             format    = GL_RGB;
             break;
+#ifdef USE_GLES
+        case SDL_PIXELFORMAT_BGR24:
+            log->write(
+                "gl-texture-env", LogType::Warning, "format BGR24 not supported, converting to RGB24",
+                data.w, data.h, formatstr.c_str());
+
+            converted_surf = SDL_ConvertSurfaceFormat(&data, SDL_PIXELFORMAT_RGB24, 0);
+            if (!converted_surf) {
+                log->write(
+                    "gl-texture-env", LogType::Error, "conversion failed: %s", SDL_GetError());
+            }
+
+            formatstr = "BGR24 -> RGB24";
+            format    = GL_RGB;
+            break;
+#else
         case SDL_PIXELFORMAT_BGR24:
             formatstr = "BGR24";
             format    = GL_BGR;
             break;
+#endif
         default:
             formatstr = fmt::format("unknown ({:04x})", data.format->format);
             format    = GL_RGB;
             break;
     }
 
+#ifdef USE_GLES
+    GLenum dest_format = GL_RGB8;
+    if (format == GL_RGBA || format == GL_BGRA) {
+        dest_format = GL_RGBA8;
+    }
+#else
     GLenum dest_format = GL_SRGB;
     if (format == GL_RGBA || format == GL_BGRA) {
         dest_format = GL_SRGB_ALPHA;
     }
-
+#endif
     log->write(
         "gl-texture-env", LogType::Info, "setting texture data: width=%d, height=%d, format=%s",
         data.w, data.h, formatstr.c_str());
 
     SDL_LockSurface(&data);
-    glTexImage2D(
-        GL_TEXTURE_2D, 0, dest_format, data.w, data.h, 0, format, GL_UNSIGNED_BYTE, data.pixels);
+    if (!converted_surf) {
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, dest_format, data.w, data.h, 0, format, GL_UNSIGNED_BYTE, data.pixels);
+    } else {
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, dest_format, data.w, data.h, 0, format, GL_UNSIGNED_BYTE,
+            converted_surf->pixels);
+        SDL_FreeSurface(converted_surf);
+    }
     SDL_UnlockSurface(&data);
+
 }
 
 /**
@@ -256,7 +312,7 @@ tl::expected<uintptr_t, ImageError> GLTextureEnvironment::setTextureData(
             if (currentbind != 0) {
                 glBindTexture(GL_TEXTURE_2D, currentbind);
             }
-            
+
             return handle;
         })
         .map_error([](auto error) { return error; });

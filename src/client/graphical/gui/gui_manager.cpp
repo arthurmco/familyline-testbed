@@ -1,5 +1,4 @@
-#include <GL/glew.h>
-
+#include <client/graphical/window.hpp>
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/gfx_service.hpp>
 #include <client/graphical/gui/gui_manager.hpp>

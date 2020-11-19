@@ -53,6 +53,7 @@ add_library(
   "graphical/opengl/gl_texture_environment.cpp"
   "graphical/opengl/gl_gui_manager.cpp"
   "graphical/opengl/gl_shader.cpp"
+  "graphical/opengl/gles_utils.cpp"
   "HumanPlayer.cpp"
   "input/Cursor.cpp"
   "input/input_processor.cpp"

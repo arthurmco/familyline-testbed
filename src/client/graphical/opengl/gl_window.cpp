@@ -12,8 +12,12 @@
 #include <client/graphical/gfx_service.hpp>
 #include <client/graphical/opengl/gl_renderer.hpp>
 #include <client/graphical/opengl/gl_shader.hpp>
+
 #include <client/graphical/opengl/gl_texture_environment.hpp>
 #include <client/graphical/renderer.hpp>
+
+#include <client/graphical/opengl/gles_utils.hpp>
+
 #include <client/graphical/shader_manager.hpp>
 #include <client/input/input_service.hpp>
 #include <common/logger.hpp>
@@ -129,6 +133,25 @@ static void enable_gl_debug()
         LoggerService::getLogger()->write(ssource, ltype, "%s", fmt::to_string(out).data());
     };
 
+    #ifdef USE_GLES
+
+    glEnable(GL_DEBUG_OUTPUT_KHR);
+
+    if (isExtensionPresent("GL_KHR_debug") && isFunctionPresent("glDebugMessageCallbackKHR")) {
+        // Try KHR_debug first
+        log->write("gl_window", LogType::Info, "KHR_debug supported and used to get GPU debug messages");
+        callGLFunction<PFNGLDEBUGMESSAGECALLBACKKHRPROC>("glDebugMessageCallbackKHR", gl_debug_callback, nullptr);
+        callGLFunction<PFNGLDEBUGMESSAGECONTROLKHRPROC>("glDebugMessageControlKHR", GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+    } else {
+        log->write(
+            "gl_window", LogType::Warning,
+            "Neither KHR_debug nor ARB_debug_output extensions are supported");
+        log->write("gl_window", LogType::Warning, "GPU debugging messages will not be available");
+    }
+     
+    #else
+    
     glEnable(GL_DEBUG_OUTPUT);
 
     if (GL_KHR_debug && glDebugMessageCallback) {
@@ -138,33 +161,37 @@ static void enable_gl_debug()
         glDebugMessageCallback(gl_debug_callback, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
-    } else if (GLEW_ARB_debug_output && glDebugMessageCallbackARB) {
-        // Try ARB_debug_output as a fallback (it's older, but best supported)
-        log->write(
-            "gl_window", LogType::Info,
-            "ARB_debug_output supported and used to get GPU debugging messages");
-        /* Create the callback */
-        glDebugMessageCallbackARB(gl_debug_callback, nullptr);
-        glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     } else {
         log->write(
             "gl_window", LogType::Warning,
             "Neither KHR_debug nor ARB_debug_output extensions are supported");
         log->write("gl_window", LogType::Warning, "GPU debugging messages will not be available");
     }
+
+    #endif
 }
 
 GLWindow::GLWindow(GLDevice* dev, int width, int height) : _dev(dev), _width(width), _height(height)
 {
+    auto& log = LoggerService::getLogger();
+   
     /* Setup SDL GL context data */
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
+#ifdef USE_GLES
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    // Needed to run in macOS
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+
+    log->write("gl_window", LogType::Info, "Using OpenGL ES as a backend");
+#else
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     // Needed to run in macOS
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
@@ -175,8 +202,12 @@ GLWindow::GLWindow(GLDevice* dev, int width, int height) : _dev(dev), _width(wid
     if (true) {
         fflags |= SDL_GL_CONTEXT_DEBUG_FLAG;
     }
-
+    
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, fflags);
+
+    log->write("gl_window", LogType::Info, "Using OpenGL as a backend");
+
+#endif
     _win = SDL_CreateWindow(
         "Familyline", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height,
         SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
@@ -223,6 +254,7 @@ void GLWindow::show()
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+#ifndef USE_GLES
     glewExperimental  = GL_TRUE;
     GLenum glewStatus = glewInit();
 
@@ -238,6 +270,7 @@ void GLWindow::show()
         SDL_Quit();
         throw renderer_exception(err, glewStatus);
     }
+#endif
 
     SDL_GL_GetDrawableSize(_win, &_fwidth, &_fheight);
     printf("apparent window size is %d x %d\n", _fwidth, _fheight);
