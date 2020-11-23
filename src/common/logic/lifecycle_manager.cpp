@@ -10,6 +10,13 @@ using namespace familyline::logic;
 /// sending events.
 
 
+ObjectLifecycleManager::~ObjectLifecycleManager()
+{
+    LogicService::getActionQueue()->removeEmitter((EventEmitter*)lee_);
+    delete lee_;
+}    
+
+
 /**
  * Register the object. Return its ID
  *

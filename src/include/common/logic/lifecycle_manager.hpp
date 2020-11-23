@@ -64,6 +64,8 @@ public:
         : _om(om), lee_{new LifecycleEventEmitter{}}
         {}
 
+    ~ObjectLifecycleManager();
+    
     /**
      * Register the object. Return its ID
      *
