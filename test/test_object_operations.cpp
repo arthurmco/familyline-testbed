@@ -2,6 +2,7 @@
 
 #include <common/logic/logic_service.hpp>
 #include <common/logic/object_manager.hpp>
+#include <variant>
 
 #include "utils.hpp"
 
@@ -81,21 +82,23 @@ TEST(ObjectOps, ObjectTestIfCreationNotifies)
     auto id        = om.add(std::move(component));
     EXPECT_GT(id, 0);
 
-    Event e;
+    EntityEvent e;
 
     ObjectEventReceiver oer;
     EXPECT_FALSE(oer.pollEvent(e));
 
     actionQueue->addReceiver(
         &oer, {
-                  EventType::ObjectCreated,
+                  ActionQueueEvent::Created,
               });
 
     actionQueue->processEvents();
 
     EXPECT_TRUE(oer.pollEvent(e));
-    EXPECT_EQ(EventType::ObjectCreated, e.type);
-    EXPECT_EQ(id, e.object.id);
+
+    auto* ev = std::get_if<EventCreated>(&e.type);
+    EXPECT_TRUE(ev);
+    EXPECT_EQ(id, ev->objectID);
 
     actionQueue->removeReceiver(&oer);
 }
@@ -114,14 +117,14 @@ TEST(ObjectOps, ObjectTestIfRemovalNotifies)
     auto id        = om.add(std::move(component));
     EXPECT_GT(id, 0);
 
-    Event e;
+    EntityEvent e;
 
     ObjectEventReceiver oer;
     EXPECT_FALSE(oer.pollEvent(e));
 
     actionQueue->addReceiver(
         &oer, {
-                  EventType::ObjectDestroyed,
+                  ActionQueueEvent::Destroyed,
               });
 
     om.remove(id);
@@ -129,8 +132,10 @@ TEST(ObjectOps, ObjectTestIfRemovalNotifies)
     actionQueue->processEvents();
 
     EXPECT_TRUE(oer.pollEvent(e));
-    EXPECT_EQ(EventType::ObjectDestroyed, e.type);
-    EXPECT_EQ(id, e.object.id);
+
+    auto* ev = std::get_if<EventDestroyed>(&e.type);
+    EXPECT_TRUE(ev);
+    EXPECT_EQ(id, ev->objectID);
 
     actionQueue->removeReceiver(&oer);
 }

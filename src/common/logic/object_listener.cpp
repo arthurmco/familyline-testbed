@@ -7,17 +7,21 @@ using namespace familyline::logic;
  */
 void ObjectListener::updateObjects()
 {
-    Event e = {};
+    EntityEvent e = {};
 
     while (this->pollEvent(e)) {
-        switch (e.type) {
-            case EventType::ObjectCreated:
-                this->_objects.insert(e.object.id);
-                break;
+        auto* evCreate = std::get_if<EventCreated>(&e.type);
 
-            case EventType::ObjectDestroyed:
-                this->_objects.erase(e.object.id);
-                break;
+        if (evCreate) {
+            this->_objects.insert(evCreate->objectID);
+            continue;
+        }
+
+        auto* evDestroy = std::get_if<EventDestroyed>(&e.type);
+
+        if (evDestroy) {
+            this->_objects.erase(evDestroy->objectID);
+            continue;
         }
     }
 }

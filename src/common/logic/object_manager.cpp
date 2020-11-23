@@ -22,11 +22,7 @@ ObjectEventEmitter::ObjectEventEmitter() : _name("object-event-emitter")
  */
 void ObjectEventEmitter::notifyCreationStart(object_id_t id, const std::string& name)
 {
-    Event e{EventType::ObjectCreated};
-    e.emitter            = this;
-    e.object.id          = id;
-    e.object.name        = std::string{name};
-    e.object.objectState = ObjectState::Creating;
+    EntityEvent e{0, EventCreated{id}, this};
     this->pushEvent(e);
 }
 
@@ -40,10 +36,7 @@ void ObjectEventEmitter::notifyRemoval(object_id_t id, const std::string& name)
 {
     (void)name;
 
-    Event e{ObjectDestroyed};
-    e.emitter   = this;
-    e.object.id = id;
-    // e.object.name = std::string{ name };
+    EntityEvent e{0, EventDestroyed{id}, this};
     this->pushEvent(e);
 }
 

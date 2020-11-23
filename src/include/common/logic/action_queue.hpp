@@ -1,15 +1,35 @@
 #pragma once
 
+#include <common/logic/game_event.hpp>
 #include <queue>
 #include <vector>
 
-#include "game_event.hpp"
-
 namespace familyline::logic
 {
+
+/**
+ * The type of event
+ *
+ * Please keep the queue event enumerator elements in the same order as the
+ * EntityEventType variant in the game_event.hpp header, because I use this
+ * value as sort of a numeric value 
+ */
+enum ActionQueueEvent {
+    Created = 0,
+    Building,
+    Built,
+    Ready,
+    Attacking,
+    Working,
+    Garrisoned,
+    Dying,
+    Dead,
+    Destroyed
+};
+
 struct ReceiverData {
     EventReceiver* receiver;
-    std::vector<EventType> events;
+    std::vector<ActionQueueEvent> events;
 };
 
 /**
@@ -18,17 +38,17 @@ struct ReceiverData {
 class ActionQueue
 {
 private:
-    std::queue<Event> events;
+    std::queue<EntityEvent> events;
     std::vector<ReceiverData> receivers;
 
 public:
     void addEmitter(EventEmitter* e);
-    void addReceiver(EventReceiver* r, std::initializer_list<EventType> events);
+    void addReceiver(EventReceiver* r, std::initializer_list<ActionQueueEvent> events);
 
     void removeReceiver(EventReceiver*);
     void removeEmitter(EventEmitter*);
 
-    void pushEvent(const Event& e);
+    void pushEvent(const EntityEvent& e);
     void processEvents();
 
     void clearEvents()

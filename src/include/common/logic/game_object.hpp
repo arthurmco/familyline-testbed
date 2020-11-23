@@ -20,7 +20,7 @@ typedef unsigned long object_id_t;
  * The human would not have to guess and think much, and the computer would
  * have to compare only one value. It would also remove ambiguity
  */
-enum ObjectCategory { CommonUnit, Building, ResourceDepot, SiegeUnit, NavalUnit };
+enum class ObjectCategory { CommonUnit, Building, ResourceDepot, SiegeUnit, NavalUnit };
 
 /**
  * Our beloved base game object

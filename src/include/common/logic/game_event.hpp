@@ -3,161 +3,137 @@
 #include <memory>
 #include <queue>
 #include <string>
+#include <variant>
 
 namespace familyline::logic
 {
 // TODO: rename GameObject to GameEntity?
 
-/**
- * An event
- *
- * Our events will be used to broadcast important events that can
- * work as triggers for the entities who listen to it, like mission
- * completion.
- * It might even be used to reconstruct the game, so that a save is simply just
- * a bunch of events serialized.
+/*
+ * These events are events that happen from the point of view of the
+ * objects
  */
-enum EventType {
-    //! Object has been added to the object manager
-    ObjectCreated = 1,
+typedef unsigned long long entity_id_t;
 
-    //! Object has been removed from the object manager
-    ObjectDestroyed,
+/**
+ * An object has been created.
+ *
+ * It does not means unit born, or construction built.
+ * It only means the object has been added to the object manager
+ */
+struct EventCreated {
+    entity_id_t objectID;
+};
 
-    //! Object position has changed
-    ObjectMoved,
+/**
+ * An entity has been started to build
+ *
+ * This means a building has been started to be built.
+ * This event also happens for units, but right before the "Built" event
+ */
+struct EventBuilding {
+    entity_id_t objectID;
+};
 
-    //! Object state has changed
-    //! \see ObjectState
-    ObjectStateChanged,
+/**
+ * An entity has been built
+ *
+ * This means a building finished build, or an unit has been born
+ */
+struct EventBuilt {
+    entity_id_t objectID;
+};
 
-    //! Object is attacking other object
-    ObjectAttack,
+/**
+ * The entity has been finished doing some action and it is waiting
+ */
+struct EventReady {
+    entity_id_t objectID;
+};
+
+/**
+ * The entity who sent the event is attacking another entity
+ *
+ * We also send the position of where the attacker and the defender was
+ */
+struct EventAttacking {
+    entity_id_t attackerID;
+    entity_id_t defenderID;
+
+    unsigned int atkXPos, atkYPos;
+    unsigned int defXPos, defYPos;
+
+    double damageDealt;
+};
+
+/**
+ * This entity is working, collecting resources
+ */
+struct EventWorking {
+    entity_id_t objectID;
+
+    unsigned int atkXPos, atkYPos;
+};
+
+/**
+ * This entity is starting to get garrisoned or ungarrisoned
+ *
+ * The `parentID` is the entity that you will be entering/exiting, and
+ * the `entering` value defines if you are entering to/exiting from the
+ * entity.
+ */
+struct EventGarrisoned {
+    entity_id_t objectID;
+
+    entity_id_t parentID;
+    bool entering;
+};
+
+/**
+ * This entity just had its health points reduced to 0
+ *
+ * It started dying.
+ * This event will be used to run the death animation
+ */
+struct EventDying {
+    entity_id_t objectID;
+
+    unsigned int atkXPos, atkYPos;
+};
+
+/**
+ * This entity just ended the death animation. Only its remains lie at the
+ * floor.
+ *
+ * Soon this entity will be cleaned from memtoy
+ */
+struct EventDead {
+    entity_id_t objectID;
+};
+
+/**
+ * The entity has been deallocated from memory
+ *
+ * You will not be able to use this ID. This is only for you to know
+ * who has been deallocated, so you can remove this ID from *your*
+ * bookkeeping lists
+ */
+struct EventDestroyed {
+    entity_id_t objectID;
 };
 
 class EventEmitter;
-
 class ActionQueue;
 
-/**
- * Possible states of an object
- *
- * It goes like this:
- * (the diagram requires an 80-column monitor to be viewed right
- *
- *   (User requests object creation)
- *                 |
- *                \|/
- *            [ Creating ]
- *                 |
- *                 | Object build finishes
- *            [ Created ]
- *  (1)->------->--|
- *                 |
- *                \|/ Object stopped doing actions
- *              [ Idle ]
- *                /|\-------------------------------->(2)
- / | \      Object has been killed
- /  |  \     (either by the user or other unit)
- *             /   |   \
- *   ----------    |    \-------------------[Damaged]--->-\
- *   |             |       Object has been                | Object lost more
- *   | Object started      attacked                       | than 50% of HP
- *   | working on some            (1)<----[Wounded]----<--/
- *   | task (like mining
- *   | or hunting) |           /------------<----------\
- *  \|/            \------>----\->------>[Attacking]-->/------------------>(1)
- * [ Working ]        Object started an                  Attacked unit
- *   |                attack                             died, or the attacker
- *   |                                                   left
- *   |
- *   |
- *   | Object stopped working
- *  \|/on that work
- *  (1)
- *
- *  (2)-------[Dying]--|-------------------------->---\
- *                     Death animation started        |
- *                                                    |
- *  (Remove the object <----------------[Dead]---|----/
- *   from the manager)              Death animation ended
- */
-enum ObjectState {
+typedef std::variant<
+    EventCreated, EventBuilding, EventBuilt, EventReady, EventAttacking, EventWorking,
+    EventGarrisoned, EventDying, EventDead, EventDestroyed>
+    EntityEventType;
 
-    /**
-     * The object has started being built.
-     *
-     * Usable only for constructions and certain units
-     */
-    Creating = 1,
-
-    /**
-     * This object exists in the world and is fully build
-     */
-    Created,
-
-    /**
-     * This object has started doing nothing
-     */
-    Idle,
-
-    //! Unit is working
-    Working,
-
-    //! Object is attacked
-    Attacking,
-
-    //! Object is badly damaged, like < 50% health
-    Damaged,
-
-    //! Object has suffered some damage
-    Wounded,
-
-    /**
-     * Object has reached 0 HP and started to die.
-     *
-     * Maybe it is time to run that death animation
-     */
-    Dying,
-
-    //! Object is dead, time to draw the corpse
-    Dead,
-};
-
-/**
- * Event
- */
-struct Event {
-    // Event timestamp, in microseconds.
-    long long int timestamp;
-    EventType type;
-
+struct EntityEvent {
+    unsigned long long timestamp;
+    EntityEventType type;
     EventEmitter* emitter;
-
-    // union {
-    struct {
-        int id;
-        std::string name;
-        int x, y;
-        ObjectState objectState;  // states are Creating, Created, Idle, Working, Attacking,
-                                  // Damaged, Wounded (badly damaged), Dying and Dead.
-    } object;
-
-    struct {
-        int attackerID;
-        std::string name;
-        int attackedID;
-
-        double damageDealt;
-        double attackedHealth;
-
-    } attack;
-    //};
-
-    Event() = default;
-    Event(EventType);
-    Event(const Event&);
-    ~Event() {}
 };
 
 /**
@@ -166,7 +142,7 @@ struct Event {
 class EventReceiver
 {
 protected:
-    std::queue<Event> events;
+    std::queue<EntityEvent> events;
 
 public:
     virtual const std::string getName() = 0;
@@ -175,9 +151,9 @@ public:
      * Push the event to the receiver internal queue, so it can be
      * pulled by anyone who is listening through this receiver
      */
-    void pushEvent(Event& e);
+    void pushEvent(EntityEvent& e);
 
-    bool pollEvent(Event& e);
+    bool pollEvent(EntityEvent& e);
 };
 
 /**
@@ -193,7 +169,7 @@ protected:
     /**
      * Pushes the event to the central action queue
      */
-    void pushEvent(Event& e);
+    void pushEvent(EntityEvent& e);
 
 public:
     virtual const std::string getName() = 0;

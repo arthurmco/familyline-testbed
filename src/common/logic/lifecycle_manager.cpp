@@ -3,6 +3,12 @@
 
 using namespace familyline::logic;
 
+/// TODO: redo the whole way the ObjectState events are sent.
+///
+/// For example, the ObjectManager does not have worry about
+/// sending events.
+
+
 /**
  * Register the object. Return its ID
  *
@@ -12,8 +18,7 @@ object_id_t ObjectLifecycleManager::doRegister(std::weak_ptr<GameObject> o)
 {
     LifecycleData lcd = {};
     lcd.obj           = o;
-    lcd.event         = EventType::ObjectCreated;
-    lcd.state         = ObjectState::Creating;
+    lcd.event         = ActionQueueEvent::Created;
 
     assert(!o.expired());
     auto id         = o.lock()->getID();
@@ -47,8 +52,7 @@ void ObjectLifecycleManager::notifyCreation(object_id_t id)
     }
 
     LifecycleData lcd = optr->second;
-    lcd.event         = EventType::ObjectCreated;
-    lcd.state         = ObjectState::Created;
+    lcd.event         = ActionQueueEvent::Created;
 
     _o_created[id] = lcd;
     _o_creating.erase(id);
@@ -80,8 +84,7 @@ void ObjectLifecycleManager::notifyDeath(object_id_t id)
     }
 
     LifecycleData lcd = optr->second;
-    lcd.event         = EventType::ObjectStateChanged;
-    lcd.state         = ObjectState::Dying;
+    lcd.event         = ActionQueueEvent::Dying;
     lcd.time_to_die   = 80;  // 80 ticks before removing the object
 
     _o_dying[id] = lcd;
@@ -111,8 +114,7 @@ void ObjectLifecycleManager::update()
         lcd.time_to_die--;
 
         if (lcd.time_to_die <= 0) {
-            lcd.event = EventType::ObjectDestroyed;
-            lcd.state = ObjectState::Dead;
+            lcd.event = ActionQueueEvent::Dead;
 
             log->write(
                 "lifecycle-manager", LogType::Info,

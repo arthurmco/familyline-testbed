@@ -15,9 +15,7 @@ namespace familyline::logic
 {
 struct LifecycleData {
     std::weak_ptr<GameObject> obj;
-    EventType event;
-
-    ObjectState state;
+    ActionQueueEvent event;
 
     int time_to_die = -1;
 };

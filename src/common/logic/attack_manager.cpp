@@ -3,12 +3,13 @@
 #include <common/logic/attack_manager.hpp>
 #include <common/logic/game_object.hpp>
 #include <common/logic/logic_service.hpp>
+#include "common/logic/game_event.hpp"
 
 using namespace familyline::logic;
 
 AttackManagerEventReceiver::AttackManagerEventReceiver()
 {
-    LogicService::getActionQueue()->addReceiver((EventReceiver*)this, {EventType::ObjectDestroyed});
+    LogicService::getActionQueue()->addReceiver((EventReceiver*)this, {ActionQueueEvent::Destroyed});
 }
 
 const std::string AttackManagerEventReceiver::getName() { return _name; }
@@ -61,12 +62,17 @@ void AttackManager::endAttack(attack_handle_t ahandle) { this->attacks.erase(aha
  */
 void AttackManager::checkRemovedObjects()
 {
-    Event e;
+    EntityEvent e;
 
     std::vector<std::tuple<attack_handle_t, int>> to_remove;
     while (this->ame_receiver->pollEvent(e)) {
         // The event types are guaranteed to be only the object destruction events
-        auto eid = e.object.id;
+        auto* atk = std::get_if<EventAttacking>(&e.type);
+        if (!atk)
+            continue;
+        
+        
+        auto eid = atk->attackerID;
 
         for (auto [ahandle, adata] : this->attacks) {
             int atkID, defID;
@@ -168,36 +174,30 @@ const std::string AttackManagerEventEmitter::getName() { return _name; }
 void AttackManagerEventEmitter::generateAttackEvent(
     AttackComponent* atk, AttackComponent* def, double dmg)
 {
-    Event eatk(EventType::ObjectAttack);
-    Event edef(EventType::ObjectStateChanged);
-
-    eatk.object.objectState = ObjectState::Attacking;
-    edef.object.objectState = ObjectState::Wounded;
-
     auto atkpos = atk->object->getPosition();
     auto defpos = def->object->getPosition();
 
-    eatk.object.id   = atk->object->getID();
-    eatk.object.name = atk->object->getName();
-    eatk.object.x    = int(atkpos.x);
-    eatk.object.y    = int(atkpos.z);
 
-    edef.object.id   = def->object->getID();
-    edef.object.name = def->object->getName();
-    edef.object.x    = int(defpos.x);
-    edef.object.y    = int(defpos.z);
+    EntityEvent eatk{0, EventAttacking{
+            atk->object->getID(),
+            def->object->getID(),
+            unsigned(atkpos.x), unsigned(atkpos.z),
+            unsigned(defpos.x), unsigned(defpos.z),
+            dmg
+        }, nullptr};
+    this->pushEvent(eatk);
 
-    eatk.attack.damageDealt    = dmg;
-    eatk.attack.attackedHealth = atk->object->getHealth();
-    eatk.attack.attackedID     = edef.object.id;
-    eatk.attack.attackerID     = eatk.object.id;
-    eatk.attack.name           = eatk.object.name;
-    edef.attack                = eatk.attack;
 
     if (def->object->getHealth() <= 0.0) {
-        edef.object.objectState = ObjectState::Dying;
+        EntityEvent edying{
+            0, EventDying{
+                def->object->getID(),
+                unsigned(defpos.x), unsigned(defpos.z)
+            },
+            nullptr
+        };
+
+        this->pushEvent(edying);
     }
 
-    this->pushEvent(eatk);
-    this->pushEvent(edef);
 }

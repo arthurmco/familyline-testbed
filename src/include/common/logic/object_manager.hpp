@@ -4,8 +4,8 @@
 #include <optional>
 #include <vector>
 
-#include "action_queue.hpp"
-#include "game_object.hpp"
+#include <common/logic/action_queue.hpp>
+#include <common/logic/game_object.hpp>
 
 /// TODO: add event creation on object add/delete
 

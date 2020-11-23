@@ -32,8 +32,8 @@ std::unique_ptr<ObjectListener>& LogicService::getObjectListener()
         _object_listener = std::make_unique<ObjectListener>();
         getActionQueue()->addReceiver(
             _object_listener.get(), {
-                                        EventType::ObjectCreated,
-                                        EventType::ObjectDestroyed,
+                                        ActionQueueEvent::Created,
+                                        ActionQueueEvent::Destroyed,
                                     });
     }
 
