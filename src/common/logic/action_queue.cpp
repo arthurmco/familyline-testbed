@@ -1,5 +1,7 @@
 #include <algorithm>
+#include <common/logger.hpp>
 #include <common/logic/action_queue.hpp>
+#include <functional>
 
 using namespace familyline::logic;
 
@@ -31,14 +33,88 @@ void ActionQueue::removeReceiver(EventReceiver* r)
 
 void ActionQueue::removeEmitter(EventEmitter* e) { e->queue = nullptr; }
 
-void ActionQueue::pushEvent(const EntityEvent& e)
-{
-    // const char* evnames[] = {"null",        "ObjectCreated",      "ObjectDestroyed",
-    //                         "ObjectMoved", "ObjectStateChanged", "ObjectAttack"};
+/// This will allow us to use std::visit with multiple variants at once, a thing
+/// that should be part of C++20.
+template <class... Ts>
+struct overload : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overload(Ts...) -> overload<Ts...>;
 
-    // printf("event received: %s (%#x), timestamp=%lld id=%d name='%s'\n", evnames[e.type], e.type,
-    //	e.timestamp, e.object.id, e.object.name.c_str());
-    this->events.push(e);
+void ActionQueue::pushEvent(const EntityEvent& ev)
+{
+    char begin[128];
+    sprintf(
+        begin, "timestamp=%llu, source=%s", ev.timestamp,
+        ev.emitter ? ev.emitter->getName().c_str() : "(null emitter)");
+
+    auto& log = LoggerService::getLogger();
+    std::visit(
+        overload{
+            [&](const EventCreated& e) {
+                log->write(
+                    "action-queue", LogType::Info, "event added: EventCreated (%s, objectID=%llu)",
+                    begin, e.objectID);
+            },
+            [&](const EventBuilding& e) {
+                log->write(
+                    "action-queue", LogType::Info, "event added: EventBuilding (%s, objectID=%llu)",
+                    begin, e.objectID);
+            },
+            [&](const EventBuilt& e) {
+                log->write(
+                    "action-queue", LogType::Info, "event added: EventBuilt (%s, objectID=%llu)",
+                    begin, e.objectID);
+            },
+            [&](const EventReady& e) {
+                log->write(
+                    "action-queue", LogType::Info, "event added: EventReady (%s, objectID=%llu)",
+                    begin, e.objectID);
+            },
+            [&](const EventAttacking& e) {
+                log->write(
+                    "action-queue", LogType::Info,
+                    "event added: EventAttacking (%s, "
+                    "attacker(id=%llu, xpos=%d, ypos=%d), defender(id=%llu, xpos=%d, ypos=%d),"
+                    "damageDealt=%.2f)",
+                    begin, e.attackerID, e.atkXPos, e.atkYPos, e.defenderID, e.defXPos, e.defYPos,
+                    e.damageDealt);
+            },
+            [&](const EventWorking& e) {
+                log->write(
+                    "action-queue", LogType::Info,
+                    "event added: EventWorking (%s, objectID=%llu,"
+                    "atkXPos=%d, atkYPos=%d",
+                    begin, e.objectID, e.atkXPos, e.atkYPos);
+            },
+            [&](const EventGarrisoned& e) {
+                log->write(
+                    "action-queue", LogType::Info,
+                    "event added: EventGarrisoned (%s, objectID=%llu,"
+                    "parentID=%d, entering=%s",
+                    begin, e.objectID, e.parentID, e.entering ? "true" : "false");
+            },
+            [&](const EventDying& e) {
+                log->write(
+                    "action-queue", LogType::Info,
+                    "event added: EventDying (%s, objectID=%llu,"
+                    "atkXPos=%d, atkYPos=%d",
+                    begin, e.objectID, e.atkXPos, e.atkYPos);
+            },
+            [&](const EventDead& e) {
+                log->write(
+                    "action-queue", LogType::Info, "event added: EventDead (%s, objectID=%llu)",
+                    begin, e.objectID);
+            },
+            [&](const EventDestroyed& e) {
+                log->write(
+                    "action-queue", LogType::Info,
+                    "event added: EventDestroyed (%s, objectID=%llu)", begin, e.objectID);
+            }},
+        ev.type);
+
+    this->events.push(ev);
 }
 
 void ActionQueue::processEvents()
@@ -49,7 +125,8 @@ void ActionQueue::processEvents()
         // printf("event %x !\n", e.type);
 
         for (auto& rec : this->receivers) {
-            if (std::find(rec.events.begin(), rec.events.end(), e.type.index()) != rec.events.end()) {
+            if (std::find(rec.events.begin(), rec.events.end(), e.type.index()) !=
+                rec.events.end()) {
                 // printf("\t received by %s\n", rec.receiver->getName().c_str());
                 rec.receiver->pushEvent(e);
             }
