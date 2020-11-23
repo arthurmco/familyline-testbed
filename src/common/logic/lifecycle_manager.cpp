@@ -1,5 +1,6 @@
 #include <common/logger.hpp>
 #include <common/logic/lifecycle_manager.hpp>
+#include <common/logic/logic_service.hpp>
 
 using namespace familyline::logic;
 
@@ -121,6 +122,7 @@ void ObjectLifecycleManager::update()
                 "object with ID %ld is dead and will be removed", id);
 
             _o_dead[id] = lcd;
+            lee_->sendDeathEvent(id);
             dying_remove.push_back(id);
         }
     }
@@ -128,4 +130,19 @@ void ObjectLifecycleManager::update()
     for (auto id : dying_remove) {
         _o_dying.erase(id);
     }
+}
+
+
+//////////////////////////
+
+
+LifecycleEventEmitter::LifecycleEventEmitter()
+{
+    LogicService::getActionQueue()->addEmitter((EventEmitter*)this);
+}
+
+void LifecycleEventEmitter::sendDeathEvent(unsigned object_id)
+{
+    EntityEvent d{0, EventDead{object_id}, this};
+    this->pushEvent(d);
 }

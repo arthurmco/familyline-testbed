@@ -131,7 +131,7 @@ typedef std::variant<
     EntityEventType;
 
 struct EntityEvent {
-    unsigned long long timestamp;
+    unsigned long long timestamp;   /// unix timestamp, in nanoseconds
     EntityEventType type;
     EventEmitter* emitter;
 };
@@ -154,6 +154,8 @@ public:
     void pushEvent(EntityEvent& e);
 
     bool pollEvent(EntityEvent& e);
+
+    virtual ~EventReceiver() {}
 };
 
 /**
@@ -173,5 +175,7 @@ protected:
 
 public:
     virtual const std::string getName() = 0;
+
+    virtual ~EventEmitter() {}
 };
 }  // namespace familyline::logic

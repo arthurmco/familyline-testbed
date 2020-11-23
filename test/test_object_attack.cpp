@@ -6,6 +6,7 @@
 #include <optional>
 
 #include "utils.hpp"
+#include "utils/test_event_receiver.hpp"
 
 using namespace familyline::logic;
 
@@ -48,6 +49,15 @@ TEST(ObjectAttack, TestDeathNotification)
 
     ObjectManager om;
     ObjectLifecycleManager olm{om};
+
+    EntityEvent e;
+    TestEventReceiver oer{"test-event-receiver"};
+    EXPECT_FALSE(oer.pollEvent(e));
+    actionQueue->addReceiver(
+        &oer, {
+            ActionQueueEvent::Dead,
+            ActionQueueEvent::Destroyed,
+        });
 
     atker_s->setPosition(glm::vec3(1, 0, 1));
     defer_s->setPosition(glm::vec3(1, 0, 1));
@@ -97,11 +107,24 @@ TEST(ObjectAttack, TestDeathNotification)
             actionQueue->processEvents();
         }
 
+        EXPECT_TRUE(oer.pollEvent(e));
+
+        auto* ev = std::get_if<EventDead>(&e.type);
+        EXPECT_TRUE(ev);
+        EXPECT_EQ(deferid, ev->objectID);
+
         olm.update();
         actionQueue->processEvents();
+
+        EXPECT_TRUE(oer.pollEvent(e));
+
+        auto* ev2 = std::get_if<EventDestroyed>(&e.type);
+        EXPECT_TRUE(ev2);
+        EXPECT_EQ(deferid, ev2->objectID);
     }
 
     ASSERT_FALSE(om.get(deferid).has_value());
+    actionQueue->removeReceiver(&oer);
 }
 
 TEST(ObjectAttack, NotAttackIfMeleeOutOfRange)

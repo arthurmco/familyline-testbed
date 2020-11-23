@@ -20,6 +20,21 @@ struct LifecycleData {
     int time_to_die = -1;
 };
 
+class LifecycleEventEmitter : public EventEmitter
+{
+private:
+    std::string _name = "lifecycle-event-emitter";
+
+public:
+    LifecycleEventEmitter();
+
+    virtual const std::string getName() { return _name; };
+
+    void sendDeathEvent(unsigned object_id);
+
+    virtual ~LifecycleEventEmitter() {}
+};
+
 class Player;
 
 /**
@@ -42,8 +57,12 @@ private:
     std::unordered_map<object_id_t, LifecycleData> _o_dying;
     std::unordered_map<object_id_t, LifecycleData> _o_dead;
 
+    LifecycleEventEmitter* lee_ = nullptr;
+
 public:
-    ObjectLifecycleManager(ObjectManager &om) : _om(om) {}
+    ObjectLifecycleManager(ObjectManager &om)
+        : _om(om), lee_{new LifecycleEventEmitter{}}
+        {}
 
     /**
      * Register the object. Return its ID

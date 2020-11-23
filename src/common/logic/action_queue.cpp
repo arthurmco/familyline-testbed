@@ -28,10 +28,13 @@ void ActionQueue::removeReceiver(EventReceiver* r)
     auto newend = std::remove_if(receivers.begin(), receivers.end(), [r](ReceiverData rec) {
         return (rec.receiver->getName() == r->getName());
     });
-    receivers.erase(newend);
+    receivers.erase(newend, receivers.end());
 }
 
-void ActionQueue::removeEmitter(EventEmitter* e) { e->queue = nullptr; }
+void ActionQueue::removeEmitter(EventEmitter* e)
+{
+    e->queue = nullptr;
+}
 
 /// This will allow us to use std::visit with multiple variants at once, a thing
 /// that should be part of C++20.
