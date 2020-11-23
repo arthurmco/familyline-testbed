@@ -8,6 +8,7 @@
 
 #include <unordered_map>
 
+#include "common/logic/action_queue.hpp"
 #include "game_event.hpp"
 #include "object_manager.hpp"
 
@@ -30,7 +31,7 @@ public:
 
     virtual const std::string getName() { return _name; };
 
-    void sendDeathEvent(unsigned object_id);
+    void updateLifecycleData(ActionQueueEvent e, unsigned objectID);
 
     virtual ~LifecycleEventEmitter() {}
 };

@@ -1,6 +1,7 @@
 #include <common/logger.hpp>
 #include <common/logic/lifecycle_manager.hpp>
 #include <common/logic/logic_service.hpp>
+#include "common/logic/game_event.hpp"
 
 using namespace familyline::logic;
 
@@ -14,7 +15,7 @@ ObjectLifecycleManager::~ObjectLifecycleManager()
 {
     LogicService::getActionQueue()->removeEmitter((EventEmitter*)lee_);
     delete lee_;
-}    
+}
 
 
 /**
@@ -60,10 +61,11 @@ void ObjectLifecycleManager::notifyCreation(object_id_t id)
     }
 
     LifecycleData lcd = optr->second;
-    lcd.event         = ActionQueueEvent::Created;
+    lcd.event         = ActionQueueEvent::Built;
 
     _o_created[id] = lcd;
     _o_creating.erase(id);
+    lee_->updateLifecycleData(lcd.event, id);
 
     log->write("lifecycle-manager", LogType::Info, "Object with ID %ld has been created", id);
 }
@@ -129,7 +131,7 @@ void ObjectLifecycleManager::update()
                 "object with ID %ld is dead and will be removed", id);
 
             _o_dead[id] = lcd;
-            lee_->sendDeathEvent(id);
+            lee_->updateLifecycleData(lcd.event, id);
             dying_remove.push_back(id);
         }
     }
@@ -148,8 +150,29 @@ LifecycleEventEmitter::LifecycleEventEmitter()
     LogicService::getActionQueue()->addEmitter((EventEmitter*)this);
 }
 
-void LifecycleEventEmitter::sendDeathEvent(unsigned object_id)
+void LifecycleEventEmitter::updateLifecycleData(ActionQueueEvent e, unsigned objectID)
 {
-    EntityEvent d{0, EventDead{object_id}, this};
+    EntityEvent d{0, EventReady{objectID}, this};
+
+    switch (e) {
+    case ActionQueueEvent::Building:
+        d.type = EventBuilding{objectID};
+        break;
+    case ActionQueueEvent::Built:
+        d.type = EventBuilt{objectID};
+        break;
+    case ActionQueueEvent::Dead:
+        d.type = EventDead{objectID};
+        break;
+    case ActionQueueEvent::Ready:
+        d.type = EventReady{objectID};
+        break;
+    default:
+        LoggerService::getLogger()->write("lifecycle-event-emitter",
+                                          LogType::Warning, "unknown event %x", e);
+        return;
+    }
+
     this->pushEvent(d);
+
 }
