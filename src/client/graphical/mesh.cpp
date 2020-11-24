@@ -36,6 +36,9 @@ BoundingBox Mesh::getBoundingBox()
 {
     auto vdx = _ani->getCurrentFrame();
 
+    if (bbcache_ && !this->isVertexDataDirty())
+        return *bbcache_;
+
     std::vector<BoundingBox> binit;
     std::transform(vdx.begin(), vdx.end(), std::back_inserter(binit), [](VertexData vd) {
         BoundingBox b;
@@ -57,7 +60,7 @@ BoundingBox Mesh::getBoundingBox()
     BoundingBox b;
     b.minX = b.minY = b.minZ = 99999999.0f;
     b.maxX = b.maxY = b.maxZ = -99999999.0f;
-    return std::accumulate(binit.begin(), binit.end(), b, [](BoundingBox cur, BoundingBox prev) {
+    bbcache_ = std::accumulate(binit.begin(), binit.end(), b, [](BoundingBox cur, BoundingBox prev) {
         cur.maxX = glm::max(prev.maxX, cur.maxX);
         cur.maxY = glm::max(prev.maxY, cur.maxY);
         cur.maxZ = glm::max(prev.maxZ, cur.maxZ);
@@ -67,4 +70,5 @@ BoundingBox Mesh::getBoundingBox()
 
         return cur;
     });
+    return *bbcache_;
 }

@@ -1,12 +1,11 @@
+#pragma once
 
 #include <common/logic/imesh.hpp>
 #include <string>
+#include <optional>
 
 #include "animator.hpp"
 #include "asset_object.hpp"
-
-#ifndef _MESH_HPP
-#define _MESH_HPP
 
 namespace familyline::graphics
 {
@@ -23,6 +22,8 @@ private:
     glm::mat4 _worldMatrix;
     glm::vec3 worldPosition;
     std::vector<VertexInfo> vinfo;
+    
+    std::optional<BoundingBox> bbcache_;
 
 public:
     Mesh(const char* name, Animator* ani, std::vector<VertexInfo> vinfo)
@@ -57,5 +58,3 @@ public:
     virtual AssetType getAssetType() const { return AssetType::MeshAsset; }
 };
 }  // namespace familyline::graphics
-
-#endif
