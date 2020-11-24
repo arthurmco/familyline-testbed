@@ -1,11 +1,5 @@
 #pragma once
 
-#if !(defined(__gl_h_) || defined(__GL_H__) || defined(_GL_H) || defined(__X_GL_H))
-#include <GL/glew.h>
-#endif
-
-#include <SDL2/SDL_opengl.h>
-
 #include <string_view>
 
 namespace familyline::graphics
@@ -19,30 +13,24 @@ namespace familyline::graphics
  */
 class Framebuffer
 {
-private:
-    std::string_view _name;
-
-    GLuint _handle;
-
-    // texture, for color data, read-write
-    GLuint _textureHandle;
-
-    // renderbuffer, for depth data, write-only
-    GLuint _rboHandle;
-
-    void setupTexture(int width, int height);
-
+protected:
+    std::string_view name_;
+    int width_;
+    int height_;
+    
 public:
-    Framebuffer(std::string_view name, int width, int height);
+    Framebuffer(std::string_view name, int width, int height)
+        : name_(name), width_(width), height_(height)
+        {}
 
     /// Call this before you start drawing data
-    void startDraw();
+    virtual void startDraw() = 0;
 
     /// Call this after you end drawing data
-    void endDraw();
+    virtual void endDraw() = 0;
 
-    int getTextureHandle();
+    virtual int getTextureHandle() = 0;
 
-    ~Framebuffer();
+    virtual ~Framebuffer() {};
 };
 }  // namespace familyline::graphics

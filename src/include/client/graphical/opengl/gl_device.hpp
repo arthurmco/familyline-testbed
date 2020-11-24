@@ -44,6 +44,8 @@ public:
     virtual ShaderProgram* createShaderProgram(std::string_view name,
                                                std::initializer_list<Shader*> shaders);
 
+    virtual Framebuffer* createFramebuffer(std::string name, int width, int height);
+
     /**
      * Get a list of devices in the machine
      */

@@ -1,10 +1,13 @@
 #include <client/graphical/exceptions.hpp>
-#include <client/graphical/framebuffer.hpp>
+#include <client/graphical/opengl/gl_framebuffer.hpp>
 #include <common/logger.hpp>
+
+#ifdef RENDERER_OPENGL
 
 using namespace familyline::graphics;
 
-Framebuffer::Framebuffer(std::string_view name, int width, int height) : _name(name)
+GLFramebuffer::GLFramebuffer(std::string_view name, int width, int height) :
+    Framebuffer(name, width, height)
 {
     auto& log = LoggerService::getLogger();
     glGetError();
@@ -56,7 +59,7 @@ Framebuffer::Framebuffer(std::string_view name, int width, int height) : _name(n
 ///
 /// Each framebuffer has a texture attached to it. All rendering commands sent to the framebuffer
 /// will write to the texture, and the texture will have the final rendered 2d image
-void Framebuffer::setupTexture(int width, int height)
+void GLFramebuffer::setupTexture(int width, int height)
 {
     glGenTextures(1, &_textureHandle);
     glBindTexture(GL_TEXTURE_2D, _textureHandle);
@@ -87,21 +90,23 @@ void Framebuffer::setupTexture(int width, int height)
     delete[] c;
 }
 
-void Framebuffer::startDraw()
+void GLFramebuffer::startDraw()
 {
     glBindRenderbuffer(GL_RENDERBUFFER, _rboHandle);
     glBindFramebuffer(GL_FRAMEBUFFER, _handle);
 }
 
-void Framebuffer::endDraw()
+void GLFramebuffer::endDraw()
 {
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-int Framebuffer::getTextureHandle() { return _textureHandle; }
+int GLFramebuffer::getTextureHandle() { return _textureHandle; }
 
-Framebuffer::~Framebuffer() {
+GLFramebuffer::~GLFramebuffer() {
     glDeleteFramebuffers(1, &_handle);
     glDeleteTextures(1, &_textureHandle);
 }
+
+#endif

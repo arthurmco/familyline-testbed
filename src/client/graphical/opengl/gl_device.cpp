@@ -7,6 +7,7 @@
 
 #include <client/graphical/opengl/gl_window.hpp>
 #include <client/graphical/opengl/gl_shader.hpp>
+#include <client/graphical/opengl/gl_framebuffer.hpp>
 
 using namespace familyline;
 using namespace familyline::graphics;
@@ -86,6 +87,12 @@ ShaderProgram* GLDevice::createShaderProgram(
     });
 
     return new GLShaderProgram{name, glsh};
+}
+
+
+Framebuffer* GLDevice::createFramebuffer(std::string name, int width, int height)
+{
+    return new GLFramebuffer(name, width, height);
 }
 
 

@@ -329,9 +329,9 @@ int main(int argc, char const* argv[])
         win->getFramebufferSize(fwidth, fheight);
         win->getFramebufferSize(gwidth, gheight);
 
-        Framebuffer f3D  = Framebuffer("f3D", fwidth, fheight);
-        Framebuffer fGUI = Framebuffer("fGUI", gwidth, gheight);
-        win->setFramebuffers(&f3D, &fGUI);
+        Framebuffer* f3D  = GFXService::getDevice()->createFramebuffer("f3D", fwidth, fheight);
+        Framebuffer* fGUI = GFXService::getDevice()->createFramebuffer("fGUI", gwidth, gheight);
+        win->setFramebuffers(f3D, fGUI);
 
         guir = win->createGUIManager();
         guir->initialize(*win);
@@ -344,7 +344,7 @@ int main(int argc, char const* argv[])
 
         if (pi.mapFile) {
             int frames = 0;
-            Game* g    = start_game(&f3D, &fGUI, win, guir, lr, *pi.mapFile);
+            Game* g    = start_game(f3D, fGUI, win, guir, lr, *pi.mapFile);
             lr.load([&]() { return g->runLoop(); });
 
             run_game_loop(lr, frames);
@@ -352,10 +352,12 @@ int main(int argc, char const* argv[])
             if (g) delete g;
 
             delete win;
+            delete f3D;
+            delete fGUI;
             fmt::print("\nExited. ({:d} frames)\n", frames);
 
         } else {
-            return show_starting_menu(pi, &f3D, &fGUI, win, guir, gwidth, gheight, lr);
+            return show_starting_menu(pi, f3D, fGUI, win, guir, gwidth, gheight, lr);
         }
 
     } catch (shader_exception& se) {
@@ -524,6 +526,8 @@ static int show_starting_menu(
     delete gwin;
 
     delete win;
+    delete f3D;
+    delete fGUI;
     fmt::print("\nExited. ({:d} frames)\n", frames);
 
     return 0;
