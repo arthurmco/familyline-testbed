@@ -254,6 +254,7 @@ bool Game::runLoop()
     rendertime_ = std::chrono::high_resolution_clock::now();
     bool player = true;
 
+    auto inputstart = std::chrono::high_resolution_clock::now();
     /* Runs the input code at fixed steps, like the logic one below */
     while (inputTime >= INPUT_DELTA) {
         player = this->runInput();
@@ -262,24 +263,33 @@ bool Game::runLoop()
         }
 
         inputTime -= INPUT_DELTA;
-    } 
+    }    
+    inputtime_ = std::chrono::high_resolution_clock::now() - inputstart;
 
     /* Run the logic code in steps of fixed blocks
      * This is called fixed timestep, and will ensure game consistency
      * on multiplayer games
      */
     int li = 0;
+    auto logicstart = std::chrono::high_resolution_clock::now();
+
     while (logicTime >= LOGIC_DELTA) {
         this->runLogic();
         logicTime -= LOGIC_DELTA;
         li++;
         gctx.tick++;
     }
+    logictime_ = std::chrono::high_resolution_clock::now() - logicstart;
+
 
     if (frame_ > 1) limax = std::max(li, limax);
 
+    auto drawstart = std::chrono::high_resolution_clock::now();
+
     this->showDebugInfo();
     this->runGraphical(double(delta.count()));
+    drawtime_ = std::chrono::high_resolution_clock::now() - drawstart;
+
     Timer::getInstance()->RunTimers(delta.count());
 
     frame_++;
@@ -296,8 +306,9 @@ bool Game::runLoop()
 
     ticks_ = elapsed;
 
-    char sfps[128];
-    sprintf(sfps, "%.3f fps, %.3f ms/frame", float(1000 / pms), float(pms));
+    char sfps[164];
+    sprintf(sfps, "%.2f fps, %.3f ms/frame  - (%.3f ms logic, %.3f ms input, %.3f ms draw)",
+            float(1000 / pms), float(pms), logictime_.count(), inputtime_.count(), drawtime_.count());
     widgets.lblFPS->setText(sfps);
     //      gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 

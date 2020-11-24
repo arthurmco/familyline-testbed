@@ -138,6 +138,9 @@ private:
     int limax        = 0;
     std::chrono::high_resolution_clock::time_point ticks_;
     std::chrono::high_resolution_clock::time_point rendertime_;
+    std::chrono::duration<double, std::milli> logictime_;
+    std::chrono::duration<double, std::milli> inputtime_;
+    std::chrono::duration<double, std::milli> drawtime_;
 
     // todo: probably will be removed?
     logic::GameActionManager gam;
