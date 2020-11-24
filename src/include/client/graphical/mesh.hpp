@@ -23,8 +23,6 @@ private:
     glm::vec3 worldPosition;
     std::vector<VertexInfo> vinfo;
     
-    std::optional<BoundingBox> bbcache_;
-
 public:
     Mesh(const char* name, Animator* ani, std::vector<VertexInfo> vinfo)
         :  _name(name), _ani(ani), _worldMatrix(glm::mat4(1.0))

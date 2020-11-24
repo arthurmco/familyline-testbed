@@ -134,7 +134,6 @@ void InputPicker::UpdateTerrainProjectedPosition()
 void InputPicker::UpdateIntersectedObject()
 {
     glm::vec3 direction = this->GetCursorWorldRay();
-
     glm::vec3 origin = _cam->GetPosition();
 
     const auto& olist = familyline::logic::LogicService::getObjectListener();
@@ -183,9 +182,18 @@ void InputPicker::UpdateIntersectedObject()
 
     // Check the existing objects
     for (const PickerObjectInfo& poi : poi_list) {
-        BoundingBox bb = poi.mesh->getBoundingBox();
-        glm::vec4 vmin = glm::vec4(bb.minX, bb.minY, bb.minZ, 1);
-        glm::vec4 vmax = glm::vec4(bb.maxX, bb.maxY, bb.maxZ, 1);
+        auto obj = _om->get(poi.ID);
+        if (!obj)
+            continue;
+
+        auto osize = (*obj)->getSize();
+        auto gsize = _terrain->gameToGraphical(
+            glm::vec3(osize.x, 0, osize.y));  	
+        auto gpos = poi.mesh->getPosition();
+
+        glm::vec4 vmin = glm::vec4(-gsize.x/2, gpos.y, -gsize.z/2, 1);
+        glm::vec4 vmax = glm::vec4(gsize.x/2, glm::max(gsize.x, gsize.z),
+            gsize.z/2, 1);
 
         vmin = poi.mesh->getWorldMatrix() * vmin;
         vmax = poi.mesh->getWorldMatrix() * vmax;
