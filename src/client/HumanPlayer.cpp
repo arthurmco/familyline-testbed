@@ -279,7 +279,8 @@ void HumanPlayer::generateInput()
             // Requested to run the default action on the selected object
             // Can be harvest or attack.
             auto l = _ip->GetIntersectedObject().lock();
-//            this->pushAction(ObjectUseAction{(long int)l->getID()});
+            if (l)
+                this->pushAction(CommandInput{"attack", l->getID()});
 
             // TODO: how to treat things when the object is too far from the
             // destination to perform an action?
