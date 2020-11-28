@@ -5,10 +5,10 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <common/logic/types.hpp>
 
 namespace familyline::logic
 {
-typedef unsigned long object_id_t;
 
 /**
  * Game object type
@@ -123,6 +123,19 @@ public:
 
     ObjectCategory getCategory() { return this->category; }
 
+    /**
+     * Check if an object supports running a certain command
+     *
+     * A command is simply something that the object can run.
+     * It might be graphically represented by a button into the game.
+     */
+    virtual bool hasCommand(std::string_view command) { return false; }
+
+    /**
+     * Run the specified command, with the specified params
+     */
+    virtual void runCommand(std::string_view command, std::array<unsigned long long, 5> params) {}
+    
     virtual ~GameObject() {}
 };
 }  // namespace familyline::logic

@@ -9,76 +9,106 @@
  * (C) 2020 Arthur M.
  */
 
+#include <array>
+#include <common/logic/types.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace familyline::logic
 {
 /**
- * Enqueue the build of some object
- */
-struct EnqueueBuildAction {
-    std::string type_name;
-};
-
-/**
- * Commit the last build, starts building it at the specified game
- * position.
- * The server should verify that the build position is valid, that is
- * it is inside the camera vision range
+ * Select one or more objects
  *
- * last_build value means, if false, that we should expect more
- * commits
- */
-struct CommitLastBuildAction {
-    double destX, destZ;
-    double destY;  // do not serialize this value, it can be determined automatically
-    bool last_build;
-};
-
-/**
- * Select an object
- */
-struct ObjectSelectAction {
-    unsigned long int objectID;
-};
-
-
-/**
- * Clear object selection
- */
-struct SelectionClearAction {
-    int dummy = 0;
-};
-
-/**
- * Move the selected object to some location
- */
-struct SelectedObjectMoveAction {
-    double destX, destZ;
-};
-
-/**
- * Make the selected object do the 'use' action in some other object.
- * This action varies from object to object. It can be harvest, attack
- * or trade
+ * If two actions of this type come one after another, it will effectively
+ * select all objects of the first, deselect and then select all objects
+ * of the second.
  *
- * It is the action you run when you right-click.
+ * Therefore, if you need to deselect everyone, just send a select action
+ * with no objects.
  */
-struct ObjectUseAction {
-    long int useWhat;
+struct SelectAction {
+    std::vector<object_id_t> objects;
 };
 
 /**
- * Make the selected object run the specified action
- *
- * The action is a string, it can be anything, but the selected object
- * should understand
+ * Same as above, but just pushes the specified objects
+ * to the current selection buffer
  */
-struct ObjectRunAction {
-    std::string actionName;
+struct AddSelectAction {
+    std::vector<object_id_t> objects;
+};
+
+/**
+ * Create a selection group with number `number`, with the current selected objects
+ */
+struct CreateSelectGroup {
+    int number;
+};
+
+/**
+ * Select all objects from the group `number`
+ */
+struct SelectGroup {
+    int number;
+};
+
+/**
+ * Controls a command
+ *
+ * An command is just a command that is created from a
+ * building, or an unit
+ * This command might cause an unit to set some state, or another
+ * building to be created
+ *
+ * This command is run from all selected objects.
+ * If you need to run a command in an object, you will need to select it first.
+ *
+ * The command can have an optional parameter, being an ID or a location.
+ */
+struct CommandInput {
+    std::string commandName;
+    std::variant<std::monostate, object_id_t, std::array<int, 2>> param;
+};
+
+/**
+ * Creates an entity with type `type` in the specified coordinates
+ *
+ * Note that you should only send this command for initial entities
+ * and entities that are created because of triggers, NEVER because
+ * of an action
+ */
+struct CreateEntity {
+    std::string type;
+    int xPos, yPos;
+};
+
+/**
+ * Makes one or more selected objects move to a specific location
+ *
+ * It only tells the final destination of the pathfinder, for example, not the
+ * midpoints.
+ * It was like it sent only the location of the "right-click"
+ */
+struct ObjectMove {
+    int xPos;
+    int yPos;
+};
+
+/**
+ * Add the current selected objects to the group name `number`
+ */
+struct AddSelectGroup {
+    int number;
+};
+
+/**
+ * Removes the group `number`
+ */
+struct RemoveSelectGroup {
+    int number;
 };
 
 /**
@@ -92,9 +122,18 @@ struct CameraMove {
     double deltaZoom;
 };
 
+/**
+ * Controls camera rotation
+ *
+ * Also might be useful on recorded games.
+ */
+struct CameraRotate {
+    double radians;
+};
+
 using PlayerInputType = std::variant<
-    EnqueueBuildAction, CommitLastBuildAction, ObjectSelectAction, SelectedObjectMoveAction,
-    SelectionClearAction, ObjectUseAction, ObjectRunAction, CameraMove>;
+    CommandInput, ObjectMove, SelectAction, AddSelectAction, CreateSelectGroup, CreateEntity,
+    SelectGroup, AddSelectGroup, RemoveSelectGroup, CameraMove, CameraRotate>;
 
 struct PlayerInputAction {
     uint64_t timestamp;

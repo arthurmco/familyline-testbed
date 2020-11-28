@@ -234,14 +234,14 @@ void HumanPlayer::generateInput()
     }
 
     if (build_tent) {
-        this->pushAction(EnqueueBuildAction{"tent"});
+        nextBuild_ = "tent";
         build_tent      = false;
         mouse_click     = false;
         build_something = true;
     }
 
     if (build_tower) {
-        this->pushAction(EnqueueBuildAction{"watchtower"});
+        nextBuild_ = "watchtower";
         build_tower     = false;
         mouse_click     = false;
         build_something = true;
@@ -254,19 +254,20 @@ void HumanPlayer::generateInput()
         glm::vec2 to = _ip->GetGameProjectedPosition();
         glm::vec3 p  = terr_.graphicalToGame(_ip->GetTerrainProjectedPosition());
 
-        this->pushAction(CommitLastBuildAction{to.x, to.y, p.y, true});
+        this->pushAction(CreateEntity{nextBuild_, int(p.x), int(p.z)});
         build_something = false;
         mouse_click     = false;
+        nextBuild_ = "";
     } else if (has_selection && mouse_click) {
         // Individual object selection, click-based
         // TODO: do multiple object selection, drag-based
         //       this can be started by adding a DragAction on input_actions.hpp
         auto l = _ip->GetIntersectedObject().lock();
-        this->pushAction(ObjectSelectAction{(unsigned long int)l->getID()});
+        this->pushAction(SelectAction{{(unsigned long int)l->getID()}});
         mouse_click = false;
     } else if (!has_selection && mouse_click) {
         // Object deselection, aka click on anything.
-        this->pushAction(SelectionClearAction{0});
+        this->pushAction(SelectAction{{}});
         mouse_click = false;
     }
 
@@ -278,12 +279,12 @@ void HumanPlayer::generateInput()
             // Requested to run the default action on the selected object
             // Can be harvest or attack.
             auto l = _ip->GetIntersectedObject().lock();
-            this->pushAction(ObjectUseAction{(long int)l->getID()});
+//            this->pushAction(ObjectUseAction{(long int)l->getID()});
 
             // TODO: how to treat things when the object is too far from the
             // destination to perform an action?
         } else {
-            this->pushAction(SelectedObjectMoveAction{to.x, to.y});
+            this->pushAction(ObjectMove{int(to.x), int(to.y)});
         }
 
         do_something = false;
