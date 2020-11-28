@@ -296,7 +296,16 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                     (*optcam)->AddZoomLevel(a.deltaZoom);
                 }
             },
-            [&](const CameraRotate& a) {},
+            [&](const CameraRotate& a) {
+                log->write(
+                    "player-manager", LogType::Info,
+                    "%s: CameraRotate { angle=%.3f rad} ", str, a.radians);
+
+                auto optcam = (*player)->getCamera();
+                if (optcam.has_value()) {                    
+                    (*optcam)->AddRotation(glm::vec3(0, 1, 0), a.radians);
+                }                
+            },
             [&](const CreateEntity& a) {
                 log->write(
                     "player-manager", LogType::Info,
