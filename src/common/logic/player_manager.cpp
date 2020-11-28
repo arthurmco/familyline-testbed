@@ -9,6 +9,14 @@
 #include <common/logic/logic_service.hpp>
 #include <common/logic/player_manager.hpp>
 
+/**
+ * TODO: create an object that will create other objects.
+ *
+ * it will be used now to create our test objects in the map, but in the future it will
+ * be used to create objects in scripts, or in triggers, or in the start of the game.
+ */
+
+using namespace familyline;
 using namespace familyline::logic;
 
 /**
@@ -33,11 +41,7 @@ int PlayerManager::add(std::unique_ptr<Player> p, bool allocate_id)
  * Remember that this object is owned by the player manager.
  * In C++, you are the borrow checker.
  */
-std::optional<Player*> PlayerManager::get(int id)
-{
-    return this->getPlayerFromID(id);
-}
-
+std::optional<Player*> PlayerManager::get(int id) { return this->getPlayerFromID(id); }
 
 std::optional<Player*> PlayerManager::getPlayerFromID(int id)
 {
@@ -69,9 +73,8 @@ void PlayerManager::pushAction(unsigned int id, PlayerInputType type)
     uint64_t micros = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 
     auto& log = LoggerService::getLogger();
-    log->write("player-manager",
-               LogType::Debug,
-               "push action of player %08x on tick %d", id, _tick);
+    log->write(
+        "player-manager", LogType::Debug, "push action of player %08x on tick %d", id, _tick);
 
     PlayerInputAction a;
     a.playercode = id;
@@ -117,6 +120,49 @@ int PlayerManager::addListener(PlayerListenerHandler h)
     return phi.id;
 }
 
+/// This will allow us to use std::visit with multiple variants at once, a thing
+/// that should be part of C++20.
+/// There are two locations that I use this. I hope this gets suggested for C++23
+/// or C++26
+template <class... Ts>
+struct overload : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overload(Ts...) -> overload<Ts...>;
+
+void writeSelectDebugInfo(auto& log, auto str, const SelectAction& a)
+{
+    switch (a.objects.size()) {
+        case 0:
+            log->write(
+                "player-manager", LogType::Info, "%s: SelectAction { objects=0, deselecting all } ",
+                str);
+            break;
+        case 1:
+            log->write(
+                "player-manager", LogType::Info, "%s: SelectAction { objects=[%lld] } ", str,
+                a.objects[0]);
+            break;
+        case 2:
+            log->write(
+                "player-manager", LogType::Info, "%s: SelectAction { objects=[%lld, %lld] } ", str,
+                a.objects[0], a.objects[1]);
+            break;
+        case 3:
+            log->write(
+                "player-manager", LogType::Info, "%s: SelectAction { objects=[%lld, %lld, %lld] } ",
+                str, a.objects[0], a.objects[1], a.objects[2]);
+            break;
+        default:
+            log->write(
+                "player-manager", LogType::Info,
+                "%s: SelectAction { objects=[%lld, %lld, %lld... (%zu objects)] } ", str,
+                a.objects[0], a.objects[1], a.objects[2], a.objects.size());
+            break;
+    }
+}
+
 void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& om)
 {
     fmt::memory_buffer out;
@@ -125,147 +171,38 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
     assert(olm != nullptr);
     assert(pf != nullptr);
 
-    struct InputVisitor {
-        std::optional<Player*> pl;
-        fmt::memory_buffer& out;
-        ObjectManager& om;
-        ObjectLifecycleManager& olm;
-        PathFinder& pf;
-        std::function<void(std::shared_ptr<GameObject>)> render_add_cb;
-        std::function<void(std::shared_ptr<GameObject>, unsigned /*player_id*/)>
-            colony_add_callback;
+    auto& log = LoggerService::getLogger();
 
-        void operator()(EnqueueBuildAction a)
-        {
-            auto& log = LoggerService::getLogger();
-            log->write(
-                "player-manager", LogType::Debug, "%s type: EnqueueBuildAction: typename %s",
-                fmt::to_string(out).data(), a.type_name.c_str());
+    char str[96];
+    sprintf(str, "receive action of player %lx at tick %d", pia.playercode, pia.tick);
 
-            if (this->pl.has_value()) {
-                (*this->pl)->pushNextBuilding(a.type_name);
-            }
-        }
-        void operator()(CommitLastBuildAction a)
-        {
-            auto& log = LoggerService::getLogger();
-            log->write(
-                "player-manager", LogType::Debug,
-                "%s type: CommitLastBuildAction: pos: %.2f, %.2f, last: %s",
-                fmt::to_string(out).data(), a.destX, a.destZ, a.last_build ? "true" : "false");
+    auto player        = this->getPlayerFromID(pia.playercode);
+    bool invalidAction = false;
 
-            if (this->pl.has_value()) {
-                auto player   = (*this->pl);
-                auto building = player->getNextBuilding();
+    if (!player.has_value()) {
+        log->write("player-manager", LogType::Fatal, "invalid player ID (%llx)!", pia.playercode);
+        return;
+    }
 
-                if (building.has_value()) {
-                    auto& of  = LogicService::getObjectFactory();
-                    auto nobj = std::dynamic_pointer_cast<GameObject>(
-                        of->getObject(building->c_str(), 0, 0, 0));
+    std::visit(
+        overload{
+            [&](const CommandInput& a) {
+                /**
+                 * The attack command is the only command treated specially.
+                 */
+                log->write(
+                    "player-manager", LogType::Info, "%s: CommandInput { command=%s } ", str,
+                    a.commandName.c_str());
 
-                    if (!nobj) {
-                        log->write(
-                            "player-manager", LogType::Error, "building type %s not found",
-                            building->c_str());
+                if (a.commandName == "attack") {
+                    auto* objectID = std::get_if<object_id_t>(&a.param);
+                    if (!objectID) {
+                        invalidAction = true;
                         return;
                     }
 
-                    player->clearSelection();
-
-                    glm::vec3 buildpos(a.destX, a.destY, a.destZ);
-                    nobj->setPosition(buildpos);
-
-                    auto cobjID = om.add(std::move(nobj));
-                    auto ncobj  = om.get(cobjID).value();
-
-                    assert(ncobj->getPosition().x == buildpos.x);
-                    assert(ncobj->getPosition().z == buildpos.z);
-
-                    render_add_cb(ncobj);
-
-                    olm.doRegister(ncobj);
-                    colony_add_callback(ncobj, player->getCode());
-                    olm.notifyCreation(cobjID);
-                }
-            }
-        }
-        void operator()(SelectionClearAction a)
-        {
-            auto& log = LoggerService::getLogger();
-            log->write(
-                "player-manager", LogType::Debug, "%s type: SelectionClearAction",
-                fmt::to_string(out).data());
-
-            if (this->pl.has_value()) {
-                auto player = (*this->pl);
-
-                // TODO: add an action to clear a previous selection
-
-                player->clearSelection();
-            }
-        }
-        void operator()(ObjectSelectAction a)
-        {
-            auto& log = LoggerService::getLogger();
-            log->write(
-                "player-manager", LogType::Debug, "%s type: ObjectSelectAction: id %ld",
-                fmt::to_string(out).data(), a.objectID);
-
-            auto obj = om.get(a.objectID);
-            if (this->pl.has_value() && obj.has_value()) {
-                auto player = (*this->pl);
-
-                player->clearSelection();
-                player->pushToSelection(a.objectID, *obj);
-            }
-        }
-        void operator()(SelectedObjectMoveAction a)
-        {
-            auto& log = LoggerService::getLogger();
-            log->write(
-                "player-manager", LogType::Debug,
-                "%s type: SelectedObjectMoveAction: move selected objects to %.2f,%.2f",
-                fmt::to_string(out).data(), a.destX, a.destZ);
-
-            if (this->pl.has_value()) {
-                auto player = (*this->pl);
-                // TODO: add an action to clear a previous selection
-                auto selections       = player->getSelections();
-                auto valid_selections = getValidSelections(selections);
-
-                for (auto& s : valid_selections) {
-                    // Only move components that are of the player.
-                    if (s->getColonyComponent().has_value() &&
-                        s->getColonyComponent()->owner.has_value() &&
-                        s->getColonyComponent()->owner->get().isOfPlayer(*player)) {
-                        auto path    = pf.CreatePath(*s.get(), glm::vec2(a.destX, a.destZ));
-                        glm::vec2 lp = path.back();
-                        log->write(
-                            "human-player", LogType::Debug, "moved to %.2fx%.2f", lp.x, lp.y);
-
-                        ObjectPathManager::getInstance()->AddPath(s.get(), path);
-                    }
-                }
-            }
-        }
-        void operator()(ObjectUseAction a)
-        {
-            auto& log = LoggerService::getLogger();
-            log->write(
-                "player-manager", LogType::Debug,
-                "%s type: ObjectUseAction: make selected objects do default action on object %ld",
-                fmt::to_string(out).data(), a.useWhat);
-
-            if (this->pl.has_value()) {
-                auto player = (*this->pl);
-
-                /// We only implement the attack action, but other actions will be implemented
-                /// when the action system is good.
-                std::string default_action = std::string{"attack"};
-
-                if (default_action == std::string{"attack"}) {
-                    auto attacker_w = (*pl)->getSelections().at(0);
-                    auto attackee_o = om.get(a.useWhat);
+                    auto attacker_w = (*player)->getSelections().at(0);
+                    auto attackee_o = om.get(*objectID);
 
                     if (!attacker_w.expired() && attackee_o.has_value()) {
                         auto attacker = attacker_w.lock();
@@ -273,7 +210,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
 
                         if (attacker->getColonyComponent().has_value() &&
                             attacker->getColonyComponent()->owner.has_value() &&
-                            attacker->getColonyComponent()->owner->get().isOfPlayer(*player)) {
+                            attacker->getColonyComponent()->owner->get().isOfPlayer(*(*player))) {
                             auto& atkManager = LogicService::getAttackManager();
                             atkManager->doRegister(
                                 attacker->getID(), attacker->getAttackComponent().value());
@@ -282,27 +219,75 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                             atkManager->startAttack(attacker->getID(), attackee->getID());
                         }
                     }
-                }
-            }
-        }
-        void operator()(ObjectRunAction a)
-        {
-            auto& log = LoggerService::getLogger();
-            log->write(
-                "player-manager", LogType::Debug,
-                "%s type: ObjectRunAction: make selected object run action %s",
-                fmt::to_string(out).data(), a.actionName.c_str());
-        }
-        void operator()(CameraMove a)
-        {
-            auto& log = LoggerService::getLogger();
-            log->write(
-                "player-manager", LogType::Debug,
-                "%s type: CameraMove: dx: %.2f, dy: %.2f, dZoom: %.3f", fmt::to_string(out).data(),
-                a.deltaX, a.deltaY, a.deltaZoom);
 
-            if (this->pl.has_value()) {
-                auto optcam = (*this->pl)->getCamera();
+                } else {
+                    auto selections       = (*player)->getSelections();
+                    auto valid_selections = getValidSelections(selections);
+
+                    for (auto& s : valid_selections) {
+                        if (s->hasCommand(a.commandName)) {
+                            switch (a.param.index()) {
+                                case 0: s->runCommand(a.commandName, {}); break;
+                                case 1: {
+                                    auto object = std::get<object_id_t>(a.param);
+                                    s->runCommand(a.commandName, {object});
+                                    break;
+                                }
+                                case 2: {
+                                    auto pos = std::get<std::array<int, 2>>(a.param);
+                                    s->runCommand(
+                                        a.commandName,
+                                        {(unsigned long long)pos[0], (unsigned long long)pos[1]});
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            [&](const SelectAction& a) {
+                writeSelectDebugInfo(log, str, a);
+
+                (*player)->clearSelection();
+
+                if (a.objects.size() > 0) {
+                    auto obj = om.get(a.objects[0]);
+                    if (!obj) {
+                        invalidAction = true;
+                    } else {
+                        (*player)->pushToSelection(a.objects[0], *obj);
+                    }
+                }
+            },
+            [&](const ObjectMove& a) {
+                log->write(
+                    "player-manager", LogType::Info, "%s: ObjectMove { xPos=%.2f, yPos=%.2f } ",
+                    str, a.xPos, a.yPos);
+
+                auto selections       = (*player)->getSelections();
+                auto valid_selections = getValidSelections(selections);
+
+                for (auto& s : valid_selections) {
+                    // Only move components that are of the player.
+                    if (s->getColonyComponent().has_value() &&
+                        s->getColonyComponent()->owner.has_value() &&
+                        s->getColonyComponent()->owner->get().isOfPlayer(*(*player))) {
+                        auto path    = pf->CreatePath(*s.get(), glm::vec2(a.xPos, a.yPos));
+                        glm::vec2 lp = path.back();
+                        log->write(
+                            "human-player", LogType::Debug, "moved to %.2fx%.2f", lp.x, lp.y);
+
+                        ObjectPathManager::getInstance()->AddPath(s.get(), path);
+                    }
+                }
+            },
+            [&](const CameraMove& a) {
+                log->write(
+                    "player-manager", LogType::Info,
+                    "%s: CameraMove { dx=%.2f, dy=%.2f, dZoom=%.2f} ", str, a.deltaX, a.deltaY,
+                    a.deltaZoom);
+
+                auto optcam = (*player)->getCamera();
                 if (optcam.has_value()) {
                     glm::vec3 mov(a.deltaX, 0, a.deltaY);
 
@@ -310,14 +295,52 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                     (*optcam)->AddLookAt(mov);
                     (*optcam)->AddZoomLevel(a.deltaZoom);
                 }
-            }
-        }
-    };
-    std::visit(
-        InputVisitor{
-            this->getPlayerFromID(pia.playercode), out, om, *olm, *pf, this->render_add_callback,
-            this->colony_add_callback},
+            },
+            [&](const CameraRotate& a) {},
+            [&](const CreateEntity& a) {
+                log->write(
+                    "player-manager", LogType::Info,
+                    "%s: CreateEntity { type=%s, xPos=%d, yPos=%d } ", str, a.type.c_str(),
+                    a.xPos, a.yPos);
+
+                auto& of  = LogicService::getObjectFactory();
+                auto nobj = std::dynamic_pointer_cast<GameObject>(
+                    of->getObject(a.type.c_str(), 0, 0, 0));
+
+                if (!nobj) {
+                    log->write(
+                        "player-manager", LogType::Error, "building type %s not found",
+                        a.type.c_str());
+                    invalidAction = false;
+                    return;
+                }
+
+                auto height = (*player)->terr_.getHeightFromCoords(glm::vec2(a.xPos, a.yPos));
+                glm::vec3 buildpos(a.xPos, height, a.yPos);
+                nobj->setPosition(buildpos);
+
+                auto cobjID = om.add(std::move(nobj));
+                auto ncobj  = om.get(cobjID).value();
+
+                assert(ncobj->getPosition().x == buildpos.x);
+                assert(ncobj->getPosition().z == buildpos.z);
+
+                this->render_add_callback(ncobj);
+
+                olm->doRegister(ncobj);
+                colony_add_callback(ncobj, (*player)->getCode());
+                olm->notifyCreation(cobjID);
+                
+            },
+            [&](const AddSelectAction& a) {}, [&](const CreateSelectGroup& a) {},
+            [&](const SelectGroup& a) {}, [&](const AddSelectGroup& a) {},
+            [&](const RemoveSelectGroup& a) {}},
         pia.type);
+
+    if (invalidAction) {
+        log->write("player-manager", LogType::Fatal, "last action had an invalid parameter!");
+        log->write("player-manager", LogType::Fatal, "This WILL cause issues later!");
+    }
 }
 
 /**
@@ -346,8 +369,6 @@ void PlayerManager::generateInput()
     }
 }
 
-
-
 /**
  * Gets a multimap of ID=>playername, so you can easily discover the
  * ID of a certain player name, or a name of a player who has a
@@ -357,11 +378,10 @@ std::multimap<int, std::string> PlayerManager::getPlayerNames()
 {
     std::multimap<int, std::string> r;
 
-    std::for_each(players_.begin(), players_.end(),
-                   [&r](PlayerInfo& i) {
-                       r.emplace(i.id, std::string{i.player->getName()});                       
-                   });
-    return r;    
+    std::for_each(players_.begin(), players_.end(), [&r](PlayerInfo& i) {
+        r.emplace(i.id, std::string{i.player->getName()});
+    });
+    return r;
 }
 
 /**

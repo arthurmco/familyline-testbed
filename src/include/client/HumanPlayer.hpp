@@ -35,6 +35,8 @@ private:
 
     familyline::input::HumanListenerHandler _listener;
 
+    std::string nextBuild_;
+    
     bool _updated = false;
 
 public:
