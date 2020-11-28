@@ -45,11 +45,11 @@ TEST(PlayerManager, TestIfPlayerCanBuild)
         make_object({"test", "Test Object", glm::vec2(0, 0), 200, 200, true, []() {}, atkc1});
     LogicService::getObjectFactory()->addObject(obj_s.get());
 
-    TerrainFile tf{1,1};
+    TerrainFile tf{20,20};
     Terrain t{tf};
 
     auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
-        return {EnqueueBuildAction{"test"}, CommitLastBuildAction{10.0, 12.0, 1.0, true}};
+            return {CreateEntity{"test", 10, 12}};
     });
 
     auto i = pm.add(std::move(d));
@@ -60,7 +60,7 @@ TEST(PlayerManager, TestIfPlayerCanBuild)
         auto pos = o->getPosition();
         ASSERT_FLOAT_EQ(10.0, pos.x);
         ASSERT_FLOAT_EQ(12.0, pos.z);
-        ASSERT_FLOAT_EQ(1.0, pos.y);
+        ASSERT_FLOAT_EQ(0.0, pos.y);
 
         object_rendered = true;
     };
@@ -103,7 +103,7 @@ TEST(PlayerManager, TestIfPlayerCanSelect)
     
     auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
         return {
-            ObjectSelectAction{sid},
+            SelectAction{{sid}},
         };
     });
     ASSERT_EQ(0, d->getSelections().size());
@@ -165,11 +165,11 @@ TEST(PlayerManager, TestIfPlayerCanDeselect)
         switch (gctx.tick) {
             case 1:
                 return {
-                    ObjectSelectAction{sid},
+                    SelectAction{{sid}},
                 };
             default:
                 return {
-                    SelectionClearAction{},
+                    SelectAction{{}},
                 };
         }
     });
@@ -242,15 +242,15 @@ TEST(PlayerManager, TestIfPlayerCannotMoveNotOwnedObject)
         switch (gctx.tick) {
             case 1:
                 return {
-                    ObjectSelectAction{sid},
+                    SelectAction{{sid}},
                 };
             case 2:
                 return {
-                    SelectedObjectMoveAction{15, 14},
+                    ObjectMove{15, 14},
                 };
             default:
                 return {
-                    SelectionClearAction{},
+                    SelectAction{{}},
                 };
         }
     });
@@ -342,15 +342,15 @@ TEST(PlayerManager, TestIfPlayerCanMove)
         switch (gctx.tick) {
             case 1:
                 return {
-                    ObjectSelectAction{sid},
+                    SelectAction{{sid}},
                 };
             case 2:
                 return {
-                    SelectedObjectMoveAction{15, 14},
+                    ObjectMove{15, 14},
                 };
             default:
                 return {
-                    SelectionClearAction{},
+                    SelectAction{{}},
                 };
         }
     });
