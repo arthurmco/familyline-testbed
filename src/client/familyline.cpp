@@ -7,6 +7,7 @@
 ***/
 
 #include <fmt/core.h>
+#include "client/graphical/gui/gui_container_component.hpp"
 #define GLM_FORCE_RADIANS
 
 #ifndef _WIN32
@@ -32,6 +33,7 @@
 #include <client/graphical/gui/gui_button.hpp>
 #include <client/graphical/gui/gui_imageview.hpp>
 #include <client/graphical/gui/gui_label.hpp>
+#include <client/graphical/gui/gui_checkbox.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
 #include <client/graphical/gui/gui_window.hpp>
 #include <client/graphical/renderer.hpp>
@@ -428,10 +430,14 @@ static int show_starting_menu(
 
     Button* bret = new Button(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
     bret->setClickCallback([&](auto* c) { guir->closeWindow(*gsettings); });
-
+    
+    Checkbox* recordGame = new Checkbox(300, 32, "Record the game inputs");
+    
     gsettings->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)lb));
     gsettings->add(
         0.37, 0.13, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)header));
+    gsettings->add(
+        0.05, 0.3, ControlPositioning::Relative, std::unique_ptr<Control>((Control*)recordGame));
     gsettings->add(
         0.37, 0.9, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bret));
 
