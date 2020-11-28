@@ -173,17 +173,14 @@ void GUIManager::receiveEvent()
                 if (hovered_) {
                     // a control was already focused
                     if ((*hovered_)->getID() != (*control)->getID()) {
-                        printf("control id %#lx out of focus\n", (*hovered_)->getID());
                         (*hovered_)->onFocusLost();
                         
-                        printf("control id %#lx focused\n", (*control)->getID());
                         (*control)->onFocusEnter();
                         hovered_ = control;
                     }
 
                 } else {
                     // no control focused yet
-                    printf("control id %#lx focused \n", (*control)->getID());
                     (*control)->onFocusEnter();
                     hovered_ = control;
                 }

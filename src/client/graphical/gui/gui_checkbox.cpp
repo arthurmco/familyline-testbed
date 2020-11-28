@@ -55,7 +55,7 @@ void Checkbox::receiveEvent(const familyline::input::HumanInputAction& ev, Callb
 {
     if (std::holds_alternative<ClickAction>(ev.type)) {
         auto ca  = std::get<ClickAction>(ev.type);
-        if (ca.isPressed) {
+        if (ca.isPressed && ca.buttonCode == 1) {
             enabled_ = !enabled_;
         }
     }

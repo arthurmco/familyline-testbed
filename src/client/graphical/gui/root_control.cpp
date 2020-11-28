@@ -69,7 +69,6 @@ bool RootControl::update(cairo_t* context, cairo_surface_t* canvas)
 
 void RootControl::onFocusLost()
 {
-    printf("\tcontrol id %#lx out of focus\n", (*hovered_)->getID());
     (*hovered_)->onFocusLost();
 
     hovered_ = std::nullopt;
@@ -127,7 +126,6 @@ void RootControl::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
     } else {
         if (hovered_) {
             // a control was already focused
-            printf("\tcontrol id %#lx out of focus\n", (*hovered_)->getID());
             (*hovered_)->onFocusLost();
             hovered_ = std::nullopt;
         }
