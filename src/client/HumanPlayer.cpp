@@ -198,6 +198,7 @@ void HumanPlayer::SetPicker(familyline::input::InputPicker* ip) { _ip = ip; }
 void HumanPlayer::generateInput()
 {
     double camera_speed = 0.1;
+    double rotate_speed = glm::radians(1.0);
     double zoom_speed   = 0.01;
 
     glm::vec2 cameraSpeedVec = glm::vec2(0, 0);
@@ -233,6 +234,12 @@ void HumanPlayer::generateInput()
         zoom_factor = 0;
     }
 
+    if (rotate_left) {
+        this->pushAction(CameraRotate{rotate_speed});
+    } else if (rotate_right) {
+        this->pushAction(CameraRotate{-rotate_speed});
+    }
+    
     if (build_tent) {
         nextBuild_ = "tent";
         build_tent      = false;

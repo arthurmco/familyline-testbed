@@ -63,7 +63,7 @@ public:
     /*  Add rotation to the camera.
         You can rotate the camera by changing the look-at value in a
         'circular way'. I will use the glm rotation functions */
-    void AddRotation(glm::vec3 axis, float angle);
+    virtual void AddRotation(glm::vec3 axis, float angle);
 
     glm::mat4 GetViewMatrix();
     glm::mat4 GetProjectionMatrix();

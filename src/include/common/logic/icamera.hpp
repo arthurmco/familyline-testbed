@@ -30,6 +30,11 @@ public:
     virtual void SetLookAt(glm::vec3)   = 0;
     virtual void AddLookAt(glm::vec3)   = 0;
 
+    /*  Add rotation to the camera.
+        You can rotate the camera by changing the look-at value in a
+        'circular way'. I will use the glm rotation functions */
+    virtual void AddRotation(glm::vec3 axis, float angle) = 0;
+    
     virtual void AddZoomLevel(float) = 0;
 
     virtual ~ICamera() {}
