@@ -1,4 +1,5 @@
 #include <fmt/format.h>
+#include <cinttypes>
 
 #include <algorithm>
 #include <cassert>
@@ -174,13 +175,13 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
     auto& log = LoggerService::getLogger();
 
     char str[96];
-    sprintf(str, "receive action of player %lx at tick %d", pia.playercode, pia.tick);
+    sprintf(str, "receive action of player %" PRIx64 " at tick %" PRId32, pia.playercode, pia.tick);
 
     auto player        = this->getPlayerFromID(pia.playercode);
     bool invalidAction = false;
 
     if (!player.has_value()) {
-        log->write("player-manager", LogType::Fatal, "invalid player ID (%llx)!", pia.playercode);
+        log->write("player-manager", LogType::Fatal, "invalid player ID (%" PRIx64 ")!", pia.playercode);
         return;
     }
 
