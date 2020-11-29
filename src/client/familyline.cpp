@@ -275,8 +275,8 @@ int main(int argc, char const* argv[])
 
     fmt::print("Using resolution {} x {} \n", pi.width, pi.height);
     ConfigData confdata = read_settings();
-    
-    LoggerService::createLogger(pi.log_device, LogType::Info);
+
+    LoggerService::createLogger(pi.log_device, LogType::Info, confdata.log.blockTags);
 
     auto& log = LoggerService::getLogger();
 

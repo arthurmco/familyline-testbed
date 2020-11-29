@@ -1,7 +1,9 @@
 log:
   block_tags:
-    - player_manager
-    - gl_renderer
+    - player-manager
+    - gl-renderer
+    - terrain-renderer
+    
 
 
 enable_input_recording: true

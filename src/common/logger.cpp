@@ -9,9 +9,10 @@ std::unique_ptr<Logger> LoggerService::_logger;
 
 std::mutex mtx;
 
-void Logger::write(const char* tag, LogType type, const char* format, ...)
+void Logger::write(std::string_view tag, LogType type, const char* format, ...)
 {
     if (type < _minlog) return;
+    if (std::find(blockTags_.begin(), blockTags_.end(), tag) != blockTags_.end()) return;
 
     const char* prefix;
     const char* colorstart;
@@ -38,9 +39,7 @@ void Logger::write(const char* tag, LogType type, const char* format, ...)
             prefix     = "[fatal] ";
             colorstart = "\033[31;1m";
             break;
-        default:
-            prefix = "";
-            break;
+        default: prefix = ""; break;
     }
 
     char msg[1024] = {};
@@ -54,11 +53,11 @@ void Logger::write(const char* tag, LogType type, const char* format, ...)
 
     mtx.lock();
 
-    if (!tag || tag[0] == '\0') {
+    if (tag == "") {
         fprintf(_out, "[%13.4f] %s%s%s%s\n", this->getDelta(), prefix, colorstart, msg, colorend);
     } else {
         char stag[128] = {};
-        snprintf(stag, 127, "\033[1m%s\033[0m", tag);
+        snprintf(stag, 127, "\033[1m%s\033[0m", tag.data());
 
         fprintf(
             _out, "[%13.4f] %s%s: %s%s%s\n", this->getDelta(), prefix, stag, colorstart, msg,
