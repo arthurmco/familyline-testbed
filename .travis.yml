@@ -28,6 +28,8 @@ addons:
       - libpango-1.0-0
       - libpango1.0-dev
       - libpangocairo-1.0-0
+      - libflatbuffers-dev
+      - flatbuffers-compiler-dev
       
 env:
   - CXX=g++-10

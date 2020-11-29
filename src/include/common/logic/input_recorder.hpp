@@ -9,6 +9,7 @@
 
 #include <common/logic/player_actions.hpp>
 #include <common/logic/player_manager.hpp>
+#include <common/logic/input_serialize_generated.h>
 
 namespace familyline::logic {
 
@@ -16,16 +17,19 @@ namespace familyline::logic {
         uint64_t id;
         std::string name;
     };
-    
+
     class InputRecorder {
     private:
         FILE* f_ = nullptr;
         PlayerManager& pm_;
         std::vector<RecordPlayerInfo> pinfo_;
 
+        flatbuffers::FlatBufferBuilder builder_;
+        std::vector<PlayerInputAction> pia_list_;
+        
     public:
         InputRecorder(PlayerManager& pm);
-        
+
         /**
          * Create the file.
          *
@@ -40,15 +44,14 @@ namespace familyline::logic {
          */
         bool addAction(PlayerInputAction a);
 
-        ~InputRecorder() {
-            if (f_)
-                fclose(f_);
-        }
+        void commit();
+
+        ~InputRecorder();
 
         InputRecorder(InputRecorder&) = delete;
         InputRecorder(const InputRecorder&) = delete;
-        
+
     };
 
-    
+
 }

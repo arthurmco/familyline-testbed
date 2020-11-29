@@ -37,6 +37,7 @@ On Linux, you will need the softwares below:
  - *devIL:* for loading our textures.
  - *cairo:* for drawing the interfaces
  - *libyaml:* For parsing the `assets.yaml` file, aka the asset list.
+ - *libflatbuffers:* For serializing the input to a file
 
 Please build in a separate directory from the source. For exemple,
 when you clone the repository, you can create a directory named
@@ -61,7 +62,7 @@ You will need to have vcpkg integrated with Visual Studio.
 
 Execute the following command:
 
-`> vcpkg install glm glew sdl2 devil cairo libyaml fmt`
+`> vcpkg install glm glew sdl2 devil cairo libyaml fmt flatbuffers`
 
 Go make a coffee and buy needed things in the market. Order some
 food. This will take some time.

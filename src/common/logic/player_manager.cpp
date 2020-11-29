@@ -123,7 +123,7 @@ int PlayerManager::addListener(PlayerListenerHandler h)
 
 /// This will allow us to use std::visit with multiple variants at once, a thing
 /// that should be part of C++20.
-/// There are two locations that I use this. I hope this gets suggested for C++23
+/// There are three locations that I use this. I hope this gets suggested for C++23
 /// or C++26
 template <class... Ts>
 struct overload : Ts... {
@@ -262,7 +262,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
             },
             [&](const ObjectMove& a) {
                 log->write(
-                    "player-manager", LogType::Info, "%s: ObjectMove { xPos=%.2f, yPos=%.2f } ",
+                    "player-manager", LogType::Info, "%s: ObjectMove { xPos=%d, yPos=%d } ",
                     str, a.xPos, a.yPos);
 
                 auto selections       = (*player)->getSelections();
