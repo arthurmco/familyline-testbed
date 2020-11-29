@@ -27,6 +27,7 @@
 #include <fmt/format.h>
 
 #include <client/game.hpp>
+#include <client/config_reader.hpp>
 #include <client/player_enumerator.hpp>
 #include <client/graphical/device.hpp>
 #include <client/graphical/framebuffer.hpp>
@@ -248,13 +249,33 @@ void run_game_loop(LoopRunner& lr, int& framecount)
 /////////
 /////////
 
+ConfigData read_settings()
+{
+    ConfigData confdata;
+
+    if (auto confenv = getenv("CONFIG_FILE_PATH"); confenv) {
+        fprintf(stderr, "reading config file from envvar (%s)\n", confenv);
+        read_config_from(confenv, confdata);
+        return confdata;
+    }
+    
+    auto confpaths = get_config_valid_paths();
+    for (auto& confpath : confpaths) {
+        read_config_from(confpath, confdata);
+    }
+
+    return confdata;
+}
+
+
 int main(int argc, char const* argv[])
 {
     auto pi = parse_params(std::vector<std::string>{argv + 1, argv + argc});
     enable_console_color(pi.log_device);
 
     fmt::print("Using resolution {} x {} \n", pi.width, pi.height);
-
+    ConfigData confdata = read_settings();
+    
     LoggerService::createLogger(pi.log_device, LogType::Info);
 
     auto& log = LoggerService::getLogger();

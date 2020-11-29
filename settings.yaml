@@ -1,0 +1,7 @@
+log:
+  block_tags:
+    - player_manager
+    - gl_renderer
+
+
+enable_input_recording: true
