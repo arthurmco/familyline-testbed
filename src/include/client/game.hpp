@@ -36,6 +36,7 @@
 #include <common/logic/object_factory.hpp>
 #include <common/logic/player_manager.hpp>
 #include <common/logic/terrain_file.hpp>
+#include <common/logic/input_recorder.hpp>
 //#include "graphical/gui/ImageControl.hpp"
 
 //#include <client/input/InputPicker.hpp>
@@ -56,13 +57,13 @@ struct GFXGameInit {
 
 class Game
 {
-public:    
+public:
     Game(GFXGameInit& gi)
         : terrFile_(std::make_unique<logic::TerrainFile>()),
           window_(gi.window),
           fb3D_(gi.fb3D),
           fbGUI_(gi.fbGUI),
-          gui_(gi.gui),          
+          gui_(gi.gui),
           camera_(std::make_unique<graphics::Camera>(
                       glm::vec3(6.0, 36.0, 6.0), 16.0 / 9.0f, glm::vec3(0))),
           am(graphics::GFXService::getAssetManager())
@@ -95,6 +96,9 @@ public:
             player_colony_map,
         int human_id);
 
+
+    void initRecorder(std::unique_ptr<logic::InputRecorder> ir) { ir_ = std::move(ir); }
+    
     /**
      * Initialize the object manager and the object factory
      */
@@ -109,6 +113,7 @@ public:
 
 private:
     ///////////////////// logic
+
     std::unique_ptr<logic::TerrainFile> terrFile_;
     std::unique_ptr<logic::Terrain> terrain_;
 
@@ -120,6 +125,11 @@ private:
     std::unique_ptr<logic::ObjectLifecycleManager> olm_;
     std::unique_ptr<logic::ColonyManager> cm_;
     std::unique_ptr<logic::PathFinder> pathf_;
+
+    // might not be used at all, but it needs to have the same lifetime
+    // as the game, so inputs can be captured.
+    std::unique_ptr<logic::InputRecorder> ir_;
+
 
     std::chrono::duration<double, std::milli> delta;
     double pms = 0.0;

@@ -7,6 +7,7 @@
 ***/
 
 #include <fmt/core.h>
+
 #include "client/graphical/gui/gui_container_component.hpp"
 #define GLM_FORCE_RADIANS
 
@@ -26,15 +27,14 @@
 
 #include <fmt/format.h>
 
-#include <client/game.hpp>
 #include <client/config_reader.hpp>
-#include <client/player_enumerator.hpp>
+#include <client/game.hpp>
 #include <client/graphical/device.hpp>
 #include <client/graphical/framebuffer.hpp>
 #include <client/graphical/gui/gui_button.hpp>
+#include <client/graphical/gui/gui_checkbox.hpp>
 #include <client/graphical/gui/gui_imageview.hpp>
 #include <client/graphical/gui/gui_label.hpp>
-#include <client/graphical/gui/gui_checkbox.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
 #include <client/graphical/gui/gui_window.hpp>
 #include <client/graphical/renderer.hpp>
@@ -44,7 +44,9 @@
 #include <client/input/input_service.hpp>
 #include <client/loop_runner.hpp>
 #include <client/params.hpp>
+#include <client/player_enumerator.hpp>
 #include <common/logger.hpp>
+#include <common/logic/input_recorder.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -201,11 +203,11 @@ std::tuple<std::string, std::string, std::string> get_system_name()
 
 static int show_starting_menu(
     const ParamInfo& pi, Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win,
-    GUIManager* guir, size_t gwidth, size_t gheight, LoopRunner& lr);
+    GUIManager* guir, size_t gwidth, size_t gheight, LoopRunner& lr, ConfigData& confdata);
 
 Game* start_game(
     Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win, GUIManager* guir, LoopRunner& lr,
-    std::string_view mapFile)
+    std::string_view mapFile, ConfigData& confdata)
 {
     GFXGameInit gi{
         win,
@@ -214,19 +216,38 @@ Game* start_game(
         guir,
     };
 
+    auto& log = LoggerService::getLogger();
 
-    Game* g = new Game(gi);
-    auto& map = g->initMap(mapFile);
-    auto pinfo = InitPlayerInfo{"Arthur", -1};
+    Game* g      = new Game(gi);
+    auto& map    = g->initMap(mapFile);
+    auto pinfo   = InitPlayerInfo{"Arthur", -1};
     auto session = initSinglePlayerSession(map, pinfo);
 
     auto pm = std::move(session.players);
     auto cm = std::move(session.colonies);
-    
+
     if (pinfo.id == -1) {
         throw std::runtime_error{"Could not create the human player"};
     }
 
+    std::unique_ptr<InputRecorder> ir;
+
+    if (confdata.enableInputRecording) {
+        log->write("game", LogType::Info, "This game inputs will be recorded");
+        
+        ir = std::make_unique<InputRecorder>(*pm.get());
+        auto recordfilename = fmt::format("record-{}.frec", time(nullptr));
+
+        log->write("game", LogType::Info, "\trecord destination: %s", recordfilename.c_str());
+
+        if (!ir->createFile(recordfilename)) {
+            log->write("game", LogType::Error, "\tinput record file could not be created");
+            ir = std::unique_ptr<InputRecorder>(nullptr);
+        }
+
+        g->initRecorder(std::move(ir));
+    }
+    
     g->initPlayers(std::move(pm), std::move(cm), session.player_colony, pinfo.id);
     g->initObjects();
     g->initLoopData(pinfo.id);
@@ -258,7 +279,7 @@ ConfigData read_settings()
         read_config_from(confenv, confdata);
         return confdata;
     }
-    
+
     auto confpaths = get_config_valid_paths();
     for (auto& confpath : confpaths) {
         read_config_from(confpath, confdata);
@@ -266,7 +287,6 @@ ConfigData read_settings()
 
     return confdata;
 }
-
 
 int main(int argc, char const* argv[])
 {
@@ -310,7 +330,7 @@ int main(int argc, char const* argv[])
     PlayerManager* pm     = nullptr;
     Game* g               = nullptr;
 
-    try {       
+    try {
         auto devs          = pi.devices;
         Device* defaultdev = nullptr;
 
@@ -367,7 +387,7 @@ int main(int argc, char const* argv[])
 
         if (pi.mapFile) {
             int frames = 0;
-            Game* g    = start_game(f3D, fGUI, win, guir, lr, *pi.mapFile);
+            Game* g    = start_game(f3D, fGUI, win, guir, lr, *pi.mapFile, confdata);
             lr.load([&]() { return g->runLoop(); });
 
             run_game_loop(lr, frames);
@@ -380,7 +400,7 @@ int main(int argc, char const* argv[])
             fmt::print("\nExited. ({:d} frames)\n", frames);
 
         } else {
-            return show_starting_menu(pi, f3D, fGUI, win, guir, gwidth, gheight, lr);
+            return show_starting_menu(pi, f3D, fGUI, win, guir, gwidth, gheight, lr, confdata);
         }
 
     } catch (shader_exception& se) {
@@ -425,7 +445,7 @@ int main(int argc, char const* argv[])
 
 static int show_starting_menu(
     const ParamInfo& pi, Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win,
-    GUIManager* guir, size_t gwidth, size_t gheight, LoopRunner& lr)
+    GUIManager* guir, size_t gwidth, size_t gheight, LoopRunner& lr, ConfigData& confdata)
 {
     auto& log = LoggerService::getLogger();
     Game* g   = nullptr;
@@ -450,9 +470,13 @@ static int show_starting_menu(
     });
 
     Button* bret = new Button(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
-    bret->setClickCallback([&](auto* c) { guir->closeWindow(*gsettings); });
-    
-    Checkbox* recordGame = new Checkbox(300, 32, "Record the game inputs");
+    Checkbox* recordGame = new Checkbox(300, 32, "Record the game inputs",
+                                        confdata.enableInputRecording);
+
+    bret->setClickCallback([&](auto* c) {
+        confdata.enableInputRecording = recordGame->getState();        
+        guir->closeWindow(*gsettings);
+    });
     
     gsettings->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)lb));
     gsettings->add(
@@ -495,7 +519,7 @@ static int show_starting_menu(
     bnew->setClickCallback([&](Control* cc) {
         (void)cc;
         guir->closeWindow(*gwin);
-        g = start_game(f3D, fGUI, win, guir, lr, ASSET_FILE_DIR "terrain_test.flte");
+        g = start_game(f3D, fGUI, win, guir, lr, ASSET_FILE_DIR "terrain_test.flte", confdata);
         lr.load([&]() { return g->runLoop(); });
     });
 

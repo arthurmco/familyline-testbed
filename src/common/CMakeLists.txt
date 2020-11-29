@@ -14,6 +14,7 @@ add_library(
   "logic/GameActionManager.cpp"
   "logic/game_event.cpp"
   "logic/game_object.cpp"
+  "logic/input_recorder.cpp"
   "logic/lifecycle_manager.cpp"
   "logic/logic_service.cpp"
   "logic/object_components.cpp"
