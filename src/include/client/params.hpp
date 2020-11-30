@@ -25,6 +25,7 @@ struct ParamInfo {
     std::vector<familyline::graphics::Device*> devices;
     
     std::optional<std::string> mapFile;
+    std::optional<std::string> inputFile;
 };
 
 /**

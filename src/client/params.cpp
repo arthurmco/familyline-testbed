@@ -7,14 +7,16 @@
 
 static void show_help()
 {
-    fmt::print("Familyline help:\n");
-    fmt::print("--version:\t\tPrint version and, if compiled inside a Git repo, commit hash\n");
-    fmt::print("--help:\t\t\tPrint this help information\n");
-    fmt::print("--size <W>x<H>:\t\tChanges the game resolution to <W>x<H> pixels\n");
-    fmt::print("--file <path>:\t\tLoad a map from the specified path\n");
+    fmt::print("Familyline command line help:\n");
+    fmt::print("  --version:\n\tPrint version and, if compiled inside a Git repo, commit hash\n\n");
+    fmt::print("  --help:\n\tPrint this help information\n\n");
+    fmt::print("  --size <W>x<H>:\n\tChanges the game resolution to <W>x<H> pixels\n\n");
+    fmt::print("  --file <path>:\n\tLoad a map from the specified path\n\n");
+    fmt::print("  --readinput <path>:\n\tLoad an input file. The game will start in the map\n");
+    fmt::print("  \tyou played when you recorded\n\n");
     fmt::print(
-        "--log [<filename>|screen]: Logs to filename 'filename', or screen to log to screen, or "
-        "wherever stderr is bound to\n");
+        "  --log [<filename>|screen]:\n\tLogs to filename 'filename', or screen to log to screen, or\n"
+        "  \twherever stderr is bound to\n\n");
 }
 
 
@@ -100,7 +102,8 @@ ParamInfo parse_params(const std::vector<std::string>& params)
     bool next_is_size = false;
     bool next_is_log = false;
     bool next_is_file = false;
-
+    bool next_is_input = false;
+    
     for (auto& p : params) {
         ////// parse values
         if (next_is_size) {
@@ -119,6 +122,12 @@ ParamInfo parse_params(const std::vector<std::string>& params)
         if (next_is_file) {
             pi.mapFile = p;
             next_is_file = false;
+            continue;
+        }
+
+        if (next_is_input) {
+            pi.inputFile = p;
+            next_is_input = false;
             continue;
         }
 
@@ -145,6 +154,11 @@ ParamInfo parse_params(const std::vector<std::string>& params)
             continue;
         }
 
+        if (p == "--readinput") {
+            next_is_input = true;
+            continue;
+        }
+
         if (p == "--log") {
             next_is_log = true;
             continue;
@@ -163,6 +177,16 @@ ParamInfo parse_params(const std::vector<std::string>& params)
 
     if (next_is_log || !pi.log_device) {
         fmt::print("Expected log device: can be stdout, stderr or a filename\n");
+        exit(1);
+    }
+
+    if (next_is_file) {
+        fmt::print("Expected a map file name\n");
+        exit(1);
+    }
+
+    if (next_is_input) {
+        fmt::print("Expected an input record file (the file with .frec extension)\n");
         exit(1);
     }
 
