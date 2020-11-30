@@ -5,7 +5,7 @@
 
 using namespace familyline::logic;
 
-InputRecorder::InputRecorder(PlayerManager& pm) : pm_(pm), builder_(1024)
+InputRecorder::InputRecorder(PlayerManager& pm) : pm_(pm)
 {
     pm_.addListener(std::bind(&InputRecorder::addAction, this, std::placeholders::_1));
 
@@ -23,25 +23,38 @@ InputRecorder::InputRecorder(PlayerManager& pm) : pm_(pm), builder_(1024)
 bool InputRecorder::createFile(std::string_view path)
 {
     if (f_) fclose(f_);
+    flatbuffers::FlatBufferBuilder builder;
 
     f_ = fopen(path.data(), "wb");
+
+    // Add a header and a player list
+    const char* magic = "FREC";
+    uint32_t version = 1;
+
+    fwrite((void*)magic, 1, 4, f_);
+    fwrite((void*)&version, sizeof(version), 1, f_);
+
+    std::vector<flatbuffers::Offset<familyline::PlayerInfo>> playerlist;
+
+    for (auto& pi : pinfo_) {
+        auto piName  = builder.CreateString(pi.name);
+        auto piColor = builder.CreateString("#ff0000");
+        auto piFlat  = CreatePlayerInfo(builder, pi.id, piName, piColor);
+
+        playerlist.push_back(piFlat);
+    }
+
+    auto playervec = builder.CreateVector(playerlist.data(), playerlist.size());
+    builder.Finish(playervec);
+    uint32_t psize = builder.GetSize();
+    fwrite(&psize, sizeof(psize), 1, f_);
+    fwrite(builder.GetBufferPointer(), builder.GetSize(), 1, f_);
+
     if (!f_) return false;
 
     return true;
 }
 
-/**
- * You should pass this function as a callback to the player manager
- * `addListener` function
- */
-bool InputRecorder::addAction(PlayerInputAction a)
-{
-    if (f_) {
-        pia_list_.push_back(a);
-    }
-
-    return (f_ != nullptr);
-}
 
 /// This will allow us to use std::visit with multiple variants at once, a thing
 /// that should be part of C++20.
@@ -54,29 +67,23 @@ struct overload : Ts... {
 template <class... Ts>
 overload(Ts...) -> overload<Ts...>;
 
-void InputRecorder::commit()
+
+/**
+ * You should pass this function as a callback to the player manager
+ * `addListener` function
+ */
+bool InputRecorder::addAction(PlayerInputAction pia)
 {
-    std::vector<flatbuffers::Offset<familyline::PlayerInfo>> playerlist;
-    fseek(f_, 0, SEEK_SET);
+    if (f_) {
+        flatbuffers::FlatBufferBuilder builder;
 
-    for (auto& pi : pinfo_) {
-        auto piName  = builder_.CreateString(pi.name);
-        auto piColor = builder_.CreateString("#ff0000");
-        auto piFlat  = CreatePlayerInfo(builder_, pi.id, piName, piColor);
-
-        playerlist.push_back(piFlat);
-    }
-
-    std::vector<flatbuffers::Offset<familyline::InputElement>> inputs;
-
-    for (auto& pia : pia_list_) {
         familyline::InputType type_val;
         flatbuffers::Offset<void> type_data;
 
         std::visit(
             overload{
                 [&](const CommandInput& a) {
-                    auto cstr = builder_.CreateString(a.commandName);
+                    auto cstr = builder.CreateString(a.commandName);
 
                     std::array<unsigned long, 5> params;
                     if (auto* objectID = std::get_if<object_id_t>(&a.param); objectID) {
@@ -85,70 +92,82 @@ void InputRecorder::commit()
                         params = {(unsigned long)(*arr)[0], (unsigned long)(*arr)[1]};
                     }
 
-                    auto pserialize = builder_.CreateVector(params.data(), params.size());
-                    auto cargs = CreateCommandInputArgs(builder_, pserialize);
-                    
-                    auto cval       = CreateCommandInput(builder_, cstr, cargs);
+                    auto pserialize = builder.CreateVector(params.data(), params.size());
+                    auto cargs      = CreateCommandInputArgs(builder, pserialize);
 
-                    type_val = InputType_cmd;
-                    type_data = cval.Union();                    
+                    auto cval = CreateCommandInput(builder, cstr, cargs);
+
+                    type_val  = InputType_cmd;
+                    type_data = cval.Union();
                 },
-                [&](const SelectAction& a) {                    
-                    auto ovec = builder_.CreateVector(a.objects.data(), a.objects.size());
-                    auto oobjs = CreateSelectActionObjects(builder_, ovec);
-                    auto cval = CreateSelectAction(builder_, oobjs);
+                [&](const SelectAction& a) {
+                    auto ovec  = builder.CreateVector(a.objects.data(), a.objects.size());
+                    auto oobjs = CreateSelectActionObjects(builder, ovec);
+                    auto cval  = CreateSelectAction(builder, oobjs);
 
-                    type_val = InputType_sel;
+                    type_val  = InputType_sel;
                     type_data = cval.Union();
                 },
                 [&](const ObjectMove& a) {
-                    auto cval = CreateObjectMove(builder_, a.xPos, a.yPos);
-                    
-                    type_val = InputType_obj_move;
+                    auto cval = CreateObjectMove(builder, a.xPos, a.yPos);
+
+                    type_val  = InputType_obj_move;
                     type_data = cval.Union();
                 },
                 [&](const CameraMove& a) {
-                    auto cval = CreateCameraMove(builder_, a.deltaX, a.deltaY, a.deltaZoom);
-                    
-                    type_val = InputType_cam_move;
+                    auto cval = CreateCameraMove(builder, a.deltaX, a.deltaY, a.deltaZoom);
+
+                    type_val  = InputType_cam_move;
                     type_data = cval.Union();
-                    
                 },
                 [&](const CameraRotate& a) {
-                    auto cval = CreateCameraRotate(builder_, a.radians);
-                    
-                    type_val = InputType_cam_rotate;
+                    auto cval = CreateCameraRotate(builder, a.radians);
+
+                    type_val  = InputType_cam_rotate;
                     type_data = cval.Union();
-                    
                 },
                 [&](const CreateEntity& a) {
-                    auto strtype = builder_.CreateString(a.type);
-                    auto cval = CreateCreateEntity(builder_, strtype, a.xPos, a.yPos);
-                    
-                    type_val = InputType_create;
-                    type_data = cval.Union();                    
+                    auto strtype = builder.CreateString(a.type);
+                    auto cval    = CreateCreateEntity(builder, strtype, a.xPos, a.yPos);
+
+                    type_val  = InputType_create;
+                    type_data = cval.Union();
                 },
                 [&](const AddSelectAction& a) {
-                    
+
                 },
                 [&](const CreateSelectGroup& a) {}, [&](const SelectGroup& a) {},
                 [&](const AddSelectGroup& a) {}, [&](const RemoveSelectGroup& a) {}},
             pia.type);
 
-        inputs.push_back(CreateInputElement(builder_, pia.tick, pia.playercode,
-                                            pia.timestamp, type_val, type_data));
+        auto inputel = CreateInputElement(
+            builder, pia.tick, pia.playercode, pia.timestamp, type_val, type_data);
+
+        builder.Finish(inputel);
+
+        uint32_t isize   = builder.GetSize();
+        const char* imagic = "FINP";
+        fwrite((void*)imagic, 1, 4, f_);
+        fwrite(&isize, sizeof(isize), 1, f_);
+        fwrite(builder.GetBufferPointer(), builder.GetSize(), 1, f_);
+
+        inputcount_++;
     }
 
-    auto playervec = builder_.CreateVector(playerlist.data(), playerlist.size());
-    auto inputvec = builder_.CreateVector(inputs.data(), inputs.size());
-    InputFileBuilder ifb(builder_);
-    ifb.add_player_info(playervec);
-    ifb.add_input_element(inputvec);
-    auto fileinfo = ifb.Finish();
+    return (f_ != nullptr);
+}
 
-    builder_.Finish(fileinfo, "FREC");
+void InputRecorder::commit()
+{
+    std::vector<flatbuffers::Offset<familyline::InputElement>> inputs;
+
+    const char* endmagic = "FEND";
+    uint32_t inputcount = inputcount_;
+    uint32_t checksum = 0;
     
-    fwrite(builder_.GetBufferPointer(), builder_.GetSize(), 1, f_);
+    fwrite((void*)endmagic, 1, 4, f_);
+    fwrite(&inputcount, sizeof(inputcount), 1, f_);
+    fwrite(&checksum, sizeof(checksum), 1, f_);
 }
 
 InputRecorder::~InputRecorder()

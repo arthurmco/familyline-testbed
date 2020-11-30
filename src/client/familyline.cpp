@@ -236,7 +236,13 @@ Game* start_game(
         log->write("game", LogType::Info, "This game inputs will be recorded");
         
         ir = std::make_unique<InputRecorder>(*pm.get());
-        auto recordfilename = fmt::format("record-{}.frec", time(nullptr));
+
+        auto rawtime = time(NULL);
+        auto ftime = localtime(&rawtime);
+        auto recordfilename = fmt::format(
+            "record-{}{:02d}{:02d}-{:02d}{:02d}{:02d}.frec",
+            ftime->tm_year, ftime->tm_mon, ftime->tm_mday,
+            ftime->tm_hour, ftime->tm_min, ftime->tm_sec);
 
         log->write("game", LogType::Info, "\trecord destination: %s", recordfilename.c_str());
 

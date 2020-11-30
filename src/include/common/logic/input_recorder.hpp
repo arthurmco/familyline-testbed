@@ -24,8 +24,7 @@ namespace familyline::logic {
         PlayerManager& pm_;
         std::vector<RecordPlayerInfo> pinfo_;
 
-        flatbuffers::FlatBufferBuilder builder_;
-        std::vector<PlayerInputAction> pia_list_;
+        int inputcount_ = 0;
         
     public:
         InputRecorder(PlayerManager& pm);
