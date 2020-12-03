@@ -12,6 +12,7 @@
 
 #include <common/logger.hpp>
 #include <common/logic/player_session.hpp>
+#include <common/logic/player_actions.hpp>
 #include <cstdint>
 #include <input_serialize_generated.h>
 
@@ -30,7 +31,7 @@ namespace familyline::logic {
     class InputReproducer {
     public:
         InputReproducer(std::string_view file)
-            : file_(file), f_(nullptr), pinfo_({}), inputcount_(0)
+            : file_(file), f_(nullptr), pinfo_({}), actioncount_(0), currentaction_(0)
             {}
 
         /**
@@ -54,13 +55,22 @@ namespace familyline::logic {
 
         std::string getTerrainFile() { return "terrain_test.flte"; }
 
+        /**
+         * Get the next action from the file
+         *
+         * If no more actions exist, returns an empty optional
+         */
+        std::optional<PlayerInputAction> getNextAction();
+
+        uint64_t getCurrentActionIndex() const { return currentaction_; }
+        
         ~InputReproducer();
 
     private:
         std::string file_;
         FILE* f_;
         std::vector<InputInfo> pinfo_;
-        long long int inputcount_;
+        long long int actioncount_, currentaction_;
     };
 
 }

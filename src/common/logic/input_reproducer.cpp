@@ -1,5 +1,6 @@
 #include <input_serialize_generated.h>
 
+#include <algorithm>
 #include <cerrno>
 #include <cinttypes>
 #include <common/logger.hpp>
@@ -8,6 +9,7 @@
 #include <common/logic/player_actions.hpp>
 #include <common/logic/player_manager.hpp>
 #include <cstring>
+#include <optional>
 
 using namespace familyline::logic;
 
@@ -30,6 +32,8 @@ std::vector<familyline::logic::InputInfo> readPlayerInfo(FILE* file)
         log->write(
             "input-reproducer", LogType::Error, "Could not read the player info section (%d of %d)",
             rsize, size);
+
+        delete[] data;
         return {};
     }
 
@@ -47,6 +51,7 @@ std::vector<familyline::logic::InputInfo> readPlayerInfo(FILE* file)
             logic::InputInfo{vit->name()->str(), vit->color()->str(), vit->id(), {}, {}});
     }
 
+    delete[] data;
     return players;
 }
 
@@ -126,14 +131,14 @@ bool InputReproducer::open()
         return false;
     }
 
-    inputcount_ = readInputCount(f_);
-    if (inputcount_ < 0) {
+    actioncount_ = readInputCount(f_);
+    if (actioncount_ < 0) {
         return false;
     }
 
     log->write(
         "input-reproducer", LogType::Info, "'%s': %lld input actions detected", file_.data(),
-        inputcount_);
+        actioncount_);
 
     return true;
 }
@@ -146,6 +151,122 @@ bool InputReproducer::open()
  * correct thing to do is to save it into the file
  */
 PlayerSession InputReproducer::createPlayerSession() {}
+
+/**
+ * Get the next action from the file
+ *
+ * If no more actions exist, returns an empty optional
+ */
+std::optional<PlayerInputAction> InputReproducer::getNextAction()
+{
+    if (currentaction_ == actioncount_) return std::nullopt;
+
+    // action structure: string "FINP" + int containg the size + flatbuffer data
+    // of the input action.
+    auto& log = LoggerService::getLogger();
+
+    auto apos = ftell(f_);
+
+    char magic[5]       = {};
+    uint32_t actionsize = 0;
+
+    fread((void*)magic, 4, 1, f_);
+    if (strncmp(magic, R_ACTION_MAGIC, 4)) {
+        log->write(
+            "input-reproducer", LogType::Fatal,
+            "'%s': Action number %d (at offset %08x) is invalid", file_.data(), currentaction_,
+            apos);
+
+        return std::nullopt;
+    }
+
+    fread((void*)&actionsize, sizeof(actionsize), 1, f_);
+    if (actionsize == 0) {
+        log->write(
+            "input-reproducer", LogType::Fatal,
+            "'%s': Action number %d (at offset %08x) has no size. Stopping because this is very "
+            "weird",
+            file_.data(), currentaction_, apos);
+
+        return std::nullopt;
+    }
+
+    char* data = new char[actionsize + 1];
+    auto rsize = fread((void*)data, 1, actionsize, f_);
+
+    flatbuffers::FlatBufferBuilder builder;
+    auto actioninfo = flatbuffers::GetRoot<InputElement>((uint8_t*)data);
+
+    PlayerInputType type;
+    switch (actioninfo->type_type()) {
+        case InputType_cmd: {
+            auto cmd = actioninfo->type_as_cmd();
+            auto val = std::monostate{};
+
+            switch (cmd->args()->args()->size()) {
+            case 1:
+                type = CommandInput{cmd->command()->str(), cmd->args()->args()->Get(0)};
+                break;
+            case 2:
+                type = CommandInput{cmd->command()->str(),
+                    std::array<int, 2>{
+                        (int)cmd->args()->args()->Get(0),
+                        (int)cmd->args()->args()->Get(1)
+                                    }};
+                break;
+            default:
+                type = CommandInput{cmd->command()->str(), std::monostate{}};
+                break;
+
+            }
+            
+        } break;
+        case InputType_sel: {
+            auto sel = actioninfo->type_as_sel();
+            std::vector<long unsigned int> objects;
+
+            std::copy(
+                sel->objects()->values()->cbegin(), sel->objects()->values()->cend(),
+                std::back_inserter(objects));
+            type = SelectAction{objects};
+        } break;
+        case InputType_obj_move: {
+            auto omove    = actioninfo->type_as_obj_move();
+            int xPos = (int)omove->x_pos(), yPos = (int)omove->y_pos();
+
+            type = ObjectMove{xPos, yPos};
+        } break;
+        case InputType_cam_move: {
+            auto cmove = actioninfo->type_as_cam_move();
+            double dX = cmove->x_delta(), dY = cmove->y_delta(), dZoom = cmove->zoom_delta();
+
+            type = CameraMove{dX, dY, dZoom};
+        } break;
+        case InputType_cam_rotate: {
+            auto crot = actioninfo->type_as_cam_rotate();
+            double radians = crot->radians();
+
+            type = CameraRotate{radians};
+        } break;
+        case InputType_create: {
+            auto centity = actioninfo->type_as_create();
+            std::string etype = centity->type()->str();
+            int xPos = centity->x_pos(), yPos = centity->y_pos();
+
+            type = CreateEntity{etype, xPos, yPos};
+        } break;
+
+        default: type = CommandInput{"null", 0ul}; break;
+    }
+
+    auto val = std::optional<PlayerInputAction>{PlayerInputAction{
+        actioninfo->timestamp(), actioninfo->playercode(), (uint32_t)actioninfo->tick(), type}};
+
+    currentaction_++;
+
+    delete[] data;
+    return val;
+}
 
 InputReproducer::~InputReproducer()
 {

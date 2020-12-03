@@ -29,6 +29,7 @@ addons:
       - libpango1.0-dev
       - libpangocairo-1.0-0
       - libflatbuffers-dev
+      - libflatbuffers1
       - flatbuffers-compiler-dev
       - flatbuffers-compiler
       

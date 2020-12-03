@@ -10,4 +10,5 @@
 #define R_VERSION 1
 
 
+#define R_ACTION_MAGIC "FINP"
 #define R_FOOTER_MAGIC "FEND"

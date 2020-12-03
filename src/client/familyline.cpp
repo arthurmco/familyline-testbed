@@ -218,6 +218,13 @@ struct StartGameInfo {
     std::optional<std::string> inputFile;
 };
 
+template <class... Ts>
+struct overload : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overload(Ts...) -> overload<Ts...>;
+
 Game* start_game(
     Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win, GUIManager* guir, LoopRunner& lr,
     const StartGameInfo& sgai, ConfigData& confdata)
@@ -233,18 +240,18 @@ Game* start_game(
 
     std::string mapfile = sgai.mapFile;
     std::unique_ptr<InputReproducer> irepr;
-    
+
     if (sgai.inputFile) {
         irepr = std::make_unique<InputReproducer>(*sgai.inputFile);
 
         if (!irepr->open()) {
             mapfile = ASSET_FILE_DIR "terrain_test.flte";
             irepr.reset();
-        } else {            
+        } else {
             mapfile = irepr->getTerrainFile();
         }
     }
-    
+
     Game* g      = new Game(gi);
     auto& map    = g->initMap(mapfile);
     auto pinfo   = InitPlayerInfo{"Arthur", -1};
@@ -259,7 +266,7 @@ Game* start_game(
 
     std::unique_ptr<InputRecorder> ir;
 
-    if (confdata.enableInputRecording) {
+    if (confdata.enableInputRecording && !irepr) {
         log->write("game", LogType::Info, "This game inputs will be recorded");
 
         ir = std::make_unique<InputRecorder>(*pm.get());
@@ -267,7 +274,7 @@ Game* start_game(
         auto rawtime        = time(NULL);
         auto ftime          = localtime(&rawtime);
         auto recordfilename = fmt::format(
-            "record-{}{:04d}{:02d}-{:02d}{:02d}{:02d}.frec", 1900+ftime->tm_year, ftime->tm_mon,
+            "record-{}{:04d}{:02d}-{:02d}{:02d}{:02d}.frec", 1900 + ftime->tm_year, ftime->tm_mon,
             ftime->tm_mday, ftime->tm_hour, ftime->tm_min, ftime->tm_sec);
 
         log->write("game", LogType::Info, "\trecord destination: %s", recordfilename.c_str());
@@ -281,14 +288,67 @@ Game* start_game(
         //
         // It will work, will not overwrite any file (because the filename is decided by the
         // recording date), but it is redundant.
-        if (!irepr) {
-            g->initRecorder(std::move(ir));            
-        }
-
+        g->initRecorder(std::move(ir));
     }
 
     if (irepr) {
-        log->write("game", LogType::Info, "Replaying inputs from file %s", (*sgai.inputFile).c_str());
+        log->write(
+            "game", LogType::Info, "Replaying inputs from file %s", (*sgai.inputFile).c_str());
+
+        for (auto f = irepr->getNextAction(); f; f = irepr->getNextAction()) {
+            printf(
+                "\t[%" PRId64 "] tick: %d, player: %" PRIx64 ", timestamp %" PRId64 " | ",
+                irepr->getCurrentActionIndex() - 1, f->tick, f->playercode, f->timestamp);
+
+            std::visit(
+                overload{
+                    [&](const logic::CommandInput& a) {
+                        printf("CommandInput { command=%s } ", a.commandName.c_str());
+                    },
+                    [&](const logic::SelectAction& a) {
+                        switch (a.objects.size()) {
+                            case 0: printf("SelectAction { objects=0, deselecting all } "); break;
+                            case 1: printf("SelectAction { objects=[%lu] } ", a.objects[0]); break;
+                            case 2:
+                                printf(
+                                    "SelectAction { objects=[%lu, %lu] } ", a.objects[0],
+                                    a.objects[1]);
+                                break;
+                            case 3:
+                                printf(
+                                    "SelectAction { objects=[%lu, %lu, %lu] } ", a.objects[0],
+                                    a.objects[1], a.objects[2]);
+                                break;
+                            default:
+                                printf(
+                                    "SelectAction { objects=[%lu, %lu, %lu... (%zu objects)] } ",
+                                    a.objects[0], a.objects[1], a.objects[2], a.objects.size());
+                                break;
+                        }
+                    },
+                    [&](const logic::ObjectMove& a) {
+                        printf("ObjectMove { xPos=%d, yPos=%d } ", a.xPos, a.yPos);
+                    },
+                    [&](const logic::CameraMove& a) {
+                        printf(
+                            "CameraMove { dx=%.2f, dy=%.2f, dZoom=%.2f} ", a.deltaX, a.deltaY,
+                            a.deltaZoom);
+                    },
+                    [&](const logic::CameraRotate& a) {
+                        printf("CameraRotate { angle=%.3f rad} ", a.radians);
+                    },
+                    [&](const logic::CreateEntity& a) {
+                        printf(
+                            "CreateEntity { type=%s, xPos=%d, yPos=%d } ", a.type.c_str(), a.xPos,
+                            a.yPos);
+                    },
+                    [&](const logic::AddSelectAction& a) {}, [&](const CreateSelectGroup& a) {},
+                    [&](const SelectGroup& a) {}, [&](const AddSelectGroup& a) {},
+                    [&](const RemoveSelectGroup& a) {}},
+                f->type);
+
+            puts("");
+        }
     }
 
     g->initPlayers(std::move(pm), std::move(cm), session.player_colony, pinfo.id);
@@ -432,8 +492,8 @@ int main(int argc, char const* argv[])
             int frames = 0;
 
             std::string mapFile = pi.inputFile ? "" : *pi.mapFile;
-            
-            Game* g    = start_game(
+
+            Game* g = start_game(
                 f3D, fGUI, win, guir, lr, StartGameInfo{mapFile, pi.inputFile}, confdata);
             lr.load([&]() { return g->runLoop(); });
 

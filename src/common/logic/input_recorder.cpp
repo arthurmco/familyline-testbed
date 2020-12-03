@@ -103,7 +103,7 @@ bool InputRecorder::addAction(PlayerInputAction pia)
                     type_data = cval.Union();
                 },
                 [&](const SelectAction& a) {
-                    auto ovec  = builder.CreateVector(a.objects.data(), a.objects.size());
+                    auto ovec  = builder.CreateVector(a.objects);
                     auto oobjs = CreateSelectActionObjects(builder, ovec);
                     auto cval  = CreateSelectAction(builder, oobjs);
 
@@ -148,7 +148,7 @@ bool InputRecorder::addAction(PlayerInputAction pia)
         builder.Finish(inputel);
 
         uint32_t isize   = builder.GetSize();
-        const char* imagic = "FINP";
+        const char* imagic = R_ACTION_MAGIC;
         fwrite((void*)imagic, 1, 4, f_);
         fwrite(&isize, sizeof(isize), 1, f_);
         fwrite(builder.GetBufferPointer(), builder.GetSize(), 1, f_);

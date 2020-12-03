@@ -221,6 +221,10 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                         }
                     }
 
+                    
+                } else if (a.commandName == "null") {
+                    log->write("player-manager", LogType::Warning, "null command, maybe the recorded player did not recoginize");
+                    
                 } else {
                     auto selections       = (*player)->getSelections();
                     auto valid_selections = getValidSelections(selections);
