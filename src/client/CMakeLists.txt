@@ -2,6 +2,9 @@
 # Add all files that are exclusive to the client:
 # (rendering and input gathering code)
 
+include("${CMAKE_SOURCE_DIR}/src/common/generated.cmake")
+get_target_property(INPUT_FLATBUFFER_INCLUDE input-flatbuffer GENERATED_INCLUDES_DIR)
+
 add_library(
   familyline-client
   "params.cpp"
@@ -68,13 +71,14 @@ if (MSVC)
   find_path(PANGO_INCLUDE pango/pango.h)
 
   target_link_libraries(familyline-client PUBLIC ${PANGO_LIB} ${PANGOCAIRO_LIB} ${GOBJECT_LIB})
-  target_include_directories(familyline-client PUBLIC ${PANGO_INCLUDE} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
+  target_include_directories(familyline-client PUBLIC ${PANGO_INCLUDE} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR} ${INPUT_FLATBUFFER_INCLUDE})
 
 else()
   find_package(PkgConfig REQUIRED)
 
   pkg_search_module(PANGOCAIRO REQUIRED pangocairo) # finds pango-cairo
-  target_include_directories(familyline-client PUBLIC ${PANGOCAIRO_INCLUDE_DIRS})
+  target_include_directories(familyline-client PUBLIC ${PANGOCAIRO_INCLUDE_DIRS}
+    ${INPUT_FLATBUFFER_INCLUDE})
   
 endif(MSVC)
 

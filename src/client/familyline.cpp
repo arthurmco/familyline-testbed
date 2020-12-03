@@ -205,9 +205,21 @@ static int show_starting_menu(
     const ParamInfo& pi, Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win,
     GUIManager* guir, size_t gwidth, size_t gheight, LoopRunner& lr, ConfigData& confdata);
 
+/**
+ * Information required to start a game, besides player information
+ */
+struct StartGameInfo {
+    /// The terrain file
+    std::string mapFile;
+
+    /// If present, the input record file.
+    /// If this is present, it means that we have a recorded game.
+    std::optional<std::string> inputFile;
+};
+
 Game* start_game(
     Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win, GUIManager* guir, LoopRunner& lr,
-    std::string_view mapFile, ConfigData& confdata)
+    const StartGameInfo& sgai, ConfigData& confdata)
 {
     GFXGameInit gi{
         win,
@@ -219,7 +231,7 @@ Game* start_game(
     auto& log = LoggerService::getLogger();
 
     Game* g      = new Game(gi);
-    auto& map    = g->initMap(mapFile);
+    auto& map    = g->initMap(sgai.mapFile);
     auto pinfo   = InitPlayerInfo{"Arthur", -1};
     auto session = initSinglePlayerSession(map, pinfo);
 
@@ -234,15 +246,14 @@ Game* start_game(
 
     if (confdata.enableInputRecording) {
         log->write("game", LogType::Info, "This game inputs will be recorded");
-        
+
         ir = std::make_unique<InputRecorder>(*pm.get());
 
-        auto rawtime = time(NULL);
-        auto ftime = localtime(&rawtime);
+        auto rawtime        = time(NULL);
+        auto ftime          = localtime(&rawtime);
         auto recordfilename = fmt::format(
-            "record-{}{:02d}{:02d}-{:02d}{:02d}{:02d}.frec",
-            ftime->tm_year, ftime->tm_mon, ftime->tm_mday,
-            ftime->tm_hour, ftime->tm_min, ftime->tm_sec);
+            "record-{}{:04d}{:02d}-{:02d}{:02d}{:02d}.frec", 1900+ftime->tm_year, ftime->tm_mon,
+            ftime->tm_mday, ftime->tm_hour, ftime->tm_min, ftime->tm_sec);
 
         log->write("game", LogType::Info, "\trecord destination: %s", recordfilename.c_str());
 
@@ -253,7 +264,14 @@ Game* start_game(
 
         g->initRecorder(std::move(ir));
     }
-    
+
+    if (sgai.inputFile) {
+        log->write("game", LogType::Info, "Replaying inputs from file %s", (*sgai.inputFile).c_str());
+
+        
+        
+    }
+
     g->initPlayers(std::move(pm), std::move(cm), session.player_colony, pinfo.id);
     g->initObjects();
     g->initLoopData(pinfo.id);
@@ -393,7 +411,8 @@ int main(int argc, char const* argv[])
 
         if (pi.mapFile) {
             int frames = 0;
-            Game* g    = start_game(f3D, fGUI, win, guir, lr, *pi.mapFile, confdata);
+            Game* g    = start_game(
+                f3D, fGUI, win, guir, lr, StartGameInfo{*pi.mapFile, pi.inputFile}, confdata);
             lr.load([&]() { return g->runLoop(); });
 
             run_game_loop(lr, frames);
@@ -476,14 +495,14 @@ static int show_starting_menu(
     });
 
     Button* bret = new Button(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
-    Checkbox* recordGame = new Checkbox(300, 32, "Record the game inputs",
-                                        confdata.enableInputRecording);
+    Checkbox* recordGame =
+        new Checkbox(300, 32, "Record the game inputs", confdata.enableInputRecording);
 
     bret->setClickCallback([&](auto* c) {
-        confdata.enableInputRecording = recordGame->getState();        
+        confdata.enableInputRecording = recordGame->getState();
         guir->closeWindow(*gsettings);
     });
-    
+
     gsettings->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)lb));
     gsettings->add(
         0.37, 0.13, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)header));
@@ -525,7 +544,9 @@ static int show_starting_menu(
     bnew->setClickCallback([&](Control* cc) {
         (void)cc;
         guir->closeWindow(*gwin);
-        g = start_game(f3D, fGUI, win, guir, lr, ASSET_FILE_DIR "terrain_test.flte", confdata);
+        g = start_game(
+            f3D, fGUI, win, guir, lr,
+            StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt}, confdata);
         lr.load([&]() { return g->runLoop(); });
     });
 

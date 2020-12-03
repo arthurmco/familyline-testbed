@@ -2,6 +2,7 @@ familyline
 familyline-server
 familyline-tests
 
+
 *.o
 *.swp
 *.pch
@@ -18,6 +19,7 @@ EnviroDefs.h
 
 #CMake generated files
 CMakeCache.txt
+generated/
 
 CMakeFiles/*
 src/*/CMakeFiles/*

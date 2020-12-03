@@ -1,7 +1,7 @@
 #include <cinttypes>
 #include <common/logic/input_recorder.hpp>
 
-#include "common/logic/input_serialize_generated.h"
+#include <input_serialize_generated.h>
 
 using namespace familyline::logic;
 

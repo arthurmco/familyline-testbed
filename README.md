@@ -142,11 +142,11 @@ Aside from issues, there are things I would like to do very soon
  - ~~Test build in clang~~
  - ~~Try to build in a Mac, for those hipsters who use OS x (I kid!
    :wink:)~~
- - Support animated meshes
+ - ~~Support animated meshes~~
  
 ## License
 
-Every file in this game is licensed under the MIT license, the best in
-existence.
+Every file in this game (except some inside the cmake directory) is
+licensed under the MIT license, the best in existence.
 
-Copyright (C) 2016-2020 Arthur Mendes.
+Copyright (C) 2016-2020 Arthur Mendes et al,

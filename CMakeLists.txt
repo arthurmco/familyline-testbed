@@ -10,11 +10,15 @@ project(Familyline VERSION 0.2.1)
 option(USE_RELATIVE_PATH "Set if you want the path to the game resources to be local" OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" )
 
 
 #Familyline game data
 add_subdirectory(src/common)
 add_subdirectory(src/client)
+
+include("${CMAKE_SOURCE_DIR}/src/common/generated.cmake")
+get_target_property(INPUT_FLATBUFFER_INCLUDE input-flatbuffer GENERATED_INCLUDES_DIR)
 
 add_executable(familyline "src/client/familyline.cpp" "src/client/familyline.exe.manifest")
 target_link_libraries(familyline familyline-client)
@@ -23,7 +27,6 @@ target_compile_features(familyline PUBLIC cxx_std_20)
 
 include("test/unit-tests.cmake")
 
-set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" )
 
 # Add packages natively supported by cmake
 find_package(GLEW REQUIRED)
@@ -33,6 +36,7 @@ find_package(OpenGL REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(FlatBuffers REQUIRED)
 
 include_directories(AFTER ${GLEW_INCLUDE_DIRS} ${IL_INCLUDE_DIR} ${yaml_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 target_include_directories(familyline PRIVATE "${CMAKE_SOURCE_DIR}/src/include")

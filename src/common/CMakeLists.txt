@@ -2,6 +2,9 @@
 # Add all files that are common to the server and client:
 # (logic, logging, net and object code)
 
+include("${CMAKE_SOURCE_DIR}/src/common/generated.cmake")
+get_target_property(INPUT_FLATBUFFER_INCLUDE input-flatbuffer GENERATED_INCLUDES_DIR)
+
 add_library(
   familyline-common
   "logger.cpp"
@@ -31,6 +34,7 @@ add_library(
   "objects/WatchTower.cpp"
   )
 
+add_dependencies(familyline-common input-flatbuffer)
  
 find_package(fmt CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
@@ -39,14 +43,17 @@ if (MSVC)
 	
   include(${CMAKE_TOOLCHAIN_FILE})
   find_package(GLM CONFIG REQUIRED)
-  target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
+  target_include_directories(familyline-common PUBLIC
+    ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR}
+    ${INPUT_FLATBUFFER_INCLUDE})
   target_link_libraries(familyline-common PUBLIC fmt::fmt glm ${ZLIB_LIBRARIES})
 
 else()
   find_package(PkgConfig REQUIRED)
   pkg_search_module(GLM REQUIRED glm) # finds glm
   target_link_libraries(familyline-common PUBLIC fmt::fmt ${GLM_LIBRARIES} ${ZLIB_LIBRARIES})
-  target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
+  target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS}
+    ${ZLIB_INCLUDE_DIR} ${INPUT_FLATBUFFER_INCLUDE})
 endif(MSVC)
 
 if (SET_COVERAGE)

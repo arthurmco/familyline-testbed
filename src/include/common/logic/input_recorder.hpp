@@ -9,7 +9,9 @@
 
 #include <common/logic/player_actions.hpp>
 #include <common/logic/player_manager.hpp>
-#include <common/logic/input_serialize_generated.h>
+
+// This file will be generated when building, so no problem
+#include <input_serialize_generated.h>
 
 namespace familyline::logic {
 
@@ -25,7 +27,7 @@ namespace familyline::logic {
         std::vector<RecordPlayerInfo> pinfo_;
 
         int inputcount_ = 0;
-        
+
     public:
         InputRecorder(PlayerManager& pm);
 
