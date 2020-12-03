@@ -30,6 +30,7 @@ addons:
       - libpangocairo-1.0-0
       - libflatbuffers-dev
       - flatbuffers-compiler-dev
+      - flatbuffers-compiler
       
 env:
   - CXX=g++-10

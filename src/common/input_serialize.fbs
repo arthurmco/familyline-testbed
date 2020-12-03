@@ -11,6 +11,10 @@ table PlayerInfo {
        color: string(required);
 }
 
+table PlayerInfoChunk {
+      players: [PlayerInfo];
+}
+
 table CommandInputArgs {
       args: [ulong];
 }

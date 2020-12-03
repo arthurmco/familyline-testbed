@@ -47,6 +47,7 @@
 #include <client/player_enumerator.hpp>
 #include <common/logger.hpp>
 #include <common/logic/input_recorder.hpp>
+#include <common/logic/input_reproducer.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -230,8 +231,22 @@ Game* start_game(
 
     auto& log = LoggerService::getLogger();
 
+    std::string mapfile = sgai.mapFile;
+    std::unique_ptr<InputReproducer> irepr;
+    
+    if (sgai.inputFile) {
+        irepr = std::make_unique<InputReproducer>(*sgai.inputFile);
+
+        if (!irepr->open()) {
+            mapfile = ASSET_FILE_DIR "terrain_test.flte";
+            irepr.reset();
+        } else {            
+            mapfile = irepr->getTerrainFile();
+        }
+    }
+    
     Game* g      = new Game(gi);
-    auto& map    = g->initMap(sgai.mapFile);
+    auto& map    = g->initMap(mapfile);
     auto pinfo   = InitPlayerInfo{"Arthur", -1};
     auto session = initSinglePlayerSession(map, pinfo);
 
@@ -262,14 +277,18 @@ Game* start_game(
             ir = std::unique_ptr<InputRecorder>(nullptr);
         }
 
-        g->initRecorder(std::move(ir));
+        // You can't reproduce a record while recording.
+        //
+        // It will work, will not overwrite any file (because the filename is decided by the
+        // recording date), but it is redundant.
+        if (!irepr) {
+            g->initRecorder(std::move(ir));            
+        }
+
     }
 
-    if (sgai.inputFile) {
+    if (irepr) {
         log->write("game", LogType::Info, "Replaying inputs from file %s", (*sgai.inputFile).c_str());
-
-        
-        
     }
 
     g->initPlayers(std::move(pm), std::move(cm), session.player_colony, pinfo.id);
@@ -409,10 +428,13 @@ int main(int argc, char const* argv[])
             "texture", LogType::Info, "maximum tex size: %zu x %zu", Texture::GetMaximumSize(),
             Texture::GetMaximumSize());
 
-        if (pi.mapFile) {
+        if (pi.mapFile || pi.inputFile) {
             int frames = 0;
+
+            std::string mapFile = pi.inputFile ? "" : *pi.mapFile;
+            
             Game* g    = start_game(
-                f3D, fGUI, win, guir, lr, StartGameInfo{*pi.mapFile, pi.inputFile}, confdata);
+                f3D, fGUI, win, guir, lr, StartGameInfo{mapFile, pi.inputFile}, confdata);
             lr.load([&]() { return g->runLoop(); });
 
             run_game_loop(lr, frames);

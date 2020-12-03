@@ -9,9 +9,7 @@
  * Copyright (C) 2020 Arthur Mendes
  */
 
-#include <common/logic/colony_manager.hpp>
-#include <common/logic/player_manager.hpp>
-#include <memory>
+#include <common/logic/player_session.hpp>
 #include <tuple>
 
 namespace familyline
@@ -27,13 +25,6 @@ struct InitPlayerInfo {
     int id = -1;  /// used only for storing the ID from the player manager
 };
 
-struct PlayerSession {
-    std::unique_ptr<logic::PlayerManager> players;
-    std::unique_ptr<logic::ColonyManager> colonies;
-
-    std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>> player_colony;
-};
-
 /**
  * Create a single player player manager.
  *
@@ -41,6 +32,6 @@ struct PlayerSession {
  * but now, only the dummy player (see the cpp file) and the
  * human player will be added.
  */
-PlayerSession initSinglePlayerSession(logic::Terrain& terrain, InitPlayerInfo& human_info);
+logic::PlayerSession initSinglePlayerSession(logic::Terrain& terrain, InitPlayerInfo& human_info);
 
 }  // namespace familyline

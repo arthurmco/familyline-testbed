@@ -1,4 +1,5 @@
 #include <cinttypes>
+#include <common/logic/input_file.hpp>
 #include <common/logic/input_recorder.hpp>
 
 #include <input_serialize_generated.h>
@@ -28,8 +29,8 @@ bool InputRecorder::createFile(std::string_view path)
     f_ = fopen(path.data(), "wb");
 
     // Add a header and a player list
-    const char* magic = "FREC";
-    uint32_t version = 1;
+    const char* magic = R_MAGIC;
+    uint32_t version = R_VERSION;
 
     fwrite((void*)magic, 1, 4, f_);
     fwrite((void*)&version, sizeof(version), 1, f_);
@@ -45,7 +46,8 @@ bool InputRecorder::createFile(std::string_view path)
     }
 
     auto playervec = builder.CreateVector(playerlist.data(), playerlist.size());
-    builder.Finish(playervec);
+    auto playerchunk = CreatePlayerInfoChunk(builder, playervec);   
+    builder.Finish(playerchunk);
     uint32_t psize = builder.GetSize();
     fwrite(&psize, sizeof(psize), 1, f_);
     fwrite(builder.GetBufferPointer(), builder.GetSize(), 1, f_);
@@ -161,7 +163,7 @@ void InputRecorder::commit()
 {
     std::vector<flatbuffers::Offset<familyline::InputElement>> inputs;
 
-    const char* endmagic = "FEND";
+    const char* endmagic = R_FOOTER_MAGIC;
     uint32_t inputcount = inputcount_;
     uint32_t checksum = 0;
     
