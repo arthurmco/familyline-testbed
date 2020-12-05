@@ -81,17 +81,17 @@ void enable_console_color(FILE* f)
         // color escape sequences can work on Windows
         HANDLE hOut = GetStdHandle(f == stderr ? STD_ERROR_HANDLE : STD_OUTPUT_HANDLE);
         if (hOut == INVALID_HANDLE_VALUE) {
-            return GetLastError();
+            GetLastError();
         }
 
         DWORD dwMode = 0;
         if (!GetConsoleMode(hOut, &dwMode)) {
-            return GetLastError();
+            GetLastError();
         }
 
         dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
         if (!SetConsoleMode(hOut, dwMode)) {
-            return GetLastError();
+            GetLastError();
         }
     }
 #endif

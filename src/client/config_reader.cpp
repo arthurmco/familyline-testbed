@@ -1,4 +1,4 @@
-#include <asm-generic/errno-base.h>
+#include <cerrno>
 
 #include <client/config_reader.hpp>
 #include <cstring>

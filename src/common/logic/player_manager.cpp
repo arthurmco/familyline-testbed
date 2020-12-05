@@ -132,7 +132,7 @@ struct overload : Ts... {
 template <class... Ts>
 overload(Ts...) -> overload<Ts...>;
 
-void writeSelectDebugInfo(auto& log, auto str, const SelectAction& a)
+void writeSelectDebugInfo(std::unique_ptr<Logger>& log, const char* str, const SelectAction& a)
 {
     switch (a.objects.size()) {
         case 0:

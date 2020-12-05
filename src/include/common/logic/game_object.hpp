@@ -6,6 +6,7 @@
 #include <string>
 #include <string_view>
 #include <common/logic/types.hpp>
+#include <array>
 
 namespace familyline::logic
 {
