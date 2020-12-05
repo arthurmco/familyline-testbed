@@ -34,9 +34,9 @@ addons:
       - flatbuffers-compiler
       
 env:
-  - CXX=g++-10
-  - DFLATC_TARGET=""
-  - DFLATC="/usr/bin/flatc"
+  - CXX=g++-10 
+    DFLATC_TARGET=""
+    DFLATC="/usr/bin/flatc"
   
 # We attempt to fix an issue with the flatc finder command
 script:
