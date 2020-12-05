@@ -88,5 +88,8 @@ public:
      * not
      */
     std::optional<std::shared_ptr<GameObject>> get(object_id_t id);
+
+    ~ObjectManager();
+
 };
 }  // namespace familyline::logic

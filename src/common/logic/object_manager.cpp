@@ -13,6 +13,7 @@ ObjectEventEmitter::ObjectEventEmitter() : _name("object-event-emitter")
     LogicService::getActionQueue()->addEmitter((EventEmitter*)this);
 }
 
+
 /**
  * Notify the creation start
  *
@@ -43,6 +44,12 @@ void ObjectEventEmitter::notifyRemoval(object_id_t id, const std::string& name)
 const std::string ObjectEventEmitter::getName() { return _name; }
 
 ObjectManager::ObjectManager() { eventEmitter = new ObjectEventEmitter{}; }
+
+ObjectManager::~ObjectManager()
+{
+    LogicService::getActionQueue()->removeEmitter(eventEmitter);
+}    
+
 
 /**
  * Add an object to the manager.

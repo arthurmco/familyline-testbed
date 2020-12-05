@@ -131,6 +131,7 @@ size_t Texture::GetMaximumSize()
 
         if (texture_size < 0) {
             log->write("texture", LogType::Fatal, "Invalid texture max size. Something is wrong");
+            texture_size = 1;
         }
     }
     return (texture_size > 0) ? texture_size : 0;

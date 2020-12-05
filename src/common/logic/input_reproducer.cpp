@@ -269,7 +269,6 @@ std::optional<PlayerInputAction> InputReproducer::getNextAction()
                     log->write(
                         "input-reproducer", LogType::Error,
                         "invalid parameter count for command (%zu)", cmd->args()->args()->size());
-                    sleep(4);
                     type = CommandInput{cmd->command()->str(), std::monostate{}};
                     break;
             }

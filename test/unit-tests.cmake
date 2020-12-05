@@ -1,15 +1,15 @@
 #
 # Unit test compilation routines
-# 
+#
 # Copyright (C) 2017 Arthur M
 #
 
 option(DO_TESTS "Set if you want to enable unit tests, unset if you don't" ON)
 
 if (DO_TESTS)
- 
+
   enable_testing()
-  
+
   configure_file(${CMAKE_SOURCE_DIR}/test/unit-tests.cmake.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
@@ -35,14 +35,28 @@ if (DO_TESTS)
   # the gtest and gtest_main targets.
   add_subdirectory(${CMAKE_SOURCE_DIR}/test/googletest
     ${CMAKE_BINARY_DIR}/googletest-build)
+
+  set( SRC_TEST_FILES
+    "${CMAKE_SOURCE_DIR}/test/test_colony_manager.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_game.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_model_opener.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_object_attack.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_object_factory.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_object_operations.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_pathfinder.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_player_manager.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_scene_manager.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_terrain.cpp"
+    "${CMAKE_SOURCE_DIR}/test/tests.cpp"
+    "${CMAKE_SOURCE_DIR}/test/utils.cpp"
+    )
   
-  file( GLOB SRC_TEST_FILES "${CMAKE_SOURCE_DIR}/test/*.cpp" )
   file( GLOB SRC_UTIL_FILES "${CMAKE_SOURCE_DIR}/test/utils/test_renderer.cpp" )
 
   message("${SRC_SERVER_TEST}")
 
   find_package(OpenGL REQUIRED)
-  
+
   add_executable(familyline-tests ${SRC_TEST_FILES} ${SRC_UTIL_FILES})
   target_link_libraries(familyline-tests familyline-common)
   target_link_libraries(familyline-tests familyline-client)
@@ -50,11 +64,11 @@ if (DO_TESTS)
   target_link_libraries(familyline-tests ${YAML_LIBRARIES}) # You need to build YAML as a dll (use -DB  target_compile_features(familyline-tests PUBLIC cxx_std_20)
 
   target_compile_features(familyline-tests PUBLIC cxx_std_20)
-  
+
   target_include_directories(familyline-tests PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
   file(COPY "${CMAKE_SOURCE_DIR}/test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
-  
+
   option(DO_CHECK_ASAN "Enable address sanitizer" OFF)
   option(SET_COVERAGE "Enable coverage testing" OFF)
 
@@ -81,8 +95,6 @@ if (DO_TESTS)
   target_compile_definitions(familyline-tests PUBLIC
     TESTS_DIR="${CMAKE_SOURCE_DIR}/test"
   )
-  
+
   add_test(NAME general-test COMMAND familyline-tests)
 endif(DO_TESTS)
-
-
