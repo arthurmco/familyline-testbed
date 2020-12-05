@@ -20,4 +20,8 @@ void ReplayPlayer::generateInput() {
         this->pushAction(action.type);
         actions_.pop();
     }
+
+    if (actions_.empty()) {
+        end_callback_(this);
+    }
 }

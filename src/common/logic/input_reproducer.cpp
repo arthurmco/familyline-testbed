@@ -149,6 +149,18 @@ bool InputReproducer::open()
     return true;
 }
 
+void InputReproducer::onActionEnd(ReplayPlayer* p)
+{
+    if (currentaction_ == actioncount_) {
+        player_ended_[p->getCode()] = true;
+    }
+}
+
+bool InputReproducer::isReproductionEnded() const
+{
+    return std::all_of(player_ended_.begin(), player_ended_.end(), [](auto p) { return p.second; });
+}
+
 /**
  * Create a player session with players that will
  * reproduce what happened in the file
@@ -166,9 +178,11 @@ PlayerSession InputReproducer::createPlayerSession(Terrain& terrain)
         int code = int(p.id);
 
         {
-            ReplayPlayer* rp = new ReplayPlayer{*pm.get(), terrain, p.name.c_str(), code, *this};
+            ReplayPlayer* rp = new ReplayPlayer{*pm.get(), terrain, p.name.c_str(), code, *this,
+                std::bind(&InputReproducer::onActionEnd, this, std::placeholders::_1)};
             action_callbacks_.insert(
                 {code, std::bind(&ReplayPlayer::enqueueAction, rp, std::placeholders::_1)});
+            player_ended_.insert({code, false});
 
             pm->add(std::unique_ptr<Player>(rp), false);
         }
@@ -254,10 +268,10 @@ std::optional<PlayerInputAction> InputReproducer::getNextAction()
                 default:
                     log->write(
                         "input-reproducer", LogType::Error,
-                        "invalid parameter count for command (%zu)",
-                        cmd->args()->args()->size());
+                        "invalid parameter count for command (%zu)", cmd->args()->args()->size());
                     sleep(4);
-                    type = CommandInput{cmd->command()->str(), std::monostate{}}; break;
+                    type = CommandInput{cmd->command()->str(), std::monostate{}};
+                    break;
             }
 
         } break;

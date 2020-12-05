@@ -23,10 +23,16 @@ private:
 
     std::queue<PlayerInputAction> actions_;
 
+    /**
+     * A callback called when the action queue is empty
+     */
+    std::function<void(ReplayPlayer*)> end_callback_;
+    
 public:
     ReplayPlayer(
-        PlayerManager& pm, const Terrain& terr, const char* name, int code, InputReproducer& ir)
-        : Player(pm, terr, name, code), ir_(ir)
+        PlayerManager& pm, const Terrain& terr, const char* name, int code, InputReproducer& ir,
+        std::function<void(ReplayPlayer*)> end_callback)
+        : Player(pm, terr, name, code), ir_(ir), end_callback_(end_callback)
     {
     }
 

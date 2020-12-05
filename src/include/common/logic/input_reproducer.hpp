@@ -27,6 +27,7 @@ namespace familyline::logic {
         std::vector<uint64_t> enemies;
     };
 
+    class ReplayPlayer;
 
     class InputReproducer {
     public:
@@ -72,14 +73,13 @@ namespace familyline::logic {
             }
         }
 
-        bool isReproductionEnded() const { return nextTick_ == 0x8fff0000; }
+        bool isReproductionEnded() const;
 
         /**
          * Dispatch events to the players, from nextTick_ to nextTick_+nextTicks
          */
         void dispatchEvents(unsigned nextTicks);
-        
-        
+
         ~InputReproducer();
 
     private:
@@ -89,10 +89,12 @@ namespace familyline::logic {
 
         off_t off_actionlist_ = 0;
         long long int actioncount_, currentaction_;
-
-
+        
+        void onActionEnd(ReplayPlayer* p);
+        
         std::map<int,
                  std::function<void(PlayerInputAction)>> action_callbacks_;
+        std::map<int, bool> player_ended_;
 
         int nextTick_ = 0;
         std::optional<PlayerInputAction> last_action_;
