@@ -35,13 +35,11 @@ addons:
       
 env:
   - CXX=g++-10 
-    DFLATC_TARGET=""
-    DFLATC="/usr/bin/flatc"
-  
+      
 # We attempt to fix an issue with the flatc finder command
 script:
   - ${CXX} --version
   - mkdir build && cd build
-  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DFLATC_TARGET="" -DFLATC="/usr/bin/flatc" ..
   - make familyline-tests
   - ./familyline-tests
