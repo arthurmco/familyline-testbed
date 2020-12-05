@@ -35,7 +35,10 @@ addons:
       
 env:
   - CXX=g++-10
-
+  - DFLATC_TARGET=""
+  - DFLATC="/usr/bin/flatc"
+  
+# We attempt to fix an issue with the flatc finder command
 script:
   - ${CXX} --version
   - mkdir build && cd build
