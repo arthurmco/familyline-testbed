@@ -37,6 +37,7 @@
 #include <common/logic/player_manager.hpp>
 #include <common/logic/terrain_file.hpp>
 #include <common/logic/input_recorder.hpp>
+#include <common/logic/input_reproducer.hpp>
 //#include "graphical/gui/ImageControl.hpp"
 
 //#include <client/input/InputPicker.hpp>
@@ -98,6 +99,15 @@ public:
 
 
     void initRecorder(std::unique_ptr<logic::InputRecorder> ir) { ir_ = std::move(ir); }
+
+    /**
+     * If you need to reproduce input, you add the reproducer here
+     *
+     * Besides the `update()` field, it will only be added here because both
+     * instances (the game and reproducer) has the same lifetimes)
+     */
+    void initReproducer(std::unique_ptr<logic::InputReproducer> irepr) { irepr_ = std::move(irepr); }
+
     
     /**
      * Initialize the object manager and the object factory
@@ -130,7 +140,9 @@ private:
     // as the game, so inputs can be captured.
     std::unique_ptr<logic::InputRecorder> ir_;
 
+    std::unique_ptr<logic::InputReproducer> irepr_;
 
+    
     std::chrono::duration<double, std::milli> delta;
     double pms = 0.0;
 

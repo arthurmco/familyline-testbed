@@ -87,14 +87,14 @@ bool InputRecorder::addAction(PlayerInputAction pia)
                 [&](const CommandInput& a) {
                     auto cstr = builder.CreateString(a.commandName);
 
-                    std::array<unsigned long, 5> params;
+                    std::vector<unsigned long> params;
                     if (auto* objectID = std::get_if<object_id_t>(&a.param); objectID) {
                         params = {*objectID};
                     } else if (auto* arr = std::get_if<std::array<int, 2>>(&a.param); arr) {
                         params = {(unsigned long)(*arr)[0], (unsigned long)(*arr)[1]};
                     }
-
-                    auto pserialize = builder.CreateVector(params.data(), params.size());
+                    
+                    auto pserialize = builder.CreateVector(params);
                     auto cargs      = CreateCommandInputArgs(builder, pserialize);
 
                     auto cval = CreateCommandInput(builder, cstr, cargs);

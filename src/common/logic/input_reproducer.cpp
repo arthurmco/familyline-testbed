@@ -8,7 +8,9 @@
 #include <common/logic/input_reproducer.hpp>
 #include <common/logic/player_actions.hpp>
 #include <common/logic/player_manager.hpp>
+#include <common/logic/replay_player.hpp>
 #include <cstring>
+#include <functional>
 #include <optional>
 
 using namespace familyline::logic;
@@ -77,6 +79,7 @@ long long int readInputCount(FILE* file)
         log->write(
             "input-reproducer", LogType::Error, "Wrong footer section magic (%s != %s)", magic,
             R_FOOTER_MAGIC);
+        fseek(file, loc, SEEK_SET);
         return -1;
     }
 
@@ -140,6 +143,9 @@ bool InputReproducer::open()
         "input-reproducer", LogType::Info, "'%s': %lld input actions detected", file_.data(),
         actioncount_);
 
+    off_actionlist_ = ftell(f_);
+    currentaction_  = 0;
+
     return true;
 }
 
@@ -150,7 +156,37 @@ bool InputReproducer::open()
  * The diplomacy will be kept neutral between everyone, but the
  * correct thing to do is to save it into the file
  */
-PlayerSession InputReproducer::createPlayerSession() {}
+PlayerSession InputReproducer::createPlayerSession(Terrain& terrain)
+{
+    std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>> player_colony;
+    auto pm = std::make_unique<PlayerManager>();
+    auto cm = std::make_unique<ColonyManager>();
+
+    for (auto& p : pinfo_) {
+        int code = int(p.id);
+
+        {
+            ReplayPlayer* rp = new ReplayPlayer{*pm.get(), terrain, p.name.c_str(), code, *this};
+            action_callbacks_.insert(
+                {code, std::bind(&ReplayPlayer::enqueueAction, rp, std::placeholders::_1)});
+
+            pm->add(std::unique_ptr<Player>(rp), false);
+        }
+
+        int r = 0, g = 0, b = 0;
+        sscanf(p.color.c_str(), "%02x%02x%02x", &r, &g, &b);
+        int colorval = (b & 0xff) | (g << 8) | (b << 16);
+
+        auto* player   = *(pm->get(code));
+        auto& alliance = cm->createAlliance(p.name);
+        auto& colony   = cm->createColony(
+            *player, colorval, std::optional<std::reference_wrapper<Alliance>>{alliance});
+
+        player_colony.emplace(p.id, std::reference_wrapper(colony));
+    }
+
+    return PlayerSession{std::move(pm), std::move(cm), player_colony};
+}
 
 /**
  * Get the next action from the file
@@ -204,22 +240,26 @@ std::optional<PlayerInputAction> InputReproducer::getNextAction()
             auto val = std::monostate{};
 
             switch (cmd->args()->args()->size()) {
-            case 1:
-                type = CommandInput{cmd->command()->str(), cmd->args()->args()->Get(0)};
-                break;
-            case 2:
-                type = CommandInput{cmd->command()->str(),
-                    std::array<int, 2>{
-                        (int)cmd->args()->args()->Get(0),
-                        (int)cmd->args()->args()->Get(1)
-                                    }};
-                break;
-            default:
-                type = CommandInput{cmd->command()->str(), std::monostate{}};
-                break;
+                case 0: type = CommandInput{cmd->command()->str(), std::monostate{}}; break;
 
+                case 1:
+                    type = CommandInput{cmd->command()->str(), cmd->args()->args()->Get(0)};
+                    break;
+                case 2:
+                    type = CommandInput{
+                        cmd->command()->str(),
+                        std::array<int, 2>{
+                            (int)cmd->args()->args()->Get(0), (int)cmd->args()->args()->Get(1)}};
+                    break;
+                default:
+                    log->write(
+                        "input-reproducer", LogType::Error,
+                        "invalid parameter count for command (%zu)",
+                        cmd->args()->args()->size());
+                    sleep(4);
+                    type = CommandInput{cmd->command()->str(), std::monostate{}}; break;
             }
-            
+
         } break;
         case InputType_sel: {
             auto sel = actioninfo->type_as_sel();
@@ -231,7 +271,7 @@ std::optional<PlayerInputAction> InputReproducer::getNextAction()
             type = SelectAction{objects};
         } break;
         case InputType_obj_move: {
-            auto omove    = actioninfo->type_as_obj_move();
+            auto omove = actioninfo->type_as_obj_move();
             int xPos = (int)omove->x_pos(), yPos = (int)omove->y_pos();
 
             type = ObjectMove{xPos, yPos};
@@ -243,13 +283,13 @@ std::optional<PlayerInputAction> InputReproducer::getNextAction()
             type = CameraMove{dX, dY, dZoom};
         } break;
         case InputType_cam_rotate: {
-            auto crot = actioninfo->type_as_cam_rotate();
+            auto crot      = actioninfo->type_as_cam_rotate();
             double radians = crot->radians();
 
             type = CameraRotate{radians};
         } break;
         case InputType_create: {
-            auto centity = actioninfo->type_as_create();
+            auto centity      = actioninfo->type_as_create();
             std::string etype = centity->type()->str();
             int xPos = centity->x_pos(), yPos = centity->y_pos();
 
@@ -266,6 +306,29 @@ std::optional<PlayerInputAction> InputReproducer::getNextAction()
 
     delete[] data;
     return val;
+}
+
+void InputReproducer::dispatchAction(const PlayerInputAction& action)
+{
+    if (auto it = action_callbacks_.find(action.playercode); it != action_callbacks_.end()) {
+        it->second(action);
+    }
+}
+
+/**
+ * Dispatch events to the players, from nextTick_ to nextTick_+nextTicks
+ */
+void InputReproducer::dispatchEvents(unsigned nextTicks)
+{
+    auto endTick = nextTick_ + nextTicks;
+    do {
+        if (last_action_) {
+            this->dispatchAction(*last_action_);
+        }
+        last_action_ = this->getNextAction();
+    } while (last_action_ && last_action_->tick <= endTick);
+
+    nextTick_ = endTick;
 }
 
 InputReproducer::~InputReproducer()

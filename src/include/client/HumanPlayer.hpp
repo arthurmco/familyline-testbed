@@ -39,12 +39,19 @@ private:
     
     bool _updated = false;
 
+    /**
+     * Can add entities and control them?
+     *
+     * It will be false only when reproducing a recorded game
+     */
+    bool can_control_ = false;
+    
 public:
     bool renderBBs = false;
 
     HumanPlayer(
         familyline::logic::PlayerManager& pm, const familyline::logic::Terrain& t, const char* name,
-        int code);
+        int code, bool can_control_);
 
     /**
      * Generate the input actions.

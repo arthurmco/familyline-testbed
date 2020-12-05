@@ -28,6 +28,7 @@ add_library(
   "logic/ObjectPathManager.cpp"
   "logic/PathFinder.cpp"
   "logic/player.cpp"
+  "logic/replay_player.cpp"
   "logic/player_manager.cpp"
   "logic/terrain.cpp"
   "logic/terrain_file.cpp"

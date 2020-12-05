@@ -27,6 +27,7 @@
 
 #include <fmt/format.h>
 
+#include <client/HumanPlayer.hpp>
 #include <client/config_reader.hpp>
 #include <client/game.hpp>
 #include <client/graphical/device.hpp>
@@ -252,15 +253,41 @@ Game* start_game(
         }
     }
 
-    Game* g      = new Game(gi);
-    auto& map    = g->initMap(mapfile);
-    auto pinfo   = InitPlayerInfo{"Arthur", -1};
-    auto session = initSinglePlayerSession(map, pinfo);
+    Game* g   = new Game(gi);
+    auto& map = g->initMap(mapfile);
 
-    auto pm = std::move(session.players);
-    auto cm = std::move(session.colonies);
+    std::string player_name = "Arthur";
+    auto pinfo              = InitPlayerInfo{player_name, -1};
 
-    if (pinfo.id == -1) {
+    std::unique_ptr<PlayerManager> pm;
+    std::unique_ptr<ColonyManager> cm;
+    unsigned int human_player_id = 0;
+    PlayerSession session;
+    
+    if (irepr) {
+        /// loading input from a file
+        session = irepr->createPlayerSession(map);
+        pm           = std::move(session.players);
+        cm           = std::move(session.colonies);
+
+        human_player_id = pm->add(
+            std::unique_ptr<Player>(new HumanPlayer{*pm.get(), map, player_name.c_str(), 0, false}));
+        auto* player   = *(pm->get(human_player_id));
+        auto& alliance = cm->createAlliance(std::string{player->getName()});
+        auto& colony   = cm->createColony(*player, 0xffffff,
+                                          std::optional<std::reference_wrapper<Alliance>>{alliance});
+        session.player_colony.emplace(human_player_id,
+                                      std::reference_wrapper(colony));
+
+    } else {
+        /// running a normal game
+        session    = initSinglePlayerSession(map, pinfo);
+        pm              = std::move(session.players);
+        cm              = std::move(session.colonies);
+        human_player_id = pinfo.id;
+    }
+
+    if (human_player_id == -1) {
         throw std::runtime_error{"Could not create the human player"};
     }
 
@@ -299,7 +326,7 @@ Game* start_game(
             printf(
                 "\t[%" PRId64 "] tick: %d, player: %" PRIx64 ", timestamp %" PRId64 " | ",
                 irepr->getCurrentActionIndex() - 1, f->tick, f->playercode, f->timestamp);
-
+            
             std::visit(
                 overload{
                     [&](const logic::CommandInput& a) {
@@ -349,12 +376,18 @@ Game* start_game(
 
             puts("");
         }
-    }
 
-    g->initPlayers(std::move(pm), std::move(cm), session.player_colony, pinfo.id);
+        irepr->reset();
+
+        // dispatch 10 seconds worth of events
+        irepr->dispatchEvents((1000/LOGIC_DELTA) * 1);
+        g->initReproducer(std::move(irepr));
+    }    
+
+    g->initPlayers(std::move(pm), std::move(cm), session.player_colony, human_player_id);
     g->initObjects();
-    g->initLoopData(pinfo.id);
-
+    g->initLoopData(human_player_id);
+    
     return g;
 }
 

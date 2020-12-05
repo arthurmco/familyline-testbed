@@ -70,7 +70,7 @@ std::unique_ptr<logic::PlayerManager> initPlayerManager(
     auto pm = std::make_unique<PlayerManager>();
 
     auto hid = pm->add(
-        std::unique_ptr<Player>(new HumanPlayer{*pm.get(), terrain, human_info.name.c_str(), 0}));
+        std::unique_ptr<Player>(new HumanPlayer{*pm.get(), terrain, human_info.name.c_str(), 0, true}));
     pm->add(std::unique_ptr<Player>(new DummyPlayer{*pm.get(), terrain, "Dummy Player", 1}));
 
     fprintf(stderr, "%x ----", hid);

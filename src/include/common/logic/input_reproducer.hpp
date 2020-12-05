@@ -34,6 +34,7 @@ namespace familyline::logic {
             : file_(file), f_(nullptr), pinfo_({}), actioncount_(0), currentaction_(0)
             {}
 
+        
         /**
          * Open and verify the file
          *
@@ -48,7 +49,7 @@ namespace familyline::logic {
          * The diplomacy will be kept neutral between everyone, but the
          * correct thing to do is to save it into the file
          */
-        PlayerSession createPlayerSession();
+        PlayerSession createPlayerSession(Terrain& terrain);
 
         InputReproducer(InputReproducer&) = delete;
         InputReproducer(const InputReproducer&) = delete;
@@ -63,6 +64,21 @@ namespace familyline::logic {
         std::optional<PlayerInputAction> getNextAction();
 
         uint64_t getCurrentActionIndex() const { return currentaction_; }
+
+        void reset() {
+            if (f_) {
+                fseek(f_, off_actionlist_, SEEK_SET);
+                currentaction_ = 0;
+            }
+        }
+
+        bool isReproductionEnded() const { return nextTick_ == 0x8fff0000; }
+
+        /**
+         * Dispatch events to the players, from nextTick_ to nextTick_+nextTicks
+         */
+        void dispatchEvents(unsigned nextTicks);
+        
         
         ~InputReproducer();
 
@@ -70,7 +86,19 @@ namespace familyline::logic {
         std::string file_;
         FILE* f_;
         std::vector<InputInfo> pinfo_;
+
+        off_t off_actionlist_ = 0;
         long long int actioncount_, currentaction_;
-    };
+
+
+        std::map<int,
+                 std::function<void(PlayerInputAction)>> action_callbacks_;
+
+        int nextTick_ = 0;
+        std::optional<PlayerInputAction> last_action_;
+
+
+        void dispatchAction(const PlayerInputAction& action);
+   };
 
 }

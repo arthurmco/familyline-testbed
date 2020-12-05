@@ -1,9 +1,9 @@
 #include <fmt/format.h>
-#include <cinttypes>
 
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cinttypes>
 #include <common/logger.hpp>
 #include <common/logic/ObjectPathManager.hpp>
 #include <common/logic/colony.hpp>
@@ -27,10 +27,11 @@ using namespace familyline::logic;
  */
 int PlayerManager::add(std::unique_ptr<Player> p, bool allocate_id)
 {
-    auto& pi = players_.emplace_back(
-        (uintptr_t)p.get() / 1 + (((uintptr_t)players_.size() * 16384)), std::move(p));
+    auto id = allocate_id ? (uintptr_t)p.get() / 1 + (((uintptr_t)players_.size() * 16384))
+                          : p->getCode();
 
-    if (allocate_id) pi.player->code_ = pi.id;
+    auto& pi         = players_.emplace_back(id, std::move(p));
+    pi.player->code_ = pi.id;
 
     return pi.id;
 }
@@ -181,7 +182,8 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
     bool invalidAction = false;
 
     if (!player.has_value()) {
-        log->write("player-manager", LogType::Fatal, "invalid player ID (%" PRIx64 ")!", pia.playercode);
+        log->write(
+            "player-manager", LogType::Fatal, "invalid player ID (%" PRIx64 ")!", pia.playercode);
         return;
     }
 
@@ -198,6 +200,9 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                 if (a.commandName == "attack") {
                     auto* objectID = std::get_if<object_id_t>(&a.param);
                     if (!objectID) {
+                        log->write(
+                            "player-manager", LogType::Error,
+                            "invalid attackee (eventparamtype=%d)", a.param.index());
                         invalidAction = true;
                         return;
                     }
@@ -219,12 +224,17 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                                 attackee->getID(), attackee->getAttackComponent().value());
                             atkManager->startAttack(attacker->getID(), attackee->getID());
                         }
+                    } else {
+                        log->write(
+                            "player-manager", LogType::Error,
+                            "invalid attackee (ID %d or its target could not be found)", *objectID);
                     }
 
-                    
                 } else if (a.commandName == "null") {
-                    log->write("player-manager", LogType::Warning, "null command, maybe the recorded player did not recoginize");
-                    
+                    log->write(
+                        "player-manager", LogType::Warning,
+                        "null command, maybe the recorded player did not recoginize");
+
                 } else {
                     auto selections       = (*player)->getSelections();
                     auto valid_selections = getValidSelections(selections);
@@ -266,8 +276,8 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
             },
             [&](const ObjectMove& a) {
                 log->write(
-                    "player-manager", LogType::Info, "%s: ObjectMove { xPos=%d, yPos=%d } ",
-                    str, a.xPos, a.yPos);
+                    "player-manager", LogType::Info, "%s: ObjectMove { xPos=%d, yPos=%d } ", str,
+                    a.xPos, a.yPos);
 
                 auto selections       = (*player)->getSelections();
                 auto valid_selections = getValidSelections(selections);
@@ -303,23 +313,23 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
             },
             [&](const CameraRotate& a) {
                 log->write(
-                    "player-manager", LogType::Info,
-                    "%s: CameraRotate { angle=%.3f rad} ", str, a.radians);
+                    "player-manager", LogType::Info, "%s: CameraRotate { angle=%.3f rad} ", str,
+                    a.radians);
 
                 auto optcam = (*player)->getCamera();
-                if (optcam.has_value()) {                    
+                if (optcam.has_value()) {
                     (*optcam)->AddRotation(glm::vec3(0, 1, 0), a.radians);
-                }                
+                }
             },
             [&](const CreateEntity& a) {
                 log->write(
                     "player-manager", LogType::Info,
-                    "%s: CreateEntity { type=%s, xPos=%d, yPos=%d } ", str, a.type.c_str(),
-                    a.xPos, a.yPos);
+                    "%s: CreateEntity { type=%s, xPos=%d, yPos=%d } ", str, a.type.c_str(), a.xPos,
+                    a.yPos);
 
-                auto& of  = LogicService::getObjectFactory();
-                auto nobj = std::dynamic_pointer_cast<GameObject>(
-                    of->getObject(a.type.c_str(), 0, 0, 0));
+                auto& of = LogicService::getObjectFactory();
+                auto nobj =
+                    std::dynamic_pointer_cast<GameObject>(of->getObject(a.type.c_str(), 0, 0, 0));
 
                 if (!nobj) {
                     log->write(
@@ -344,7 +354,6 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                 olm->doRegister(ncobj);
                 colony_add_callback(ncobj, (*player)->getCode());
                 olm->notifyCreation(cobjID);
-                
             },
             [&](const AddSelectAction& a) {}, [&](const CreateSelectGroup& a) {},
             [&](const SelectGroup& a) {}, [&](const AddSelectGroup& a) {},

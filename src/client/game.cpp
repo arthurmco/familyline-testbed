@@ -306,9 +306,10 @@ bool Game::runLoop()
 
     ticks_ = elapsed;
 
-    char sfps[164];
-    sprintf(sfps, "%.2f fps, %.3f ms/frame  - (%.3f ms logic, %.3f ms input, %.3f ms draw)",
-            float(1000 / pms), float(pms), logictime_.count(), inputtime_.count(), drawtime_.count());
+    char sfps[192];
+    sprintf(sfps, "%.2f fps, %.3f ms/frame  - (%.3f ms logic, %.3f ms input, %.3f ms draw) - tick %05zu",
+            float(1000 / pms), float(pms), logictime_.count(), inputtime_.count(),
+            drawtime_.count(), pm_->tick());
     widgets.lblFPS->setText(sfps);
     //      gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
@@ -357,6 +358,10 @@ bool Game::runInput()
 
 void Game::runLogic()
 {
+    if (irepr_) {
+        irepr_->dispatchEvents((1000/LOGIC_DELTA));
+    }
+    
     pm_->run(gctx);
     olm_->update();
 
@@ -413,6 +418,14 @@ void Game::runGraphical(double framems)
  */
 void Game::showDebugInfo()
 {
+    if (irepr_) {
+        widgets.lblKeys->setText("Reproducing input...");
+
+        if (irepr_->isReproductionEnded()) {
+            widgets.lblKeys->setText("End of replay!");
+        }
+    }
+    
     const int human_id_ = 1;
     pm_->iterate([&](Player* p) {
         if (p->getCode() == human_id_) {

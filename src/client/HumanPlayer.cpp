@@ -32,8 +32,9 @@ bool do_something = false;
 
 std::weak_ptr<GameObject> attacker, attackee;
 
-HumanPlayer::HumanPlayer(PlayerManager& pm, const Terrain& t, const char* name, int code)
-    : Player(pm, t, name, code)
+HumanPlayer::HumanPlayer(PlayerManager& pm, const Terrain& t, const char* name, int code,
+                         bool can_control = true)
+    : Player(pm, t, name, code), can_control_(can_control)
 {
     /* Initialize input subsystems */
     srand((size_t)name * code);
@@ -256,7 +257,7 @@ void HumanPlayer::generateInput()
 
     bool has_selection = !_ip->GetIntersectedObject().expired();
 
-    if (build_something && mouse_click) {
+    if (build_something && mouse_click && can_control_) {
         // Something is queued to be built.
         glm::vec2 to = _ip->GetGameProjectedPosition();
         glm::vec3 p  = terr_.graphicalToGame(_ip->GetTerrainProjectedPosition());
@@ -278,7 +279,7 @@ void HumanPlayer::generateInput()
         mouse_click = false;
     }
 
-    if (selected_.size() > 0 && do_something) {
+    if (selected_.size() > 0 && do_something && can_control_) {
         // Requested to move a selected object
         glm::vec2 to = _ip->GetGameProjectedPosition();
 
