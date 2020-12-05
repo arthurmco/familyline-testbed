@@ -87,13 +87,13 @@ bool InputRecorder::addAction(PlayerInputAction pia)
                 [&](const CommandInput& a) {
                     auto cstr = builder.CreateString(a.commandName);
 
-                    std::vector<unsigned long> params;
+                    std::vector<uint64_t> params;
                     if (auto* objectID = std::get_if<object_id_t>(&a.param); objectID) {
                         params = {*objectID};
                     } else if (auto* arr = std::get_if<std::array<int, 2>>(&a.param); arr) {
                         params = {(unsigned long)(*arr)[0], (unsigned long)(*arr)[1]};
                     }
-                    
+
                     auto pserialize = builder.CreateVector(params);
                     auto cargs      = CreateCommandInputArgs(builder, pserialize);
 
@@ -103,7 +103,11 @@ bool InputRecorder::addAction(PlayerInputAction pia)
                     type_data = cval.Union();
                 },
                 [&](const SelectAction& a) {
-                    auto ovec  = builder.CreateVector(a.objects);
+                    std::vector<uint64_t> cobjs;
+                    std::transform(a.objects.begin(), a.objects.end(), std::back_inserter(cobjs),                
+                                   [](auto v) { return v; });                                   
+
+                    auto ovec  = builder.CreateVector(cobjs);
                     auto oobjs = CreateSelectActionObjects(builder, ovec);
                     auto cval  = CreateSelectAction(builder, oobjs);
 
