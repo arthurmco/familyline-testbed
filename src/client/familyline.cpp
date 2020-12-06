@@ -26,6 +26,7 @@
 #endif
 
 #include <fmt/format.h>
+#include <cinttypes>
 
 #include <client/HumanPlayer.hpp>
 #include <client/config_reader.hpp>
