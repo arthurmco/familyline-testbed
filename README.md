@@ -37,7 +37,8 @@ On Linux, you will need the softwares below:
  - *devIL:* for loading our textures.
  - *cairo:* for drawing the interfaces
  - *libyaml:* For parsing the `assets.yaml` file, aka the asset list.
- - *libflatbuffers:* For serializing the input to a file
+ - *libflatbuffers:* For serializing the input to a file, and reading
+   from it
 
 Please build in a separate directory from the source. For exemple,
 when you clone the repository, you can create a directory named
@@ -53,6 +54,11 @@ make familyline
 
 The relative path tells that some files, like assets, are in the same
 directory as the executable rather than the default path (/usr/share)
+
+You will probably have to point to the `flatc` executable.  
+This is more frequent in Windows and MacOS, but, in case you do need,
+just set the `FLATBUFFERS_FLATC_EXECUTABLE` CMake variable to where it
+is.
 
 ### Windows
 
@@ -84,6 +90,8 @@ variables key
 
 Then, cmake it
 
+You will probably have to point to the `flatc` executable.  
+Just set the `FLATBUFFERS_FLATC_EXECUTABLE` CMake variable to where it is.
 
 ### Fruits
 
@@ -105,9 +113,7 @@ familyline-server` to compile the server (that doesn't work yet) or
 (On Windows, inside Visual Studio, the targets might appear as projects
 inside the solutions).
 
-We use doxygen to document the source, so if you want to generate some
-source documentation, type `make docs`. The docs will be generated
-inside the `docs/doxygen` folder
+You will probably have to point to the `flatc` executable...
 
 ## Running
 
