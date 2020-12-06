@@ -1,8 +1,9 @@
+#include <input_serialize_generated.h>
+
 #include <cinttypes>
+#include <common/logger.hpp>
 #include <common/logic/input_file.hpp>
 #include <common/logic/input_recorder.hpp>
-
-#include <input_serialize_generated.h>
 
 using namespace familyline::logic;
 
@@ -27,10 +28,16 @@ bool InputRecorder::createFile(std::string_view path)
     flatbuffers::FlatBufferBuilder builder;
 
     f_ = fopen(path.data(), "wb");
+    if (!f_) {
+        LoggerService::getLogger()->write(
+            "input-recorder", LogType::Error, "could not create input recorder file %s: %s (%d)",
+            path.data(), strerror(errno), errno);
+        return false;
+    }
 
     // Add a header and a player list
     const char* magic = R_MAGIC;
-    uint32_t version = R_VERSION;
+    uint32_t version  = R_VERSION;
 
     fwrite((void*)magic, 1, 4, f_);
     fwrite((void*)&version, sizeof(version), 1, f_);
@@ -45,8 +52,8 @@ bool InputRecorder::createFile(std::string_view path)
         playerlist.push_back(piFlat);
     }
 
-    auto playervec = builder.CreateVector(playerlist.data(), playerlist.size());
-    auto playerchunk = CreatePlayerInfoChunk(builder, playervec);   
+    auto playervec   = builder.CreateVector(playerlist.data(), playerlist.size());
+    auto playerchunk = CreatePlayerInfoChunk(builder, playervec);
     builder.Finish(playerchunk);
     uint32_t psize = builder.GetSize();
     fwrite(&psize, sizeof(psize), 1, f_);
@@ -56,7 +63,6 @@ bool InputRecorder::createFile(std::string_view path)
 
     return true;
 }
-
 
 /// This will allow us to use std::visit with multiple variants at once, a thing
 /// that should be part of C++20.
@@ -68,7 +74,6 @@ struct overload : Ts... {
 };
 template <class... Ts>
 overload(Ts...) -> overload<Ts...>;
-
 
 /**
  * You should pass this function as a callback to the player manager
@@ -104,8 +109,9 @@ bool InputRecorder::addAction(PlayerInputAction pia)
                 },
                 [&](const SelectAction& a) {
                     std::vector<uint64_t> cobjs;
-                    std::transform(a.objects.begin(), a.objects.end(), std::back_inserter(cobjs),                
-                                   [](auto v) { return v; });                                   
+                    std::transform(
+                        a.objects.begin(), a.objects.end(), std::back_inserter(cobjs),
+                        [](auto v) { return v; });
 
                     auto ovec  = builder.CreateVector(cobjs);
                     auto oobjs = CreateSelectActionObjects(builder, ovec);
@@ -151,7 +157,7 @@ bool InputRecorder::addAction(PlayerInputAction pia)
 
         builder.Finish(inputel);
 
-        uint32_t isize   = builder.GetSize();
+        uint32_t isize     = builder.GetSize();
         const char* imagic = R_ACTION_MAGIC;
         fwrite((void*)imagic, 1, 4, f_);
         fwrite(&isize, sizeof(isize), 1, f_);
@@ -168,9 +174,9 @@ void InputRecorder::commit()
     std::vector<flatbuffers::Offset<familyline::InputElement>> inputs;
 
     const char* endmagic = R_FOOTER_MAGIC;
-    uint32_t inputcount = inputcount_;
-    uint32_t checksum = 0;
-    
+    uint32_t inputcount  = inputcount_;
+    uint32_t checksum    = 0;
+
     fwrite((void*)endmagic, 1, 4, f_);
     fwrite(&inputcount, sizeof(inputcount), 1, f_);
     fwrite(&checksum, sizeof(checksum), 1, f_);

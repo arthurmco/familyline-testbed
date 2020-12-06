@@ -1,5 +1,4 @@
 #include <cerrno>
-
 #include <client/config_reader.hpp>
 #include <cstring>
 
@@ -21,7 +20,10 @@ std::vector<std::string> familyline::get_config_valid_paths()
     else
         strcpy(file_settings, "settings.yaml");
 
-    return { "settings.yaml", file_settings, };
+    return {
+        "settings.yaml",
+        file_settings,
+    };
 
 #else
 
@@ -42,42 +44,55 @@ std::vector<std::string> familyline::get_config_valid_paths()
     return {};
 }
 
-
-std::string replace_string(std::string str, std::string from, std::string to, size_t limit=1) {
+std::string replace_string(std::string str, std::string from, std::string to, size_t limit = 1)
+{
     auto cidx = 0;
-    auto fidx = str.find_first_of(from, cidx);
+    auto fidx = str.find(from, cidx);
 
     auto i = 0;
     while (fidx != std::string::npos) {
         str.replace(fidx, from.size(), to);
 
         i++;
-        if (i >= limit)
-            break;
+        if (i >= limit) break;
 
         cidx = fidx + to.size();
+        fidx = str.find(from, cidx);
     }
 
     return str;
 }
 
+#if __has_include(<windows.h>) && __has_include(<winbase.h>)
+#include <Shlobj.h>
+#endif
+
 /**
  * Expand path-specific keywords, like `~` and `%HOME%`, to
  * its full path, because they are usually not expanded
  */
-std::string expand_path(std::string s) {
-    char* homedir = getenv("HOME");
-    
-    #if __has_include(<windows.h>) && __has_include(<winbase.h>)
-    char* appd = getenv("APPDATA");
-    s = replace_string(s, "%HOME%", homedir ? homedir : "%HOME%");
-    s = replace_string(s, "%APPDATA%", appd ? appd : "%APPDATA%");
-    
-    #else
+std::string expand_path(std::string s)
+{
+#if __has_include(<windows.h>) && __has_include(<winbase.h>)
+    WCHAR* path = nullptr;
+    std::string homedir = "%HOME%";
+    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Profile, 0, NULL, &path))) {
+        std::wstring ws(path);
+        homedir = std::string(ws.begin(), ws.end());
 
-    s = replace_string(s, "~", homedir);
-    
-    #endif
+        CoTaskMemFree(path);
+    }
+
+    char* appd = getenv("APPDATA");
+    s          = replace_string(s, "%HOME%", homedir);
+    s          = replace_string(s, "%APPDATA%", appd ? appd : "%APPDATA%");
+    s          = replace_string(s, "\\", "/", MAX_PATH);
+
+#else
+    char* homedir = getenv("HOME");
+    s             = replace_string(s, "~", homedir);
+
+#endif
     return s;
 }
 
@@ -221,7 +236,8 @@ bool familyline::read_config_from(std::string_view path, ConfigData& data)
                         data.enableInputRecording = (value == "true");
                     } else if (currentProperty == "default_input_record_directory") {
                         printf("defaultInputRecordDir = %s\n", expand_path(value).c_str());
-                        data.defaultInputRecordDir = expand_path(value);;
+                        data.defaultInputRecordDir = expand_path(value);
+                        ;
                     }
 
                     currentProperty = "";

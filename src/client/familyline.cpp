@@ -26,9 +26,8 @@
 #endif
 
 #include <fmt/format.h>
-#include <cinttypes>
-#include <filesystem>
 
+#include <cinttypes>
 #include <client/HumanPlayer.hpp>
 #include <client/config_reader.hpp>
 #include <client/game.hpp>
@@ -55,6 +54,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <filesystem>
 #include <glm/gtc/matrix_transform.hpp>  //glm::lookAt()
 
 using namespace familyline;
@@ -265,25 +265,24 @@ Game* start_game(
     std::unique_ptr<ColonyManager> cm;
     unsigned int human_player_id = 0;
     PlayerSession session;
-    
+
     if (irepr) {
         /// loading input from a file
         session = irepr->createPlayerSession(map);
-        pm           = std::move(session.players);
-        cm           = std::move(session.colonies);
+        pm      = std::move(session.players);
+        cm      = std::move(session.colonies);
 
-        human_player_id = pm->add(
-            std::unique_ptr<Player>(new HumanPlayer{*pm.get(), map, player_name.c_str(), 0, false}));
-        auto* player   = *(pm->get(human_player_id));
-        auto& alliance = cm->createAlliance(std::string{player->getName()});
-        auto& colony   = cm->createColony(*player, 0xffffff,
-                                          std::optional<std::reference_wrapper<Alliance>>{alliance});
-        session.player_colony.emplace(human_player_id,
-                                      std::reference_wrapper(colony));
+        human_player_id = pm->add(std::unique_ptr<Player>(
+            new HumanPlayer{*pm.get(), map, player_name.c_str(), 0, false}));
+        auto* player    = *(pm->get(human_player_id));
+        auto& alliance  = cm->createAlliance(std::string{player->getName()});
+        auto& colony    = cm->createColony(
+            *player, 0xffffff, std::optional<std::reference_wrapper<Alliance>>{alliance});
+        session.player_colony.emplace(human_player_id, std::reference_wrapper(colony));
 
     } else {
         /// running a normal game
-        session    = initSinglePlayerSession(map, pinfo);
+        session         = initSinglePlayerSession(map, pinfo);
         pm              = std::move(session.players);
         cm              = std::move(session.colonies);
         human_player_id = pinfo.id;
@@ -306,8 +305,8 @@ Game* start_game(
             "record-{}{:04d}{:02d}-{:02d}{:02d}{:02d}.frec", 1900 + ftime->tm_year, ftime->tm_mon,
             ftime->tm_mday, ftime->tm_hour, ftime->tm_min, ftime->tm_sec);
         std::filesystem::path recordpath(confdata.defaultInputRecordDir);
-        recordpath /= recordfilename;
-        
+        recordpath.make_preferred() /= recordfilename;
+
         log->write("game", LogType::Info, "\trecord destination: %s", recordpath.c_str());
 
         if (!ir->createFile(recordpath.string())) {
@@ -330,7 +329,7 @@ Game* start_game(
             printf(
                 "\t[%" PRId64 "] tick: %d, player: %" PRIx64 ", timestamp %" PRId64 " | ",
                 irepr->getCurrentActionIndex() - 1, f->tick, f->playercode, f->timestamp);
-            
+
             std::visit(
                 overload{
                     [&](const logic::CommandInput& a) {
@@ -384,14 +383,14 @@ Game* start_game(
         irepr->reset();
 
         // dispatch 10 seconds worth of events
-        irepr->dispatchEvents((1000/LOGIC_DELTA) * 1);
+        irepr->dispatchEvents((1000 / LOGIC_DELTA) * 1);
         g->initReproducer(std::move(irepr));
-    }    
+    }
 
     g->initPlayers(std::move(pm), std::move(cm), session.player_colony, human_player_id);
     g->initObjects();
     g->initLoopData(human_player_id);
-    
+
     return g;
 }
 
