@@ -20,7 +20,8 @@ add_subdirectory(src/client)
 include("${CMAKE_SOURCE_DIR}/src/common/generated.cmake")
 get_target_property(INPUT_FLATBUFFER_INCLUDE input-flatbuffer GENERATED_INCLUDES_DIR)
 
-add_executable(familyline "src/client/familyline.cpp" "src/client/familyline.exe.manifest")
+add_executable(familyline "src/client/familyline.cpp" "src/client/familyline.exe.manifest"
+    "src/game.rc")
 target_link_libraries(familyline familyline-client)
 
 target_compile_features(familyline PUBLIC cxx_std_20)
