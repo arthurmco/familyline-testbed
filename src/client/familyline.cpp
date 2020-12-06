@@ -27,6 +27,7 @@
 
 #include <fmt/format.h>
 #include <cinttypes>
+#include <filesystem>
 
 #include <client/HumanPlayer.hpp>
 #include <client/config_reader.hpp>
@@ -304,10 +305,12 @@ Game* start_game(
         auto recordfilename = fmt::format(
             "record-{}{:04d}{:02d}-{:02d}{:02d}{:02d}.frec", 1900 + ftime->tm_year, ftime->tm_mon,
             ftime->tm_mday, ftime->tm_hour, ftime->tm_min, ftime->tm_sec);
+        std::filesystem::path recordpath(confdata.defaultInputRecordDir);
+        recordpath /= recordfilename;
+        
+        log->write("game", LogType::Info, "\trecord destination: %s", recordpath.c_str());
 
-        log->write("game", LogType::Info, "\trecord destination: %s", recordfilename.c_str());
-
-        if (!ir->createFile(recordfilename)) {
+        if (!ir->createFile(recordpath.string())) {
             log->write("game", LogType::Error, "\tinput record file could not be created");
             ir = std::unique_ptr<InputRecorder>(nullptr);
         }

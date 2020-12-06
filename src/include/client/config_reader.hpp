@@ -8,6 +8,9 @@
  *   On Windows, is inside of the app directory and inside of the AppData directory
  *   On Unixes, can be in /etc/familyline, or in ~/.config/familyline.
  *
+ * See the settings.yaml in the repository root for an example of the configuration file,
+ * with all settings specified.
+ *
  * The latter places can override the configurations in the earlier places.
  */
 
@@ -36,6 +39,11 @@ struct ConfigData {
      * else can reproduce the game.
      */
     bool enableInputRecording = false;
+
+    /**
+     * The directory where recorded games will be saved
+     */
+    std::string defaultInputRecordDir = ".";
 };
 
     std::vector<std::string> get_config_valid_paths();

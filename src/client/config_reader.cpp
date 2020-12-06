@@ -42,6 +42,45 @@ std::vector<std::string> familyline::get_config_valid_paths()
     return {};
 }
 
+
+std::string replace_string(std::string str, std::string from, std::string to, size_t limit=1) {
+    auto cidx = 0;
+    auto fidx = str.find_first_of(from, cidx);
+
+    auto i = 0;
+    while (fidx != std::string::npos) {
+        str.replace(fidx, from.size(), to);
+
+        i++;
+        if (i >= limit)
+            break;
+
+        cidx = fidx + to.size();
+    }
+
+    return str;
+}
+
+/**
+ * Expand path-specific keywords, like `~` and `%HOME%`, to
+ * its full path, because they are usually not expanded
+ */
+std::string expand_path(std::string s) {
+    char* homedir = getenv("HOME");
+    
+    #if __has_include(<windows.h>) && __has_include(<winbase.h>)
+    char* appd = getenv("APPDATA");
+    s = replace_string(s, "%HOME%", homedir ? homedir : "%HOME%");
+    s = replace_string(s, "%APPDATA%", appd ? appd : "%APPDATA%");
+    
+    #else
+
+    s = replace_string(s, "~", homedir);
+    
+    #endif
+    return s;
+}
+
 void read_log_block_tags_section(yaml_parser_t* parser, ConfigData& data)
 {
     int level = -1;
@@ -180,6 +219,9 @@ bool familyline::read_config_from(std::string_view path, ConfigData& data)
                     if (currentProperty == "enable_input_recording") {
                         printf("enableInputRecording = true\n");
                         data.enableInputRecording = (value == "true");
+                    } else if (currentProperty == "default_input_record_directory") {
+                        printf("defaultInputRecordDir = %s\n", expand_path(value).c_str());
+                        data.defaultInputRecordDir = expand_path(value);;
                     }
 
                     currentProperty = "";
