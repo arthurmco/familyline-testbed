@@ -5,7 +5,7 @@
 ####
 cmake_minimum_required(VERSION 3.12)
 
-project(Familyline VERSION 0.2.1)
+project(Familyline VERSION 0.2.2)
 
 option(USE_RELATIVE_PATH "Set if you want the path to the game resources to be local" OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
