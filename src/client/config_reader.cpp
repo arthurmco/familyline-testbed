@@ -13,15 +13,15 @@ std::vector<std::string> familyline::get_config_valid_paths()
 {
     char file_settings[256] = {};
 
-#ifdef WINDOWS
+#if __has_include(<windows.h>) && __has_include(<winbase.h>)
     char* appdata = getenv("LOCALAPPDATA");
 
     if (appdata)
-        snprintf(file_settings, 255, "%s\\Familyline\settings.yaml", appdata);
+        snprintf(file_settings, 255, "%s\\Familyline\\settings.yaml", appdata);
     else
         strcpy(file_settings, "settings.yaml");
 
-    return { "settings.yaml", file_settings, }
+    return { "settings.yaml", file_settings, };
 
 #else
 
