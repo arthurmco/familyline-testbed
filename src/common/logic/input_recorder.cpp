@@ -1,6 +1,7 @@
 #include <input_serialize_generated.h>
 
 #include <cinttypes>
+#include <cerrno>
 #include <common/logger.hpp>
 #include <common/logic/input_file.hpp>
 #include <common/logic/input_recorder.hpp>
