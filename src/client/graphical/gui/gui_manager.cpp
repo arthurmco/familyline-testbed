@@ -1,16 +1,15 @@
 #include <GL/glew.h>
 
-#include <client/graphical/window.hpp>
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/gfx_service.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
+#include <client/graphical/window.hpp>
 
 using namespace familyline::graphics::gui;
 using namespace familyline::graphics;
 using namespace familyline::input;
 
 static int vv = 0;
-
 
 /**
  * Show the window you pass
@@ -20,9 +19,7 @@ static int vv = 0;
  */
 void GUIManager::showWindow(GUIWindow* win)
 {
-    win->event_onDelete = [&](GUIWindow& w) {
-        this->closeWindow(w);
-    };
+    win->event_onDelete = [&](GUIWindow& w) { this->closeWindow(w); };
 
     auto [w, h] = win->getNeededSize(context_);
 
@@ -39,8 +36,8 @@ void GUIManager::closeWindow(const GUIWindow& w)
     windowstack_.erase(itend, windowstack_.end());
 }
 
-
-void GUIManager::update() {
+void GUIManager::update()
+{
     root_control_->update(context_, canvas_);
 
     // Clean bg
@@ -65,7 +62,6 @@ void GUIManager::update() {
         cairo_set_source_surface(context_, win.canvas, absx, absy);
         win.win->updatePosition(absx, absy);
         cairo_paint(context_);
-
     }
 
     cairo_set_operator(context_, CAIRO_OPERATOR_OVER);
@@ -95,7 +91,7 @@ std::optional<Control*> GUIManager::getControlAtPoint(int x, int y)
     if (windowstack_.empty())
         return std::nullopt;
     else
-        return std::optional<Control*>((Control*) windowstack_.back().win);
+        return std::optional<Control*>((Control*)windowstack_.back().win);
 }
 
 bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
@@ -138,7 +134,7 @@ auto mousey_ = -1;
 void GUIManager::receiveEvent()
 {
     while (!input_actions_.empty()) {
-        auto& hia = input_actions_.front();
+        auto& hia           = input_actions_.front();
         bool is_mouse_event = false;
 
         std::optional<Control*> control = std::nullopt;
@@ -149,17 +145,16 @@ void GUIManager::receiveEvent()
         }
 
         if (std::holds_alternative<MouseAction>(hia.type)) {
-            auto ma = std::get<MouseAction>(hia.type);
-            mousex_ = ma.screenX;
-            mousey_ = ma.screenY;
+            auto ma        = std::get<MouseAction>(hia.type);
+            mousex_        = ma.screenX;
+            mousey_        = ma.screenY;
             is_mouse_event = true;
-            control = this->getControlAtPoint(ma.screenX, ma.screenY);
+            control        = this->getControlAtPoint(ma.screenX, ma.screenY);
         }
 
         if (std::holds_alternative<KeyAction>(hia.type)) {
             auto ka = std::get<KeyAction>(hia.type);
-            if (mousex_ >= 0)
-                control = this->getControlAtPoint(mousex_, mousey_);
+            if (mousex_ >= 0) control = this->getControlAtPoint(mousex_, mousey_);
         }
 
         if (std::holds_alternative<WheelAction>(hia.type)) {
@@ -168,13 +163,12 @@ void GUIManager::receiveEvent()
         }
 
         if (control.has_value()) {
-
             if (is_mouse_event) {
                 if (hovered_) {
                     // a control was already focused
                     if ((*hovered_)->getID() != (*control)->getID()) {
                         (*hovered_)->onFocusLost();
-                        
+
                         (*control)->onFocusEnter();
                         hovered_ = control;
                     }
@@ -187,7 +181,7 @@ void GUIManager::receiveEvent()
             }
 
             (*control)->receiveEvent(hia, cb_queue_);
-        } 
+        }
 
         input_actions_.pop();
     }
@@ -202,6 +196,45 @@ void GUIManager::runCallbacks()
 
         // TODO: check if the owner exists.
         cb.fn(cb.owner);
+    }
+}
+
+GUIWindow* GUIManager::createGUIWindow(std::string name, unsigned width, unsigned height)
+{
+    if (windows_.find(name) == windows_.end()) {
+        windows_[name] = std::make_unique<GUIWindow>(width, height);
+    }
+
+    return windows_[name].get();
+}
+
+GUIWindow* GUIManager::getGUIWindow(std::string name)
+{
+    if (auto it = windows_.find(name); it != windows_.end()) {
+        return it->second.get();
+    }
+
+    return nullptr;
+}
+
+
+/**
+ * Destroy window
+ */
+void GUIManager::destroyGUIWindow(std::string name)
+{
+    if (auto it = windows_.find(name); it != windows_.end()) {
+
+        /**
+         * If the current window is being hovered, "unhover" it, so
+         * that a dangling pointer does not remain
+         */
+        if (hovered_) {
+            if ((*hovered_)->getID() == it->second->getID())
+                hovered_ = std::nullopt;
+        }
+        
+        windows_.erase(it);
     }
 }
 

@@ -597,37 +597,7 @@ static int show_starting_menu(
     bool r = true;
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
-    GUIWindow* gwin      = new GUIWindow(gwidth, gheight);
-    GUIWindow* gsettings = new GUIWindow(gwidth, gheight);
-    // TODO: copy label?
-    Label* lb = new Label(0.37, 0.03, "FAMILYLINE");
-    lb->modifyAppearance([](ControlAppearance& ca) {
-        ca.fontSize   = 32;
-        ca.foreground = {1, 1, 1, 1};
-    });
-
-    Label* header = new Label(0.37, 0.03, "Settings");
-    header->modifyAppearance([](ControlAppearance& ca) {
-        ca.fontSize   = 24;
-        ca.foreground = {1, 1, 1, 0.9};
-    });
-
-    Button* bret = new Button(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
-    Checkbox* recordGame =
-        new Checkbox(300, 32, "Record the game inputs", confdata.enableInputRecording);
-
-    bret->setClickCallback([&](auto* c) {
-        confdata.enableInputRecording = recordGame->getState();
-        guir->closeWindow(*gsettings);
-    });
-
-    gsettings->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)lb));
-    gsettings->add(
-        0.37, 0.13, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)header));
-    gsettings->add(
-        0.05, 0.3, ControlPositioning::Relative, std::unique_ptr<Control>((Control*)recordGame));
-    gsettings->add(
-        0.37, 0.9, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bret));
+    GUIWindow* gwin = guir->createGUIWindow("main", gwidth, gheight);
 
     Label* l = new Label(0.37, 0.03, "FAMILYLINE");
     l->modifyAppearance([](ControlAppearance& ca) {
@@ -657,7 +627,42 @@ static int show_starting_menu(
         r = false;
     });
 
-    bsettings->setClickCallback([&](auto* cc) { guir->showWindow(gsettings); });
+    bsettings->setClickCallback([&](auto* cc) {
+        GUIWindow* gsettings = guir->createGUIWindow("settings", gwidth, gheight);
+        // TODO: copy label?
+        auto lb = std::make_unique<Label>(0.37, 0.03, "FAMILYLINE");
+        lb->modifyAppearance([](ControlAppearance& ca) {
+            ca.fontSize   = 32;
+            ca.foreground = {1, 1, 1, 1};
+        });
+
+        auto header = std::make_unique<Label>(0.37, 0.03, "Settings");
+        header->modifyAppearance([](ControlAppearance& ca) {
+            ca.fontSize   = 24;
+            ca.foreground = {1, 1, 1, 0.9};
+        });
+
+        auto bret =
+            std::make_unique<Button>(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
+        Checkbox* recordGame =
+            new Checkbox(300, 32, "Record the game inputs", confdata.enableInputRecording);
+
+        bret->setClickCallback([&](auto* c) {
+            GUIWindow* gsettings = guir->getGUIWindow("settings");
+            confdata.enableInputRecording = recordGame->getState();
+            guir->closeWindow(*gsettings);
+            guir->destroyGUIWindow("settings");
+        });
+
+        gsettings->add(0.37, 0.03, ControlPositioning::CenterX, std::move(lb));
+        gsettings->add(0.37, 0.13, ControlPositioning::CenterX, std::move(header));
+        gsettings->add(
+            0.05, 0.3, ControlPositioning::Relative,
+            std::unique_ptr<Control>((Control*)recordGame));
+        gsettings->add(0.37, 0.9, ControlPositioning::CenterX, std::move(bret));
+
+        guir->showWindow(gsettings);
+    });
 
     bnew->setClickCallback([&](Control* cc) {
         (void)cc;
@@ -717,9 +722,6 @@ static int show_starting_menu(
     run_game_loop(lr, frames);
 
     if (g) delete g;
-
-    delete gsettings;
-    delete gwin;
 
     delete win;
     delete f3D;

@@ -17,6 +17,7 @@
 #include <memory>
 #include <queue>
 #include <span>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -37,9 +38,7 @@ class GUIManager
 {
 protected:
     familyline::graphics::Window& win_;
-
-    std::array<unsigned int, 32 * 32> ibuf;
-
+    
     unsigned width_, height_;
 
     // Cairo things, to actually do the rendering work
@@ -49,11 +48,8 @@ protected:
 
     std::unique_ptr<RootControl> root_control_;
 
-    Label* lbl3;
-    Label* lbl4;
-
     // Cached mouse positions, to help check events that do not send the mouse position along them,
-    // like the KeyEvent
+    // like the KepayEvent
     int hitmousex_ = 1, hitmousey_ = 1;
     std::queue<familyline::input::HumanInputAction> input_actions_;
 
@@ -63,6 +59,9 @@ protected:
     /// Hovered control
     std::optional<Control*> hovered_ = std::nullopt;
 
+    /// A map of all windows created, keyed by name
+    std::unordered_map<std::string, std::unique_ptr<GUIWindow>> windows_;
+    
     
     /// TODO: add a way to lock event receiving to the GUI. Probably the text edit control
     /// will need, to ensure you can type on it when you click and continue to be able to,
@@ -82,6 +81,7 @@ protected:
      */
     virtual void renderToTexture() = 0;
 
+    
     /**
      * Checks if an event mouse position hits a control or not.
      * This allows us to ignore events that do not belong to us, and pass them
@@ -220,7 +220,27 @@ public:
      *
      */
     void runCallbacks();
+    
+    /**
+     * Creates a GUI window
+     *
+     * This window will be owned by the GUIManager, so you do not need
+     * to care about destroying it
+     */
+    GUIWindow* createGUIWindow(std::string name, unsigned width, unsigned height);
 
+    /**
+     * Get the window named by `name`, or null if it does not exist
+     */
+    GUIWindow* getGUIWindow(std::string name);
+
+    /**
+     * Destroy window, aka remove it from memory
+     *
+     * This will also destroy all controls from it, since they are owned by the window.
+     */    
+    void destroyGUIWindow(std::string name);
+    
     virtual ~GUIManager();
 };
 
