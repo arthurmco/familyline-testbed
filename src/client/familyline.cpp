@@ -589,15 +589,15 @@ int main(int argc, char const* argv[])
     }
 }
 
-std::thread async_test;
-std::atomic<int> val = 0;
-std::atomic<bool> aexit = false;
-std::atomic<bool> query_thread_started = false;
 
 static int show_starting_menu(
     const ParamInfo& pi, Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win,
     GUIManager* guir, size_t gwidth, size_t gheight, LoopRunner& lr, ConfigData& confdata)
-{
+{    
+    std::thread async_test;
+    std::atomic<int> val = 0;
+    std::atomic<bool> aexit = false;
+    
     auto& log = LoggerService::getLogger();
     Game* g   = nullptr;
     auto& ima = InputService::getInputManager();
@@ -705,7 +705,6 @@ static int show_starting_menu(
         val = 0;
         
         async_test = std::thread([&](){
-            query_thread_started = true;
             std::this_thread::sleep_for(std::chrono::seconds(1));
             Label* lbl = (Label*)guir->getGUIWindow("mplayer")->get("async_lbl");
             while (!aexit) {
@@ -739,7 +738,15 @@ static int show_starting_menu(
 
     bnew->setClickCallback([&](Control* cc) {
         (void)cc;
+        if (async_test.joinable()) {
+            if (!aexit) {
+                aexit = true;            
+                async_test.join();
+            }
+        }
+        
         guir->closeWindow(*gwin);
+               
         g = start_game(
             f3D, fGUI, win, guir, lr,
             StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt}, confdata);
@@ -761,7 +768,7 @@ static int show_starting_menu(
     ima->addListenerHandler([&](HumanInputAction hia) {
         /* Only listen for game exit events, because you sure want to
            close the window The others will be handled by the GUI listener */
-        if (std::holds_alternative<GameExit>(hia.type)) {
+        if (std::holds_alternative<GameExit>(hia.type)) {            
             r = false;
         }
 
@@ -795,7 +802,7 @@ static int show_starting_menu(
 
     run_game_loop(lr, frames);
 
-    if (query_thread_started) {
+    if (async_test.joinable()) {
         if (!aexit) {
             aexit = true;            
             async_test.join();
