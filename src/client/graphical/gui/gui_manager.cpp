@@ -75,6 +75,7 @@ void GUIManager::render(unsigned int x, unsigned int y) { this->renderToTexture(
 
 GUIManager::~GUIManager()
 {
+    windowstack_.clear();
     cairo_destroy(context_);
     cairo_surface_destroy(canvas_);
 

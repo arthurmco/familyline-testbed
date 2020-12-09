@@ -17,12 +17,13 @@
 #include <memory>
 #include <queue>
 #include <span>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
-namespace familyline::graphics {
-    class Window;
+namespace familyline::graphics
+{
+class Window;
 }
 
 namespace familyline::graphics::gui
@@ -30,7 +31,6 @@ namespace familyline::graphics::gui
 /// TODO: PLEASE find a way to run the GUI update function always in tribalia.cpp, or
 ///       familyline.cpp if renamed. It will make things easier.
 
-    
 /**
  * Manages the graphical interface state and rendering
  */
@@ -38,7 +38,7 @@ class GUIManager
 {
 protected:
     familyline::graphics::Window& win_;
-    
+
     unsigned width_, height_;
 
     // Cairo things, to actually do the rendering work
@@ -55,14 +55,12 @@ protected:
 
     CallbackQueue cb_queue_;
 
-
     /// Hovered control
     std::optional<Control*> hovered_ = std::nullopt;
 
     /// A map of all windows created, keyed by name
     std::unordered_map<std::string, std::unique_ptr<GUIWindow>> windows_;
-    
-    
+
     /// TODO: add a way to lock event receiving to the GUI. Probably the text edit control
     /// will need, to ensure you can type on it when you click and continue to be able to,
     /// even if you move the mouse out of it.
@@ -81,7 +79,6 @@ protected:
      */
     virtual void renderToTexture() = 0;
 
-    
     /**
      * Checks if an event mouse position hits a control or not.
      * This allows us to ignore events that do not belong to us, and pass them
@@ -100,7 +97,8 @@ protected:
         GUIWindow* win;
         cairo_t* context;
         cairo_surface_t* canvas;
-
+        
+        
         GUIWindowInfo(GUIWindow* w, cairo_t* ctxt, cairo_surface_t* s)
             : win(w), context(ctxt), canvas(s)
         {
@@ -164,7 +162,7 @@ public:
         });
         debug_window_.event_onDelete = [](auto& o) {};  // set the delete callback to avoid a
                                                         // bad function call exception on the
-                                                        // destructor       
+                                                        // destructor
         debug_window_info_ = GUIWindowInfo(&debug_window_, context, canvas);
 
         root_control_ = std::make_unique<RootControl>(width, height);
@@ -180,7 +178,7 @@ public:
     }
 
     void initialize(const Window& win) { this->init(win); }
-    
+
     /**
      * Show the window you pass
      *
@@ -220,7 +218,7 @@ public:
      *
      */
     void runCallbacks();
-    
+
     /**
      * Creates a GUI window
      *
@@ -240,9 +238,9 @@ public:
      * Destroy window, aka remove it from memory
      *
      * This will also destroy all controls from it, since they are owned by the window.
-     */    
+     */
     void destroyGUIWindow(std::string name);
-    
+
     virtual ~GUIManager();
 };
 
