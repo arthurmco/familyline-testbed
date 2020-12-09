@@ -7,6 +7,7 @@
 ***/
 
 #include <fmt/core.h>
+#include <chrono>
 
 #include "client/graphical/gui/gui_container_component.hpp"
 #define GLM_FORCE_RADIANS
@@ -26,7 +27,9 @@
 #endif
 
 #include <fmt/format.h>
+#include <atomic>
 
+#include <thread>
 #include <cinttypes>
 #include <client/HumanPlayer.hpp>
 #include <client/config_reader.hpp>
@@ -586,6 +589,11 @@ int main(int argc, char const* argv[])
     }
 }
 
+std::thread async_test;
+std::atomic<int> val = 0;
+std::atomic<bool> aexit = false;
+std::atomic<bool> query_thread_started = false;
+
 static int show_starting_menu(
     const ParamInfo& pi, Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win,
     GUIManager* guir, size_t gwidth, size_t gheight, LoopRunner& lr, ConfigData& confdata)
@@ -613,6 +621,8 @@ static int show_starting_menu(
 
     Button* bnew      = new Button(400, 50, "New Game");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
     Button* bsettings = new Button(400, 50, "Settings");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
+    Button* bmplayer =
+        new Button(400, 50, "Multiplayer");            // Button(0.1, 0.2, 0.8, 0.1, "New Game");
     Button* bquit = new Button(400, 50, "Exit Game");  // Button(0.1, 0.31, 0.8, 0.1, "Exit Game");
 
     ImageView* ilogo = new ImageView(300, 450);  // 0.2, 0.1, 0.6, 0.9,
@@ -644,11 +654,11 @@ static int show_starting_menu(
 
         auto bret =
             std::make_unique<Button>(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
-        Checkbox* recordGame =
+        auto recordGame =
             new Checkbox(300, 32, "Record the game inputs", confdata.enableInputRecording);
 
         bret->setClickCallback([&](auto* c) {
-            GUIWindow* gsettings = guir->getGUIWindow("settings");
+            GUIWindow* gsettings          = guir->getGUIWindow("settings");
             confdata.enableInputRecording = recordGame->getState();
             guir->closeWindow(*gsettings);
             guir->destroyGUIWindow("settings");
@@ -662,6 +672,69 @@ static int show_starting_menu(
         gsettings->add(0.37, 0.9, ControlPositioning::CenterX, std::move(bret));
 
         guir->showWindow(gsettings);
+    });
+
+    bmplayer->setClickCallback([&](auto* cc) {
+        GUIWindow* gmplayer = guir->createGUIWindow("mplayer", gwidth, gheight);
+        // TODO: copy label?
+        auto lb = std::make_unique<Label>(0.37, 0.03, "FAMILYLINE");
+        lb->modifyAppearance([](ControlAppearance& ca) {
+            ca.fontSize   = 32;
+            ca.foreground = {1, 1, 1, 1};
+        });
+
+        auto header = std::make_unique<Label>(0.37, 0.03, "Multiplayer");
+        header->modifyAppearance([](ControlAppearance& ca) {
+            ca.fontSize   = 24;
+            ca.foreground = {1, 1, 1, 0.9};
+        });
+
+        auto disclaimer = std::make_unique<Label>(0.37, 0.03, "Not implemented :(");
+        header->modifyAppearance([](ControlAppearance& ca) {
+            ca.fontSize   = 24;
+            ca.foreground = {1, 1, 1, 0.9};
+        });
+
+        auto async_lbl = std::make_unique<Label>(0.37, 0.03, "---");
+        header->modifyAppearance([](ControlAppearance& ca) {
+            ca.fontSize   = 24;
+            ca.foreground = {1, 1, 1, 0.9};
+        });
+
+        aexit = false;
+        val = 0;
+        
+        async_test = std::thread([&](){
+            query_thread_started = true;
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            Label* lbl = (Label*)guir->getGUIWindow("mplayer")->get("async_lbl");
+            while (!aexit) {
+                if (lbl) {
+                    auto s = fmt::format("{:04}", val++);
+                    lbl->setText(s);
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
+            }
+        });
+
+        auto bret =
+            std::make_unique<Button>(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
+
+        bret->setClickCallback([&](auto* c) {
+            aexit = true;
+            async_test.join();
+            GUIWindow* gmplayer           = guir->getGUIWindow("mplayer");
+            guir->closeWindow(*gmplayer);
+            guir->destroyGUIWindow("mplayer");
+        });
+
+        gmplayer->add(0.37, 0.03, ControlPositioning::CenterX, std::move(lb));
+        gmplayer->add(0.37, 0.13, ControlPositioning::CenterX, std::move(header));
+        gmplayer->add(0.15, 0.3, ControlPositioning::Relative, std::move(disclaimer));
+        gmplayer->add(0.15, 0.4, ControlPositioning::Relative, std::move(async_lbl), "async_lbl");
+        gmplayer->add(0.37, 0.9, ControlPositioning::CenterX, std::move(bret));
+
+        guir->showWindow(gmplayer);
     });
 
     bnew->setClickCallback([&](Control* cc) {
@@ -678,7 +751,8 @@ static int show_starting_menu(
     gwin->add(0.1, 0.2, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bnew));
     gwin->add(
         0.1, 0.305, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bsettings));
-    gwin->add(0.1, 0.410, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
+    gwin->add(0.1, 0.41, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bmplayer));
+    gwin->add(0.1, 0.52, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)bquit));
     gwin->add(0.2, 0.01, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)ilogo));
 
     guir->showWindow(gwin);
@@ -721,6 +795,13 @@ static int show_starting_menu(
 
     run_game_loop(lr, frames);
 
+    if (query_thread_started) {
+        if (!aexit) {
+            aexit = true;            
+            async_test.join();
+        }
+    }
+    
     if (g) delete g;
 
     delete win;

@@ -1,5 +1,6 @@
 
 #include <client/graphical/gui/gui_label.hpp>
+#include <mutex>
 
 #include "pango/pango-font.h"
 
@@ -8,18 +9,18 @@ using namespace familyline::graphics::gui;
 PangoWeight Label::getPangoWeightFromAppearance(FontWeight fw) const
 {
     switch (fw) {
-    case FontWeight::Thin: return PANGO_WEIGHT_THIN; break;
-    case FontWeight::Ultralight: return PANGO_WEIGHT_ULTRALIGHT; break;
-    case FontWeight::Light: return PANGO_WEIGHT_LIGHT; break;
-    case FontWeight::Semilight: return PANGO_WEIGHT_SEMILIGHT; break;
-    case FontWeight::Book: return PANGO_WEIGHT_BOOK; break;
-    case FontWeight::Normal: return PANGO_WEIGHT_NORMAL; break;
-    case FontWeight::Medium: return PANGO_WEIGHT_MEDIUM; break;
-    case FontWeight::Semibold: return PANGO_WEIGHT_SEMIBOLD; break;
-    case FontWeight::Bold: return PANGO_WEIGHT_BOLD; break;
-    case FontWeight::Ultrabold: return PANGO_WEIGHT_ULTRABOLD; break;
-    case FontWeight::Heavy: return PANGO_WEIGHT_HEAVY; break;
-    case FontWeight::Ultraheavy: return PANGO_WEIGHT_ULTRAHEAVY; break;
+        case FontWeight::Thin: return PANGO_WEIGHT_THIN; break;
+        case FontWeight::Ultralight: return PANGO_WEIGHT_ULTRALIGHT; break;
+        case FontWeight::Light: return PANGO_WEIGHT_LIGHT; break;
+        case FontWeight::Semilight: return PANGO_WEIGHT_SEMILIGHT; break;
+        case FontWeight::Book: return PANGO_WEIGHT_BOOK; break;
+        case FontWeight::Normal: return PANGO_WEIGHT_NORMAL; break;
+        case FontWeight::Medium: return PANGO_WEIGHT_MEDIUM; break;
+        case FontWeight::Semibold: return PANGO_WEIGHT_SEMIBOLD; break;
+        case FontWeight::Bold: return PANGO_WEIGHT_BOLD; break;
+        case FontWeight::Ultrabold: return PANGO_WEIGHT_ULTRABOLD; break;
+        case FontWeight::Heavy: return PANGO_WEIGHT_HEAVY; break;
+        case FontWeight::Ultraheavy: return PANGO_WEIGHT_ULTRAHEAVY; break;
     }
 
     return PANGO_WEIGHT_NORMAL;
@@ -41,7 +42,7 @@ PangoLayout* Label::getLayout(cairo_t* context) const
     pango_layout_set_text(layout, this->text_.c_str(), -1);
 
     pango_font_description_free(font_description);
-    
+
     return layout;
 }
 
@@ -54,8 +55,10 @@ bool Label::update(cairo_t* context, cairo_surface_t* canvas)
         pango_layout_set_font_description(layout_, nullptr);
         g_object_unref(layout_);
     }
-    
-    layout_ = this->getLayout(context);    
+
+    std::lock_guard<std::mutex> guard(text_mtx_);
+
+    layout_ = this->getLayout(context);
 
     cairo_set_source_rgba(context, br, bg, bb, ba);
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
@@ -87,12 +90,13 @@ std::tuple<int, int> Label::getNeededSize(cairo_t* parent_context) const
 
     pango_layout_set_font_description(layout, nullptr);
     g_object_unref(layout);
-    
+
     return std::tie(width, height);
 }
 
 void Label::setText(std::string v)
 {
+    std::lock_guard<std::mutex> guard(text_mtx_);
     if (this->text_ != v) {
         this->text_ = v;
 

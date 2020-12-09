@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <mutex>
 
 namespace familyline::graphics::gui
 {
@@ -19,12 +20,13 @@ private:
     unsigned width_, height_;
     std::string text_;
     PangoLayout* layout_ = nullptr;
+    std::mutex text_mtx_;
     
     PangoLayout* getLayout(cairo_t* context) const;
     PangoWeight getPangoWeightFromAppearance(FontWeight fw) const;
 
     cairo_t* last_context_ = nullptr;
-
+    
 public:
     Label(unsigned width, unsigned height, std::string text)
         : width_(width), height_(height), text_(text)
