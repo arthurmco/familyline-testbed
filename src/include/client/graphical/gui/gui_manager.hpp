@@ -231,6 +231,8 @@ public:
 
     /**
      * Get the window named by `name`, or null if it does not exist
+     *
+     * This raw pointer might not always be valid in the lifetime of the window.
      */
     GUIWindow* getGUIWindow(std::string name);
 

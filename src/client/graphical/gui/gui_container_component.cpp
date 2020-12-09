@@ -1,12 +1,13 @@
-#include <client/graphical/gui/gui_container_component.hpp>
-#include <client/graphical/gui/control.hpp>
 #include <algorithm>
+#include <client/graphical/gui/control.hpp>
+#include <client/graphical/gui/gui_container_component.hpp>
 #include <ctime>
 #include <numeric>  // for std::accumulate
+#include <fmt/format.h>
 
 using namespace familyline::graphics::gui;
 
-void ContainerComponent::add(int x, int y, std::unique_ptr<Control> c)
+void ContainerComponent::add(int x, int y, std::unique_ptr<Control> c, std::string name = "")
 {
     this->children.reserve(128);
     c->setResizeCallback([&](Control* co, size_t w, size_t h) {
@@ -23,12 +24,16 @@ void ContainerComponent::add(int x, int y, std::unique_ptr<Control> c)
         }
     });
 
+    if (name == "")
+        name = fmt::format("{:16x}", (uintptr_t)c.get());
+    
     auto [context, canvas] = this->parent->createChildContext(c.get());
     c->updatePosition(x, y);
-    this->children.emplace_back(x, y, ControlPositioning::Pixel, context, canvas, std::move(c));
+    this->children.emplace_back(x, y, ControlPositioning::Pixel, context, canvas, std::move(c), name);
 }
 
-void ContainerComponent::add(float x, float y, ControlPositioning cpos, std::unique_ptr<Control> c)
+void ContainerComponent::add(
+    float x, float y, ControlPositioning cpos, std::unique_ptr<Control> c, std::string name = "")
 {
     c->setResizeCallback([&](Control* co, size_t w, size_t h) {
         auto co_it = std::find_if(
@@ -45,14 +50,16 @@ void ContainerComponent::add(float x, float y, ControlPositioning cpos, std::uni
     });
 
     auto [context, canvas] = this->parent->createChildContext(c.get());
-
+    if (name == "")
+        name = fmt::format("{:16x}", (uintptr_t)c.get());
+    
     if (x > 1.1 || y > 1.1 || cpos == ControlPositioning::Pixel) {
         c->updatePosition(x, y);
         this->children.emplace_back(
-            (int)x, (int)y, ControlPositioning::Pixel, context, canvas, std::move(c));
+            (int)x, (int)y, ControlPositioning::Pixel, context, canvas, std::move(c), name);
     } else {
-        this->children.emplace_back(x, y, cpos, context, canvas, std::move(c));
-    }    
+        this->children.emplace_back(x, y, cpos, context, canvas, std::move(c), name);
+    }
 }
 
 void ContainerComponent::remove(unsigned long long control_id)
@@ -143,3 +150,23 @@ std::optional<Control*> ContainerComponent::getControlAtPoint(int x, int y)
     return std::nullopt;
 }
 
+
+/**
+ * Gets the control you gave the name `name`
+ *
+ * Useful for things that require you to change the control in a different thread,
+ * or even from a different function it was created.
+ */
+Control* ContainerComponent::get(std::string name)
+{
+    auto obj = std::find_if(this->children.begin(), this->children.end(),
+                            [&](const ControlData& cd) {
+                                return cd.name == name;
+                            });
+
+    if (obj != this->children.end()) {
+        return obj->control.get();
+    }
+
+    return nullptr;
+}

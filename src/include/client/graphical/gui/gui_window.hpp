@@ -43,13 +43,18 @@ public:
     virtual bool update(cairo_t* context, cairo_surface_t* canvas);
     virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq);
 
-    void add(double x, double y, ControlPositioning cpos, std::unique_ptr<Control> control) {
-        rc_.getControlContainer()->add(x, y, cpos, std::move(control));
+    void add(double x, double y, ControlPositioning cpos, std::unique_ptr<Control> control,
+             std::string name="") {
+        rc_.getControlContainer()->add(x, y, cpos, std::move(control), name);
     }
 
     void remove(Control* control) {
         if (control)
             rc_.getControlContainer()->remove(control->getID());
+    }
+
+    Control* get(std::string name) {
+        return rc_.getControlContainer()->get(name);
     }
 
     std::function<void(GUIWindow&)> event_onDelete;
