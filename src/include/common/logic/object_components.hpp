@@ -100,6 +100,7 @@ struct AttackComponent {
      * Return the pure damage dealt, or an empty optional if the target is out of range
      */
     std::optional<double> doDirectAttack(const AttackComponent& other);
+    
 };
 
 /**

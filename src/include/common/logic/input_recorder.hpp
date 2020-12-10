@@ -20,10 +20,12 @@ namespace familyline::logic {
         std::string name;
     };
 
+    class ObjectFactory;
+    
     /**
      * The input recorder file is divided into three parts:
-     *   - the header, marked by the FREC keyword, contain the length, version
-     *     and player information
+     *   - the header, marked by the FREC keyword, contain the length, version,
+     *     player information and object checksum data
      *   - the inputs; each input is marked by the FINP keyword. We mark the inputs
      *     because, in the case of an unexpected crash, we can use this file for
      *     debugging; the file will be incomplete, but we can find the input commands
@@ -48,7 +50,7 @@ namespace familyline::logic {
          *
          * Return true if it could create, false if it could not
          */
-        bool createFile(std::string_view path);
+        bool createFile(std::string_view path, ObjectFactory* const of);
 
 
         /**

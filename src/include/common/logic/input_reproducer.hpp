@@ -6,101 +6,117 @@
  * (C) 2020 Arthur Mendes
  */
 
-#include <string>
-#include <vector>
-#include <tuple>
-
-#include <common/logger.hpp>
-#include <common/logic/player_session.hpp>
-#include <common/logic/player_actions.hpp>
-#include <cstdint>
 #include <input_serialize_generated.h>
 
-namespace familyline::logic {
+#include <common/logger.hpp>
+#include <common/logic/player_actions.hpp>
+#include <common/logic/player_session.hpp>
+#include <cstdint>
+#include <string>
+#include <tuple>
+#include <vector>
+#include <array>
 
-    struct InputInfo {
-        std::string name;
-        std::string color;
-        uint64_t id;
+namespace familyline::logic
+{
+struct InputInfo {
+    std::string name;
+    std::string color;
+    uint64_t id;
 
-        std::vector<uint64_t> allies;
-        std::vector<uint64_t> enemies;
-    };
+    std::vector<uint64_t> allies;
+    std::vector<uint64_t> enemies;
+};
 
-    class ReplayPlayer;
+class ReplayPlayer;
+class ObjectFactory;
 
-    class InputReproducer {
-    public:
-        InputReproducer(std::string_view file)
-            : file_(file), f_(nullptr), pinfo_({}), actioncount_(0), currentaction_(0)
-            {}
+class InputReproducer
+{
+public:
+    InputReproducer(std::string_view file)
+        : file_(file), f_(nullptr), pinfo_({}), actioncount_(0), currentaction_(0)
+    {
+    }
 
-        
-        /**
-         * Open and verify the file
-         *
-         * It will return true on success, and false on error
-         */
-        bool open();
+    /**
+     * Open and verify the file
+     *
+     * It will return true on success, and false on error
+     */
+    bool open();
 
-        /**
-         * Create a player session with players that will
-         * reproduce what happened in the file
-         *
-         * The diplomacy will be kept neutral between everyone, but the
-         * correct thing to do is to save it into the file
-         */
-        PlayerSession createPlayerSession(Terrain& terrain);
+    /**
+     * Verify the object checksums, compare them with the ones in the
+     * file
+     */
+    bool verifyObjectChecksums(ObjectFactory* const of);
 
-        InputReproducer(InputReproducer&) = delete;
-        InputReproducer(const InputReproducer&) = delete;
+    /**
+     * Create a player session with players that will
+     * reproduce what happened in the file
+     *
+     * The diplomacy will be kept neutral between everyone, but the
+     * correct thing to do is to save it into the file
+     */
+    PlayerSession createPlayerSession(Terrain& terrain);
 
-        std::string getTerrainFile() { return "terrain_test.flte"; }
+    InputReproducer(InputReproducer&)       = delete;
+    InputReproducer(const InputReproducer&) = delete;
 
-        /**
-         * Get the next action from the file
-         *
-         * If no more actions exist, returns an empty optional
-         */
-        std::optional<PlayerInputAction> getNextAction();
+    std::string getTerrainFile() { return "terrain_test.flte"; }
 
-        uint64_t getCurrentActionIndex() const { return currentaction_; }
+    /**
+     * Get the next action from the file
+     *
+     * If no more actions exist, returns an empty optional
+     */
+    std::optional<PlayerInputAction> getNextAction();
 
-        void reset() {
-            if (f_) {
-                fseek(f_, off_actionlist_, SEEK_SET);
-                currentaction_ = 0;
-            }
+    uint64_t getCurrentActionIndex() const { return currentaction_; }
+
+    void reset()
+    {
+        if (f_) {
+            fseek(f_, off_actionlist_, SEEK_SET);
+            currentaction_ = 0;
         }
+    }
 
-        bool isReproductionEnded() const;
+    bool isReproductionEnded() const;
 
-        /**
-         * Dispatch events to the players, from nextTick_ to nextTick_+nextTicks
-         */
-        void dispatchEvents(unsigned nextTicks);
+    /**
+     * Dispatch events to the players, from nextTick_ to nextTick_+nextTicks
+     */
+    void dispatchEvents(unsigned nextTicks);
 
-        ~InputReproducer();
+    ~InputReproducer();
 
-    private:
-        std::string file_;
-        FILE* f_;
-        std::vector<InputInfo> pinfo_;
+private:
+    std::string file_;
+    FILE* f_;
+    
+    std::vector<InputInfo> pinfo_;
 
-        off_t off_actionlist_ = 0;
-        long long int actioncount_, currentaction_;
-        
-        void onActionEnd(ReplayPlayer* p);
-        
-        std::map<int,
-                 std::function<void(PlayerInputAction)>> action_callbacks_;
-        std::map<int, bool> player_ended_;
+    using checksum_raw_t = std::vector<std::tuple<std::string /* type */, std::array<uint8_t, 256> /* checksum */>>;
+    
+    /// Checksum information, in a somewhat raw form
+    checksum_raw_t pchecksum_;
 
-        int nextTick_ = 0;
-        std::optional<PlayerInputAction> last_action_;
+    std::tuple<std::vector<InputInfo>, decltype(pchecksum_)> readPlayerInfo(FILE* file);
+    
+    off_t off_actionlist_ = 0;
+    long long int actioncount_, currentaction_;
 
+    void onActionEnd(ReplayPlayer* p);
 
-        void dispatchAction(const PlayerInputAction& action);
-   };
+    std::map<int, std::function<void(PlayerInputAction)>> action_callbacks_;
+    std::map<int, bool> player_ended_;
 
-}
+    int nextTick_ = 0;
+    std::optional<PlayerInputAction> last_action_;
+
+    void dispatchAction(const PlayerInputAction& action);
+};
+
+}  // namespace familyline::logic

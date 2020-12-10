@@ -38,6 +38,11 @@ public:
      */
     void addObject(GameObject* object);
 
+    /**
+     * Get a key of types and object checksums
+     */
+    std::map<std::string, object_checksum_t> getObjectChecksums() const;
+    
     void clear() { _objects.clear(); }
 };
 

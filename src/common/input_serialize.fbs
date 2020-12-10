@@ -11,8 +11,18 @@ table PlayerInfo {
        color: string(required);
 }
 
-table PlayerInfoChunk {
+table ObjectChecksum {
+      value: [ubyte];
+}
+
+table ObjectChecksums {
+      typenames: [string] (required);
+      checksums: [ObjectChecksum] (required);            
+}
+
+table RecordHeader {
       players: [PlayerInfo];
+      checksums: ObjectChecksums (required);
 }
 
 table CommandInputArgs {
@@ -26,12 +36,12 @@ table CommandInput {
 
 
 table SelectActionObjects {
-      values: [ulong];
+      values: [ulong] (required) ;
 }
 
 
 table SelectAction {
-      objects: SelectActionObjects;
+      objects: SelectActionObjects (required);
 }
 
 
@@ -70,7 +80,7 @@ table InputElement {
        tick: ulong;
        playercode: ulong;
        timestamp: ulong;
-       type: InputType;
+       type: InputType (required);
 }
 
 table InputFile {

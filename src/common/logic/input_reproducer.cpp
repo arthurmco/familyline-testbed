@@ -1,11 +1,14 @@
 #include <input_serialize_generated.h>
+#include <zlib.h>  // for the CRC32 calculation
 
 #include <algorithm>
+#include <array>
 #include <cerrno>
 #include <cinttypes>
 #include <common/logger.hpp>
 #include <common/logic/input_file.hpp>
 #include <common/logic/input_reproducer.hpp>
+#include <common/logic/object_factory.hpp>
 #include <common/logic/player_actions.hpp>
 #include <common/logic/player_manager.hpp>
 #include <common/logic/replay_player.hpp>
@@ -13,17 +16,16 @@
 #include <functional>
 #include <optional>
 
-#include <zlib.h> // for the CRC32 calculation
-
 using namespace familyline::logic;
+
+using checksum_raw_t =
+    std::vector<std::tuple<std::string /* type */, std::array<uint8_t, 256> /* checksum */>>;
 
 /**
  * Read player info at the file's current position
  */
-std::vector<familyline::logic::InputInfo> readPlayerInfo(FILE* file)
+std::tuple<std::vector<InputInfo>, checksum_raw_t> InputReproducer::readPlayerInfo(FILE* file)
 {
-    using namespace familyline;
-
     auto& log = LoggerService::getLogger();
 
     uint32_t size = 0;
@@ -43,7 +45,7 @@ std::vector<familyline::logic::InputInfo> readPlayerInfo(FILE* file)
 
     flatbuffers::FlatBufferBuilder builder;
 
-    auto playerinfo = flatbuffers::GetRoot<PlayerInfoChunk>((uint8_t*)data);
+    auto playerinfo = flatbuffers::GetRoot<RecordHeader>((uint8_t*)data);
 
     std::vector<logic::InputInfo> players;
     for (auto vit = playerinfo->players()->cbegin(); vit != playerinfo->players()->cend(); ++vit) {
@@ -55,8 +57,34 @@ std::vector<familyline::logic::InputInfo> readPlayerInfo(FILE* file)
             logic::InputInfo{vit->name()->str(), vit->color()->str(), vit->id(), {}, {}});
     }
 
+    checksum_raw_t checksuminfo;
+    auto serchecksums = playerinfo->checksums();
+
+    std::vector<std::string> typenames;
+    std::vector<std::array<uint8_t, 256>> typechecksums;
+
+    for (auto vit = serchecksums->typenames()->cbegin(); vit != serchecksums->typenames()->cend();
+         ++vit) {
+        puts(vit->c_str());
+        typenames.push_back(vit->str());
+    }
+
+    for (auto vit = serchecksums->checksums()->cbegin(); vit != serchecksums->checksums()->cend();
+         ++vit) {
+        std::array<uint8_t, 256> r;
+        std::copy(vit->value()->cbegin(), vit->value()->cend(), r.begin());
+
+        typechecksums.push_back(r);
+    }
+
+    int i = 0;
+    for (auto name : typenames) {
+        checksuminfo.push_back(std::make_tuple(name, typechecksums[i]));
+        i++;
+    }
+    
     delete[] data;
-    return players;
+    return std::tie(players, checksuminfo);
 }
 
 long long int readInputCount(FILE* file)
@@ -108,14 +136,13 @@ bool verifyChecksum(FILE* f)
 
     rewind(f);
     auto checksumpos = filesize - 4;
-    char* filedata = new char[filesize];
+    char* filedata   = new char[filesize];
 
-    auto reallen   = fread(filedata, 1, filesize, f);
-    filedata[checksumpos] = 0;
-    filedata[checksumpos+1] = 0;
-    filedata[checksumpos+2] = 0;
-    filedata[checksumpos+3] = 0;
-    
+    auto reallen              = fread(filedata, 1, filesize, f);
+    filedata[checksumpos]     = 0;
+    filedata[checksumpos + 1] = 0;
+    filedata[checksumpos + 2] = 0;
+    filedata[checksumpos + 3] = 0;
 
     unsigned long crc = crc32(0L, Z_NULL, 0);
     crc               = crc32(crc, (const unsigned char*)filedata, reallen);
@@ -128,7 +155,7 @@ bool verifyChecksum(FILE* f)
     fread(&file_crc, 1, sizeof(file_crc), f);
 
     bool ret = file_crc == crc;
-    
+
     fseek(f, pos, SEEK_SET);
 
     return ret;
@@ -175,14 +202,12 @@ bool InputReproducer::open()
     }
 
     if (!verifyChecksum(f_)) {
-        log->write(
-            "input-reproducer", LogType::Error, "Invalid checksum of file %s",
-            file_.data());
+        log->write("input-reproducer", LogType::Error, "Invalid checksum of file %s", file_.data());
 
-        return false;        
+        return false;
     }
-    
-    pinfo_ = readPlayerInfo(f_);
+
+    std::tie(pinfo_, pchecksum_) = readPlayerInfo(f_);
     if (pinfo_.size() == 0) {
         return false;
     }
@@ -215,6 +240,44 @@ bool InputReproducer::isReproductionEnded() const
 }
 
 /**
+ * Verify the object checksums, compare them with the ones in the
+ * file
+ */
+bool InputReproducer::verifyObjectChecksums(ObjectFactory* const of)
+{
+    auto& log = LoggerService::getLogger();
+
+    auto checksumlist = of->getObjectChecksums();
+
+    if (checksumlist.size() != pchecksum_.size()) {
+        log->write(
+            "input-reproducer", LogType::Warning,
+            "input file %s and this game has different count of objects (%zu here, %zu in the "
+            "file)",
+            file_.data(), checksumlist.size(), pchecksum_.size());
+        log->write(
+            "input-reproducer", LogType::Warning,
+            "The simulation will work, do not worry, but be aware");
+    }
+
+    int i = 0;
+    for (auto& craw : pchecksum_) {
+        auto stype    = std::get<0>(craw);
+        auto checksum = std::get<1>(craw);
+
+        if (checksumlist[stype] != checksum) {
+            log->write(
+                "input-reproducer", LogType::Error,
+                "input file %s has a different checksum of building type '%s'",
+                file_.data(), stype.c_str());
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
  * Create a player session with players that will
  * reproduce what happened in the file
  *
@@ -231,7 +294,12 @@ PlayerSession InputReproducer::createPlayerSession(Terrain& terrain)
         int code = int(p.id);
 
         {
-            ReplayPlayer* rp = new ReplayPlayer{*pm.get(), terrain, p.name.c_str(), code, *this,
+            ReplayPlayer* rp = new ReplayPlayer{
+                *pm.get(),
+                terrain,
+                p.name.c_str(),
+                code,
+                *this,
                 std::bind(&InputReproducer::onActionEnd, this, std::placeholders::_1)};
             action_callbacks_.insert(
                 {code, std::bind(&ReplayPlayer::enqueueAction, rp, std::placeholders::_1)});

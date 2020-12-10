@@ -1,3 +1,4 @@
+#include <flatbuffers/flatbuffers.h>
 #include <input_serialize_generated.h>
 #include <zlib.h>
 
@@ -6,6 +7,7 @@
 #include <common/logger.hpp>
 #include <common/logic/input_file.hpp>
 #include <common/logic/input_recorder.hpp>
+#include <common/logic/object_factory.hpp>
 
 using namespace familyline::logic;
 
@@ -19,12 +21,34 @@ InputRecorder::InputRecorder(PlayerManager& pm) : pm_(pm)
     }
 }
 
+flatbuffers::Offset<familyline::ObjectChecksums> serializeChecksums(
+    ObjectFactory* const of, flatbuffers::FlatBufferBuilder& builder)
+{
+    std::vector<flatbuffers::Offset<flatbuffers::String>> typenames;
+    std::vector<flatbuffers::Offset<familyline::ObjectChecksum>> checksums;
+
+    for (auto [type, checksum] : of->getObjectChecksums()) {
+        auto sertype = builder.CreateString(type);
+        auto serchecksum = builder.CreateVector(checksum.data(), checksum.size());
+        auto serval = familyline::CreateObjectChecksum(builder, serchecksum);
+        
+        typenames.push_back(sertype);
+        checksums.push_back(serval);
+    }
+
+    auto sertypenames = builder.CreateVector(typenames);
+    auto serchecksums = builder.CreateVector(checksums);
+
+    auto ret = familyline::CreateObjectChecksums(builder, sertypenames, serchecksums);
+    return ret;
+}
+
 /**
  * Create the file.
  *
  * Return true if it could create, false if it could not
  */
-bool InputRecorder::createFile(std::string_view path)
+bool InputRecorder::createFile(std::string_view path, ObjectFactory* const of)
 {
     if (f_) fclose(f_);
     flatbuffers::FlatBufferBuilder builder;
@@ -55,7 +79,8 @@ bool InputRecorder::createFile(std::string_view path)
     }
 
     auto playervec   = builder.CreateVector(playerlist.data(), playerlist.size());
-    auto playerchunk = CreatePlayerInfoChunk(builder, playervec);
+    auto checksums   = serializeChecksums(of, builder);
+    auto playerchunk = CreateRecordHeader(builder, playervec, checksums);
     builder.Finish(playerchunk);
     uint32_t psize = builder.GetSize();
     fwrite(&psize, sizeof(psize), 1, f_);
@@ -64,8 +89,7 @@ bool InputRecorder::createFile(std::string_view path)
     if (!f_) return false;
 
     LoggerService::getLogger()->write(
-        "input-recorder", LogType::Info, "creating input file %s",
-        path.data());
+        "input-recorder", LogType::Info, "creating input file %s", path.data());
     path_ = path;
     return true;
 }
@@ -201,8 +225,7 @@ void InputRecorder::commit()
     const char* endmagic = R_FOOTER_MAGIC;
     uint32_t inputcount  = inputcount_;
     uint32_t checksum    = 0;
-    
-    
+
     fwrite((void*)endmagic, 1, 4, f_);
     fwrite(&inputcount, sizeof(inputcount), 1, f_);
 

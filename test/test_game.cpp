@@ -56,9 +56,10 @@ TEST(GameTest, TestIfGameStartsAndRuns)
     session.player_colony.emplace(i, std::reference_wrapper(colony));
 
 
+    g->initObjectFactory();
     g->initPlayers(std::move(session.players), std::move(session.colonies),
                    session.player_colony, i);
-    g->initObjects();
+    g->initObjectManager();
     g->initLoopData(i);
     
     for (auto i = 0; i < 120; i++)

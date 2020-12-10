@@ -108,11 +108,18 @@ public:
      */
     void initReproducer(std::unique_ptr<logic::InputReproducer> irepr) { irepr_ = std::move(irepr); }
 
+
+    /**
+     * Initialize the object factory, with all game objects, and return a reference to it
+     *
+     * This is good, so we can get the object checksums
+     */
+    logic::ObjectFactory* initObjectFactory();
     
     /**
-     * Initialize the object manager and the object factory
+     * Initialize the object manager
      */
-    void initObjects();
+    void initObjectManager();
 
     void initLoopData(int human_id);
 

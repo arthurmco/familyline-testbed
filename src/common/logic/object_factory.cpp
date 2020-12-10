@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <common/logic/object_factory.hpp>
 
 using namespace familyline::logic;
@@ -18,3 +19,18 @@ std::shared_ptr<GameObject> ObjectFactory::getObject(const char* type, float x, 
 
 /* Adds an object to the factory */
 void ObjectFactory::addObject(GameObject* object) { _objects[object->getType()] = object; }
+
+/**
+ * Get a key of types and object checksums
+ */
+std::map<std::string, object_checksum_t> ObjectFactory::getObjectChecksums() const
+{
+    std::map<std::string, object_checksum_t> ret;
+
+    std::for_each(_objects.begin(), _objects.end(), [&]
+                   (const std::pair<std::string, GameObject*>& val) {
+        ret[val.first] = val.second->getChecksum();
+    });
+
+    return ret;
+}

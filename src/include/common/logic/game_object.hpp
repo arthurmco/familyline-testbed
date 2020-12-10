@@ -1,16 +1,15 @@
 #pragma once
 
+#include <array>
 #include <common/logic/object_components.hpp>
+#include <common/logic/types.hpp>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <common/logic/types.hpp>
-#include <array>
 
 namespace familyline::logic
 {
-
 /**
  * Game object type
  *
@@ -22,6 +21,8 @@ namespace familyline::logic
  * have to compare only one value. It would also remove ambiguity
  */
 enum class ObjectCategory { CommonUnit, Building, ResourceDepot, SiegeUnit, NavalUnit };
+
+typedef std::array<uint8_t, 256> object_checksum_t;
 
 /**
  * Our beloved base game object
@@ -73,12 +74,12 @@ protected:
     std::optional<ColonyComponent> cColony;
 
     ObjectCategory category;
-    
+
     /**
      * Update internal object logic
      */
-    virtual void doUpdate() {};
-    
+    virtual void doUpdate(){};
+
 public:
     object_id_t getID() const { return _id; }
     const std::string& getType() const { return _type; }
@@ -87,6 +88,18 @@ public:
     double getHealth() const { return _health; }
     int getMaxHealth() const { return _maxHealth; }
     bool isShowingHealth() const { return _showHealth; }
+
+    /**
+     * Get the "object checksum"
+     *
+     * This checksum will be used by network games and the input reproducer
+     * to see if this object is the same as the objects used in the other
+     * clients, or in the client who recorded the inputs.
+     *
+     * If the checksum matches, it will mean that the components
+     * were equal, and then the simulation will succeed.
+     */
+    virtual object_checksum_t getChecksum() const;
 
     double addHealth(double v)
     {
@@ -141,7 +154,7 @@ public:
      * Run the specified command, with the specified params
      */
     virtual void runCommand(std::string_view command, std::array<unsigned long long, 5> params) {}
-    
+
     virtual ~GameObject() {}
 };
 }  // namespace familyline::logic

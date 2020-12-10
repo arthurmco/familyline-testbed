@@ -268,32 +268,43 @@ Game* start_game(
     std::unique_ptr<ColonyManager> cm;
     unsigned int human_player_id = 0;
     PlayerSession session;
+    ObjectFactory* of = g->initObjectFactory();
 
-    if (irepr) {
-        /// loading input from a file
-        session = irepr->createPlayerSession(map);
-        pm      = std::move(session.players);
-        cm      = std::move(session.colonies);
-
-        human_player_id = pm->add(std::unique_ptr<Player>(
-            new HumanPlayer{*pm.get(), map, player_name.c_str(), 0, false}));
-        auto* player    = *(pm->get(human_player_id));
-        auto& alliance  = cm->createAlliance(std::string{player->getName()});
-        auto& colony    = cm->createColony(
-            *player, 0xffffff, std::optional<std::reference_wrapper<Alliance>>{alliance});
-        session.player_colony.emplace(human_player_id, std::reference_wrapper(colony));
-
-    } else {
+    auto createNormalSession_fn = [&](){
         /// running a normal game
         session         = initSinglePlayerSession(map, pinfo);
         pm              = std::move(session.players);
         cm              = std::move(session.colonies);
         human_player_id = pinfo.id;
+    };
+    
+    if (irepr) {
+        if (!irepr->verifyObjectChecksums(of)) {
+            irepr.reset();
+            createNormalSession_fn();
+            
+        } else {
+            /// loading input from a file
+            session = irepr->createPlayerSession(map);
+            pm      = std::move(session.players);
+            cm      = std::move(session.colonies);
+
+            human_player_id = pm->add(std::unique_ptr<Player>(
+                                          new HumanPlayer{*pm.get(), map, player_name.c_str(), 0, false}));
+            auto* player    = *(pm->get(human_player_id));
+            auto& alliance  = cm->createAlliance(std::string{player->getName()});
+            auto& colony    = cm->createColony(
+                *player, 0xffffff, std::optional<std::reference_wrapper<Alliance>>{alliance});
+            session.player_colony.emplace(human_player_id, std::reference_wrapper(colony));
+        }
+    } else {        
+        createNormalSession_fn();
     }
 
     if (human_player_id == -1) {
         throw std::runtime_error{"Could not create the human player"};
     }
+
 
     std::unique_ptr<InputRecorder> ir;
 
@@ -312,7 +323,7 @@ Game* start_game(
 
         log->write("game", LogType::Info, "\trecord destination: %s", recordpath.c_str());
 
-        if (!ir->createFile(recordpath.string())) {
+        if (!ir->createFile(recordpath.string(), of)) {
             log->write("game", LogType::Error, "\tinput record file could not be created");
             ir = std::unique_ptr<InputRecorder>(nullptr);
         }
@@ -327,62 +338,7 @@ Game* start_game(
     if (irepr) {
         log->write(
             "game", LogType::Info, "Replaying inputs from file %s", (*sgai.inputFile).c_str());
-
-        for (auto f = irepr->getNextAction(); f; f = irepr->getNextAction()) {
-            printf(
-                "\t[%" PRId64 "] tick: %d, player: %" PRIx64 ", timestamp %" PRId64 " | ",
-                irepr->getCurrentActionIndex() - 1, f->tick, f->playercode, f->timestamp);
-
-            std::visit(
-                overload{
-                    [&](const logic::CommandInput& a) {
-                        printf("CommandInput { command=%s } ", a.commandName.c_str());
-                    },
-                    [&](const logic::SelectAction& a) {
-                        switch (a.objects.size()) {
-                            case 0: printf("SelectAction { objects=0, deselecting all } "); break;
-                            case 1: printf("SelectAction { objects=[%lu] } ", a.objects[0]); break;
-                            case 2:
-                                printf(
-                                    "SelectAction { objects=[%lu, %lu] } ", a.objects[0],
-                                    a.objects[1]);
-                                break;
-                            case 3:
-                                printf(
-                                    "SelectAction { objects=[%lu, %lu, %lu] } ", a.objects[0],
-                                    a.objects[1], a.objects[2]);
-                                break;
-                            default:
-                                printf(
-                                    "SelectAction { objects=[%lu, %lu, %lu... (%zu objects)] } ",
-                                    a.objects[0], a.objects[1], a.objects[2], a.objects.size());
-                                break;
-                        }
-                    },
-                    [&](const logic::ObjectMove& a) {
-                        printf("ObjectMove { xPos=%d, yPos=%d } ", a.xPos, a.yPos);
-                    },
-                    [&](const logic::CameraMove& a) {
-                        printf(
-                            "CameraMove { dx=%.2f, dy=%.2f, dZoom=%.2f} ", a.deltaX, a.deltaY,
-                            a.deltaZoom);
-                    },
-                    [&](const logic::CameraRotate& a) {
-                        printf("CameraRotate { angle=%.3f rad} ", a.radians);
-                    },
-                    [&](const logic::CreateEntity& a) {
-                        printf(
-                            "CreateEntity { type=%s, xPos=%d, yPos=%d } ", a.type.c_str(), a.xPos,
-                            a.yPos);
-                    },
-                    [&](const logic::AddSelectAction& a) {}, [&](const CreateSelectGroup& a) {},
-                    [&](const SelectGroup& a) {}, [&](const AddSelectGroup& a) {},
-                    [&](const RemoveSelectGroup& a) {}},
-                f->type);
-
-            puts("");
-        }
-
+        
         irepr->reset();
 
         // dispatch 10 seconds worth of events
@@ -391,7 +347,7 @@ Game* start_game(
     }
 
     g->initPlayers(std::move(pm), std::move(cm), session.player_colony, human_player_id);
-    g->initObjects();
+    g->initObjectManager();
     g->initLoopData(human_player_id);
 
     return g;

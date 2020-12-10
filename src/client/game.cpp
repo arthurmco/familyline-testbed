@@ -94,33 +94,46 @@ void Game::initPlayers(
     log->write("game", LogType::Info, "player manager configured");
 }
 
-void Game::initObjects()
+
+/**
+ * Initialize the object factory, with all game objects, and return a reference to it
+ *
+ * This is good, so we can get the object checksums
+ */
+logic::ObjectFactory* Game::initObjectFactory()
+{
+    rndr_ = window_->createRenderer();
+    if (terr_rend_)
+        delete terr_rend_;
+    
+    // TODO: move this outside?
+    AssetFile f;
+    f.loadFile("assets.yml");
+    am->loadFile(f);
+    
+    auto& of = LogicService::getObjectFactory();
+
+    /* Adds the objects to the factory */
+    of->addObject(new WatchTower);
+    of->addObject(new Tent);
+
+    return of.get();
+}
+
+void Game::initObjectManager()
 {
     auto& log = LoggerService::getLogger();
     log->write("game", LogType::Info, "configuring game objects");
 
-    rndr_ = window_->createRenderer();
-    if (terr_rend_)
-        delete terr_rend_;
     
     terr_rend_ = rndr_->createTerrainRenderer(*camera_.get());
     terr_rend_->setTerrain(terrain_.get());
     terr_rend_->buildVertexData();
     terr_rend_->buildTextures();
 
-    // TODO: move this outside?
-    AssetFile f;
-    f.loadFile("assets.yml");
-    am->loadFile(f);
 
     om_  = std::make_unique<ObjectManager>();
     olm_ = std::make_unique<ObjectLifecycleManager>(*om_.get());
-
-    auto& of = LogicService::getObjectFactory();
-
-    /* Adds the objects to the factory */
-    of->addObject(new WatchTower);
-    of->addObject(new Tent);
 
     pathf_ = std::make_unique<PathFinder>(om_.get());
 
