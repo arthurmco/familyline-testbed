@@ -20,12 +20,24 @@ namespace familyline::logic {
         std::string name;
     };
 
+    /**
+     * The input recorder file is divided into three parts:
+     *   - the header, marked by the FREC keyword, contain the length, version
+     *     and player information
+     *   - the inputs; each input is marked by the FINP keyword. We mark the inputs
+     *     because, in the case of an unexpected crash, we can use this file for
+     *     debugging; the file will be incomplete, but we can find the input commands
+     *     thanks to those keywords.
+     *   - the footer, marked by the FEND keyword, contains checksum and input data
+     *     count
+     */    
     class InputRecorder {
     private:
         FILE* f_ = nullptr;
         PlayerManager& pm_;
         std::vector<RecordPlayerInfo> pinfo_;
 
+        std::string path_ = "";
         int inputcount_ = 0;
 
     public:

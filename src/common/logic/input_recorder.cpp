@@ -1,7 +1,8 @@
 #include <input_serialize_generated.h>
+#include <zlib.h>
 
-#include <cinttypes>
 #include <cerrno>
+#include <cinttypes>
 #include <common/logger.hpp>
 #include <common/logic/input_file.hpp>
 #include <common/logic/input_recorder.hpp>
@@ -28,7 +29,7 @@ bool InputRecorder::createFile(std::string_view path)
     if (f_) fclose(f_);
     flatbuffers::FlatBufferBuilder builder;
 
-    f_ = fopen(path.data(), "wb");
+    f_ = fopen(path.data(), "wb+");
     if (!f_) {
         LoggerService::getLogger()->write(
             "input-recorder", LogType::Error, "could not create input recorder file %s: %s (%d)",
@@ -62,6 +63,10 @@ bool InputRecorder::createFile(std::string_view path)
 
     if (!f_) return false;
 
+    LoggerService::getLogger()->write(
+        "input-recorder", LogType::Info, "creating input file %s",
+        path.data());
+    path_ = path;
     return true;
 }
 
@@ -170,6 +175,25 @@ bool InputRecorder::addAction(PlayerInputAction pia)
     return (f_ != nullptr);
 }
 
+uint32_t calculateChecksum(std::string path)
+{
+    FILE* firead = fopen(path.c_str(), "rb");
+    fseek(firead, 0L, SEEK_END);
+    auto filesize = ftell(firead);
+
+    rewind(firead);
+    char* filedata = new char[filesize];
+    auto reallen   = fread(filedata, 1, filesize, firead);
+
+    unsigned long crc = crc32(0L, Z_NULL, 0);
+    crc               = crc32(crc, (const unsigned char*)filedata, reallen);
+
+    delete[] filedata;
+    fclose(firead);
+
+    return crc;
+}
+
 void InputRecorder::commit()
 {
     std::vector<flatbuffers::Offset<familyline::InputElement>> inputs;
@@ -177,9 +201,21 @@ void InputRecorder::commit()
     const char* endmagic = R_FOOTER_MAGIC;
     uint32_t inputcount  = inputcount_;
     uint32_t checksum    = 0;
-
+    
+    
     fwrite((void*)endmagic, 1, 4, f_);
     fwrite(&inputcount, sizeof(inputcount), 1, f_);
+
+    auto checksumpos = ftell(f_);
+    fwrite(&checksum, sizeof(checksum), 1, f_);
+    fflush(f_);
+
+    checksum = calculateChecksum(path_);
+    LoggerService::getLogger()->write(
+        "input-recorder", LogType::Info, "writing checksum %08x to the file %s", checksum,
+        path_.c_str());
+
+    fseek(f_, checksumpos, SEEK_SET);
     fwrite(&checksum, sizeof(checksum), 1, f_);
 }
 

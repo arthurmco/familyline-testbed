@@ -13,6 +13,8 @@
 #include <functional>
 #include <optional>
 
+#include <zlib.h> // for the CRC32 calculation
+
 using namespace familyline::logic;
 
 /**
@@ -90,6 +92,49 @@ long long int readInputCount(FILE* file)
 }
 
 /**
+ * Verify if the file checksum is OK.
+ *
+ * Returns true if the checksum matches, false if it does not
+ *
+ * There will be files that will not have the checksum field, but a tool
+ * will be built to repair them
+ */
+bool verifyChecksum(FILE* f)
+{
+    auto pos = ftell(f);
+    fseek(f, 0L, SEEK_END);
+
+    auto filesize = ftell(f);
+
+    rewind(f);
+    auto checksumpos = filesize - 4;
+    char* filedata = new char[filesize];
+
+    auto reallen   = fread(filedata, 1, filesize, f);
+    filedata[checksumpos] = 0;
+    filedata[checksumpos+1] = 0;
+    filedata[checksumpos+2] = 0;
+    filedata[checksumpos+3] = 0;
+    
+
+    unsigned long crc = crc32(0L, Z_NULL, 0);
+    crc               = crc32(crc, (const unsigned char*)filedata, reallen);
+
+    delete[] filedata;
+
+    uint32_t file_crc = 0;
+
+    fseek(f, checksumpos, SEEK_SET);
+    fread(&file_crc, 1, sizeof(file_crc), f);
+
+    bool ret = file_crc == crc;
+    
+    fseek(f, pos, SEEK_SET);
+
+    return ret;
+}
+
+/**
  * Open and verify the file
  *
  * It will return true on success, and false on error
@@ -129,6 +174,14 @@ bool InputReproducer::open()
         return false;
     }
 
+    if (!verifyChecksum(f_)) {
+        log->write(
+            "input-reproducer", LogType::Error, "Invalid checksum of file %s",
+            file_.data());
+
+        return false;        
+    }
+    
     pinfo_ = readPlayerInfo(f_);
     if (pinfo_.size() == 0) {
         return false;
