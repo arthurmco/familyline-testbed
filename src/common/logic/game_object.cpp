@@ -55,4 +55,7 @@ std::shared_ptr<GameObject> GameObject::create()
 /**
  * Update internal object logic
  */
-void GameObject::update() {}
+void GameObject::update() {
+
+    this->doUpdate();
+}

@@ -73,7 +73,12 @@ protected:
     std::optional<ColonyComponent> cColony;
 
     ObjectCategory category;
-
+    
+    /**
+     * Update internal object logic
+     */
+    virtual void doUpdate() {};
+    
 public:
     object_id_t getID() const { return _id; }
     const std::string& getType() const { return _type; }
@@ -114,7 +119,7 @@ public:
     /**
      * Update internal object logic
      */
-    virtual void update();
+    void update();
 
     std::optional<LocationComponent>& getLocationComponent() { return cLocation; }
     std::optional<AttackComponent>& getAttackComponent() { return cAttack; }

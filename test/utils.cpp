@@ -14,7 +14,7 @@ TestObject::TestObject(const struct object_init& init)
     }
 }
 
-void TestObject::update() { fnUpdate_(); }
+void TestObject::doUpdate() { fnUpdate_(); }
 
 std::shared_ptr<GameObject> TestObject::create()
 {

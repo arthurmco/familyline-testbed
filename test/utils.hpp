@@ -30,11 +30,11 @@ private:
 
     // Preserve the original init parameters to ease object cloning
     struct object_init init_params_;
+    
+    virtual void doUpdate();    
 
 public:
     TestObject(const struct object_init& init);
-
-    virtual void update();
 
     CLONE_MACRO_H(TestObject)
 };
