@@ -1,17 +1,21 @@
+#include <SDL2/SDL_messagebox.h>
+#include <fmt/core.h>
+
 #include <client/graphical/opengl/gl_window.hpp>
+
 #include "client/graphical/gui/gui_manager.hpp"
+#include "client/graphical/window.hpp"
 
 #ifdef RENDERER_OPENGL
 
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/gfx_service.hpp>
-#include <client/graphical/renderer.hpp>
 #include <client/graphical/opengl/gl_renderer.hpp>
 #include <client/graphical/opengl/gl_shader.hpp>
+#include <client/graphical/renderer.hpp>
 #include <client/graphical/shader_manager.hpp>
-#include <common/logger.hpp>
-
 #include <client/input/input_service.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::graphics;
 
@@ -24,7 +28,7 @@ using namespace familyline::graphics;
 static void enable_gl_debug()
 {
     using namespace familyline;
-    
+
     auto& log = LoggerService::getLogger();
     struct LogTime {
         unsigned qt      = 0;
@@ -128,7 +132,8 @@ static void enable_gl_debug()
 
     if (GL_KHR_debug && glDebugMessageCallback) {
         // Try KHR_debug first
-        log->write("gl_window", LogType::Info, "KHR_debug supported and used to get GPU debug messages");
+        log->write(
+            "gl_window", LogType::Info, "KHR_debug supported and used to get GPU debug messages");
         glDebugMessageCallback(gl_debug_callback, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
@@ -147,7 +152,6 @@ static void enable_gl_debug()
         log->write("gl_window", LogType::Warning, "GPU debugging messages will not be available");
     }
 }
-
 
 GLWindow::GLWindow(GLDevice* dev, int width, int height) : _dev(dev), _width(width), _height(height)
 {
@@ -239,9 +243,8 @@ void GLWindow::show()
 
     this->createWindowSquare();
     SDL_ShowWindow(_win);
-    
+
     enable_gl_debug();
-    
 }
 
 static const GLfloat base_win_square_points[] = {-1.0, 1.0,  1.0, 1.0,  1.0,  1.0,
@@ -356,9 +359,7 @@ gui::GUIManager* GLWindow::createGUIManager()
     }
 
     return (gui::GUIManager*)guim_.get();
-    
 }
-
 
 Renderer* GLWindow::createRenderer()
 {
@@ -366,5 +367,21 @@ Renderer* GLWindow::createRenderer()
     return (GLRenderer*)renderer_.get();
 }
 Renderer* GLWindow::getRenderer() { return (GLRenderer*)renderer_.get(); }
+
+void GLWindow::showMessageBox(std::string title, SysMessageBoxFlags flags, std::string content)
+{
+    uint32_t sdlflags = 0;
+    switch (flags) {
+        case SysMessageBoxFlags::Error: sdlflags = SDL_MESSAGEBOX_ERROR; break;
+        case SysMessageBoxFlags::Warning: sdlflags = SDL_MESSAGEBOX_WARNING; break;
+        case SysMessageBoxFlags::Information: sdlflags = SDL_MESSAGEBOX_INFORMATION; break;
+    }
+
+    int buttonid = 0;
+    if (SDL_ShowSimpleMessageBox(
+            sdlflags, title.c_str(), content.c_str(), this->_win ? this->_win : nullptr) < 0) {
+        fmt::print("{}\n{}\n\n", title, content);
+    }
+}
 
 #endif

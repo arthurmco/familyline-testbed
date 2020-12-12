@@ -32,8 +32,8 @@ logic::Terrain& Game::initMap(std::string_view path)
     auto& log = LoggerService::getLogger();
 
     if (!terrFile_->open(path)) {
-        throw new logic_exception{
-            fmt::format("Could not open terrain " ASSET_FILE_DIR " terrain_test.flte")};
+        throw logic_exception{
+            fmt::format("Could not open terrain '{}'", path)};
     }
 
     terrain_ = std::move(std::make_unique<Terrain>(*terrFile_.get()));

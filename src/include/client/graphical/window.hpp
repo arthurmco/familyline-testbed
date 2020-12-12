@@ -2,14 +2,16 @@
 
 #include <client/graphical/device.hpp>
 #include <client/graphical/framebuffer.hpp>
-#include <client/graphical/shader.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
+#include <client/graphical/shader.hpp>
 #include <memory>
 
 namespace familyline::graphics
 {
-    class Renderer;    
-    
+class Renderer;
+
+enum class SysMessageBoxFlags { Warning, Error, Information };
+
 /**
  * The window
  *
@@ -36,11 +38,18 @@ public:
     virtual ~Window() {}
 
     virtual Renderer* createRenderer() = 0;
-    virtual Renderer* getRenderer() = 0;
+    virtual Renderer* getRenderer()    = 0;
 
     virtual gui::GUIManager* createGUIManager() = 0;
-};
 
-    
+    /**
+     * Shows a message box (can be a system or an in-game message box,
+     * depends on the renderer, but this function cannot cause an error)
+     *
+     * A message box will usually be used to report errors
+     */
+    virtual void showMessageBox(
+        std::string title, SysMessageBoxFlags flags, std::string content) = 0;
+};
 
 }  // namespace familyline::graphics

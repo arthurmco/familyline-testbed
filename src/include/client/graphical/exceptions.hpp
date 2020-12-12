@@ -42,8 +42,10 @@ private:
     std::string _msg;
 
 public:
-    explicit shader_exception(std::string_view message, int code)
-        : graphical_exception(message), errorCode(code)
+    std::string file;
+
+    explicit shader_exception(std::string_view message, int code, std::string file="")
+        : graphical_exception(message), errorCode(code), file(file)
     {
         _msg = fmt::format("Shader error {}, code {}", this->_message.data(), this->errorCode);
     }

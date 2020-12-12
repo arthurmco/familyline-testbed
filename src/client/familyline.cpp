@@ -509,21 +509,37 @@ int main(int argc, char const* argv[])
         log->write("init", LogType::Fatal, "Shader error: %s [d]", se.what());
 
         if (win) {
-            //            fmt::memory_buffer out;
-            //            format_to(out,
-            //                "Familyline found an error in a shader\n"
-            //                "\n"
-            //                "Error: {:s}\n"
-            //                "File: {:s}, type: {:d}, code: {:d}",
-            //                se.what(), se.file.c_str(), se.type, se.code);
-            //            w->showMessageBox(out.data(), "Error", MessageBoxInfo::Error);
+            std::string content = fmt::format(
+                "Shader {} could not be compiled\n"
+                "\n"
+                "Error: {}",
+                se.file, se.what());
+            win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
         }
 
         exit(EXIT_FAILURE);
     } catch (graphical_exception& we) {
         log->write("init", LogType::Fatal, "Window creation error: %s (d)", we.what());
 
-        fmt::print(stderr, "Error while creating the window: {:s}\n", we.what());
+        if (win) {
+            std::string content = fmt::format(
+                "Graphical error: {}\n",
+                we.what());
+            win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
+        }
+
+        exit(EXIT_FAILURE);
+    } catch (logic_exception& le) {
+        log->write("init", LogType::Fatal, "Logic exception: %s (d)", le.what());
+
+        if (win) {
+            std::string content = fmt::format(
+                "An error happened in the simulation part of the game:\n"
+                "\n"
+                "Error: {}",
+                le.what());
+            win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
+        }
 
         exit(EXIT_FAILURE);
     } catch (std::bad_alloc& be) {
@@ -532,13 +548,10 @@ int main(int argc, char const* argv[])
         log->write("init", LogType::Fatal, "Probably out of memory");
 
         if (win) {
-            //            fmt::memory_buffer out;
-            //            format_to(out,
-            //                "Insufficient memory\n"
-            //                "\n"
-            //                "Error: {:s}",
-            //                be.what());
-            //            w->ShowMessageBox(out.data(), "Error", MessageBoxInfo::Error);
+            std::string content = fmt::format(
+                "Insufficient memory\n\nError: {:s}",
+                be.what());
+            win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
         }
 
         exit(EXIT_FAILURE);

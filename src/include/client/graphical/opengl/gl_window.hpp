@@ -58,6 +58,16 @@ namespace familyline::graphics
         virtual Renderer* getRenderer();
 
         virtual gui::GUIManager* createGUIManager();
+
+        /**
+         * Shows a message box (can be a system or an in-game message box,
+         * depends on the renderer, but this function cannot cause an error)
+         *
+         * A message box will usually be used to report errors
+         */
+        virtual void showMessageBox(
+            std::string title, SysMessageBoxFlags flags, std::string content);
+
         
         virtual ~GLWindow() {}
     };

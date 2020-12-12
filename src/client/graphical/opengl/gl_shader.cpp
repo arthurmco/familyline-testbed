@@ -8,6 +8,7 @@
 #include <cstdio>
 
 #include <regex>
+#include <fmt/format.h>
 
 using namespace familyline::graphics;
 
@@ -60,11 +61,8 @@ std::string GLShader::readAndProcessFile(const char* file)
 
     FILE* f = fopen(file, "r");
     if (!f) {
-        std::string e = "Error while opening ";
-        e.append(file);
-        e.append(": ");
-        e.append(strerror(errno));
-        throw shader_exception(e, errno);
+        std::string e = fmt::format("Error while opening {}: {}", file, strerror(errno));
+        throw shader_exception(e, errno, std::string{file});
     }
 
     char s[1024];
@@ -117,11 +115,8 @@ void GLShader::compile()
         char* logdata = new char[logsize];
 
         glGetShaderInfoLog(this->_handle, logsize, NULL, logdata);
-        std::string e = "Error while compiling ";
-        e.append(this->_file);
-        e.append(": ");
-        e.append(logdata);
-        throw shader_exception(e, -1023);
+        std::string e = fmt::format("Error while compiling {}: {}", this->_file, logdata);
+        throw shader_exception(e, -1023, std::string{_file});
     }
 }
 
@@ -152,13 +147,10 @@ void GLShaderProgram::link()
         char* logdata = new char[logsize];
 
         glGetProgramInfoLog(this->_handle, logsize, NULL, logdata);
-        std::string e = "Error while compiling shader program '";
-        e.append(_name);
-        e.append("': ");
-        e.append(logdata);
+        std::string e = fmt::format("Error while compiling shader program '{}': {}", _name, logdata);
 
         // if (res == GL_TRUE)
-        throw shader_exception(e, 1023);
+        throw shader_exception(e, 1023, std::string{_name});
     }
 
     GFXService::getShaderManager()->addShader(this);

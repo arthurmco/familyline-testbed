@@ -18,9 +18,9 @@ ShaderProgram* ShaderManager::getShader(std::string_view name)
 {
     auto res = _shaders.find(std::string{name});
     if (res == _shaders.end()) {
-        char s[256];
+        char s[256];        
         sprintf(s, "Shader %s not found in shader manager", name.data());
-        throw shader_exception(std::string_view{s}, 2);
+        throw shader_exception(std::string_view{s}, 2, std::string{name});
     }
 
     return res->second;
