@@ -63,6 +63,12 @@ std::tuple<std::vector<InputInfo>, checksum_raw_t> InputReproducer::readPlayerIn
     std::vector<std::string> typenames;
     std::vector<std::array<uint8_t, 256>> typechecksums;
 
+    if (!serchecksums) {
+        log->write(
+            "input-reproducer", LogType::Warning, "no checksum information found on this file");
+        return std::tie(players, checksuminfo);
+    }
+
     for (auto vit = serchecksums->typenames()->cbegin(); vit != serchecksums->typenames()->cend();
          ++vit) {
         puts(vit->c_str());
@@ -82,7 +88,7 @@ std::tuple<std::vector<InputInfo>, checksum_raw_t> InputReproducer::readPlayerIn
         checksuminfo.push_back(std::make_tuple(name, typechecksums[i]));
         i++;
     }
-    
+
     delete[] data;
     return std::tie(players, checksuminfo);
 }
@@ -242,13 +248,24 @@ bool InputReproducer::isReproductionEnded() const
 /**
  * Verify the object checksums, compare them with the ones in the
  * file
+ *
  */
 bool InputReproducer::verifyObjectChecksums(ObjectFactory* const of)
 {
     auto& log = LoggerService::getLogger();
 
     auto checksumlist = of->getObjectChecksums();
-
+    if (pchecksum_.size() == 0) {
+        log->write(
+            "input-reproducer", LogType::Warning,
+            "input file %s has no object checksum field. We cannot determine what the game will use",
+            file_.data());
+        log->write(
+            "input-reproducer", LogType::Warning,
+            "It is better not to continue read the file");
+        return false;        
+    }
+    
     if (checksumlist.size() != pchecksum_.size()) {
         log->write(
             "input-reproducer", LogType::Warning,
@@ -259,6 +276,8 @@ bool InputReproducer::verifyObjectChecksums(ObjectFactory* const of)
             "input-reproducer", LogType::Warning,
             "The simulation will work, do not worry, but be aware");
     }
+
+    std::vector<bool> foundChecksums(pchecksum_.size(), false);
 
     int i = 0;
     for (auto& craw : pchecksum_) {
@@ -272,7 +291,20 @@ bool InputReproducer::verifyObjectChecksums(ObjectFactory* const of)
                 file_.data(), stype.c_str());
             return false;
         }
+
+        printf("%d %zu\n", i, foundChecksums.size());
+        foundChecksums[i] = true;
+        i++;
     }
+
+    if (std::find(foundChecksums.begin(), foundChecksums.end(), false) != foundChecksums.end()) {
+        log->write(
+            "input-reproducer", LogType::Error,
+            "we have some objects in the file '%s' that were not in this game",
+            file_.data());
+        return false;
+    }
+
 
     return true;
 }

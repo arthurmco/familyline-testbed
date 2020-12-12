@@ -253,6 +253,12 @@ Game* start_game(
         if (!irepr->open()) {
             mapfile = ASSET_FILE_DIR "terrain_test.flte";
             irepr.reset();
+            win->showMessageBox("Familyline error",
+                                SysMessageBoxFlags::Error,
+                                fmt::format("Could not open input record {}\n"
+                                            "Check the logs for more information.", *sgai.inputFile));
+            return nullptr;
+
         } else {
             mapfile = irepr->getTerrainFile();
         }
@@ -281,7 +287,12 @@ Game* start_game(
     if (irepr) {
         if (!irepr->verifyObjectChecksums(of)) {
             irepr.reset();
-            createNormalSession_fn();
+            win->showMessageBox("Familyline error",
+                                SysMessageBoxFlags::Error,
+                                fmt::format("Could not open input record {}, objects do not match\n"
+                                    "The person who recorded might have a mod you do not have, or a"
+                                            "different version than you.", *sgai.inputFile));
+            return nullptr;
             
         } else {
             /// loading input from a file
@@ -490,9 +501,11 @@ int main(int argc, char const* argv[])
 
             Game* g = start_game(
                 f3D, fGUI, win, guir, lr, StartGameInfo{mapFile, pi.inputFile}, confdata);
-            lr.load([&]() { return g->runLoop(); });
 
-            run_game_loop(lr, frames);
+            if (g) {
+                lr.load([&]() { return g->runLoop(); });
+                run_game_loop(lr, frames);
+            }            
 
             if (g) delete g;
 
@@ -719,7 +732,10 @@ static int show_starting_menu(
         g = start_game(
             f3D, fGUI, win, guir, lr,
             StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt}, confdata);
-        lr.load([&]() { return g->runLoop(); });
+
+        if (g) {
+            lr.load([&]() { return g->runLoop(); });
+        }
     });
 
     gwin->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)l));
