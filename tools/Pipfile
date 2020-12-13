@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 Pillow = "*"
+flatbuffers = "*"
 
 [dev-packages]
 pylint = "*"
