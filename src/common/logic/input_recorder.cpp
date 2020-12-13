@@ -71,6 +71,7 @@ bool InputRecorder::createFile(std::string_view path, ObjectFactory* const of)
         LoggerService::getLogger()->write(
             "input-recorder", LogType::Error, "could not create input recorder file %s: %s (%d)",
             path.data(), strerror(errno), errno);
+        path_ = "";
         return false;
     }
 
@@ -124,7 +125,7 @@ overload(Ts...) -> overload<Ts...>;
  */
 bool InputRecorder::addAction(PlayerInputAction pia)
 {
-    if (f_) {
+    if (f_ && path_ != "") {
         flatbuffers::FlatBufferBuilder builder;
 
         familyline::InputType type_val;
@@ -257,7 +258,7 @@ void InputRecorder::commit()
 
 InputRecorder::~InputRecorder()
 {
-    if (f_) {
+    if (f_ && path_ != "") {
         this->commit();
         fclose(f_);
     }

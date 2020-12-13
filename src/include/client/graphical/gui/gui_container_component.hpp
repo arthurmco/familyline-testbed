@@ -12,6 +12,7 @@
 #include <optional>
 #include <tuple>
 #include <vector>
+#include <string>
 
 namespace familyline::graphics::gui
 {

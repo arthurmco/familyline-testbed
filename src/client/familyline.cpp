@@ -7,6 +7,7 @@
 ***/
 
 #include <fmt/core.h>
+
 #include <chrono>
 
 #include "client/graphical/gui/gui_container_component.hpp"
@@ -27,9 +28,8 @@
 #endif
 
 #include <fmt/format.h>
-#include <atomic>
 
-#include <thread>
+#include <atomic>
 #include <cinttypes>
 #include <client/HumanPlayer.hpp>
 #include <client/config_reader.hpp>
@@ -59,6 +59,7 @@
 #include <ctime>
 #include <filesystem>
 #include <glm/gtc/matrix_transform.hpp>  //glm::lookAt()
+#include <thread>
 
 using namespace familyline;
 using namespace familyline::logic;
@@ -253,10 +254,12 @@ Game* start_game(
         if (!irepr->open()) {
             mapfile = ASSET_FILE_DIR "terrain_test.flte";
             irepr.reset();
-            win->showMessageBox("Familyline error",
-                                SysMessageBoxFlags::Error,
-                                fmt::format("Could not open input record {}\n"
-                                            "Check the logs for more information.", *sgai.inputFile));
+            win->showMessageBox(
+                "Familyline error", SysMessageBoxFlags::Error,
+                fmt::format(
+                    "Could not open input record {}\n"
+                    "Check the logs for more information.",
+                    *sgai.inputFile));
             return nullptr;
 
         } else {
@@ -277,24 +280,26 @@ Game* start_game(
     g->initAssets();
     ObjectFactory* of = g->initObjectFactory();
 
-    auto createNormalSession_fn = [&](){
+    auto createNormalSession_fn = [&]() {
         /// running a normal game
         session         = initSinglePlayerSession(map, pinfo);
         pm              = std::move(session.players);
         cm              = std::move(session.colonies);
         human_player_id = pinfo.id;
     };
-    
+
     if (irepr) {
         if (!irepr->verifyObjectChecksums(of)) {
             irepr.reset();
-            win->showMessageBox("Familyline error",
-                                SysMessageBoxFlags::Error,
-                                fmt::format("Could not open input record {}, objects do not match\n"
-                                    "The person who recorded might have a mod you do not have, or a"
-                                            "different version than you.", *sgai.inputFile));
+            win->showMessageBox(
+                "Familyline error", SysMessageBoxFlags::Error,
+                fmt::format(
+                    "Could not open input record {}, objects do not match\n"
+                    "The person who recorded might have a mod you do not have, or a"
+                    "different version than you.",
+                    *sgai.inputFile));
             return nullptr;
-            
+
         } else {
             /// loading input from a file
             session = irepr->createPlayerSession(map);
@@ -302,14 +307,14 @@ Game* start_game(
             cm      = std::move(session.colonies);
 
             human_player_id = pm->add(std::unique_ptr<Player>(
-                                          new HumanPlayer{*pm.get(), map, player_name.c_str(), 0, false}));
+                new HumanPlayer{*pm.get(), map, player_name.c_str(), 0, false}));
             auto* player    = *(pm->get(human_player_id));
             auto& alliance  = cm->createAlliance(std::string{player->getName()});
             auto& colony    = cm->createColony(
                 *player, 0xffffff, std::optional<std::reference_wrapper<Alliance>>{alliance});
             session.player_colony.emplace(human_player_id, std::reference_wrapper(colony));
         }
-    } else {        
+    } else {
         createNormalSession_fn();
     }
 
@@ -349,7 +354,7 @@ Game* start_game(
     if (irepr) {
         log->write(
             "game", LogType::Info, "Replaying inputs from file %s", (*sgai.inputFile).c_str());
-        
+
         irepr->reset();
 
         // dispatch 10 seconds worth of events
@@ -505,7 +510,7 @@ int main(int argc, char const* argv[])
             if (g) {
                 lr.load([&]() { return g->runLoop(); });
                 run_game_loop(lr, frames);
-            }            
+            }
 
             if (g) delete g;
 
@@ -535,9 +540,7 @@ int main(int argc, char const* argv[])
         log->write("init", LogType::Fatal, "Window creation error: %s (d)", we.what());
 
         if (win) {
-            std::string content = fmt::format(
-                "Graphical error: {}\n",
-                we.what());
+            std::string content = fmt::format("Graphical error: {}\n", we.what());
             win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
         }
 
@@ -561,9 +564,7 @@ int main(int argc, char const* argv[])
         log->write("init", LogType::Fatal, "Probably out of memory");
 
         if (win) {
-            std::string content = fmt::format(
-                "Insufficient memory\n\nError: {:s}",
-                be.what());
+            std::string content = fmt::format("Insufficient memory\n\nError: {:s}", be.what());
             win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
         }
 
@@ -571,15 +572,14 @@ int main(int argc, char const* argv[])
     }
 }
 
-
 static int show_starting_menu(
     const ParamInfo& pi, Framebuffer* f3D, Framebuffer* fGUI, graphics::Window* win,
     GUIManager* guir, size_t gwidth, size_t gheight, LoopRunner& lr, ConfigData& confdata)
-{    
+{
     std::thread async_test;
-    std::atomic<int> val = 0;
+    std::atomic<int> val    = 0;
     std::atomic<bool> aexit = false;
-    
+
     auto& log = LoggerService::getLogger();
     Game* g   = nullptr;
     auto& ima = InputService::getInputManager();
@@ -636,11 +636,10 @@ static int show_starting_menu(
 
         auto bret =
             std::make_unique<Button>(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
-        auto recordGame =
-            new Checkbox(300, 32, "Record the game inputs", confdata.enableInputRecording);
 
         bret->setClickCallback([&](auto* c) {
             GUIWindow* gsettings          = guir->getGUIWindow("settings");
+            Checkbox* recordGame          = (Checkbox*) gsettings->get("recordGame");
             confdata.enableInputRecording = recordGame->getState();
             guir->closeWindow(*gsettings);
             guir->destroyGUIWindow("settings");
@@ -650,7 +649,9 @@ static int show_starting_menu(
         gsettings->add(0.37, 0.13, ControlPositioning::CenterX, std::move(header));
         gsettings->add(
             0.05, 0.3, ControlPositioning::Relative,
-            std::unique_ptr<Control>((Control*)recordGame));
+            std::make_unique<Checkbox>(
+                300, 32, "Record the game inputs", confdata.enableInputRecording),
+            "recordGame");
         gsettings->add(0.37, 0.9, ControlPositioning::CenterX, std::move(bret));
 
         guir->showWindow(gsettings);
@@ -684,9 +685,9 @@ static int show_starting_menu(
         });
 
         aexit = false;
-        val = 0;
-        
-        async_test = std::thread([&](){
+        val   = 0;
+
+        async_test = std::thread([&]() {
             std::this_thread::sleep_for(std::chrono::seconds(1));
             Label* lbl = (Label*)guir->getGUIWindow("mplayer")->get("async_lbl");
             while (!aexit) {
@@ -704,7 +705,7 @@ static int show_starting_menu(
         bret->setClickCallback([&](auto* c) {
             aexit = true;
             async_test.join();
-            GUIWindow* gmplayer           = guir->getGUIWindow("mplayer");
+            GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
             guir->closeWindow(*gmplayer);
             guir->destroyGUIWindow("mplayer");
         });
@@ -722,13 +723,13 @@ static int show_starting_menu(
         (void)cc;
         if (async_test.joinable()) {
             if (!aexit) {
-                aexit = true;            
+                aexit = true;
                 async_test.join();
             }
         }
-        
+
         guir->closeWindow(*gwin);
-               
+
         g = start_game(
             f3D, fGUI, win, guir, lr,
             StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt}, confdata);
@@ -753,7 +754,7 @@ static int show_starting_menu(
     ima->addListenerHandler([&](HumanInputAction hia) {
         /* Only listen for game exit events, because you sure want to
            close the window The others will be handled by the GUI listener */
-        if (std::holds_alternative<GameExit>(hia.type)) {            
+        if (std::holds_alternative<GameExit>(hia.type)) {
             r = false;
         }
 
@@ -789,11 +790,11 @@ static int show_starting_menu(
 
     if (async_test.joinable()) {
         if (!aexit) {
-            aexit = true;            
+            aexit = true;
             async_test.join();
         }
     }
-    
+
     if (g) delete g;
 
     delete win;
