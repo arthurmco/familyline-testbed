@@ -105,6 +105,11 @@ void Game::initAssets()
     AssetFile f;
     f.loadFile("assets.yml");
     am->loadFile(f);
+
+    rndr_ = window_->createRenderer();
+    if (terr_rend_)
+        delete terr_rend_;
+
 }
 
 /**
@@ -113,12 +118,7 @@ void Game::initAssets()
  * This is good, so we can get the object checksums
  */
 logic::ObjectFactory* Game::initObjectFactory()
-{
-    rndr_ = window_->createRenderer();
-    if (terr_rend_)
-        delete terr_rend_;
-    
-    
+{   
     auto& of = LogicService::getObjectFactory();
 
     /* Adds the objects to the factory */

@@ -19,11 +19,11 @@ TEST(ColonyManager, TestIfColonyAdds)
     Terrain t{tf};
 
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
 
     Colony& c1 = cm.createColony(*p1.get(), 0xffff00ff, std::nullopt);
     Colony& c2 = cm.createColony(*p2.get(), 0xff0000ff, std::nullopt);
@@ -43,11 +43,11 @@ TEST(ColonyManager, TestIfAllianceAdds)
     Terrain t{tf};
 
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
 
     Alliance& a1 = cm.createAlliance("Alliance1");
     Alliance& a2 = cm.createAlliance("ANewAlliance2");
@@ -77,11 +77,11 @@ TEST(ColonyManager, TestIfAllianceChangesOneSideAlly)
     Terrain t{tf};
 
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
 
     Alliance& a1 = cm.createAlliance("Alliance1");
     Alliance& a2 = cm.createAlliance("Alliance2");
@@ -107,11 +107,11 @@ TEST(ColonyManager, TestIfAllianceChangesOneSideEnemy)
     Terrain t{tf};
 
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
 
     Alliance& a1 = cm.createAlliance("Alliance1");
     Alliance& a2 = cm.createAlliance("Alliance2");
@@ -137,11 +137,11 @@ TEST(ColonyManager, TestIfAllianceChangesBoth)
     Terrain t{tf};
 
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
 
     Alliance& a1 = cm.createAlliance("Alliance1");
     Alliance& a2 = cm.createAlliance("Alliance2");
@@ -168,11 +168,11 @@ TEST(ColonyManager, TestIfAllianceChangesAndChangesBack)
     Terrain t{tf};
 
     auto p1 = std::make_unique<DummyPlayer>(
-        pm, t, "Test1", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test1", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p2 = std::make_unique<DummyPlayer>(
-        pm, t, "Test2", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test2", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
     auto p3 = std::make_unique<DummyPlayer>(
-        pm, t, "Test3", 1, [&]() -> std::vector<PlayerInputType> { return {}; });
+        pm, t, "Test3", 1, [&](size_t) -> std::vector<PlayerInputType> { return {}; });
 
     Alliance& a1 = cm.createAlliance("Alliance1");
     Alliance& a2 = cm.createAlliance("Alliance2");

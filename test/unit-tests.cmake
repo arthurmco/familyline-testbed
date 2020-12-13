@@ -39,6 +39,7 @@ if (DO_TESTS)
   set( SRC_TEST_FILES
     "${CMAKE_SOURCE_DIR}/test/test_colony_manager.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_game.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_input_recorder.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_model_opener.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_object_attack.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_object_factory.cpp"
@@ -49,6 +50,7 @@ if (DO_TESTS)
     "${CMAKE_SOURCE_DIR}/test/test_terrain.cpp"
     "${CMAKE_SOURCE_DIR}/test/tests.cpp"
     "${CMAKE_SOURCE_DIR}/test/utils.cpp"
+    "${CMAKE_SOURCE_DIR}/test/utils/test_device.cpp"
     )
   
   file( GLOB SRC_UTIL_FILES "${CMAKE_SOURCE_DIR}/test/utils/test_renderer.cpp" )

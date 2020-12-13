@@ -2,12 +2,15 @@
 #include <input_serialize_generated.h>
 #include <zlib.h>
 
+#include <filesystem>
 #include <cerrno>
 #include <cinttypes>
 #include <common/logger.hpp>
 #include <common/logic/input_file.hpp>
 #include <common/logic/input_recorder.hpp>
 #include <common/logic/object_factory.hpp>
+
+#include <fmt/format.h>
 
 using namespace familyline::logic;
 
@@ -53,6 +56,16 @@ bool InputRecorder::createFile(std::string_view path, ObjectFactory* const of)
     if (f_) fclose(f_);
     flatbuffers::FlatBufferBuilder builder;
 
+    if (std::filesystem::is_regular_file(path)) {
+        auto oldpath = path;
+        path = fmt::format("new-{}", path);
+        LoggerService::getLogger()->write(
+            "input-recorder", LogType::Error, "file '%s' already exists!, renaming to '%s'",
+            oldpath.data(), path.data());
+
+    }
+
+    
     f_ = fopen(path.data(), "wb+");
     if (!f_) {
         LoggerService::getLogger()->write(

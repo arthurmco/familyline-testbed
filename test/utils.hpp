@@ -30,7 +30,8 @@ private:
 
     // Preserve the original init parameters to ease object cloning
     struct object_init init_params_;
-    
+
+protected:
     virtual void doUpdate();    
 
 public:
@@ -48,10 +49,13 @@ private:
     // Preserve the original init parameters to ease object cloning
     struct object_init init_params_;
 
+protected:
+    virtual void doUpdate();
+
+    
 public:
     TestOwnableObject(const struct object_init& init);
 
-    virtual void update();
 
     CLONE_MACRO_H(TestObject)
 };
@@ -68,8 +72,9 @@ std::shared_ptr<TestOwnableObject> make_ownable_object(const struct object_init&
 class DummyPlayer : public familyline::logic::Player
 {
 private:
-    std::function<std::vector<familyline::logic::PlayerInputType>(void)> player_input_cb_;
-
+    std::function<std::vector<familyline::logic::PlayerInputType>(size_t)> player_input_cb_;
+    size_t last_tick = 0xffffffff;
+    
 public:
     DummyPlayer(
         familyline::logic::PlayerManager& pm, const familyline::logic::Terrain& t, const char* name,

@@ -45,12 +45,13 @@ TEST(PlayerManager, TestIfPlayerCanBuild)
         make_object({"test", "Test Object", glm::vec2(0, 0), 200, 200, true, []() {}, atkc1});
     LogicService::getObjectFactory()->addObject(obj_s.get());
 
-    TerrainFile tf{20,20};
+    TerrainFile tf{20, 20};
     Terrain t{tf};
 
-    auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
+    auto d = std::make_unique<DummyPlayer>(
+        pm, t, "Test", 1, [&](size_t) -> std::vector<PlayerInputType> {
             return {CreateEntity{"test", 10, 12}};
-    });
+        });
 
     auto i = pm.add(std::move(d));
     ASSERT_NE(1, i);
@@ -98,14 +99,15 @@ TEST(PlayerManager, TestIfPlayerCanSelect)
     auto sid = om.add(obj_s1);
     om.add(obj_s2);
 
-    TerrainFile tf{1,1};
+    TerrainFile tf{1, 1};
     Terrain t{tf};
-    
-    auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
-        return {
-            SelectAction{{sid}},
-        };
-    });
+
+    auto d = std::make_unique<DummyPlayer>(
+        pm, t, "Test", 1, [&](size_t) -> std::vector<PlayerInputType> {
+            return {
+                SelectAction{{sid}},
+            };
+        });
     ASSERT_EQ(0, d->getSelections().size());
 
     auto i = pm.add(std::move(d));
@@ -157,22 +159,23 @@ TEST(PlayerManager, TestIfPlayerCanDeselect)
     om.add(obj_s2);
 
     GameContext gctx = {&om, 1, 0};
-    
-    TerrainFile tf{1,1};
+
+    TerrainFile tf{1, 1};
     Terrain t{tf};
-    
-    auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
-        switch (gctx.tick) {
-            case 1:
-                return {
-                    SelectAction{{sid}},
-                };
-            default:
-                return {
-                    SelectAction{{}},
-                };
-        }
-    });
+
+    auto d = std::make_unique<DummyPlayer>(
+        pm, t, "Test", 1, [&](size_t) -> std::vector<PlayerInputType> {
+            switch (gctx.tick) {
+                case 1:
+                    return {
+                        SelectAction{{sid}},
+                    };
+                default:
+                    return {
+                        SelectAction{{}},
+                    };
+            }
+        });
 
     auto i = pm.add(std::move(d));
     ASSERT_NE(1, i);
@@ -237,23 +240,23 @@ TEST(PlayerManager, TestIfPlayerCannotMoveNotOwnedObject)
 
     GameContext gctx = {&om, 1, 0};
 
-    
-    auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
-        switch (gctx.tick) {
-            case 1:
-                return {
-                    SelectAction{{sid}},
-                };
-            case 2:
-                return {
-                    ObjectMove{15, 14},
-                };
-            default:
-                return {
-                    SelectAction{{}},
-                };
-        }
-    });
+    auto d = std::make_unique<DummyPlayer>(
+        pm, t, "Test", 1, [&](size_t) -> std::vector<PlayerInputType> {
+            switch (gctx.tick) {
+                case 1:
+                    return {
+                        SelectAction{{sid}},
+                    };
+                case 2:
+                    return {
+                        ObjectMove{15, 14},
+                    };
+                default:
+                    return {
+                        SelectAction{{}},
+                    };
+            }
+        });
 
     auto& alliance = cm.createAlliance(std::string{"AAAA"});
     auto& colony   = cm.createColony(*d.get(), 0xff0000, std::optional{std::ref(alliance)});
@@ -337,23 +340,23 @@ TEST(PlayerManager, TestIfPlayerCanMove)
 
     GameContext gctx = {&om, 1, 0};
 
-    
-    auto d = std::make_unique<DummyPlayer>(pm, t, "Test", 1, [&]() -> std::vector<PlayerInputType> {
-        switch (gctx.tick) {
-            case 1:
-                return {
-                    SelectAction{{sid}},
-                };
-            case 2:
-                return {
-                    ObjectMove{15, 14},
-                };
-            default:
-                return {
-                    SelectAction{{}},
-                };
-        }
-    });
+    auto d = std::make_unique<DummyPlayer>(
+        pm, t, "Test", 1, [&](size_t) -> std::vector<PlayerInputType> {
+            switch (gctx.tick) {
+                case 1:
+                    return {
+                        SelectAction{{sid}},
+                    };
+                case 2:
+                    return {
+                        ObjectMove{15, 14},
+                    };
+                default:
+                    return {
+                        SelectAction{{}},
+                    };
+            }
+        });
 
     auto& alliance = cm.createAlliance(std::string{"AAAA"});
     auto& colony   = cm.createColony(*d.get(), 0xff0000, std::optional{std::ref(alliance)});

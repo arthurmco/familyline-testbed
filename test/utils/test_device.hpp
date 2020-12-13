@@ -1,3 +1,5 @@
+#pragma once
+
 /**
  * Those classes below mocks a device, plus a list of shaders
  *
@@ -10,15 +12,13 @@
 #include <client/graphical/shader.hpp>
 #include <client/graphical/gfx_service.hpp>
 
-int shader_nidx = 0;
-
 class TestShader : public familyline::graphics::Shader
 {
 private:
     int idx = 0;
 
 public:
-    TestShader(const char* file, ShaderType type) : Shader(file, type) { idx = ++shader_nidx; }
+    TestShader(const char* file, ShaderType type);
 
     virtual void compile() {}
 
@@ -87,10 +87,7 @@ public:
     }
 
     virtual familyline::graphics::Framebuffer* createFramebuffer(
-        std::string name, int width, int height)
-    {
-        return new TestFramebuffer{name, width, height};
-    }
+        std::string name, int width, int height);
 
     virtual familyline::graphics::Window* createWindow(size_t w, size_t h) { return nullptr; }
 };

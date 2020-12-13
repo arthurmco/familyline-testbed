@@ -43,7 +43,7 @@ TestOwnableObject::TestOwnableObject(const struct object_init& init)
     this->cColony = std::make_optional(ColonyComponent());
 }
 
-void TestOwnableObject::update() { fnUpdate_(); }
+void TestOwnableObject::doUpdate() { fnUpdate_(); }
 
 std::shared_ptr<GameObject> TestOwnableObject::create()
 {
@@ -60,7 +60,13 @@ std::shared_ptr<TestOwnableObject> make_ownable_object(const struct object_init&
 
 void DummyPlayer::generateInput()
 {
-    auto input = player_input_cb_();
+    /// Make sure that the input callback is called once per tick
+    if (last_tick == this->getTick())
+        return;
+
+    last_tick = this->getTick();
+    
+    auto input = player_input_cb_(last_tick);
 
     for (auto& i : input) {
         this->pushAction(i);

@@ -86,7 +86,7 @@ void InputPicker::UpdateTerrainProjectedPosition()
 
     glm::vec3 pHalf = glm::vec3(64, 0, 64);
     auto [width, height] = _terrain->getSize();
-    
+
     //  printf("near: %.3f %.3f %.3f, far: %.3f %.3f %.3f, prolongs: { ",
     //         pNear.x, pNear.y, pNear.z, pFar.x, pFar.y, pFar.z);
     for (int i = 0; i < MAX_PICK_ITERATIONS; i++) {
@@ -188,7 +188,11 @@ void InputPicker::UpdateIntersectedObject()
 
         auto osize = (*obj)->getSize();
         auto gsize = _terrain->gameToGraphical(
-            glm::vec3(osize.x, 0, osize.y));  	
+            glm::vec3(osize.x, 0, osize.y));
+
+        if (!poi.mesh)
+            continue;
+
         auto gpos = poi.mesh->getPosition();
 
         glm::vec4 vmin = glm::vec4(-gsize.x/2, gpos.y, -gsize.z/2, 1);

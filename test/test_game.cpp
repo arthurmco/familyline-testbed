@@ -43,7 +43,7 @@ TEST(GameTest, TestIfGameStartsAndRuns)
     session.colonies      = std::make_unique<ColonyManager>();
 
     auto d = std::make_unique<DummyPlayer>(
-        *session.players.get(), map, "Test", 1, [&]() -> std::vector<PlayerInputType> {
+        *session.players.get(), map, "Test", 1, [&](size_t) -> std::vector<PlayerInputType> {
             return {};
         });
     auto i         = session.players->add(std::move(d));
