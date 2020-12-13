@@ -5,6 +5,9 @@
 # We could use `flatc` directly, but, since the file will be written in chunks, to ease
 # recovering in case of a crash, we have smaller flatbuffer chunks, instead of a big
 # flatbuffer file.
+#
+# You need to run `flatc --python ../src/common/input_serialize.fbs` before running
+# this script, to generate the familyline.* module, a series of flatbuffers accessors.
 
 import sys
 import struct

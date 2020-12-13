@@ -274,6 +274,7 @@ Game* start_game(
     std::unique_ptr<ColonyManager> cm;
     unsigned int human_player_id = 0;
     PlayerSession session;
+    g->initAssets();
     ObjectFactory* of = g->initObjectFactory();
 
     auto createNormalSession_fn = [&](){

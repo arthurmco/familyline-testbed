@@ -95,6 +95,18 @@ void Game::initPlayers(
 }
 
 
+
+/**
+ * Initialize the asset library
+ */
+void Game::initAssets()
+{
+    // TODO: move this outside?
+    AssetFile f;
+    f.loadFile("assets.yml");
+    am->loadFile(f);
+}
+
 /**
  * Initialize the object factory, with all game objects, and return a reference to it
  *
@@ -106,10 +118,6 @@ logic::ObjectFactory* Game::initObjectFactory()
     if (terr_rend_)
         delete terr_rend_;
     
-    // TODO: move this outside?
-    AssetFile f;
-    f.loadFile("assets.yml");
-    am->loadFile(f);
     
     auto& of = LogicService::getObjectFactory();
 

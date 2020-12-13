@@ -55,7 +55,7 @@ TEST(GameTest, TestIfGameStartsAndRuns)
         *player, 0xffffff, std::optional<std::reference_wrapper<Alliance>>{alliance});
     session.player_colony.emplace(i, std::reference_wrapper(colony));
 
-
+    g->initAssets();
     g->initObjectFactory();
     g->initPlayers(std::move(session.players), std::move(session.colonies),
                    session.player_colony, i);

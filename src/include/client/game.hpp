@@ -110,6 +110,11 @@ public:
 
 
     /**
+     * Initialize the asset library
+     */
+    void initAssets();
+    
+    /**
      * Initialize the object factory, with all game objects, and return a reference to it
      *
      * This is good, so we can get the object checksums
