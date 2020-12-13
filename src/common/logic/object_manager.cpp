@@ -97,7 +97,7 @@ void ObjectManager::update()
     }
 }
 
-std::optional<std::shared_ptr<GameObject>> ObjectManager::get(object_id_t id)
+std::optional<std::shared_ptr<GameObject>> ObjectManager::get(object_id_t id) const
 {
     auto r = std::find_if(_objects.begin(), _objects.end(), [id](std::shared_ptr<GameObject> v) {
         return v->getID() == id;

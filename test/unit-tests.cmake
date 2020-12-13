@@ -40,6 +40,7 @@ if (DO_TESTS)
     "${CMAKE_SOURCE_DIR}/test/test_colony_manager.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_game.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_input_recorder.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_input_reproducer.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_model_opener.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_object_attack.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_object_factory.cpp"

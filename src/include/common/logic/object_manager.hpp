@@ -87,7 +87,7 @@ public:
      * Returns an optional filled with the object if found, or an empty one if
      * not
      */
-    std::optional<std::shared_ptr<GameObject>> get(object_id_t id);
+    std::optional<std::shared_ptr<GameObject>> get(object_id_t id) const;
 
     ~ObjectManager();
 

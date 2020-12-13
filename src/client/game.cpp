@@ -408,6 +408,12 @@ void Game::runLogic()
     LogicService::getDebugDrawer()->update();
 }
 
+ObjectManager* Game::getObjectManager() const
+{
+    return om_.get();
+}
+
+
 void Game::runGraphical(double framems)
 {
     /* Rendering */

@@ -58,7 +58,7 @@ TEST(InputRecorderTest, TestIfInputRecords)
                 default: return {};
             }
         });
-    auto i = session.players->add(std::move(d));
+    auto i = session.players->add(std::move(d), false);
     ASSERT_NE(-1, i);
 
     auto* player   = *(session.players->get(i));
@@ -88,7 +88,7 @@ TEST(InputRecorderTest, TestIfInputRecords)
         g->initObjectManager();
         g->initLoopData(i);
 
-        for (auto i = 0; i < (1000 / LOGIC_DELTA) * 10; i++)
+        for (auto i = 0; i < (1000 / LOGIC_DELTA) * 20; i++)
             g->runLoop();
 
         delete g;
@@ -99,6 +99,15 @@ TEST(InputRecorderTest, TestIfInputRecords)
         ASSERT_TRUE(std::filesystem::is_regular_file(recordfile));
         FILE* frec = fopen(recordfile, "rb");
         ASSERT_TRUE(frec != nullptr);
+
+        char start[5] = {};
+        uint32_t version = 0;
+        fread(start, 4, 1, frec);
+        ASSERT_STREQ(start, "FREC");
+
+        fread(&version, 4, 1, frec);
+        ASSERT_EQ(version, 1);
+
 
         char end[5] = {};
         uint32_t count = 0;
@@ -116,10 +125,10 @@ TEST(InputRecorderTest, TestIfInputRecords)
 
         fread(&checksum, 4, 1, frec );
         ASSERT_NE(checksum, 0);
-        
+
         fclose(frec);
     }
-    
+
     LogicService::getActionQueue()->clearEvents();
     InputService::setInputManager(std::unique_ptr<InputManager>());
     GFXService::setDevice(std::unique_ptr<TestDevice>());

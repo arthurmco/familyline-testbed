@@ -49,6 +49,8 @@ public:
      * They must be pushed to the input manager
      */
     virtual void generateInput();
+
+    virtual ~ReplayPlayer() {}
 };
 
 }  // namespace familyline::logic

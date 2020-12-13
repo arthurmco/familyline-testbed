@@ -133,6 +133,8 @@ public:
     /// Return maximum, minimum and average fps
     std::tuple<double, double, double> getStatisticInfo();
 
+    logic::ObjectManager* getObjectManager() const;
+    
 private:
     ///////////////////// logic
 

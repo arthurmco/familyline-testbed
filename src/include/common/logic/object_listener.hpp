@@ -39,6 +39,8 @@ public:
      */
     void updateObjects();
 
+    void clear() { _objects.clear(); }
+    
     std::set<object_id_t> getAliveObjects() const;
 
     ~ObjectListener();

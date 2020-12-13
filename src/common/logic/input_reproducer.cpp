@@ -292,7 +292,6 @@ bool InputReproducer::verifyObjectChecksums(ObjectFactory* const of)
             return false;
         }
 
-        printf("%d %zu\n", i, foundChecksums.size());
         foundChecksums[i] = true;
         i++;
     }

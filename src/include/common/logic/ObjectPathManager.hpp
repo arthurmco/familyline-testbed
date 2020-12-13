@@ -69,6 +69,8 @@ public:
 
     void SetTerrain(Terrain*);
 
+    void clear() { _pathrefs.clear(); }
+    
     static ObjectPathManager* getInstance()
     {
         static ObjectPathManager* i = nullptr;

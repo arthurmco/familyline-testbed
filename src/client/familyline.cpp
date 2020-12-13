@@ -317,7 +317,6 @@ Game* start_game(
         throw std::runtime_error{"Could not create the human player"};
     }
 
-
     std::unique_ptr<InputRecorder> ir;
 
     if (confdata.enableInputRecording && !irepr) {
