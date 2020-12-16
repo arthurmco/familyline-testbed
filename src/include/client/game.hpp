@@ -134,6 +134,10 @@ public:
     std::tuple<double, double, double> getStatisticInfo();
 
     logic::ObjectManager* getObjectManager() const;
+
+    /// The ID of the human player.
+    /// Used to show what player to show selections, camera coordinates...
+    int human_id_ = 0;
     
 private:
     ///////////////////// logic

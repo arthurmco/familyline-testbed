@@ -89,6 +89,7 @@ void Game::initPlayers(
     if (human_id != -1) {
         HumanPlayer* hp = (HumanPlayer*)*pm_->get(human_id);
         hp->setCamera(camera_.get());
+        human_id_ = human_id;
     }
 
     log->write("game", LogType::Info, "player manager configured");
@@ -118,7 +119,7 @@ void Game::initAssets()
  * This is good, so we can get the object checksums
  */
 logic::ObjectFactory* Game::initObjectFactory()
-{   
+{
     auto& of = LogicService::getObjectFactory();
 
     /* Adds the objects to the factory */
@@ -133,7 +134,7 @@ void Game::initObjectManager()
     auto& log = LoggerService::getLogger();
     log->write("game", LogType::Info, "configuring game objects");
 
-    
+
     terr_rend_ = rndr_->createTerrainRenderer(*camera_.get());
     terr_rend_->setTerrain(terrain_.get());
     terr_rend_->buildVertexData();
@@ -167,7 +168,7 @@ auto pointlight2 = std::make_unique<Light>(
     PointLightType{glm::vec3(50.0, 10.0, 10.0)}, 9.8f, glm::vec3(0.8, 0.2, 0.0), "redishlight");
 
 void Game::initLoopData(int human_id)
-{        
+{
     auto& log = LoggerService::getLogger();
     log->write("game", LogType::Info, "initializing other data needed by the game");
 
@@ -177,7 +178,6 @@ void Game::initLoopData(int human_id)
 
     gctx    = {};
     gctx.om = om_.get();
-    // gam.AddListener(new GameActionListenerImpl());
 
     scenernd_ = std::make_unique<SceneManager>(*rndr_, *camera_.get());
     scenernd_->add(std::make_shared<SceneObject<Light>>(*sunlight.get()));
@@ -284,7 +284,7 @@ bool Game::runLoop()
         }
 
         inputTime -= INPUT_DELTA;
-    }    
+    }
     inputtime_ = std::chrono::high_resolution_clock::now() - inputstart;
 
     /* Run the logic code in steps of fixed blocks
@@ -332,7 +332,6 @@ bool Game::runLoop()
             float(1000 / pms), float(pms), logictime_.count(), inputtime_.count(),
             drawtime_.count(), pm_->tick());
     widgets.lblFPS->setText(sfps);
-    //      gr->DebugWrite(0, 420, "%.2f ms, %.2f fps", pms, 1000 / pms);
 
 #define FPS_LOCK 120.0
 
@@ -382,7 +381,7 @@ void Game::runLogic()
     if (irepr_) {
         irepr_->dispatchEvents((1000/LOGIC_DELTA));
     }
-    
+
     pm_->run(gctx);
     olm_->update();
 
@@ -421,20 +420,14 @@ void Game::runGraphical(double framems)
     fb3D_->startDraw();
     terr_rend_->render(*rndr_);
 
-    //  rndr->SetBoundingBox(hp->renderBBs);
-
     scenernd_->update(framems);
 
-    //    rndr->UpdateObjects();
-
-    //    rndr->UpdateFrames();
     rndr_->render(camera_.get());
 
     fb3D_->endDraw();
 
     fbGUI_->startDraw();
     gui_->render(0, 0);
-    //    gr->renderToScreen();
     fbGUI_->endDraw();
 
     window_->update();
@@ -452,8 +445,7 @@ void Game::showDebugInfo()
             widgets.lblKeys->setText("End of replay!");
         }
     }
-    
-    const int human_id_ = 1;
+
     pm_->iterate([&](Player* p) {
         if (p->getCode() == human_id_) {
             this->showHumanPlayerInfo(p);
@@ -465,7 +457,7 @@ void Game::showHumanPlayerInfo(logic::Player* hp)
 {
     auto selections = hp->getSelections();
     std::shared_ptr<GameObject> selected =
-        selections.size() == 1 ? selections[0].lock() : std::shared_ptr<GameObject>();
+        selections.size() >= 1 ? selections[0].lock() : std::shared_ptr<GameObject>();
 
     if (BuildQueue::GetInstance()->getNext()) {
         char s[256];
@@ -491,11 +483,11 @@ void Game::showHumanPlayerInfo(logic::Player* hp)
         }
     }
 
-    widgets.lblSelected->setText("");
-    if (selected) {
-        char s[150];
-        auto& acomp = selected->getAttackComponent();
 
+    if (selected) {
+        char s[150] = {};
+        auto& acomp = selected->getAttackComponent();
+ 
         if (acomp) {
             sprintf(
                 s, "Selected object: '%s' (%4f/%4d)", selected->getName().c_str(),
@@ -505,6 +497,8 @@ void Game::showHumanPlayerInfo(logic::Player* hp)
         }
 
         widgets.lblSelected->setText(s);
+    } else {
+        widgets.lblSelected->setText("");
     }
 
     glm::vec3 p = ip_->GetTerrainProjectedPosition();
