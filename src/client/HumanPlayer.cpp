@@ -26,11 +26,11 @@ bool zoom_out        = false;
 double zoom_factor   = 0;
 bool zoom_mouse      = false;
 bool build_something = false;
+bool preview_building = false;
 bool build_tent = false, build_tower = false;
 
 bool do_something = false;
 
-std::weak_ptr<GameObject> attacker, attackee;
 
 HumanPlayer::HumanPlayer(PlayerManager& pm, const Terrain& t, const char* name, int code,
                          bool can_control = true)
@@ -246,6 +246,7 @@ void HumanPlayer::generateInput()
         build_tent      = false;
         mouse_click     = false;
         build_something = true;
+        preview_building = false;        
     }
 
     if (build_tower) {
@@ -253,6 +254,7 @@ void HumanPlayer::generateInput()
         build_tower     = false;
         mouse_click     = false;
         build_something = true;
+        preview_building = false;        
     }
 
     bool has_selection = !_ip->GetIntersectedObject().expired();
@@ -265,6 +267,10 @@ void HumanPlayer::generateInput()
         this->pushAction(CreateEntity{nextBuild_, int(p.x), int(p.z)});
         build_something = false;
         mouse_click     = false;
+        if (pr_)
+            pr_->reset();
+
+        preview_building = false;        
         nextBuild_ = "";
     } else if (has_selection && mouse_click) {
         // Individual object selection, click-based
@@ -277,6 +283,13 @@ void HumanPlayer::generateInput()
         // Object deselection, aka click on anything.
         this->pushAction(SelectAction{{}});
         mouse_click = false;
+    }
+
+    if (build_something && !preview_building && nextBuild_.size() > 0) {
+        preview_building = true;
+        if (pr_) {
+            pr_->add(nextBuild_, true);
+        }
     }
 
     if (selected_.size() > 0 && do_something && can_control_) {

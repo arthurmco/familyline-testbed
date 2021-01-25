@@ -60,6 +60,8 @@ void GLRenderer::render(Camera* c)
     auto& shaderManager = GFXService::getShaderManager();
     auto& log           = LoggerService::getLogger();
 
+    this->runHooks(c);
+
     auto viewMatrix = c->GetViewMatrix();
     auto projMatrix = c->GetProjectionMatrix();
 
@@ -177,7 +179,7 @@ void GLRenderer::render(Camera* c)
             return;
         }
     }
-
+    
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
 }

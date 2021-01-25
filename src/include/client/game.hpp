@@ -7,6 +7,7 @@
 #include <memory>
 
 //#include "logic/ObjectRenderer.hpp"
+#include <client/preview_renderer.hpp>
 #include <client/graphical/GraphicalPlotInterface.hpp>
 #include <client/graphical/TextureOpener.hpp>
 #include <client/graphical/asset_file.hpp>
@@ -150,6 +151,7 @@ private:
     std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>> colonies_;
 
     std::unique_ptr<logic::ObjectManager> om_;
+    std::unique_ptr<PreviewRenderer> pr_;
     std::unique_ptr<logic::ObjectLifecycleManager> olm_;
     std::unique_ptr<logic::ColonyManager> cm_;
     std::unique_ptr<logic::PathFinder> pathf_;

@@ -25,6 +25,7 @@
 #include <client/input/InputPicker.hpp>
 #include <client/input/input_manager.hpp>
 #include <client/input/input_service.hpp>
+#include <client/preview_renderer.hpp>
 
 class HumanPlayer : public familyline::logic::Player
 {
@@ -36,7 +37,9 @@ private:
     familyline::input::HumanListenerHandler _listener;
 
     std::string nextBuild_;
-    
+
+    std::weak_ptr<familyline::logic::GameObject> attacker, attackee;
+
     bool _updated = false;
 
     /**
@@ -45,6 +48,8 @@ private:
      * It will be false only when reproducing a recorded game
      */
     bool can_control_ = false;
+
+    familyline::PreviewRenderer* pr_ = nullptr;
     
 public:
     bool renderBBs = false;
@@ -66,6 +71,7 @@ public:
     virtual bool exitRequested();
 
     void setCamera(familyline::graphics::Camera*);
+    void setPreviewer(familyline::PreviewRenderer* pr) { pr_ = pr; }
     void SetPicker(familyline::input::InputPicker* ip);
     void SetInputManager(familyline::input::InputManager*) {};
     //	void SetGameActionManager(familyline::logic::GameActionManager* );

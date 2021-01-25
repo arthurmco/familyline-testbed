@@ -9,6 +9,7 @@ add_library(
   "params.cpp"
   "config_reader.cpp"
   "game.cpp"
+  "preview_renderer.cpp"
   "player_enumerator.cpp"
   "graphical/asset_file.cpp"
   "graphical/asset_manager.cpp"

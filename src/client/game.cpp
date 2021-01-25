@@ -193,7 +193,10 @@ void Game::initLoopData(int human_id)
 
     if (human_id != -1) {
         HumanPlayer* hp = (HumanPlayer*)*pm_->get(human_id);
+        auto& of = LogicService::getObjectFactory();
+        pr_ = std::make_unique<PreviewRenderer>(*of.get(), *rndr_, *ip_.get());
         hp->SetPicker(ip_.get());
+        hp->setPreviewer(pr_.get());
     }
 
     ObjectPathManager::getInstance()->SetTerrain(terrain_.get());
