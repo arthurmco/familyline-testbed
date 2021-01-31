@@ -30,8 +30,6 @@ PreviewRenderer::PreviewRenderer(ObjectFactory& of, graphics::Renderer& rndr, In
             glm::vec3 fixcoords =
                 glm::vec3(coords_->x, std::min(coords_->y, c->GetPosition().y - 10), coords_->z);
 
-            printf("update: %.3f %.3f %.3f\n", fixcoords.x, fixcoords.y, fixcoords.z);
-
             pi.m->setLogicPosition(fixcoords);
             pi.m->update();
             auto vinfos = pi.m->getVertexInfo();
@@ -76,8 +74,6 @@ bool PreviewRenderer::add(std::string type, bool possible)
             for (auto i = 0; i < vdata.size(); i++) {
                 vhandles.push_back(rndr_.createVertex(vdata[i], vinfo[i]));
             }
-
-            printf("new: %.3f %.3f %.3f\n", ncoords.x, ncoords.y, ncoords.z);
 
             prev_data_ = std::make_tuple(PreviewInfo{mesh, vhandles}, possible);
         }

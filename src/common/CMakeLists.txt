@@ -34,12 +34,15 @@ add_library(
   "logic/terrain_file.cpp"
   "objects/Tent.cpp"
   "objects/WatchTower.cpp"
+  "net/server_finder.cpp"
   )
 
 add_dependencies(familyline-common input-flatbuffer)
  
 find_package(fmt CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(ZLIB REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 if (MSVC)
 	
@@ -49,11 +52,13 @@ if (MSVC)
     ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR}
     ${INPUT_FLATBUFFER_INCLUDE})
   target_link_libraries(familyline-common PUBLIC fmt::fmt glm ${ZLIB_LIBRARIES})
+  target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
 
 else()
   find_package(PkgConfig REQUIRED)
   pkg_search_module(GLM REQUIRED glm) # finds glm
   target_link_libraries(familyline-common PUBLIC fmt::fmt ${GLM_LIBRARIES} ${ZLIB_LIBRARIES})
+  target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
   target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIR} ${INPUT_FLATBUFFER_INCLUDE})
 endif(MSVC)

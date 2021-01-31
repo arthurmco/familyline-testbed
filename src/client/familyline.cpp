@@ -23,6 +23,7 @@
 #define _WINSOCKAPI_
 #define _WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <ws2tcpip.h> 
 #define usleep(x) Sleep(x / 1000);
 
 #endif
@@ -53,6 +54,7 @@
 #include <client/player_enumerator.hpp>
 #include <common/logger.hpp>
 #include <common/logic/input_recorder.hpp>
+#include <common/net/server_finder.hpp>
 #include <common/logic/input_reproducer.hpp>
 #include <cstdio>
 #include <cstdlib>
@@ -67,6 +69,7 @@ using namespace familyline::logic;
 using namespace familyline::graphics;
 using namespace familyline::graphics::gui;
 using namespace familyline::input;
+using namespace familyline::net;
 
 #ifdef WIN32
 #include <io.h>
@@ -78,6 +81,25 @@ using namespace familyline::input;
 #undef main  // somehow vs does not find main()
 
 #endif
+
+/**
+ * Initialize global sockets.
+ *
+ * Currently only meaningful on Windows because of that WSADATA thing
+ *
+ * Yes, this will be moved out of here.
+ */
+bool init_network()
+{
+#ifdef WIN32
+    WSADATA trash;
+    if(WSAStartup(MAKEWORD(2,0),&trash)!=0)
+        return false;
+#endif
+
+    return true;
+}
+
 
 /**
  * Enable console color on Windows 8 or newer
@@ -437,7 +459,7 @@ int main(int argc, char const* argv[])
     log->write("", LogType::Info, "Default model directory is " MODELS_DIR);
     log->write("", LogType::Info, "Default texture directory is " TEXTURES_DIR);
     log->write("", LogType::Info, "Default material directory is " MATERIALS_DIR);
-
+    
     LoopRunner lr;
 
     graphics::Window* win = nullptr;
@@ -479,6 +501,10 @@ int main(int argc, char const* argv[])
         win->show();
         // enable_gl_debug();
 
+        if(!init_network()) {
+            throw net_exception("Could not initialize network");
+        }
+        
         log->write("", LogType::Info, "Device name: %s", defaultdev->getName().data());
         log->write("", LogType::Info, "Device vendor: %s ", defaultdev->getVendor().data());
 
@@ -559,6 +585,19 @@ int main(int argc, char const* argv[])
         }
 
         exit(EXIT_FAILURE);
+    } catch (net_exception& le) {
+        log->write("init", LogType::Fatal, "Network exception: %s (d)", le.what());
+
+        if (win) {
+            std::string content = fmt::format(
+                "A network-related fatal error happened:\n"
+                "\n"
+                "Error: {}",
+                le.what());
+            win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
+        }
+
+        exit(EXIT_FAILURE);
     } catch (std::bad_alloc& be) {
         log->write("init", LogType::Fatal, "Allocation error: %s", be.what());
 
@@ -581,6 +620,8 @@ static int show_starting_menu(
     std::atomic<int> val    = 0;
     std::atomic<bool> aexit = false;
 
+    auto sf = ServerFinder();
+    
     auto& log = LoggerService::getLogger();
     Game* g   = nullptr;
     auto& ima = InputService::getInputManager();
@@ -688,16 +729,13 @@ static int show_starting_menu(
         aexit = false;
         val   = 0;
 
-        async_test = std::thread([&]() {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            Label* lbl = (Label*)guir->getGUIWindow("mplayer")->get("async_lbl");
-            while (!aexit) {
-                if (lbl) {
-                    auto s = fmt::format("{:04}", val++);
-                    lbl->setText(s);
-                    std::this_thread::sleep_for(std::chrono::seconds(1));
-                }
-            }
+        sf.startDiscover([](ServerInfo si) {
+            fmt::print(" \033[1m{}\033[0m ({}/{})\n{}:{}\n\n",
+                       si.name,
+                       si.player_count, si.player_max,
+                       si.ip_addr, si.port);
+
+            
         });
 
         auto bret =
@@ -708,9 +746,9 @@ static int show_starting_menu(
             Listbox* slist = (Listbox*) gmplayer->get("serverlist");
             
             aexit = true;
-            async_test.join();
             printf("%s ==== \n", slist->getSelectedItem().c_str());
             
+            sf.stopDiscover();
             guir->closeWindow(*gmplayer);
             guir->destroyGUIWindow("mplayer");
         });
