@@ -97,5 +97,15 @@ private:
     const int multicast_port_     = 1983;
 
     std::unordered_map<std::string /*ip*/, ServerInfo> servers_;
+
+    /**
+     * Gets the local IP
+     *
+     * To get the current local IP, we need to get the machine hostname, and resolve it,
+     * because this will usually get a valid IP for us
+     *
+     * We could get the IP by querying each interface, but this would not be much portable
+     */
+    in_addr getLocalIP();
 };
 }  // namespace familyline::net

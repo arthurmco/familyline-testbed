@@ -1,23 +1,78 @@
+#include <arpa/inet.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/utsname.h>
 #include <unistd.h>
 
 #include <common/logger.hpp>
 #include <common/net/server_finder.hpp>
+#include <nlohmann/json.hpp>
 #include <optional>
 #include <string_view>
 #include <thread>
 
-#include <nlohmann/json.hpp>
-
 using namespace familyline::net;
 using json = nlohmann::json;
 
-in_addr getLocalIP()
+std::string getHostname()
 {
+    struct utsname buf;
+    if (uname(&buf) == 0) {
+        if (strlen(buf.nodename) > 0) {
+            return std::string{buf.nodename};
+        }
+    }
+
+    return std::string{"localhost"};
+}
+
+/**
+ * Gets the local IP
+ *
+ * To get the current local IP, we need to get the machine hostname, and resolve it,
+ * because this will usually get a valid IP for us
+ *
+ * We could get the IP by querying each interface, but this would not be much portable
+ */
+in_addr ServerFinder::getLocalIP()
+{
+    struct addrinfo* addrdata;
+    auto hostname = getHostname();
+    auto& log     = LoggerService::getLogger();
     struct in_addr local_addr;
-    local_addr.s_addr = inet_addr("192.168.1.112");
+    
+    if (getaddrinfo(hostname.c_str(), NULL, NULL, &addrdata)) {
+        log->write(
+            "server-finder", LogType::Error,
+            "could not resolve IP for hostname %s (%x/%s), defaulting to loopback",
+            hostname.c_str(), errno, gai_strerror(errno));
+
+        local_addr.s_addr = inet_addr("127.0.0.1");
+        return local_addr;
+    }
+
+    if (!addrdata) {
+        log->write(
+            "server-finder", LogType::Error, "no IP address found for hostname %s",
+            hostname.c_str());
+
+        local_addr.s_addr = inet_addr("127.0.0.1");
+        return local_addr;
+    }
+
+    while (addrdata) {
+        // skip ipv6 for now.
+        if (addrdata->ai_family != AF_INET) {
+            addrdata = addrdata->ai_next;
+            continue;
+        }
+
+        local_addr = ((struct sockaddr_in*)addrdata->ai_addr)->sin_addr;
+        addrdata = addrdata->ai_next;
+    }
+
+    freeaddrinfo(addrdata);
 
     return local_addr;
 }
@@ -38,6 +93,11 @@ ServerFinder::ServerFinder()
     inet_pton(AF_INET, multicast_ip_str_, &mcast_addr_.sin_addr.s_addr);
 
     auto local_addr = getLocalIP();
+    char buf[61]    = {};
+    log->write(
+        "server-finder", LogType::Info, "IP address is %s",
+        inet_ntop(AF_INET, &local_addr, buf, 60));
+
     if (setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_IF, (char*)&local_addr, sizeof(local_addr)) <
         0) {
         throw net_exception(fmt::format(
@@ -52,28 +112,27 @@ ServerFinder::~ServerFinder()
     close(socket_);
 }
 
-std::vector<std::string> splitLines(std::string_view s, char sep = '\n') {
+std::vector<std::string> splitLines(std::string_view s, char sep = '\n')
+{
     auto strptr = s;
     std::vector<std::string> r;
 
     auto lastidx = 0;
-    auto idx = 0;
+    auto idx     = 0;
 
     do {
         lastidx = idx;
-        idx = s.find_first_of(sep, lastidx);
-        strptr = s.substr(lastidx, idx-lastidx);
+        idx     = s.find_first_of(sep, lastidx);
+        strptr  = s.substr(lastidx, idx - lastidx);
 
         std::string s{strptr};
 
-        if (auto cr = s.find_first_of('\r'); cr != std::string::npos)
-            s.erase(cr);
-        
+        if (auto cr = s.find_first_of('\r'); cr != std::string::npos) s.erase(cr);
+
         r.push_back(s);
 
-        if (idx != std::string_view::npos)
-            idx += 1;
-        
+        if (idx != std::string_view::npos) idx += 1;
+
     } while (idx != std::string_view::npos);
 
     return r;
@@ -85,13 +144,13 @@ std::vector<std::string> splitLines(std::string_view s, char sep = '\n') {
  * Return the server information, or nullopt if the server information is
  * invalid
  */
-std::optional<ServerInfo> parseDiscoverInformation(std::string_view data){
-
+std::optional<ServerInfo> parseDiscoverInformation(std::string_view data)
+{
     auto lines = splitLines(data);
 
-    bool http_message = false;
+    bool http_message   = false;
     bool content_starts = false;
-    
+
     std::optional<ServerInfo> si = {};
 
     std::string addr;
@@ -99,37 +158,36 @@ std::optional<ServerInfo> parseDiscoverInformation(std::string_view data){
 
     std::string json_data = {};
     std::string version;
-    
+
     for (auto& l : lines) {
         if (l.starts_with("HTTP") && l.ends_with("200 OK")) {
-            http_message = true;
+            http_message   = true;
             content_starts = false;
-            si = {};
+            si             = {};
         }
 
         if (l.starts_with("Location")) {
             if (auto midx = l.find_first_of(' '); midx != std::string::npos) {
-                auto lval = l.substr(midx+1);
+                auto lval = l.substr(midx + 1);
 
                 // Location has the format
                 //    http://<url>
-                //    url can be an IP or a hostname, followed by an optional port value after a colon
+                //    url can be an IP or a hostname, followed by an optional port value after a
+                //    colon
 
                 if (auto httpos = lval.find("http"); httpos != std::string::npos) {
-                    auto residx = httpos + 7;
+                    auto residx  = httpos + 7;
                     auto portidx = lval.find_first_of(':', residx);
 
                     if (portidx != std::string::npos) {
-                        addr = lval.substr(residx, portidx-residx);
-                        
-                        port = std::atoi(lval.substr(portidx+1).c_str());
+                        addr = lval.substr(residx, portidx - residx);
+
+                        port = std::atoi(lval.substr(portidx + 1).c_str());
                     } else {
-                        addr = lval.substr(residx+1);                        
+                        addr = lval.substr(residx + 1);
                     }
-                    
                 }
-                
-            }            
+            }
         }
 
         if (l == "" && http_message && !content_starts) {
@@ -139,11 +197,11 @@ std::optional<ServerInfo> parseDiscoverInformation(std::string_view data){
 
         if (l.starts_with("Server")) {
             if (auto midx = l.find_first_of(' '); midx != std::string::npos) {
-                auto lval = l.substr(midx+1);
+                auto lval = l.substr(midx + 1);
 
-                if (lval.starts_with("familyline-server"))  {
+                if (lval.starts_with("familyline-server")) {
                     int versionval = strlen("familyline-server") + 1;
-                    
+
                     version = lval.substr(versionval);
                 } else {
                     return std::nullopt;
@@ -152,11 +210,10 @@ std::optional<ServerInfo> parseDiscoverInformation(std::string_view data){
         }
 
         if (content_starts) {
-            json_data = l;
+            json_data      = l;
             content_starts = false;
-            http_message = false;
+            http_message   = false;
         }
-        
     }
 
     if (json_data.size() == 0) {
@@ -165,17 +222,16 @@ std::optional<ServerInfo> parseDiscoverInformation(std::string_view data){
 
     auto body = json::parse(json_data);
 
-    ServerInfo sinfo = {};
-    sinfo.ip_addr = addr;
-    sinfo.port = port;
-    sinfo.version = version;
-    sinfo.name = body["name"];
-    sinfo.description = "";
+    ServerInfo sinfo   = {};
+    sinfo.ip_addr      = addr;
+    sinfo.port         = port;
+    sinfo.version      = version;
+    sinfo.name         = body["name"];
+    sinfo.description  = "";
     sinfo.player_count = body["num_clients"];
-    sinfo.player_max = body["max_clients"];
-    
+    sinfo.player_max   = body["max_clients"];
+
     return std::make_optional(sinfo);
-    
 };
 
 /// Start the server discovery process.
@@ -193,7 +249,7 @@ void ServerFinder::startDiscover(discovery_cb callback)
             log->write("server-finder", LogType::Info, "starting discover");
 
             std::unordered_map<std::string, ServerInfo> servers;
-            
+
             std::string message =
                 "M-SEARCH * \r\n"
                 "MAN: \"ssdp:discover\"\r\n"
