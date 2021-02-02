@@ -37,6 +37,7 @@ On Linux, you will need the softwares below:
  - *devIL:* for loading our textures.
  - *cairo:* for drawing the interfaces
  - *libyaml:* For parsing the `assets.yaml` file, aka the asset list.
+ - *nlohmann-json*: For parsing and creating JSON from some network messages.
  - *libflatbuffers:* For serializing the input to a file, and reading
    from it
 
@@ -68,7 +69,7 @@ You will need to have vcpkg integrated with Visual Studio.
 
 Execute the following command:
 
-`> vcpkg install glm glew sdl2 devil cairo libyaml fmt flatbuffers`
+`> vcpkg install glm glew sdl2 devil cairo libyaml fmt flatbuffers nlohmann-json`
 
 Go make a coffee and buy needed things in the market. Order some
 food. This will take some time.

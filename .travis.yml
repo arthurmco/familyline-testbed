@@ -30,6 +30,7 @@ addons:
       - libpangocairo-1.0-0
       - libflatbuffers-dev
       - libflatbuffers1
+      - nlohmann-json3-dev
       - flatbuffers-compiler-dev
       - flatbuffers-compiler
       
