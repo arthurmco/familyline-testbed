@@ -245,33 +245,46 @@ void ServerFinder::startDiscover(discovery_cb callback)
     discovering_  = true;
     thr_discover_ = std::thread(
         [](SOCKET& s, struct sockaddr_in multicastaddr, bool& operating, discovery_cb cb) {
+            int seconds_between_discover = 5;            
             auto& log = LoggerService::getLogger();
             log->write("server-finder", LogType::Info, "starting discover");
 
             std::unordered_map<std::string, ServerInfo> servers;
+           
+            auto send_discover_message = [&](){
+                fprintf(stderr, "????????");
+                
+                std::string message =
+                    "M-SEARCH * \r\n"
+                    "MAN: \"ssdp:discover\"\r\n"
+                    "ST: game_server:familyline1\r\n"
+                    "\r\n";
 
-            std::string message =
-                "M-SEARCH * \r\n"
-                "MAN: \"ssdp:discover\"\r\n"
-                "ST: game_server:familyline1\r\n"
-                "\r\n";
-
-            if (sendto(
-                    s, message.data(), message.size(), 0, (struct sockaddr*)&multicastaddr,
-                    sizeof(multicastaddr)) < 0) {
-                log->write(
-                    "server-finder", LogType::Error,
-                    "sendto() failed when sending discovery message: %d (%s)", errno,
-                    strerror(errno));
-                return;
-            }
-
+                if (sendto(
+                        s, message.data(), message.size(), 0, (struct sockaddr*)&multicastaddr,
+                        sizeof(multicastaddr)) < 0) {
+                    log->write(
+                        "server-finder", LogType::Error,
+                        "sendto() failed when sending discovery message: %d (%s)", errno,
+                        strerror(errno));
+                    return;
+                }
+            };
+            
+            send_discover_message();
+            auto last_discover = time(nullptr);
             usleep(2000);
 
             // Use a non-blocking receive so it does not block the rest of the game.
             //
             // We need to be able to detect that the discovery has been canceled.
             while (operating) {
+                auto discover = time(nullptr);
+                if (discover-last_discover >= seconds_between_discover) {
+                    send_discover_message();
+                    last_discover = discover;
+                }
+                
                 char buf[4096] = {};
                 if (recvfrom(s, buf, 4095, MSG_DONTWAIT, nullptr, 0) < 0) {
                     switch (errno) {
@@ -287,7 +300,7 @@ void ServerFinder::startDiscover(discovery_cb callback)
 
                     continue;
                 }
-
+                
                 log->write("server-finder", LogType::Info, "received something");
 
                 auto data = parseDiscoverInformation(std::string_view{buf, 4096});
