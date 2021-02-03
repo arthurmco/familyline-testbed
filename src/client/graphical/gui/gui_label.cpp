@@ -39,7 +39,7 @@ PangoLayout* Label::getLayout(cairo_t* context) const
 
     PangoLayout* layout = pango_cairo_create_layout(context);
     pango_layout_set_font_description(layout, font_description);
-    pango_layout_set_text(layout, this->text_.c_str(), -1);
+    pango_layout_set_markup(layout, this->text_.c_str(), -1);
 
     pango_font_description_free(font_description);
 
