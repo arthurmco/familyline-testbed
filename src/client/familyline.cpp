@@ -40,6 +40,7 @@
 #include <client/graphical/gui/gui_checkbox.hpp>
 #include <client/graphical/gui/gui_imageview.hpp>
 #include <client/graphical/gui/gui_label.hpp>
+#include <client/graphical/gui/gui_listbox.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
 #include <client/graphical/gui/gui_window.hpp>
 #include <client/graphical/renderer.hpp>
@@ -673,17 +674,17 @@ static int show_starting_menu(
         });
 
         auto disclaimer = std::make_unique<Label>(0.37, 0.03, "Not implemented :(");
-        header->modifyAppearance([](ControlAppearance& ca) {
-            ca.fontSize   = 24;
-            ca.foreground = {1, 1, 1, 0.9};
-        });
-
         auto async_lbl = std::make_unique<Label>(0.37, 0.03, "---");
-        header->modifyAppearance([](ControlAppearance& ca) {
-            ca.fontSize   = 24;
-            ca.foreground = {1, 1, 1, 0.9};
-        });
 
+        auto serverlist = std::make_unique<Listbox>(800*0.7, 600*0.35);
+        serverlist->addItem("test", std::make_unique<Label>(0, 0, "Item"));
+        serverlist->addItem("test2", std::make_unique<Label>(0, 0, "Item2"));
+        serverlist->addItem("test3", std::make_unique<Label>(0, 0, "<b>Pango test?</b>"));
+        serverlist->addItem("test4", std::make_unique<Label>(0, 0, "Item4 we skip uiesbhfi"));
+        serverlist->addItem("test5", std::make_unique<Label>(0, 0, "무엇을 보든 좋아할 거야"));
+
+        serverlist->selectItem("test");
+        
         aexit = false;
         val   = 0;
 
@@ -703,17 +704,22 @@ static int show_starting_menu(
             std::make_unique<Button>(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
 
         bret->setClickCallback([&](auto* c) {
+            GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
+            Listbox* slist = (Listbox*) gmplayer->get("serverlist");
+            
             aexit = true;
             async_test.join();
-            GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
+            printf("%s ==== \n", slist->getSelectedItem().c_str());
+            
             guir->closeWindow(*gmplayer);
             guir->destroyGUIWindow("mplayer");
         });
 
         gmplayer->add(0.37, 0.03, ControlPositioning::CenterX, std::move(lb));
         gmplayer->add(0.37, 0.13, ControlPositioning::CenterX, std::move(header));
-        gmplayer->add(0.15, 0.3, ControlPositioning::Relative, std::move(disclaimer));
-        gmplayer->add(0.15, 0.4, ControlPositioning::Relative, std::move(async_lbl), "async_lbl");
+        gmplayer->add(0.15, 0.2, ControlPositioning::Relative, std::move(disclaimer));
+        gmplayer->add(0.15, 0.3, ControlPositioning::Relative, std::move(async_lbl), "async_lbl");
+        gmplayer->add(0.05, 0.4, ControlPositioning::Relative, std::move(serverlist), "serverlist");
         gmplayer->add(0.37, 0.9, ControlPositioning::CenterX, std::move(bret));
 
         guir->showWindow(gmplayer);
