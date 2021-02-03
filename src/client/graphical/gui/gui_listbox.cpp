@@ -17,7 +17,8 @@ bool Listbox::update(cairo_t* context, cairo_surface_t* canvas)
 
     int i = 0;
     int maxitems = height_ / item_height_;
-    
+
+    list_mtx_.lock();
     for (auto& it: items_) {
         if (current_start_index_ > i) {
             i++;
@@ -44,7 +45,8 @@ bool Listbox::update(cairo_t* context, cairo_surface_t* canvas)
         
         i++;
     }
-
+    list_mtx_.unlock();
+    
 
     // draw a border
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
@@ -63,6 +65,8 @@ std::tuple<int, int> Listbox::getNeededSize(cairo_t* parent_context) const
 
 void Listbox::selectItem(std::string code)
 {
+    std::lock_guard<std::mutex> guard(list_mtx_);
+
     if (items_.contains(code)) {
         if (selected_item_ != "")
             items_[selected_item_].selected = false;
@@ -78,10 +82,12 @@ void Listbox::addItem(std::string code, std::unique_ptr<Control> control)
     if (code == "") {
         return;
     }
-
+    
     int w=0, h=0;
     cairo_surface_t* canvas = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width_, item_height_);
     cairo_t* context = cairo_create(canvas);
+
+    std::lock_guard<std::mutex> guard(list_mtx_);
 
     std::tie(w, h) = control->getNeededSize(context);
 
@@ -90,6 +96,7 @@ void Listbox::addItem(std::string code, std::unique_ptr<Control> control)
 
 void Listbox::removeItem(std::string code)
 {
+    std::lock_guard<std::mutex> guard(list_mtx_);
     cairo_surface_destroy(items_[code].canvas);
     cairo_destroy(items_[code].context);
     items_.erase(code);
@@ -110,6 +117,9 @@ void Listbox::receiveEvent(const familyline::input::HumanInputAction& ev, Callba
                 return;
             }
 
+            
+            list_mtx_.lock();
+
             int itidx = 0;
             auto val = std::find_if(items_.begin(), items_.end(), [&](auto& item) {
                 if (itidx == realidx) {
@@ -119,7 +129,8 @@ void Listbox::receiveEvent(const familyline::input::HumanInputAction& ev, Callba
                 itidx++;
                 return false;
             });
-
+            list_mtx_.unlock();
+            
             if (val != items_.end()) {
                 this->selectItem(val->first);                
             }

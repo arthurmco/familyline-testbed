@@ -23,7 +23,7 @@
 #define _WINSOCKAPI_
 #define _WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#include <ws2tcpip.h> 
+#include <ws2tcpip.h>
 #define usleep(x) Sleep(x / 1000);
 
 #endif
@@ -54,8 +54,8 @@
 #include <client/player_enumerator.hpp>
 #include <common/logger.hpp>
 #include <common/logic/input_recorder.hpp>
-#include <common/net/server_finder.hpp>
 #include <common/logic/input_reproducer.hpp>
+#include <common/net/server_finder.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -93,13 +93,11 @@ bool init_network()
 {
 #ifdef WIN32
     WSADATA trash;
-    if(WSAStartup(MAKEWORD(2,0),&trash)!=0)
-        return false;
+    if (WSAStartup(MAKEWORD(2, 0), &trash) != 0) return false;
 #endif
 
     return true;
 }
-
 
 /**
  * Enable console color on Windows 8 or newer
@@ -459,7 +457,7 @@ int main(int argc, char const* argv[])
     log->write("", LogType::Info, "Default model directory is " MODELS_DIR);
     log->write("", LogType::Info, "Default texture directory is " TEXTURES_DIR);
     log->write("", LogType::Info, "Default material directory is " MATERIALS_DIR);
-    
+
     LoopRunner lr;
 
     graphics::Window* win = nullptr;
@@ -501,10 +499,10 @@ int main(int argc, char const* argv[])
         win->show();
         // enable_gl_debug();
 
-        if(!init_network()) {
+        if (!init_network()) {
             throw net_exception("Could not initialize network");
         }
-        
+
         log->write("", LogType::Info, "Device name: %s", defaultdev->getName().data());
         log->write("", LogType::Info, "Device vendor: %s ", defaultdev->getVendor().data());
 
@@ -621,7 +619,7 @@ static int show_starting_menu(
     std::atomic<bool> aexit = false;
 
     auto sf = ServerFinder();
-    
+
     auto& log = LoggerService::getLogger();
     Game* g   = nullptr;
     auto& ima = InputService::getInputManager();
@@ -681,7 +679,7 @@ static int show_starting_menu(
 
         bret->setClickCallback([&](auto* c) {
             GUIWindow* gsettings          = guir->getGUIWindow("settings");
-            Checkbox* recordGame          = (Checkbox*) gsettings->get("recordGame");
+            Checkbox* recordGame          = (Checkbox*)gsettings->get("recordGame");
             confdata.enableInputRecording = recordGame->getState();
             guir->closeWindow(*gsettings);
             guir->destroyGUIWindow("settings");
@@ -715,39 +713,24 @@ static int show_starting_menu(
         });
 
         auto disclaimer = std::make_unique<Label>(0.37, 0.03, "Not implemented :(");
-        auto async_lbl = std::make_unique<Label>(0.37, 0.03, "---");
+        auto async_lbl  = std::make_unique<Label>(0.37, 0.03, "---");
 
-        auto serverlist = std::make_unique<Listbox>(800*0.7, 600*0.35);
-        serverlist->addItem("test", std::make_unique<Label>(0, 0, "Item"));
-        serverlist->addItem("test2", std::make_unique<Label>(0, 0, "Item2"));
-        serverlist->addItem("test3", std::make_unique<Label>(0, 0, "<b>Pango test?</b>"));
-        serverlist->addItem("test4", std::make_unique<Label>(0, 0, "Item4 we skip uiesbhfi"));
-        serverlist->addItem("test5", std::make_unique<Label>(0, 0, "무엇을 보든 좋아할 거야"));
+        auto serverlist = std::make_unique<Listbox>(800 * 0.7, 600 * 0.35);
 
-        serverlist->selectItem("test");
-        
         aexit = false;
         val   = 0;
 
-        sf.startDiscover([](ServerInfo si) {
-            fmt::print(" \033[1m{}\033[0m ({}/{})\n{}:{}\n\n",
-                       si.name,
-                       si.player_count, si.player_max,
-                       si.ip_addr, si.port);
-
-            
-        });
 
         auto bret =
             std::make_unique<Button>(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
 
         bret->setClickCallback([&](auto* c) {
             GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
-            Listbox* slist = (Listbox*) gmplayer->get("serverlist");
-            
+            Listbox* slist      = (Listbox*)gmplayer->get("serverlist");
+
             aexit = true;
             printf("%s ==== \n", slist->getSelectedItem().c_str());
-            
+
             sf.stopDiscover();
             guir->closeWindow(*gmplayer);
             guir->destroyGUIWindow("mplayer");
@@ -759,7 +742,23 @@ static int show_starting_menu(
         gmplayer->add(0.15, 0.3, ControlPositioning::Relative, std::move(async_lbl), "async_lbl");
         gmplayer->add(0.05, 0.4, ControlPositioning::Relative, std::move(serverlist), "serverlist");
         gmplayer->add(0.37, 0.9, ControlPositioning::CenterX, std::move(bret));
+        
+        sf.startDiscover([&](ServerInfo si) {
+            fmt::print(
+                " \033[1m{}\033[0m ({}/{})\n{}:{}\n\n", si.name, si.player_count, si.player_max,
+                si.ip_addr, si.port);
 
+            GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
+            Listbox* slist      = (Listbox*)gmplayer->get("serverlist");
+            
+            slist->addItem(
+                si.ip_addr, std::make_unique<Label>(
+                    0, 0,
+                    fmt::format(
+                        "<b>{}</b>     - {}:{} <span foreground='cyan'>({}/{})</span>", si.name,
+                        si.ip_addr, si.port, si.player_count, si.player_max)));
+        });
+        
         guir->showWindow(gmplayer);
     });
 

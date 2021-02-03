@@ -44,6 +44,7 @@ private:
     int margin_ = 6;
     
     std::string selected_item_ = "";
+    std::mutex list_mtx_;
     
 public:
     Listbox(unsigned width, unsigned height)
