@@ -712,17 +712,29 @@ static int show_starting_menu(
             ca.foreground = {1, 1, 1, 0.9};
         });
 
-        auto disclaimer = std::make_unique<Label>(0.37, 0.03, "Not implemented :(");
-        auto async_lbl  = std::make_unique<Label>(0.37, 0.03, "---");
+        auto info = std::make_unique<Label>(
+            0.37, 0.03, "Select a server from the list below, and click in 'Connect'");
+        info->modifyAppearance([](ControlAppearance& ca) { ca.foreground = {1, 1, 1, 1}; });
 
-        auto serverlist = std::make_unique<Listbox>(800 * 0.7, 600 * 0.35);
+        auto disclbl = std::make_unique<Label>(
+            0.37, 0.03, "<i>Discovering servers in your local network...</i>");
+        disclbl->modifyAppearance([](ControlAppearance& ca) { ca.foreground = {1, 1, 1, 1}; });
+
+        
+        auto serverlist = std::make_unique<Listbox>(800 * 0.7, 600 * 0.4);
 
         aexit = false;
         val   = 0;
 
+        auto bconnect = std::make_unique<Button>(
+            200, 50, "Connect");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
+        bconnect->modifyAppearance([](ControlAppearance& ca) {
+            ca.foreground = {0, 0, 0, 0.9};
+            ca.background = {1, 1, 1, 0.9};
+        });
 
         auto bret =
-            std::make_unique<Button>(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
+            std::make_unique<Button>(200, 30, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
 
         bret->setClickCallback([&](auto* c) {
             GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
@@ -738,11 +750,13 @@ static int show_starting_menu(
 
         gmplayer->add(0.37, 0.03, ControlPositioning::CenterX, std::move(lb));
         gmplayer->add(0.37, 0.13, ControlPositioning::CenterX, std::move(header));
-        gmplayer->add(0.15, 0.2, ControlPositioning::Relative, std::move(disclaimer));
-        gmplayer->add(0.15, 0.3, ControlPositioning::Relative, std::move(async_lbl), "async_lbl");
-        gmplayer->add(0.05, 0.4, ControlPositioning::Relative, std::move(serverlist), "serverlist");
+        gmplayer->add(0.05, 0.2, ControlPositioning::Relative, std::move(info));
+        gmplayer->add(
+            0.05, 0.25, ControlPositioning::Relative, std::move(serverlist), "serverlist");
+        gmplayer->add(0.6, 0.775, ControlPositioning::Relative, std::move(bconnect));
+        gmplayer->add(0.05, 0.8, ControlPositioning::Relative, std::move(disclbl));
         gmplayer->add(0.37, 0.9, ControlPositioning::CenterX, std::move(bret));
-        
+
         sf.startDiscover([&](ServerInfo si) {
             fmt::print(
                 " \033[1m{}\033[0m ({}/{})\n{}:{}\n\n", si.name, si.player_count, si.player_max,
@@ -750,15 +764,15 @@ static int show_starting_menu(
 
             GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
             Listbox* slist      = (Listbox*)gmplayer->get("serverlist");
-            
+
             slist->addItem(
                 si.ip_addr, std::make_unique<Label>(
-                    0, 0,
-                    fmt::format(
-                        "<b>{}</b>     - {}:{} <span foreground='cyan'>({}/{})</span>", si.name,
-                        si.ip_addr, si.port, si.player_count, si.player_max)));
+                                0, 0,
+                                fmt::format(
+                                    "<b>{}</b>     - {}:{} <span foreground='cyan'>({}/{})</span>",
+                                    si.name, si.ip_addr, si.port, si.player_count, si.player_max)));
         });
-        
+
         guir->showWindow(gmplayer);
     });
 

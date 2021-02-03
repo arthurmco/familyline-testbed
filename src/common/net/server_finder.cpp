@@ -252,8 +252,6 @@ void ServerFinder::startDiscover(discovery_cb callback)
             std::unordered_map<std::string, ServerInfo> servers;
            
             auto send_discover_message = [&](){
-                fprintf(stderr, "????????");
-                
                 std::string message =
                     "M-SEARCH * \r\n"
                     "MAN: \"ssdp:discover\"\r\n"
