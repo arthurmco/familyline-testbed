@@ -63,6 +63,22 @@ public:
      */
     bool pollAction(HumanInputAction& a);
 
+    /**
+     * Start receiving text events
+     *
+     * Call this if, for example, you are inserting text in a
+     * textbox
+     */
+    void enableTextEvents();
+
+    /**
+     * Stop receiving text events
+     *
+     * Call this if, for example, you moved focus from a combobox to
+     * another control
+     */
+    void disableTextEvents();
+    
     ~InputProcessor() { this->stopInputReceiver(); }
 };
 

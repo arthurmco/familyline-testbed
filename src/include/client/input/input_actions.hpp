@@ -48,13 +48,31 @@ struct WheelAction {
     int scrollX, scrollY;
 };
 
+/// Text input event.
+///
+/// Sent when you type some text
+struct TextInput {
+    char text[32];
+};
+
+/// Text edit event.
+///
+/// Sent when the system does not registered all input for a character, but
+/// decided to show you anyway
+struct TextEdit {
+    char text[32];
+    int start;
+    int length;
+};
+
 struct GameExit {
     int why;
 };
 
 ////
 
-using HumanInputType = std::variant<ClickAction, MouseAction, KeyAction, WheelAction, GameExit>;
+using HumanInputType =
+    std::variant<ClickAction, MouseAction, KeyAction, WheelAction, TextInput, TextEdit, GameExit>;
 
 struct HumanInputAction {
     uint64_t timestamp;

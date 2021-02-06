@@ -103,6 +103,11 @@ void RootControl::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
         control = this->cc_->getControlAtPoint(wa.screenX, wa.screenY);
     }
 
+    if (std::holds_alternative<TextInput>(hia.type)) {
+        auto ma = std::get<TextInput>(hia.type);
+        control = this->cc_->getControlAtPoint(mousex_, mousey_);
+    }
+    
     if (control.has_value()) {
         if (is_mouse_event) {
             if (hovered_) {

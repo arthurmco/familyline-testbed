@@ -1,4 +1,6 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keyboard.h>
 
 #include <chrono>
 #include <client/input/input_processor.hpp>
@@ -53,6 +55,26 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
             _actions.push({millis, GameExit{0}});
             _isRunning = false;
             break;
+
+    case SDL_TEXTINPUT: {
+        TextInput t;
+        strcpy(t.text, e.text.text);
+
+        printf("textinput: %s\n", t.text);
+        _actions.push({millis, t});
+        break;
+    }
+    case SDL_TEXTEDITING: {
+        TextEdit t;
+        strcpy(t.text, e.edit.text);
+        t.start = e.edit.start;
+        t.length = e.edit.length;
+
+        printf("textediting: %s (%d, %d)\n", t.text, t.start, t.length);
+
+        _actions.push({millis, t});
+        break;        
+    }
 
         case SDL_WINDOWEVENT:
 
@@ -151,4 +173,27 @@ bool InputProcessor::pollAction(HumanInputAction& a)
     a = _actions.front();
     _actions.pop();
     return true;
+}
+
+
+/**
+ * Start receiving text events
+ *
+ * Call this if, for example, you are inserting text in a
+ * textbox
+ */
+void InputProcessor::enableTextEvents()
+{
+    SDL_StartTextInput();
+}
+
+/**
+ * Stop receiving text events
+ *
+ * Call this if, for example, you moved focus from a combobox to
+ * another control
+ */
+void InputProcessor::disableTextEvents()
+{
+    SDL_StopTextInput();
 }

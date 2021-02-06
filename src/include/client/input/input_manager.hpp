@@ -53,6 +53,24 @@ private:
 public:
     InputManager(InputProcessor& ip);
 
+
+    /**
+     * Start receiving text events
+     *
+     * Call this if, for example, you are inserting text in a
+     * textbox
+     */
+    void enableTextEvents() { _ip.enableTextEvents(); }
+
+    /**
+     * Stop receiving text events
+     *
+     * Call this if, for example, you moved focus from a combobox to
+     * another control
+     */
+    void disableTextEvents() { _ip.disableTextEvents(); }
+
+    
     /**
      * Process input events, human inputs and player inputs
      *

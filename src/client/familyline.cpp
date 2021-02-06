@@ -42,6 +42,7 @@
 #include <client/graphical/gui/gui_imageview.hpp>
 #include <client/graphical/gui/gui_label.hpp>
 #include <client/graphical/gui/gui_listbox.hpp>
+#include <client/graphical/gui/gui_textbox.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
 #include <client/graphical/gui/gui_window.hpp>
 #include <client/graphical/renderer.hpp>
@@ -674,6 +675,8 @@ static int show_starting_menu(
             ca.foreground = {1, 1, 1, 0.9};
         });
 
+        auto txtname = std::make_unique<Textbox>(600, 40, "Nome do player");
+        
         auto bret =
             std::make_unique<Button>(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
 
@@ -692,6 +695,7 @@ static int show_starting_menu(
             std::make_unique<Checkbox>(
                 300, 32, "Record the game inputs", confdata.enableInputRecording),
             "recordGame");
+        gsettings->add(0.05, 0.4, ControlPositioning::Relative, std::move(txtname));
         gsettings->add(0.37, 0.9, ControlPositioning::CenterX, std::move(bret));
 
         guir->showWindow(gsettings);
@@ -720,7 +724,6 @@ static int show_starting_menu(
             0.37, 0.03, "<i>Discovering servers in your local network...</i>");
         disclbl->modifyAppearance([](ControlAppearance& ca) { ca.foreground = {1, 1, 1, 1}; });
 
-        
         auto serverlist = std::make_unique<Listbox>(800 * 0.7, 600 * 0.4);
 
         aexit = false;

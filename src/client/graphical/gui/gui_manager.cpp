@@ -122,6 +122,11 @@ bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
         return this->getControlAtPoint(wa.screenX, wa.screenY).has_value();
     }
 
+    if (std::holds_alternative<TextInput>(hia.type)) {
+        auto ma = std::get<TextInput>(hia.type);
+        return this->getControlAtPoint(hitmousex_, hitmousey_).has_value();
+    }
+
     return false;
 }
 
@@ -161,6 +166,11 @@ void GUIManager::receiveEvent()
         if (std::holds_alternative<WheelAction>(hia.type)) {
             auto wa = std::get<WheelAction>(hia.type);
             control = this->getControlAtPoint(wa.screenX, wa.screenY);
+        }
+
+        if (std::holds_alternative<TextInput>(hia.type)) {
+            auto ma = std::get<TextInput>(hia.type);
+            control = this->getControlAtPoint(hitmousex_, hitmousey_);
         }
 
         if (control.has_value()) {
@@ -218,23 +228,20 @@ GUIWindow* GUIManager::getGUIWindow(std::string name)
     return nullptr;
 }
 
-
 /**
  * Destroy window
  */
 void GUIManager::destroyGUIWindow(std::string name)
 {
     if (auto it = windows_.find(name); it != windows_.end()) {
-
         /**
          * If the current window is being hovered, "unhover" it, so
          * that a dangling pointer does not remain
          */
         if (hovered_) {
-            if ((*hovered_)->getID() == it->second->getID())
-                hovered_ = std::nullopt;
+            if ((*hovered_)->getID() == it->second->getID()) hovered_ = std::nullopt;
         }
-        
+
         windows_.erase(it);
     }
 }
