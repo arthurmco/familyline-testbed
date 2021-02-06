@@ -78,6 +78,8 @@ public:
      * another control
      */
     void disableTextEvents();
+
+    std::string getClipboardText();
     
     ~InputProcessor() { this->stopInputReceiver(); }
 };

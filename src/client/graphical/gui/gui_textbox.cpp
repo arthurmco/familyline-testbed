@@ -100,7 +100,7 @@ bool Textbox::update(cairo_t* context, cairo_surface_t* canvas)
     // draw the cursor
     cairo_set_line_width(context, 1);
     cairo_set_source_rgba(context, 0, 0, 0, 0.75);
-    cairo_rectangle(context, 6 + beforew + 1, 0, 2, height_);
+    cairo_rectangle(context, 6 + beforew - 1, 0, 2, height_);
     cairo_fill(context);
 
     // draw a border
@@ -171,15 +171,29 @@ void Textbox::receiveEvent(const familyline::input::HumanInputAction& ev, Callba
 
         if (ka.isPressed) {
             switch (ka.keycode) {
-                case SDLK_LEFT: cursorpos_ = std::max(0, cursorpos_ - 1); break;
-                case SDLK_RIGHT: cursorpos_ = std::min((int)text_.size(), cursorpos_ + 1); break;
-                case SDLK_HOME: cursorpos_ = 0; break;
-                case SDLK_END: cursorpos_ = text_.size(); break;
+            case SDLK_LEFT: cursorpos_ = std::max(0, cursorpos_ - 1); break;
+            case SDLK_RIGHT: cursorpos_ = std::min((int)text_.size(), cursorpos_ + 1); break;
+            case SDLK_HOME: cursorpos_ = 0; break;
+            case SDLK_END: cursorpos_ = text_.size(); break;
             case SDLK_BACKSPACE:
                 if (cursorpos_ > 0) {
                     text_.erase(cursorpos_-1, 1);
                     cursorpos_--;
                 }
+                break;
+            case SDLK_DELETE:
+                if (text_.size() > 0) {
+                    text_.erase(cursorpos_, 1);
+                }
+            case SDLK_v:
+                if ((ka.modifiers & KMOD_CTRL) > 0) {
+                    auto clipboard = InputService::getInputManager()->getClipboardText();
+                    std::erase_if(clipboard, [](char v) { return v == '\n' || v == '\r'; });
+                    auto text32 = this->convertUTF8ToUTF32(clipboard);
+                    text_.insert(cursorpos_, text32);
+                    cursorpos_ += text32.size();
+                }
+                
                 break;
             }
         }

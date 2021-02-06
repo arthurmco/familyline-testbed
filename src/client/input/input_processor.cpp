@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_clipboard.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
 
@@ -154,6 +155,17 @@ void InputProcessor::startInputReceiver()
 }
 
 void InputProcessor::stopInputReceiver() { _isRunning = false; }
+
+std::string InputProcessor::getClipboardText()
+{
+    char* clipboard = SDL_GetClipboardText();
+
+    if (clipboard)
+        return std::string{clipboard};
+    else
+        return std::string{""};
+}
+
 
 /**
  * Last X and Y positions, used for sending mouse events for events

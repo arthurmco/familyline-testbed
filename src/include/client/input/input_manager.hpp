@@ -70,6 +70,8 @@ public:
      */
     void disableTextEvents() { _ip.disableTextEvents(); }
 
+    std::string getClipboardText() { return _ip.getClipboardText(); }
+
     
     /**
      * Process input events, human inputs and player inputs
