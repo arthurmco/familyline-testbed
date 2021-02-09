@@ -74,6 +74,8 @@ public:
 
     virtual void onFocusEnter();
     virtual void onFocusLost();
+
+    int maxChars = 255;
     
     virtual ~Textbox() {
         if (layout_before_)

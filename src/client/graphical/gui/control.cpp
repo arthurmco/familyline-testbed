@@ -20,8 +20,11 @@ std::tuple<cairo_t*, cairo_surface_t*> Control::createChildContext(Control* c)
     if (w <= 1 || h <= 1) {
         auto [w, h] = c->getNeededSize(context);
 
-        cairo_surface_destroy(canvas);
-        cairo_destroy(context);
+        if (canvas)
+            cairo_surface_destroy(canvas);
+
+        if (context)
+            cairo_destroy(context);
 
         canvas  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
         context = cairo_create(canvas);

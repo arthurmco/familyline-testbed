@@ -203,9 +203,12 @@ void Textbox::receiveEvent(const familyline::input::HumanInputAction& ev, Callba
         auto ti = std::get<TextInput>(ev.type);
 
         auto text32 = this->convertUTF8ToUTF32(ti.text);
+        if (cursorpos_ + text32.size() > maxChars) {
+            return;
+        }
+        
         text_.insert(cursorpos_, text32);
-        cursorpos_ += text32.size();
+        cursorpos_ += text32.size();        
     }
 
-    fprintf(stderr, "%d ||", cursorpos_);
 }
