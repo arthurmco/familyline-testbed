@@ -163,7 +163,7 @@ private:
     std::unique_ptr<logic::InputReproducer> irepr_;
 
     
-    std::chrono::duration<double, std::milli> delta;
+    std::chrono::duration<double, std::milli> delta{1.0};
     double pms = 0.0;
 
     double maxdelta = 0, mindelta = 99, sumfps = 0;

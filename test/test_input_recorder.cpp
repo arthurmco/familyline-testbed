@@ -92,6 +92,7 @@ TEST(InputRecorderTest, TestIfInputRecords)
             g->runLoop();
 
         delete g;
+        delete gi.gui;
         delete w;
     }
 
@@ -128,7 +129,7 @@ TEST(InputRecorderTest, TestIfInputRecords)
 
         fclose(frec);
     }
-
+    
     LogicService::getActionQueue()->clearEvents();
     InputService::setInputManager(std::unique_ptr<InputManager>());
     GFXService::setDevice(std::unique_ptr<TestDevice>());

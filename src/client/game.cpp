@@ -241,12 +241,12 @@ void Game::initLoopData(int human_id)
     });
 
     GUIWindow& gw = gui_->getDebugWindow();
+    gw.add(
+        5, 65, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)widgets.lblBuilding));
     gw.add(5, 5, ControlPositioning::Pixel, std::unique_ptr<Control>(widgets.lblFPS));
     gw.add(
         5, 35, ControlPositioning::Pixel,
         std::unique_ptr<Control>((Control*)widgets.lblTerrainPos));
-    gw.add(
-        5, 65, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)widgets.lblBuilding));
     gw.add(5, 95, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)widgets.lblRange));
     gw.add(
         5, 125, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)widgets.lblSelected));

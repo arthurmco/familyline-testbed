@@ -62,12 +62,14 @@ TEST(GameTest, TestIfGameStartsAndRuns)
     g->initObjectManager();
     g->initLoopData(i);
     
-    for (auto i = 0; i < 120; i++)
+    for (auto i = 0; i < 120; i++) {
         g->runLoop();
+    }
 
     ASSERT_NE(-1, i);
 
     delete g;
+    delete gi.gui;
     delete w;
 
     LogicService::getActionQueue()->clearEvents();

@@ -10,9 +10,9 @@
 
 #include <memory>
 #include <optional>
+#include <string>
 #include <tuple>
 #include <vector>
-#include <string>
 
 namespace familyline::graphics::gui
 {
@@ -93,7 +93,7 @@ struct ControlData {
           control_canvas(other.control_canvas),
           name(other.name)
     {
-        this->control = std::move(other.control);
+        this->control.swap(other.control);
 
         other.local_context  = nullptr;
         other.control_canvas = nullptr;
@@ -110,7 +110,7 @@ struct ControlData {
         this->control_canvas = other.control_canvas;
         this->name           = other.name;
 
-        this->control = std::move(other.control);
+        this->control.swap(other.control);
 
         other.local_context  = nullptr;
         other.control_canvas = nullptr;
@@ -133,6 +133,8 @@ struct ControlData {
  */
 struct ContainerComponent {
     Control* parent = nullptr;
+
+    ContainerComponent() { this->children.reserve(128); }
 
     /**
      * Sort the controls by their z-index values

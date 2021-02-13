@@ -28,7 +28,9 @@ std::tuple<cairo_t*, cairo_surface_t*> Control::createChildContext(Control* c)
 
         canvas  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
         context = cairo_create(canvas);
+
     }
+
 
     return std::tie(context, canvas);
 }
