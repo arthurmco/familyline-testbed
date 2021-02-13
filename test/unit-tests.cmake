@@ -72,7 +72,7 @@ if (DO_TESTS)
 
   file(COPY "${CMAKE_SOURCE_DIR}/test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
 
-  option(DO_CHECK_ASAN "Enable address sanitizer" OFF)
+  option(DO_CHECK_ASAN "Enable address sanitizer" ON)
   option(SET_COVERAGE "Enable coverage testing" OFF)
 
   if (SET_COVERAGE)

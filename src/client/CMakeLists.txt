@@ -87,6 +87,7 @@ target_include_directories(familyline-client PRIVATE "${CMAKE_SOURCE_DIR}/src/in
 target_link_libraries(familyline-client PUBLIC familyline-common)
 target_compile_features(familyline-client PRIVATE cxx_std_20)
 
+
 if (WIN32 OR USE_RELATIVE_PATH)
   set(SHADERS_DIR "\"./shaders/\"")
 	set(ICONS_DIR "\"./icons/\"")
@@ -101,6 +102,14 @@ else()
 	set(MODELS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/models/\"")
 	set(TEXTURES_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/textures/\"")
 	set(ASSET_FILE_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/\"")
+
+
+    if (DO_CHECK_ASAN)
+      target_compile_options(familyline-client PUBLIC "-fsanitize=address")
+      target_link_libraries( familyline-client
+        gtest gtest_main "-fsanitize=address")
+    endif()
+
 endif(WIN32 OR USE_RELATIVE_PATH)
 
 target_compile_definitions(familyline-client PUBLIC
