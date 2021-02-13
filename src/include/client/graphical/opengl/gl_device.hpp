@@ -51,6 +51,7 @@ public:
      */
     static std::vector<Device*> getDeviceList();
 
+    virtual ~GLDevice() {}
 };
 }  // namespace familyline::graphics
 

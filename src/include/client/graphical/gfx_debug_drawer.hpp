@@ -38,6 +38,9 @@ public:
 
     /// Update some internal structure
     virtual void update() {}
+
+    virtual ~DummyDebugDrawer() {}
+
 };
 
 class GFXDebugDrawer : public familyline::logic::DebugDrawer
@@ -60,5 +63,8 @@ public:
 
     /// Update some internal structure
     virtual void update();
+
+    virtual ~GFXDebugDrawer() {}
+
 };
 }  // namespace familyline::graphics

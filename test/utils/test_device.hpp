@@ -90,4 +90,7 @@ public:
         std::string name, int width, int height);
 
     virtual familyline::graphics::Window* createWindow(size_t w, size_t h) { return nullptr; }
+
+    virtual ~TestDevice() {};
+
 };

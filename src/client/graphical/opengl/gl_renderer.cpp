@@ -2,9 +2,9 @@
 
 #ifdef RENDERER_OPENGL
 
-#include <client/graphical/opengl/gl_terrain_renderer.hpp>
 #include <client/graphical/exceptions.hpp>
 #include <client/graphical/gfx_service.hpp>
+#include <client/graphical/opengl/gl_terrain_renderer.hpp>
 #include <client/graphical/shader_manager.hpp>
 #include <common/logger.hpp>
 
@@ -179,11 +179,10 @@ void GLRenderer::render(Camera* c)
             return;
         }
     }
-    
+
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
 }
-
 
 /**
  * Set a shader to draw the available lights on
@@ -192,9 +191,10 @@ void GLRenderer::drawLights(ShaderProgram& sp)
 {
     sp.setUniform("dirColor", directionalLight_->light.getColor());
     sp.setUniform("dirPower", directionalLight_->light.getPower());
-    sp.setUniform("dirDirection", std::get<SunLightType>(directionalLight_->light.getType()).direction);
+    sp.setUniform(
+        "dirDirection", std::get<SunLightType>(directionalLight_->light.getType()).direction);
 
-    int idx = 0;
+    int idx             = 0;
     const int maxLights = 4;
 
     char posstr[32];
@@ -204,11 +204,9 @@ void GLRenderer::drawLights(ShaderProgram& sp)
     /// TODO: maybe order by the distance from the camera
     /// and render lights close to it first?
     for (auto& l : this->vlight_list_) {
-        if (idx == maxLights)
-            break;
+        if (idx == maxLights) break;
 
-        if (l.get() == this->directionalLight_)
-            continue;
+        if (l.get() == this->directionalLight_) continue;
 
         sprintf(posstr, "lights[%d].position", idx);
         sprintf(colorstr, "lights[%d].color", idx);
@@ -226,7 +224,6 @@ void GLRenderer::drawLights(ShaderProgram& sp)
 
     sp.setUniform("lightCount", idx);
 }
-
 
 /**
  * Create a raw VAO, with the vbox for position, normal and texture.
@@ -299,50 +296,45 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd, ShaderProgr
 void GLRenderer::removeVertex(VertexHandle* vh)
 {
     GLVertexHandle* gvh = dynamic_cast<GLVertexHandle*>(vh);
-    if (!gvh) return;
+    if (gvh == nullptr) return;
 
     glDeleteVertexArrays(1, (GLuint*)&gvh->vao);
     glDeleteBuffers(1, (GLuint*)&gvh->vboPos);
     glDeleteBuffers(1, (GLuint*)&gvh->vboNorm);
 
-    if (gvh->vboTex >= 0)
-        glDeleteBuffers(1, (GLuint*)&gvh->vboTex);
+    if (gvh->vboTex >= 0) glDeleteBuffers(1, (GLuint*)&gvh->vboTex);
 
     auto r = std::remove_if(
         _vhandle_list.begin(), _vhandle_list.end(),
-        [gvh](const std::unique_ptr<GLVertexHandle>& handle) { return (handle->vao == gvh->vao); });
+        [gvh](const std::unique_ptr<GLVertexHandle>& handle) {
+            return (handle.get() == nullptr) || (handle->vao == gvh->vao);
+        });
 
     _vhandle_list.erase(r, _vhandle_list.end());
-
-
 }
 
 LightHandle* GLRenderer::createLight(Light& light)
 {
     auto lhandle = std::make_unique<LightHandle>(light);
-    auto ret = lhandle.get();
+    auto ret     = lhandle.get();
     vlight_list_.push_back(std::move(lhandle));
 
-    if (std::holds_alternative<SunLightType>(ret->light.getType()))
-        directionalLight_ = ret;
+    if (std::holds_alternative<SunLightType>(ret->light.getType())) directionalLight_ = ret;
 
     return ret;
 }
 
 void GLRenderer::removeLight(LightHandle* lh)
 {
-    if (directionalLight_ == lh)
-        directionalLight_ = nullptr;
+    if (directionalLight_ == lh) directionalLight_ = nullptr;
 
     auto r = std::remove_if(
-        vlight_list_.begin(), vlight_list_.end(),
-        [lh](const std::unique_ptr<LightHandle>& handle) {
+        vlight_list_.begin(), vlight_list_.end(), [lh](const std::unique_ptr<LightHandle>& handle) {
             return (handle->light.getName() == lh->light.getName());
         });
 
     vlight_list_.erase(r, vlight_list_.end());
 }
-
 
 TerrainRenderer* GLRenderer::createTerrainRenderer(Camera& camera)
 {
@@ -363,7 +355,7 @@ bool GLVertexHandle::update(VertexData& vd)
 
 bool GLVertexHandle::remove()
 {
-    this->_renderer.removeVertex((VertexHandle*) this);
+    this->_renderer.removeVertex((VertexHandle*)this);
     return true;
 }
 
@@ -385,6 +377,5 @@ bool GLVertexHandle::recreate(VertexData& vd, VertexInfo& vi)
 
     return false;
 }
-
 
 #endif

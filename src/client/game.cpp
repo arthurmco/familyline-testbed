@@ -192,11 +192,14 @@ void Game::initLoopData(int human_id)
         terrain_.get(), window_, scenernd_.get(), camera_.get(), om_.get());
 
     if (human_id != -1) {
-        HumanPlayer* hp = (HumanPlayer*)*pm_->get(human_id);
         auto& of = LogicService::getObjectFactory();
         pr_ = std::make_unique<PreviewRenderer>(*of.get(), *rndr_, *ip_.get());
-        hp->SetPicker(ip_.get());
-        hp->setPreviewer(pr_.get());
+        HumanPlayer* hp = dynamic_cast<HumanPlayer*>(*pm_->get(human_id));
+
+        if (hp) {
+            hp->SetPicker(ip_.get());
+            hp->setPreviewer(pr_.get());
+        }
     }
 
     ObjectPathManager::getInstance()->SetTerrain(terrain_.get());

@@ -85,14 +85,13 @@ if (DO_TESTS)
     target_link_libraries(familyline-tests "--coverage")
   endif()
 
+  target_link_libraries( familyline-tests
+    gtest gtest_main)
+
   if (DO_CHECK_ASAN)
     target_compile_options(familyline-tests PUBLIC "-fsanitize=address")
-    target_link_libraries( familyline-tests
-      gtest gtest_main "-fsanitize=address")
-  else()
-    target_link_libraries( familyline-tests
-      gtest gtest_main)
-  endif()
+    target_link_libraries( familyline-tests "-ggdb -fsanitize=address -static-libstdc++ -static-libasan -lrt")
+  endif(DO_CHECK_ASAN)
 
 
   target_compile_definitions(familyline-tests PUBLIC

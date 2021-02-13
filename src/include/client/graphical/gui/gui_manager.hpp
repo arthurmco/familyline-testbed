@@ -53,6 +53,7 @@ protected:
     int hitmousex_ = 1, hitmousey_ = 1;
     std::queue<familyline::input::HumanInputAction> input_actions_;
 
+    bool destroying = false;
     CallbackQueue cb_queue_;
 
     /// Hovered control

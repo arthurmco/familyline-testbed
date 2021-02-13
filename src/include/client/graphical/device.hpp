@@ -44,5 +44,6 @@ public:
     
     virtual Window* createWindow(size_t w, size_t h) = 0;
 
+    virtual ~Device() {}
 };
 }

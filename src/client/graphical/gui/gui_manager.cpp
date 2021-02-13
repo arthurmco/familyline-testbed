@@ -30,10 +30,12 @@ void GUIManager::showWindow(GUIWindow* win)
 
 void GUIManager::closeWindow(const GUIWindow& w)
 {
-    auto itend = std::remove_if(windowstack_.begin(), windowstack_.end(), [&](GUIWindowInfo& wi) {
-        return (wi.win->getID() == w.getID());
-    });
-    windowstack_.erase(itend, windowstack_.end());
+    if (!destroying) {
+        auto itend = std::remove_if(windowstack_.begin(), windowstack_.end(), [&](GUIWindowInfo& wi) {
+            return (wi.win->getID() == w.getID());
+        });
+        windowstack_.erase(itend, windowstack_.end());
+    }
 }
 
 void GUIManager::update()
@@ -75,6 +77,7 @@ void GUIManager::render(unsigned int x, unsigned int y) { this->renderToTexture(
 
 GUIManager::~GUIManager()
 {
+    destroying = true;
     windowstack_.clear();
     cairo_destroy(context_);
     cairo_surface_destroy(canvas_);

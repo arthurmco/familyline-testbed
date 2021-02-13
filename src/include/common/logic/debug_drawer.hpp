@@ -41,6 +41,8 @@ public:
     DebugDrawer(const Terrain& terr)
         : terr_(terr)
         {}
+
+    virtual ~DebugDrawer() {}
 };
 
 }  // namespace familyline::logic
