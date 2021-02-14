@@ -167,6 +167,57 @@ void read_log_section(yaml_parser_t* parser, ConfigData& data)
     } while (level >= 0);
 }
 
+
+/**
+ * Read the player section of the config file
+ *
+ * The log section looks like this, more or less:
+ *
+ * ```yaml
+ *
+ * player:
+ *   username: "Arthur"
+ *
+ * ```
+ *
+ */
+void read_player_section(yaml_parser_t* parser, ConfigData& data)
+{
+    int level = -1;
+    std::string current_property = "";
+
+    do {
+        yaml_token_t token;
+        yaml_event_t event;
+
+        yaml_parser_parse(parser, &event);
+        
+        switch (event.type) {
+            case YAML_MAPPING_START_EVENT: level++; break;
+            case YAML_MAPPING_END_EVENT: level--; break;
+            case YAML_SEQUENCE_START_EVENT: level++; break;
+            case YAML_SEQUENCE_END_EVENT: level--; break;
+            case YAML_SCALAR_EVENT: {
+                std::string value((char*)event.data.scalar.value, event.data.scalar.length);
+                
+                if (current_property == "") {
+                    current_property = value;
+                    break;
+                }
+
+                if (current_property == "username") {
+                    data.player.username = value;
+                    printf("player.username = %s\n", value.c_str());
+                    current_property = "";
+                }
+                break;
+            }
+            default: continue;
+        }
+
+    } while (level >= 0);
+}
+
 bool familyline::read_config_from(std::string_view path, ConfigData& data)
 {
     FILE* fConfig = fopen(path.data(), "r");
@@ -223,7 +274,9 @@ bool familyline::read_config_from(std::string_view path, ConfigData& data)
                 // a property was expected
                 if (currentProperty == "") {
                     if (value == "log") {
-                        read_log_section(&parser, data);
+                        read_log_section(&parser, data);                        
+                    } else if (value == "player") {
+                        read_player_section(&parser, data);
                     } else {
                         currentProperty = value;
                     }

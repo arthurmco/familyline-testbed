@@ -1,9 +1,30 @@
+#
+# Familyline sample settings file.
+#
+
+# Logger specific options
 log:
+  # Here you add the tags (the short names in bold that the logger shows)
+  # you do not want to see logged.
+  #
+  # Useful for debugging
   block_tags:
     - player-manager
     - gl-renderer
     - terrain-renderer
-    
 
-default_input_record_directory: "~/.local/share/familyline/records"
+#
+# Whether to enable recording gameplay inputs or not
 enable_input_recording: true
+    
+#
+# The default directory for where the input recordings will go
+#
+# This directory must exist.
+default_input_record_directory: "~/.local/share/familyline/records"
+
+
+# Player information
+player:
+  # Your name; the name that will appear in-game
+  username: "Arthur"

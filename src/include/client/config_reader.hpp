@@ -44,6 +44,10 @@ struct ConfigData {
      * The directory where recorded games will be saved
      */
     std::string defaultInputRecordDir = ".";
+
+    struct {
+        std::string username = "DefaultUser";
+    } player;
 };
 
     std::vector<std::string> get_config_valid_paths();

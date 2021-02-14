@@ -293,7 +293,7 @@ Game* start_game(
     Game* g   = new Game(gi);
     auto& map = g->initMap(mapfile);
 
-    std::string player_name = "Arthur";
+    std::string player_name = confdata.player.username;
     auto pinfo              = InitPlayerInfo{player_name, -1};
 
     std::unique_ptr<PlayerManager> pm;
@@ -677,7 +677,7 @@ static int show_starting_menu(
             ca.foreground = {1, 1, 1, 0.9};
         });
 
-        auto txtname = std::make_unique<Textbox>(600, 40, "Nome do player");
+        auto txtname = std::make_unique<Textbox>(600, 40, confdata.player.username);
 
         auto bret =
             std::make_unique<Button>(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
@@ -685,7 +685,9 @@ static int show_starting_menu(
         bret->setClickCallback([&](auto* c) {
             GUIWindow* gsettings          = guir->getGUIWindow("settings");
             Checkbox* recordGame          = (Checkbox*)gsettings->get("recordGame");
+            Textbox* txtuname             = (Textbox*)gsettings->get("txtuname");
             confdata.enableInputRecording = recordGame->getState();
+            confdata.player.username      = txtuname->getText();
             guir->closeWindow(*gsettings);
             guir->destroyGUIWindow("settings");
         });
@@ -697,7 +699,7 @@ static int show_starting_menu(
             std::make_unique<Checkbox>(
                 300, 32, "Record the game inputs", confdata.enableInputRecording),
             "recordGame");
-        gsettings->add(0.05, 0.4, ControlPositioning::Relative, std::move(txtname));
+        gsettings->add(0.05, 0.4, ControlPositioning::Relative, std::move(txtname), "txtuname");
         gsettings->add(0.37, 0.9, ControlPositioning::CenterX, std::move(bret));
 
         guir->showWindow(gsettings);
@@ -758,8 +760,9 @@ static int show_starting_menu(
             GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
             auto addr           = ((Textbox*)gmplayer->get("txtaddr"))->getText();
             if (addr.size() < 3) return;
-
-            auto ret = cserv.login(addr, "Client");
+            
+            
+            auto ret = cserv.login(addr, confdata.player.username);
             if (ret != ServerResult::OK) {
                 ((Textbox*)gmplayer->get("txtaddr"))->setText("");
 
