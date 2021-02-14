@@ -157,6 +157,10 @@ void Textbox::setText(std::string v)
     std::u32string ns32 = this->convertUTF8ToUTF32(v);
     std::lock_guard<std::mutex> guard(text_mtx_);
     if (this->text_ != ns32) {
+        if (ns32.size() < cursorpos_) {
+            cursorpos_ = ns32.size();
+        }
+        
         this->text_ = ns32;
     }
 }

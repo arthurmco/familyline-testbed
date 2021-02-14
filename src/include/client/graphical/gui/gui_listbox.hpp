@@ -53,6 +53,8 @@ public:
         this->appearance_.background = {1.0, 1.0, 1.0, 0.4};
     }
 
+    std::function<void(std::string)> onSelectItem = [](std::string v){};
+    
     virtual bool update(cairo_t* context, cairo_surface_t* canvas);
 
     virtual std::tuple<int, int> getNeededSize(cairo_t* parent_context) const;

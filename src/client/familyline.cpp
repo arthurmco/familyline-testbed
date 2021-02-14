@@ -42,8 +42,8 @@
 #include <client/graphical/gui/gui_imageview.hpp>
 #include <client/graphical/gui/gui_label.hpp>
 #include <client/graphical/gui/gui_listbox.hpp>
-#include <client/graphical/gui/gui_textbox.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
+#include <client/graphical/gui/gui_textbox.hpp>
 #include <client/graphical/gui/gui_window.hpp>
 #include <client/graphical/renderer.hpp>
 #include <client/graphical/shader_manager.hpp>
@@ -56,6 +56,7 @@
 #include <common/logger.hpp>
 #include <common/logic/input_recorder.hpp>
 #include <common/logic/input_reproducer.hpp>
+#include <common/net/server.hpp>
 #include <common/net/server_finder.hpp>
 #include <cstdio>
 #include <cstdlib>
@@ -629,6 +630,7 @@ static int show_starting_menu(
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
     GUIWindow* gwin = guir->createGUIWindow("main", gwidth, gheight);
+    CServer cserv{};
 
     Label* l = new Label(0.37, 0.03, "FAMILYLINE");
     l->modifyAppearance([](ControlAppearance& ca) {
@@ -676,7 +678,7 @@ static int show_starting_menu(
         });
 
         auto txtname = std::make_unique<Textbox>(600, 40, "Nome do player");
-        
+
         auto bret =
             std::make_unique<Button>(200, 50, "Return");  // Button(0.1, 0.2, 0.8, 0.1, "New Game");
 
@@ -701,7 +703,13 @@ static int show_starting_menu(
         guir->showWindow(gsettings);
     });
 
+    std::map<std::string, ServerInfo> silist;
+    std::mutex simtx;
     bmplayer->setClickCallback([&](auto* cc) {
+        simtx.lock();
+        silist.clear();
+        simtx.unlock();
+
         GUIWindow* gmplayer = guir->createGUIWindow("mplayer", gwidth, gheight);
         // TODO: copy label?
         auto lb = std::make_unique<Label>(0.37, 0.03, "FAMILYLINE");
@@ -724,7 +732,18 @@ static int show_starting_menu(
             0.37, 0.03, "<i>Discovering servers in your local network...</i>");
         disclbl->modifyAppearance([](ControlAppearance& ca) { ca.foreground = {1, 1, 1, 1}; });
 
-        auto serverlist = std::make_unique<Listbox>(800 * 0.7, 600 * 0.4);
+        auto txtaddr             = std::make_unique<Textbox>(300, 40, "");
+        auto serverlist          = std::make_unique<Listbox>(800 * 0.7, 600 * 0.4);
+        serverlist->onSelectItem = [&](std::string addr) {
+            GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
+
+            simtx.lock();
+            ServerInfo si        = silist[addr];
+            std::string addrport = fmt::format("{}:{}", si.ip_addr, si.port);
+            simtx.unlock();
+
+            if (gmplayer) ((Textbox*)gmplayer->get("txtaddr"))->setText(addrport);
+        };
 
         aexit = false;
         val   = 0;
@@ -734,6 +753,65 @@ static int show_starting_menu(
         bconnect->modifyAppearance([](ControlAppearance& ca) {
             ca.foreground = {0, 0, 0, 0.9};
             ca.background = {1, 1, 1, 0.9};
+        });
+        bconnect->setClickCallback([&](auto* c) {
+            GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
+            auto addr           = ((Textbox*)gmplayer->get("txtaddr"))->getText();
+            if (addr.size() < 3) return;
+
+            auto ret = cserv.login(addr, "Client");
+            if (ret != ServerResult::OK) {
+                ((Textbox*)gmplayer->get("txtaddr"))->setText("");
+
+                switch (ret) {
+                    case ConnectionError:
+                        win->showMessageBox(
+                            "Connection error", SysMessageBoxFlags::Warning,
+                            fmt::format("Could not connect to address {}: Connection error", addr));
+                        return;
+                    case WrongPassword:
+                        win->showMessageBox(
+                            "Connection error", SysMessageBoxFlags::Warning,
+                            fmt::format("Server {} has a password", addr));
+                        return;
+                    case LoginFailure:
+                        win->showMessageBox(
+                            "Connection error", SysMessageBoxFlags::Warning,
+                            fmt::format(
+                                "Could not log in to {}\nThe server was found, but we could not "
+                                "login there.",
+                                addr));
+                        return;
+                    case ConnectionTimeout:
+                        win->showMessageBox(
+                            "Connection error", SysMessageBoxFlags::Warning,
+                            fmt::format(
+                                "Timed out while connecting to {}\nThe server probably does not "
+                                "exist, or there is a firewall issue.",
+                                addr));
+                        return;
+                    case ServerError:
+                        win->showMessageBox(
+                            "Connection error", SysMessageBoxFlags::Warning,
+                            fmt::format(
+                                "Error while connecting to {}. The server sent incorrect data to "
+                                "the client.",
+                                addr));
+                        return;
+                    default:
+                        win->showMessageBox(
+                            "Connection error", SysMessageBoxFlags::Warning,
+                            fmt::format(
+                                "Could not connect to address {}: unknown error {}", addr, ret));
+                        return;
+                }
+            }
+
+            fprintf(
+                stderr, "EI GAARA VEJA A OBRA DE UM ARTISTA: %lx %lu\n", cserv.getUserID(),
+                cserv.getUserID());
+
+            cserv.logout();
         });
 
         auto bret =
@@ -756,8 +834,9 @@ static int show_starting_menu(
         gmplayer->add(0.05, 0.2, ControlPositioning::Relative, std::move(info));
         gmplayer->add(
             0.05, 0.25, ControlPositioning::Relative, std::move(serverlist), "serverlist");
-        gmplayer->add(0.6, 0.775, ControlPositioning::Relative, std::move(bconnect));
-        gmplayer->add(0.05, 0.8, ControlPositioning::Relative, std::move(disclbl));
+        gmplayer->add(0.6, 0.75, ControlPositioning::Relative, std::move(bconnect));
+        gmplayer->add(0.05, 0.75, ControlPositioning::Relative, std::move(txtaddr), "txtaddr");
+        gmplayer->add(0.05, 0.85, ControlPositioning::Relative, std::move(disclbl));
         gmplayer->add(0.37, 0.9, ControlPositioning::CenterX, std::move(bret));
 
         sf.startDiscover([&](ServerInfo si) {
@@ -767,6 +846,10 @@ static int show_starting_menu(
 
             GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
             Listbox* slist      = (Listbox*)gmplayer->get("serverlist");
+
+            simtx.lock();
+            silist[si.ip_addr] = si;
+            simtx.unlock();
 
             slist->addItem(
                 si.ip_addr, std::make_unique<Label>(

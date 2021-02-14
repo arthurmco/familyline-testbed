@@ -72,6 +72,7 @@ void Listbox::selectItem(std::string code)
             items_[selected_item_].selected = false;
         
         items_[code].selected = true;
+        onSelectItem(code);
         selected_item_ = code;
     }
 }
