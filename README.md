@@ -37,7 +37,10 @@ On Linux, you will need the softwares below:
  - *devIL:* for loading our textures.
  - *cairo:* for drawing the interfaces
  - *libyaml:* For parsing the `assets.yaml` file, aka the asset list.
- - *nlohmann-json*: For parsing and creating JSON from some network messages.
+ - *nlohmann-json*: For parsing and creating JSON from some network
+   messages.
+ - *curlpp:* For network communication (pre-game server-client
+   communication is HTTP-based)
  - *libflatbuffers:* For serializing the input to a file, and reading
    from it
 
@@ -69,7 +72,8 @@ You will need to have vcpkg integrated with Visual Studio.
 
 Execute the following command:
 
-`> vcpkg install glm glew sdl2 devil cairo libyaml fmt flatbuffers nlohmann-json`
+`> vcpkg install glm glew sdl2 devil cairo libyaml fmt flatbuffers
+nlohmann-json curlpp`
 
 Go make a coffee and buy needed things in the market. Order some
 food. This will take some time.
@@ -143,17 +147,12 @@ install in the `/usr/local` directory when you run `make install`
 
 Aside from issues, there are things I would like to do very soon
 
- - ~~Continuous integration~~
  - Increase test coverage
- - ~~Add support for vcpkg in Windows~~
- - ~~Test build in clang~~
- - ~~Try to build in a Mac, for those hipsters who use OS x (I kid!
-   :wink:)~~
- - ~~Support animated meshes~~
+ - Add Windows test coverage
  
 ## License
 
 Every file in this game (except some inside the cmake directory) is
 licensed under the MIT license, the best in existence.
 
-Copyright (C) 2016-2020 Arthur Mendes et al,
+Copyright (C) 2016-2021 Arthur Mendes et al,
