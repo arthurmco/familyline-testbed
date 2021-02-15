@@ -60,8 +60,6 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
     case SDL_TEXTINPUT: {
         TextInput t;
         strcpy(t.text, e.text.text);
-
-        printf("textinput: %s\n", t.text);
         _actions.push({millis, t});
         break;
     }

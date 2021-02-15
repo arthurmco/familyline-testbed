@@ -26,6 +26,8 @@ struct ParamInfo {
     
     std::optional<std::string> mapFile;
     std::optional<std::string> inputFile;
+
+    std::optional<std::string> serverAddress;
 };
 
 /**

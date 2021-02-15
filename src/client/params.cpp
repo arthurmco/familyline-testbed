@@ -14,6 +14,7 @@ static void show_help()
     fmt::print("  --file <path>:\n\tLoad a map from the specified path\n\n");
     fmt::print("  --readinput <path>:\n\tLoad an input file. The game will start in the map\n");
     fmt::print("  \tyou played when you recorded\n\n");
+    fmt::print("  --connect <addr>:\n\tConnect to the game server specified as <addr>\n");
     fmt::print(
         "  --log [<filename>|screen]:\n\tLogs to filename 'filename', or screen to log to screen, or\n"
         "  \twherever stderr is bound to\n\n");
@@ -103,6 +104,7 @@ ParamInfo parse_params(const std::vector<std::string>& params)
     bool next_is_log = false;
     bool next_is_file = false;
     bool next_is_input = false;
+    bool next_is_server = false;
     
     for (auto& p : params) {
         ////// parse values
@@ -128,6 +130,13 @@ ParamInfo parse_params(const std::vector<std::string>& params)
         if (next_is_input) {
             pi.inputFile = p;
             next_is_input = false;
+            continue;
+        }
+
+
+        if (next_is_server) {
+            pi.serverAddress = p;
+            next_is_server = false;
             continue;
         }
 
@@ -161,6 +170,11 @@ ParamInfo parse_params(const std::vector<std::string>& params)
 
         if (p == "--log") {
             next_is_log = true;
+            continue;
+        }
+
+        if (p == "--connect") {
+            next_is_server = true;
             continue;
         }
 

@@ -29,12 +29,13 @@ typedef unsigned int in_addr_t;
 #endif
 
 #include <sstream>
+#include <vector>
 
 enum ServerResult {
     OK = 0,
 
     ConnectionError = 1,
-    WrongPassword   = 2,
+    WrongPassword,
     LoginFailure,
     ConnectionTimeout,
     ServerError,
@@ -44,9 +45,15 @@ enum ServerResult {
 /**
  * Client information, as returned by the server
  */
-struct ClientInfo {
+struct CClientInfo {
     uint64_t id;
     std::string name;
+};
+
+struct CServerInfo {
+    std::string name;
+    size_t max_clients;
+    std::vector<CClientInfo> clients;
 };
 
 /// i do not want to include curlpp here (but maybe I should?)
@@ -85,9 +92,12 @@ public:
      * You must be prepared for that.
      */
     ServerResult logout();
-    
-    uint64_t getUserID() const;
 
+    ServerResult getServerInfo(CServerInfo& info);
+
+    uint64_t getUserID() const;
+    std::string getAddress() const;
+    
     bool isLogged() const;
     
 private:
@@ -105,7 +115,7 @@ private:
     int timeout_secs_ = 10;
 
     ServerResult checkErrors(unsigned httpcode, std::stringstream& body);
-    
+
     /**
      * Build a basic curlpp request.
      *
@@ -118,8 +128,8 @@ private:
      * Returns a stringstream where the response body will be stored.
      */
     std::stringstream buildRequest(
-        curlpp::Easy& req, std::string endpoint, std::string method = "GET",
-        bool jsonbody = false, std::string data = "");
+        curlpp::Easy& req, std::string endpoint, std::string method = "GET", bool jsonbody = false,
+        std::string data = "");
 };
 
 }  // namespace familyline::net

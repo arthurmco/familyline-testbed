@@ -101,6 +101,61 @@ bool init_network()
     return true;
 }
 
+void start_networked_game(CServer& cserv, std::function<void(std::string, ServerResult)> errHandler,
+    ConfigData& cdata)
+{
+
+    CServerInfo si = {};
+    auto ret = cserv.getServerInfo(si);
+    if (ret != ServerResult::OK) {
+        errHandler("Failure to get server info", ret);
+        return;
+    }
+
+    bool exit = false;
+    while (!exit) {
+
+        fmt::print("\033[2J\n\033[1;1H");
+        fmt::print("\033[1m{}\033[0m\t ({})\n", si.name, cserv.getAddress());
+        fmt::print("\t\033[32m{}\033[0m/{} clients\n", si.clients.size(), si.max_clients);
+        fmt::print("\n---------------------------------------------------\n");
+        
+        for (auto& cli: si.clients) {
+            fmt::print(" {} {}\n",
+                       cli.id == cserv.getUserID() ? "=>" : "  ",
+                       cli.name);
+        }
+
+        fmt::print("\033[{}B", si.max_clients - si.clients.size() + 1);
+        fmt::print("\033[3B [(u)pdate, (q)uit, (c)onnect]> ");
+        auto v = getchar();
+
+        switch (v) {
+        case 'q':
+        case 'Q':
+            exit = true;
+            break;
+        case 'u':
+        case 'U':
+            ret = cserv.getServerInfo(si);
+            if (ret != ServerResult::OK) {
+                errHandler("Failure to get server info", ret);
+                return;
+            }            
+            break;
+        case 'c':
+        case 'C':
+            fmt::print("not implemented yet!\n");
+            fflush(stdout);
+            sleep(3);
+            break;
+        }
+    }
+
+
+}
+
+
 /**
  * Enable console color on Windows 8 or newer
  *
@@ -403,6 +458,62 @@ void run_game_loop(LoopRunner& lr, int& framecount)
     }
 }
 
+
+void start_networked_game_cmdline(std::string addr, ConfigData& cdata)
+{
+    auto treat_errors = [&](std::string msg, ServerResult ret){
+        switch (ret) {
+        case ConnectionError:
+            fmt::print(
+                "{}: {}\n", msg,
+                fmt::format("Could not connect to address {}: {}", addr));
+            break;
+        case WrongPassword:
+            fmt::print("{}: {}", fmt::format("Server {} has a password", addr));
+            break;
+        case LoginFailure:
+            fmt::print(
+                "{}: {}\n", msg,
+                fmt::format(
+                    "Could not log in to {}\nThe server was found, but we could not "
+                    "login there.",
+                    addr));
+            break;
+        case ConnectionTimeout:
+            fmt::print(
+                "{}: {}\n", msg,
+                fmt::format(
+                    "Timed out while connecting to {}\nThe server probably does not "
+                    "exist, or there is a firewall issue.",
+                    addr));
+            break;
+        case ServerError:
+            fmt::print(
+                "{}: {}\n", msg,
+                fmt::format(
+                    "Error while connecting to {}. The server sent incorrect data to "
+                    "the client.",
+                    addr));
+            break;
+        default:
+            fmt::print(
+                "{}: {}\n", msg,
+                fmt::format("Could not connect to address {}: unknown error {}", addr, ret));
+        }
+    };
+
+    CServer cserv{};
+    auto ret = cserv.login(addr, cdata.player.username);
+    if (ret != ServerResult::OK) {
+        treat_errors("Connection error", ret);
+        return;
+    }
+
+    start_networked_game(cserv, treat_errors, cdata);
+
+    cserv.logout();
+}
+
 /////////
 /////////
 /////////
@@ -546,6 +657,15 @@ int main(int argc, char const* argv[])
             delete fGUI;
             fmt::print("\nExited. ({:d} frames)\n", frames);
 
+        } else if (pi.serverAddress) {
+            std::string addr = *pi.serverAddress;
+
+            if (addr.find_first_of(':') == std::string::npos) {
+                addr += ":8100";
+            }
+
+            fmt::print("Connecting to {}\n", addr);
+            start_networked_game_cmdline(addr, confdata);
         } else {
             return show_starting_menu(pi, f3D, fGUI, win, guir, gwidth, gheight, lr, confdata);
         }
@@ -757,64 +877,71 @@ static int show_starting_menu(
             ca.background = {1, 1, 1, 0.9};
         });
         bconnect->setClickCallback([&](auto* c) {
+            Button* b = (Button*)c;
+
             GUIWindow* gmplayer = guir->getGUIWindow("mplayer");
             auto addr           = ((Textbox*)gmplayer->get("txtaddr"))->getText();
             if (addr.size() < 3) return;
-            
+
+            b->setText("Connecting...");
+
+            auto errHandler = [&](std::string msg, ServerResult ret) {
+                switch (ret) {
+                case ConnectionError:
+                    win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format("Could not connect to address {}: Connection error", addr));
+                    break;
+                case WrongPassword:
+                    win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format("Server {} has a password", addr));
+                    break;
+                case LoginFailure:
+                    win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format(
+                            "Could not log in to {}\nThe server was found, but we could not "
+                            "login there.",
+                            addr));
+                    break;
+                case ConnectionTimeout:
+                    win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format(
+                            "Timed out while connecting to {}\nThe server probably does not "
+                            "exist, or there is a firewall issue.",
+                            addr));
+                    break;
+                case ServerError:
+                    win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format(
+                            "Error while connecting to {}. The server sent incorrect data to "
+                            "the client.",
+                            addr));
+                    break;
+                default:
+                    win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format(
+                            "Could not connect to address {}: unknown error {}", addr, ret));
+                    break;
+                }  
+            };
             
             auto ret = cserv.login(addr, confdata.player.username);
             if (ret != ServerResult::OK) {
                 ((Textbox*)gmplayer->get("txtaddr"))->setText("");
-
-                switch (ret) {
-                    case ConnectionError:
-                        win->showMessageBox(
-                            "Connection error", SysMessageBoxFlags::Warning,
-                            fmt::format("Could not connect to address {}: Connection error", addr));
-                        return;
-                    case WrongPassword:
-                        win->showMessageBox(
-                            "Connection error", SysMessageBoxFlags::Warning,
-                            fmt::format("Server {} has a password", addr));
-                        return;
-                    case LoginFailure:
-                        win->showMessageBox(
-                            "Connection error", SysMessageBoxFlags::Warning,
-                            fmt::format(
-                                "Could not log in to {}\nThe server was found, but we could not "
-                                "login there.",
-                                addr));
-                        return;
-                    case ConnectionTimeout:
-                        win->showMessageBox(
-                            "Connection error", SysMessageBoxFlags::Warning,
-                            fmt::format(
-                                "Timed out while connecting to {}\nThe server probably does not "
-                                "exist, or there is a firewall issue.",
-                                addr));
-                        return;
-                    case ServerError:
-                        win->showMessageBox(
-                            "Connection error", SysMessageBoxFlags::Warning,
-                            fmt::format(
-                                "Error while connecting to {}. The server sent incorrect data to "
-                                "the client.",
-                                addr));
-                        return;
-                    default:
-                        win->showMessageBox(
-                            "Connection error", SysMessageBoxFlags::Warning,
-                            fmt::format(
-                                "Could not connect to address {}: unknown error {}", addr, ret));
-                        return;
-                }
+                b->setText("Connect");
+                errHandler("Connection error", ret);
+                return;
             }
 
-            fprintf(
-                stderr, "EI GAARA VEJA A OBRA DE UM ARTISTA: %lx %lu\n", cserv.getUserID(),
-                cserv.getUserID());
-
+            start_networked_game(cserv, errHandler, confdata);
+            
             cserv.logout();
+            b->setText("Connect...");
         });
 
         auto bret =

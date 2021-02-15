@@ -42,6 +42,6 @@ env:
 script:
   - ${CXX} --version
   - mkdir build && cd build
-  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=on -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DFLATC_TARGET="" -DFLATBUFFERS_FLATC_EXECUTABLE="/usr/bin/flatc" ..
+  - cmake -DDO_TESTS=on -DDO_CHECK_ASAN=off -DSET_COVERAGE=off -DUSE_RELATIVE_PATH=on -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DFLATC_TARGET="" -DFLATBUFFERS_FLATC_EXECUTABLE="/usr/bin/flatc" ..
   - make familyline-tests
   - ./familyline-tests
