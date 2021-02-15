@@ -12,11 +12,46 @@
 #include <string_view>
 #include <thread>
 
+#ifdef __linux__
+#include <ifaddrs.h>
+#include <net/if.h>
+#endif
+
 using namespace familyline::net;
 using json = nlohmann::json;
 
-std::string getHostname()
+std::string getPrimaryAddress()
 {
+#ifdef __linux__
+    struct ifaddrs* ifs;
+    getifaddrs(&ifs);
+
+    if (ifs) {
+        struct ifaddrs* baseif = ifs;
+
+        for (; ifs; ifs = ifs->ifa_next) {
+            if (ifs->ifa_flags & IFF_LOOPBACK || !(ifs->ifa_flags & IFF_MULTICAST)) {
+                continue;
+            }
+
+            if (!ifs->ifa_addr) continue;
+
+            char ip[128] = {};
+            switch (ifs->ifa_addr->sa_family) {
+                case AF_INET:
+                    inet_ntop(
+                        ifs->ifa_addr->sa_family, &((struct sockaddr_in*)ifs->ifa_addr)->sin_addr,
+                        ip, sizeof(struct sockaddr));
+                    break;
+                default: continue;
+            }
+
+            printf("%s: %s\n", ifs->ifa_name, ip);
+            return std::string{ip};
+        }
+    }
+#endif
+
     struct utsname buf;
     if (uname(&buf) == 0) {
         if (strlen(buf.nodename) > 0) {
@@ -38,10 +73,10 @@ std::string getHostname()
 in_addr ServerFinder::getLocalIP()
 {
     struct addrinfo* addrdata;
-    auto hostname = getHostname();
+    auto hostname = getPrimaryAddress();
     auto& log     = LoggerService::getLogger();
     struct in_addr local_addr;
-    
+
     if (getaddrinfo(hostname.c_str(), NULL, NULL, &addrdata)) {
         log->write(
             "server-finder", LogType::Error,
@@ -61,6 +96,7 @@ in_addr ServerFinder::getLocalIP()
         return local_addr;
     }
 
+    struct addrinfo* baseaddrdata = addrdata;
     while (addrdata) {
         // skip ipv6 for now.
         if (addrdata->ai_family != AF_INET) {
@@ -69,10 +105,10 @@ in_addr ServerFinder::getLocalIP()
         }
 
         local_addr = ((struct sockaddr_in*)addrdata->ai_addr)->sin_addr;
-        addrdata = addrdata->ai_next;
+        addrdata   = addrdata->ai_next;
     }
 
-    freeaddrinfo(addrdata);
+    freeaddrinfo(baseaddrdata);
 
     return local_addr;
 }
@@ -245,13 +281,13 @@ void ServerFinder::startDiscover(discovery_cb callback)
     discovering_  = true;
     thr_discover_ = std::thread(
         [](SOCKET& s, struct sockaddr_in multicastaddr, bool& operating, discovery_cb cb) {
-            int seconds_between_discover = 5;            
-            auto& log = LoggerService::getLogger();
+            int seconds_between_discover = 5;
+            auto& log                    = LoggerService::getLogger();
             log->write("server-finder", LogType::Info, "starting discover");
 
             std::unordered_map<std::string, ServerInfo> servers;
-           
-            auto send_discover_message = [&](){
+
+            auto send_discover_message = [&]() {
                 std::string message =
                     "M-SEARCH * \r\n"
                     "MAN: \"ssdp:discover\"\r\n"
@@ -268,7 +304,7 @@ void ServerFinder::startDiscover(discovery_cb callback)
                     return;
                 }
             };
-            
+
             send_discover_message();
             auto last_discover = time(nullptr);
             usleep(2000);
@@ -278,11 +314,11 @@ void ServerFinder::startDiscover(discovery_cb callback)
             // We need to be able to detect that the discovery has been canceled.
             while (operating) {
                 auto discover = time(nullptr);
-                if (discover-last_discover >= seconds_between_discover) {
+                if (discover - last_discover >= seconds_between_discover) {
                     send_discover_message();
                     last_discover = discover;
                 }
-                
+
                 char buf[4096] = {};
                 if (recvfrom(s, buf, 4095, MSG_DONTWAIT, nullptr, 0) < 0) {
                     switch (errno) {
@@ -298,7 +334,7 @@ void ServerFinder::startDiscover(discovery_cb callback)
 
                     continue;
                 }
-                
+
                 log->write("server-finder", LogType::Info, "received something");
 
                 auto data = parseDiscoverInformation(std::string_view{buf, 4096});
