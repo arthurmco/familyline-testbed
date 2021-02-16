@@ -121,13 +121,15 @@ void start_networked_game(CServer& cserv, std::function<void(std::string, Server
         fmt::print("\n---------------------------------------------------\n");
         
         for (auto& cli: si.clients) {
-            fmt::print(" {} {}\n",
+            std::string readycolor = cli.ready ? "\033[34m" : "";
+            fmt::print(" {} {}{}\033[0m\n",                       
                        cli.id == cserv.getUserID() ? "=>" : "  ",
+                       readycolor,
                        cli.name);
         }
 
         fmt::print("\033[{}B", si.max_clients - si.clients.size() + 1);
-        fmt::print("\033[3B [(u)pdate, (q)uit, (c)onnect]> ");
+        fmt::print("\033[3B [(u)pdate, (q)uit, (c)onnect, (t)oggle ready]> ");
         auto v = getchar();
 
         switch (v) {
@@ -143,6 +145,29 @@ void start_networked_game(CServer& cserv, std::function<void(std::string, Server
                 return;
             }            
             break;
+        case 't':
+        case 'T':
+            ret = cserv.toggleReady(!cserv.isReady());
+            if (ret != ServerResult::OK) {
+                errHandler("Failure to set ready", ret);
+                return;
+            }
+
+            ret = cserv.getServerInfo(si);
+            if (ret != ServerResult::OK) {
+                errHandler("Failure to get server info", ret);
+                return;
+            }    
+
+            if (std::all_of(si.clients.begin(), si.clients.end(),
+                            [](auto& v) { return v.ready == true; })
+                && si.clients.size() >= 2) {
+
+                cserv.connect();
+                
+            }
+            
+            break;            
         case 'c':
         case 'C':
             fmt::print("not implemented yet!\n");
@@ -493,6 +518,13 @@ void start_networked_game_cmdline(std::string addr, ConfigData& cdata)
                 fmt::format(
                     "Error while connecting to {}. The server sent incorrect data to "
                     "the client.",
+                    addr));
+            break;
+        case NotAllClientsConnected:
+            fmt::print(
+                "{}: {}\n", msg,
+                fmt::format(
+                    "Error where connecting to {}: Not all clients were connected, but the client and the server disagree on that.",
                     addr));
             break;
         default:
@@ -919,6 +951,13 @@ static int show_starting_menu(
                         fmt::format(
                             "Error while connecting to {}. The server sent incorrect data to "
                             "the client.",
+                            addr));
+                    break;
+                case NotAllClientsConnected:
+                    win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format(
+                            "Error while connecting to {}. The server reported that not all clients were connected, but the client and the server disagree on that.",
                             addr));
                     break;
                 default:

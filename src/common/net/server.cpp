@@ -3,11 +3,11 @@
 #include <algorithm>
 #include <common/logger.hpp>
 #include <common/net/server.hpp>
+#include <iterator>  // for std::back_inserter
 #include <nlohmann/detail/exceptions.hpp>
 #include <nlohmann/json.hpp>
 #include <sstream>
 #include <string_view>
-#include <iterator> // for std::back_inserter
 
 using namespace familyline::net;
 using json = nlohmann::json;
@@ -26,12 +26,15 @@ std::stringstream CServer::buildRequest(
     std::stringstream outstr;
 
     // Set the URL and the timeout lue.
-    req.setOpt<Url>(fmt::format("http://{}/{}", address_, endpoint));
+    req.setOpt<Url>(fmt::format("http://{}/{}", http_address_, endpoint));
     req.setOpt<Timeout>(timeout_secs_);
     req.setOpt<WriteStream>(&outstr);
 
     if (method == "POST") {
         req.setOpt<Post>(true);
+    }
+    if (method == "PUT") {
+        req.setOpt<CustomRequest>("PUT");
     }
 
     if (jsonbody) {
@@ -50,13 +53,12 @@ std::stringstream CServer::buildRequest(
 
 uint64_t CServer::getUserID() const { return userID_; }
 bool CServer::isLogged() const { return client_token_ != ""; }
-std::string CServer::getAddress() const {
-    if (isLogged())
-        return address_;
+std::string CServer::getAddress() const
+{
+    if (isLogged()) return http_address_;
 
-    return "";    
+    return "";
 }
-
 
 ServerResult CServer::checkErrors(unsigned httpcode, std::stringstream& body)
 {
@@ -70,6 +72,10 @@ ServerResult CServer::checkErrors(unsigned httpcode, std::stringstream& body)
                 json response       = json::parse(body);
                 std::string message = response["message"];
                 log->write("cli-server", LogType::Error, "login failure: %s", message.c_str());
+                if (message.find("Not all clients are ready") != std::string::npos) {
+                    return ServerResult::NotAllClientsConnected;
+                }
+                
                 return ServerResult::LoginFailure;
             }
             default:
@@ -85,8 +91,8 @@ ServerResult CServer::checkErrors(unsigned httpcode, std::stringstream& body)
 
 ServerResult CServer::login(std::string address, std::string username)
 {
-    address_  = address;
-    auto& log = LoggerService::getLogger();
+    http_address_ = address;
+    auto& log     = LoggerService::getLogger();
 
     log->write("cli-server", LogType::Info, "logging to %s", address.c_str());
     unsigned httpcode = 0;
@@ -181,7 +187,7 @@ ServerResult CServer::logout()
         return ServerResult::AlreadyLoggedOff;
     }
 
-    log->write("cli-server", LogType::Info, "logging out from %s", address_.c_str());
+    log->write("cli-server", LogType::Info, "logging out from %s", http_address_.c_str());
     unsigned httpcode = 0;
 
     try {
@@ -244,7 +250,7 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
         return ServerResult::AlreadyLoggedOff;
     }
 
-    log->write("cli-server", LogType::Info, "getting server info from %s", address_.c_str());
+    log->write("cli-server", LogType::Info, "getting server info from %s", http_address_.c_str());
     unsigned httpcode = 0;
 
     try {
@@ -267,18 +273,134 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
             return e;
         }
 
-        json response = json::parse(sstr);
-        info.name = response["name"];
+        json response    = json::parse(sstr);
+        info.name        = response["name"];
         info.max_clients = response["max_clients"];
 
         auto& jclients = response["clients"];
-        
+
         info.clients.clear();
-        std::transform(std::begin(jclients), std::end(jclients),
-                       std::back_inserter(info.clients),
-                       [&](auto& jclient) {
-                           return CClientInfo{jclient["user_id"], jclient["name"]};
-                       });        
+        std::transform(
+            std::begin(jclients), std::end(jclients), std::back_inserter(info.clients),
+            [&](auto& jclient) {
+                return CClientInfo{jclient["user_id"], jclient["name"], jclient["ready"]};
+            });
+
+    } catch (curlpp::RuntimeError& e) {
+        std::string_view exc{e.what()};
+        if (exc.find("Connection timed out") != std::string::npos) {
+            return ServerResult::ConnectionTimeout;
+        }
+    } catch (curlpp::LogicError& e) {
+        std::cerr << "Logic: " << e.what() << std::endl;
+    } catch (nlohmann::detail::exception& e) {
+        log->write(
+            "cli-server", LogType::Error,
+            "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
+            e.what());
+        return ServerResult::ServerError;
+    }
+
+    return ServerResult::OK;
+}
+
+bool CServer::isReady() const { return isReady_; }
+
+ServerResult CServer::toggleReady(bool value)
+{
+    auto& log = LoggerService::getLogger();
+
+    if (!isLogged()) {
+        log->write("cli-server", LogType::Warning, "getting server info but already logged off");
+        return ServerResult::AlreadyLoggedOff;
+    }
+
+    log->write(
+        "cli-server", LogType::Info, "setting ready from %s to %s", http_address_.c_str(),
+        value ? "true" : "false");
+    unsigned httpcode = 0;
+
+    try {
+        // That's all that is needed to do cleanup of used resources (RAII style).
+        curlpp::Cleanup myCleanup;
+
+        // Our request to be sent.
+        curlpp::Easy myRequest;
+
+        json j               = createTokenMessage(this->client_token_);
+        std::string endpoint = fmt::format("ready/{}", value ? "set" : "unset");
+
+        auto sstr = this->buildRequest(myRequest, endpoint, "PUT", true, j.dump());
+
+        // Send request and get a result.
+        // By default the result goes to standard output.
+        myRequest.perform();
+
+        auto httpcode = curlpp::infos::ResponseCode::get(myRequest);
+
+        if (auto e = this->checkErrors(httpcode, sstr); e != ServerResult::OK) {
+            return e;
+        }
+        isReady_ = value;
+
+    } catch (curlpp::RuntimeError& e) {
+        std::string_view exc{e.what()};
+        if (exc.find("Connection timed out") != std::string::npos) {
+            return ServerResult::ConnectionTimeout;
+        }
+    } catch (curlpp::LogicError& e) {
+        std::cerr << "Logic: " << e.what() << std::endl;
+    } catch (nlohmann::detail::exception& e) {
+        log->write(
+            "cli-server", LogType::Error,
+            "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
+            e.what());
+        return ServerResult::ServerError;
+    }
+
+    return ServerResult::OK;
+}
+
+bool CServer::isConnecting() const
+{
+    return (address_ != "" && port_ > 0);
+}
+
+ServerResult CServer::connect()
+{
+    auto& log = LoggerService::getLogger();
+
+    if (!isLogged()) {
+        log->write("cli-server", LogType::Warning, "getting server info but already logged off");
+        return ServerResult::AlreadyLoggedOff;
+    }
+
+    log->write("cli-server", LogType::Info, "connecting to %s", http_address_.c_str());
+    unsigned httpcode = 0;
+
+    try {
+        // That's all that is needed to do cleanup of used resources (RAII style).
+        curlpp::Cleanup myCleanup;
+
+        // Our request to be sent.
+        curlpp::Easy myRequest;
+
+        json j    = createTokenMessage(this->client_token_);
+        auto sstr = this->buildRequest(myRequest, "connect", "POST", true, j.dump());
+
+        // Send request and get a result.
+        // By default the result goes to standard output.
+        myRequest.perform();
+
+        auto httpcode = curlpp::infos::ResponseCode::get(myRequest);
+
+        if (auto e = this->checkErrors(httpcode, sstr); e != ServerResult::OK) {
+            return e;
+        }
+
+        json response    = json::parse(sstr);
+        address_ = response["address"];
+        port_ = response["port"];
 
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};

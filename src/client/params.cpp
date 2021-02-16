@@ -14,7 +14,7 @@ static void show_help()
     fmt::print("  --file <path>:\n\tLoad a map from the specified path\n\n");
     fmt::print("  --readinput <path>:\n\tLoad an input file. The game will start in the map\n");
     fmt::print("  \tyou played when you recorded\n\n");
-    fmt::print("  --connect <addr>:\n\tConnect to the game server specified as <addr>\n");
+    fmt::print("  --connect <addr>[:<port>]:\n\tConnect to the game server specified as <addr>\n\n");
     fmt::print(
         "  --log [<filename>|screen]:\n\tLogs to filename 'filename', or screen to log to screen, or\n"
         "  \twherever stderr is bound to\n\n");

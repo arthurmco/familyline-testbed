@@ -40,6 +40,7 @@ enum ServerResult {
     ConnectionTimeout,
     ServerError,
     AlreadyLoggedOff,
+    NotAllClientsConnected,
 };
 
 /**
@@ -48,6 +49,7 @@ enum ServerResult {
 struct CClientInfo {
     uint64_t id;
     std::string name;
+    bool ready = false;
 };
 
 struct CServerInfo {
@@ -94,22 +96,34 @@ public:
     ServerResult logout();
 
     ServerResult getServerInfo(CServerInfo& info);
-
+    ServerResult toggleReady(bool);
+    ServerResult connect();
+    
     uint64_t getUserID() const;
     std::string getAddress() const;
     
+    bool isReady() const;
     bool isLogged() const;
+    bool isConnecting() const;
     
 private:
-    std::string address_;
+    /// The address used to communicate with the HTTP part of the game protocol
+    std::string http_address_;
 
     /// The client token, used to communicate with the server
     ///
     /// Obtained on login.
     std::string client_token_ = "";
 
+    /// Is the client ready? (according to the server.)
+    bool isReady_ = false;
+    
     /// This client user ID.
     uint64_t userID_;
+
+    /// The address and port used to communicate with the game
+    std::string address_ = "";
+    int port_ = 0;
 
     /// Timeout for each request
     int timeout_secs_ = 10;
