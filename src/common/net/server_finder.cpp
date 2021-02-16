@@ -346,7 +346,7 @@ void ServerFinder::startDiscover(discovery_cb callback)
             u_long iMode = 1;
             ioctlsocket(s, FIONBIO, &iMode);
 #endif
-
+            
             while (operating) {
                 auto discover = time(nullptr);
                 if (discover - last_discover >= seconds_between_discover) {
