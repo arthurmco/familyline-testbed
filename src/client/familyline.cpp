@@ -57,6 +57,7 @@
 #include <common/logger.hpp>
 #include <common/logic/input_recorder.hpp>
 #include <common/logic/input_reproducer.hpp>
+#include <common/net/game_packet_server.hpp>
 #include <common/net/server.hpp>
 #include <common/net/server_finder.hpp>
 #include <cstdio>
@@ -102,37 +103,37 @@ bool init_network()
     return true;
 }
 
-void end_network() {
-    #ifdef WIN32
+void end_network()
+{
+#ifdef WIN32
     WSACleanup();
-    #endif
+#endif
 }
 
-void start_networked_game(CServer& cserv, std::function<void(std::string, ServerResult)> errHandler,
-    ConfigData& cdata)
+void start_networked_game(
+    CServer& cserv, std::function<void(std::string, ServerResult)> errHandler, ConfigData& cdata)
 {
-
     CServerInfo si = {};
-    auto ret = cserv.getServerInfo(si);
+    auto ret       = cserv.getServerInfo(si);
     if (ret != ServerResult::OK) {
         errHandler("Failure to get server info", ret);
         return;
     }
 
+    std::optional<GamePacketServer> gps;
+
     bool exit = false;
     while (!exit) {
-
         fmt::print("\033[2J\n\033[1;1H");
         fmt::print("\033[1m{}\033[0m\t ({})\n", si.name, cserv.getAddress());
         fmt::print("\t\033[32m{}\033[0m/{} clients\n", si.clients.size(), si.max_clients);
         fmt::print("\n---------------------------------------------------\n");
 
-        for (auto& cli: si.clients) {
+        for (auto& cli : si.clients) {
             std::string readycolor = cli.ready ? "\033[34m" : "";
-            fmt::print(" {} {}{}\033[0m\n",
-                       cli.id == cserv.getUserID() ? "=>" : "  ",
-                       readycolor,
-                       cli.name);
+            fmt::print(
+                " {} {}{}\033[0m\n", cli.id == cserv.getUserID() ? "=>" : "  ", readycolor,
+                cli.name);
         }
 
         fmt::print("\033[{}B", si.max_clients - si.clients.size() + 1);
@@ -140,63 +141,71 @@ void start_networked_game(CServer& cserv, std::function<void(std::string, Server
         auto v = getchar();
 
         switch (v) {
-        case 'q':
-        case 'Q':
-            exit = true;
-            break;
-        case 'u':
-        case 'U':
-            ret = cserv.getServerInfo(si);
-            if (ret != ServerResult::OK) {
-                errHandler("Failure to get server info", ret);
-                return;
-            }
-            break;
-        case 't':
-        case 'T':
-            ret = cserv.toggleReady(!cserv.isReady());
-            if (ret != ServerResult::OK) {
-                errHandler("Failure to set ready", ret);
-                return;
-            }
+            case 'q':
+            case 'Q': exit = true; break;
+            case 'u':
+            case 'U':
+                ret = cserv.getServerInfo(si);
+                if (ret != ServerResult::OK) {
+                    errHandler("Failure to get server info", ret);
+                    return;
+                }
+                break;
+            case 't':
+            case 'T':
+                ret = cserv.toggleReady(!cserv.isReady());
+                if (ret != ServerResult::OK) {
+                    errHandler("Failure to set ready", ret);
+                    return;
+                }
 
-            ret = cserv.getServerInfo(si);
-            if (ret != ServerResult::OK) {
-                errHandler("Failure to get server info", ret);
-                return;
-            }
+                ret = cserv.getServerInfo(si);
+                if (ret != ServerResult::OK) {
+                    errHandler("Failure to get server info", ret);
+                    return;
+                }
 
-            if (std::all_of(si.clients.begin(), si.clients.end(),
-                            [](auto& v) { return v.ready == true; })
-                && si.clients.size() >= 2) {
+                if (std::all_of(
+                        si.clients.begin(), si.clients.end(),
+                        [](auto& v) { return v.ready == true; }) &&
+                    si.clients.size() >= 2) {
+                    cserv.connect();
+                }
 
-                cserv.connect();
+                break;
+            case 'c':
+            case 'C':
+                ret = cserv.getServerInfo(si);
+                if (ret != ServerResult::OK) {
+                    errHandler("Failure to get server info", ret);
+                    return;
+                }
 
-            }
+                ret = cserv.connect();
+                if (ret != ServerResult::OK) {
+                    errHandler("Failure to get the game server info", ret);
 
-            break;
-        case 'c':
-        case 'C':
-            ret = cserv.getServerInfo(si);
-            if (ret != ServerResult::OK) {
-                errHandler("Failure to get server info", ret);
-                return;
-            }
+                } else {
+                    printf("connecting to the game server\n");
+                    gps = cserv.getGameServer();
+                    if (!gps) {
+                        printf("error: connection failed");
+                    } else {
+                        if (!gps->connect()) {
+                            printf("error: failed to connect to server (%s)", strerror(errno));
+                        } else {
+                            for (auto i = 0; i < 16; i++)
+                                gps->update();
+                        }
+                    }
+                }
 
-            ret = cserv.connect();
-            if (ret != ServerResult::OK) {
-                errHandler("Failure to get the game server info", ret);
-            }
-
-            fflush(stdout);
-            sleep(3);
-            break;
+                fflush(stdout);
+                sleep(3);
+                break;
         }
     }
-
-
 }
-
 
 /**
  * Enable console color on Windows 8 or newer
@@ -500,54 +509,52 @@ void run_game_loop(LoopRunner& lr, int& framecount)
     }
 }
 
-
 void start_networked_game_cmdline(std::string addr, ConfigData& cdata)
 {
-    auto treat_errors = [&](std::string msg, ServerResult ret){
+    auto treat_errors = [&](std::string msg, ServerResult ret) {
         switch (ret) {
-        case ConnectionError:
-            fmt::print(
-                "{}: {}\n", msg,
-                fmt::format("Could not connect to address {}", addr));
-            break;
-        case WrongPassword:
-            fmt::print("{}: {}", fmt::format("Server {} has a password", addr));
-            break;
-        case LoginFailure:
-            fmt::print(
-                "{}: {}\n", msg,
-                fmt::format(
-                    "Could not log in to {}\nThe server was found, but we could not "
-                    "login there.",
-                    addr));
-            break;
-        case ConnectionTimeout:
-            fmt::print(
-                "{}: {}\n", msg,
-                fmt::format(
-                    "Timed out while connecting to {}\nThe server probably does not "
-                    "exist, or there is a firewall issue.",
-                    addr));
-            break;
-        case ServerError:
-            fmt::print(
-                "{}: {}\n", msg,
-                fmt::format(
-                    "Error while connecting to {}. The server sent incorrect data to "
-                    "the client.",
-                    addr));
-            break;
-        case NotAllClientsConnected:
-            fmt::print(
-                "{}: {}\n", msg,
-                fmt::format(
-                    "Error where connecting to {}: Not all clients were connected, but the client and the server disagree on that.",
-                    addr));
-            break;
-        default:
-            fmt::print(
-                "{}: {}\n", msg,
-                fmt::format("Could not connect to address {}: unknown error {}", addr, ret));
+            case ConnectionError:
+                fmt::print("{}: {}\n", msg, fmt::format("Could not connect to address {}", addr));
+                break;
+            case WrongPassword:
+                fmt::print("{}: {}", fmt::format("Server {} has a password", addr));
+                break;
+            case LoginFailure:
+                fmt::print(
+                    "{}: {}\n", msg,
+                    fmt::format(
+                        "Could not log in to {}\nThe server was found, but we could not "
+                        "login there.",
+                        addr));
+                break;
+            case ConnectionTimeout:
+                fmt::print(
+                    "{}: {}\n", msg,
+                    fmt::format(
+                        "Timed out while connecting to {}\nThe server probably does not "
+                        "exist, or there is a firewall issue.",
+                        addr));
+                break;
+            case ServerError:
+                fmt::print(
+                    "{}: {}\n", msg,
+                    fmt::format(
+                        "Error while connecting to {}. The server sent incorrect data to "
+                        "the client.",
+                        addr));
+                break;
+            case NotAllClientsConnected:
+                fmt::print(
+                    "{}: {}\n", msg,
+                    fmt::format(
+                        "Error where connecting to {}: Not all clients were connected, but the "
+                        "client and the server disagree on that.",
+                        addr));
+                break;
+            default:
+                fmt::print(
+                    "{}: {}\n", msg,
+                    fmt::format("Could not connect to address {}: unknown error {}", addr, ret));
         }
     };
 
@@ -938,53 +945,55 @@ static int show_starting_menu(
 
             auto errHandler = [&](std::string msg, ServerResult ret) {
                 switch (ret) {
-                case ConnectionError:
-                    win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format("Could not connect to address {}: Connection error", addr));
-                    break;
-                case WrongPassword:
-                    win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format("Server {} has a password", addr));
-                    break;
-                case LoginFailure:
-                    win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format(
-                            "Could not log in to {}\nThe server was found, but we could not "
-                            "login there.",
-                            addr));
-                    break;
-                case ConnectionTimeout:
-                    win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format(
-                            "Timed out while connecting to {}\nThe server probably does not "
-                            "exist, or there is a firewall issue.",
-                            addr));
-                    break;
-                case ServerError:
-                    win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format(
-                            "Error while connecting to {}. The server sent incorrect data to "
-                            "the client.",
-                            addr));
-                    break;
-                case NotAllClientsConnected:
-                    win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format(
-                            "Error while connecting to {}. The server reported that not all clients were connected, but the client and the server disagree on that.",
-                            addr));
-                    break;
-                default:
-                    win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format(
-                            "Could not connect to address {}: unknown error {}", addr, ret));
-                    break;
+                    case ConnectionError:
+                        win->showMessageBox(
+                            msg, SysMessageBoxFlags::Warning,
+                            fmt::format("Could not connect to address {}: Connection error", addr));
+                        break;
+                    case WrongPassword:
+                        win->showMessageBox(
+                            msg, SysMessageBoxFlags::Warning,
+                            fmt::format("Server {} has a password", addr));
+                        break;
+                    case LoginFailure:
+                        win->showMessageBox(
+                            msg, SysMessageBoxFlags::Warning,
+                            fmt::format(
+                                "Could not log in to {}\nThe server was found, but we could not "
+                                "login there.",
+                                addr));
+                        break;
+                    case ConnectionTimeout:
+                        win->showMessageBox(
+                            msg, SysMessageBoxFlags::Warning,
+                            fmt::format(
+                                "Timed out while connecting to {}\nThe server probably does not "
+                                "exist, or there is a firewall issue.",
+                                addr));
+                        break;
+                    case ServerError:
+                        win->showMessageBox(
+                            msg, SysMessageBoxFlags::Warning,
+                            fmt::format(
+                                "Error while connecting to {}. The server sent incorrect data to "
+                                "the client.",
+                                addr));
+                        break;
+                    case NotAllClientsConnected:
+                        win->showMessageBox(
+                            msg, SysMessageBoxFlags::Warning,
+                            fmt::format(
+                                "Error while connecting to {}. The server reported that not all "
+                                "clients were connected, but the client and the server disagree on "
+                                "that.",
+                                addr));
+                        break;
+                    default:
+                        win->showMessageBox(
+                            msg, SysMessageBoxFlags::Warning,
+                            fmt::format(
+                                "Could not connect to address {}: unknown error {}", addr, ret));
+                        break;
                 }
             };
 

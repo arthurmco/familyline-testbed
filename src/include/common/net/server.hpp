@@ -28,6 +28,9 @@ typedef unsigned int in_addr_t;
 
 #include <sstream>
 #include <vector>
+#include <optional>
+
+#include <common/net/game_packet_server.hpp>
 
 enum ServerResult {
     OK = 0,
@@ -50,7 +53,6 @@ struct CClientInfo {
     bool ready = false;
 };
 
-
 struct CurrentClientInfo {
     CClientInfo info;
     std::string token;
@@ -60,7 +62,7 @@ struct CurrentClientInfo {
 /// the game)
 struct GameServerInfo {
     std::string address = "";
-    int port = 0;
+    int port            = 0;
 };
 
 struct CServerInfo {
@@ -116,23 +118,24 @@ public:
      * clients are ready
      */
     ServerResult connect();
-    
+
     uint64_t getUserID() const;
     std::string getAddress() const;
-    
+
     bool isReady() const;
     bool isLogged() const;
     bool isConnecting() const;
+
+    std::optional<GamePacketServer> getGameServer();
     
 private:
     /// The address used to communicate with the HTTP part of the game protocol
     std::string http_address_;
 
-
     /// The information for this client, such as ID, name, readiness and the client
     /// token.
     std::optional<CurrentClientInfo> cci_;
-    
+
     /// The address and port used to communicate with the game
     std::optional<GameServerInfo> gsi_;
 
@@ -141,8 +144,8 @@ private:
 
     CServerInfo info_;
 
-    ServerResult checkErrors(unsigned httpcode, std::stringstream& body);    
-    
+    ServerResult checkErrors(unsigned httpcode, std::stringstream& body);
+
     /**
      * Build a basic curlpp request.
      *
@@ -156,9 +159,7 @@ private:
      */
     std::stringstream buildRequest(
         curlpp::Easy& req, std::string endpoint, std::string method = "GET", bool jsonbody = false,
-        std::string data = "");
-
-
+        std::string data = ""); 
 };
 
 }  // namespace familyline::net

@@ -6,8 +6,10 @@
 #include <iterator>  // for std::back_inserter
 #include <nlohmann/detail/exceptions.hpp>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <sstream>
 #include <string_view>
+#include "common/net/game_packet_server.hpp"
 
 using namespace familyline::net;
 using json = nlohmann::json;
@@ -52,7 +54,7 @@ std::stringstream CServer::buildRequest(
 }
 
 uint64_t CServer::getUserID() const { return cci_.has_value() ? cci_->info.id : 0; }
-bool CServer::isLogged() const { return cci_.has_value() ; }
+bool CServer::isLogged() const { return cci_.has_value(); }
 std::string CServer::getAddress() const
 {
     if (isLogged()) return http_address_;
@@ -75,7 +77,7 @@ ServerResult CServer::checkErrors(unsigned httpcode, std::stringstream& body)
                 if (message.find("Not all clients are ready") != std::string::npos) {
                     return ServerResult::NotAllClientsConnected;
                 }
-                
+
                 return ServerResult::LoginFailure;
             }
             default:
@@ -118,11 +120,10 @@ ServerResult CServer::login(std::string address, std::string username)
             return e;
         }
 
-        
-        json response = json::parse(sstr);
+        json response     = json::parse(sstr);
         std::string token = response["token"];
-        uint64_t userid = response["user_id"];
-        
+        uint64_t userid   = response["user_id"];
+
         if (response["name"] != username || token == "" || userid == 0) {
             return ServerResult::ServerError;
         }
@@ -279,7 +280,7 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
         json response    = json::parse(sstr);
         info.name        = response["name"];
         info.max_clients = response["max_clients"];
-        
+
         auto& jclients = response["clients"];
 
         info.clients.clear();
@@ -288,7 +289,7 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
             [&](auto& jclient) {
                 return CClientInfo{jclient["user_id"], jclient["name"], jclient["ready"]};
             });
-        
+
         info_ = info;
 
     } catch (curlpp::RuntimeError& e) {
@@ -309,7 +310,7 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
     return ServerResult::OK;
 }
 
-bool CServer::isReady() const { return cci_->info.ready ; }
+bool CServer::isReady() const { return cci_->info.ready; }
 
 ServerResult CServer::toggleReady(bool value)
 {
@@ -366,10 +367,7 @@ ServerResult CServer::toggleReady(bool value)
     return ServerResult::OK;
 }
 
-bool CServer::isConnecting() const
-{
-    return (gsi_.address != "" && gsi_.port > 0);
-}
+bool CServer::isConnecting() const { return (gsi_->address != "" && gsi_->port > 0); }
 
 ServerResult CServer::connect()
 {
@@ -403,14 +401,15 @@ ServerResult CServer::connect()
             return e;
         }
 
-        json response    = json::parse(sstr);
+        json response       = json::parse(sstr);
         std::string address = response["address"];
-        int port = response["port"];
+        int port            = response["port"];
 
         gsi_ = std::optional(GameServerInfo{address, port});
 
-        log->write("cli-server", LogType::Info, "game data transmission server at %s:%d",
-                   address.c_str(), port);
+        log->write(
+            "cli-server", LogType::Info, "game data transmission server at %s:%d", address.c_str(),
+            port);
 
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};
@@ -428,4 +427,12 @@ ServerResult CServer::connect()
     }
 
     return ServerResult::OK;
+}
+
+std::optional<GamePacketServer> CServer::getGameServer()
+{
+    if (!this->isLogged() || !this->isConnecting())
+        return std::nullopt;
+
+    return std::make_optional<GamePacketServer>(gsi_->address, gsi_->port);
 }

@@ -9,22 +9,7 @@
 #include <string_view>
 #include <thread>
 
-#ifdef __linux__
-#include <ifaddrs.h>
-#include <net/if.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/utsname.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#endif
-
-#ifdef WIN32
-#define MSG_DONTWAIT 0
-#define usleep(x) Sleep(x/1000)
-#define close(x) closesocket(x)
-#define errno  WSAGetLastError()
-#endif
+#include <common/net/net_common.hpp>
 
 using namespace familyline::net;
 using json = nlohmann::json;

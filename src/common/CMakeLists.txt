@@ -36,6 +36,7 @@ add_library(
   "objects/WatchTower.cpp"
   "net/server_finder.cpp"
   "net/server.cpp"
+  "net/game_packet_server.cpp"
   )
 
 add_dependencies(familyline-common input-flatbuffer)
