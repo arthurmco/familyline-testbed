@@ -126,10 +126,10 @@ void start_networked_game(CServer& cserv, std::function<void(std::string, Server
         fmt::print("\033[1m{}\033[0m\t ({})\n", si.name, cserv.getAddress());
         fmt::print("\t\033[32m{}\033[0m/{} clients\n", si.clients.size(), si.max_clients);
         fmt::print("\n---------------------------------------------------\n");
-        
+
         for (auto& cli: si.clients) {
             std::string readycolor = cli.ready ? "\033[34m" : "";
-            fmt::print(" {} {}{}\033[0m\n",                       
+            fmt::print(" {} {}{}\033[0m\n",
                        cli.id == cserv.getUserID() ? "=>" : "  ",
                        readycolor,
                        cli.name);
@@ -150,7 +150,7 @@ void start_networked_game(CServer& cserv, std::function<void(std::string, Server
             if (ret != ServerResult::OK) {
                 errHandler("Failure to get server info", ret);
                 return;
-            }            
+            }
             break;
         case 't':
         case 'T':
@@ -164,20 +164,30 @@ void start_networked_game(CServer& cserv, std::function<void(std::string, Server
             if (ret != ServerResult::OK) {
                 errHandler("Failure to get server info", ret);
                 return;
-            }    
+            }
 
             if (std::all_of(si.clients.begin(), si.clients.end(),
                             [](auto& v) { return v.ready == true; })
                 && si.clients.size() >= 2) {
 
                 cserv.connect();
-                
+
             }
-            
-            break;            
+
+            break;
         case 'c':
         case 'C':
-            fmt::print("not implemented yet!\n");
+            ret = cserv.getServerInfo(si);
+            if (ret != ServerResult::OK) {
+                errHandler("Failure to get server info", ret);
+                return;
+            }
+
+            ret = cserv.connect();
+            if (ret != ServerResult::OK) {
+                errHandler("Failure to get the game server info", ret);
+            }
+
             fflush(stdout);
             sleep(3);
             break;
@@ -498,7 +508,7 @@ void start_networked_game_cmdline(std::string addr, ConfigData& cdata)
         case ConnectionError:
             fmt::print(
                 "{}: {}\n", msg,
-                fmt::format("Could not connect to address {}: {}", addr));
+                fmt::format("Could not connect to address {}", addr));
             break;
         case WrongPassword:
             fmt::print("{}: {}", fmt::format("Server {} has a password", addr));
@@ -975,9 +985,9 @@ static int show_starting_menu(
                         fmt::format(
                             "Could not connect to address {}: unknown error {}", addr, ret));
                     break;
-                }  
+                }
             };
-            
+
             auto ret = cserv.login(addr, confdata.player.username);
             if (ret != ServerResult::OK) {
                 ((Textbox*)gmplayer->get("txtaddr"))->setText("");
@@ -987,7 +997,7 @@ static int show_starting_menu(
             }
 
             start_networked_game(cserv, errHandler, confdata);
-            
+
             cserv.logout();
             b->setText("Connect...");
         });

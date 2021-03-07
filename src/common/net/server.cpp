@@ -51,8 +51,8 @@ std::stringstream CServer::buildRequest(
     return outstr;
 }
 
-uint64_t CServer::getUserID() const { return userID_; }
-bool CServer::isLogged() const { return client_token_ != ""; }
+uint64_t CServer::getUserID() const { return cci_.has_value() ? cci_->info.id : 0; }
+bool CServer::isLogged() const { return cci_.has_value() ; }
 std::string CServer::getAddress() const
 {
     if (isLogged()) return http_address_;
@@ -118,17 +118,20 @@ ServerResult CServer::login(std::string address, std::string username)
             return e;
         }
 
+        
         json response = json::parse(sstr);
-        client_token_ = response["token"];
-        userID_       = response["user_id"];
-
-        if (response["name"] != username || client_token_ == "" || userID_ == 0) {
+        std::string token = response["token"];
+        uint64_t userid = response["user_id"];
+        
+        if (response["name"] != username || token == "" || userid == 0) {
             return ServerResult::ServerError;
         }
 
+        cci_ = std::optional(CurrentClientInfo{CClientInfo{userid, username, false}, token});
+
         log->write(
             "cli-server", LogType::Info,
-            "logged succesfully: username=%s, userid=%ull, token=<XXX>", username.c_str(), userID_);
+            "logged succesfully: username=%s, userid=%ull, token=<XXX>", username.c_str(), userid);
 
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};
@@ -197,7 +200,7 @@ ServerResult CServer::logout()
         // Our request to be sent.
         curlpp::Easy myRequest;
 
-        json j    = createTokenMessage(this->client_token_);
+        json j    = createTokenMessage(cci_->token);
         auto sstr = this->buildRequest(myRequest, "logout", "POST", true, j.dump());
 
         // Send request and get a result.
@@ -213,11 +216,11 @@ ServerResult CServer::logout()
         json response = json::parse(sstr);
         auto serverid = response["id"];
 
-        if (serverid != userID_) {
+        if (serverid != cci_->info.id) {
             log->write(
                 "cli-server", LogType::Error,
                 "for some reason, IDs between client and server differ (cli %llx != ser %llx)",
-                userID_, (uint64_t)serverid);
+                cci_->info.id, (uint64_t)serverid);
             return ServerResult::ServerError;
         }
 
@@ -260,7 +263,7 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
         // Our request to be sent.
         curlpp::Easy myRequest;
 
-        json j    = createTokenMessage(this->client_token_);
+        json j    = createTokenMessage(cci_->token);
         auto sstr = this->buildRequest(myRequest, "info", "POST", true, j.dump());
 
         // Send request and get a result.
@@ -276,7 +279,7 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
         json response    = json::parse(sstr);
         info.name        = response["name"];
         info.max_clients = response["max_clients"];
-
+        
         auto& jclients = response["clients"];
 
         info.clients.clear();
@@ -285,6 +288,8 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
             [&](auto& jclient) {
                 return CClientInfo{jclient["user_id"], jclient["name"], jclient["ready"]};
             });
+        
+        info_ = info;
 
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};
@@ -304,7 +309,7 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
     return ServerResult::OK;
 }
 
-bool CServer::isReady() const { return isReady_; }
+bool CServer::isReady() const { return cci_->info.ready ; }
 
 ServerResult CServer::toggleReady(bool value)
 {
@@ -327,7 +332,7 @@ ServerResult CServer::toggleReady(bool value)
         // Our request to be sent.
         curlpp::Easy myRequest;
 
-        json j               = createTokenMessage(this->client_token_);
+        json j               = createTokenMessage(cci_->token);
         std::string endpoint = fmt::format("ready/{}", value ? "set" : "unset");
 
         auto sstr = this->buildRequest(myRequest, endpoint, "PUT", true, j.dump());
@@ -341,7 +346,7 @@ ServerResult CServer::toggleReady(bool value)
         if (auto e = this->checkErrors(httpcode, sstr); e != ServerResult::OK) {
             return e;
         }
-        isReady_ = value;
+        cci_->info.ready = value;
 
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};
@@ -363,7 +368,7 @@ ServerResult CServer::toggleReady(bool value)
 
 bool CServer::isConnecting() const
 {
-    return (address_ != "" && port_ > 0);
+    return (gsi_.address != "" && gsi_.port > 0);
 }
 
 ServerResult CServer::connect()
@@ -385,7 +390,7 @@ ServerResult CServer::connect()
         // Our request to be sent.
         curlpp::Easy myRequest;
 
-        json j    = createTokenMessage(this->client_token_);
+        json j    = createTokenMessage(cci_->token);
         auto sstr = this->buildRequest(myRequest, "connect", "POST", true, j.dump());
 
         // Send request and get a result.
@@ -399,8 +404,13 @@ ServerResult CServer::connect()
         }
 
         json response    = json::parse(sstr);
-        address_ = response["address"];
-        port_ = response["port"];
+        std::string address = response["address"];
+        int port = response["port"];
+
+        gsi_ = std::optional(GameServerInfo{address, port});
+
+        log->write("cli-server", LogType::Info, "game data transmission server at %s:%d",
+                   address.c_str(), port);
 
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};
