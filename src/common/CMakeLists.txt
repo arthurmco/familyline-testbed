@@ -4,6 +4,8 @@
 
 include("${CMAKE_SOURCE_DIR}/src/common/generated.cmake")
 get_target_property(INPUT_FLATBUFFER_INCLUDE input-flatbuffer GENERATED_INCLUDES_DIR)
+get_target_property(INPUT_FLATBUFFER_INCLUDE input-ser-flatbuffer GENERATED_INCLUDES_DIR)
+get_target_property(INPUT_FLATBUFFER_INCLUDE network-flatbuffer GENERATED_INCLUDES_DIR)
 
 add_library(
   familyline-common
@@ -39,7 +41,7 @@ add_library(
   "net/game_packet_server.cpp"
   )
 
-add_dependencies(familyline-common input-flatbuffer)
+add_dependencies(familyline-common input-flatbuffer input-ser-flatbuffer network-flatbuffer)
  
 find_package(fmt CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)

@@ -434,5 +434,5 @@ std::optional<GamePacketServer> CServer::getGameServer()
     if (!this->isLogged() || !this->isConnecting())
         return std::nullopt;
 
-    return std::make_optional<GamePacketServer>(gsi_->address, gsi_->port);
+    return std::make_optional<GamePacketServer>(gsi_->address, gsi_->port, cci_->info.id);
 }

@@ -11,24 +11,36 @@
  * Copyright (C) 2021 Arthur Mendes
  */
 
-#include <string>
-#include <cstdint>
-#include <vector>
-#include <optional>
 #include <common/net/net_common.hpp>
-
+#include <cstdint>
+#include <optional>
 #include <queue>
+#include <string>
+#include <vector>
+#include <chrono>
 
-namespace familyline::net
-{
-    struct Packet {int size;};
+#include <network_generated.h>
 
+namespace familyline::net {
+
+/**
+ * Really a copy of the NetPacket struct, so we can copy them
+ */
+    struct Packet {
+        unsigned long int tick;
+        unsigned long int source_client;
+        unsigned long int dest_client;
+        std::chrono::seconds timestamp;
+        unsigned long int id;
+    };
+    
+
+    
 class GamePacketServer
 {
 public:
-    GamePacketServer(std::string address, int port)
-        : address_(address), port_(port)
-        {}
+    GamePacketServer(std::string address, int port, long long id)
+        : address_(address), port_(port), id_(id) {}
 
     /**
      * Connect to the server
@@ -41,19 +53,21 @@ public:
      * Send pending messages to the server and receive messages from the server
      */
     void update();
-    
+
 private:
     std::string address_;
     int port_;
-
-    SOCKET socket_;
+    long long id_;
     
-    std::vector<uint8_t> createMessage(const Packet& p);
+    SOCKET socket_;
+
+    std::vector<uint8_t> createMessage(
+        flatbuffers::Offset<NetPacket> p, flatbuffers::FlatBufferBuilder& fbb);
     std::optional<Packet> decodeMessage(std::vector<uint8_t>);
 
-    std::queue<Packet> send_queue_;
+    std::queue<std::tuple<flatbuffers::Offset<NetPacket>, flatbuffers::FlatBufferBuilder>>
+        send_queue_;
     std::queue<Packet> receive_queue_;
-    
 };
 
 }  // namespace familyline::net

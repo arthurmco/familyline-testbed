@@ -4,13 +4,29 @@
 
 #include <common/logger.hpp>
 #include <common/net/game_packet_server.hpp>
+#include <common/net/server.hpp>
+#include <optional>
+#include "network_generated.h"
+
 
 using namespace familyline::net;
+
+
+Packet toNativePacket(const ::familyline::NetPacket* p) {
+    std::chrono::seconds d{p->timestamp()};
+    return Packet {
+        p->tick(),
+        p->source_client(),
+        p->dest_client(),
+        d,
+        p->id()
+    };
+}
 
 bool GamePacketServer::connect()
 {
     auto& log = LoggerService::getLogger();
-
+    
     socket_ = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if (socket_ < 0) {
         throw net_exception(fmt::format(
@@ -31,7 +47,11 @@ bool GamePacketServer::connect()
         return false;
     }
 
-    send_queue_.push(Packet{333});
+    flatbuffers::FlatBufferBuilder builder;
+    auto sreq = CreateStartRequest(builder, id_, builder.CreateString("??????"));    
+    auto np = CreateNetPacket(builder, 0, id_, 0, time(NULL), 1, Message_sreq, sreq.Union());
+
+    send_queue_.push(std::make_tuple(std::move(np), std::move(builder)));
 
     return true;
 }
@@ -45,9 +65,9 @@ void GamePacketServer::update()
     auto& log = LoggerService::getLogger();
 
     if (send_queue_.size() > 0) {
-        auto& msg = send_queue_.front();
+        auto& [msg, builder] = send_queue_.front();
 
-        auto byte_data = this->createMessage(msg);
+        auto byte_data = this->createMessage(msg, builder);
         send_queue_.pop();
 
         auto r = send(socket_, byte_data.data(), byte_data.size(), 0);
@@ -138,18 +158,22 @@ bool validateCRC(const std::vector<uint8_t>& data, uint32_t expected)
     return checksum == expected;
 }
 
-std::vector<uint8_t> GamePacketServer::createMessage(const Packet& p)
+std::vector<uint8_t> GamePacketServer::createMessage(flatbuffers::Offset<NetPacket> p,
+                                                     flatbuffers::FlatBufferBuilder& fbb)
 {
+    FinishNetPacketBuffer(fbb, p);
+    
     std::string magic = "FAMI";
+    uint32_t size = fbb.GetSize();
     std::vector<uint8_t> ret;
-    uint32_t size = p.size;
+    std::vector<uint8_t> data(fbb.GetBufferPointer(), fbb.GetBufferPointer()+size);
 
     ret.insert(ret.begin(), magic.begin(), magic.begin() + 4);
     push_multi(ret, 0, 0, 0, 0);  // flags
     push_multi(ret, 0, 0, 0, 0);  // checksum (will be fixed later)
     push_multi(ret, size & 0xff, (size >> 8) & 0xff, (size >> 16) & 0xff, (size >> 24) & 0xff);
 
-    for (auto i = 0; i < size; i++) ret.push_back(0);
+    std::copy(data.begin(), data.end(), std::back_inserter(ret));
 
     uint32_t checksum = calculateCRC(ret);
     ret[8]            = checksum & 0xff;
@@ -159,6 +183,7 @@ std::vector<uint8_t> GamePacketServer::createMessage(const Packet& p)
 
     return ret;
 }
+
 
 std::optional<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
 {
@@ -173,5 +198,6 @@ std::optional<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
 
     uint32_t size = getU32(data, 12);
 
-    return std::make_optional<Packet>(size);
+    auto pkt = GetNetPacket(data.data());
+    return std::make_optional(toNativePacket(pkt));    
 }

@@ -1,4 +1,5 @@
 #include <flatbuffers/flatbuffers.h>
+#include <input_generated.h>
 #include <input_serialize_generated.h>
 #include <zlib.h>
 
@@ -144,7 +145,7 @@ bool InputRecorder::addAction(PlayerInputAction pia)
                     }
 
                     auto pserialize = builder.CreateVector(params);
-                    auto cargs      = CreateCommandInputArgs(builder, pserialize);
+                    auto cargs      = CreateCommandInputA(builder, pserialize);
 
                     auto cval = CreateCommandInput(builder, cstr, cargs);
 
