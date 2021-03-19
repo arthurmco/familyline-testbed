@@ -47,6 +47,8 @@ typedef unsigned int in_addr_t;
 #include <string_view>
 #include <stdexcept>
 
+#define HAS_UTSNAME __has_include(<sys/utsname.h)
+
 namespace familyline::net
 {
 class net_exception : public std::runtime_error

@@ -1,7 +1,6 @@
 
 #include <fcntl.h>
 
-
 #include <common/logger.hpp>
 #include <common/net/server_finder.hpp>
 #include <nlohmann/json.hpp>
@@ -46,7 +45,7 @@ std::string getPrimaryAddress()
     }
 #endif
 
-#ifdef __linux__ || APPLE
+#ifdef HAS_UTSNAME
     struct utsname buf;
     if (uname(&buf) == 0) {
         if (strlen(buf.nodename) > 0) {
