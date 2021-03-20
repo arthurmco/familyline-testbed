@@ -61,6 +61,11 @@ Packet toNativePacket(const ::familyline::NetPacket* p)
             message = std::monostate{};  // Packet::NGameStartResponse{m->reserved()};
             break;
         }
+        case familyline::Message_NONE: {
+            auto m  = p->message_as_ires();
+            message = std::monostate{};  // Packet::NGameStartResponse{m->reserved()};
+            break;
+        }
     }
 
     std::chrono::seconds d{p->timestamp()};
