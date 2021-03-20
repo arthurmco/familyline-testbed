@@ -45,8 +45,8 @@ add_dependencies(familyline-common input-flatbuffer input-ser-flatbuffer network
  
 find_package(fmt CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(ZLIB REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(tl-expected CONFIG REQUIRED)
 
 if (MSVC)
 	
@@ -59,6 +59,7 @@ if (MSVC)
   target_link_libraries(familyline-common PUBLIC fmt::fmt glm ${ZLIB_LIBRARIES})
   target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
   target_link_libraries(familyline-common PUBLIC unofficial::curlpp::curlpp)
+  target_link_libraries(familyline-common PUBLIC tl::expected)
   
 else()
   find_package(PkgConfig REQUIRED)
@@ -66,6 +67,7 @@ else()
   pkg_search_module(CURLPP REQUIRED curlpp)
   target_link_libraries(familyline-common PUBLIC fmt::fmt ${GLM_LIBRARIES} ${ZLIB_LIBRARIES})
   target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
+  target_link_libraries(familyline-common PUBLIC tl::expected)
   target_link_libraries(familyline-common PUBLIC ${CURLPP_LDFLAGS})
   target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIR} ${INPUT_FLATBUFFER_INCLUDE} ${CURLPP_INCLUDE_DIRS})
