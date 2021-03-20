@@ -180,10 +180,9 @@ bool GamePacketServer::connect()
  * from the clients
  */
 void GamePacketServer::update()
-{    
-    if (!connected_)
-        return;
-    
+{
+    if (!connected_) return;
+
     auto& log = LoggerService::getLogger();
 
     if (send_queue_.size() > 0) {
@@ -261,53 +260,56 @@ GamePacketServer::waitForClientConnection(int timeout)
 {
     using RetT = std::vector<NetworkClient>;
     using RetE = NetResult;
-    return std::async(
-        std::launch::async, [this, timeout]() -> tl::expected<RetT, RetE> {
-            bool all_ack = false;
-            auto start = std::chrono::system_clock::now();
-            std::vector<uint64_t> player_ids_;
+    return std::async(std::launch::async, [this, timeout]() -> tl::expected<RetT, RetE> {
+        bool all_ack = false;
+        auto start   = std::chrono::system_clock::now();
+        std::vector<uint64_t> player_ids_;
 
-            while (true) {
-                // check if we timed out
-                auto current = std::chrono::system_clock::now();
-                if (current - start > std::chrono::seconds(timeout)) {
-                    return tl::make_unexpected(NetResult::ConnectionTimeout);
-                }
+        while (true) {
+            printf("\n0\n");
 
-                if (!this->connected_) {
-                    return tl::make_unexpected(NetResult::UnexpectedDisconnect);
-                }
-
-                auto& log = LoggerService::getLogger();
-
-                while (!this->receive_queue_.empty()) {
-                    std::lock_guard<std::mutex> lg(this->receive_mutex_);
-                    auto& pkt = receive_queue_.front();
-
-                    if (auto p = std::get_if<Packet::NStartResponse>(&pkt.message); p) {
-                        log->write("game-packet-server", LogType::Info, "client id %llx ack'ed", p->client_ack);
-                        player_ids_.push_back(p->client_ack);
-
-                        if (p->all_clients_ack) {
-                            all_ack = true;
-                        }                        
-                    }
-                    
-                    receive_queue_.pop();
-
-                    if (all_ack) {
-                        log->write("game-packet-server", LogType::Info, "all clients ack'ed");
-                        break;
-                    }
-                }
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            // check if we timed out
+            auto current = std::chrono::system_clock::now();
+            if (current - start > std::chrono::seconds(timeout)) {
+                return tl::make_unexpected(NetResult::ConnectionTimeout);
             }
 
-            std::vector<NetworkClient> clients;
+            if (!this->connected_) {
+                return tl::make_unexpected(NetResult::UnexpectedDisconnect);
+            }
 
-            return tl::expected<RetT, RetE>(clients);
-        });
+            auto& log = LoggerService::getLogger();
+
+            while (!this->receive_queue_.empty()) {
+                std::lock_guard<std::mutex> lg(this->receive_mutex_);
+                auto& pkt = receive_queue_.front();
+
+                if (auto p = std::get_if<Packet::NStartResponse>(&pkt.message); p) {
+                    log->write(
+                        "game-packet-server", LogType::Info, "client id %llx ack'ed",
+                        p->client_ack);
+                    player_ids_.push_back(p->client_ack);
+
+                    if (p->all_clients_ack) {
+                        all_ack = true;
+                    }
+                }
+
+                receive_queue_.pop();
+
+                if (all_ack) {
+                    log->write("game-packet-server", LogType::Info, "all clients ack'ed");
+                    break;
+                }
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+
+        std::vector<NetworkClient> clients;
+
+        return tl::expected<RetT, RetE>(clients);
+    });
 }
 
 /**
@@ -388,6 +390,6 @@ std::optional<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
 
     uint32_t size = getU32(data, 12);
 
-    auto pkt = GetNetPacket(data.data());
+    auto pkt = GetNetPacket(data.data() + 16);
     return std::make_optional(toNativePacket(pkt));
 }

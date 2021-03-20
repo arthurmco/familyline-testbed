@@ -150,6 +150,10 @@ NetResult CServer::login(std::string address, std::string username)
         if (exc.find("Connection refused") != std::string::npos) {
             return NetResult::ConnectionError;
         }
+        
+        if (exc.find("reset by peer") != std::string::npos) {
+            return NetResult::ConnectionError;
+        }
 
         return NetResult::ServerError;
 

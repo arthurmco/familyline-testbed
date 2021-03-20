@@ -138,6 +138,8 @@ void start_networked_game(
 
         fmt::print("\033[{}B", si.max_clients - si.clients.size() + 1);
         fmt::print("\033[3B [(u)pdate, (q)uit, (c)onnect, (t)oggle ready]> ");
+
+        fflush(stdin);
         auto v = getchar();
 
         switch (v) {
@@ -586,8 +588,8 @@ void start_networked_game_cmdline(std::string addr, ConfigData& cdata)
                 fmt::print(
                     "{}: {}\n", msg,
                     fmt::format(
-                        "Error where connecting to {}: Not all clients were connected, but the "
-                        "client and the server disagree on that.",
+                        "Error where connecting to {}: The server reported that not all clients "
+                        "were connected",
                         addr));
                 break;
             default:
