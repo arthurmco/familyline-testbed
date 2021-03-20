@@ -31,33 +31,19 @@ typedef unsigned int in_addr_t;
 #include <optional>
 
 #include <common/net/game_packet_server.hpp>
+#include <common/net/net_client.hpp>
 
-enum ServerResult {
-    OK = 0,
 
-    ConnectionError = 1,
-    WrongPassword,
-    LoginFailure,
-    ConnectionTimeout,
-    ServerError,
-    AlreadyLoggedOff,
-    NotAllClientsConnected,
-};
+/// i do not want to include curlpp here (but maybe I should?)
+namespace curlpp
+{
+class Easy;
+}
 
-/**
- * Client information, as returned by the server
- */
-struct CClientInfo {
-    uint64_t id;
-    std::string name;
-    bool ready = false;
-};
+namespace familyline::net
+{
 
-struct CurrentClientInfo {
-    CClientInfo info;
-    std::string token;
-};
-
+    
 /// Information about the game server port (the port that you really need to communicate with
 /// the game)
 struct GameServerInfo {
@@ -71,14 +57,7 @@ struct CServerInfo {
     std::vector<CClientInfo> clients;
 };
 
-/// i do not want to include curlpp here (but maybe I should?)
-namespace curlpp
-{
-class Easy;
-}
 
-namespace familyline::net
-{
 /**
  * Client-side server communication routines
  *
@@ -94,7 +73,7 @@ public:
      *
      * Returns a certain result.
      */
-    ServerResult login(std::string address, std::string username);
+    NetResult login(std::string address, std::string username);
 
     /**
      * Logout from the server
@@ -106,10 +85,10 @@ public:
      *
      * You must be prepared for that.
      */
-    ServerResult logout();
+    NetResult logout();
 
-    ServerResult getServerInfo(CServerInfo& info);
-    ServerResult toggleReady(bool);
+    NetResult getServerInfo(CServerInfo& info);
+    NetResult toggleReady(bool);
 
     /**
      * Tells the game you are starting.
@@ -117,7 +96,7 @@ public:
      * Here, the call may succeed, or fail with the warning of not all
      * clients are ready
      */
-    ServerResult connect();
+    NetResult connect();
 
     uint64_t getUserID() const;
     std::string getAddress() const;
@@ -144,7 +123,7 @@ private:
 
     CServerInfo info_;
 
-    ServerResult checkErrors(unsigned httpcode, std::stringstream& body);
+    NetResult checkErrors(unsigned httpcode, std::stringstream& body);
 
     /**
      * Build a basic curlpp request.

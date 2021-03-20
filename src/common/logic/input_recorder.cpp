@@ -111,7 +111,7 @@ bool InputRecorder::createFile(std::string_view path, ObjectFactory* const of)
 
 /// This will allow us to use std::visit with multiple variants at once, a thing
 /// that should be part of C++20.
-/// There are three locations that I use this. I hope this gets suggested for C++23
+/// There are FOUR locations that I use this. I hope this gets suggested for C++23
 /// or C++26
 template <class... Ts>
 struct overload : Ts... {

@@ -1,32 +1,150 @@
 #include <bits/stdint-uintn.h>
+#include <flatbuffers/flatbuffers.h>
 #include <fmt/format.h>
 #include <sys/socket.h>
 
+#include <chrono>
 #include <common/logger.hpp>
 #include <common/net/game_packet_server.hpp>
 #include <common/net/server.hpp>
+#include <mutex>
 #include <optional>
-#include "network_generated.h"
+#include <thread>
+#include <tl/expected.hpp>
+#include <variant>
 
+#include "network_generated.h"
 
 using namespace familyline::net;
 
+Packet toNativePacket(const ::familyline::NetPacket* p)
+{
+    decltype(Packet::message) message = std::monostate{};
+    switch (p->message_type()) {
+        case familyline::Message_sreq: {
+            auto m  = p->message_as_sreq();
+            message = Packet::NStartRequest{m->client_id(), m->token()->str()};
+            break;
+        }
+        case familyline::Message_sres: {
+            auto m  = p->message_as_sres();
+            message = Packet::NStartResponse{m->client_ack(), m->all_clients_ack()};
+            break;
+        }
+        case familyline::Message_lreq: {
+            auto m  = p->message_as_lreq();
+            message = Packet::NLoadingRequest{m->percent()};
+            break;
+        }
+        case familyline::Message_lres: {
+            auto m  = p->message_as_lres();
+            message = Packet::NLoadingResponse{m->percent()};
+            break;
+        }
+        case familyline::Message_greq: {
+            auto m  = p->message_as_greq();
+            message = Packet::NGameStartRequest{m->reserved()};
+            break;
+        }
+        case familyline::Message_gres: {
+            auto m  = p->message_as_gres();
+            message = Packet::NGameStartResponse{m->reserved()};
+            break;
+        }
+        case familyline::Message_ireq: {
+            auto m  = p->message_as_ireq();
+            message = std::monostate{};  // Packet::NGameStartRequest{m->reserved()};
+            break;
+        }
+        case familyline::Message_ires: {
+            auto m  = p->message_as_ires();
+            message = std::monostate{};  // Packet::NGameStartResponse{m->reserved()};
+            break;
+        }
+    }
 
-Packet toNativePacket(const ::familyline::NetPacket* p) {
     std::chrono::seconds d{p->timestamp()};
-    return Packet {
-        p->tick(),
-        p->source_client(),
-        p->dest_client(),
-        d,
-        p->id()
-    };
+    return Packet{p->tick(), p->source_client(), p->dest_client(), d, p->id(), message};
+}
+
+/// This will allow us to use std::visit with multiple variants at once, a thing
+/// that should be part of C++20.
+/// There are FOUR locations that I use this. I hope this gets suggested for C++23
+/// or C++26
+template <class... Ts>
+struct overload : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overload(Ts...) -> overload<Ts...>;
+
+flatbuffers::Offset<::familyline::NetPacket> GamePacketServer::toSerializedPacket(
+    const Packet& p, flatbuffers::FlatBufferBuilder& b)
+{
+    familyline::Message msg_type = familyline::Message_NONE;
+    flatbuffers::Offset<void> msg_data;
+
+    std::visit(
+        overload{
+            [&](const std::monostate& m) {
+                auto& log = LoggerService::getLogger();
+
+                log->write(
+                    "game-packet-server", LogType::Error,
+                    "to be sent message (timestamp %ull, id %d) is invalid (has invalid type)",
+                    p.timestamp.count(), p.id);
+                msg_type = familyline::Message_NONE;
+            },
+            [&](const Packet::NStartRequest& a) {
+                auto token = b.CreateString(a.token);
+                auto cval  = familyline::CreateStartRequest(b, a.client_id, token);
+
+                msg_type = familyline::Message_sreq;
+                msg_data = cval.Union();
+            },
+            [&](const Packet::NStartResponse& m) {
+                auto cval = familyline::CreateStartResponse(b, m.client_ack, m.all_clients_ack);
+
+                msg_type = familyline::Message_sres;
+                msg_data = cval.Union();
+            },
+            [&](const Packet::NLoadingRequest& m) {
+                auto cval = familyline::CreateLoadingRequest(b, m.percent);
+
+                msg_type = familyline::Message_lreq;
+                msg_data = cval.Union();
+            },
+            [&](const Packet::NLoadingResponse& m) {
+                auto cval = familyline::CreateLoadingResponse(b, m.percent);
+
+                msg_type = familyline::Message_lres;
+                msg_data = cval.Union();
+            },
+            [&](const Packet::NGameStartRequest& m) {
+                auto cval = familyline::CreateGameStartRequest(b, m.val);
+
+                msg_type = familyline::Message_lreq;
+                msg_data = cval.Union();
+            },
+            [&](const Packet::NGameStartResponse& m) {
+                auto cval = familyline::CreateGameStartResponse(b, m.val);
+
+                msg_type = familyline::Message_lres;
+                msg_data = cval.Union();
+            }
+
+        },
+        p.message);
+
+    auto fbpacket = familyline::CreateNetPacket(
+        b, p.tick, p.source_client, p.dest_client, p.timestamp.count(), p.id, msg_type, msg_data);
+    return fbpacket;
 }
 
 bool GamePacketServer::connect()
 {
     auto& log = LoggerService::getLogger();
-    
+
     socket_ = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if (socket_ < 0) {
         throw net_exception(fmt::format(
@@ -47,12 +165,13 @@ bool GamePacketServer::connect()
         return false;
     }
 
-    flatbuffers::FlatBufferBuilder builder;
-    auto sreq = CreateStartRequest(builder, id_, builder.CreateString("??????"));    
-    auto np = CreateNetPacket(builder, 0, id_, 0, time(NULL), 1, Message_sreq, sreq.Union());
+    auto epoch_secs =
+        duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
+    send_queue_.push(Packet{
+        0, (unsigned long long)id_, 0, epoch_secs, 1,
+        Packet::NStartRequest{(unsigned long long)id_, token_}});
 
-    send_queue_.push(std::make_tuple(std::move(np), std::move(builder)));
-
+    connected_ = true;
     return true;
 }
 
@@ -61,14 +180,19 @@ bool GamePacketServer::connect()
  * from the clients
  */
 void GamePacketServer::update()
-{
+{    
+    if (!connected_)
+        return;
+    
     auto& log = LoggerService::getLogger();
 
     if (send_queue_.size() > 0) {
-        auto& [msg, builder] = send_queue_.front();
-
-        auto byte_data = this->createMessage(msg, builder);
+        send_mutex_.lock();
+        auto& packet   = send_queue_.front();
+        packet.id      = ++last_message_id_;
+        auto byte_data = this->createMessage(packet);
         send_queue_.pop();
+        send_mutex_.unlock();
 
         auto r = send(socket_, byte_data.data(), byte_data.size(), 0);
 
@@ -91,6 +215,7 @@ void GamePacketServer::update()
     auto r             = recv(socket_, data, 1023, MSG_DONTWAIT);
     if (r == 0) {
         log->write("game-packet-server", LogType::Error, "Connection terminated");
+        connected_ = false;
         return;
     }
 
@@ -111,13 +236,78 @@ void GamePacketServer::update()
     if (!pkt) {
         log->write(
             "game-packet-server", LogType::Error,
-            "received invalid package (len %zu, starts with %02x %02x %02x %02x",
-            r,
-            r>0 ? vdata[0]: 0, r>1 ? vdata[1] : 0,
-            r>2 ? vdata[2]: 0, r>3 ? vdata[3] : 0);        
+            "received invalid package (len %zu, starts with %02x %02x %02x %02x", r,
+            r > 0 ? vdata[0] : 0, r > 1 ? vdata[1] : 0, r > 2 ? vdata[2] : 0, r > 3 ? vdata[3] : 0);
     } else {
+        log->write(
+            "game-packet-server", LogType::Info,
+            "received package (id %llu, from %llu, to %llu, timestamp %llu..., type %d )", pkt->id,
+            pkt->source_client, pkt->dest_client, pkt->timestamp, pkt->message.index());
+        receive_mutex_.lock();
         receive_queue_.push(*pkt);
+        receive_mutex_.unlock();
     }
+}
+
+/**
+ * Wait for all clients to be connected, or until a timeout (in seconds)
+ *
+ * This future will only be valid after all clients are connected.
+ * If no clients are connected, it will return a NetResult, matching the ServerError we found.
+ * Not all server errors will be returned, though
+ */
+std::future<tl::expected<std::vector<NetworkClient>, NetResult>>
+GamePacketServer::waitForClientConnection(int timeout)
+{
+    using RetT = std::vector<NetworkClient>;
+    using RetE = NetResult;
+    return std::async(
+        std::launch::async, [this, timeout]() -> tl::expected<RetT, RetE> {
+            bool all_ack = false;
+            auto start = std::chrono::system_clock::now();
+            std::vector<uint64_t> player_ids_;
+
+            while (true) {
+                // check if we timed out
+                auto current = std::chrono::system_clock::now();
+                if (current - start > std::chrono::seconds(timeout)) {
+                    return tl::make_unexpected(NetResult::ConnectionTimeout);
+                }
+
+                if (!this->connected_) {
+                    return tl::make_unexpected(NetResult::UnexpectedDisconnect);
+                }
+
+                auto& log = LoggerService::getLogger();
+
+                while (!this->receive_queue_.empty()) {
+                    std::lock_guard<std::mutex> lg(this->receive_mutex_);
+                    auto& pkt = receive_queue_.front();
+
+                    if (auto p = std::get_if<Packet::NStartResponse>(&pkt.message); p) {
+                        log->write("game-packet-server", LogType::Info, "client id %llx ack'ed", p->client_ack);
+                        player_ids_.push_back(p->client_ack);
+
+                        if (p->all_clients_ack) {
+                            all_ack = true;
+                        }                        
+                    }
+                    
+                    receive_queue_.pop();
+
+                    if (all_ack) {
+                        log->write("game-packet-server", LogType::Info, "all clients ack'ed");
+                        break;
+                    }
+                }
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            }
+
+            std::vector<NetworkClient> clients;
+
+            return tl::expected<RetT, RetE>(clients);
+        });
 }
 
 /**
@@ -158,15 +348,16 @@ bool validateCRC(const std::vector<uint8_t>& data, uint32_t expected)
     return checksum == expected;
 }
 
-std::vector<uint8_t> GamePacketServer::createMessage(flatbuffers::Offset<NetPacket> p,
-                                                     flatbuffers::FlatBufferBuilder& fbb)
+std::vector<uint8_t> GamePacketServer::createMessage(const Packet& p)
 {
-    FinishNetPacketBuffer(fbb, p);
-    
+    flatbuffers::FlatBufferBuilder fbb;
+    auto packet = toSerializedPacket(p, fbb);
+    FinishNetPacketBuffer(fbb, packet);
+
     std::string magic = "FAMI";
-    uint32_t size = fbb.GetSize();
+    uint32_t size     = fbb.GetSize();
     std::vector<uint8_t> ret;
-    std::vector<uint8_t> data(fbb.GetBufferPointer(), fbb.GetBufferPointer()+size);
+    std::vector<uint8_t> data(fbb.GetBufferPointer(), fbb.GetBufferPointer() + size);
 
     ret.insert(ret.begin(), magic.begin(), magic.begin() + 4);
     push_multi(ret, 0, 0, 0, 0);  // flags
@@ -184,7 +375,6 @@ std::vector<uint8_t> GamePacketServer::createMessage(flatbuffers::Offset<NetPack
     return ret;
 }
 
-
 std::optional<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
 {
     if (data[0] != 'F' || data[1] != 'A' || data[2] != 'M' || data[3] != 'I') {
@@ -199,5 +389,5 @@ std::optional<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
     uint32_t size = getU32(data, 12);
 
     auto pkt = GetNetPacket(data.data());
-    return std::make_optional(toNativePacket(pkt));    
+    return std::make_optional(toNativePacket(pkt));
 }

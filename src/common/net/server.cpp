@@ -9,6 +9,7 @@
 #include <optional>
 #include <sstream>
 #include <string_view>
+
 #include "common/net/game_packet_server.hpp"
 
 using namespace familyline::net;
@@ -62,7 +63,7 @@ std::string CServer::getAddress() const
     return "";
 }
 
-ServerResult CServer::checkErrors(unsigned httpcode, std::stringstream& body)
+NetResult CServer::checkErrors(unsigned httpcode, std::stringstream& body)
 {
     body.seekg(0);
 
@@ -75,23 +76,23 @@ ServerResult CServer::checkErrors(unsigned httpcode, std::stringstream& body)
                 std::string message = response["message"];
                 log->write("cli-server", LogType::Error, "login failure: %s", message.c_str());
                 if (message.find("Not all clients are ready") != std::string::npos) {
-                    return ServerResult::NotAllClientsConnected;
+                    return NetResult::NotAllClientsConnected;
                 }
 
-                return ServerResult::LoginFailure;
+                return NetResult::LoginFailure;
             }
             default:
                 log->write(
                     "cli-server", LogType::Error, "login returned weird HTTP code: %d", httpcode);
-                return ServerResult::ConnectionError;
+                return NetResult::ConnectionError;
         }
     }
 
     body.seekg(0);
-    return ServerResult::OK;
+    return NetResult::OK;
 }
 
-ServerResult CServer::login(std::string address, std::string username)
+NetResult CServer::login(std::string address, std::string username)
 {
     http_address_ = address;
     auto& log     = LoggerService::getLogger();
@@ -116,7 +117,7 @@ ServerResult CServer::login(std::string address, std::string username)
 
         auto httpcode = curlpp::infos::ResponseCode::get(myRequest);
 
-        if (auto e = this->checkErrors(httpcode, sstr); e != ServerResult::OK) {
+        if (auto e = this->checkErrors(httpcode, sstr); e != NetResult::OK) {
             return e;
         }
 
@@ -125,7 +126,7 @@ ServerResult CServer::login(std::string address, std::string username)
         uint64_t userid   = response["user_id"];
 
         if (response["name"] != username || token == "" || userid == 0) {
-            return ServerResult::ServerError;
+            return NetResult::ServerError;
         }
 
         cci_ = std::optional(CurrentClientInfo{CClientInfo{userid, username, false}, token});
@@ -139,18 +140,18 @@ ServerResult CServer::login(std::string address, std::string username)
         log->write("cli-server", LogType::Error, "CURL error: %s,", exc.data());
 
         if (exc.find("timed out") != std::string::npos) {
-            return ServerResult::ConnectionTimeout;
+            return NetResult::ConnectionTimeout;
         }
 
         if (exc.find("Could not resolve host") != std::string::npos) {
-            return ServerResult::ConnectionError;
+            return NetResult::ConnectionError;
         }
 
         if (exc.find("Connection refused") != std::string::npos) {
-            return ServerResult::ConnectionError;
+            return NetResult::ConnectionError;
         }
 
-        return ServerResult::ServerError;
+        return NetResult::ServerError;
 
     } catch (curlpp::LogicError& e) {
         std::cerr << "Logic: " << e.what() << std::endl;
@@ -159,10 +160,10 @@ ServerResult CServer::login(std::string address, std::string username)
             "cli-server", LogType::Error,
             "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
             e.what());
-        return ServerResult::ServerError;
+        return NetResult::ServerError;
     }
 
-    return ServerResult::OK;
+    return NetResult::OK;
 }
 
 json createTokenMessage(std::string token)
@@ -182,13 +183,13 @@ json createTokenMessage(std::string token)
  *
  * You must be prepared for that.
  */
-ServerResult CServer::logout()
+NetResult CServer::logout()
 {
     auto& log = LoggerService::getLogger();
 
     if (!isLogged()) {
         log->write("cli-server", LogType::Warning, "logging out but already logged off");
-        return ServerResult::AlreadyLoggedOff;
+        return NetResult::AlreadyLoggedOff;
     }
 
     log->write("cli-server", LogType::Info, "logging out from %s", http_address_.c_str());
@@ -210,7 +211,7 @@ ServerResult CServer::logout()
 
         auto httpcode = curlpp::infos::ResponseCode::get(myRequest);
 
-        if (auto e = this->checkErrors(httpcode, sstr); e != ServerResult::OK) {
+        if (auto e = this->checkErrors(httpcode, sstr); e != NetResult::OK) {
             return e;
         }
 
@@ -222,7 +223,7 @@ ServerResult CServer::logout()
                 "cli-server", LogType::Error,
                 "for some reason, IDs between client and server differ (cli %llx != ser %llx)",
                 cci_->info.id, (uint64_t)serverid);
-            return ServerResult::ServerError;
+            return NetResult::ServerError;
         }
 
         log->write("cli-server", LogType::Info, "logged out succesfully");
@@ -230,7 +231,7 @@ ServerResult CServer::logout()
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};
         if (exc.find("Connection timed out") != std::string::npos) {
-            return ServerResult::ConnectionTimeout;
+            return NetResult::ConnectionTimeout;
         }
     } catch (curlpp::LogicError& e) {
         std::cerr << "Logic: " << e.what() << std::endl;
@@ -239,19 +240,19 @@ ServerResult CServer::logout()
             "cli-server", LogType::Error,
             "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
             e.what());
-        return ServerResult::ServerError;
+        return NetResult::ServerError;
     }
 
-    return ServerResult::OK;
+    return NetResult::OK;
 }
 
-ServerResult CServer::getServerInfo(CServerInfo& info)
+NetResult CServer::getServerInfo(CServerInfo& info)
 {
     auto& log = LoggerService::getLogger();
 
     if (!isLogged()) {
         log->write("cli-server", LogType::Warning, "getting server info but already logged off");
-        return ServerResult::AlreadyLoggedOff;
+        return NetResult::AlreadyLoggedOff;
     }
 
     log->write("cli-server", LogType::Info, "getting server info from %s", http_address_.c_str());
@@ -273,7 +274,7 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
 
         auto httpcode = curlpp::infos::ResponseCode::get(myRequest);
 
-        if (auto e = this->checkErrors(httpcode, sstr); e != ServerResult::OK) {
+        if (auto e = this->checkErrors(httpcode, sstr); e != NetResult::OK) {
             return e;
         }
 
@@ -295,7 +296,7 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};
         if (exc.find("Connection timed out") != std::string::npos) {
-            return ServerResult::ConnectionTimeout;
+            return NetResult::ConnectionTimeout;
         }
     } catch (curlpp::LogicError& e) {
         std::cerr << "Logic: " << e.what() << std::endl;
@@ -304,21 +305,21 @@ ServerResult CServer::getServerInfo(CServerInfo& info)
             "cli-server", LogType::Error,
             "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
             e.what());
-        return ServerResult::ServerError;
+        return NetResult::ServerError;
     }
 
-    return ServerResult::OK;
+    return NetResult::OK;
 }
 
 bool CServer::isReady() const { return cci_->info.ready; }
 
-ServerResult CServer::toggleReady(bool value)
+NetResult CServer::toggleReady(bool value)
 {
     auto& log = LoggerService::getLogger();
 
     if (!isLogged()) {
         log->write("cli-server", LogType::Warning, "getting server info but already logged off");
-        return ServerResult::AlreadyLoggedOff;
+        return NetResult::AlreadyLoggedOff;
     }
 
     log->write(
@@ -344,7 +345,7 @@ ServerResult CServer::toggleReady(bool value)
 
         auto httpcode = curlpp::infos::ResponseCode::get(myRequest);
 
-        if (auto e = this->checkErrors(httpcode, sstr); e != ServerResult::OK) {
+        if (auto e = this->checkErrors(httpcode, sstr); e != NetResult::OK) {
             return e;
         }
         cci_->info.ready = value;
@@ -352,7 +353,7 @@ ServerResult CServer::toggleReady(bool value)
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};
         if (exc.find("Connection timed out") != std::string::npos) {
-            return ServerResult::ConnectionTimeout;
+            return NetResult::ConnectionTimeout;
         }
     } catch (curlpp::LogicError& e) {
         std::cerr << "Logic: " << e.what() << std::endl;
@@ -361,21 +362,21 @@ ServerResult CServer::toggleReady(bool value)
             "cli-server", LogType::Error,
             "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
             e.what());
-        return ServerResult::ServerError;
+        return NetResult::ServerError;
     }
 
-    return ServerResult::OK;
+    return NetResult::OK;
 }
 
 bool CServer::isConnecting() const { return (gsi_->address != "" && gsi_->port > 0); }
 
-ServerResult CServer::connect()
+NetResult CServer::connect()
 {
     auto& log = LoggerService::getLogger();
 
     if (!isLogged()) {
         log->write("cli-server", LogType::Warning, "getting server info but already logged off");
-        return ServerResult::AlreadyLoggedOff;
+        return NetResult::AlreadyLoggedOff;
     }
 
     log->write("cli-server", LogType::Info, "connecting to %s", http_address_.c_str());
@@ -397,7 +398,7 @@ ServerResult CServer::connect()
 
         auto httpcode = curlpp::infos::ResponseCode::get(myRequest);
 
-        if (auto e = this->checkErrors(httpcode, sstr); e != ServerResult::OK) {
+        if (auto e = this->checkErrors(httpcode, sstr); e != NetResult::OK) {
             return e;
         }
 
@@ -414,7 +415,7 @@ ServerResult CServer::connect()
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};
         if (exc.find("Connection timed out") != std::string::npos) {
-            return ServerResult::ConnectionTimeout;
+            return NetResult::ConnectionTimeout;
         }
     } catch (curlpp::LogicError& e) {
         std::cerr << "Logic: " << e.what() << std::endl;
@@ -423,16 +424,18 @@ ServerResult CServer::connect()
             "cli-server", LogType::Error,
             "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
             e.what());
-        return ServerResult::ServerError;
+        return NetResult::ServerError;
     }
 
-    return ServerResult::OK;
+    return NetResult::OK;
 }
 
 std::optional<GamePacketServer> CServer::getGameServer()
 {
-    if (!this->isLogged() || !this->isConnecting())
+    if (!this->isLogged() || !this->isConnecting()) {
         return std::nullopt;
+    }
 
-    return std::make_optional<GamePacketServer>(gsi_->address, gsi_->port, cci_->info.id);
+    return std::make_optional<GamePacketServer>(
+        gsi_->address, gsi_->port, cci_->token, cci_->info.id, info_.clients);
 }
