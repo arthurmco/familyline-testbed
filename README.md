@@ -31,17 +31,19 @@ The game runs in Linux and Windows. Other platforms need to be tested.
 
 On Linux, you will need the softwares below:
 
- - *GLM:* for vector mathematics
- - *GLEW:* for dealing with OpenGL extensions
- - *SDL:* for dealing with our window. Version 2.0 is required.
- - *devIL:* for loading our textures.
- - *cairo:* for drawing the interfaces
- - *libyaml:* For parsing the `assets.yaml` file, aka the asset list.
+ - *GLM*: for vector mathematics
+ - *GLEW*: for dealing with OpenGL extensions
+ - *SDL*: for dealing with our window. Version 2.0 is required.
+ - *devIL*: for loading our textures.
+ - *cairo*: for drawing the interfaces
+ - *libyaml*: For parsing the `assets.yaml` file, aka the asset list.
  - *nlohmann-json*: For parsing and creating JSON from some network
    messages.
- - *curlpp:* For network communication (pre-game server-client
+ - *tl-expected*: We are now starting to use the tl-expected header
+   files to make error handling nicer
+ - *curlpp*: For network communication (pre-game server-client
    communication is HTTP-based)
- - *libflatbuffers:* For serializing the input to a file, and reading
+ - *libflatbuffers*: For serializing the input to a file, and reading
    from it
 
 Please build in a separate directory from the source. For exemple,
@@ -73,7 +75,7 @@ You will need to have vcpkg integrated with Visual Studio.
 Execute the following command:
 
 `> vcpkg install glm glew sdl2 devil cairo libyaml fmt flatbuffers
-nlohmann-json curlpp`
+nlohmann-json curlpp tl-expected`
 
 Go make a coffee and buy needed things in the market. Order some
 food. This will take some time.
