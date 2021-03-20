@@ -270,9 +270,7 @@ GamePacketServer::waitForClientConnection(int timeout)
         auto start   = std::chrono::system_clock::now();
         std::vector<uint64_t> player_ids_;
 
-        while (true) {
-            printf("\n0\n");
-
+        while (!all_ack) {
             // check if we timed out
             auto current = std::chrono::system_clock::now();
             if (current - start > std::chrono::seconds(timeout)) {
