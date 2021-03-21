@@ -39,6 +39,7 @@ add_library(
   "net/server_finder.cpp"
   "net/server.cpp"
   "net/game_packet_server.cpp"
+  "net/network_client.cpp"
   )
 
 add_dependencies(familyline-common input-flatbuffer input-ser-flatbuffer network-flatbuffer)

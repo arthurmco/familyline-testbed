@@ -8,9 +8,12 @@
 
 #include <fmt/core.h>
 
+#include <algorithm>
 #include <chrono>
+#include <iterator>
 
 #include "client/graphical/gui/gui_container_component.hpp"
+#include "common/net/network_client.hpp"
 #define GLM_FORCE_RADIANS
 
 #ifndef _WIN32
@@ -60,6 +63,7 @@
 #include <common/net/game_packet_server.hpp>
 #include <common/net/server.hpp>
 #include <common/net/server_finder.hpp>
+#include <concepts>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -110,7 +114,140 @@ void end_network()
 #endif
 }
 
-void start_networked_game(
+/**
+ * Wait for a list futures promises, then return
+ *
+ * Return true when every item on the promise resolves
+ *
+ * The FnValidator is a function that you should call, and the cancel is a variable
+ * you should set when you want to cancel the operation
+ */
+template <typename Result, typename Expect, std::invocable<Expect&> FnValidator>
+bool waitFutures(
+    std::vector<std::pair<Result, std::future<Expect>>>& promises, std::vector<Result>& result,
+    FnValidator&& validator, auto& cancel)
+{
+    bool all_loaded = false;
+    while (!all_loaded) {
+        
+        if (cancel)
+            break;
+        
+        for (auto& [id, promise] : promises) {
+            if (!promise.valid()) continue;
+
+//            printf("waiting on %zu\n", id);
+            
+            if (auto fstatus = promise.wait_for(std::chrono::milliseconds(100));
+                fstatus == std::future_status::ready) {                
+                printf("%zu is ready\n", id);
+                
+                auto res = promise.get();
+                if (!res.has_value()) {
+                    printf("\tan error occurred while handling message for %lu\n", id);
+                    continue;
+                }
+
+                if (validator(res)) {
+                    result.push_back(id);
+                }
+            }
+
+            if (result.size() == promises.size()) {
+                all_loaded = true;
+            }
+        }
+    }
+
+    return all_loaded;
+}
+
+int start_networked_game(
+    GamePacketServer& gps, std::vector<NetworkClient>& clients, ConfigData& cdata)
+{
+    printf("Loading the game...\n");
+    printf("\tWaiting for the other clients to load\n");
+    assert(clients.size() > 0);
+
+    bool all_loaded = false;
+    bool all_ready  = false;
+    std::atomic<bool> quitting   = false;
+
+    std::thread netthread([&]() {
+        int iters = 0;
+        while (!quitting) {
+            iters++;
+
+            gps.update();
+            std::for_each(clients.begin(), clients.end(), [&](NetworkClient& c) { c.update(); });
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+            // 1 min timeout
+            if (iters == 1000 * 30) {
+                puts("TIMED OUT");
+                break;
+            }
+        }
+    });
+
+    std::vector<std::pair<uint64_t, std::future<tl::expected<bool, NetResult>>>> loading_promises;
+    std::transform(
+        clients.begin(), clients.end(), std::back_inserter(loading_promises),
+        [](NetworkClient& c) { return std::make_pair(c.id(), c.waitLoading()); });
+    std::vector<uint64_t> loading_clients;
+
+    gps.sendLoadingMessage(0);
+    /// TODO: load the map, assets, game class...
+
+    /// TODO: fix an issue where two messages can come on the same TCP packet.
+    /// This might happen here.
+    /// Fix here and on Rust server, but only when receiving.
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    gps.sendLoadingMessage(100);
+    printf("\t our game loaded! \n");
+
+    all_loaded = waitFutures(
+        loading_promises, loading_clients, [&](auto& res) { return res.value_or(false) == true; }, quitting);
+
+    if (!all_loaded) {
+        quitting = true;
+        printf("\tanother client failed to load, exiting\n");
+        netthread.join();
+        return 1;
+    }
+
+    printf("\tnotifying other clients we are about to start, and waiting them\n");
+    std::vector<std::pair<uint64_t, std::future<tl::expected<bool, NetResult>>>> start_promises;
+    std::transform(
+        clients.begin(), clients.end(), std::back_inserter(start_promises),
+        [](NetworkClient& c) { return std::make_pair(c.id(), c.waitReadyToStart()); });
+    std::vector<uint64_t> start_clients;
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    gps.sendStartMessage();
+
+    all_ready = waitFutures(
+        start_promises, start_clients, [&](auto& res) { return res.value_or(false) == true; }, quitting);
+
+    if (!all_ready) {
+        quitting = true;
+        printf("\tanother client failed to start the game, exiting\n");
+        netthread.join();
+        return 1;
+    }
+
+    printf("\tstarting the game\n");
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    quitting = true;
+    netthread.join();
+
+    return 0;
+}
+
+void start_networked_game_room(
     CServer& cserv, std::function<void(std::string, NetResult)> errHandler, ConfigData& cdata)
 {
     CServerInfo si = {};
@@ -202,6 +339,7 @@ void start_networked_game(
 
                     std::vector<NetworkClient> clients;
                     auto clientfut = gps->waitForClientConnection();
+                    int cycles = 0;
                     for (;;) {
                         gps->update();
 
@@ -234,11 +372,16 @@ void start_networked_game(
                                           .value_or(std::vector<NetworkClient>{});
                             break;
                         }
-
-                        if (clients.size() <= 0) {
-                            continue;
-                        }
                     }
+
+                    if (clients.size() <= 0) {
+                        printf("No clients.\n");
+                        std::this_thread::sleep_for(std::chrono::seconds(2));
+                        continue;
+                    }
+
+                    start_networked_game(*gps, clients, cdata);
+                    exit = true;
                 }
 
                 fflush(stdout);
@@ -606,7 +749,7 @@ void start_networked_game_cmdline(std::string addr, ConfigData& cdata)
         return;
     }
 
-    start_networked_game(cserv, treat_errors, cdata);
+    start_networked_game_room(cserv, treat_errors, cdata);
 
     cserv.logout();
 }
@@ -1046,7 +1189,7 @@ static int show_starting_menu(
                 return;
             }
 
-            start_networked_game(cserv, errHandler, confdata);
+            start_networked_game_room(cserv, errHandler, confdata);
 
             cserv.logout();
             b->setText("Connect...");

@@ -17,6 +17,7 @@
 #include <common/logic/player_actions.hpp>
 #include <common/net/net_client.hpp>
 #include <common/net/net_common.hpp>
+#include <common/net/network_client.hpp>
 #include <cstdint>
 #include <functional>
 #include <future>
@@ -28,6 +29,7 @@
 #include <vector>
 #include <mutex>
 
+
 namespace familyline::net
 {
 /**
@@ -37,11 +39,11 @@ namespace familyline::net
  * NetPacket has no copy constructors, and moving it did not seem to work also
  */
 struct Packet {
-    unsigned long int tick;
-    unsigned long int source_client;
-    unsigned long int dest_client;
+    uint64_t tick;
+    uint64_t source_client;
+    uint64_t dest_client;
     std::chrono::seconds timestamp;
-    unsigned long int id;
+    uint64_t id;
 
     struct NStartRequest {
         uint64_t client_id;
@@ -85,37 +87,6 @@ struct Packet {
         message;
 };
 
-/**
- * The network client
- *
- * The network client is where you will send and receive packets (depending on its configuration)
- * You cannot use the GamePacketServer directly, so you will need to use this
- *
- * TODO: for the love of god, move this to its own file
- */
-class NetworkClient
-{
-    using FnClientOut = std::function<void(Packet&&)>;
-    using FnClientIn  = std::function<bool(Packet&)>;
-
-private:
-    // the client will call this function when it needs to send a packet
-    FnClientOut fn_out_;
-
-    // the client will call this function when it needs to receive a packet
-    // you return true if you have a packet, false if you do not
-    FnClientIn fn_in_;
-
-    // the client ID
-    uint64_t id_;
-
-public:
-    NetworkClient(uint64_t id, FnClientOut fn_out, FnClientIn fn_in)
-        : id_(id), fn_out_(fn_out), fn_in_(fn_in)
-    {
-    }
-};
-
 class GamePacketServer
 {
 public:
@@ -136,6 +107,16 @@ public:
     void update();
 
     /**
+     * Send a message that will tell the server that you are loading data
+     */
+    void sendLoadingMessage(int percent);
+
+    /**
+     * Send a message that will tell the server you are ready to start the game
+     */
+    void sendStartMessage();
+    
+    /**
      * Wait for all clients to be connected, or until a timeout
      *
      * This future will only be valid after all clients are connected.
@@ -155,6 +136,8 @@ public:
         this->last_message_id_ = c.last_message_id_;
         this->send_queue_ = c.send_queue_;
         this->receive_queue_ = c.receive_queue_;
+        this->client_receive_queue_ = std::move(c.client_receive_queue_);
+        this->dispatch_client_messages_.exchange(c.dispatch_client_messages_);
         
         c.socket_ = -1;
     }
@@ -173,6 +156,8 @@ public:
         this->last_message_id_ = c.last_message_id_;
         this->send_queue_ = c.send_queue_;
         this->receive_queue_ = c.receive_queue_;
+        this->client_receive_queue_ = std::move(c.client_receive_queue_);
+        this->dispatch_client_messages_.exchange(c.dispatch_client_messages_);
         
         c.socket_ = -1;
         return *this;
@@ -188,7 +173,8 @@ private:
     bool connected_ = false;
     
     std::vector<CClientInfo> clients_;
-
+    std::atomic<bool> dispatch_client_messages_ = false;
+    
     /**
      * The last message ID we sent
      *
@@ -204,11 +190,14 @@ private:
     std::vector<uint8_t> createMessage(const Packet& p);
 
     /**
-     * From a vector of bytes, build a packet.
+     * From a vector of bytes, build a list of packets.
      *
-     * Returns a valid packet if the bytestream is a valid packet, else None if not
+     * Since TCP is a streaming protocol, two messages can be sent in one packet.
+     * We must be prepared for that.
+     *
+     * Returns a vector with length > 0 if the packet is valid, otherwise return {}
      */
-    std::optional<Packet> decodeMessage(std::vector<uint8_t>);
+    std::vector<Packet> decodeMessage(std::vector<uint8_t>);
 
     /**
      * Transform a native packet to a serialized packet
@@ -216,10 +205,39 @@ private:
     flatbuffers::Offset<::familyline::NetPacket> toSerializedPacket(
         const Packet& p, flatbuffers::FlatBufferBuilder& b);
 
+
+    Packet createPacket(uint64_t tick, uint64_t source, uint64_t dest,
+                        uint64_t id, decltype(Packet::message) message);    
+
+    /**
+     * Enqueue a packet
+     */
+    void enqueuePacket(Packet&& p);
+
+
+    /**
+     * Poll a packet for a specific client
+     *
+     * Returns true if we have a packet, false if we do not
+     */
+    bool pollPacketFor(uint64_t id, Packet& p);
+    
     std::mutex send_mutex_;
     std::queue<Packet> send_queue_;
     std::mutex receive_mutex_;
+
+    /**
+     * A receive queue for the packets that came from the server directly
+     */
     std::queue<Packet> receive_queue_;
+
+    /**
+     * An individual receive queue for each client
+     *
+     * We start using them after we detect all clients, after we return
+     * a valid result for `waitForClientConnection()`.
+     */
+    std::unordered_map<uint64_t, decltype(receive_queue_)> client_receive_queue_;
 };
 
 }  // namespace familyline::net

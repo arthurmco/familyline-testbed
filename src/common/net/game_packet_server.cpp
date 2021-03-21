@@ -3,10 +3,12 @@
 #include <fmt/format.h>
 #include <sys/socket.h>
 
+#include <algorithm>
 #include <chrono>
 #include <common/logger.hpp>
 #include <common/net/game_packet_server.hpp>
 #include <common/net/server.hpp>
+#include <iterator>
 #include <mutex>
 #include <optional>
 #include <thread>
@@ -128,13 +130,13 @@ flatbuffers::Offset<::familyline::NetPacket> GamePacketServer::toSerializedPacke
             [&](const Packet::NGameStartRequest& m) {
                 auto cval = familyline::CreateGameStartRequest(b, m.val);
 
-                msg_type = familyline::Message_lreq;
+                msg_type = familyline::Message_greq;
                 msg_data = cval.Union();
             },
             [&](const Packet::NGameStartResponse& m) {
                 auto cval = familyline::CreateGameStartResponse(b, m.val);
 
-                msg_type = familyline::Message_lres;
+                msg_type = familyline::Message_gres;
                 msg_data = cval.Union();
             }
 
@@ -190,11 +192,19 @@ void GamePacketServer::update()
 
     auto& log = LoggerService::getLogger();
 
-    if (send_queue_.size() > 0) {
+    while (!send_queue_.empty()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(750));
+
         send_mutex_.lock();
-        auto& packet   = send_queue_.front();
-        packet.id      = ++last_message_id_;
+        auto packet = send_queue_.front();
+        packet.id   = ++last_message_id_;
+        log->write(
+            "game-packet-server", LogType::Info,
+            "sending package (id %llu, from %llu, to %llu, timestamp %llu..., type %d )", packet.id,
+            packet.source_client, packet.dest_client, packet.timestamp, packet.message.index());
+
         auto byte_data = this->createMessage(packet);
+
         send_queue_.pop();
         send_mutex_.unlock();
 
@@ -215,6 +225,7 @@ void GamePacketServer::update()
         log->write("game-packet-server", LogType::Info, "data sent! (%zu)", byte_data.size());
     }
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
     uint8_t data[1024] = {};
     auto r             = recv(socket_, data, 1023, MSG_DONTWAIT);
     if (r == 0) {
@@ -235,22 +246,53 @@ void GamePacketServer::update()
     }
 
     std::vector<uint8_t> vdata(data, data + r);
-    auto pkt = this->decodeMessage(vdata);
-
-    if (!pkt) {
+    auto pkts = this->decodeMessage(vdata);
+    if (pkts.size() == 0) {
         log->write(
             "game-packet-server", LogType::Error,
-            "received invalid package (len %zu, starts with %02x %02x %02x %02x", r,
+            "received invalid packet (len %zu, starts with %02x %02x %02x %02x", r,
             r > 0 ? vdata[0] : 0, r > 1 ? vdata[1] : 0, r > 2 ? vdata[2] : 0, r > 3 ? vdata[3] : 0);
-    } else {
+    }
+
+    for (auto& pkt : pkts) {
         log->write(
             "game-packet-server", LogType::Info,
-            "received package (id %llu, from %llu, to %llu, timestamp %llu..., type %d )", pkt->id,
-            pkt->source_client, pkt->dest_client, pkt->timestamp, pkt->message.index());
+            "received packet (id %llu, from %llu, to %llu, timestamp %llu..., type %d )", pkt.id,
+            pkt.source_client, pkt.dest_client, pkt.timestamp, pkt.message.index());
         receive_mutex_.lock();
-        receive_queue_.push(*pkt);
+        if (dispatch_client_messages_ && pkt.source_client != 0) {
+            client_receive_queue_[pkt.source_client].push(pkt);
+        } else {
+            receive_queue_.push(pkt);
+        }
         receive_mutex_.unlock();
     }
+}
+
+/**
+ * Enqueue a packet
+ */
+void GamePacketServer::enqueuePacket(Packet&& p)
+{
+    std::lock_guard<std::mutex> lg(this->send_mutex_);
+    send_queue_.push(p);
+}
+
+/**
+ * Poll a packet
+ *
+ * Returns true if we have a packet, false if we do not
+ */
+bool GamePacketServer::pollPacketFor(uint64_t id, Packet& p)
+{
+    if (!client_receive_queue_.contains(id)) return false;
+
+    if (client_receive_queue_[id].empty()) return false;
+
+    p = client_receive_queue_[id].front();
+    client_receive_queue_[id].pop();
+
+    return true;
 }
 
 /**
@@ -268,7 +310,7 @@ GamePacketServer::waitForClientConnection(int timeout)
     return std::async(std::launch::async, [this, timeout]() -> tl::expected<RetT, RetE> {
         bool all_ack = false;
         auto start   = std::chrono::system_clock::now();
-        std::vector<uint64_t> player_ids_;
+        std::vector<uint64_t> player_ids;
 
         while (!all_ack) {
             // check if we timed out
@@ -287,11 +329,15 @@ GamePacketServer::waitForClientConnection(int timeout)
                 std::lock_guard<std::mutex> lg(this->receive_mutex_);
                 auto& pkt = receive_queue_.front();
 
+                printf("received a message!");
                 if (auto p = std::get_if<Packet::NStartResponse>(&pkt.message); p) {
                     log->write(
                         "game-packet-server", LogType::Info, "client id %llx ack'ed",
                         p->client_ack);
-                    player_ids_.push_back(p->client_ack);
+
+                    // Do not add ourselves to the client list
+                    // The clients represents the other people.
+                    if (p->client_ack != id_) player_ids.push_back(p->client_ack);
 
                     if (p->all_clients_ack) {
                         all_ack = true;
@@ -305,13 +351,20 @@ GamePacketServer::waitForClientConnection(int timeout)
                     break;
                 }
             }
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
 
         std::vector<NetworkClient> clients;
+        dispatch_client_messages_ = true;
+        std::transform(
+            player_ids.begin(), player_ids.end(), std::back_inserter(clients),
+            [this](uint64_t& id) {
+                using namespace std::placeholders;
+                return NetworkClient(
+                    id, std::bind(&GamePacketServer::enqueuePacket, this, _1),
+                    std::bind(&GamePacketServer::pollPacketFor, this, id, _1));
+            });
 
-        return tl::expected<RetT, RetE>(clients);
+        return tl::expected<RetT, RetE>(std::move(clients));
     });
 }
 
@@ -380,19 +433,88 @@ std::vector<uint8_t> GamePacketServer::createMessage(const Packet& p)
     return ret;
 }
 
-std::optional<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
+std::vector<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
 {
+    auto& log = LoggerService::getLogger();
+
+    if (data.size() <= 16) {
+        log->write(
+            "game-packet-server", LogType::Error,
+            "received a packet too small (%zu bytes, minimum is 16+1)", data.size());
+        return std::vector<Packet>();
+    }
+
     if (data[0] != 'F' || data[1] != 'A' || data[2] != 'M' || data[3] != 'I') {
-        return std::nullopt;
+        log->write(
+            "game-packet-server", LogType::Error,
+            "received a packet with an incorrect header (%02x %02X %02x %02x)", data[0], data[1],
+            data[2], data[3]);
+        return std::vector<Packet>();
     }
 
     uint32_t flags = getU32(data, 4);
     if (flags != 0) {
-        return std::nullopt;
+        return std::vector<Packet>();
     }
 
     uint32_t size = getU32(data, 12);
 
-    auto pkt = GetNetPacket(data.data() + 16);
-    return std::make_optional(toNativePacket(pkt));
+    std::vector<Packet> res;
+
+    std::vector<uint8_t> packetdata;
+    std::copy_n(data.begin(), size+16, std::back_inserter(packetdata));
+    
+    auto pkt = GetNetPacket(packetdata.data() + 16);
+    assert(packetdata[0] == 'F');
+    
+    if (pkt) {
+        res.push_back(toNativePacket(pkt));
+    } else {
+        log->write(
+            "game-packet-server", LogType::Error, "flatbuffer conversion returned a null pointer!");
+    }
+
+    if (data.size() > packetdata.size()) {
+        log->write(
+            "game-packet-server", LogType::Warning,
+            "extra data in this packet, maybe we received more than 1 packet in a message? (%zu vs %zu)",
+            data.size(), packetdata.size());
+
+        auto len = data.size() - packetdata.size();
+        std::vector<uint8_t> newpacket;
+        std::copy_n(data.begin() + packetdata.size(), len, std::back_inserter(newpacket));
+
+        auto nres = decodeMessage(newpacket);
+        std::copy(nres.begin(), nres.end(), std::back_inserter(res));
+        
+    }
+
+    return res;
+}
+
+Packet GamePacketServer::createPacket(
+    uint64_t tick, uint64_t source, uint64_t dest, uint64_t id, decltype(Packet::message) message)
+{
+    auto timestamp =
+        duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
+    return Packet{tick, source, dest, timestamp, id, message};
+}
+
+/**
+ * Send a message that will tell the server that you are loading data
+ */
+void GamePacketServer::sendLoadingMessage(int percent)
+{
+    auto pkt = createPacket(
+        0, this->id_, 0, 1, Packet::NLoadingRequest{(unsigned short)(percent & 0xffff)});
+    this->enqueuePacket(std::move(pkt));
+}
+
+/**
+ * Send a message that will tell the server you are ready to start the game
+ */
+void GamePacketServer::sendStartMessage()
+{
+    auto pkt = createPacket(0, this->id_, 0, 2, Packet::NGameStartRequest{0});
+    this->enqueuePacket(std::move(pkt));
 }
