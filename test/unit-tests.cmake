@@ -4,9 +4,9 @@
 # Copyright (C) 2017 Arthur M
 #
 
-option(DO_TESTS "Set if you want to enable unit tests, unset if you don't" ON)
+option(FLINE_BUILD_TESTS "Set if you want to enable unit tests, unset if you don't" ON)
 
-if (DO_TESTS)
+if (FLINE_BUILD_TESTS)
 
   enable_testing()
 
@@ -72,10 +72,10 @@ if (DO_TESTS)
 
   file(COPY "${CMAKE_SOURCE_DIR}/test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
 
-  option(DO_CHECK_ASAN "Enable address sanitizer" ON)
-  option(SET_COVERAGE "Enable coverage testing" OFF)
+  option(FLINE_DO_CHECK_ASAN "Enable address sanitizer" ON)
+  option(FLINE_SET_COVERAGE "Enable coverage testing" OFF)
 
-  if (SET_COVERAGE)
+  if (FLINE_SET_COVERAGE)
     target_compile_options(familyline-tests PUBLIC "-fprofile-arcs")
     target_compile_options(familyline-tests PUBLIC "-ftest-coverage")
     target_compile_options(familyline-tests PUBLIC "-O0")
@@ -88,10 +88,10 @@ if (DO_TESTS)
   target_link_libraries( familyline-tests
     gtest gtest_main)
 
-  if (DO_CHECK_ASAN)
+  if (FLINE_DO_CHECK_ASAN)
     target_compile_options(familyline-tests PUBLIC "-fsanitize=address")
     target_link_libraries( familyline-tests "-ggdb -fsanitize=address -static-libstdc++ -static-libasan -lrt")
-  endif(DO_CHECK_ASAN)
+  endif(FLINE_DO_CHECK_ASAN)
 
 
   target_compile_definitions(familyline-tests PUBLIC
@@ -99,4 +99,4 @@ if (DO_TESTS)
   )
 
   add_test(NAME general-test COMMAND familyline-tests)
-endif(DO_TESTS)
+endif(FLINE_BUILD_TESTS)

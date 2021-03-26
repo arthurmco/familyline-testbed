@@ -88,7 +88,7 @@ target_link_libraries(familyline-client PUBLIC familyline-common)
 target_compile_features(familyline-client PRIVATE cxx_std_20)
 
 
-if (WIN32 OR USE_RELATIVE_PATH)
+if (WIN32 OR FLINE_USE_RELATIVE_PATH)
   set(SHADERS_DIR "\"./shaders/\"")
   set(ICONS_DIR "\"./icons/\"")
   set(MATERIALS_DIR "\"./materials/\"")
@@ -105,7 +105,7 @@ else()
 endif()
 
 
-if (DO_CHECK_ASAN)
+if (FLINE_DO_CHECK_ASAN)
   target_compile_options(familyline-client PUBLIC "-fsanitize=address")
   target_link_libraries( familyline-client PUBLIC "-fsanitize=address")
 endif()

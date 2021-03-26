@@ -74,7 +74,7 @@ else()
     ${ZLIB_INCLUDE_DIR} ${INPUT_FLATBUFFER_INCLUDE} ${CURLPP_INCLUDE_DIRS})
 endif(MSVC)
 
-if (SET_COVERAGE)
+if (FLINE_SET_COVERAGE)
   target_compile_options(familyline-common PUBLIC "-fprofile-arcs")
   target_compile_options(familyline-common PUBLIC "-ftest-coverage")
   target_compile_options(familyline-common PUBLIC "-O0")
@@ -82,6 +82,11 @@ if (SET_COVERAGE)
   target_link_libraries(familyline-common PUBLIC "-ftest-coverage")
   target_link_libraries(familyline-common PUBLIC "gcov")
   target_link_libraries(familyline-common PUBLIC "--coverage")
+endif()
+
+if (FLINE_DO_CHECK_ASAN)
+  target_compile_options(familyline-common PUBLIC "-fsanitize=address")
+  target_link_libraries(familyline-common PUBLIC "-fsanitize=address")
 endif()
 
 

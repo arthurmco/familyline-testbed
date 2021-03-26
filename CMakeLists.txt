@@ -1,13 +1,14 @@
 ####
-# Familyline makelist
+# Familyline CMAKE file
 #
-# Copyright (C) 2016-2020 Arthur M
+# Copyright (C) 2016-2021 Arthur M
 ####
 cmake_minimum_required(VERSION 3.12)
 
 project(Familyline VERSION 0.2.2)
 
-option(USE_RELATIVE_PATH "Set if you want the path to the game resources to be local" OFF)
+option(FLINE_USE_RELATIVE_PATH
+  "Set if you want the path to the game resources to be relative to the file (OFF), or in a system default location (ON). On Windows, this option makes no difference" OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" )

@@ -53,8 +53,8 @@ when you clone the repository, you can create a directory named
 ```
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DUSE_RELATIVE_PATH=off
--DDO_TESTS=off ..
+cmake -DCMAKE_BUILD_TYPE=Release -DFLINE_USE_RELATIVE_PATH=off
+-DFLINE_DO_TESTS=off ..
 make familyline
 ```
 
@@ -132,7 +132,7 @@ To generate a package, simply run these three commands:
 
 ```
 mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DUSE_RELATIVE_PATH=off -DDO_TESTS=off ..
+cmake -DCMAKE_BUILD_TYPE=Release -DFLINE_USE_RELATIVE_PATH=off -DFLINE_DO_TESTS=off ..
 make package
 ```
 
