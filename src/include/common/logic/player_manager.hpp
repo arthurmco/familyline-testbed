@@ -12,7 +12,7 @@
 #include <common/logic/player_actions.hpp>
 #include <functional>
 #include <memory>
-#include <queue>
+#include <deque>
 #include <vector>
 #include <map>
 
@@ -47,7 +47,14 @@ class PlayerManager
 private:
     std::vector<PlayerInfo> players_;
 
-    std::queue<PlayerInputAction> actions_;
+    /**
+     * A "queue" of actions
+     *
+     * Not a queue, really, because we might want to sort it
+     */
+    std::deque<PlayerInputAction> actions_;
+
+    
     std::vector<PlayerHandlerInfo> player_input_listeners_;
 
     /// The tick we are executing right now

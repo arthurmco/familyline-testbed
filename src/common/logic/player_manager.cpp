@@ -94,7 +94,16 @@ void PlayerManager::pushAction(
     a.timestamp  = micros;
     a.type       = type;
 
-    actions_.push(a);
+    actions_.push_back(a);
+    
+    std::sort(actions_.begin(), actions_.end(), [&](const PlayerInputAction& a, const PlayerInputAction& b){
+        // return a < b
+
+        if (a.tick != b.tick)
+            return a.tick < b.tick;
+
+        return a.timestamp < b.timestamp;
+    });
 }
 
 auto getValidSelections(const std::vector<std::weak_ptr<GameObject>>& selections)
@@ -436,6 +445,6 @@ void PlayerManager::run(GameContext& gctx)
             h.handler(a);
         }
 
-        actions_.pop();
+        actions_.pop_front();
     }
 }

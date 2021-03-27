@@ -10,6 +10,7 @@
 #include <common/logic/terrain.hpp>
 #include <common/logic/terrain_file.hpp>
 
+#include "common/logic/player_actions.hpp"
 #include "utils.hpp"
 
 using namespace familyline::logic;
@@ -473,4 +474,69 @@ TEST(PlayerManager, TestIfTickDeltaIsRespected)
     for (auto i = 0; i < delta; i++) stepLogic(pm, gctx);
 
     ASSERT_TRUE(object_rendered);
+}
+
+TEST(PlayerManager, TestIfOutOfOrderActionsAreOrdered)
+{
+    LogicService::getObjectFactory()->clear();
+
+    ObjectManager om;
+    ObjectLifecycleManager olm{om};
+    PathFinder pf{&om};
+
+    bool object_rendered = false;
+
+    PlayerManager pm;
+    pm.olm = &olm;
+    pm.pf  = &pf;
+
+    auto atkc1 = std::optional<AttackComponent>(AttackComponent{
+        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto obj_s =
+        make_object({"test", "Test Object", glm::vec2(0, 0), 200, 200, true, []() {}, atkc1});
+    LogicService::getObjectFactory()->addObject(obj_s.get());
+
+    TerrainFile tf{20, 20};
+    Terrain t{tf};
+
+    auto d = std::make_unique<DummyPlayer>(
+        pm, t, "Test", 1, [&](size_t tick) -> std::vector<PlayerInputType> {
+            return {};
+        });
+
+    auto i = pm.add(std::move(d));
+    ASSERT_NE(1, i);
+
+    pm.pushAction(i, CameraMove{6, 4, 0}, 1);        
+    pm.pushAction(i, CameraMove{10, 10, 0}, 3);
+    pm.pushAction(i, CreateEntity{"test", 10, 12}, 4);
+    pm.pushAction(i, CameraMove{8, 8, 0}, 2);        
+    pm.pushAction(i, CameraMove{6, 6, 0}, 2);        
+
+    auto delta = pm.tickDelta();
+
+    GameContext gctx       = {&om, 1, 0};
+    pm.render_add_callback = [&](std::shared_ptr<GameObject> o) {
+        auto pos = o->getPosition();
+        ASSERT_FLOAT_EQ(10.0, pos.x);
+        ASSERT_FLOAT_EQ(12.0, pos.z);
+        ASSERT_FLOAT_EQ(0.0, pos.y);
+
+        object_rendered = true;
+    };
+    pm.colony_add_callback = [](auto o, auto id) {};
+
+    ASSERT_FALSE(object_rendered); // tick=0
+    
+    stepLogic(pm, gctx);
+    ASSERT_FALSE(object_rendered); // tick=1
+
+    stepLogic(pm, gctx);
+    ASSERT_FALSE(object_rendered); // tick=2
+
+    stepLogic(pm, gctx);
+    ASSERT_FALSE(object_rendered); // tick=3
+
+    stepLogic(pm, gctx);
+    ASSERT_TRUE(object_rendered);  // tick=4
 }
