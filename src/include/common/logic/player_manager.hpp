@@ -34,7 +34,6 @@ struct PlayerHandlerInfo {
 
 using PlayerCallback = std::function<void(Player*)>;
 
-/////////////////
 class PlayerManager
 {
 private:
