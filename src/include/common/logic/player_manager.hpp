@@ -34,6 +34,14 @@ struct PlayerHandlerInfo {
 
 using PlayerCallback = std::function<void(Player*)>;
 
+/**
+ * The player manager
+ *
+ * It will manage the player instances and execute its actions.
+ * Since some clients might not be able to send actions in time (because of network),
+ * we need to make the tick we are executing different from the tick that the pushed message
+ * will be run
+ */
 class PlayerManager
 {
 private:
@@ -42,8 +50,13 @@ private:
     std::queue<PlayerInputAction> actions_;
     std::vector<PlayerHandlerInfo> player_input_listeners_;
 
-    unsigned int _tick = 0;
+    /// The tick we are executing right now
+    size_t tick_ = 0;
 
+    /// The difference between the tick we are executing and the tick that the message pushed in this
+    /// tick will be run by default
+    size_t tick_delta_ = 2;
+    
     void processAction(const PlayerInputAction& a, ObjectManager& om);
 
     std::optional<Player*> getPlayerFromID(int id);
@@ -85,11 +98,13 @@ public:
      * certain ID
      */
     std::multimap<int, std::string> getPlayerNames();
-    
+
     /**
      * Push an action
+     *
+     * We can push an action to be ran in a certain tick
      */
-    void pushAction(unsigned int id, PlayerInputType type);
+    void pushAction(unsigned int id, PlayerInputType type, std::optional<unsigned int> tick = std::nullopt);
 
     /**
      * Adds a listener to the player input action event listeners
@@ -125,7 +140,18 @@ public:
     /**
      * Get the current tick, as registered by the player manager
      */
-    size_t tick() const { return _tick; }
+    size_t tick() const { return tick_; }
+
+
+    /**
+     * Get the current tick delta
+     */
+    size_t tickDelta() const { return tick_delta_; }
+
+    /**
+     * TODO: maybe add support to changing the tick delta value
+     */
+    
 };
 
 }  // namespace familyline::logic
