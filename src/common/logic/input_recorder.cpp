@@ -17,7 +17,7 @@ using namespace familyline::logic;
 
 InputRecorder::InputRecorder(PlayerManager& pm) : pm_(pm)
 {
-    pm_.addListener(std::bind(&InputRecorder::addAction, this, std::placeholders::_1));
+    pm_handle_ = pm_.addListener(std::bind(&InputRecorder::addAction, this, std::placeholders::_1));
 
     auto pmap = pm_.getPlayerNames();
     for (auto [id, name] : pmap) {
@@ -265,4 +265,6 @@ InputRecorder::~InputRecorder()
         this->commit();
         fclose(f_);
     }
+
+    pm_.removeListener(pm_handle_);
 }

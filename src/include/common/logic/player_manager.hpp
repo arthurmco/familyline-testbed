@@ -121,6 +121,11 @@ public:
     int addListener(PlayerListenerHandler h);
 
     /**
+     * Removes the player input action event listener
+     */
+    void removeListener(int id);
+
+    /**
      * Generate input from all players
      */
     void generateInput();
