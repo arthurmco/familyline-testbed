@@ -635,12 +635,14 @@ Game* start_game(
         throw std::runtime_error{"Could not create the human player"};
     }
 
-    std::unique_ptr<InputRecorder> ir;
-
+    // You can't reproduce a record while recording.
+    //
+    // It will work, will not overwrite any file (because the filename is decided by the
+    // recording date), but it is redundant.
     if (confdata.enableInputRecording && !irepr) {
         log->write("game", LogType::Info, "This game inputs will be recorded");
 
-        ir = std::make_unique<InputRecorder>(*pm.get());
+        auto ir = std::make_unique<InputRecorder>(*pm.get());
 
         auto rawtime        = time(NULL);
         auto ftime          = localtime(&rawtime);
@@ -654,14 +656,9 @@ Game* start_game(
 
         if (!ir->createFile(recordpath.string(), of)) {
             log->write("game", LogType::Error, "\tinput record file could not be created");
-            ir = std::unique_ptr<InputRecorder>(nullptr);
+        } else {
+            g->initRecorder(std::move(ir));
         }
-
-        // You can't reproduce a record while recording.
-        //
-        // It will work, will not overwrite any file (because the filename is decided by the
-        // recording date), but it is redundant.
-        g->initRecorder(std::move(ir));
     }
 
     if (irepr) {

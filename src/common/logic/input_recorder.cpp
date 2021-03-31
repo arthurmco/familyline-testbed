@@ -241,20 +241,22 @@ void InputRecorder::commit()
     uint32_t inputcount  = inputcount_;
     uint32_t checksum    = 0;
 
-    fwrite((void*)endmagic, 1, 4, f_);
-    fwrite(&inputcount, sizeof(inputcount), 1, f_);
+    if (f_) {
+        fwrite((void*)endmagic, 1, 4, f_);
+        fwrite(&inputcount, sizeof(inputcount), 1, f_);
 
-    auto checksumpos = ftell(f_);
-    fwrite(&checksum, sizeof(checksum), 1, f_);
-    fflush(f_);
+        auto checksumpos = ftell(f_);
+        fwrite(&checksum, sizeof(checksum), 1, f_);
+        fflush(f_);
 
-    checksum = calculateChecksum(path_);
-    LoggerService::getLogger()->write(
-        "input-recorder", LogType::Info, "writing checksum %08x to the file %s", checksum,
-        path_.c_str());
+        checksum = calculateChecksum(path_);
+        LoggerService::getLogger()->write(
+            "input-recorder", LogType::Info, "writing checksum %08x to the file %s", checksum,
+            path_.c_str());
 
-    fseek(f_, checksumpos, SEEK_SET);
-    fwrite(&checksum, sizeof(checksum), 1, f_);
+        fseek(f_, checksumpos, SEEK_SET);
+        fwrite(&checksum, sizeof(checksum), 1, f_);
+    }
 }
 
 InputRecorder::~InputRecorder()
