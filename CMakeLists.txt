@@ -7,8 +7,16 @@ cmake_minimum_required(VERSION 3.12)
 
 project(Familyline VERSION 0.2.2)
 
+include(CMakeDependentOption)
+
 option(FLINE_USE_RELATIVE_PATH
   "Set if you want the path to the game resources to be relative to the file (OFF), or in a system default location (ON). On Windows, this option makes no difference" OFF)
+option(FLINE_BUILD_TESTS "Set if you want to enable unit tests, unset if you don't" ON)
+
+option(FLINE_DO_CHECK_ASAN "Enable address sanitizer" ON)
+cmake_dependent_option(FLINE_SET_COVERAGE "Enable coverage testing. Only enabled when tests are enabled" OFF,
+  "FLINE_BUILD_TESTS" OFF)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" )

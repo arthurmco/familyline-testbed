@@ -1,13 +1,10 @@
 #
 # Unit test compilation routines
 #
-# Copyright (C) 2017 Arthur M
+# Copyright (C) 2017,2021 Arthur M
 #
 
-option(FLINE_BUILD_TESTS "Set if you want to enable unit tests, unset if you don't" ON)
-
 if (FLINE_BUILD_TESTS)
-
   enable_testing()
 
   configure_file(${CMAKE_SOURCE_DIR}/test/unit-tests.cmake.in googletest-download/CMakeLists.txt)
@@ -71,9 +68,6 @@ if (FLINE_BUILD_TESTS)
   target_include_directories(familyline-tests PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
   file(COPY "${CMAKE_SOURCE_DIR}/test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
-
-  option(FLINE_DO_CHECK_ASAN "Enable address sanitizer" ON)
-  option(FLINE_SET_COVERAGE "Enable coverage testing" OFF)
 
   if (FLINE_SET_COVERAGE)
     target_compile_options(familyline-tests PUBLIC "-fprofile-arcs")
