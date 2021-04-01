@@ -18,7 +18,8 @@ std::string getPrimaryAddress()
 #ifdef __linux__
     struct ifaddrs* ifs;
     getifaddrs(&ifs);
-
+    struct ifaddrs* base_ifs = ifs;    
+    
     if (ifs) {
         struct ifaddrs* baseif = ifs;
 
@@ -40,8 +41,13 @@ std::string getPrimaryAddress()
             }
 
             printf("%s: %s\n", ifs->ifa_name, ip);
-            return std::string{ip};
+            auto sip = std::string{ip};
+            freeifaddrs(base_ifs);
+            return sip;
         }
+
+        freeifaddrs(base_ifs);
+
     }
 #endif
 

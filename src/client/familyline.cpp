@@ -79,6 +79,8 @@ using namespace familyline::graphics::gui;
 using namespace familyline::input;
 using namespace familyline::net;
 
+// TODO: create a shader manager *and* a texture manager
+
 #ifdef WIN32
 #include <io.h>
 #define isatty _isatty
