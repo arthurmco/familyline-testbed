@@ -27,6 +27,18 @@ Expect it to have a lot of good humor!
 
 The game runs in Linux and Windows. Other platforms need to be tested.
 
+Before you do anything, you need to pull the dependent repositories.
+The only dependency that needs this is the Google Test framework.
+
+Type those commands in the appropriate shell
+
+```
+git submodule init
+git submodule update
+```
+
+and then you are good to go!
+
 ### Penguins
 
 On Linux, you will need the softwares below:
@@ -151,6 +163,7 @@ Aside from issues, there are things I would like to do very soon
 
  - Increase test coverage
  - Add Windows test coverage
+ - Port and test on FreeBSD
  
 ## License
 
