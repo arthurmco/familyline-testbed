@@ -17,9 +17,30 @@ option(FLINE_DO_CHECK_ASAN "Enable address sanitizer" ON)
 cmake_dependent_option(FLINE_SET_COVERAGE "Enable coverage testing. Only enabled when tests are enabled" OFF,
   "FLINE_BUILD_TESTS" OFF)
 
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" )
+
+#
+# Set the default directory location
+set(SHADERS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/shaders/\"")
+set(ICONS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/icons/\"")
+set(MATERIALS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/materials/\"")
+set(MODELS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/models/\"")
+set(TEXTURES_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/textures/\"")
+set(ASSET_FILE_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/\"")
+
+if (WIN32 OR FLINE_USE_RELATIVE_PATH)
+  set(SHADERS_DIR "\"./shaders/\"")
+  set(ICONS_DIR "\"./icons/\"")
+  set(MATERIALS_DIR "\"./materials/\"")
+  set(MODELS_DIR "\"./models/\"")
+  set(TEXTURES_DIR "\"./textures/\"")
+  set(ASSET_FILE_DIR "\"./\"")
+endif()
+
+
 
 
 #Familyline game data
@@ -192,13 +213,13 @@ INCLUDE(CPack)
 # Copy the asset folders to the build folder
 # This means that we have to make a separate build directory.
 # Usually this is the case.
-file(COPY "${CMAKE_SOURCE_DIR}/shaders" DESTINATION "${PROJECT_BINARY_DIR}")
-file(COPY "${CMAKE_SOURCE_DIR}/icons" DESTINATION "${PROJECT_BINARY_DIR}")
-file(COPY "${CMAKE_SOURCE_DIR}/materials" DESTINATION "${PROJECT_BINARY_DIR}")
-file(COPY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${PROJECT_BINARY_DIR}")
-file(COPY "${CMAKE_SOURCE_DIR}/textures" DESTINATION "${PROJECT_BINARY_DIR}")
-file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.flte" DESTINATION "${PROJECT_BINARY_DIR}")
-file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${PROJECT_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/shaders" DESTINATION "${CMAKE_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/icons" DESTINATION "${CMAKE_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/materials" DESTINATION "${CMAKE_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${CMAKE_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/textures" DESTINATION "${CMAKE_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/terrain_test.flte" DESTINATION "${CMAKE_BINARY_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/assets.yml" DESTINATION "${CMAKE_BINARY_DIR}")
 
 
 # Install locations
@@ -210,3 +231,7 @@ install(DIRECTORY materials DESTINATION share/familyline)
 install(DIRECTORY models DESTINATION share/familyline)
 install(FILES assets.yml DESTINATION share/familyline)
 install(FILES terrain_test.flte DESTINATION share/familyline)
+
+
+configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/src/include/config.h.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/include/config.h" )

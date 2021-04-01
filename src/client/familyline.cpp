@@ -6,6 +6,8 @@
 
 ***/
 
+#include <config.h>
+
 #include <fmt/core.h>
 
 #include <algorithm>
