@@ -1,25 +1,27 @@
 
+#include <config.h>
 #include <fcntl.h>
 
 #include <common/logger.hpp>
+#include <common/net/net_common.hpp>
 #include <common/net/server_finder.hpp>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <string_view>
 #include <thread>
 
-#include <common/net/net_common.hpp>
-
 using namespace familyline::net;
 using json = nlohmann::json;
 
 std::string getPrimaryAddress()
 {
+#ifdef FLINE_NET_SUPPORT
+
 #ifdef __linux__
     struct ifaddrs* ifs;
     getifaddrs(&ifs);
-    struct ifaddrs* base_ifs = ifs;    
-    
+    struct ifaddrs* base_ifs = ifs;
+
     if (ifs) {
         struct ifaddrs* baseif = ifs;
 
@@ -47,7 +49,6 @@ std::string getPrimaryAddress()
         }
 
         freeifaddrs(base_ifs);
-
     }
 #endif
 
@@ -58,6 +59,7 @@ std::string getPrimaryAddress()
             return std::string{buf.nodename};
         }
     }
+#endif
 #endif
 
     return std::string{"localhost"};
@@ -73,6 +75,7 @@ std::string getPrimaryAddress()
  */
 in_addr ServerFinder::getLocalIP()
 {
+#ifdef FLINE_NET_SUPPORT
     struct addrinfo* addrdata;
     auto hostname = getPrimaryAddress();
     auto& log     = LoggerService::getLogger();
@@ -112,11 +115,18 @@ in_addr ServerFinder::getLocalIP()
     freeaddrinfo(baseaddrdata);
 
     return local_addr;
+
+#else
+    throw net_exception("Network support is not compiled in!");
+
+#endif
 }
 
 ServerFinder::ServerFinder()
 {
     auto& log = LoggerService::getLogger();
+    
+#ifdef FLINE_NET_SUPPORT
 
     socket_ = socket(AF_INET, SOCK_DGRAM, 0);
     if (socket_ < 0) {
@@ -141,6 +151,12 @@ ServerFinder::ServerFinder()
             "Could not set multicast interface for server finder: {} ({})", strerror(errno),
             errno));
     }
+
+#else
+    log->write(
+        "server-finder", LogType::Error, "Network support is not compiled in!");
+
+#endif
 }
 
 ServerFinder::~ServerFinder()
@@ -184,6 +200,8 @@ std::vector<std::string> splitLines(std::string_view s, char sep = '\n')
  */
 std::optional<ServerInfo> parseDiscoverInformation(std::string_view data)
 {
+#ifdef FLINE_NET_SUPPORT
+
     auto lines = splitLines(data);
 
     bool http_message   = false;
@@ -270,6 +288,10 @@ std::optional<ServerInfo> parseDiscoverInformation(std::string_view data)
     sinfo.player_max   = body["max_clients"];
 
     return std::make_optional(sinfo);
+
+#else
+    throw net_exception("Network support is not compiled in!");
+#endif
 };
 
 /// Start the server discovery process.
@@ -280,6 +302,8 @@ std::optional<ServerInfo> parseDiscoverInformation(std::string_view data)
 /// The discovery will happen in a separate thread, so watch out.
 void ServerFinder::startDiscover(discovery_cb callback)
 {
+#ifdef FLINE_NET_SUPPORT
+
     discovering_  = true;
     thr_discover_ = std::thread(
         [](SOCKET& s, struct sockaddr_in multicastaddr, bool& operating, discovery_cb cb) {
@@ -311,14 +335,13 @@ void ServerFinder::startDiscover(discovery_cb callback)
             auto last_discover = time(nullptr);
             usleep(2000);
 
-
-            // Use a non-blocking receive so it does not block the rest of the game.
-            //
-            // We need to be able to detect that the discovery has been canceled.
-            #ifdef WIN32
-            u_long iMode=1;
+// Use a non-blocking receive so it does not block the rest of the game.
+//
+// We need to be able to detect that the discovery has been canceled.
+#ifdef WIN32
+            u_long iMode = 1;
             ioctlsocket(s, FIONBIO, &iMode);
-            #endif
+#endif
 
             while (operating) {
                 auto discover = time(nullptr);
@@ -355,6 +378,11 @@ void ServerFinder::startDiscover(discovery_cb callback)
             puts(":(");
         },
         std::ref(socket_), mcast_addr_, std::ref(discovering_), callback);
+
+#else
+    throw net_exception("Network support is not compiled in!");
+
+#endif
 }
 
 /// Stop the server discovery process

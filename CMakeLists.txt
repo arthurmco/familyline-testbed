@@ -17,6 +17,8 @@ option(FLINE_DO_CHECK_ASAN "Enable address sanitizer" ON)
 cmake_dependent_option(FLINE_SET_COVERAGE "Enable coverage testing. Only enabled when tests are enabled" OFF,
   "FLINE_BUILD_TESTS" OFF)
 
+option(FLINE_NET_SUPPORT "Enable networking support" ON)
+
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

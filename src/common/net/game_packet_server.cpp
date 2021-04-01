@@ -1,4 +1,5 @@
 #include <bits/stdint-uintn.h>
+#include <config.h>
 #include <flatbuffers/flatbuffers.h>
 #include <fmt/format.h>
 #include <sys/socket.h>
@@ -151,6 +152,8 @@ flatbuffers::Offset<::familyline::NetPacket> GamePacketServer::toSerializedPacke
 bool GamePacketServer::connect()
 {
     auto& log = LoggerService::getLogger();
+    
+#ifdef FLINE_NET_SUPPORT
 
     socket_ = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
     if (socket_ < 0) {
@@ -180,6 +183,20 @@ bool GamePacketServer::connect()
 
     connected_ = true;
     return true;
+
+#else
+
+    log->write(
+        "game-packet-server", LogType::Fatal,
+        "Cannot connect because you did not compile the network support!");
+    log->write(
+        "game-packet-server", LogType::Fatal,
+        "Please run cmake again with -DFILE_NET_SUPPORT:BOOL=on");
+
+    throw net_exception("Network support is not compiled in!");
+    return false;
+
+#endif
 }
 
 /**
@@ -188,6 +205,7 @@ bool GamePacketServer::connect()
  */
 void GamePacketServer::update()
 {
+#ifdef FLINE_NET_SUPPORT
     if (!connected_) return;
 
     auto& log = LoggerService::getLogger();
@@ -267,6 +285,11 @@ void GamePacketServer::update()
         }
         receive_mutex_.unlock();
     }
+
+#else
+    throw net_exception("Network support is not compiled in!");
+
+#endif
 }
 
 /**
@@ -285,6 +308,8 @@ void GamePacketServer::enqueuePacket(Packet&& p)
  */
 bool GamePacketServer::pollPacketFor(uint64_t id, Packet& p)
 {
+#ifdef FLINE_NET_SUPPORT
+
     if (!client_receive_queue_.contains(id)) return false;
 
     if (client_receive_queue_[id].empty()) return false;
@@ -293,6 +318,10 @@ bool GamePacketServer::pollPacketFor(uint64_t id, Packet& p)
     client_receive_queue_[id].pop();
 
     return true;
+#else
+    throw net_exception("Network support is not compiled in!");
+
+#endif
 }
 
 /**
@@ -305,6 +334,8 @@ bool GamePacketServer::pollPacketFor(uint64_t id, Packet& p)
 std::future<tl::expected<std::vector<NetworkClient>, NetResult>>
 GamePacketServer::waitForClientConnection(int timeout)
 {
+#ifdef FLINE_NET_SUPPORT
+
     using RetT = std::vector<NetworkClient>;
     using RetE = NetResult;
     return std::async(std::launch::async, [this, timeout]() -> tl::expected<RetT, RetE> {
@@ -366,6 +397,9 @@ GamePacketServer::waitForClientConnection(int timeout)
 
         return tl::expected<RetT, RetE>(std::move(clients));
     });
+#else
+    throw net_exception("Network support is not compiled in!");
+#endif
 }
 
 /**
@@ -408,6 +442,7 @@ bool validateCRC(const std::vector<uint8_t>& data, uint32_t expected)
 
 std::vector<uint8_t> GamePacketServer::createMessage(const Packet& p)
 {
+#ifdef FLINE_NET_SUPPORT
     flatbuffers::FlatBufferBuilder fbb;
     auto packet = toSerializedPacket(p, fbb);
     FinishNetPacketBuffer(fbb, packet);
@@ -462,11 +497,11 @@ std::vector<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
     std::vector<Packet> res;
 
     std::vector<uint8_t> packetdata;
-    std::copy_n(data.begin(), size+16, std::back_inserter(packetdata));
-    
+    std::copy_n(data.begin(), size + 16, std::back_inserter(packetdata));
+
     auto pkt = GetNetPacket(packetdata.data() + 16);
     assert(packetdata[0] == 'F');
-    
+
     if (pkt) {
         res.push_back(toNativePacket(pkt));
     } else {
@@ -477,7 +512,8 @@ std::vector<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
     if (data.size() > packetdata.size()) {
         log->write(
             "game-packet-server", LogType::Warning,
-            "extra data in this packet, maybe we received more than 1 packet in a message? (%zu vs %zu)",
+            "extra data in this packet, maybe we received more than 1 packet in a message? (%zu vs "
+            "%zu)",
             data.size(), packetdata.size());
 
         auto len = data.size() - packetdata.size();
@@ -486,10 +522,13 @@ std::vector<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
 
         auto nres = decodeMessage(newpacket);
         std::copy(nres.begin(), nres.end(), std::back_inserter(res));
-        
     }
 
     return res;
+
+#else
+    throw net_exception("Network support is not compiled in!");
+#endif
 }
 
 Packet GamePacketServer::createPacket(
