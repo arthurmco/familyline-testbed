@@ -1,4 +1,5 @@
 #include <client/graphical/opengl/gl_renderer.hpp>
+#include "client/graphical/terrain_renderer.hpp"
 
 #ifdef RENDERER_OPENGL
 
@@ -353,9 +354,14 @@ void GLRenderer::removeLight(LightHandle* lh)
     vlight_list_.erase(r, vlight_list_.end());
 }
 
+std::unique_ptr<GLRenderer> renderer_;
 TerrainRenderer* GLRenderer::createTerrainRenderer(Camera& camera)
 {
-    return new GLTerrainRenderer{camera};
+    if (!terrain_renderer_) {
+        terrain_renderer_ = std::unique_ptr<TerrainRenderer>(new GLTerrainRenderer{camera});
+
+    }
+    return terrain_renderer_.get();
 }
 
 bool GLVertexHandle::update(VertexData& vd)
