@@ -20,8 +20,8 @@ using namespace familyline;
 
 TEST(GameTest, TestIfGameStartsAndRuns)
 {    
-    InputProcessor* ipr = new InputProcessor;
-    InputService::setInputManager(std::make_unique<InputManager>(*ipr));
+    auto ipr = std::make_unique<InputProcessor>();
+    InputService::setInputManager(std::make_unique<InputManager>(*ipr.get()));
         
     LogicService::getActionQueue()->clearEvents();
     LogicService::getObjectFactory()->clear();
