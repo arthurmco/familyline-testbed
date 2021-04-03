@@ -30,6 +30,10 @@ public:
         this->vinfo = vinfo;
     }
 
+    ~Mesh() {
+        delete _ani;
+    }
+    
     /**
      * Update the world matrix and the animator
      */
