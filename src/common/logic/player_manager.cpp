@@ -5,7 +5,7 @@
 #include <chrono>
 #include <cinttypes>
 #include <common/logger.hpp>
-#include <common/logic/ObjectPathManager.hpp>
+#include <common/logic/object_path_manager.hpp>
 #include <common/logic/colony.hpp>
 #include <common/logic/logic_service.hpp>
 #include <common/logic/player_manager.hpp>
@@ -203,7 +203,6 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
     format_to(out, "action of player {:x} at tick {:d}", pia.playercode, pia.tick);
 
     assert(olm != nullptr);
-    assert(pf != nullptr);
 
     auto& log = LoggerService::getLogger();
 
@@ -319,12 +318,13 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                     if (s->getColonyComponent().has_value() &&
                         s->getColonyComponent()->owner.has_value() &&
                         s->getColonyComponent()->owner->get().isOfPlayer(*(*player))) {
-                        auto path    = pf->CreatePath(*s.get(), glm::vec2(a.xPos, a.yPos));
-                        glm::vec2 lp = path.back();
-                        log->write(
-                            "human-player", LogType::Debug, "moved to %.2fx%.2f", lp.x, lp.y);
 
-                        ObjectPathManager::getInstance()->AddPath(s.get(), path);
+                        auto& pm = LogicService::getPathManager();
+                        pm->startPathing(*s.get(), glm::vec2(a.xPos, a.yPos));
+
+                        log->write(
+                            "human-player", LogType::Debug, "moved to %.2fx%.2f", a.xPos, a.yPos);
+                        
                     }
                 }
             },
