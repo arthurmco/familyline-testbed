@@ -25,7 +25,6 @@ TEST(InputReproduceTest, TestIfInputReproduces)
     InputService::setInputManager(std::make_unique<InputManager>(*ipr));
 
     LogicService::getObjectListener()->clear();
-    ObjectPathManager::getInstance()->clear();
     LogicService::getActionQueue()->clearEvents();
     LogicService::getObjectFactory()->clear();
     GFXService::setDevice(std::make_unique<TestDevice>());
@@ -103,7 +102,6 @@ TEST(InputReproduceTest, TestIfInputReproduces)
     }
 
     LogicService::getObjectListener()->clear();
-    ObjectPathManager::getInstance()->clear();
     LogicService::getActionQueue()->clearEvents();
     InputService::setInputManager(std::unique_ptr<InputManager>());
     GFXService::setDevice(std::unique_ptr<TestDevice>());
@@ -116,7 +114,6 @@ TEST(InputReproduceTest, TestIfInputReproducerFailsOnBrokenFile)
     InputService::setInputManager(std::make_unique<InputManager>(*ipr));
 
     LogicService::getObjectListener()->clear();
-    ObjectPathManager::getInstance()->clear();
     LogicService::getActionQueue()->clearEvents();
     LogicService::getObjectFactory()->clear();
     GFXService::setDevice(std::make_unique<TestDevice>());
@@ -149,7 +146,6 @@ TEST(InputReproduceTest, TestIfInputReproducerFailsOnBrokenFile)
     delete w;
 
     LogicService::getObjectListener()->clear();
-    ObjectPathManager::getInstance()->clear();
     LogicService::getActionQueue()->clearEvents();
     InputService::setInputManager(std::unique_ptr<InputManager>());
     GFXService::setDevice(std::unique_ptr<TestDevice>());

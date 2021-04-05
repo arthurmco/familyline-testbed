@@ -29,8 +29,8 @@
 #include <client/graphical/window.hpp>
 #include <common/logic/BuildQueue.hpp>
 #include <common/logic/GameActionManager.hpp>
-#include <common/logic/ObjectPathManager.hpp>
-#include <common/logic/PathFinder.hpp>
+#include <common/logic/object_path_manager.hpp>
+#include <common/logic/pathfinder.hpp>
 #include <common/logic/colony_manager.hpp>
 #include <common/logic/debug_drawer.hpp>
 #include <common/logic/lifecycle_manager.hpp>
@@ -154,7 +154,6 @@ private:
     std::unique_ptr<PreviewRenderer> pr_;
     std::unique_ptr<logic::ObjectLifecycleManager> olm_;
     std::unique_ptr<logic::ColonyManager> cm_;
-    std::unique_ptr<logic::PathFinder> pathf_;
 
     // might not be used at all, but it needs to have the same lifetime
     // as the game, so inputs can be captured.

@@ -12,8 +12,8 @@
 #include <common/logic/logic_service.hpp>
 #include <exception>
 
-#include "client/graphical/exceptions.hpp"
-#include "common/logic/PathFinder.hpp"
+#include <client/graphical/exceptions.hpp>
+#include <common/logic/pathfinder.hpp>
 
 using namespace familyline;
 using namespace familyline::logic;
@@ -143,17 +143,7 @@ void Game::initObjectManager()
 
     om_  = std::make_unique<ObjectManager>();
     olm_ = std::make_unique<ObjectLifecycleManager>(*om_.get());
-
-    pathf_ = std::make_unique<PathFinder>(om_.get());
-
-    {
-        auto [w, h] = terrain_->getSize();
-        pathf_->InitPathmap(w, h);
-        pathf_->UpdatePathmap(w, h);
-    }
-
     pm_->olm = olm_.get();
-    pm_->pf  = pathf_.get();
 
     log->write("game", LogType::Info, "game objects configured");
 }
@@ -202,7 +192,7 @@ void Game::initLoopData(int human_id)
         }
     }
 
-    ObjectPathManager::getInstance()->SetTerrain(terrain_.get());
+    LogicService::initPathManager(*terrain_.get());
 
     /// add the labels
     widgets.lblBuilding   = new Label(0.05 * 640, 0.1 * 480, "!!!");
@@ -404,11 +394,11 @@ void Game::runLogic()
     if (objupdate) {
         objrend_->update();
         auto [w, h] = terrain_->getSize();
-        pathf_->UpdatePathmap(w, h);
+
     }
 
     LogicService::getAttackManager()->processAttacks(*olm_.get());
-    ObjectPathManager::getInstance()->UpdatePaths(LOGIC_DELTA);
+    LogicService::getPathManager()->update(*om_.get());
 
     LogicService::getDebugDrawer()->update();
 }

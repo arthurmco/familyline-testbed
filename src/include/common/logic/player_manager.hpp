@@ -6,7 +6,7 @@
  * Copyright (C) 2020 Arthur M.
  */
 
-#include <common/logic/PathFinder.hpp>
+#include <common/logic/pathfinder.hpp>
 #include <common/logic/lifecycle_manager.hpp>
 #include <common/logic/player.hpp>
 #include <common/logic/player_actions.hpp>
@@ -69,7 +69,7 @@ private:
 
 public:
     ObjectLifecycleManager* olm = nullptr;
-    PathFinder* pf              = nullptr;
+    Pathfinder* pf              = nullptr;
 
     /* Callback to a function that allows us to add
      * an object to the renderer
