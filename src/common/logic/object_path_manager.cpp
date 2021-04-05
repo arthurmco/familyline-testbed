@@ -51,9 +51,7 @@ ObjectPathManager::ObjectPathManager(Terrain& t) : t_(t)
 PathHandle ObjectPathManager::startPathing(GameObject& o, glm::vec2 dest)
 {
     // TODO: require some sort of MovementComponent to start pathing
-    auto pathref = PathRef(o, t_, dest);
-    auto& l      = LoggerService::getLogger();
-    auto retid   = pathref.handleval();
+    auto& l = LoggerService::getLogger();
 
     auto* existingref = findPathRefFromObject(o);
     if (existingref) {
@@ -61,14 +59,21 @@ PathHandle ObjectPathManager::startPathing(GameObject& o, glm::vec2 dest)
             "object-path-manager", LogType::Info,
             "found an existing reference to '%s' (%d) in the pathing list", o.getName().c_str(),
             o.getID());
+        existingref->status = PathStatus::Repathing;
+        existingref->start  = existingref->position() ? *existingref->position()
+                                                     : glm::vec2(
+                                                           existingref->object.getPosition().x,
+                                                           existingref->object.getPosition().z);
+        existingref->end = dest;
+        return existingref->handleval();
     } else {
+        auto pathref = PathRef(o, t_, dest);
         l->write(
             "object-path-manager", LogType::Info,
             "adding reference to '%s' (%d) in the pathing list", o.getName().c_str(), o.getID());
         operations_.push_back(std::move(pathref));
+        return pathref.handleval();
     }
-
-    return retid;
 }
 
 /**
@@ -187,7 +192,10 @@ void ObjectPathManager::update(const ObjectManager& om)
                         "object-path-manager", LogType::Info, "Pathing of %d (%d - %s) completed!",
                         op.handleval(), op.object.getID(), op.object.getName().c_str());
 
-                    op.status = PathStatus::Completed;
+                    if (op.pathfinder->maxIterReached())
+                        op.status = PathStatus::Repathing;
+                    else
+                        op.status = PathStatus::Completed;
                 }
 
                 break;
@@ -205,7 +213,12 @@ void ObjectPathManager::update(const ObjectManager& om)
                 break;
             }
             case PathStatus::Repathing: {
-                assert(false);  // Not implemented
+                log->write(
+                    "object-path-manager", LogType::Info,
+                    "Pathing of %d (%d - %s) needs to be recalculated!", op.handleval(),
+                    op.object.getID(), op.object.getName().c_str());
+                this->recalculatePath(op, true);
+                op.status = PathStatus::InProgress;
                 break;
             }
             case PathStatus::Unreachable: {
@@ -218,9 +231,12 @@ void ObjectPathManager::update(const ObjectManager& om)
     // There is more than one entity moving, path recalculation is needed, so entities
     // do not collide with each other
     if (movingEntities > 1) {
-        log->write("object-path-manager", LogType::Info, "Recalculating path for %d entities", movingEntities);
-        std::for_each(
-            operations_.begin(), operations_.end(), [this](PathRef& r) { this->recalculatePath(r); });
+        log->write(
+            "object-path-manager", LogType::Info, "Recalculating path for %d entities",
+            movingEntities);
+        std::for_each(operations_.begin(), operations_.end(), [this](PathRef& r) {
+            this->recalculatePath(r);
+        });
     }
 
     if (toRemove.size() > 0) {
@@ -243,31 +259,31 @@ void ObjectPathManager::update(const ObjectManager& om)
 void ObjectPathManager::createPath(PathRef& r)
 {
     r.pathfinder->update(createBitmapForObject(r.object));
-    auto elements = r.pathfinder->findPath(r.start, r.end, r.object.getSize());
+    auto elements = r.pathfinder->findPath(r.start, r.end, r.object.getSize(), max_iter_paths_per_frame_);
     assert(r.pathElements.size() == 0);
     r.pathElements.insert(r.pathElements.begin(), elements.begin(), elements.end());
 }
 
-
-
 /**
  * Create a path for an object whose path already exists, essentially redoing it
  */
-void ObjectPathManager::recalculatePath(PathRef& r)
+void ObjectPathManager::recalculatePath(PathRef& r, bool force)
 {
     auto& log = LoggerService::getLogger();
-    log->write("object-path-manager", LogType::Debug, "Recalculating path for handle %d (%s) (%zu remaining points)",
-               r.handleval(), r.object.getName().c_str(), r.pathElements.size());
-    
-    if (r.pathElements.size() <= 2)
-        return;
-    
-    if (auto pos = r.position(); pos) {
-        r.pathfinder->update(createBitmapForObject(r.object));
-        auto elements = r.pathfinder->findPath(*pos, r.end, r.object.getSize());
-        r.pathElements.resize(elements.size());
-        std::copy(elements.begin(), elements.end(), r.pathElements.begin());
-    }
+    log->write(
+        "object-path-manager", LogType::Debug,
+        "Recalculating path for handle %d (%s) (%zu remaining points)", r.handleval(),
+        r.object.getName().c_str(), r.pathElements.size());
+
+    if (r.pathElements.size() <= 2 && !force) return;
+
+    auto posv =
+        r.position().value_or(glm::vec2(r.object.getPosition().x, r.object.getPosition().z));
+
+    r.pathfinder->update(createBitmapForObject(r.object));
+    auto elements = r.pathfinder->findPath(posv, r.end, r.object.getSize(), max_iter_paths_per_frame_);
+    r.pathElements.resize(elements.size());
+    std::copy(elements.begin(), elements.end(), r.pathElements.begin());
 }
 
 /**
@@ -279,10 +295,10 @@ std::optional<glm::vec2> ObjectPathManager::updatePosition(PathRef& r)
     if (!pos) return std::nullopt;
 
     auto height = t_.getHeightFromCoords(*pos);
-    
+
     setObjectOnBitmap(obstacle_bitmap_, r.object, false);
     setObjectOnBitmap(obstacle_bitmap_, *pos, r.object.getSize(), true);
-    
+
     LoggerService::getLogger()->write(
         "object-path-manager", LogType::Debug,
         "position of object id %d (%s) is now (%.2f, %d, %.2f)", r.object.getID(),
@@ -407,11 +423,15 @@ void ObjectPathManager::setObjectOnBitmap(
     int posx = pos.x;
     int posy = pos.y;
 
-    auto width = int(std::get<0>(t_.getSize()));
+    auto [width, height] = t_.getSize();
 
     for (int y = posy - double(size.y / 2); y < posy + double(size.y / 2); y++) {
+        if (y < 0 || y >= height) continue;
+
         for (int x = posx - double(size.x / 2); x < posx + double(size.x / 2); x++) {
-            bitmap[y * width + x] = value;
+            if (x < 0 || x >= width) continue;
+
+            bitmap[y * int(width) + x] = value;
         }
     }
 }

@@ -183,10 +183,14 @@ public:
      */
     void removePathing(PathHandle);
 
+    void setItersPerFrame(int v) { max_iter_paths_per_frame_ = v; }
+    
 private:
     Terrain& t_;
     std::unique_ptr<EventReceiver> obj_events_;
 
+    int max_iter_paths_per_frame_ = 200;
+    
     /**
      * A map of object IDs and their respective positions and sizes, to mask them into the
      * obstacle bitmap
@@ -234,7 +238,7 @@ private:
     /**
      * Create a path for an object whose path already exists, essentially redoing it
      */
-    void recalculatePath(PathRef& r);
+    void recalculatePath(PathRef& r, bool force=false);
 
     /**
      * Update the position of an object

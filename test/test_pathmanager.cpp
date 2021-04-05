@@ -63,6 +63,50 @@ TEST(ObjectPathManager, CanFindPathOnMultipleIterations)
     LogicService::getActionQueue()->clearEvents();
 
     LogicService::initPathManager(t);
+
+    ObjectManager om;
+
+    auto atkComp                 = std::optional<AttackComponent>();
+    struct object_init objParams = {"test-obj", "Test Object", glm::vec2(3, 3), 100,
+                                    100,        false,         [&]() {},        atkComp};
+
+    auto component = make_object(objParams);
+    component->setPosition(glm::vec3(10, 1, 10));
+
+    auto cid = om.add(std::move(component));
+
+    glm::vec3 destination(199, 0, 199);
+
+    auto& pm = LogicService::getPathManager();
+    pm->setItersPerFrame(50);
+    auto handle =
+        pm->startPathing(*om.get(cid).value().get(), glm::vec2{destination.x, destination.z});
+    EXPECT_EQ(PathStatus::NotStarted, pm->getPathStatus(handle));
+
+    pm->update(om);
+    EXPECT_NE(PathStatus::Invalid, pm->getPathStatus(handle));
+    EXPECT_EQ(PathStatus::InProgress, pm->getPathStatus(handle));
+
+    for (int i = 0; i <= 150; i++) {
+        pm->update(om);
+    }
+
+    EXPECT_EQ(PathStatus::InProgress, pm->getPathStatus(handle));
+    
+    for (int i = 0; i <= 150; i++) {
+        pm->update(om);
+    }
+
+    EXPECT_NE(PathStatus::Invalid, pm->getPathStatus(handle));
+    EXPECT_EQ(PathStatus::Completed, pm->getPathStatus(handle));
+
+    {
+        auto ncomp = om.get(cid).value();
+        auto pos   = ncomp->getPosition();
+        EXPECT_EQ(destination.x, pos.x);
+        EXPECT_EQ(destination.y, pos.y);
+        EXPECT_EQ(destination.z, pos.z);
+    }
 }
 
 TEST(ObjectPathManager, IsPathFoundOnMultipleIterationsTheSameAsOneFoundIntoOne)
@@ -284,4 +328,75 @@ TEST(ObjectPathManager, CanStopMovingOnImpossiblePath)
     LogicService::getActionQueue()->clearEvents();
 
     LogicService::initPathManager(t);
+}
+
+
+TEST(ObjectPathManager, CanPathEntityTwice)
+{
+    TerrainFile tf{200, 200};
+    Terrain t(tf);
+    LogicService::getActionQueue()->clearEvents();
+
+    LogicService::initPathManager(t);
+
+    ObjectManager om;
+
+    auto atkComp                 = std::optional<AttackComponent>();
+    struct object_init objParams = {"test-obj", "Test Object", glm::vec2(3, 3), 100,
+                                    100,        false,         [&]() {},        atkComp};
+
+    auto component = make_object(objParams);
+    component->setPosition(glm::vec3(10, 1, 10));
+
+    auto cid = om.add(std::move(component));
+
+    glm::vec3 destination(30, 0, 30);
+
+    auto& pm = LogicService::getPathManager();
+    auto handle =
+        pm->startPathing(*om.get(cid).value().get(), glm::vec2{destination.x, destination.z});
+    EXPECT_EQ(PathStatus::NotStarted, pm->getPathStatus(handle));
+
+    pm->update(om);
+    EXPECT_NE(PathStatus::Invalid, pm->getPathStatus(handle));
+    EXPECT_EQ(PathStatus::InProgress, pm->getPathStatus(handle));
+
+    for (int i = 0; i <= 20; i++) {
+        pm->update(om);
+    }
+
+    EXPECT_NE(PathStatus::Invalid, pm->getPathStatus(handle));
+    EXPECT_EQ(PathStatus::Completed, pm->getPathStatus(handle));
+
+    {
+        auto ncomp = om.get(cid).value();
+        auto pos   = ncomp->getPosition();
+        EXPECT_EQ(destination.x, pos.x);
+        EXPECT_EQ(destination.y, pos.y);
+        EXPECT_EQ(destination.z, pos.z);
+    }
+
+    destination = glm::vec3(40, 0, 20);
+    
+    handle =
+        pm->startPathing(*om.get(cid).value().get(), glm::vec2{destination.x, destination.z});
+    EXPECT_EQ(PathStatus::Repathing, pm->getPathStatus(handle));
+
+    pm->update(om);
+    EXPECT_EQ(PathStatus::InProgress, pm->getPathStatus(handle));
+
+    for (int i = 0; i <= 20; i++) {
+        pm->update(om);
+    }
+
+    EXPECT_EQ(PathStatus::Completed, pm->getPathStatus(handle));
+
+    {
+        auto ncomp = om.get(cid).value();
+        auto pos   = ncomp->getPosition();
+        EXPECT_EQ(destination.x, pos.x);
+        EXPECT_EQ(destination.y, pos.y);
+        EXPECT_EQ(destination.z, pos.z);
+    }
+    
 }
