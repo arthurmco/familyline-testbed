@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 {
     ::testing::InitGoogleTest(&argc, argv);
 
-    familyline::LoggerService::createLogger(stderr, familyline::LogType::Debug);
+    familyline::LoggerService::createLogger(stderr, familyline::LogType::Fatal);
 
     return RUN_ALL_TESTS();
 }

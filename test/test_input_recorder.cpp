@@ -42,7 +42,7 @@ TEST(InputRecorderTest, TestIfInputRecords)
     auto atkc1 = std::optional<AttackComponent>(AttackComponent{
         nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
     auto obj_s = make_ownable_object(
-        {"testobj", "Test Object", glm::vec2(0, 0), 200, 200, true, []() {}, atkc1});
+        {"testobj", "Test Object", glm::vec2(1, 1), 200, 200, true, []() {}, atkc1});
 
     PlayerSession session = {};
     session.players       = std::make_unique<PlayerManager>();
