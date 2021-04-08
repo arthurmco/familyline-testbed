@@ -21,7 +21,7 @@ using namespace familyline;
 
 TEST(InputReproduceTest, TestIfInputReproduces)
 {
-    InputProcessor* ipr = new InputProcessor;
+    auto ipr = std::make_unique<InputProcessor>();
     InputService::setInputManager(std::make_unique<InputManager>(*ipr));
 
     LogicService::getObjectListener()->clear();
@@ -110,7 +110,7 @@ TEST(InputReproduceTest, TestIfInputReproduces)
 
 TEST(InputReproduceTest, TestIfInputReproducerFailsOnBrokenFile)
 {
-    InputProcessor* ipr = new InputProcessor;
+    auto ipr = std::make_unique<InputProcessor>();
     InputService::setInputManager(std::make_unique<InputManager>(*ipr));
 
     LogicService::getObjectListener()->clear();
