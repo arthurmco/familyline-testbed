@@ -153,6 +153,7 @@ Asset AssetManager::processAsset(AssetItem& av)
         Material* m = new Material{matname, MaterialData(0.1, 0.8, 0.5)};
         m->setTexture(tex);
         GFXService::getMaterialManager()->addMaterial(m);
+        delete[] matname;
 
     } else if (av.type == "material") {
         asset.type = AssetType::MaterialAsset;
