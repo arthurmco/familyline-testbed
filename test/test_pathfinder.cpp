@@ -179,3 +179,68 @@ TEST(Pathfinder, CanWalkAroundObstacle)
     ASSERT_EQ(glm::vec2(21, 21), path[path.size() - 2]);
     ASSERT_EQ(glm::vec2(22, 22), path[path.size() - 1]);
 }
+
+TEST(Pathfinder, CanWalkUpwards)
+{
+    auto& actionQueue = LogicService::getActionQueue();
+    actionQueue->clearEvents();
+
+    const auto& olist = familyline::logic::LogicService::getObjectListener();
+
+    ObjectManager om;
+
+    auto atkComp                 = std::optional<AttackComponent>();
+    struct object_init objParams = {"test-obj", "Test Object", glm::vec2(3, 3), 100,
+                                    100,        false,         [&]() {},        atkComp};
+
+    auto component = make_object(objParams);
+
+    component->setPosition(glm::vec3(10, 1, 10));
+
+    auto id = om.add(std::move(component));
+
+    actionQueue->processEvents();
+    olist->updateObjects();
+
+    auto heightdata = std::vector<uint16_t>(100*100, 0);
+    heightdata[21*100+22] = 255;
+    heightdata[22*100+22] = 255;
+    heightdata[23*100+22] = 255;
+    heightdata[21*100+21] = 255;
+    heightdata[22*100+21] = 255;
+    heightdata[23*100+21] = 255;
+    heightdata[21*100+23] = 255;
+    heightdata[22*100+23] = 255;
+    heightdata[23*100+23] = 255;
+    
+    TerrainFile tf{100, 100, heightdata};
+    
+    Terrain t(tf);    
+
+    Pathfinder pf(t);
+    auto map = createPathmap(100, 100);
+
+    pf.update(map);
+
+    auto path = createPath(pf, om, id, glm::vec2(22, 22));
+
+    int i = 0;
+    
+    EXPECT_LT(10, path.size());
+    EXPECT_GT(20, path.size());
+    ASSERT_FALSE(pf.maxIterReached());
+    ASSERT_TRUE(pf.hasPossiblePath());
+    
+    ASSERT_EQ(glm::vec2(10, 10), path[0]);
+    ASSERT_EQ(glm::vec2(11, 11), path[1]);
+    ASSERT_EQ(glm::vec2(12, 12), path[2]);
+    ASSERT_EQ(glm::vec2(13, 13), path[3]);
+    ASSERT_EQ(glm::vec2(14, 14), path[4]);
+    ASSERT_EQ(glm::vec2(15, 15), path[5]);
+    ASSERT_EQ(glm::vec2(16, 16), path[6]);
+    ASSERT_EQ(glm::vec2(17, 17), path[7]);
+    ASSERT_EQ(glm::vec2(18, 18), path[8]);
+    ASSERT_EQ(glm::vec2(19, 19), path[9]);
+
+    ASSERT_EQ(glm::vec2(22, 22), path[path.size() - 1]);
+}

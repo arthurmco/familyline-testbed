@@ -267,7 +267,7 @@ Pathfinder::PathNode* Pathfinder::traversePath(
 void Pathfinder::PathNode::calculateG(glm::vec2 start, glm::vec2 end, const TerrainTile& current)
 {
     if (parent) {
-        auto heightcost = (glm::abs(glm::distance(double(current.height), parent->height)) / 0.01);
+        auto heightcost = glm::abs(glm::distance(double(current.height), parent->height)) * 0.01;
         g = parent->g + glm::abs(glm::distance(position, parent->position)) + heightcost;
     } else {
         g = 0;
