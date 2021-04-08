@@ -192,14 +192,25 @@ void ObjectPathManager::update(const ObjectManager& om)
                         "object-path-manager", LogType::Info, "Pathing of %d (%d - %s) completed!",
                         op.handleval(), op.object.getID(), op.object.getName().c_str());
 
-                    if (op.pathfinder->maxIterReached())
-                        op.status = PathStatus::Repathing;
+                    if (!op.pathfinder->hasPossiblePath())
+                        op.status = PathStatus::Unreachable;
                     else
                         op.status = PathStatus::Completed;
+                    
+                } else {
+                    if (op.pathfinder->maxIterReached()) {
+                        op.status = PathStatus::Repathing;
+                    }
                 }
 
                 break;
             }
+            case PathStatus::Unreachable: 
+                log->write(
+                    "object-path-manager", LogType::Warning,
+                    "Path handle %d from (%.2f, %.2f) to (%.2f, %.2f) is not reachable", op.handleval(),
+                    op.start.x, op.start.y, op.end.x, op.end.y);
+                [[fallthrough]];
             case PathStatus::Stopped: [[fallthrough]];
             case PathStatus::Invalid: [[fallthrough]];  // there is not much we can do here...
             case PathStatus::Completed: {
@@ -217,12 +228,12 @@ void ObjectPathManager::update(const ObjectManager& om)
                     "object-path-manager", LogType::Info,
                     "Pathing of %d (%d - %s) needs to be recalculated!", op.handleval(),
                     op.object.getID(), op.object.getName().c_str());
+
+                if (!op.pathfinder->maxIterReached())
+                    op.pathfinder->update(createBitmapForObject(op.object));
+                
                 this->recalculatePath(op, true);
                 op.status = PathStatus::InProgress;
-                break;
-            }
-            case PathStatus::Unreachable: {
-                assert(false);  // Not implemented
                 break;
             }
         }
@@ -235,6 +246,7 @@ void ObjectPathManager::update(const ObjectManager& om)
             "object-path-manager", LogType::Info, "Recalculating path for %d entities",
             movingEntities);
         std::for_each(operations_.begin(), operations_.end(), [this](PathRef& r) {
+            r.pathfinder->update(createBitmapForObject(r.object));
             this->recalculatePath(r);
         });
     }
@@ -259,7 +271,8 @@ void ObjectPathManager::update(const ObjectManager& om)
 void ObjectPathManager::createPath(PathRef& r)
 {
     r.pathfinder->update(createBitmapForObject(r.object));
-    auto elements = r.pathfinder->findPath(r.start, r.end, r.object.getSize(), max_iter_paths_per_frame_);
+    auto elements =
+        r.pathfinder->findPath(r.start, r.end, r.object.getSize(), max_iter_paths_per_frame_);
     assert(r.pathElements.size() == 0);
     r.pathElements.insert(r.pathElements.begin(), elements.begin(), elements.end());
 }
@@ -277,11 +290,15 @@ void ObjectPathManager::recalculatePath(PathRef& r, bool force)
 
     if (r.pathElements.size() <= 2 && !force) return;
 
+    auto pos2d = glm::vec2(r.object.getPosition().x, r.object.getPosition().z);
+    if (r.pathElements.size() == 0)
+        r.pathElements.push_back(pos2d);
+    
     auto posv =
-        r.position().value_or(glm::vec2(r.object.getPosition().x, r.object.getPosition().z));
+        r.position().value_or(pos2d);
 
-    r.pathfinder->update(createBitmapForObject(r.object));
-    auto elements = r.pathfinder->findPath(posv, r.end, r.object.getSize(), max_iter_paths_per_frame_);
+    auto elements =
+        r.pathfinder->findPath(posv, r.end, r.object.getSize(), max_iter_paths_per_frame_);
     r.pathElements.resize(elements.size());
     std::copy(elements.begin(), elements.end(), r.pathElements.begin());
 }
@@ -304,6 +321,9 @@ std::optional<glm::vec2> ObjectPathManager::updatePosition(PathRef& r)
         "position of object id %d (%s) is now (%.2f, %d, %.2f)", r.object.getID(),
         r.object.getName().c_str(), pos->x, height, pos->y);
 
+    assert(fabs(pos->x - r.object.getPosition().x) <= 1.5);
+    assert(fabs(pos->y - r.object.getPosition().z) <= 1.5);
+    
     r.object.setPosition(glm::vec3(pos->x, height, pos->y));
     mapped_objects_[r.object.getID()] = std::make_tuple<>(*pos, r.object.getSize());
     r.pathElements.pop_front();
@@ -337,7 +357,6 @@ void ObjectPathManager::pollEntities(const ObjectManager& om)
 
     EntityEvent e;
     while (obj_events_->pollEvent(e)) {
-        puts("???");
         if (auto* ec = std::get_if<EventCreated>(&e.type); ec) {
             if (auto obj = om.get(ec->objectID); obj) {
                 auto pos  = (*obj)->getPosition();
