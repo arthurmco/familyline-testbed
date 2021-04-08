@@ -38,6 +38,22 @@ public:
 
     void drawPath(std::vector<glm::vec3> points, glm::vec4 color);
 
+    template <typename Iter>
+    void drawPath(Iter begin, Iter end, glm::vec4 color) {
+        if (begin == end)
+            return;
+        
+        auto prev = begin;
+        for (auto it = begin+1; it != end; ++it) {
+            glm::vec3 prev3(prev->x, terr_.getHeightFromCoords(*prev)+10, prev->y);
+            glm::vec3 it3(it->x, terr_.getHeightFromCoords(*it)+10, it->y);
+            
+            this->drawLine(prev3, it3, color);
+            prev = it;
+        }        
+    }
+        
+
     template <typename Container>
     void drawPath(Container points, glm::vec4 color)
     {
@@ -59,4 +75,30 @@ public:
     virtual ~DebugDrawer() {}
 };
 
+
+
+/**
+ * A dummy debug drawer
+ * 
+ * It does not render anywhere
+ */
+class DummyDebugDrawer : public familyline::logic::DebugDrawer
+{
+public:
+    DummyDebugDrawer(const familyline::logic::Terrain &terr)
+        : DebugDrawer(terr) {}
+
+    virtual void drawLine(glm::vec3 start, glm::vec3 end, glm::vec4 color) {}
+    virtual void drawSquare(
+        glm::vec3 start, glm::vec3 end, glm::vec4 foreground, glm::vec4 background) {}
+    virtual void drawCircle(
+        glm::vec3 point, glm::vec3 radius, glm::vec4 foreground, glm::vec4 background) {}
+
+    /// Update some internal structure
+    virtual void update() {}
+
+    virtual ~DummyDebugDrawer() {}
+
+};
+    
 }  // namespace familyline::logic

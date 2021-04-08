@@ -47,6 +47,7 @@ TEST(PlayerManager, TestIfPlayerCanBuild)
     TerrainFile tf{20, 20};
     Terrain t{tf};
     LogicService::initPathManager(t);
+    LogicService::initDebugDrawer(new DummyDebugDrawer{t});
     
     auto d = std::make_unique<DummyPlayer>(
         pm, t, "Test", 1, [&](size_t) -> std::vector<PlayerInputType> {
@@ -102,6 +103,7 @@ TEST(PlayerManager, TestIfPlayerCanSelect)
     TerrainFile tf{1, 1};
     Terrain t{tf};
     LogicService::initPathManager(t);
+    LogicService::initDebugDrawer(new DummyDebugDrawer{t});
     
     auto d = std::make_unique<DummyPlayer>(
         pm, t, "Test", 1, [&](size_t) -> std::vector<PlayerInputType> {
@@ -164,6 +166,7 @@ TEST(PlayerManager, TestIfPlayerCanDeselect)
     TerrainFile tf{1, 1};
     Terrain t{tf};
     LogicService::initPathManager(t);
+    LogicService::initDebugDrawer(new DummyDebugDrawer{t});
     
     auto d = std::make_unique<DummyPlayer>(
         pm, t, "Test", 1, [&](size_t tick) -> std::vector<PlayerInputType> {
@@ -218,6 +221,7 @@ TEST(PlayerManager, TestIfPlayerCannotMoveNotOwnedObject)
     auto tf = std::make_unique<TerrainFile>(30, 30);
     Terrain t{*tf};
     LogicService::initPathManager(t);
+    LogicService::initDebugDrawer(new DummyDebugDrawer{t});
     
     ColonyManager cm;
     ObjectManager om;
@@ -313,6 +317,7 @@ TEST(PlayerManager, TestIfPlayerCanMove)
     auto tf = std::make_unique<TerrainFile>(30, 30);
     Terrain t{*tf};
     LogicService::initPathManager(t);
+    LogicService::initDebugDrawer(new DummyDebugDrawer{t});
     
     ColonyManager cm;
     ObjectManager om;
@@ -427,6 +432,7 @@ TEST(PlayerManager, TestIfTickDeltaIsRespected)
     TerrainFile tf{20, 20};
     Terrain t{tf};
     LogicService::initPathManager(t);
+    LogicService::initDebugDrawer(new DummyDebugDrawer{t});
     
     auto d = std::make_unique<DummyPlayer>(
         pm, t, "Test", 1, [&](size_t tick) -> std::vector<PlayerInputType> {
@@ -483,6 +489,7 @@ TEST(PlayerManager, TestIfOutOfOrderActionsAreOrdered)
     TerrainFile tf{20, 20};
     Terrain t{tf};
     LogicService::initPathManager(t);
+    LogicService::initDebugDrawer(new DummyDebugDrawer{t});
     
     auto d = std::make_unique<DummyPlayer>(
         pm, t, "Test", 1, [&](size_t tick) -> std::vector<PlayerInputType> {
