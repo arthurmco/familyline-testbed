@@ -148,6 +148,8 @@ private:
 
     std::unique_ptr<logic::PlayerManager> pm_;
 
+    std::vector<std::unique_ptr<logic::GameObject>> factory_objects_;
+    
     std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>> colonies_;
 
     std::unique_ptr<logic::ObjectManager> om_;
