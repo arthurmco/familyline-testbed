@@ -21,7 +21,7 @@ using namespace familyline;
 
 TEST(InputRecorderTest, TestIfInputRecords)
 {
-    InputProcessor* ipr = new InputProcessor;
+    auto ipr = std::make_unique<InputProcessor>();
     InputService::setInputManager(std::make_unique<InputManager>(*ipr));
 
     LogicService::getActionQueue()->clearEvents();
