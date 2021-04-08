@@ -563,12 +563,6 @@ TEST(ObjectPathManager, CanPathEntityTwice)
 
 TEST(ObjectPathManager, CanPathEntityTwice)
 {
-    TerrainFile tf{200, 200};
-    Terrain t(tf);
-    LogicService::getActionQueue()->clearEvents();
-
-    LogicService::initPathManager(t);
-
     ObjectManager om;
 
     auto atkComp                 = std::optional<AttackComponent>();
