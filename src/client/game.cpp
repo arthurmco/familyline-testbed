@@ -121,10 +121,14 @@ void Game::initAssets()
 logic::ObjectFactory* Game::initObjectFactory()
 {
     auto& of = LogicService::getObjectFactory();
+    factory_objects_.clear();
+    
+    factory_objects_.push_back(std::make_unique<WatchTower>());
+    factory_objects_.push_back(std::make_unique<Tent>());
 
     /* Adds the objects to the factory */
-    of->addObject(new WatchTower);
-    of->addObject(new Tent);
+    for (auto& o: factory_objects_)
+        of->addObject(o.get());
 
     return of.get();
 }
