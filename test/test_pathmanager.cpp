@@ -492,7 +492,7 @@ TEST_F(ObjectPathManagerTest, CanPathEntityTwice)
 
 TEST(ObjectPathManager, CanPathEntityTwice)
 {
-    TerrainFile tf{200, 200};
+    TerrainFile tf{100, 50};
     Terrain t(tf);
     LogicService::getActionQueue()->clearEvents();
 
@@ -575,12 +575,15 @@ TEST(ObjectPathManager, CanPathEntityTwice)
     struct object_init objParams = {"test-obj", "Test Object", glm::vec2(3, 3), 100,
                                     100,        false,         [&]() {},        atkComp};
 
+
+    glm::vec3 start(10, 1, 10);
+    glm::vec3 destination(30, 0, 30);
+    
     auto component = make_object(objParams);
-    component->setPosition(glm::vec3(10, 1, 10));
+    component->setPosition(start);
 
     auto cid = om.add(std::move(component));
 
-    glm::vec3 destination(30, 0, 30);
 
     auto& pm = LogicService::getPathManager();
     auto handle =
@@ -606,6 +609,7 @@ TEST(ObjectPathManager, CanPathEntityTwice)
         EXPECT_EQ(destination.z, pos.z);
     }
 
+    auto prevdest = destination;
     destination = glm::vec3(40, 0, 20);
     
     handle =
@@ -613,12 +617,22 @@ TEST(ObjectPathManager, CanPathEntityTwice)
     EXPECT_EQ(PathStatus::Repathing, pm->getPathStatus(handle));
 
     pm->update(om);
+    pm->update(om);
+    pm->update(om);
     EXPECT_EQ(PathStatus::InProgress, pm->getPathStatus(handle));
 
-    for (int i = 0; i <= 20; i++) {
+    {
+        auto ncomp = om.get(cid).value();
+        auto pos   = ncomp->getPosition();
+        EXPECT_EQ(prevdest.x+1, pos.x);
+        EXPECT_EQ(prevdest.y, pos.y);
+        EXPECT_EQ(prevdest.z-1, pos.z);
+    }
+    
+    for (int i = 0; i <= 18; i++) {
         pm->update(om);
     }
-
+        
     EXPECT_EQ(PathStatus::Completed, pm->getPathStatus(handle));
 
     {
