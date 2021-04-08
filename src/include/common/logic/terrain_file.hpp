@@ -114,6 +114,17 @@ public:
     }
 
     /**
+     * Create an empty terrain file with a custom height data
+     *
+     * Useful for testing
+     */
+    TerrainFile(size_t w, size_t h, std::vector<uint16_t> height)
+        : size_(std::make_tuple(w, h)),
+          height_data(height),
+          type_data(std::vector<uint16_t>(w * h, 0))
+    {}
+
+    /**
      * Open the terrain
      *
      * Return true if no error occurred, false if an error occurred.
