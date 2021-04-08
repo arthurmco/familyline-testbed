@@ -30,7 +30,7 @@ public:
         this->vinfo = vinfo;
     }
 
-    ~Mesh() {
+    virtual ~Mesh() {
         delete _ani;
     }
     
