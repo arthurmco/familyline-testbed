@@ -88,6 +88,13 @@ public:
 
     bool maxIterReached() const { return has_max_iter_reached_; }
 
+    bool hasPossiblePath() const {
+        if (open_list_.size() == 0)
+            return closed_list_.size() == 0;
+
+        return true;
+    }
+
 private:
     const Terrain& t_;
     std::vector<bool> obstacle_bitmap_;
