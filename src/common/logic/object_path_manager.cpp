@@ -177,6 +177,9 @@ void ObjectPathManager::update(const ObjectManager& om)
                 auto currentPos     = updatePosition(op);
                 movingEntities++;
 
+                LogicService::getDebugDrawer()->drawPath(op.pathElements.begin(), op.pathElements.end(),
+                                                         glm::vec4(0, 1 ,0 ,1));
+                
                 // It is InProgress but no more positions. This is not correct
                 if (!currentPos) {
                     log->write(

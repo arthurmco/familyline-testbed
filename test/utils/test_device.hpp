@@ -53,11 +53,17 @@ public:
 class TestDevice : public familyline::graphics::Device
 {
 private:
-    std::unique_ptr<TestShaderProgram> fwd = std::make_unique<TestShaderProgram>("forward");        
+    std::unique_ptr<TestShaderProgram> fwd = std::make_unique<TestShaderProgram>("forward");
+
+    // for the gfxline stub
+    std::unique_ptr<TestShaderProgram> lines = std::make_unique<TestShaderProgram>("lines");        
 public:
     TestDevice() {
         auto& sm = familyline::graphics::GFXService::getShaderManager();
         sm->addShader(fwd.get());
+        sm->addShader(lines.get());
+
+        // TODO: move this to some sort of global initializer
     }
     
     /// Get the device code, name and vendor

@@ -5,18 +5,33 @@
 #include <common/logic/logic_service.hpp>
 #include <common/logic/object_path_manager.hpp>
 #include <common/logic/terrain.hpp>
+#include <memory>
 
 #include "utils.hpp"
 
 using namespace familyline::logic;
 
-TEST(ObjectPathManager, CanFindPath)
-{
-    TerrainFile tf{200, 200};
-    Terrain t(tf);
-    LogicService::getActionQueue()->clearEvents();
+class ObjectPathManagerTest : public ::testing::Test {
+protected:
+    TerrainFile tf;
+    std::unique_ptr<Terrain> t;
+    
+    void SetUp() override {
+        tf = TerrainFile{200, 200};
+        t = std::make_unique<Terrain>(tf);
 
-    LogicService::initPathManager(t);
+        LogicService::getActionQueue()->clearEvents();        
+        LogicService::initDebugDrawer(new DummyDebugDrawer{*t});
+        LogicService::initPathManager(*t);
+
+    }
+
+    // void TearDown() override {}
+
+};
+
+TEST_F(ObjectPathManagerTest, CanFindPath)
+{
 
     ObjectManager om;
 
@@ -56,14 +71,8 @@ TEST(ObjectPathManager, CanFindPath)
     }
 }
 
-TEST(ObjectPathManager, CanFindPathOnMultipleIterations)
+TEST_F(ObjectPathManagerTest, CanFindPathOnMultipleIterations)
 {
-    TerrainFile tf{200, 200};
-    Terrain t(tf);
-    LogicService::getActionQueue()->clearEvents();
-
-    LogicService::initPathManager(t);
-
     ObjectManager om;
 
     auto atkComp                 = std::optional<AttackComponent>();
@@ -109,14 +118,8 @@ TEST(ObjectPathManager, CanFindPathOnMultipleIterations)
     }
 }
 
-TEST(ObjectPathManager, IsPathFoundOnMultipleIterationsTheSameAsOneFoundIntoOne)
+TEST_F(ObjectPathManagerTest, IsPathFoundOnMultipleIterationsTheSameAsOneFoundIntoOne)
 {
-    TerrainFile tf{200, 200};
-    Terrain t(tf);
-    LogicService::getActionQueue()->clearEvents();
-
-    LogicService::initPathManager(t);
-
     ObjectManager om;
 
     auto atkComp                 = std::optional<AttackComponent>();
@@ -162,14 +165,8 @@ TEST(ObjectPathManager, IsPathFoundOnMultipleIterationsTheSameAsOneFoundIntoOne)
     }
 }
 
-TEST(ObjectPathManager, CanWalkAroundStaticEntities)
+TEST_F(ObjectPathManagerTest, CanWalkAroundStaticEntities)
 {
-    TerrainFile tf{200, 200};
-    Terrain t(tf);
-
-    LogicService::initPathManager(t);
-    LogicService::getActionQueue()->clearEvents();
-
     ObjectManager om;
 
     auto atkComp                 = std::optional<AttackComponent>();
@@ -222,14 +219,8 @@ TEST(ObjectPathManager, CanWalkAroundStaticEntities)
     }
 }
 
-TEST(ObjectPathManager, CanWalkAroundMovingObstacles)
+TEST_F(ObjectPathManagerTest, CanWalkAroundMovingObstacles)
 {
-    TerrainFile tf{200, 200};
-    Terrain t(tf);
-
-    LogicService::initPathManager(t);
-    LogicService::getActionQueue()->clearEvents();
-
     ObjectManager om;
 
     auto atkComp                 = std::optional<AttackComponent>();
@@ -287,13 +278,8 @@ TEST(ObjectPathManager, CanWalkAroundMovingObstacles)
     }
 }
 
-TEST(ObjectPathManager, CanPathfindTwoObjectsSimultaneously)
+TEST_F(ObjectPathManagerTest, CanPathfindTwoObjectsSimultaneously)
 {
-    TerrainFile tf{200, 200};
-    Terrain t(tf);
-    LogicService::getActionQueue()->clearEvents();
-
-    LogicService::initPathManager(t);
     ObjectManager om;
 
     auto atkComp                 = std::optional<AttackComponent>();
@@ -365,20 +351,14 @@ TEST(ObjectPathManager, CanPathfindTwoObjectsSimultaneously)
     }
 }
 
-TEST(ObjectPathManager, CanStopMovingOnImpossiblePath)
+TEST_F(ObjectPathManagerTest, CanStopMovingOnImpossiblePath)
 {
-    TerrainFile tf{100, 50};
-    Terrain t(tf);
-    LogicService::getActionQueue()->clearEvents();
-
-    LogicService::initPathManager(t);
-
     ObjectManager om;
 
     auto atkComp                 = std::optional<AttackComponent>();
     struct object_init objParams = {"test-obj", "Test Object", glm::vec2(3, 3), 100,
                                     100,        false,         [&]() {},        atkComp};
-    struct object_init obsParams = {"test-obj", "Test Obstacle", glm::vec2(2, 100), 100,
+    struct object_init obsParams = {"test-obj", "Test Obstacle", glm::vec2(2, 400), 100,
                                     100,        false,         [&]() {},        atkComp};
 
     auto component = make_object(objParams);
@@ -411,7 +391,7 @@ TEST(ObjectPathManager, CanStopMovingOnImpossiblePath)
 
     EXPECT_EQ(PathStatus::InProgress, pm->getPathStatus(handle));
     
-    for (int i = 0; i <= 150; i++) {
+    for (int i = 0; i <= 400; i++) {
         LogicService::getActionQueue()->processEvents();
         pm->update(om);
     }
@@ -431,14 +411,8 @@ TEST(ObjectPathManager, CanStopMovingOnImpossiblePath)
 }
 
 
-TEST(ObjectPathManager, CanPathEntityTwice)
+TEST_F(ObjectPathManagerTest, CanPathEntityTwice)
 {
-    TerrainFile tf{200, 200};
-    Terrain t(tf);
-    LogicService::getActionQueue()->clearEvents();
-
-    LogicService::initPathManager(t);
-
     ObjectManager om;
 
     auto atkComp                 = std::optional<AttackComponent>();
