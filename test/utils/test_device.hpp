@@ -9,8 +9,11 @@
 
 #include <any>
 #include <client/graphical/device.hpp>
-#include <client/graphical/shader.hpp>
 #include <client/graphical/gfx_service.hpp>
+#include <client/graphical/shader.hpp>
+
+#include "test_framebuffer.hpp"
+#include "test_window.hpp"
 
 class TestShader : public familyline::graphics::Shader
 {
@@ -56,16 +59,20 @@ private:
     std::unique_ptr<TestShaderProgram> fwd = std::make_unique<TestShaderProgram>("forward");
 
     // for the gfxline stub
-    std::unique_ptr<TestShaderProgram> lines = std::make_unique<TestShaderProgram>("lines");        
+    std::unique_ptr<TestShaderProgram> lines = std::make_unique<TestShaderProgram>("lines");
+
+    std::vector<std::unique_ptr<TestFramebuffer>> fblist_;
+
 public:
-    TestDevice() {
+    TestDevice()
+    {
         auto& sm = familyline::graphics::GFXService::getShaderManager();
         sm->addShader(fwd.get());
         sm->addShader(lines.get());
 
         // TODO: move this to some sort of global initializer
     }
-    
+
     /// Get the device code, name and vendor
     virtual std::string_view getCode() { return "0000TEST"; }
     virtual std::string_view getName() { return "TestName"; }
@@ -96,8 +103,10 @@ public:
     virtual familyline::graphics::Framebuffer* createFramebuffer(
         std::string name, int width, int height);
 
-    virtual familyline::graphics::Window* createWindow(size_t w, size_t h) { return nullptr; }
+    virtual familyline::graphics::Window* createWindow(size_t w, size_t h)
+    {
+        return new TestWindow{};
+    }
 
-    virtual ~TestDevice() {};
-
+    virtual ~TestDevice(){};
 };

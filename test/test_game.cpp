@@ -28,11 +28,12 @@ TEST(GameTest, TestIfGameStartsAndRuns)
     GFXService::setDevice(std::make_unique<TestDevice>());
     
     std::string mapfile = TESTS_DIR "/terrain_test.flte";
-
-    TestWindow* w = new TestWindow{};
+    
+    TestWindow* w = (TestWindow*) GFXService::getDevice()->createWindow(800, 600);
     w->createRenderer();
     GFXGameInit gi{
-        w, new TestFramebuffer{"f3D", 800, 600}, new TestFramebuffer{"fGUI", 800, 600},
+        w, GFXService::getDevice()->createFramebuffer("f3D", 800, 600),
+        GFXService::getDevice()->createFramebuffer("fGUI", 800, 600),
         w->createGUIManager()};
 
     Game* g   = new Game(gi);
