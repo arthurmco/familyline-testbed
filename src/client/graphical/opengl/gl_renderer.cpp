@@ -178,6 +178,7 @@ void GLRenderer::render(Camera* c)
             log->write("gl-renderer", LogType::Error, "OpenGL error %#x", err);
             glBindTexture(GL_TEXTURE_2D, 0);
             glBindVertexArray(0);
+            assert(false);
 
             return;
         }
