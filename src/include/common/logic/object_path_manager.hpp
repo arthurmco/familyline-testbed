@@ -184,6 +184,7 @@ public:
     void removePathing(PathHandle);
 
     void setItersPerFrame(int v) { max_iter_paths_per_frame_ = v; }
+    int getItersPerFrame() const { return max_iter_paths_per_frame_; }
     
 private:
     Terrain& t_;

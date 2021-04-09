@@ -25,12 +25,9 @@ void addObjectToMap(std::vector<bool>& map, int width, int height, const GameObj
     int miny = fmax(0.0, pos.z - (size.y / 2.0));
     int maxx = fmin(double(width), pos.x + (size.x / 2.0));
     int maxy = fmin(double(height), pos.z + (size.y / 2.0));
-
-    printf("%.2f %.2f %.2f %.2f\n", pos.x, pos.z, size.x, size.y);
     
     for (auto y = miny; y < maxy; y++) {
         for (auto x = minx; x < maxx; x++) {
-            printf("%d %d (%d)\t", y, x, y*width+x);
             indices.push_back(y*width+x);
         }
     }
