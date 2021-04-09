@@ -62,8 +62,8 @@ PathHandle ObjectPathManager::startPathing(GameObject& o, glm::vec2 dest)
         existingref->status = PathStatus::Repathing;
         existingref->start  = existingref->position() ? *existingref->position()
                                                      : glm::vec2(
-                                                           existingref->object.getPosition().x,
-                                                           existingref->object.getPosition().z);
+                                                           existingref->object->getPosition().x,
+                                                           existingref->object->getPosition().z);
         existingref->end = dest;
         return existingref->handleval();
     } else {
@@ -86,7 +86,7 @@ PathHandle ObjectPathManager::startPathing(GameObject& o, glm::vec2 dest)
 ObjectPathManager::PathRef* ObjectPathManager::findPathRefFromObject(object_id_t oid)
 {
     auto v = std::find_if(operations_.begin(), operations_.end(), [&](PathRef& r) {
-        return r.object.getID() == oid;
+        return r.object->getID() == oid;
     });
 
     if (v == operations_.end()) return nullptr;
@@ -186,14 +186,14 @@ void ObjectPathManager::update(const ObjectManager& om)
                         "object-path-manager", LogType::Error,
                         "Status of pathing %d (object %d (%s)) is PathStatus::InProgress, but you "
                         "called it when no points are available",
-                        op.handleval(), op.object.getID(), op.object.getName().c_str());
+                        op.handleval(), op.object->getID(), op.object->getName().c_str());
                     op.status = PathStatus::Invalid;
                 } else if (isLastPosition) {
                     // TODO: make the pathfinder alert if the path was not reached, or was reached
                     // close enough
                     log->write(
                         "object-path-manager", LogType::Info, "Pathing of %d (%d - %s) completed!",
-                        op.handleval(), op.object.getID(), op.object.getName().c_str());
+                        op.handleval(), op.object->getID(), op.object->getName().c_str());
 
                     if (!op.pathfinder->hasPossiblePath())
                         op.status = PathStatus::Unreachable;
@@ -230,10 +230,10 @@ void ObjectPathManager::update(const ObjectManager& om)
                 log->write(
                     "object-path-manager", LogType::Info,
                     "Pathing of %d (%d - %s) needs to be recalculated!", op.handleval(),
-                    op.object.getID(), op.object.getName().c_str());
+                    op.object->getID(), op.object->getName().c_str());
 
                 if (!op.pathfinder->maxIterReached())
-                    op.pathfinder->update(createBitmapForObject(op.object));
+                    op.pathfinder->update(createBitmapForObject(*op.object));
                 
                 this->recalculatePath(op, true);
                 op.status = PathStatus::InProgress;
@@ -249,27 +249,19 @@ void ObjectPathManager::update(const ObjectManager& om)
             "object-path-manager", LogType::Info, "Recalculating path for %d entities",
             movingEntities);
         std::for_each(operations_.begin(), operations_.end(), [this](PathRef& r) {
-            r.pathfinder->update(createBitmapForObject(r.object));
+            r.pathfinder->update(createBitmapForObject(*r.object));
             this->recalculatePath(r);
         });
     }
 
-    /**
-     * FIXME: Apparently, deleting the PathRef makes the object position be out of sync with
-     * the model position
-     *
-     * This might be an issue with the pathref, or an issue with the GameObject class. Probably
-     * we are at fault here
-     */
-    if (toRemove.size() > 10000) {
+    if (toRemove.size() > 0) {
         log->write("object-path-manager", LogType::Info, "Removing %zu pathrefs", toRemove.size());
 
         operations_.erase(
             std::remove_if(
                 operations_.begin(), operations_.end(),
                 [&](PathRef& r) {
-                    return std::find(toRemove.begin(), toRemove.end(), r.handleval()) !=
-                           toRemove.end();
+                    return std::find(toRemove.begin(), toRemove.end(), r.handleval()) != toRemove.end();
                 }),
             operations_.end());
     }
@@ -280,9 +272,9 @@ void ObjectPathManager::update(const ObjectManager& om)
  */
 void ObjectPathManager::createPath(PathRef& r)
 {
-    r.pathfinder->update(createBitmapForObject(r.object));
+    r.pathfinder->update(createBitmapForObject(*r.object));
     auto elements =
-        r.pathfinder->findPath(r.start, r.end, r.object.getSize(), max_iter_paths_per_frame_);
+        r.pathfinder->findPath(r.start, r.end, r.object->getSize(), max_iter_paths_per_frame_);
     assert(r.pathElements.size() == 0);
     r.pathElements.insert(r.pathElements.begin(), elements.begin(), elements.end());
 }
@@ -296,11 +288,11 @@ void ObjectPathManager::recalculatePath(PathRef& r, bool force)
     log->write(
         "object-path-manager", LogType::Debug,
         "Recalculating path for handle %d (%s) (%zu remaining points)", r.handleval(),
-        r.object.getName().c_str(), r.pathElements.size());
+        r.object->getName().c_str(), r.pathElements.size());
 
     if (r.pathElements.size() <= 2 && !force) return;
 
-    auto pos2d = glm::vec2(r.object.getPosition().x, r.object.getPosition().z);
+    auto pos2d = glm::vec2(r.object->getPosition().x, r.object->getPosition().z);
     if (r.pathElements.size() == 0)
         r.pathElements.push_back(pos2d);
     
@@ -308,7 +300,7 @@ void ObjectPathManager::recalculatePath(PathRef& r, bool force)
         r.position().value_or(pos2d);
 
     auto elements =
-        r.pathfinder->findPath(posv, r.end, r.object.getSize(), max_iter_paths_per_frame_);
+        r.pathfinder->findPath(posv, r.end, r.object->getSize(), max_iter_paths_per_frame_);
     r.pathElements.resize(elements.size());
     std::copy(elements.begin(), elements.end(), r.pathElements.begin());
 }
@@ -323,19 +315,19 @@ std::optional<glm::vec2> ObjectPathManager::updatePosition(PathRef& r)
 
     auto height = t_.getHeightFromCoords(*pos);
 
-    setObjectOnBitmap(obstacle_bitmap_, r.object, false);
-    setObjectOnBitmap(obstacle_bitmap_, *pos, r.object.getSize(), true);
+    setObjectOnBitmap(obstacle_bitmap_, *r.object, false);
+    setObjectOnBitmap(obstacle_bitmap_, *pos, r.object->getSize(), true);
 
     LoggerService::getLogger()->write(
         "object-path-manager", LogType::Debug,
-        "position of object id %d (%s) is now (%.2f, %d, %.2f)", r.object.getID(),
-        r.object.getName().c_str(), pos->x, height, pos->y);
+        "position of object id %d (%s) is now (%.2f, %d, %.2f)", r.object->getID(),
+        r.object->getName().c_str(), pos->x, height, pos->y);
 
-    assert(fabs(pos->x - r.object.getPosition().x) <= 1.5);
-    assert(fabs(pos->y - r.object.getPosition().z) <= 1.5);
+    assert(fabs(pos->x - r.object->getPosition().x) <= 1.5);
+    assert(fabs(pos->y - r.object->getPosition().z) <= 1.5);
     
-    r.object.setPosition(glm::vec3(pos->x, height, pos->y));
-    mapped_objects_[r.object.getID()] = std::make_tuple<>(*pos, r.object.getSize());
+    r.object->setPosition(glm::vec3(pos->x, height, pos->y));
+    mapped_objects_[r.object->getID()] = std::make_tuple<>(*pos, r.object->getSize());
     r.pathElements.pop_front();
 
     return pos;
