@@ -15,15 +15,13 @@ const Pathfinder::TerrainTile Pathfinder::getTileAtPosition(glm::vec2 p)
 }
 
 /**
- * Get the best tile, the one with the lowest F score
+ * Sort the list so that the best tiles stay in the top
  */
-Pathfinder::PathNode* getBestTile(const std::list<std::unique_ptr<Pathfinder::PathNode>>& open_list)
+Pathfinder::PathNode* sortBestTile(std::list<std::unique_ptr<Pathfinder::PathNode>>& open_list)
 {
-    auto ret = std::min_element(
-        open_list.begin(), open_list.end(),
-        [](const std::unique_ptr<Pathfinder::PathNode>& a,
-           const std::unique_ptr<Pathfinder::PathNode>& b) { return a->f() < b->f(); });
-    return ret->get();
+    open_list.sort([](const std::unique_ptr<Pathfinder::PathNode>& a,
+                      const std::unique_ptr<Pathfinder::PathNode>& b) { return a->f() < b->f(); });
+    return open_list.front().get();
 }
 
 /**
@@ -193,7 +191,7 @@ Pathfinder::PathNode* Pathfinder::traversePath(
     }
 
     while (!open_list_.empty()) {
-        PathNode* best = getBestTile(open_list_);
+        PathNode* best = sortBestTile(open_list_);
         moveToClosedList(best);
 
         // we are in the final position
@@ -305,7 +303,7 @@ std::vector<glm::vec2> Pathfinder::findPath(
         start.x, start.y, end.x, end.y, size.x, size.y);
 
     assert(obstacle_bitmap_.size() > 1);
-    
+
     auto positions = this->calculatePath(start, end, size, maxiters);
     std::vector<glm::vec2> ret;
     ret.reserve(positions.size());

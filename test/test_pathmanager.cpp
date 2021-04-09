@@ -390,8 +390,8 @@ TEST_F(ObjectPathManagerTest, CanStopMovingOnImpossiblePath)
     }
 
     EXPECT_EQ(PathStatus::InProgress, pm->getPathStatus(handle));
-    
-    for (int i = 0; i <= 400; i++) {
+
+    for (int i = 0; i <= 80000 / pm->getItersPerFrame()  ; i++) {
         LogicService::getActionQueue()->processEvents();
         pm->update(om);
     }
