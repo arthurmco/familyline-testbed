@@ -98,6 +98,16 @@ if (FLINE_DO_CHECK_ASAN)
 endif()
 
 
+if (FLINE_DO_CHECK_UBSAN)
+  if (WIN32)
+    message("No support for windows + undefined behavior sanitizer yet")
+  else() 
+    target_compile_options(familyline-common PUBLIC "-fsanitize=undefined")
+    target_link_libraries(familyline-common PUBLIC "-fsanitize=undefined")
+  endif()
+endif()
+
+
 target_include_directories(familyline-common PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 target_compile_features(familyline-common PRIVATE cxx_std_20)
 

@@ -92,6 +92,15 @@ if (FLINE_BUILD_TESTS)
     endif()
   endif(FLINE_DO_CHECK_ASAN)
 
+  if (FLINE_DO_CHECK_UBSAN)
+    if (WIN32)
+      message("No support for windows + undefined behavior sanitizer yet")
+    else() 
+      target_compile_options(familyline-tests PUBLIC "-fsanitize=undefined")
+      target_link_libraries(familyline-tests "-fsanitize=undefined")
+    endif()
+  endif()
+
 
   target_compile_definitions(familyline-tests PUBLIC
     TESTS_DIR="${CMAKE_SOURCE_DIR}/test"
