@@ -259,7 +259,14 @@ void ObjectPathManager::update(const ObjectManager& om)
         });
     }
 
-    if (toRemove.size() > 0) {
+    /**
+     * FIXME: Apparently, deleting the PathRef makes the object position be out of sync with
+     * the model position
+     *
+     * This might be an issue with the pathref, or an issue with the GameObject class. Probably
+     * we are at fault here
+     */
+    if (toRemove.size() > 10000) {
         log->write("object-path-manager", LogType::Info, "Removing %zu pathrefs", toRemove.size());
 
         operations_.erase(
