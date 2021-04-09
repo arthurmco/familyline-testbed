@@ -44,7 +44,7 @@ enum class PathStatus {
     /// The pathing operation has been stopped, because the pathing object
     /// is dead
     Stopped,
-    
+
     /// Pathing operation is invalid
     Invalid
 };
@@ -58,10 +58,10 @@ class ObjectPathManager
 {
 public:
     ObjectPathManager(Terrain& t);
-    
+
     ObjectPathManager(const ObjectPathManager&) = delete;
     ObjectPathManager& operator=(const ObjectPathManager&) = delete;
-    
+
     struct PathRef {
         std::unique_ptr<Pathfinder> pathfinder;
         GameObject& object;
@@ -185,13 +185,13 @@ public:
 
     void setItersPerFrame(int v) { max_iter_paths_per_frame_ = v; }
     int getItersPerFrame() const { return max_iter_paths_per_frame_; }
-    
+
 private:
     Terrain& t_;
     std::unique_ptr<EventReceiver> obj_events_;
 
     int max_iter_paths_per_frame_ = 200;
-    
+
     /**
      * A map of object IDs and their respective positions and sizes, to mask them into the
      * obstacle bitmap
@@ -239,7 +239,7 @@ private:
     /**
      * Create a path for an object whose path already exists, essentially redoing it
      */
-    void recalculatePath(PathRef& r, bool force=false);
+    void recalculatePath(PathRef& r, bool force = false);
 
     /**
      * Update the position of an object
@@ -255,7 +255,6 @@ private:
      */
     void pollEntities(const ObjectManager& om);
 
-    
     /**
      * Update the global obstacle bitmap with the data from our event receiver
      */
