@@ -68,6 +68,7 @@ jobs:
         - CXX=g++-10
         - CC=gcc-10
         - EXTRAOPTS=-DFLINE_DO_CHECK_ASAN=on -DFLINE_SET_COVERAGE=off
+        - LSAN_OPTIONS="suppressions=test/lsan.supp"
 
 cache:
   apt: true
