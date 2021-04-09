@@ -53,21 +53,21 @@ jobs:
       compiler: gcc
       env:
         - CXX=g++-10
-        - EXTRAOPTS=-DFLINE_DO_CHECK_ASAN=off -DFLINE_DO_CHECK_UBSAN=off -DFLINE_SET_COVERAGE=off
+        - EXTRAOPTS="-DFLINE_DO_CHECK_ASAN=off -DFLINE_DO_CHECK_UBSAN=off -DFLINE_SET_COVERAGE=off"
     - name: clang
       os: linux
       compiler: clang
       env:
         - CXX=clang++-11
         - CC=clang-11
-        - EXTRAOPTS=-DFLINE_DO_CHECK_ASAN=off -DFLINE_DO_CHECK_UBSAN=off -DFLINE_SET_COVERAGE=off
+        - EXTRAOPTS="-DFLINE_DO_CHECK_ASAN=off -DFLINE_DO_CHECK_UBSAN=off -DFLINE_SET_COVERAGE=off"
     - name: gcc-asan
       os: linux
       compiler: gcc
       env:
         - CXX=g++-10
         - CC=gcc-10
-        - EXTRAOPTS=-DFLINE_DO_CHECK_ASAN=on -DFLINE_DO_CHECK_UBSAN=off -DFLINE_SET_COVERAGE=off
+        - EXTRAOPTS="-DFLINE_DO_CHECK_ASAN=on -DFLINE_DO_CHECK_UBSAN=off -DFLINE_SET_COVERAGE=off"
         - LSAN_OPTIONS="suppressions=../test/lsan.supp"
     - name: gcc-ubsan
       os: linux
@@ -75,7 +75,7 @@ jobs:
       env:
         - CXX=g++-10
         - CC=gcc-10
-        - EXTRAOPTS=-DFLINE_DO_CHECK_ASAN=off -DFLINE_DO_CHECK_UBSAN=on -DFLINE_SET_COVERAGE=off
+        - EXTRAOPTS="-DFLINE_DO_CHECK_ASAN=off -DFLINE_DO_CHECK_UBSAN=on -DFLINE_SET_COVERAGE=off"
 
 cache:
   apt: true
