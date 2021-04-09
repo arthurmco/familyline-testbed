@@ -64,7 +64,11 @@ public:
 
     struct PathRef {
         std::unique_ptr<Pathfinder> pathfinder;
-        GameObject& object;
+
+        /// A pointer to a game object
+        /// Apparently, we cannot use a reference here, because moving a reference deletes the move
+        /// constructor
+        GameObject* object;
         object_id_t oid;
         PathStatus status;
         glm::vec2 original_start;
@@ -83,7 +87,7 @@ public:
         int refcount = 1;
 
         PathRef(GameObject& o, Terrain& t, glm::vec2 dest)
-            : object(o),
+            : object(&o),
               oid(o.getID()),
               pathfinder(std::make_unique<Pathfinder>(t)),
               original_start(glm::vec2(o.getPosition().x, o.getPosition().z)),
@@ -98,37 +102,8 @@ public:
         PathRef(PathRef& other)                  = delete;
         PathRef& operator=(PathRef& other) = delete;
 
-        PathRef(PathRef&& other) noexcept
-            : object(other.object),
-              oid(other.oid),
-              status(other.status),
-              original_start(other.original_start),
-              start(other.start),
-              end(other.end),
-              pathElements(other.pathElements),
-              ticks_to_remove(other.ticks_to_remove),
-              calculationCompleted(other.calculationCompleted),
-              refcount(other.refcount)
-        {
-            this->pathfinder.swap(other.pathfinder);
-        }
-
-        PathRef& operator=(PathRef&& other) noexcept
-        {
-            object               = other.object;
-            oid                  = other.oid;
-            status               = other.status;
-            original_start       = other.original_start;
-            start                = other.start;
-            end                  = other.end;
-            pathElements         = other.pathElements;
-            ticks_to_remove      = other.ticks_to_remove;
-            calculationCompleted = other.calculationCompleted;
-            refcount             = other.refcount;
-
-            this->pathfinder.swap(other.pathfinder);
-            return *this;
-        }
+        PathRef(PathRef&& other) = default;
+        PathRef& operator=(PathRef&& other) = default;
 
         std::optional<glm::vec2> position() const
         {
