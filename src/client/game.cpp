@@ -87,8 +87,9 @@ void Game::initPlayers(
     };
 
     if (human_id != -1) {
-        HumanPlayer* hp = (HumanPlayer*)*pm_->get(human_id);
-        hp->setCamera(camera_.get());
+        HumanPlayer* hp = dynamic_cast<HumanPlayer*>(*pm_->get(human_id));
+        if (hp)
+            hp->setCamera(camera_.get());
         human_id_ = human_id;
     }
 
@@ -394,16 +395,16 @@ void Game::runLogic()
 
     LogicService::getActionQueue()->processEvents();
 
+    LogicService::getAttackManager()->processAttacks(*olm_.get());
+    LogicService::getPathManager()->update(*om_.get());
+    
     bool objupdate = objrend_->willUpdate();
     if (objupdate) {
         objrend_->update();
         auto [w, h] = terrain_->getSize();
 
     }
-
-    LogicService::getAttackManager()->processAttacks(*olm_.get());
-    LogicService::getPathManager()->update(*om_.get());
-
+    
     LogicService::getDebugDrawer()->update();
 }
 
