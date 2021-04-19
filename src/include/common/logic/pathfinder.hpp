@@ -53,9 +53,10 @@ public:
     Pathfinder(const Terrain& t) : t_(t), obstacle_bitmap_(1 * 1, false) {}
 
     /**
-     * Update the obstacle bitmap
+     * Update the obstacle bitmap, and the obstacle bitmap size ratio, compared to the
+     * terrain size
      */
-    void update(std::vector<bool>);
+    void update(std::vector<bool>, int ratio = 1);
 
     struct TerrainTile {
         unsigned int height;
@@ -102,6 +103,15 @@ private:
     std::list<std::unique_ptr<PathNode>> open_list_;
     std::list<std::unique_ptr<PathNode>> closed_list_;
 
+    /**
+     * Ratio of the obstacle bitmap
+     *
+     * For example, if this value is 2, the bitmap width has half of the size
+     * of the terrain width, and the bitmap height is half of the size of the terrain
+     * height
+     */
+    int ratio_ = 1;
+    
     bool has_max_iter_reached_ = false;
 
     /**
@@ -121,6 +131,8 @@ private:
      *
      * The first element is the position of the last child, (i.e, the end), and the first element is
      * the position of the first one, i.e, the start
+     *
+     * If the obstacle bitmap ratio is more than 1, interpolate the points
      */
     std::list<glm::vec2> calculatePath(
         glm::vec2 start, glm::vec2 end, glm::vec2 size, int maxiters);
