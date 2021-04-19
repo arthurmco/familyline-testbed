@@ -44,8 +44,9 @@ std::vector<std::unique_ptr<Pathfinder::PathNode>> Pathfinder::generateNeighbors
 {
     auto [width, height] = t_.getSize();
 
-    std::vector<glm::vec2> directions = {{-1, -1},        {0, -1}, {1, -1}, {-1, 0},
-                                         /* XX */ {1, 0}, {-1, 1}, {0, 1},  {1, 1}};
+    std::vector<glm::vec2> directions = {{-ratio_, -ratio_}, {0, -ratio_},    {ratio_, -ratio_},
+                                         {-ratio_, 0},       {ratio_, 0},     {-ratio_, ratio_},
+                                         {0, ratio_},        {ratio_, ratio_}};
 
     std::vector<std::unique_ptr<Pathfinder::PathNode>> ret;
     for (auto& d : directions) {
@@ -97,7 +98,6 @@ std::vector<glm::vec2> Pathfinder::getCoordsInsideObject(glm::vec2 pos, glm::vec
     for (auto y = int(miny); y <= int(maxy); y++) {
         for (auto x = int(minx); x <= int(maxx); x++) {
             if (x >= 0 && y >= 0 && x < width && y < height) coords.push_back(glm::vec2(x, y));
-            ;
         }
     }
 
@@ -125,8 +125,9 @@ bool Pathfinder::isWalkable(const PathNode& n, glm::vec2 size) const
     auto width  = std::get<0>(t_.getSize());
     auto coords = getCoordsInsideObject(n.position, size);
     std::vector<unsigned int> indices;
-    std::transform(coords.begin(), coords.end(), std::back_inserter(indices), [width](auto& v) {
-        return v.y * width + v.x;
+    auto ratio = ratio_;
+    std::transform(coords.begin(), coords.end(), std::back_inserter(indices), [width, ratio](auto& v) {
+        return v.y/ratio * width + v.x/ratio;
     });
 
     if (indices.size() == 0) return false;
@@ -142,9 +143,9 @@ bool Pathfinder::isWalkable(const PathNode& n, glm::vec2 size) const
 bool Pathfinder::isInClosedList(const PathNode& n) const
 {
     auto it = std::find_if(
-        closed_list_.begin(), closed_list_.end(),
+        closed_list_.rbegin(), closed_list_.rend(),
         [&](const std::unique_ptr<Pathfinder::PathNode>& v) { return v->position == n.position; });
-    return (it != closed_list_.end());
+    return (it != closed_list_.rend());
 }
 
 void Pathfinder::moveToClosedList(Pathfinder::PathNode* n)
@@ -196,6 +197,15 @@ Pathfinder::PathNode* Pathfinder::traversePath(
 
         // we are in the final position
         if (glm::round(best->position) == glm::round(end)) {
+            break;
+        }
+
+        // we are not in the final position, but sufficiently close to
+        if (auto delta = glm::abs(end - best->position);
+            delta.x < double(ratio_) && delta.y < double(ratio_)) {
+            auto nend    = std::make_unique<PathNode>(end);
+            nend->parent = closed_list_.back().get();
+            closed_list_.push_back(std::move(nend));
             break;
         }
 
@@ -288,7 +298,14 @@ std::list<glm::vec2> Pathfinder::calculatePath(
 
     std::list<glm::vec2> positions;
     for (PathNode* current = node; current != nullptr; current = current->parent) {
-        positions.push_back(current->position);
+        if (positions.size() > 0) {
+            auto begin = positions.back();
+            for (auto i = 1; i <= ratio_; i++) {
+                positions.push_back(glm::mix(begin, current->position, i / double(ratio_)));
+            }
+        } else {
+            positions.push_back(current->position);
+        }
     }
 
     return positions;
@@ -312,11 +329,11 @@ std::vector<glm::vec2> Pathfinder::findPath(
     return ret;
 }
 
-void Pathfinder::update(std::vector<bool> bitmap)
+void Pathfinder::update(std::vector<bool> bitmap, int ratio)
 {
     auto [width, height] = t_.getSize();
 
-    assert(bitmap.size() == width * height);
+    assert(bitmap.size() == (width / ratio) * (height / ratio));
     obstacle_bitmap_ = bitmap;
 
     // Invalidate both, because they are simply not valid now.
@@ -324,4 +341,5 @@ void Pathfinder::update(std::vector<bool> bitmap)
     // We will need to calculate the whole path
     open_list_.clear();
     closed_list_.clear();
+    ratio_ = ratio;
 }
