@@ -59,7 +59,10 @@ std::vector<std::unique_ptr<Pathfinder::PathNode>> Pathfinder::generateNeighbors
         if (newpos.x < 0 || newpos.y < 0) continue;
 
         if (newpos.x >= width || newpos.y >= height) continue;
-
+        /*
+                if (int(newpos.x) % ratio_ != 0 || int(newpos.y) % ratio_ != 0)
+                    continue;
+        */
         ret.push_back(std::make_unique<PathNode>(newpos));
     }
     return ret;
@@ -135,7 +138,7 @@ bool Pathfinder::isWalkable(const PathNode& n, glm::vec2 size) const
         [width, ratio](auto& v) { return int(v.y / ratio) * (width / ratio) + int(v.x / ratio); });
 
     if (indices.size() == 0) return false;
-
+    
     return std::all_of(indices.begin(), indices.end(), [&](auto index) {
         return (index >= obstacle_bitmap_.size()) ? false : !obstacle_bitmap_[index];
     });
