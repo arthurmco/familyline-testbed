@@ -12,6 +12,11 @@
 
 using namespace familyline::logic;
 
+/*
+ * TODO: maybe, instead of recalculating the path if we have multiple paths in the same map, we
+ *       only recalculate if a collision would occur
+ */
+
 class PathEventReceiver : public EventReceiver
 {
 public:
@@ -179,7 +184,7 @@ void ObjectPathManager::update(const ObjectManager& om)
 
                 LogicService::getDebugDrawer()->drawPath(op.pathElements.begin(), op.pathElements.end(),
                                                          glm::vec4(0, 1 ,0 ,1));
-                
+
                 // It is InProgress but no more positions. This is not correct
                 if (!currentPos) {
                     log->write(
@@ -199,7 +204,7 @@ void ObjectPathManager::update(const ObjectManager& om)
                         op.status = PathStatus::Unreachable;
                     else
                         op.status = PathStatus::Completed;
-                    
+
                 } else {
                     if (op.pathfinder->maxIterReached()) {
                         op.status = PathStatus::Repathing;
@@ -208,7 +213,7 @@ void ObjectPathManager::update(const ObjectManager& om)
 
                 break;
             }
-            case PathStatus::Unreachable: 
+            case PathStatus::Unreachable:
                 log->write(
                     "object-path-manager", LogType::Warning,
                     "Path handle %d from (%.2f, %.2f) to (%.2f, %.2f) is not reachable", op.handleval(),
@@ -233,8 +238,8 @@ void ObjectPathManager::update(const ObjectManager& om)
                     op.object->getID(), op.object->getName().c_str());
 
                 if (!op.pathfinder->maxIterReached())
-                    op.pathfinder->update(createBitmapForObject(*op.object));
-                
+                    op.pathfinder->update(createBitmapForObject(*op.object, op.ratio), op.ratio);
+
                 this->recalculatePath(op, true);
                 op.status = PathStatus::InProgress;
                 break;
@@ -249,7 +254,7 @@ void ObjectPathManager::update(const ObjectManager& om)
             "object-path-manager", LogType::Info, "Recalculating path for %d entities",
             movingEntities);
         std::for_each(operations_.begin(), operations_.end(), [this](PathRef& r) {
-            r.pathfinder->update(createBitmapForObject(*r.object));
+            r.pathfinder->update(createBitmapForObject(*r.object, r.ratio), r.ratio);
             this->recalculatePath(r);
         });
     }
@@ -272,7 +277,7 @@ void ObjectPathManager::update(const ObjectManager& om)
  */
 void ObjectPathManager::createPath(PathRef& r)
 {
-    r.pathfinder->update(createBitmapForObject(*r.object));
+    r.pathfinder->update(createBitmapForObject(*r.object, r.ratio), r.ratio);
     auto elements =
         r.pathfinder->findPath(r.start, r.end, r.object->getSize(), max_iter_paths_per_frame_);
     assert(r.pathElements.size() == 0);
@@ -295,12 +300,12 @@ void ObjectPathManager::recalculatePath(PathRef& r, bool force)
     auto pos2d = glm::vec2(r.object->getPosition().x, r.object->getPosition().z);
     if (r.pathElements.size() == 0)
         r.pathElements.push_back(pos2d);
-    
+
     auto posv =
         r.position().value_or(pos2d);
 
     auto elements =
-        r.pathfinder->findPath(posv, r.end, r.object->getSize(), max_iter_paths_per_frame_);
+        r.pathfinder->findPath(posv, r.end, r.object->getSize(), max_iter_paths_per_frame_/2);
     r.pathElements.resize(elements.size());
     std::copy(elements.begin(), elements.end(), r.pathElements.begin());
 }
@@ -325,7 +330,7 @@ std::optional<glm::vec2> ObjectPathManager::updatePosition(PathRef& r)
 
     assert(fabs(pos->x - r.object->getPosition().x) <= 1.5);
     assert(fabs(pos->y - r.object->getPosition().z) <= 1.5);
-    
+
     r.object->setPosition(glm::vec3(pos->x, height, pos->y));
     mapped_objects_[r.object->getID()] = std::make_tuple<>(*pos, r.object->getSize());
     r.pathElements.pop_front();
@@ -413,16 +418,46 @@ void ObjectPathManager::pollEntities(const ObjectManager& om)
 }
 
 /**
+ * Resize a object bitmap according to a certain ratio
+ */
+
+
+
+/**
  * Creates an obstacle bitmap for the current game object
  *
  * Currently, it only removes the actual object from the bitmap, but, in the future,
  * it will also consider the terrain type (e.g, insert water for units that only walk
  * on land)
  */
-std::vector<bool> ObjectPathManager::createBitmapForObject(const GameObject& o)
+std::vector<bool> ObjectPathManager::createBitmapForObject(const GameObject& o, int ratio)
 {
+    /// TODO: if two objects are too close to each other, one might not be seen on the other's
+    /// obstacle bitmap
     std::vector<bool> v{obstacle_bitmap_};
-    setObjectOnBitmap(v, o, false);
+    setObjectOnBitmap(v, o, false, 1);
+
+    if (ratio > 1) {
+        auto [w, h] = t_.getSize();
+        std::vector<bool> nv(v.size() / (ratio*ratio), false);
+        for (auto y = 0; y < h; y++) {
+            for (auto x = 0; x < w; x++) {                
+                nv[(y/ratio) * (w/ratio) + (x/ratio)] = v[y * w + x];
+            }
+        }
+
+        for (auto y = 0; y < h; y++) {
+            for (auto x = 0; x < w; x++) {                
+                if (nv[(y/ratio) * (w/ratio) + (x/ratio)]) {
+                    printf("aa %d %d %d %d\n", y, x, y/ratio, x/ratio);
+                }
+            }
+        }
+        puts("");
+        
+        v = nv;
+    }
+
     return v;
 }
 
@@ -430,16 +465,16 @@ std::vector<bool> ObjectPathManager::createBitmapForObject(const GameObject& o)
  * Set the object data in the obstacle bitmap to a certain state
  */
 void ObjectPathManager::setObjectOnBitmap(
-    std::vector<bool>& bitmap, const GameObject& o, bool value)
+    std::vector<bool>& bitmap, const GameObject& o, bool value, float ratio)
 {
     auto pos2d = glm::vec2(o.getPosition().x, o.getPosition().z);
-    setObjectOnBitmap(bitmap, pos2d, o.getSize(), value);
+    setObjectOnBitmap(bitmap, pos2d, o.getSize(), value, ratio);
 }
 /**
  * Set the object data in the obstacle bitmap to a certain state
  */
 void ObjectPathManager::setObjectOnBitmap(
-    std::vector<bool>& bitmap, glm::vec2 pos, glm::vec2 size, bool value)
+    std::vector<bool>& bitmap, glm::vec2 pos, glm::vec2 size, bool value, float ratio)
 {
     int posx = pos.x;
     int posy = pos.y;
@@ -452,7 +487,7 @@ void ObjectPathManager::setObjectOnBitmap(
         for (int x = posx - double(size.x / 2); x < posx + double(size.x / 2); x++) {
             if (x < 0 || x >= width) continue;
 
-            bitmap[y * int(width) + x] = value;
+            bitmap[int(ceil(y/ratio)) * int(width/ratio) + int(ceil(x/ratio))] = value;
         }
     }
 }

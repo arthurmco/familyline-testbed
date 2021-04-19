@@ -41,7 +41,7 @@ void addObjectToMap(std::vector<bool>& map, int width, int height, const GameObj
     
     for (auto y = miny; y < maxy; y++) {
         for (auto x = minx; x < maxx; x++) {
-            indices.push_back(y/ratio*width+x/ratio);
+            indices.push_back(int(ceil(y/double(ratio)))*(width/ratio)+int(ceil(x/double(ratio))));
         }
     }
     

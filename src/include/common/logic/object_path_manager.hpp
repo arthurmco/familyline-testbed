@@ -77,14 +77,23 @@ public:
 
         int ticks_to_remove = 300;
 
+        /// Current terrain ratio
+        int ratio = 1;        
+        
         /// A path element deque (because pure queues does not allow copy to it)
         /// The front element is always where the object is.
         std::deque<glm::vec2> pathElements;
-
+       
         /// The pathing calculation is completed. We now just follow the path
         bool calculationCompleted = false;
 
-        int refcount = 1;
+        int refcount = 2;
+
+        bool updated = false;
+        bool reinserted = false;
+
+        /// Minimum amount of ticks to pass until we can repath again
+        int minimum_next_repath = 0;
 
         PathRef(GameObject& o, Terrain& t, glm::vec2 dest)
             : object(&o),
@@ -93,6 +102,7 @@ public:
               original_start(glm::vec2(o.getPosition().x, o.getPosition().z)),
               start(glm::vec2(o.getPosition().x, o.getPosition().z)),
               status(PathStatus::NotStarted),
+              ratio(1),
               end(dest)
         {
         }
@@ -242,17 +252,17 @@ private:
      * it will also consider the terrain type (e.g, insert water for units that only walk
      * on land)
      */
-    std::vector<bool> createBitmapForObject(const GameObject& o);
+    std::vector<bool> createBitmapForObject(const GameObject& o, int ratio=1);
 
     /**
      * Set the object data in the obstacle bitmap to a certain state
      */
-    void setObjectOnBitmap(std::vector<bool>& bitmap, const GameObject& o, bool value);
+    void setObjectOnBitmap(std::vector<bool>& bitmap, const GameObject& o, bool value, float ratio=1.0);
 
     /**
      * Set the object data in the obstacle bitmap to a certain state
      */
-    void setObjectOnBitmap(std::vector<bool>& bitmap, glm::vec2 pos, glm::vec2 size, bool value);
+    void setObjectOnBitmap(std::vector<bool>& bitmap, glm::vec2 pos, glm::vec2 size, bool value, float ratio=1.0);
 };
 
 }  // namespace familyline::logic
