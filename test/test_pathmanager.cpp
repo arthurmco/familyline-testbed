@@ -56,6 +56,7 @@ TEST_F(ObjectPathManagerTest, CanFindPath)
     EXPECT_EQ(PathStatus::InProgress, pm->getPathStatus(handle));
 
     for (int i = 0; i <= 20; i++) {
+        EXPECT_NE(PathStatus::Repathing, pm->getPathStatus(handle)) << "Repathing in iteration " << i;
         pm->update(om);
     }
 
@@ -245,7 +246,6 @@ TEST_F(ObjectPathManagerTest, CanWalkAroundMovingObstacles)
 
     pm->startPathing(*om.get(oid).value().get(), glm::vec2{30, 20});
 
-    
     LogicService::getActionQueue()->processEvents();
     pm->update(om);
     EXPECT_EQ(PathStatus::InProgress, pm->getPathStatus(handle));
@@ -259,12 +259,12 @@ TEST_F(ObjectPathManagerTest, CanWalkAroundMovingObstacles)
         auto nobs  = om.get(oid).value();
         auto opos  = nobs->getPosition();
 
-        ASSERT_NE(std::tie(opos.x, opos.z), std::tie(cpos.x, cpos.z))
-            << "X,Y position is inside the moving obstacle at iteration " << i;
-        ASSERT_NE(std::tuple(opos.x-1, opos.z-1), std::tie(cpos.x, cpos.z))
-            << "X,Y position is inside the moving obstacle at iteration " << i;
-        ASSERT_NE(std::tuple(opos.x+1, opos.z+1), std::tie(cpos.x, cpos.z))
-            << "X,Y position is inside the moving obstacle at iteration " << i;
+        EXPECT_NE(std::tie(opos.x, opos.z), std::tie(cpos.x, cpos.z))
+            << "X,Y position " << opos.x << ", " << opos.z << " is inside the moving obstacle at iteration " << i;
+        EXPECT_NE(std::tuple(opos.x-1, opos.z-1), std::tie(cpos.x, cpos.z))
+            << "X,Y (-1) position is inside the moving obstacle at iteration " << i;
+        EXPECT_NE(std::tuple(opos.x+1, opos.z+1), std::tie(cpos.x, cpos.z))
+            << "X,Y (+1) position is inside the moving obstacle at iteration " << i;
     }
 
     EXPECT_EQ(PathStatus::Completed, pm->getPathStatus(handle));

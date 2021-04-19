@@ -1,5 +1,7 @@
 #include <common/logger.hpp>
 #include <common/logic/pathfinder.hpp>
+#include <glm/geometric.hpp>
+#include <thread>
 
 using namespace familyline::logic;
 
@@ -51,11 +53,16 @@ std::vector<std::unique_ptr<Pathfinder::PathNode>> Pathfinder::generateNeighbors
     std::vector<std::unique_ptr<Pathfinder::PathNode>> ret;
     for (auto& d : directions) {
         auto newpos = d + n.position;
+        assert(int(newpos.x) % ratio_ == 0);
+        assert(int(newpos.y) % ratio_ == 0);
 
         if (newpos.x < 0 || newpos.y < 0) continue;
 
         if (newpos.x >= width || newpos.y >= height) continue;
-
+        /*
+                if (int(newpos.x) % ratio_ != 0 || int(newpos.y) % ratio_ != 0)
+                    continue;
+        */
         ret.push_back(std::make_unique<PathNode>(newpos));
     }
     return ret;
@@ -126,12 +133,12 @@ bool Pathfinder::isWalkable(const PathNode& n, glm::vec2 size) const
     auto coords = getCoordsInsideObject(n.position, size);
     std::vector<unsigned int> indices;
     auto ratio = ratio_;
-    std::transform(coords.begin(), coords.end(), std::back_inserter(indices), [width, ratio](auto& v) {
-        return v.y/ratio * width + v.x/ratio;
-    });
+    std::transform(
+        coords.begin(), coords.end(), std::back_inserter(indices),
+        [width, ratio](auto& v) { return int(v.y / ratio) * (width / ratio) + int(v.x / ratio); });
 
     if (indices.size() == 0) return false;
-
+    
     return std::all_of(indices.begin(), indices.end(), [&](auto index) {
         return (index >= obstacle_bitmap_.size()) ? false : !obstacle_bitmap_[index];
     });
@@ -181,6 +188,25 @@ Pathfinder::PathNode* Pathfinder::traversePath(
     nstart->calculateValues(start, end, getTileAtPosition(nstart->position));
     open_list_.push_back(std::move(nstart));
     has_max_iter_reached_ = false;
+
+    /// If the start does not align to the "grid", we make it align
+    if (int(start.x) % ratio_ != 0 || int(start.y) % ratio_ != 0) {
+        auto direction = end - start;
+        auto vec       = glm::vec2(
+            direction.x > 0 ? 1 / float(ratio_) : (direction.x < 0 ? -1 / float(ratio_) : 0),
+            direction.y > 0 ? 1 / float(ratio_) : (direction.y < 0 ? -1 / float(ratio_) : 0));
+        
+        if (int(start.x) % ratio_ == 0) vec.x = 0;
+        if (int(start.y) % ratio_ == 0) vec.y = 0;
+
+        auto pos = (start / float(ratio_) + vec) * float(ratio_);
+        moveToClosedList(open_list_.back().get());
+
+        auto alignstart = std::make_unique<PathNode>(pos);
+        alignstart->calculateValues(start, end, getTileAtPosition(alignstart->position));
+        alignstart->parent = closed_list_.back().get();
+        open_list_.push_back(std::move(alignstart));
+    }
 
     int itercount = 0;
     auto endtiles = getCoordsInsideObject(end, size);
@@ -290,15 +316,17 @@ void Pathfinder::PathNode::calculateValues(
     height = current.height;
 }
 
-std::list<glm::vec2> Pathfinder::calculatePath(
+std::vector<glm::vec2> Pathfinder::calculatePath(
     glm::vec2 start, glm::vec2 end, glm::vec2 size, int maxiters)
 {
     PathNode* node = traversePath(start, end, size, maxiters);
     assert(node);
 
-    std::list<glm::vec2> positions;
+    std::vector<glm::vec2> positions;
+    positions.reserve(int(glm::abs(glm::distance(start, end))));
     for (PathNode* current = node; current != nullptr; current = current->parent) {
-        if (positions.size() > 0) {
+        if (positions.size() > 0 &&
+            glm::abs(glm::distance(current->position, positions.back())) >= ratio_) {
             auto begin = positions.back();
             for (auto i = 1; i <= ratio_; i++) {
                 positions.push_back(glm::mix(begin, current->position, i / double(ratio_)));

@@ -134,7 +134,7 @@ private:
      *
      * If the obstacle bitmap ratio is more than 1, interpolate the points
      */
-    std::list<glm::vec2> calculatePath(
+    std::vector<glm::vec2> calculatePath(
         glm::vec2 start, glm::vec2 end, glm::vec2 size, int maxiters);
 
     const TerrainTile getTileAtPosition(glm::vec2);
