@@ -11,6 +11,19 @@
 
 using namespace familyline::logic;
 
+// Custom formatters
+namespace glm {
+
+    std::ostream& operator<<(std::ostream& os, const vec2& val) {
+        return os << "(" << val.x << ", " << val.y << ")";
+    }
+
+    std::ostream& operator<<(std::ostream& os, const vec3& val) {
+        return os << "(" << val.x << ", " << val.y << ", " << val.z << ")";
+    }
+    
+}
+
 std::vector<bool> createPathmap(int w, int h) { return std::vector<bool>(w * h, false); }
 
 void addObjectToMap(std::vector<bool>& map, int width, int height, const GameObject& o)
