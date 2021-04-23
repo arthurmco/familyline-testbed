@@ -78,7 +78,7 @@ public:
         int ticks_to_remove = 300;
 
         /// Current terrain ratio
-        int ratio = 1;        
+        int ratio = 2;        
         
         /// A path element deque (because pure queues does not allow copy to it)
         /// The front element is always where the object is.
@@ -102,7 +102,7 @@ public:
               original_start(glm::vec2(o.getPosition().x, o.getPosition().z)),
               start(glm::vec2(o.getPosition().x, o.getPosition().z)),
               status(PathStatus::NotStarted),
-              ratio(1),
+              ratio(2),
               end(dest)
         {
         }
@@ -186,7 +186,14 @@ private:
     std::unordered_map<object_id_t, std::tuple<glm::vec2 /* pos */, glm::vec2 /* size */>>
         mapped_objects_;
 
-    std::vector<bool> obstacle_bitmap_;
+    /**
+     * Each element for this global obstacle 'bitmap' is a value telling how many entities
+     * would be there.
+     *
+     * Useful for correctly hiding the obstacle bitmap in certain situations where two meshes would
+     * be over each other
+     */
+    std::vector<unsigned> obstacle_bitmap_;
 
     /**
      * Find an existing path reference from an object
@@ -263,6 +270,16 @@ private:
      * Set the object data in the obstacle bitmap to a certain state
      */
     void setObjectOnBitmap(std::vector<bool>& bitmap, glm::vec2 pos, glm::vec2 size, bool value, float ratio=1.0);
+    
+    /**
+     * Set the object data in the global obstacle bitmap to a certain state
+     */
+    void setObjectOnBitmap(std::vector<unsigned>& bitmap, const GameObject& o, bool value, float ratio=1.0);
+
+    /**
+     * Set the object data in the global obstacle bitmap to a certain state
+     */
+    void setObjectOnBitmap(std::vector<unsigned>& bitmap, glm::vec2 pos, glm::vec2 size, bool value, float ratio=1.0);
 };
 
 }  // namespace familyline::logic

@@ -400,6 +400,7 @@ TEST(PlayerManager, TestIfPlayerCanMove)
     stepLogic(pm, gctx);
     stepLogic(pm, gctx);
     stepLogic(pm, gctx);
+    stepLogic(pm, gctx);
 
     for (auto i = 0; i < delta; i++) stepLogic(pm, gctx);
 

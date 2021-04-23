@@ -59,10 +59,7 @@ std::vector<std::unique_ptr<Pathfinder::PathNode>> Pathfinder::generateNeighbors
         if (newpos.x < 0 || newpos.y < 0) continue;
 
         if (newpos.x >= width || newpos.y >= height) continue;
-        /*
-                if (int(newpos.x) % ratio_ != 0 || int(newpos.y) % ratio_ != 0)
-                    continue;
-        */
+
         ret.push_back(std::make_unique<PathNode>(newpos));
     }
     return ret;
@@ -138,7 +135,7 @@ bool Pathfinder::isWalkable(const PathNode& n, glm::vec2 size) const
         [width, ratio](auto& v) { return int(v.y / ratio) * (width / ratio) + int(v.x / ratio); });
 
     if (indices.size() == 0) return false;
-    
+
     return std::all_of(indices.begin(), indices.end(), [&](auto index) {
         return (index >= obstacle_bitmap_.size()) ? false : !obstacle_bitmap_[index];
     });
@@ -195,17 +192,40 @@ Pathfinder::PathNode* Pathfinder::traversePath(
         auto vec       = glm::vec2(
             direction.x > 0 ? 1 / float(ratio_) : (direction.x < 0 ? -1 / float(ratio_) : 0),
             direction.y > 0 ? 1 / float(ratio_) : (direction.y < 0 ? -1 / float(ratio_) : 0));
-        
+
         if (int(start.x) % ratio_ == 0) vec.x = 0;
         if (int(start.y) % ratio_ == 0) vec.y = 0;
 
-        auto pos = (start / float(ratio_) + vec) * float(ratio_);
-        moveToClosedList(open_list_.back().get());
+        bool walkable                 = false;
+        int idx                       = 0;
+        std::array<glm::vec2, 8> vals = {glm::vec2(0, 0),  glm::vec2(0, 1),  glm::vec2(0, -1),
+                                         glm::vec2(1, 0),  glm::vec2(-1, 0), glm::vec2(1, 1),
+                                         glm::vec2(-1, -1)};
 
-        auto alignstart = std::make_unique<PathNode>(pos);
-        alignstart->calculateValues(start, end, getTileAtPosition(alignstart->position));
-        alignstart->parent = closed_list_.back().get();
-        open_list_.push_back(std::move(alignstart));
+        moveToClosedList(open_list_.back().get());
+        
+        do {
+            auto pos = (start / float(ratio_) + (vec + vals[idx])) * float(ratio_);
+
+            auto alignstart = std::make_unique<PathNode>(pos);
+            walkable        = isWalkable(*alignstart.get(), size);
+
+            alignstart->calculateValues(start, end, getTileAtPosition(alignstart->position));
+            alignstart->parent = closed_list_.back().get();
+
+            if (walkable) {
+                open_list_.push_back(std::move(alignstart));
+            } else {
+                idx++;
+                if (idx > vals.size()) {
+                    LoggerService::getLogger()->write(
+                        "pathfinder", LogType::Warning,
+                        "Fractional path is completely blocked! Cannot pass through! Returning the "
+                        "best value");
+                    return closed_list_.back().get();
+                }
+            }
+        } while (!walkable);
     }
 
     int itercount = 0;
