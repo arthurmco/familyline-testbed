@@ -266,7 +266,8 @@ void ObjectPathManager::update(const ObjectManager& om)
             std::remove_if(
                 operations_.begin(), operations_.end(),
                 [&](PathRef& r) {
-                    return std::find(toRemove.begin(), toRemove.end(), r.handleval()) != toRemove.end();
+                    return std::find(toRemove.begin(), toRemove.end(), r.handleval()) !=
+                           toRemove.end();
                 }),
             operations_.end());
     }
