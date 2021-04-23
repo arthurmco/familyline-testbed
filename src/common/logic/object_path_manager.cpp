@@ -41,7 +41,7 @@ public:
 ObjectPathManager::ObjectPathManager(Terrain& t) : t_(t)
 {
     auto [w, h]      = t_.getSize();
-    obstacle_bitmap_ = std::vector<bool>(w * h, false);
+    obstacle_bitmap_ = std::vector<unsigned>(w * h, 0);
     obj_events_      = std::make_unique<PathEventReceiver>();
 }
 
@@ -182,8 +182,8 @@ void ObjectPathManager::update(const ObjectManager& om)
                 auto currentPos     = updatePosition(op);
                 movingEntities++;
 
-                LogicService::getDebugDrawer()->drawPath(op.pathElements.begin(), op.pathElements.end(),
-                                                         glm::vec4(0, 1 ,0 ,1));
+                LogicService::getDebugDrawer()->drawPath(
+                    op.pathElements.begin(), op.pathElements.end(), glm::vec4(0, 1, 0, 1));
 
                 // It is InProgress but no more positions. This is not correct
                 if (!currentPos) {
@@ -216,8 +216,8 @@ void ObjectPathManager::update(const ObjectManager& om)
             case PathStatus::Unreachable:
                 log->write(
                     "object-path-manager", LogType::Warning,
-                    "Path handle %d from (%.2f, %.2f) to (%.2f, %.2f) is not reachable", op.handleval(),
-                    op.start.x, op.start.y, op.end.x, op.end.y);
+                    "Path handle %d from (%.2f, %.2f) to (%.2f, %.2f) is not reachable",
+                    op.handleval(), op.start.x, op.start.y, op.end.x, op.end.y);
                 [[fallthrough]];
             case PathStatus::Stopped: [[fallthrough]];
             case PathStatus::Invalid: [[fallthrough]];  // there is not much we can do here...
@@ -266,7 +266,8 @@ void ObjectPathManager::update(const ObjectManager& om)
             std::remove_if(
                 operations_.begin(), operations_.end(),
                 [&](PathRef& r) {
-                    return std::find(toRemove.begin(), toRemove.end(), r.handleval()) != toRemove.end();
+                    return std::find(toRemove.begin(), toRemove.end(), r.handleval()) !=
+                           toRemove.end();
                 }),
             operations_.end());
     }
@@ -298,14 +299,12 @@ void ObjectPathManager::recalculatePath(PathRef& r, bool force)
     if (r.pathElements.size() <= 2 && !force) return;
 
     auto pos2d = glm::vec2(r.object->getPosition().x, r.object->getPosition().z);
-    if (r.pathElements.size() == 0)
-        r.pathElements.push_back(pos2d);
+    if (r.pathElements.size() == 0) r.pathElements.push_back(pos2d);
 
-    auto posv =
-        r.position().value_or(pos2d);
+    auto posv = r.position().value_or(pos2d);
 
     auto elements =
-        r.pathfinder->findPath(posv, r.end, r.object->getSize(), max_iter_paths_per_frame_/2);
+        r.pathfinder->findPath(posv, r.end, r.object->getSize(), max_iter_paths_per_frame_ / 2);
     r.pathElements.resize(elements.size());
     std::copy(elements.begin(), elements.end(), r.pathElements.begin());
 }
@@ -421,8 +420,6 @@ void ObjectPathManager::pollEntities(const ObjectManager& om)
  * Resize a object bitmap according to a certain ratio
  */
 
-
-
 /**
  * Creates an obstacle bitmap for the current game object
  *
@@ -434,31 +431,19 @@ std::vector<bool> ObjectPathManager::createBitmapForObject(const GameObject& o, 
 {
     /// TODO: if two objects are too close to each other, one might not be seen on the other's
     /// obstacle bitmap
-    std::vector<bool> v{obstacle_bitmap_};
+    std::vector<unsigned> v{obstacle_bitmap_};
     setObjectOnBitmap(v, o, false, 1);
 
-    if (ratio > 1) {
-        auto [w, h] = t_.getSize();
-        std::vector<bool> nv(v.size() / (ratio*ratio), false);
-        for (auto y = 0; y < h; y++) {
-            for (auto x = 0; x < w; x++) {                
-                nv[(y/ratio) * (w/ratio) + (x/ratio)] = v[y * w + x];
-            }
-        }
+    std::vector<bool> nv(v.size() / (ratio*ratio), false);
 
-        for (auto y = 0; y < h; y++) {
-            for (auto x = 0; x < w; x++) {                
-                if (nv[(y/ratio) * (w/ratio) + (x/ratio)]) {
-                    printf("aa %d %d %d %d\n", y, x, y/ratio, x/ratio);
-                }
-            }
+    auto [w, h] = t_.getSize();
+    for (auto y = 0; y < h; y++) {
+        for (auto x = 0; x < w; x++) {
+            nv[(y / ratio) * (w / ratio) + (x / ratio)] = v[y * w + x] > 0;
         }
-        puts("");
-        
-        v = nv;
     }
 
-    return v;
+    return nv;
 }
 
 /**
@@ -487,7 +472,44 @@ void ObjectPathManager::setObjectOnBitmap(
         for (int x = posx - double(size.x / 2); x < posx + double(size.x / 2); x++) {
             if (x < 0 || x >= width) continue;
 
-            bitmap[int(ceil(y/ratio)) * int(width/ratio) + int(ceil(x/ratio))] = value;
+            bitmap[int(ceil(y / ratio)) * int(width / ratio) + int(ceil(x / ratio))] = value;
+        }
+    }
+}
+
+/**
+ * Set the object data in the global obstacle bitmap to a certain state
+ */
+void ObjectPathManager::setObjectOnBitmap(
+    std::vector<unsigned>& bitmap, const GameObject& o, bool value, float ratio)
+{
+    auto pos2d = glm::vec2(o.getPosition().x, o.getPosition().z);
+    setObjectOnBitmap(bitmap, pos2d, o.getSize(), value, ratio);
+}
+/**
+ * Set the object data in the global obstacle bitmap to a certain state
+ */
+void ObjectPathManager::setObjectOnBitmap(
+    std::vector<unsigned>& bitmap, glm::vec2 pos, glm::vec2 size, bool value, float ratio)
+{
+    int posx = pos.x;
+    int posy = pos.y;
+
+    auto [width, height] = t_.getSize();
+
+    for (int y = posy - double(size.y / 2); y < posy + double(size.y / 2); y++) {
+        if (y < 0 || y >= height) continue;
+
+        for (int x = posx - double(size.x / 2); x < posx + double(size.x / 2); x++) {
+            if (x < 0 || x >= width) continue;
+
+            auto& val = bitmap[int(ceil(y / ratio)) * int(width / ratio) + int(ceil(x / ratio))];
+
+            if (value) {
+                val++;
+            } else {
+                if (val > 0) val--;
+            }
         }
     }
 }
