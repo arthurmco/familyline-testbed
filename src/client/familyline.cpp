@@ -280,6 +280,26 @@ int start_networked_game(
     quitting = true;
     netthread.join();
 
+    LoopRunner lr;
+
+    int frames = 0;
+
+    auto createMultiplayerSession_fn = [](logic::Terrain& map, auto& local_player_info) {
+        std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>> player_colony;
+
+        auto pm = std::make_unique<PlayerManager>();
+        auto cm = std::make_unique<ColonyManager>();
+
+        return PlayerSession{std::move(pm), std::move(cm), player_colony};
+    };
+
+    Game* g = start_game(
+        ginfo, lr, StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt}, cdata,
+        createMultiplayerSession_fn);
+
+    lr.load([&]() { return g->runLoop(); });
+    run_game_loop(lr, frames);
+
     return 0;
 }
 
