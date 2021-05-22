@@ -32,10 +32,10 @@ addons:
       - libsdl2-dev
       - libdevil1c2
       - libdevil-dev
-      - libclang-common-11-dev
-      - clang-11
       - libcairo2
       - libcairo2-dev
+      - llvm-toolchain-11
+      - clang-11
       - libyaml-0-2
       - libyaml-dev
       - libpango-1.0-0
