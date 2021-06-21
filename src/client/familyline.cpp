@@ -26,8 +26,6 @@
 #include <memory>
 #include <thread>
 
-#include "common/net/network_player.hpp"
-
 using namespace familyline;
 using namespace familyline::logic;
 using namespace familyline::graphics;
@@ -287,16 +285,18 @@ int start_networked_game(
     int frames = 0;
 
     auto createMultiplayerSession_fn = [&](logic::Terrain& map, auto& local_player_info) {
-        std::map<unsigned int /*player_id*/, std::reference_wrapper<logic::Colony>> player_colony;
+        std::map<uint64_t /*player_id*/, std::reference_wrapper<logic::Colony>> player_colony;
 
         auto pm = std::make_unique<PlayerManager>();
         for (auto& c : clients) {
             pm->add(std::make_unique<NetworkPlayer>(*pm.get(), map, c), false);
         }
         auto hid = pm->add(
-            std::unique_ptr<Player>(new HumanPlayer{*pm.get(), map, local_player_info.name.c_str(), 0, true}));
+            std::unique_ptr<Player>(
+                new HumanPlayer{*pm.get(), map, local_player_info.name.c_str(), gps.id(), true}),
+            false);
         local_player_info.id = hid;
-        printf("\n%d\n", hid);
+        printf("\n%lx %lx\n", hid, gps.id());
 
         auto cm = std::make_unique<ColonyManager>();
         for (auto& c : clients) {
@@ -306,7 +306,7 @@ int start_networked_game(
             auto& alliance = cm->createAlliance("alliance");
             auto& colony   = cm->createColony(
                 *player, color, std::optional<std::reference_wrapper<Alliance>>{alliance});
-            
+
             player_colony.emplace(c.id(), std::reference_wrapper(colony));
         }
 
@@ -317,19 +317,28 @@ int start_networked_game(
             auto& alliance = cm->createAlliance("alliance");
             auto& colony   = cm->createColony(
                 *player, color, std::optional<std::reference_wrapper<Alliance>>{alliance});
-            
+
             player_colony.emplace(hid, std::reference_wrapper(colony));
         }
-        
+
         return PlayerSession{std::move(pm), std::move(cm), player_colony};
     };
 
-    Game* g = start_game(
+    watchdog = 0;
+    Game* g  = start_game(
         ginfo, lr, StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt}, cdata,
         createMultiplayerSession_fn);
 
-    lr.load([&]() { return g->runLoop(); });
+    NetPlayerSender nps{*g->getPlayerManager(), gps, g->getHumanPlayerID()};
+
+    lr.load([&]() {
+        watchdog = 0;
+        return g->runLoop();
+    });
     run_game_loop(lr, frames);
+
+    quitting = true;
+    netthread.join();
 
     return 0;
 }
