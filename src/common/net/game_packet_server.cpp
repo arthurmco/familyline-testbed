@@ -360,9 +360,8 @@ bool GamePacketServer::pollPacketFor(uint64_t id, Packet& p)
 {
 #ifdef FLINE_NET_SUPPORT
     if (!client_receive_queue_.contains(id)) return false;
-    
+
     if (client_receive_queue_[id].empty()) return false;
-    printf("ok\n");
 
     p = client_receive_queue_[id].front();
     client_receive_queue_[id].pop();
