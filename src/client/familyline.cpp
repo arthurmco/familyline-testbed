@@ -282,6 +282,7 @@ int start_networked_game(
 
     LoopRunner lr;
 
+    watchdog = 0;
     int frames = 0;
 
     auto createMultiplayerSession_fn = [&](logic::Terrain& map, auto& local_player_info) {
@@ -331,8 +332,22 @@ int start_networked_game(
 
     NetPlayerSender nps{*g->getPlayerManager(), gps, g->getHumanPlayerID()};
 
+    all_ready = waitFutures(
+        start_promises, start_clients, [&](auto& res) { return res.value_or(false) == true; },
+        quitting);
+
+    if (!all_ready) {
+        quitting = true;
+        printf("\tanother client failed to start the game, exiting\n");
+        netthread.join();
+        return 1;
+    }
+
+    printf("\tstarting the game\n");
+    watchdog = 0;
+
     lr.load([&]() {
-        watchdog = 0;
+        watchdog = 0;        
         return g->runLoop();
     });
     run_game_loop(lr, frames);
