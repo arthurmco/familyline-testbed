@@ -91,7 +91,6 @@ Packet toNativePacket(const ::familyline::NetPacket* p)
                     }
                 });
             message = Packet::InputRequest{m->client_from(), itype};
-            printf("aaa\n");
             break;
         }
         case familyline::Message_ires: {
