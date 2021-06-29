@@ -24,6 +24,7 @@ addons:
 
     packages:
       - g++-10
+      - clang-11
       - libglm-dev
       - libglew2.1
       - libglew-dev
