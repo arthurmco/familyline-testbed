@@ -85,7 +85,7 @@ if (MSVC)
 
   # Set include directories
   find_package(GLM CONFIG REQUIRED)
-  find_package(unofficial-cairo CONFIG REQUIRED)
+  find_package(cairo CONFIG REQUIRED)
 
   # SDL, GLM and cairo includes will be made available via vcpkg and put in a default path.
   # We don't really need to put them here'
@@ -95,7 +95,7 @@ if (MSVC)
   target_link_libraries(familyline GLEW::GLEW)
   target_link_libraries(familyline ${IL_LIBRARIES})
   target_link_libraries(familyline ${ILU_LIBRARIES})
-  target_link_libraries(familyline unofficial::cairo::cairo)
+  target_link_libraries(familyline cairo::cairo)
   target_link_libraries(familyline glm)
   target_link_libraries(familyline wsock32 ws2_32)
   
@@ -107,7 +107,7 @@ if (MSVC)
   	target_link_libraries(familyline-tests ${GLEW_LIBRARY})
   	target_link_libraries(familyline-tests ${IL_LIBRARIES})
   	target_link_libraries(familyline-tests ${ILU_LIBRARIES})
-	target_link_libraries(familyline-tests unofficial::cairo::cairo)
+	target_link_libraries(familyline-tests cairo::cairo)
 	target_link_libraries(familyline-tests glm)
 	target_link_libraries(familyline-tests wsock32 ws2_32)
 	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
