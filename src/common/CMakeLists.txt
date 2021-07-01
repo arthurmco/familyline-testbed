@@ -55,12 +55,12 @@ find_package(SDL2 CONFIG)
 if (WIN32)
 	
   include(${CMAKE_TOOLCHAIN_FILE})
-  find_package(GLM CONFIG REQUIRED)
+  find_package(glm CONFIG REQUIRED)
   find_package(unofficial-curlpp CONFIG REQUIRED)
   target_include_directories(familyline-common PUBLIC
-    ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR}
+    ${YAML_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR}
     ${INPUT_FLATBUFFER_INCLUDE})
-  target_link_libraries(familyline-common PUBLIC fmt::fmt glm ${ZLIB_LIBRARIES})
+  target_link_libraries(familyline-common PUBLIC fmt::fmt glm::glm ${ZLIB_LIBRARIES})
   target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
   target_link_libraries(familyline-common PUBLIC unofficual::curlpp::curlpp)
   target_link_libraries(familyline-common PUBLIC tl::expected)

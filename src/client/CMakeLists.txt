@@ -67,14 +67,25 @@ add_library(
 if (MSVC)
 
   include(${CMAKE_TOOLCHAIN_FILE})
-  find_library(PANGO_LIB pango-1.0)
+  find_library(PANGO_LIB pango-1.0 REQUIRED)
   find_library(PANGOCAIRO_LIB pangocairo-1.0)
   find_library(GOBJECT_LIB gobject-2.0)
-  find_path(PANGO_INCLUDE pango/pango.h)
+  find_path(PANGO_INCLUDE NAMES pango/pango.h REQUIRED PATH_SUFFIXES "pango-1.0")
+  find_path(HB_INCLUDE NAMES hb.h REQUIRED PATH_SUFFIXES "harfbuzz")
+  find_path(PANGOCAIRO_INCLUDE_DIR NAMES "pango/pangocairo.h" REQUIRED PATH_SUFFIXES "pango-1.0")
+  find_path(GLIB_INCLUDES NAMES glib-object.h REQUIRED 
+    PATH_SUFFIXES "glib-2.0")
+  find_path(GLIB_CONFIG_INCLUDES NAMES glibconfig.h REQUIRED 
+    PATH_SUFFIXES "lib/glib-2.0/include")
+  find_path(CAIRO_INCLUDE_DIRS cairo.h REQUIRED PATH_SUFFIXES "cairo")
 
-  target_link_libraries(familyline-client PUBLIC ${PANGO_LIB} ${PANGOCAIRO_LIB} ${GOBJECT_LIB})
-  target_include_directories(familyline-client PUBLIC ${PANGO_INCLUDE} ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
-
+  target_link_libraries(familyline-client PUBLIC ${PANGO_LIB} ${PANGOCAIRO_LIB} ${GOBJECT_LIB}
+    ${CAIRO_INCLUDE})
+  target_include_directories(familyline-client PUBLIC 
+    ${GLIB_INCLUDES} ${HB_INCLUDE} ${GLIB_CONFIG_INCLUDES} ${PANGO_INCLUDE} 
+    ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} 
+    ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR} ${PANGOCAIRO_INCLUDE_DIR})
+  
 else()
   find_package(PkgConfig REQUIRED)
 

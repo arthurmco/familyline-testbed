@@ -84,8 +84,13 @@ if (MSVC)
   include(${CMAKE_TOOLCHAIN_FILE})
 
   # Set include directories
-  find_package(GLM CONFIG REQUIRED)
-  find_package(unofficial-cairo CONFIG REQUIRED)
+  find_package(glm CONFIG REQUIRED)
+
+  find_path(CAIRO_INCLUDE_DIR cairo/cairo.h REQUIRED)
+  find_library(CAIRO_LIBRARY cairo REQUIRED)
+
+  find_path(PANGOCAIRO_INCLUDE_DIR pango/pangocairo.h REQUIRED)
+  find_library(PANGOCAIRO_LIBRARY pangocairo-1.0 REQUIRED)
 
   # SDL, GLM and cairo includes will be made available via vcpkg and put in a default path.
   # We don't really need to put them here'
@@ -95,8 +100,9 @@ if (MSVC)
   target_link_libraries(familyline GLEW::GLEW)
   target_link_libraries(familyline ${IL_LIBRARIES})
   target_link_libraries(familyline ${ILU_LIBRARIES})
-  target_link_libraries(familyline unofficial::cairo::cairo)
-  target_link_libraries(familyline glm)
+  target_link_libraries(familyline ${CAIRO_LIBRARY})
+  target_link_libraries(familyline ${PANGOCAIRO_LIBRARY})
+  target_link_libraries(familyline glm::glm)
   target_link_libraries(familyline wsock32 ws2_32)
   
 #  target_link_libraries(familyline-server wsock32 ws2_32)
@@ -106,10 +112,11 @@ if (MSVC)
   	target_link_libraries(familyline-tests ${OPENGL_gl_LIBRARY})
   	target_link_libraries(familyline-tests ${GLEW_LIBRARY})
   	target_link_libraries(familyline-tests ${IL_LIBRARIES})
-  	target_link_libraries(familyline-tests ${ILU_LIBRARIES})
-	target_link_libraries(familyline-tests cairo::cairo)
-	target_link_libraries(familyline-tests glm)
-	target_link_libraries(familyline-tests wsock32 ws2_32)
+  	target_link_libraries(familyline-tests ${ILU_LIBRARIES})	
+    target_link_libraries(familyline-tests ${CAIRO_LIBRARY})
+    target_link_libraries(familyline-tests ${PANGOCAIRO_LIBRARY})
+    target_link_libraries(familyline-tests glm::glm)
+    target_link_libraries(familyline-tests wsock32 ws2_32)
 	target_link_libraries(familyline-tests ${YAML_LIBRARIES})
     target_link_libraries(familyline-tests ${ZLIB_LIBRARIES})
   #endif(FLINE_BUILD_TESTS)
