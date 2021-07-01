@@ -62,7 +62,7 @@ if (WIN32)
     ${INPUT_FLATBUFFER_INCLUDE})
   target_link_libraries(familyline-common PUBLIC fmt::fmt glm::glm ${ZLIB_LIBRARIES})
   target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
-  target_link_libraries(familyline-common PUBLIC unofficual::curlpp::curlpp)
+  target_link_libraries(familyline-common PUBLIC unofficial::curlpp::curlpp)
   target_link_libraries(familyline-common PUBLIC tl::expected)
   
 else()
