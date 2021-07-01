@@ -55,6 +55,8 @@
 #define isatty _isatty
 #define fileno _fileno
 
+#else
+
 #include <sys/utsname.h>
 #include <unistd.h>
 #endif
