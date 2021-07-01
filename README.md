@@ -8,6 +8,10 @@
 <a href="https://travis-ci.org/arthurmco/familyline" title="travis badge">
   <img src="https://api.travis-ci.org/arthurmco/familyline.svg?branch=master" />
 </a>
+<a
+href="https://ci.appveyor.com/project/arthurmco/familyline/branch/master">
+<img src="https://ci.appveyor.com/api/projects/status/uunrg62bioyao9lv/branch/master?svg=true" />
+</a>
 </p>
 
 Familyline is a real-time strategy game focused on Ancient Era, from since the
