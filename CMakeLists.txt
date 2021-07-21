@@ -84,6 +84,7 @@ if (MSVC)
   include(${CMAKE_TOOLCHAIN_FILE})
 
   # Set include directories
+  find_package(SDL2_image CONFIG REQUIRED)
   find_package(glm CONFIG REQUIRED)
 
   find_path(CAIRO_INCLUDE_DIR cairo/cairo.h REQUIRED)
@@ -97,6 +98,7 @@ if (MSVC)
   include_directories(AFTER ${YAML_INCLUDE_DIR})
 
   target_link_libraries(familyline SDL2::SDL2 SDL2::SDL2main)
+  target_link_libraries(familyline SDL2::SDL2_image)
   target_link_libraries(familyline GLEW::GLEW)
   target_link_libraries(familyline ${IL_LIBRARIES})
   target_link_libraries(familyline ${ILU_LIBRARIES})
@@ -109,6 +111,7 @@ if (MSVC)
 
   #if (FLINE_BUILD_TESTS)
 	target_link_libraries(familyline-tests SDL2::SDL2 SDL2::SDL2main)
+	target_link_libraries(familyline-tests SDL2::SDL2_image)
   	target_link_libraries(familyline-tests ${OPENGL_gl_LIBRARY})
   	target_link_libraries(familyline-tests ${GLEW_LIBRARY})
   	target_link_libraries(familyline-tests ${IL_LIBRARIES})
@@ -127,10 +130,11 @@ else()
 	
   find_package(PkgConfig REQUIRED)
   find_package(Threads REQUIRED)
+
   pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
   pkg_search_module(PANGOCAIRO REQUIRED pangocairo) # finds pango-cairo
   pkg_search_module(GLM REQUIRED glm) # finds glm
-  
+  pkg_search_module(SDL2_IMAGE REQUIRED SDL2_image) # finds sdl2-image  
   
   if (TARGET fmt::fmt)
 	target_link_libraries(familyline fmt::fmt)
@@ -148,6 +152,7 @@ else()
   endif(TARGET fmt::fmt)
   
   target_link_libraries(familyline ${SDL2_LIBRARIES})
+  target_link_libraries(familyline ${SDL2_IMAGE_LIBRARIES})
   target_link_libraries(familyline GLEW::GLEW)
   target_link_libraries(familyline ${IL_LIBRARIES})
   target_link_libraries(familyline ${ILU_LIBRARIES})
@@ -158,6 +163,7 @@ else()
   
   if(FLINE_BUILD_TESTS)
   	target_link_libraries(familyline-tests ${SDL2_LIBRARIES})
+    target_link_libraries(familyline-tests ${SDL2_IMAGE_LIBRARIES})
   	target_link_libraries(familyline-tests GLEW::GLEW)
   	target_link_libraries(familyline-tests ${IL_LIBRARIES})
   	target_link_libraries(familyline-tests ${ILU_LIBRARIES})
@@ -177,7 +183,7 @@ else()
 
   add_compile_options(${SDL2_CFLAGS_OTHER} -Wall -Wextra)
 
-  include_directories(AFTER  ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} `${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${PANGOCAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
+  include_directories(AFTER ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${PANGOCAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
 
 endif(MSVC)
 
@@ -235,7 +241,7 @@ SET(CPACK_SOURCE_IGNORE_FILES "googletest-*/*;test/*.*;test/googletest/*")
 SET(CPACK_GENERATOR "DEB;RPM")
 SET(CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
-SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.0, libsdl2-2.0-0, libdevil1c2, libcairo2, libyaml-0-2")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.0, libsdl2-2.0-0, libdevil1c2, libcairo2, libyaml-0-2 libsdl2-image-2.0-0 libflatbuffers1")
 SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 SET(CPACK_RPM_PACKAGE_REQUIRES "glew, SDL2, DevIL, cairo, libyaml")
 SET(CPACK_RPM_PACKAGE_LICENSE "MIT")

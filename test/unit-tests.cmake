@@ -46,6 +46,7 @@ if (FLINE_BUILD_TESTS)
     "${CMAKE_SOURCE_DIR}/test/test_pathmanager.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_player_manager.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_scene_manager.cpp"
+    "${CMAKE_SOURCE_DIR}/test/test_texture_manager.cpp"
     "${CMAKE_SOURCE_DIR}/test/test_terrain.cpp"
     "${CMAKE_SOURCE_DIR}/test/tests.cpp"
     "${CMAKE_SOURCE_DIR}/test/utils.cpp"
