@@ -885,10 +885,12 @@ int main(int argc, char const* argv[])
         guir->initialize(*win);
         // guir->initShaders(win);
 
+        auto& texman = GFXService::getTextureManager();
+        
         /* If we have a networked game ready, don't even show the main menu. */
+        auto [texw, texh] = texman->getTextureMaxSize();
         log->write(
-            "texture", LogType::Info, "maximum tex size: %zu x %zu", Texture::GetMaximumSize(),
-            Texture::GetMaximumSize());
+            "texture", LogType::Info, "maximum tex size: %zu x %zu", texw, texh);
 
         if (pi.mapFile || pi.inputFile) {
             int frames = 0;

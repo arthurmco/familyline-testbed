@@ -12,6 +12,7 @@
 #include <client/graphical/gfx_service.hpp>
 #include <client/graphical/opengl/gl_renderer.hpp>
 #include <client/graphical/opengl/gl_shader.hpp>
+#include <client/graphical/opengl/gl_texture_environment.hpp>
 #include <client/graphical/renderer.hpp>
 #include <client/graphical/shader_manager.hpp>
 #include <client/input/input_service.hpp>
@@ -35,6 +36,9 @@ static void enable_gl_debug()
         unsigned lastsec = 0;
     };
 
+    auto glenv = std::make_unique<GLTextureEnvironment>();
+    GFXService::createTextureManager(std::make_unique<TextureManager>(std::move(glenv)));
+    
     auto gl_debug_callback = [](GLuint source, GLuint type, unsigned int id, GLuint severity,
                                 int length, const char* msg, const void* userparam) {
         (void)userparam;
