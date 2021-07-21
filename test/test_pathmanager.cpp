@@ -489,7 +489,7 @@ TEST_F(ObjectPathManagerTest, CanPathEntityTwice)
     
 }
 
-
+/*
 TEST(ObjectPathManager, CanPathEntityTwice)
 {
     TerrainFile tf{100, 50};
@@ -638,3 +638,4 @@ TEST(ObjectPathManager, CanPathEntityTwice)
     }
     
 }
+*/
