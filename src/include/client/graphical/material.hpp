@@ -4,14 +4,13 @@
     Copyright (C) 2016, 2019 Arthur Mendes.
 
 ***/
-
 #pragma once
 
 #include <glm/glm.hpp>
 #include <string>
 
-#include "Texture.hpp"
-#include "asset_object.hpp"
+#include <client/graphical/texture_environment.hpp>
+#include <client/graphical/asset_object.hpp>
 
 namespace familyline::graphics
 {
@@ -19,7 +18,7 @@ struct MaterialData {
     glm::vec3 diffuseColor;
     glm::vec3 specularColor;
     glm::vec3 ambientColor;
-    Texture* texture = nullptr;
+    std::optional<TextureHandle> tex_;
 
     MaterialData(glm::vec3 dif, glm::vec3 spec, glm::vec3 amb)
         : diffuseColor(dif), specularColor(spec), ambientColor(amb)
@@ -43,7 +42,7 @@ private:
     int _ID;
     std::string _name;
     MaterialData _data;
-    Texture* _tex;
+    std::optional<TextureHandle> tex_;
 
 public:
     Material(int ID, const char* name, MaterialData data);
@@ -52,8 +51,8 @@ public:
     int getID() const;
     const char* getName() const;
     MaterialData& getData();
-    Texture* getTexture();
-    void setTexture(Texture*);
+    std::optional<TextureHandle> getTexture();
+    void setTexture(std::optional<TextureHandle>);
 
     virtual AssetType getAssetType() const { return AssetType::MaterialAsset; }
 

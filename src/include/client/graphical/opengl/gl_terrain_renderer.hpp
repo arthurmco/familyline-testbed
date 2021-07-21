@@ -7,7 +7,7 @@
  */
 
 #include <client/graphical/terrain_renderer.hpp>
-#include <client/graphical/Texture.hpp>
+#include <client/graphical/texture_manager.hpp>
 #include <client/graphical/shader.hpp>
 #include <common/logic/terrain.hpp>
 #include <glm/glm.hpp>
@@ -43,7 +43,7 @@ private:
     TerrainRenderInfo tri_;
     GLuint tvao_;
 
-    Texture* tatlas_;
+    TextureHandle tatlas_;
 
     /**
      * Create the indices.

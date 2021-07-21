@@ -1,12 +1,12 @@
 #include <fmt/format.h>
 
 #include <algorithm>
-#include <client/graphical/TextureOpener.hpp>
 #include <client/graphical/asset_manager.hpp>
 #include <client/graphical/gfx_service.hpp>
 #include <client/graphical/materialopener/MTLOpener.hpp>
 #include <client/graphical/meshopener/MD2Opener.hpp>
 #include <client/graphical/meshopener/OBJOpener.hpp>
+#include <client/graphical/texture_asset.hpp>
 #include <common/logger.hpp>
 #include <iterator>  // for std::back_inserter
 
@@ -74,17 +74,14 @@ std::vector<std::shared_ptr<AssetObject>> loadMeshAsset(Asset& asset)
         delete[] matname;
     }
 
-    for (auto i=1; i<ms.size(); i++)
-        delete ms[i];
-    
+    for (auto i = 1; i < ms.size(); i++) delete ms[i];
+
     return {std::shared_ptr<Mesh>(ms[0])};
 }
 
 std::vector<std::shared_ptr<AssetObject>> loadTextureAsset(Asset& asset)
 {
-    auto tf = TextureOpener::OpenFile(asset.path.c_str());
-
-    return {std::shared_ptr<TextureFile>(tf)};
+    return {std::make_shared<TextureAsset>(asset.name, asset.path)};
 }
 
 std::vector<std::shared_ptr<AssetObject>> loadMaterialAssets(Asset& asset)
@@ -103,12 +100,9 @@ std::vector<std::shared_ptr<AssetObject>> loadMaterialAssets(Asset& asset)
 std::vector<std::shared_ptr<AssetObject>> Asset::loadAssetObject()
 {
     switch (this->type) {
-        case MeshAsset:
-            return loadMeshAsset(*this);
-        case MaterialAsset:
-            return loadMaterialAssets(*this);
-        case TextureAsset:
-            return loadTextureAsset(*this);
+        case AssetType::MeshAsset: return loadMeshAsset(*this);
+        case AssetType::MaterialAsset: return loadMaterialAssets(*this);
+        case AssetType::TextureAsset: return loadTextureAsset(*this);
         default:
             this->error = std::make_optional(AssetError::InvalidAssetType);
             throw asset_exception(
@@ -144,12 +138,12 @@ Asset AssetManager::processAsset(AssetItem& av)
         asset.type = AssetType::MeshAsset;
 
     } else if (av.type == "texture") {
-        asset.type   = AssetType::TextureAsset;
-        auto texfile = std::dynamic_pointer_cast<TextureFile>(asset.loadAssetObject()[0]);
-        Texture* tex = texfile->GetTextureCut(0, 0, -1, -1);
+        asset.type        = AssetType::TextureAsset;
+        auto texasset     = std::dynamic_pointer_cast<TextureAsset>(asset.loadAssetObject()[0]);
+        TextureHandle tex = *texasset->getHandle(*GFXService::getTextureManager().get());
 
-        asset.object = std::make_optional(texfile);
-        GFXService::getTextureManager()->AddTexture(asset.name.c_str(), tex);
+        asset.object = std::make_optional(texasset);
+        GFXService::getTextureManager()->registerTexture(asset.name.c_str(), tex);
 
         char* matname = new char[asset.name.size() + 10];
         sprintf(matname, "texture:%s", asset.name.c_str());
@@ -158,7 +152,7 @@ Asset AssetManager::processAsset(AssetItem& av)
 
         // addMaterial copies the object
         // TODO: make this explicit in typing (for example, by using an unique_ptr)
-        GFXService::getMaterialManager()->addMaterial(m); 
+        GFXService::getMaterialManager()->addMaterial(m);
         delete m;
         delete[] matname;
 
@@ -209,7 +203,7 @@ void AssetManager::loadFile(AssetFile& file)
         }
 
         Asset asset = this->processAsset(*av);
-        
+
         this->_assets[asset.name] = asset;
         log->write(
             "asset-manager", LogType::Info, "found asset '%s' at path '%s' (%zu dependencies)",

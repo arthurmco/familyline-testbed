@@ -7,9 +7,8 @@
 #include <memory>
 
 //#include "logic/ObjectRenderer.hpp"
-#include <client/preview_renderer.hpp>
 #include <client/graphical/GraphicalPlotInterface.hpp>
-#include <client/graphical/TextureOpener.hpp>
+#include <client/graphical/texture_environment.hpp>
 #include <client/graphical/asset_file.hpp>
 #include <client/graphical/asset_manager.hpp>
 #include <client/graphical/camera.hpp>
@@ -27,18 +26,19 @@
 #include <client/graphical/terrain_renderer.hpp>
 #include <client/graphical/texture_manager.hpp>
 #include <client/graphical/window.hpp>
+#include <client/preview_renderer.hpp>
 #include <common/logic/BuildQueue.hpp>
 #include <common/logic/GameActionManager.hpp>
-#include <common/logic/object_path_manager.hpp>
-#include <common/logic/pathfinder.hpp>
 #include <common/logic/colony_manager.hpp>
 #include <common/logic/debug_drawer.hpp>
-#include <common/logic/lifecycle_manager.hpp>
-#include <common/logic/object_factory.hpp>
-#include <common/logic/player_manager.hpp>
-#include <common/logic/terrain_file.hpp>
 #include <common/logic/input_recorder.hpp>
 #include <common/logic/input_reproducer.hpp>
+#include <common/logic/lifecycle_manager.hpp>
+#include <common/logic/object_factory.hpp>
+#include <common/logic/object_path_manager.hpp>
+#include <common/logic/pathfinder.hpp>
+#include <common/logic/player_manager.hpp>
+#include <common/logic/terrain_file.hpp>
 //#include "graphical/gui/ImageControl.hpp"
 
 //#include <client/input/InputPicker.hpp>
@@ -67,7 +67,7 @@ public:
           fbGUI_(gi.fbGUI),
           gui_(gi.gui),
           camera_(std::make_unique<graphics::Camera>(
-                      glm::vec3(6.0, 36.0, 6.0), 16.0 / 9.0f, glm::vec3(0))),
+              glm::vec3(6.0, 36.0, 6.0), 16.0 / 9.0f, glm::vec3(0))),
           am(graphics::GFXService::getAssetManager())
     {
     }
@@ -94,10 +94,8 @@ public:
      */
     void initPlayers(
         std::unique_ptr<logic::PlayerManager> pm, std::unique_ptr<logic::ColonyManager> cm,
-        std::map<uint64_t /*player_id*/, std::reference_wrapper<logic::Colony>>
-            player_colony_map,
+        std::map<uint64_t /*player_id*/, std::reference_wrapper<logic::Colony>> player_colony_map,
         uint64_t human_id);
-
 
     void initRecorder(std::unique_ptr<logic::InputRecorder> ir) { ir_ = std::move(ir); }
 
@@ -107,21 +105,23 @@ public:
      * Besides the `update()` field, it will only be added here because both
      * instances (the game and reproducer) has the same lifetimes)
      */
-    void initReproducer(std::unique_ptr<logic::InputReproducer> irepr) { irepr_ = std::move(irepr); }
-
+    void initReproducer(std::unique_ptr<logic::InputReproducer> irepr)
+    {
+        irepr_ = std::move(irepr);
+    }
 
     /**
      * Initialize the asset library
      */
     void initAssets();
-    
+
     /**
      * Initialize the object factory, with all game objects, and return a reference to it
      *
      * This is good, so we can get the object checksums
      */
     logic::ObjectFactory* initObjectFactory();
-    
+
     /**
      * Initialize the object manager
      */
@@ -138,8 +138,7 @@ public:
 
     logic::PlayerManager* getPlayerManager() { return pm_.get(); }
     uint64_t getHumanPlayerID() { return human_id_; }
-    
-    
+
 private:
     ///////////////////// logic
 
@@ -153,7 +152,7 @@ private:
     std::unique_ptr<logic::PlayerManager> pm_;
 
     std::vector<std::unique_ptr<logic::GameObject>> factory_objects_;
-    
+
     std::map<uint64_t /*player_id*/, std::reference_wrapper<logic::Colony>> colonies_;
 
     std::unique_ptr<logic::ObjectManager> om_;
@@ -167,7 +166,6 @@ private:
 
     std::unique_ptr<logic::InputReproducer> irepr_;
 
-    
     std::chrono::duration<double, std::milli> delta{1.0};
     double pms = 0.0;
 

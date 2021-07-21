@@ -1,15 +1,13 @@
-#include <client/graphical/opengl/gl_terrain_renderer.hpp>
+#include <config.h>
+
 #include <algorithm>
 #include <cassert>
-#include <client/graphical/TextureOpener.hpp>
-#include <client/graphical/opengl/gl_renderer.hpp>
 #include <client/graphical/gfx_service.hpp>
+#include <client/graphical/opengl/gl_renderer.hpp>
+#include <client/graphical/opengl/gl_terrain_renderer.hpp>
 #include <cmath>
 #include <common/logger.hpp>
 #include <iterator>
-
-#include <config.h>
-
 
 using namespace familyline::graphics;
 using namespace familyline::logic;
@@ -33,8 +31,7 @@ using namespace familyline::logic;
 ***/
 #include <cmath>
 
-GLTerrainRenderer::GLTerrainRenderer(Camera& cam)
-    : TerrainRenderer(cam)
+GLTerrainRenderer::GLTerrainRenderer(Camera& cam) : TerrainRenderer(cam)
 {
     auto& d = GFXService::getDevice();
 
@@ -256,7 +253,12 @@ std::unordered_map<TerrainType, unsigned int> loadTerrainTypes()
  */
 void GLTerrainRenderer::buildTextures()
 {
-    tatlas_ = TextureOpener::OpenTexture(TEXTURES_DIR "/terrain/texatlas.png");
+    auto tres = GFXService::getTextureManager()->loadTexture(TEXTURES_DIR "/terrain/texatlas.png");
+    if (tres) {
+        tatlas_ = *tres;
+    } else {
+        assert(false);
+    }
 
     terrain_data_     = loadTerrainData();
     terr_type_to_idx_ = loadTerrainTypes();
@@ -303,6 +305,8 @@ const int slot_texture_size = 16;
  */
 void GLTerrainRenderer::render(Renderer& r)
 {
+    auto& texman = GFXService::getTextureManager();
+
     assert(terr_ != nullptr);
     GLRenderer& rnd = dynamic_cast<GLRenderer&>(r);
 
@@ -327,10 +331,10 @@ void GLTerrainRenderer::render(Renderer& r)
 
     glBindVertexArray(tvao_);
 
-    glBindTexture(GL_TEXTURE_2D, tatlas_->GetHandle());
+    texman->bindTexture(tatlas_, 0); // glBindTexture(GL_TEXTURE_2D, tatlas_->GetHandle());
     glDrawElements(GL_TRIANGLES, tri_.indices.size(), GL_UNSIGNED_INT, 0);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    texman->unbindTexture(0);
 
     err = glGetError();
     if (err != GL_NO_ERROR) {

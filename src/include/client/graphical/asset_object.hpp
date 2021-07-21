@@ -13,7 +13,7 @@
 
 namespace familyline::graphics
 {
-enum AssetType { MeshAsset, MaterialAsset, TextureAsset, UnknownAsset };
+enum class AssetType { MeshAsset, MaterialAsset, TextureAsset, UnknownAsset };
 
 /**
  * An opaque interface. Represents an asset

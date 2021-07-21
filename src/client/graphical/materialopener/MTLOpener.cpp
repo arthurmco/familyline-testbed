@@ -92,10 +92,10 @@ std::vector<Material*> MTLOpener::Open(const char* file)
             std::string texname{texpath};
             texname[texname.find_last_of('.')] = 0;
 
-            Texture* t = TextureOpener::OpenTexture(texpath);
+            auto t = GFXService::getTextureManager()->loadTexture(texpath);
 
             if (t) {
-                GFXService::getTextureManager()->AddTexture(texname.c_str(), t);
+                GFXService::getTextureManager()->registerTexture(texname, *t);
             } else {
                 log->write(
                     "material-opener::mtl", LogType::Warning, "Texture %s failed to load", texpath);

@@ -4,15 +4,13 @@
     Copyright (C) 2016 Arthur M.
 
 ***/
+#pragma once
 
 #include <vector>
 
-#include "../TextureOpener.hpp"
-#include "../exceptions.hpp"
-#include "../material.hpp"
-
-#ifndef MATERIALOPENER_HPP
-#define MATERIALOPENER_HPP
+#include <client/graphical/gfx_service.hpp>
+#include <client/graphical/exceptions.hpp>
+#include <client/graphical/material.hpp>
 
 namespace familyline::graphics
 {
@@ -26,5 +24,3 @@ public:
 };
 
 }  // namespace familyline::graphics
-
-#endif /* end of include guard: MATERIALOPENER_HPP */

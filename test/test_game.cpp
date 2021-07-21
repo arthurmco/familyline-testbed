@@ -12,6 +12,7 @@
 #include "utils/test_renderer.hpp"
 #include "utils/test_device.hpp"
 #include "utils/test_window.hpp"
+#include "utils/test_texenv.hpp"
 
 using namespace familyline::logic;
 using namespace familyline::graphics;
@@ -22,10 +23,11 @@ TEST(GameTest, TestIfGameStartsAndRuns)
 {    
     auto ipr = std::make_unique<InputProcessor>();
     InputService::setInputManager(std::make_unique<InputManager>(*ipr.get()));
-        
+    
     LogicService::getActionQueue()->clearEvents();
     LogicService::getObjectFactory()->clear();
     GFXService::setDevice(std::make_unique<TestDevice>());
+    GFXService::createTextureManager(std::make_unique<TextureManager>(std::make_unique<TestTextureEnvironment>()));
     
     std::string mapfile = TESTS_DIR "/terrain_test.flte";
     

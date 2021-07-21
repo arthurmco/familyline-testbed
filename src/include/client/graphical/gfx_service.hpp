@@ -1,11 +1,10 @@
 #pragma once
 
+#include <client/graphical/asset_manager.hpp>
 #include <client/graphical/device.hpp>
-
-#include "asset_manager.hpp"
-#include "material_manager.hpp"
-#include "shader_manager.hpp"
-#include "texture_manager.hpp"
+#include <client/graphical/material_manager.hpp>
+#include <client/graphical/shader_manager.hpp>
+#include <client/graphical/texture_manager.hpp>
 
 namespace familyline::graphics
 {
@@ -46,14 +45,12 @@ public:
         return _materialm;
     }
 
-    static std::unique_ptr<TextureManager>& getTextureManager()
+    static void createTextureManager(std::unique_ptr<TextureManager> m)
     {
-        if (!_texturem) {
-            _texturem = std::make_unique<TextureManager>();
-        }
-
-        return _texturem;
+        _texturem = std::move(m);
     }
+
+    static std::unique_ptr<TextureManager>& getTextureManager() { return _texturem; }
 
     static std::unique_ptr<Device>& getDevice() { return _devicem; }
     static void setDevice(std::unique_ptr<Device>&& d) { _devicem = std::move(d); }

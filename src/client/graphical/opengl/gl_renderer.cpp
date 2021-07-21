@@ -68,6 +68,8 @@ void GLRenderer::render(Camera* c)
     auto viewMatrix = c->GetViewMatrix();
     auto projMatrix = c->GetProjectionMatrix();
 
+    auto& texman = GFXService::getTextureManager();
+    
     for (auto& vh : _vhandle_list) {
         ShaderProgram* shader = vh->vinfo.shaderState.shader;
         shaderManager->use(*shader);
@@ -94,12 +96,12 @@ void GLRenderer::render(Camera* c)
             shader->setUniform("diffuse_intensity", 1.0f);
             shader->setUniform("ambient_intensity", 1.0f);
 
-            if (Texture* t = m->getTexture(); t) {
-                glBindTexture(GL_TEXTURE_2D, t->GetHandle());
+            if (auto t = m->getTexture(); t) {
+                texman->bindTexture(*t, 0); // glBindTexture(GL_TEXTURE_2D, t->GetHandle());
                 shader->setUniform("tex_amount", 1.0f);
 
             } else {
-                glBindTexture(GL_TEXTURE_2D, 0);
+                texman->unbindTexture(0);  // glBindTexture(GL_TEXTURE_2D, 0);
                 shader->setUniform("tex_amount", 0.0f);
             }
 
@@ -109,7 +111,7 @@ void GLRenderer::render(Camera* c)
             //                   md.ambientColor.x, md.ambientColor.y, md.ambientColor.z);
 
         } else {
-            glBindTexture(GL_TEXTURE_2D, 0);
+            texman->unbindTexture(0);  // glBindTexture(GL_TEXTURE_2D, 0);
             shader->setUniform("tex_amount", 0.0f);
             shader->setUniform("diffuse_color", glm::vec3(0.5));
             shader->setUniform("ambient_color", glm::vec3(0.1));
