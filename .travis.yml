@@ -29,6 +29,8 @@ addons:
       - libglew2.1
       - libglew-dev
       - libsdl2-2.0.0
+      - libsdl2-image-dev
+      - libsdl2-image-2.0-0
       - libfmt-dev
       - libsdl2-dev
       - libdevil1c2
