@@ -84,7 +84,7 @@ if (MSVC)
   include(${CMAKE_TOOLCHAIN_FILE})
 
   # Set include directories
-  find_package(SDL2_image CONFIG REQUIRED)
+  find_package(sdl2-image CONFIG REQUIRED)
   find_package(glm CONFIG REQUIRED)
 
   find_path(CAIRO_INCLUDE_DIR cairo/cairo.h REQUIRED)
