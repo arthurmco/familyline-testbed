@@ -27,7 +27,7 @@ TEST(GameTest, TestIfGameStartsAndRuns)
     LogicService::getActionQueue()->clearEvents();
     LogicService::getObjectFactory()->clear();
     GFXService::setDevice(std::make_unique<TestDevice>());
-    GFXService::createTextureManager(std::make_unique<TextureManager>(std::make_unique<TestTextureEnvironment>()));
+    GFXService::createTextureManager(std::make_unique<TextureManager>(GFXService::getDevice()->createTextureEnv()));
     
     std::string mapfile = TESTS_DIR "/terrain_test.flte";
     

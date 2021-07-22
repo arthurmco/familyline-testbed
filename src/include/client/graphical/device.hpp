@@ -14,6 +14,7 @@
 
 #include <client/graphical/framebuffer.hpp>
 #include <client/graphical/renderer.hpp>
+#include <client/graphical/texture_environment.hpp>
 
 namespace familyline::graphics
 {
@@ -40,6 +41,8 @@ public:
     virtual ShaderProgram* createShaderProgram(std::string_view name,
                                                std::initializer_list<Shader*> shaders) = 0;
 
+    virtual std::unique_ptr<TextureEnvironment> createTextureEnv() = 0;
+    
     virtual Framebuffer* createFramebuffer(std::string name, int width, int height) = 0;
     
     virtual Window* createWindow(size_t w, size_t h) = 0;

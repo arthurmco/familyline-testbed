@@ -8,6 +8,7 @@
 #include <client/graphical/opengl/gl_window.hpp>
 #include <client/graphical/opengl/gl_shader.hpp>
 #include <client/graphical/opengl/gl_framebuffer.hpp>
+#include <client/graphical/opengl/gl_texture_environment.hpp>
 
 using namespace familyline;
 using namespace familyline::graphics;
@@ -89,6 +90,14 @@ ShaderProgram* GLDevice::createShaderProgram(
     return new GLShaderProgram{name, glsh};
 }
 
+
+std::unique_ptr<TextureEnvironment> GLDevice::createTextureEnv()
+{
+    auto glenv = std::make_unique<GLTextureEnvironment>();
+    glenv->initialize();
+    return glenv;
+}
+    
 
 Framebuffer* GLDevice::createFramebuffer(std::string name, int width, int height)
 {

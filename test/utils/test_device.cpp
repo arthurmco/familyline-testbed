@@ -1,6 +1,7 @@
 #include "test_device.hpp"
 
 #include "test_framebuffer.hpp"
+#include "test_texenv.hpp"
 
 int shader_nidx = 0;
 
@@ -14,4 +15,11 @@ familyline::graphics::Framebuffer* TestDevice::createFramebuffer(
 {
     fblist_.push_back(std::make_unique<TestFramebuffer>(name, width, height));
     return fblist_.back().get();
+}
+
+std::unique_ptr<familyline::graphics::TextureEnvironment> TestDevice::createTextureEnv() {
+    auto env = std::make_unique<TestTextureEnvironment>();
+    env->initialize();
+
+    return env;
 }

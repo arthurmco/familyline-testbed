@@ -36,9 +36,6 @@ static void enable_gl_debug()
         unsigned lastsec = 0;
     };
 
-    auto glenv = std::make_unique<GLTextureEnvironment>();
-    GFXService::createTextureManager(std::make_unique<TextureManager>(std::move(glenv)));
-    
     auto gl_debug_callback = [](GLuint source, GLuint type, unsigned int id, GLuint severity,
                                 int length, const char* msg, const void* userparam) {
         (void)userparam;

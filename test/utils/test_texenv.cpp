@@ -31,7 +31,6 @@ tl::expected<std::unique_ptr<Texture>, ImageError> TestTextureEnvironment::loadT
     SDL_Surface *surface = IMG_Load(file.data());
     if (!surface) {
         std::string err = IMG_GetError();
-        log->write("test-texture-env", LogType::Error,"Error: %s\n", err.c_str());
         
         if (err.find("Couldn't open") != std::string::npos) {
             return tl::make_unexpected(ImageError::ImageNotExists);

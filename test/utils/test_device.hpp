@@ -108,5 +108,7 @@ public:
         return new TestWindow{};
     }
 
+    virtual std::unique_ptr<familyline::graphics::TextureEnvironment> createTextureEnv();
+    
     virtual ~TestDevice(){};
 };

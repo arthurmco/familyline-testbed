@@ -45,6 +45,9 @@ public:
     virtual ShaderProgram* createShaderProgram(std::string_view name,
                                                std::initializer_list<Shader*> shaders);
 
+
+    virtual std::unique_ptr<TextureEnvironment> createTextureEnv();
+    
     virtual Framebuffer* createFramebuffer(std::string name, int width, int height);
 
     /**
