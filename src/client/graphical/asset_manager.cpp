@@ -141,9 +141,10 @@ Asset AssetManager::processAsset(AssetItem& av)
         asset.type        = AssetType::TextureAsset;
         auto texasset     = std::dynamic_pointer_cast<TextureAsset>(asset.loadAssetObject()[0]);
         TextureHandle tex = *texasset->getHandle(*GFXService::getTextureManager().get());
-
+        
         asset.object = std::make_optional(texasset);
         GFXService::getTextureManager()->registerTexture(asset.name.c_str(), tex);
+        GFXService::getTextureManager()->uploadTexture(tex);
 
         char* matname = new char[asset.name.size() + 10];
         sprintf(matname, "texture:%s", asset.name.c_str());

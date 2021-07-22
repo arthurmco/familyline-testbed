@@ -859,6 +859,9 @@ int main(int argc, char const* argv[])
         InputService::setInputManager(std::make_unique<InputManager>(*ipr.get()));
         auto& ima = InputService::getInputManager();
 
+        GFXService::createTextureManager(std::make_unique<TextureManager>(device->createTextureEnv()));
+
+        
         //        InputManager::GetInstance()->Initialize();
         win = device->createWindow(pi.width, pi.height);
 

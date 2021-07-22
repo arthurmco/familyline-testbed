@@ -62,7 +62,7 @@ struct TextureAtlasLoad {
 class TextureManager
 {
 public:
-    explicit TextureManager(std::unique_ptr<TextureEnvironment> &&environ)
+    explicit TextureManager(std::unique_ptr<TextureEnvironment> environ)
         : environ_(std::move(environ))
     {
     }

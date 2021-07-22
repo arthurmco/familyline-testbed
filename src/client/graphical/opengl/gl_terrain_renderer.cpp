@@ -256,6 +256,7 @@ void GLTerrainRenderer::buildTextures()
     auto tres = GFXService::getTextureManager()->loadTexture(TEXTURES_DIR "/terrain/texatlas.png");
     if (tres) {
         tatlas_ = *tres;
+        GFXService::getTextureManager()->uploadTexture(tatlas_);
     } else {
         assert(false);
     }

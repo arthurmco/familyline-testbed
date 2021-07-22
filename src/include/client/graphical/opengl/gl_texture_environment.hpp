@@ -47,7 +47,7 @@ public:
     loadTextureFromMemory(
         std::span<uint8_t> data, size_t width, size_t height,
         familyline::graphics::TextureFormat format);
-
+   
     /**
      * Gets the maximum texture size you can send to the GPU
      *
@@ -108,6 +108,13 @@ private:
 
     int current_unit_ = 0;
     std::array<GLuint /* texture */, 32 /* unit */> current_bound_ = {};
+
+    /**
+     * Update byte data of the current bound texture with the contents of
+     * the passed SDL_Surface 
+     */
+    void updateBoundTextureData(SDL_Surface& data);
+    
 };
 }  // namespace familyline::graphics
 

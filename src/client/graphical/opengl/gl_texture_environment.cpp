@@ -2,14 +2,25 @@
 
 #ifdef RENDERER_OPENGL
 
+#include <fmt/format.h>
+
 #include <common/logger.hpp>
 
 using namespace familyline::graphics;
 
+/**
+ * Reference count to control how much texture environments are initalized
+ *
+ * Since IMG_Init() and IMG_Quit() are global, we must control them, so if we initialize two
+ * environments, they do not initialize twice, or deinitialize each other
+ */
+static int initref = 0;
+
 bool GLTextureEnvironment::initialize()
 {
-    auto &log     = LoggerService::getLogger();
-    int flags     = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
+    auto &log = LoggerService::getLogger();
+    int flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
+
     int initflags = IMG_Init(flags);
 
     if ((initflags & flags) != flags) {
@@ -19,7 +30,10 @@ bool GLTextureEnvironment::initialize()
         return false;
     }
 
-    log->write("gl-texture-env", LogType::Info, "opengl texture environment initialized");
+    initref++;
+    log->write(
+        "gl-texture-env", LogType::Info, "opengl texture environment initialized (envcount %d)",
+        initref);
 
     started_ = true;
     return true;
@@ -60,6 +74,7 @@ tl::expected<std::unique_ptr<Texture>, ImageError> GLTextureEnvironment::loadTex
         }
     }
 
+    log->write("gl-texture-env", LogType::Info, "loaded texture '%s'", file.data());
     auto data = make_surface_unique_ptr(surface);
     return std::make_unique<Texture>(std::move(data));
 }
@@ -151,12 +166,50 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::uploadTexture(Textur
 
     t.renderer_handle = std::make_optional((uintptr_t)tex_handle);
     SDL_Surface *data = t.data.get();
+    this->updateBoundTextureData(*data);
 
-    GLenum format = GL_RGB;
-    switch (data->format->format) {
-        case SDL_PIXELFORMAT_RGBA32: format = GL_RGBA; break;
-        case SDL_PIXELFORMAT_BGRA32: format = GL_BGRA; break;
-        default: format = GL_RGB; break;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    log->write("gl-texture-env", LogType::Info, "added texture handle %08x", tex_handle);
+
+    if (currentbind != 0) {
+        glBindTexture(GL_TEXTURE_2D, currentbind);
+    }
+
+    return tex_handle;
+}
+
+/**
+ * Update byte data of the current bound texture with the contents of
+ * the passed SDL_Surface
+ */
+void GLTextureEnvironment::updateBoundTextureData(SDL_Surface &data)
+{
+    auto &log             = LoggerService::getLogger();
+    std::string formatstr = "";
+    GLenum format         = GL_RGB;
+    switch (data.format->format) {
+        case SDL_PIXELFORMAT_RGBA32:
+            formatstr = "RGBA32";
+            format    = GL_RGBA;
+            break;
+        case SDL_PIXELFORMAT_BGRA32:
+            formatstr = "BGRA32";
+            format    = GL_BGRA;
+            break;
+        case SDL_PIXELFORMAT_RGB24:
+            formatstr = "RGB24";
+            format    = GL_RGB;
+            break;
+        case SDL_PIXELFORMAT_BGR24:
+            formatstr = "BGR24";
+            format    = GL_BGR;
+            break;
+        default:
+            formatstr = fmt::format("unknown ({:04x})", data.format->format);
+            format    = GL_RGB;
+            break;
     }
 
     GLenum dest_format = GL_SRGB;
@@ -164,21 +217,14 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::uploadTexture(Textur
         dest_format = GL_SRGB_ALPHA;
     }
 
-    SDL_LockSurface(data);
+    log->write(
+        "gl-texture-env", LogType::Info, "setting texture data: width=%d, height=%d, format=%s",
+        data.w, data.h, formatstr.c_str());
+
+    SDL_LockSurface(&data);
     glTexImage2D(
-        GL_TEXTURE_2D, 0, dest_format, data->w, data->h, 0, format, GL_UNSIGNED_BYTE, data->pixels);
-    SDL_UnlockSurface(data);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    log->write("gl-texture-env", LogType::Info, "\t added texture handle %08x", tex_handle);
-
-    if (currentbind != 0) {
-        glBindTexture(GL_TEXTURE_2D, currentbind);
-    }
-
-    return tex_handle;
+        GL_TEXTURE_2D, 0, dest_format, data.w, data.h, 0, format, GL_UNSIGNED_BYTE, data.pixels);
+    SDL_UnlockSurface(&data);
 }
 
 /**
@@ -195,8 +241,23 @@ tl::expected<uintptr_t, ImageError> GLTextureEnvironment::setTextureData(
 {
     return this->loadTextureFromMemory(data, width, height, format)
         .map([&](auto ntexture) {
+            auto &log = LoggerService::getLogger();
+            log->write(
+                "gl-texture-env", LogType::Info, "setting data of texture with handle %08x",
+                *t.renderer_handle);
+
             t.data = std::move(ntexture->data);
-            return uintptr_t(t.renderer_handle ? *t.renderer_handle : 0);
+
+            auto currentbind = current_bound_[current_unit_];
+            auto handle = *t.renderer_handle;
+
+            glBindTexture(GL_TEXTURE_2D, handle);
+            this->updateBoundTextureData(*t.data.get());
+            if (currentbind != 0) {
+                glBindTexture(GL_TEXTURE_2D, currentbind);
+            }
+            
+            return handle;
         })
         .map_error([](auto error) { return error; });
 }
@@ -226,16 +287,30 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::unloadTexture(Textur
  */
 tl::expected<uintptr_t, TextureError> GLTextureEnvironment::bindTexture(Texture &t, unsigned unit)
 {
-    if (unit >= current_bound_.size())
-        return tl::make_unexpected(TextureError::TextureUnitInvalid);
+    auto &log = LoggerService::getLogger();
 
-    if (!t.renderer_handle) return tl::make_unexpected(TextureError::TextureNotFound);
+    if (unit >= current_bound_.size()) {
+        log->write(
+            "gl-texture-env", LogType::Error, "Texture unit is out of the bounds for texture %#x",
+            t.renderer_handle);
+        return tl::make_unexpected(TextureError::TextureUnitInvalid);
+    }
+
+    if (!t.renderer_handle) {
+        log->write(
+            "gl-texture-env", LogType::Error, "Texture %#x not loaded into the videocard",
+            t.renderer_handle);
+        return tl::make_unexpected(TextureError::TextureNotFound);
+    }
 
     GLuint handle        = *t.renderer_handle;
     int current_unit_    = unit;
     current_bound_[unit] = handle;
 
     glBindTexture(GL_TEXTURE_2D, handle);
+#if 0
+    log->write("gl-texture-env", LogType::Debug, "opengl texture %#x bound to unit %d", handle, unit);
+#endif
 
     return handle;
 }
@@ -245,21 +320,24 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::bindTexture(Texture 
  */
 tl::expected<uintptr_t, TextureError> GLTextureEnvironment::unbindTexture(unsigned unit)
 {
-    if (unit >= current_bound_.size())
-        return tl::make_unexpected(TextureError::TextureUnitInvalid);
+    auto &log = LoggerService::getLogger();
+    if (unit >= current_bound_.size()) return tl::make_unexpected(TextureError::TextureUnitInvalid);
 
     int current_unit_    = unit;
-    auto handle = current_bound_[unit];
+    auto handle          = current_bound_[unit];
     current_bound_[unit] = 0;
 
     glBindTexture(GL_TEXTURE_2D, 0);
-
+#if 0
+    log->write("gl-texture-env", LogType::Debug, "opengl texture %#x unbound from unit %d", handle, unit);
+#endif
     return handle;
 }
 
 GLTextureEnvironment::~GLTextureEnvironment()
 {
-    if (started_) {
+    initref--;
+    if (started_ && initref == 0) {
         IMG_Quit();
     }
 }
