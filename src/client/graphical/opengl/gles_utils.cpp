@@ -1,8 +1,9 @@
 #include <client/graphical/opengl/gles_utils.hpp>
 
+#ifdef USE_GLES
+
 using namespace familyline::graphics;
 
-#ifdef USE_GLES
 
 bool familyline::graphics::isExtensionPresent(std::string_view name)
 {

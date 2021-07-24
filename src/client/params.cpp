@@ -3,7 +3,7 @@
 #include <cstdlib>
 
 #include <client/graphical/opengl/gl_device.hpp>
-#include "client/graphical/device.hpp"
+#include <client/graphical/device.hpp>
 
 static void show_help()
 {

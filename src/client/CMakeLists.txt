@@ -4,6 +4,17 @@
 
 include("${CMAKE_SOURCE_DIR}/src/common/generated.cmake")
 
+set(FLINE_RENDERER "opengl" CACHE STRING "Set if you want to support the opengl renderer. 
+Since this is the only renderer, if you disable, you will not be able to render anything")
+
+option(FLINE_USE_GLES  "Set if you want to use OpenGL ES instead of OpenGL. Only has effect if FLINE_RENDERER=opengl" OFF)
+
+message("Renderer: ${FLINE_RENDERER} ")
+
+if (${FLINE_RENDERER} EQUAL "opengl")
+message("Use GLES: ${FLINE_USE_GLES} ")
+endif()
+
 add_library(
   familyline-client
   "params.cpp"
@@ -119,3 +130,7 @@ if (FLINE_DO_CHECK_UBSAN)
     target_link_libraries(familyline-client PUBLIC "-fsanitize=undefined")
   endif()
 endif()
+
+configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/../../src/include/client/config.h.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../src/include/client/config.h" )
+

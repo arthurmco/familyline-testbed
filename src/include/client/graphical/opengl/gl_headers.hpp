@@ -8,9 +8,13 @@
  */
 
 #if __has_include(<SDL2/SDL_opengl.h>) && __has_include(<GL/glew.h>)
-#define RENDERER_OPENGL
+#define RENDERER_OPENGL (FLINE_RENDERER == "opengl")
 
-#define USE_GLES 1
+#include <client/config.h>
+
+#ifdef FLINE_USE_GLES
+#define USE_GLES FLINE_USE_GLES
+#endif
 
 #if !(defined(__gl_h_) || defined(__GL_H__) || defined(_GL_H) || defined(__X_GL_H))
 #ifndef USE_GLES
