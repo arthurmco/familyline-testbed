@@ -26,6 +26,16 @@ private:
     std::string readAndProcessFile(const char* file);    
     std::string readFile(const char* file);
 
+    /**
+     * Only used in OpenGL ES.
+     *
+     * Since OpenGL ES requires precision attributes (lowp, mediump, highp), 
+     * we will add them.
+     * By default, this function uses mediump for every vector type, and lowp
+     * for floats
+     */
+    std::string addPrecisionData(std::string content);
+    
 public:
     GLShader(const char* file, ShaderType type);
     virtual void compile();

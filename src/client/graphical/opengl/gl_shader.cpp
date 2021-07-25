@@ -9,6 +9,9 @@
 
 #include <regex>
 #include <fmt/format.h>
+#include <tuple>
+
+#include <common/logger.hpp>
 
 using namespace familyline::graphics;
 
@@ -43,15 +46,72 @@ GLShader::GLShader(const char* file, ShaderType type)
     }
 
     this->_handle     = glCreateShader(gltype);
+
+    auto& log = LoggerService::getLogger();
+    log->write("gl-shader", LogType::Info, "creating shader %s type %s with filesize %zu",
+               file, "???", content.size());
+
+#ifdef USE_GLES
+    if (gltype == GL_FRAGMENT_SHADER)
+        content = this->addPrecisionData(content);
+#endif
+
     const char* cdata = content.c_str();
 
-    glShaderSource(this->_handle, 1, (const char**)&cdata, NULL);
 
+    glShaderSource(this->_handle, 1, (const char**)&cdata, NULL);
+    
     this->_file = file;
     this->_type = type;
 
     this->compile();
 }
+
+/**
+ * Only used in OpenGL ES.
+ *
+ * Since OpenGL ES requires precision attributes (lowp, mediump, highp),
+ * we will add them.
+ * By default, this function uses mediump for every vector type, and lowp
+ * for floats
+ *
+ * Returns the shader content, with precision data
+ */
+std::string GLShader::addPrecisionData(std::string content)
+{
+    auto& log = LoggerService::getLogger();
+    log->write("gl-shader", LogType::Info, "opengl-es: adding precision data for this shader");
+
+    /// Create a source regex and a substitution rule
+    /// It will try to match ((<qualifier>) <space> <type> <space> (<name>)), being this
+    /// into a variable declaration or a parameter declaration.
+    /// The qualifier and the variable name are captured.
+    ///
+    /// Note that this will not get declarations that are not at the start of a line.
+    auto fn_createRegex = [](const char* datatype, const char* precision) {
+        std::string restr = fmt::format(R"re(([\n\(,]\s*)([a-z]*\s*){}\s+([a-zA-Z0-9_]*)\s*)re", datatype);
+        std::string dst = fmt::format("$1$2{} {} $3", precision, datatype);
+        return std::tuple<std::regex, std::string>(std::regex(restr), dst);
+    };
+
+    auto alist = std::to_array<std::tuple<std::regex, std::string>>({
+            fn_createRegex("vec2", "mediump"),
+            fn_createRegex("vec3", "mediump"),
+            fn_createRegex("vec4", "mediump"),
+            fn_createRegex("float", "lowp"),
+        });
+
+
+    std::string ncontent = content;
+    for (auto& [restr, dst] : alist) {
+        std::string out = std::regex_replace(ncontent, restr, dst);
+        ncontent = out;
+    }
+
+    return ncontent;
+
+}
+
 
 std::regex regInclude(R"(\#include\s*\"(.*)\")");
 
@@ -145,7 +205,7 @@ GLShaderProgram::GLShaderProgram(std::string_view name, const std::vector<GLShad
     if (shaders.size() > 0)
         this->_handle = glCreateProgram();
 
-    for (auto s : shaders) {        
+    for (auto s : shaders) {
         _files.push_back(std::make_pair(s->getType(), s));
         glAttachShader(_handle, s->getHandle());
     }
