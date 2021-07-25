@@ -37,9 +37,9 @@ in vec4 outPosition;
 
 void main() {
   vec3 vcolor = diffuse_color;
-  vec3 texel = vec3(1,0,0);
+  vec3 texel = vec3(1.0,0.0,0.0);
 
-  vec2 uvcoords = vec2(tex_coords.x, (tex_idx/ycount) + (tex_coords.y/ycount));
+  vec2 uvcoords = vec2(tex_coords.x, (float(tex_idx)/ycount) + (tex_coords.y/ycount));
 
   texel = texture(tex_sam, uvcoords).rgb;
   vcolor = mix(diffuse_color, texel * 0.9, tex_amount);
