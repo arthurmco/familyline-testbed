@@ -22,20 +22,25 @@ GLShader::GLShader(const char* file, ShaderType type)
     auto content = this->readFile(file);
 
     GLenum gltype = -1;
+    const char* strtype;
     switch (type) {
         case ShaderType::Vertex:
             gltype = GL_VERTEX_SHADER;
+            strtype = "vertex";
             break;
         case ShaderType::Fragment:
             gltype = GL_FRAGMENT_SHADER;
+            strtype = "fragment";
             break;
 #ifndef USE_GLES
         /// core OpenGL ES 3.0 does not support geopetry nor compute shaders
-	case ShaderType::Geometry:
+    	case ShaderType::Geometry:
             gltype = GL_GEOMETRY_SHADER;
+            strtype = "geometry";
             break;
         case ShaderType::Compute:
             gltype = GL_COMPUTE_SHADER;
+            strtype = "compute";
             break;
 #endif
 	default:
@@ -49,7 +54,7 @@ GLShader::GLShader(const char* file, ShaderType type)
 
     auto& log = LoggerService::getLogger();
     log->write("gl-shader", LogType::Info, "creating shader %s type %s with filesize %zu",
-               file, "???", content.size());
+               file, strtype, content.size());
 
 #ifdef USE_GLES
     if (gltype == GL_FRAGMENT_SHADER)
