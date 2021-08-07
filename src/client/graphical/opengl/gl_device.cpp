@@ -25,9 +25,12 @@ std::vector<std::unique_ptr<Device>> GLDevice::getDeviceList()
     }
 
     auto driverCount = SDL_GetNumVideoDrivers();
+
     for (auto i = 0; i < driverCount; i++) {
         auto code       = SDL_GetVideoDriver(i);
-        auto is_default = !strcmp(code, SDL_GetCurrentVideoDriver());
+
+	auto current = SDL_GetCurrentVideoDriver();
+        auto is_default = current && !strcmp(code, current);
 
         devs.push_back(std::make_unique<GLDevice>(code, is_default, i));
     }
