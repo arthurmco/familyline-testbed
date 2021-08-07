@@ -446,9 +446,9 @@ void PlayerManager::generateInput()
  * ID of a certain player name, or a name of a player who has a
  * certain ID
  */
-std::multimap<int, std::string> PlayerManager::getPlayerNames()
+std::multimap<uint64_t, std::string> PlayerManager::getPlayerNames()
 {
-    std::multimap<int, std::string> r;
+    std::multimap<uint64_t, std::string> r;
 
     std::for_each(players_.begin(), players_.end(), [&r](PlayerInfo& i) {
         r.emplace(i.id, std::string{i.player->getName()});

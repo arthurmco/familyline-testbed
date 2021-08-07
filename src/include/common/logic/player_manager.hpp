@@ -115,7 +115,7 @@ public:
      * ID of a certain player name, or a name of a player who has a
      * certain ID
      */
-    std::multimap<int, std::string> getPlayerNames();
+    std::multimap<uint64_t, std::string> getPlayerNames();
 
     /**
      * Push an action
