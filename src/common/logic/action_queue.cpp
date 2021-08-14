@@ -24,7 +24,7 @@ void ActionQueue::addReceiver(EventReceiver* r, std::initializer_list<ActionQueu
     rd.events   = events;
     rd.receiver = r;
 
-    log->write("action-queue", LogType::Debug, "added event receiver %s (%p)", r->getName().c_str(), r);
+    log->write("action-queue", LogType::Debug, "added event receiver {} ({:x})", r->getName(), (uintptr_t)r);
 
     this->receivers.push_back(rd);
 }
@@ -33,7 +33,7 @@ void ActionQueue::removeReceiver(EventReceiver* r)
 {
     assert(r);
     auto& log = LoggerService::getLogger();
-    log->write("action-queue", LogType::Debug, "removed event receiver %s (%p)", r->getName().c_str(), r);
+    log->write("action-queue", LogType::Debug, "removed event receiver {} ({:x})", r->getName(), (uintptr_t)r);
 
     auto newend = std::remove_if(receivers.begin(), receivers.end(), [r](ReceiverData rec) {
         return (rec.receiver->getName() == r->getName());
@@ -63,63 +63,63 @@ void ActionQueue::pushEvent(const EntityEvent& ev)
         overload{
             [&](const EventCreated& e) {
                 log->write(
-                    "action-queue", LogType::Info, "event added: EventCreated (%s, objectID=%llu)",
-                    begin.c_str(), e.objectID);
+                    "action-queue", LogType::Info, "event added: EventCreated ({}, objectID={})",
+                    begin, e.objectID);
             },
             [&](const EventBuilding& e) {
                 log->write(
-                    "action-queue", LogType::Info, "event added: EventBuilding (%s, objectID=%llu)",
-                    begin.c_str(), e.objectID);
+                    "action-queue", LogType::Info, "event added: EventBuilding ({}, objectID={})",
+                    begin, e.objectID);
             },
             [&](const EventBuilt& e) {
                 log->write(
-                    "action-queue", LogType::Info, "event added: EventBuilt (%s, objectID=%llu)",
-                    begin.c_str(), e.objectID);
+                    "action-queue", LogType::Info, "event added: EventBuilt ({}, objectID={})",
+                    begin, e.objectID);
             },
             [&](const EventReady& e) {
                 log->write(
-                    "action-queue", LogType::Info, "event added: EventReady (%s, objectID=%llu)",
-                    begin.c_str(), e.objectID);
+                    "action-queue", LogType::Info, "event added: EventReady ({}, objectID={})",
+                    begin, e.objectID);
             },
             [&](const EventAttacking& e) {
                 log->write(
                     "action-queue", LogType::Info,
-                    "event added: EventAttacking (%s, "
-                    "attacker(id=%llu, xpos=%d, ypos=%d), defender(id=%llu, xpos=%d, ypos=%d),"
-                    "damageDealt=%.2f)",
-                    begin.c_str(), e.attackerID, e.atkXPos, e.atkYPos, e.defenderID, e.defXPos,
+                    "event added: EventAttacking ({}, "
+                    "attacker(id={}, xpos={}, ypos={}), defender(id={}, xpos={}, ypos={}),"
+                    "damageDealt={:.2f})",
+                    begin, e.attackerID, e.atkXPos, e.atkYPos, e.defenderID, e.defXPos,
                     e.defYPos, e.damageDealt);
             },
             [&](const EventWorking& e) {
                 log->write(
                     "action-queue", LogType::Info,
-                    "event added: EventWorking (%s, objectID=%llu,"
-                    "atkXPos=%d, atkYPos=%d",
-                    begin.c_str(), e.objectID, e.atkXPos, e.atkYPos);
+                    "event added: EventWorking ({}, objectID={},"
+                    "atkXPos={}, atkYPos={}",
+                    begin, e.objectID, e.atkXPos, e.atkYPos);
             },
             [&](const EventGarrisoned& e) {
                 log->write(
                     "action-queue", LogType::Info,
-                    "event added: EventGarrisoned (%s, objectID=%llu,"
-                    "parentID=%d, entering=%s",
-                    begin.c_str(), e.objectID, e.parentID, e.entering ? "true" : "false");
+                    "event added: EventGarrisoned ({}, objectID={},"
+                    "parentID={}, entering={}",
+                    begin, e.objectID, e.parentID, e.entering ? "true" : "false");
             },
             [&](const EventDying& e) {
                 log->write(
                     "action-queue", LogType::Info,
-                    "event added: EventDying (%s, objectID=%llu,"
-                    "atkXPos=%d, atkYPos=%d",
-                    begin.c_str(), e.objectID, e.atkXPos, e.atkYPos);
+                    "event added: EventDying ({}, objectID={},"
+                    "atkXPos={}, atkYPos={}",
+                    begin, e.objectID, e.atkXPos, e.atkYPos);
             },
             [&](const EventDead& e) {
                 log->write(
-                    "action-queue", LogType::Info, "event added: EventDead (%s, objectID=%llu)",
-                    begin.c_str(), e.objectID);
+                    "action-queue", LogType::Info, "event added: EventDead ({}, objectID={})",
+                    begin, e.objectID);
             },
             [&](const EventDestroyed& e) {
                 log->write(
                     "action-queue", LogType::Info,
-                    "event added: EventDestroyed (%s, objectID=%llu)", begin.c_str(), e.objectID);
+                    "event added: EventDestroyed ({}, objectID={})", begin, e.objectID);
             }},
         ev.type);
 

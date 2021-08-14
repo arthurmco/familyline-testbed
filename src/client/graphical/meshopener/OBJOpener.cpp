@@ -183,7 +183,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
             current_group->vertices.push_back(VertexList{});
             current_vert = &current_group->vertices.back();
 
-            log->write("meshopener::obj", LogType::Debug, "found group '%s'", gname);
+            log->write("meshopener::obj", LogType::Debug, "found group '{}'", gname);
 
             delete[] gname;            
             continue;
@@ -195,8 +195,8 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
                 std::string mtlname = std::string{&l[7]};
 
                 log->write(
-                    "meshopener::obj", LogType::Debug, "group %s: found material '%s'",
-                    current_group->name.c_str(), mtlname.c_str());
+                    "meshopener::obj", LogType::Debug, "group {}: found material '{}'",
+                    current_group->name, mtlname);
                 // switch vertex list
                 current_group->vertices.push_back(VertexList{});
                 current_vert          = &current_group->vertices.back();
@@ -257,8 +257,8 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
     for (const auto& vg : verts) {
         if (!vg.hasNormal && !vg.hasTexture) continue;  // No normal and no texture? Unsupported
         log->write(
-            "meshopener::obj", LogType::Debug, "mesh %s, %zu vertex lists, normals=%s, textures=%s",
-            vg.name.c_str(), vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
+            "meshopener::obj", LogType::Debug, "mesh {}, {} vertex lists, normals={}, textures={}",
+            vg.name, vg.vertices.size(), (vg.hasNormal ? "true" : "false"),
             (vg.hasTexture ? "true" : "false"));
 
         VertexDataGroup vdlist;
@@ -276,7 +276,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
             unsigned uvidx = 0;
             log->write(
-                "meshopener::obj", LogType::Debug, "\tvertex list %u, %zu edges", idx,
+                "meshopener::obj", LogType::Debug, "\tvertex list {}, {} edges", idx,
                 vl.indices.size());
 
             /* The obj file creates a index unique for each normal, vertex or texcoords.
@@ -311,7 +311,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
             log->write(
                 "meshopener::obj", LogType::Debug,
-                "%zu unique vert/texcoord/normal combinations detected, %zu indices\n", uvs.size(),
+                "{} unique vert/texcoord/normal combinations detected, {} indices\n", uvs.size(),
                 index_list.size());
 
             // Build the vertex data
@@ -351,8 +351,8 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 
             } else {
                 log->write(
-                    "meshopener::obj", LogType::Warning, "cannot load material %s for %s",
-                    vl.mtlname.c_str(), vg.name.c_str());
+                    "meshopener::obj", LogType::Warning, "cannot load material '{}' for {}",
+                    vl.mtlname, vg.name);
 
                 VertexInfo vi(idx, -1, fshader, VertexRenderStyle::Triangles);
                 vi.hasTexCoords = vg.hasTexture;

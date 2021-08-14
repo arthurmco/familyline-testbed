@@ -80,7 +80,7 @@ void GLGUIManager::init(const Window& win)
     glGenTextures(1, &texHandle_);
     glBindTexture(GL_TEXTURE_2D, texHandle_);
 
-    LOGDEBUG(LoggerService::getLogger(), "gui-manager", "gui size: %dx%d", width_, height_);
+    LOGDEBUG(LoggerService::getLogger(), "gui-manager", "gui size: {:4d}x{:4d}", width_, height_);
 
     cairo_surface_flush(this->canvas_);
     //glTexImage2D(
@@ -150,7 +150,7 @@ void GLGUIManager::renderToTexture()
 
     GLenum err = glGetError();
     if (err != GL_NO_ERROR) {
-        log->write("gui-renderer", LogType::Error, "OpenGL error %#x", err);
+        log->write("gui-renderer", LogType::Error, "OpenGL error 0x{:x}", err);
     }
 
     glBindVertexArray(0);

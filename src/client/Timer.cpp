@@ -22,8 +22,8 @@ int Timer::AddFunctionCall(double ms, TimerFunction f, void* opt_inst, void* opt
 
     auto it_evt = _function_events.find(ms);
     log->write(
-        "timer", LogType::Debug, "Added function @%#p with instance %#p, arg %#p at each %.1f ms",
-        f, opt_inst, opt_arg, ms);
+        "timer", LogType::Debug, "Added function {:16x} with instance {:16x}, arg {:16x} at each {:.1f} ms",
+        (uintptr_t)f, opt_inst, opt_arg, ms);
 
     TimerFunctionStruct tfs;
     tfs.eid      = max_id++;

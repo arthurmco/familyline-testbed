@@ -14,7 +14,7 @@ int MaterialManager::addMaterial(Material* m)
 
     log->write(
         "material-manager", LogType::Debug,
-        "Added material %s (id %d) [diffuse (%.2f %.2f %.2f) ambient (%.2f %.2f %.2f) ]",
+        "Added material {} (id {}) [diffuse ({:.2f} {:.2f} {:.2f}) ambient ({:.2f} {:.2f} {:.2f}) ]",
         m->getName(), m->getID(), m->getData().diffuseColor.r, m->getData().diffuseColor.g,
         m->getData().diffuseColor.b, m->getData().ambientColor.r, m->getData().ambientColor.g,
         m->getData().ambientColor.b);

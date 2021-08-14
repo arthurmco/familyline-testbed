@@ -40,7 +40,7 @@ Alliance& ColonyManager::createAlliance(std::string name)
     alliances_.push_back(a);
 
     auto& log = LoggerService::getLogger();
-    log->write("colony-manager", LogType::Info, "alliance %s created", name.c_str());
+    log->write("colony-manager", LogType::Info, "alliance {} created", name);
 
     auto& ab = alliances_.back();
     return ab;
@@ -90,22 +90,22 @@ void ColonyManager::setAllianceDiplomacy(Alliance& a, Alliance& other, Diplomacy
     switch (s) {
         case DiplomacyStatus::Enemy:
             log->write(
-                "colony-manager", LogType::Info, "%s is now enemy of %s", a.name.c_str(),
-                other.name.c_str());
+                "colony-manager", LogType::Info, "{} is now enemy of {}", a.name,
+                other.name);
             a.enemies.push_back(other);
             break;
 
         case DiplomacyStatus::Ally:
             log->write(
-                "colony-manager", LogType::Info, "%s is now ally of %s", a.name.c_str(),
-                other.name.c_str());
+                "colony-manager", LogType::Info, "{} is now ally of {}", a.name,
+                other.name);
             a.allies.push_back(other);
             break;
 
         default:
             log->write(
-                "colony-manager", LogType::Info, "%s is now neutral of %s (have no diplomacy set)",
-                a.name.c_str(), other.name.c_str());
+                "colony-manager", LogType::Info, "{} is now neutral of {} (have no diplomacy set)",
+                a.name, other.name);
             return;
     }
 }

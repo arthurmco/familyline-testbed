@@ -13,7 +13,7 @@ void NetworkPlayer::generateInput()
     for (net::Packet packet; client_.peek(packet);) {
         if (Packet::InputRequest* req = std::get_if<Packet::InputRequest>(&packet.message); req) {
             log->write(
-                "network-player", LogType::Debug, "received packet, from=%zu, tick=%zu",
+                "network-player", LogType::Debug, "received packet, from={}, tick={}",
                 req->client_from, packet.tick);
             this->pushAction(req->input, packet.tick);
         }

@@ -99,7 +99,7 @@ std::vector<glm::vec3> GLTerrainRenderer::createNormals(
             if (std::isnan(vnormal.x) || std::isnan(vnormal.y))
                 LoggerService::getLogger()->write(
                     "terrain-renderer", LogType::Error,
-                    "normal of (%.3f, %.3f, %.3f) [  (%.3f, %.3f, %.3f) ]"
+                    "normal of ({:.3f}, {:.3f}, {:.3f}) [  ({:.3f}, {:.3f}, {:.3f}) ]"
                     "gave NaN",
                     vertices[idx].x, vertices[idx].y, vertices[idx].z, vnormal.x, vnormal.y,
                     vnormal.z);
@@ -224,7 +224,7 @@ GLuint GLTerrainRenderer::createTerrainDataVAO()
     auto& log = LoggerService::getLogger();
     err       = glGetError();
     if (err != GL_NO_ERROR) {
-        log->write("terrain-renderer", LogType::Warning, "GL error %#x while creating VAO", err);
+        log->write("terrain-renderer", LogType::Warning, "GL error 0x{:x} while creating VAO", err);
     }
 
     return vao;
@@ -339,6 +339,6 @@ void GLTerrainRenderer::render(Renderer& r)
 
     err = glGetError();
     if (err != GL_NO_ERROR) {
-        log->write("terrain-renderer", LogType::Warning, "GL error %#x", err);
+        log->write("terrain-renderer", LogType::Warning, "GL error 0x{:x}", err);
     }
 }

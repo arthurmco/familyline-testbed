@@ -86,7 +86,7 @@ Packet toNativePacket(const ::familyline::NetPacket* p)
                         default:
                             log->write(
                                 "game-packet-server", familyline::LogType::Fatal,
-                                "Read input message type (%02x)", type);
+                                "Read input message type ({:02x})", type);
                             return (void*)nullptr;
                     }
                 });
@@ -133,7 +133,7 @@ flatbuffers::Offset<::familyline::NetPacket> GamePacketServer::toSerializedPacke
 
                 log->write(
                     "game-packet-server", LogType::Error,
-                    "to be sent message (timestamp %ull, id %d) is invalid (has invalid type)",
+                    "to be sent message (timestamp {}, id {}) is invalid (has invalid type)",
                     p.timestamp.count(), p.id);
                 msg_type = familyline::Message_NONE;
             },
@@ -219,7 +219,7 @@ bool GamePacketServer::connect()
     if (::connect(socket_, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
         log->write(
             "game-packet-server", LogType::Error,
-            "Failed to connect to game packet server at %s:%d (%s)", address_.c_str(), port_,
+            "Failed to connect to game packet server at {}:{} ({})", address_.c_str(), port_,
             strerror(errno));
 
         return false;
@@ -268,7 +268,7 @@ void GamePacketServer::update()
         packet.id   = ++last_message_id_;
         log->write(
             "game-packet-server", LogType::Info,
-            "sending package (id %llu, from %llu, to %llu, tick %llu, timestamp %llu..., type %d )", packet.id,
+            "sending package (id {}, from {}, to {}, tick {}, timestamp {}..., type {} )", packet.id,
             packet.source_client, packet.dest_client, packet.tick, packet.timestamp, packet.message.index());
 
         auto byte_data = this->createMessage(packet);
@@ -280,17 +280,17 @@ void GamePacketServer::update()
 
         if (r < 0) {
             log->write(
-                "game-packet-server", LogType::Error, "Error while sending a packet: %d (%s)",
+                "game-packet-server", LogType::Error, "Error while sending a packet: {} ({})",
                 errno, strerror(errno));
         }
 
         if (r != byte_data.size()) {
             log->write(
                 "game-packet-server", LogType::Error,
-                "Data send was different than packet size (%d != %zu)", r, byte_data.size());
+                "Data send was different than packet size ({} != {})", r, byte_data.size());
         }
 
-        log->write("game-packet-server", LogType::Info, "data sent! (%zu)", byte_data.size());
+        log->write("game-packet-server", LogType::Info, "data sent! ({})", byte_data.size());
     }
 
     auto r             = recv(socket_, data.data(), data.size()-1, MSG_DONTWAIT);
@@ -307,7 +307,7 @@ void GamePacketServer::update()
         }
 
         log->write(
-            "game-packet-server", LogType::Error, "Error while receiving a packet: %d (%s)", errno,
+            "game-packet-server", LogType::Error, "Error while receiving a packet: {} ({})", errno,
             strerror(errno));
         return;
     }
@@ -317,14 +317,14 @@ void GamePacketServer::update()
     if (pkts.size() == 0) {
         log->write(
             "game-packet-server", LogType::Error,
-            "received invalid packet (len %zu, starts with %02x %02x %02x %02x", r,
+            "received invalid packet (len {}, starts with {:02x} {:02x} {:02x} {:02x}", r,
             r > 0 ? vdata[0] : 0, r > 1 ? vdata[1] : 0, r > 2 ? vdata[2] : 0, r > 3 ? vdata[3] : 0);
     }
 
     for (auto& pkt : pkts) {
         log->write(
             "game-packet-server", LogType::Info,
-            "received packet (id %llu, from %llu, to %llu, tick %llu, timestamp %llu..., type %d )", pkt.id,
+            "received packet (id {}, from {}, to {}, tick {}, timestamp {}..., type {} )", pkt.id,
             pkt.source_client, pkt.dest_client, pkt.tick, pkt.timestamp, pkt.message.index());
         receive_mutex_.lock();
         if (dispatch_client_messages_ && pkt.source_client != 0) {
@@ -411,7 +411,7 @@ GamePacketServer::waitForClientConnection(int timeout)
                 printf("received a message!");
                 if (auto p = std::get_if<Packet::NStartResponse>(&pkt.message); p) {
                     log->write(
-                        "game-packet-server", LogType::Info, "client id %llx ack'ed",
+                        "game-packet-server", LogType::Info, "client id {} ack'ed",
                         p->client_ack);
 
                     // Do not add ourselves to the client list
@@ -523,14 +523,14 @@ std::vector<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
     if (data.size() <= 16) {
         log->write(
             "game-packet-server", LogType::Error,
-            "received a packet too small (%zu bytes, minimum is 16+1)", data.size());
+            "received a packet too small ({} bytes, minimum is 16+1)", data.size());
         return std::vector<Packet>();
     }
 
     if (data[0] != 'F' || data[1] != 'A' || data[2] != 'M' || data[3] != 'I') {
         log->write(
             "game-packet-server", LogType::Error,
-            "received a packet with an incorrect header (%02x %02X %02x %02x)", data[0], data[1],
+            "received a packet with an incorrect header ({:02x} {:02X} {:02x} {:02x})", data[0], data[1],
             data[2], data[3]);
         return std::vector<Packet>();
     }
@@ -565,8 +565,7 @@ std::vector<Packet> GamePacketServer::decodeMessage(std::vector<uint8_t> data)
     if (data.size() > packetdata.size()) {
         log->write(
             "game-packet-server", LogType::Info,
-            "we received more than 1 packet in a message? (%zu vs "
-            "%zu)",
+            "we received more than 1 packet in a message? ({} vs {})",
             data.size(), packetdata.size());
 
         auto len = data.size() - packetdata.size();

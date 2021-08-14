@@ -61,15 +61,15 @@ bool InputRecorder::createFile(std::string_view path, ObjectFactory* const of)
         auto oldpath = path;
         npath   = fmt::format("{}.new", path);
         LoggerService::getLogger()->write(
-            "input-recorder", LogType::Error, "file '%s' already exists!, renaming to '%s'",
-            oldpath.data(), npath.c_str());
+            "input-recorder", LogType::Error, "file '{}' already exists!, renaming to '{}'",
+            oldpath, npath);
     }
 
     f_ = fopen(npath.data(), "wb+");
     if (!f_) {
         LoggerService::getLogger()->write(
-            "input-recorder", LogType::Error, "could not create input recorder file %s: %s (%d)",
-            path.data(), strerror(errno), errno);
+            "input-recorder", LogType::Error, "could not create input recorder file {}: {} ({})",
+            path, strerror(errno), errno);
         path_ = "";
         return false;
     }
@@ -102,7 +102,7 @@ bool InputRecorder::createFile(std::string_view path, ObjectFactory* const of)
     if (!f_) return false;
 
     LoggerService::getLogger()->write(
-        "input-recorder", LogType::Info, "creating input file %s", npath.data());
+        "input-recorder", LogType::Info, "creating input file {}", npath);
     path_ = npath;
     return true;
 }
@@ -261,7 +261,7 @@ void InputRecorder::commit()
 
         checksum = calculateChecksum(path_);
         LoggerService::getLogger()->write(
-            "input-recorder", LogType::Info, "writing checksum %08x to the file %s", checksum,
+            "input-recorder", LogType::Info, "writing checksum {:08x} to the file {}", checksum,
             path_.c_str());
 
         fseek(f_, checksumpos, SEEK_SET);

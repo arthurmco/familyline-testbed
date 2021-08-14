@@ -144,7 +144,7 @@ void AttackManager::processAttacks(ObjectLifecycleManager& olm)
     }
 
     for (auto handle : to_remove) {
-        log->write("attack-manager", LogType::Debug, "removed %lx\n", handle);
+        log->write("attack-manager", LogType::Debug, "removed {:08x}\n", handle);
         this->attacks.erase(handle);
     }
 }

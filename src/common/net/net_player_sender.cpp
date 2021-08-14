@@ -17,7 +17,7 @@ bool NetPlayerSender::listenPlayer(logic::PlayerInputAction a)
         "CameraMove", "CameraRotate", "?", "?", "?"
     };
     
-    log->write("net-player-sender", LogType::Debug, "sending packet to the server, tick=%zu, type: %s", a.tick,
+    log->write("net-player-sender", LogType::Debug, "sending packet to the server, tick={}, type: {}", a.tick,
                action_names[a.type.index()]);
     
     gps_.sendInputMessage(a);

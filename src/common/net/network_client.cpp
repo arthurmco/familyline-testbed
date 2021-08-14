@@ -28,7 +28,7 @@ std::future<tl::expected<bool, NetResult>> NetworkClient::waitLoading()
             auto& pkt = recv_queue_.front();
 
             if (auto p = std::get_if<Packet::NLoadingResponse>(&pkt.message); p) {
-                log->write("network-client", LogType::Info, "client %lu loaded %d percent", id_, p->percent);
+                log->write("network-client", LogType::Info, "client {} loaded {:02d} percent", id_, p->percent);
 
                 if (p->percent >= 100) {
                     puts("YEAH");
@@ -38,8 +38,8 @@ std::future<tl::expected<bool, NetResult>> NetworkClient::waitLoading()
             } else {
                 log->write(
                     "network-client", LogType::Warning,
-                    "received unexpected packet (id %llu, from %llu, to %llu, timestamp %llu..., "
-                    "type %d )",
+                    "received unexpected packet (id {}, from {}, to {}, timestamp {}..., "
+                    "type {} )",
                     pkt.id, pkt.source_client, pkt.dest_client, pkt.timestamp, pkt.message.index());
             }
 

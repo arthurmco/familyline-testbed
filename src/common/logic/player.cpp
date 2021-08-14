@@ -25,7 +25,7 @@ void Player::pushToSelection(unsigned object_id, std::weak_ptr<GameObject> o)
 {
     auto& log = LoggerService::getLogger();
     if (o.expired()) {
-        log->write("player", LogType::Error, "tried to push a removed object (id %d)", object_id);
+        log->write("player", LogType::Error, "tried to push a removed object (id {:08x})", object_id);
     }
 
     std::shared_ptr<GameObject> so = o.lock();

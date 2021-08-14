@@ -22,7 +22,6 @@ void ObjectRenderer::add(std::shared_ptr<GameObject> o)
         rs.meshHandle = _sr.add(make_scene_object(*mesh));
 
         this->components.push_back(rs);
-        printf("added mesh handle %x\n", rs.meshHandle);
     }
 }
 

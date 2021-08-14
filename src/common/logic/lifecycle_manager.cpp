@@ -46,7 +46,7 @@ void ObjectLifecycleManager::notifyCreation(object_id_t id)
     if (optr == _o_creating.end()) {
         log->write(
             "lifecycle-manager", LogType::Warning,
-            "Tried to notify creation of object id %ld, but it cannot be transferred to that state",
+            "Tried to notify creation of object id {}, but it cannot be transferred to that state",
             id);
         return;
     }
@@ -57,7 +57,7 @@ void ObjectLifecycleManager::notifyCreation(object_id_t id)
     _o_created[id] = lcd;
     _o_creating.erase(id);
 
-    log->write("lifecycle-manager", LogType::Info, "Object with ID %ld has been created", id);
+    log->write("lifecycle-manager", LogType::Info, "Object with ID {} has been created", id);
 }
 
 /**
@@ -78,7 +78,7 @@ void ObjectLifecycleManager::notifyDeath(object_id_t id)
     if (optr == _o_created.end()) {
         log->write(
             "lifecycle-manager", LogType::Warning,
-            "Tried to notify death of object id %ld, but it cannot be transferred to that state",
+            "Tried to notify death of object id {}, but it cannot be transferred to that state",
             id);
         return;
     }
@@ -90,7 +90,7 @@ void ObjectLifecycleManager::notifyDeath(object_id_t id)
     _o_dying[id] = lcd;
     _o_created.erase(id);
 
-    log->write("lifecycle-manager", LogType::Info, "object with ID %ld died", id);
+    log->write("lifecycle-manager", LogType::Info, "object with ID {} died", id);
 }
 
 /**
@@ -118,7 +118,7 @@ void ObjectLifecycleManager::update()
 
             log->write(
                 "lifecycle-manager", LogType::Info,
-                "object with ID %ld is dead and will be removed", id);
+                "object with ID {} is dead and will be removed", id);
 
             _o_dead[id] = lcd;
             dying_remove.push_back(id);

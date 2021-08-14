@@ -44,7 +44,7 @@ std::vector<std::shared_ptr<AssetObject>> loadMeshAsset(Asset& asset)
             std::dynamic_pointer_cast<Material>(mats[0])->getName());
         materialID = meshMaterial->getID();
         log->write(
-            "asset-manager", LogType::Debug, "loaded material for %s: %d\n", asset.name.c_str(),
+            "asset-manager", LogType::Debug, "loaded material for {}: {}\n", asset.name,
             materialID);
         auto vdata = ms[0]->getVertexInfo();
 
@@ -199,16 +199,16 @@ void AssetManager::loadFile(AssetFile& file)
             Asset dasset               = this->processAsset(*dep.get());
             this->_assets[dasset.name] = dasset;
             log->write(
-                "asset-manager", LogType::Info, "found asset '%s' at path '%s' (%zu dependencies)",
-                dasset.name.c_str(), dasset.path.c_str(), dasset.dependencies.size());
+                "asset-manager", LogType::Info, "found asset '{}' at path '{}' ({} dependencies)",
+                dasset.name, dasset.path, dasset.dependencies.size());
         }
 
         Asset asset = this->processAsset(*av);
 
         this->_assets[asset.name] = asset;
         log->write(
-            "asset-manager", LogType::Info, "found asset '%s' at path '%s' (%zu dependencies)",
-            asset.name.c_str(), asset.path.c_str(), asset.dependencies.size());
+            "asset-manager", LogType::Info, "found asset '{}' at path '{}' ({} dependencies)",
+            asset.name, asset.path, asset.dependencies.size());
     }
     file.resetAsset();
 }
@@ -228,8 +228,8 @@ std::shared_ptr<AssetObject> AssetManager::getAsset(std::string_view assetName)
     asset_it->second.object = std::make_optional(asset_it->second.loadAssetObject()[0]);
     //    }
     log->write(
-        "asset-manager", LogType::Info, "getting asset '%s' at path '%s'",
-        asset_it->second.name.c_str(), asset_it->second.path.c_str());
+        "asset-manager", LogType::Info, "getting asset '{}' at path '{}'",
+        asset_it->second.name, asset_it->second.path);
 
     return asset_it->second.object.value();
 }

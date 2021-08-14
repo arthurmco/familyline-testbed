@@ -53,7 +53,7 @@ GLShader::GLShader(const char* file, ShaderType type)
     this->_handle     = glCreateShader(gltype);
 
     auto& log = LoggerService::getLogger();
-    log->write("gl-shader", LogType::Info, "creating shader %s type %s with filesize %zu",
+    log->write("gl-shader", LogType::Info, "creating shader {} type {} with filesize {}",
                file, strtype, content.size());
 
 #ifdef USE_GLES

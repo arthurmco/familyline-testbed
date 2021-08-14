@@ -38,7 +38,7 @@ std::tuple<std::vector<InputInfo>, checksum_raw_t> InputReproducer::readPlayerIn
 
     if (size != rsize) {
         log->write(
-            "input-reproducer", LogType::Error, "Could not read the player info section (%d of %d)",
+            "input-reproducer", LogType::Error, "Could not read the player info section ({} of {})",
             rsize, size);
 
         delete[] data;
@@ -52,7 +52,7 @@ std::tuple<std::vector<InputInfo>, checksum_raw_t> InputReproducer::readPlayerIn
     std::vector<logic::InputInfo> players;
     for (auto vit = playerinfo->players()->cbegin(); vit != playerinfo->players()->cend(); ++vit) {
         log->write(
-            "input-reproducer", LogType::Info, "found player (name %s, id %" PRIx64 ", color %s)",
+            "input-reproducer", LogType::Info, "found player (name {}, id {:16x}, color {})",
             vit->name()->c_str(), vit->id(), vit->color()->c_str());
 
         players.push_back(
@@ -115,7 +115,7 @@ long long int readInputCount(FILE* file)
     fread((void*)magic, 4, 1, file);
     if (strncmp(magic, R_FOOTER_MAGIC, 4)) {
         log->write(
-            "input-reproducer", LogType::Error, "Wrong footer section magic (%s != %s)", magic,
+            "input-reproducer", LogType::Error, "Wrong footer section magic ({} != {})", magic,
             R_FOOTER_MAGIC);
         fseek(file, loc, SEEK_SET);
         return -1;
@@ -182,7 +182,7 @@ bool InputReproducer::open()
     if (!f_) {
         f_ = nullptr;
         log->write(
-            "input-reproducer", LogType::Error, "Could not open the input file %s (error %d: %s)",
+            "input-reproducer", LogType::Error, "Could not open the input file '{}' (error {}: {})",
             file_.data(), errno, strerror(errno));
 
         return false;
@@ -195,8 +195,8 @@ bool InputReproducer::open()
 
     if (strncmp(magic, R_MAGIC, 4)) {
         log->write(
-            "input-reproducer", LogType::Error, "Invalid magic value for file %s (FREC != %s)",
-            file_.data(), magic);
+            "input-reproducer", LogType::Error, "Invalid magic value for file '{}' ('FREC' != '{}')",
+            file_, magic);
 
         return false;
     }
@@ -204,13 +204,13 @@ bool InputReproducer::open()
     if (version != R_VERSION) {
         log->write(
             "input-reproducer", LogType::Error, "Incompatible file version file %s (%x != %x)",
-            file_.data(), R_VERSION, version);
+            file_, R_VERSION, version);
 
         return false;
     }
 
     if (!verifyChecksum(f_)) {
-        log->write("input-reproducer", LogType::Error, "Invalid checksum of file %s", file_.data());
+        log->write("input-reproducer", LogType::Error, "Invalid checksum of file '{}'", file_);
 
         return false;
     }
@@ -226,7 +226,7 @@ bool InputReproducer::open()
     }
 
     log->write(
-        "input-reproducer", LogType::Info, "'%s': %lld input actions detected", file_.data(),
+        "input-reproducer", LogType::Info, "'{}': {} input actions detected", file_.data(),
         actioncount_);
 
     off_actionlist_ = ftell(f_);
@@ -260,7 +260,7 @@ bool InputReproducer::verifyObjectChecksums(ObjectFactory* const of)
     if (pchecksum_.size() == 0) {
         log->write(
             "input-reproducer", LogType::Warning,
-            "input file %s has no object checksum field. We cannot determine what the game will "
+            "input file {} has no object checksum field. We cannot determine what the game will "
             "use",
             file_.data());
         log->write(
@@ -271,7 +271,7 @@ bool InputReproducer::verifyObjectChecksums(ObjectFactory* const of)
     if (checksumlist.size() != pchecksum_.size()) {
         log->write(
             "input-reproducer", LogType::Warning,
-            "input file %s and this game has different count of objects (%zu here, %zu in the "
+            "input file %s and this game has different count of objects ({} here, {} in the "
             "file)",
             file_.data(), checksumlist.size(), pchecksum_.size());
         log->write(
@@ -289,7 +289,7 @@ bool InputReproducer::verifyObjectChecksums(ObjectFactory* const of)
         if (checksumlist[stype] != checksum) {
             log->write(
                 "input-reproducer", LogType::Error,
-                "input file %s has a different checksum of building type '%s'", file_.data(),
+                "input file %s has a different checksum of entity type '{}'", file_.data(),
                 stype.c_str());
             return false;
         }
@@ -301,7 +301,7 @@ bool InputReproducer::verifyObjectChecksums(ObjectFactory* const of)
     if (std::find(foundChecksums.begin(), foundChecksums.end(), false) != foundChecksums.end()) {
         log->write(
             "input-reproducer", LogType::Error,
-            "we have some objects in the file '%s' that were not in this game", file_.data());
+            "we have some entities in the file '{}' that were not in this game", file_.data());
         return false;
     }
 
@@ -376,7 +376,7 @@ std::optional<PlayerInputAction> InputReproducer::getNextAction()
     if (strncmp(magic, R_ACTION_MAGIC, 4)) {
         log->write(
             "input-reproducer", LogType::Fatal,
-            "'%s': Action number %d (at offset %08x) is invalid", file_.data(), currentaction_,
+            "'{}': Action number {} (at offset {:08x}) is invalid", file_, currentaction_,
             apos);
 
         return std::nullopt;
@@ -386,7 +386,7 @@ std::optional<PlayerInputAction> InputReproducer::getNextAction()
     if (actionsize == 0) {
         log->write(
             "input-reproducer", LogType::Fatal,
-            "'%s': Action number %d (at offset %08x) has no size. Stopping because this is very "
+            "'{}': Action number {} (at offset {:08x}) has no size. Stopping because this is very "
             "weird",
             file_.data(), currentaction_, apos);
 
@@ -410,7 +410,7 @@ std::optional<PlayerInputAction> InputReproducer::getNextAction()
             case familyline::InputType_cam_rotate: return (void*)a->type_as_cam_rotate();
             case familyline::InputType_create: return (void*)a->type_as_create();
             default:
-                log->write("input-reproducer", LogType::Fatal, "Invalid input message type (%02x)", type);
+                log->write("input-reproducer", LogType::Fatal, "Invalid input message type ({:02x})", type);
                 return (void*)nullptr;
             }
         });

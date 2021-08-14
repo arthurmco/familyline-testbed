@@ -98,7 +98,7 @@ std::vector<Material*> MTLOpener::Open(const char* file)
                 GFXService::getTextureManager()->registerTexture(texname, *t);
             } else {
                 log->write(
-                    "material-opener::mtl", LogType::Warning, "Texture %s failed to load", texpath);
+                    "material-opener::mtl", LogType::Warning, "Texture {} failed to load", texpath);
             }
 
             continue;

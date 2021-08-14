@@ -41,7 +41,7 @@ bool TerrainFile::checkCRC(uint32_t expectedCRC, FILE* f, uint32_t start, uint32
     delete[] filedata;
 
     auto& log = LoggerService::getLogger();
-    log->write("terrain-file", LogType::Debug, "crc32 %#x x %#x", crc, expectedCRC);
+    log->write("terrain-file", LogType::Debug, "crc32 {:08x} x {:08x}", crc, expectedCRC);
 
     fseek(f, oldpos, SEEK_SET);
     return (crc == expectedCRC);
@@ -219,20 +219,20 @@ bool TerrainFile::open(std::string_view path)
 
     fTerrain_ = fopen(path.data(), "rb");
     if (!fTerrain_) {
-        log->write("terrain-file", LogType::Error, "file %s not found", path.data());
+        log->write("terrain-file", LogType::Error, "file {} not found", path);
         return false;
     }
 
     auto th_offset = this->readFileHeader(fTerrain_);
     if (th_offset == 0) {
-        log->write("terrain-file", LogType::Error, "could not read %s", path.data());
+        log->write("terrain-file", LogType::Error, "could not read {}", path);
         return false;
     }
 
     auto th = this->readTerrainHeader(fTerrain_, th_offset);
     if (!th) {
         log->write(
-            "terrain-file", LogType::Error, "error while reading terrain data from file %s",
+            "terrain-file", LogType::Error, "error while reading terrain data from file '{}'",
             path.data());
         return false;
     }
@@ -244,7 +244,7 @@ bool TerrainFile::open(std::string_view path)
 
     if (!this->readTerrainData(fTerrain_, *th)) {
         log->write(
-            "terrain-file", LogType::Error, "error while reading terrain content from file %s",
+            "terrain-file", LogType::Error, "error while reading terrain content from file '{}'",
             path.data());
         name_.clear();
         description_.clear();
@@ -256,17 +256,11 @@ bool TerrainFile::open(std::string_view path)
     fclose(fTerrain_);
 
     std::string authlist;
-    for (auto& a : authors_) {
-        authlist.append(a);
-        authlist.append(", ");
-    }
 
-    if (authors_.size() > 0) authlist = authlist.substr(0, authlist.size() - 2);
-
-    log->write("terrain-file", LogType::Info, "read terrain %s successfully", path.data());
-    log->write("terrain-file", LogType::Info, "\tname: %s", name_.c_str());
-    log->write("terrain-file", LogType::Info, "\tdescription: %s", description_.c_str());
-    log->write("terrain-file", LogType::Info, "\tauthors: %s", authlist.c_str());
+    log->write("terrain-file", LogType::Info, "read terrain {} successfully", path);
+    log->write("terrain-file", LogType::Info, "\tname: {}", name_);
+    log->write("terrain-file", LogType::Info, "\tdescription: {}", description_);
+    log->write("terrain-file", LogType::Info, "\tauthors: {}", authors_);
 
     return true;
 }

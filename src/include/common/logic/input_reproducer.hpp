@@ -161,7 +161,7 @@ PlayerInputType deserializeInputAction(
                 default:
                     log->write(
                         "input-reproducer", familyline::LogType::Error,
-                        "invalid parameter count for command (%zu)", cmd->args()->args()->size());
+                        "invalid parameter count for command ({})", cmd->args()->args()->size());
                     type = CommandInput{cmd->command()->str(), std::monostate{}};
                     break;
             }

@@ -40,10 +40,12 @@ VertexHandle* GLRenderer::createVertex(VertexData& vd, VertexInfo& vi)
     auto vhandle                        = std::make_unique<GLVertexHandle>(vao, *this, vi);
     vhandle->vsize                      = vd.position.size();
 
-    //    log->write(
-    //        "gl-renderer", LogType::Debug, "created vertex handle: vao=%#x, vsize=%zu", vao,
-    //        vhandle->vsize);
-
+#if 0    
+    log->write(
+        "gl-renderer", LogType::Debug, "created vertex handle: vao={:x}, vsize={}", vao,
+        vhandle->vsize);
+#endif
+    
     vhandle->vboPos  = vboPos;
     vhandle->vboNorm = vboNorm;
     vhandle->vboTex  = vboTex;
@@ -133,7 +135,7 @@ void GLRenderer::render(Camera* c)
             if (err != GL_NO_ERROR) {
                 log->write(
                     "gl-renderer", LogType::Error,
-                    "OpenGL error %#x while searching for shader attribute %s (shader is invalid)",
+                    "OpenGL error 0x{:x} while searching for shader attribute {} (shader is invalid)",
                     err, name);
             }
 
@@ -177,7 +179,7 @@ void GLRenderer::render(Camera* c)
         glDrawArrays(glFormat, 0, vh->vsize);
         GLenum err = glGetError();
         if (err != GL_NO_ERROR) {
-            log->write("gl-renderer", LogType::Error, "OpenGL error %#x", err);
+            log->write("gl-renderer", LogType::Error, "OpenGL error 0x{:x}", err);
             glBindTexture(GL_TEXTURE_2D, 0);
             glBindVertexArray(0);
             assert(false);
@@ -255,7 +257,7 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd, ShaderProgr
         if (err != GL_NO_ERROR) {
             log->write(
                 "gl-renderer", LogType::Error,
-                "OpenGL error %#x while searching for shader attribute %s on vertex set addition "
+                "OpenGL error 0x{:x} while searching for shader attribute {} on vertex set addition "
                 "(shader is invalid)",
                 err, name);
         }
@@ -292,10 +294,12 @@ std::tuple<int, int, int, int> GLRenderer::createRaw(VertexData& vd, ShaderProgr
 
     glBindVertexArray(0);
 
-    //    log->write(
-    //        "gl-renderer", LogType::Debug, "created vertex set: vao=%#x, vbos=%#x,%#x,%#x", vao,
-    //        vboPos, vboNorm, vboTex);
-
+#if 0
+    log->write(
+        "gl-renderer", LogType::Debug, "created vertex set: vao={:x}, vbos={:x},{:x},{:x}", vao,
+        vboPos, vboNorm, vboTex);
+#endif
+    
     return std::tie(vao, vboPos, vboNorm, vboTex);
 }
 

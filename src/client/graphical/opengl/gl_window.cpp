@@ -66,7 +66,7 @@ static void enable_gl_debug()
         if (id_qt_map[id].qt > 20 && id_qt_map[id].lastsec <= t) {
             log->write(
                 "gl-debug-output", LogType::Warning,
-                "Suppressing id %x messages because they are too many", id);
+                "Suppressing id {:x} messages because they are too many", id);
             lastsupp = id;
             return;
         }

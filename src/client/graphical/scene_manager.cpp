@@ -81,8 +81,8 @@ void SceneManager::remove(scene_object_handle_t meshHandle)
     }
     
     log->write(
-        "scene-renderer", LogType::Debug, "removed scene object %s with ID %#x",
-        iter->object->getName().data(), meshHandle);
+        "scene-renderer", LogType::Debug, "removed scene object {} with ID {:x}",
+        iter->object->getName(), meshHandle);
 
     objects_.erase(iter);
 }
@@ -130,8 +130,8 @@ int SceneManager::add(std::shared_ptr<SceneObjectBase> so)
         default:
             log->write(
                 "scene-renderer", LogType::Error,
-                "scene object '%s' (%#x) could not be added because it was invalid or unknown",
-                so->getName().data(), id);
+                "scene object '{}' ({:x}) could not be added because it was invalid or unknown",
+                so->getName(), id);
             return -1;
     }
 
@@ -139,7 +139,7 @@ int SceneManager::add(std::shared_ptr<SceneObjectBase> so)
     objects_.emplace_back(so, id, true, vhandles, vlights);
 
     log->write(
-        "scene-renderer", LogType::Debug, "added scene object %s with ID %#x", so->getName().data(),
+        "scene-renderer", LogType::Debug, "added scene object {} with ID {:08x}", so->getName(),
         id);
 
     return id;

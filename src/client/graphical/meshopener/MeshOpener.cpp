@@ -18,7 +18,7 @@ void MeshOpener::RegisterExtension(const char* extension, MeshOpener* opener)
 
     MeshOpener::openers[std::string{extension}].ref++;
     log->write(
-        "meshopener", LogType::Debug, "registered mesh opener for the .%s extension", extension);
+        "meshopener", LogType::Debug, "registered mesh opener for the .{} extension", extension);
 }
 
 /* Unregister the extension into the main class */
@@ -40,7 +40,7 @@ void MeshOpener::UnregisterExtension(const char* extension)
         MeshOpener::openers.erase(ext);
 
     log->write(
-        "meshopener", LogType::Debug, "unregistered mesh opener for the .%s extension", extension);
+        "meshopener", LogType::Debug, "unregistered mesh opener for the .{} extension", extension);
 }
 
 /* Open any file */

@@ -26,13 +26,13 @@ bool GLTextureEnvironment::initialize()
     if ((initflags & flags) != flags) {
         log->write(
             "gl-texture-env", LogType::Error,
-            "Not all texture formats were supported (%08x != %08x)\n", flags, initflags);
+            "Not all texture formats were supported ({:08x} != {:08x})\n", flags, initflags);
         return false;
     }
 
     initref++;
     log->write(
-        "gl-texture-env", LogType::Info, "opengl texture environment initialized (envcount %d)",
+        "gl-texture-env", LogType::Info, "opengl texture environment initialized (envcount {})",
         initref);
 
     #ifdef USE_GLES
@@ -69,10 +69,10 @@ tl::expected<std::unique_ptr<Texture>, ImageError> GLTextureEnvironment::loadTex
 
     SDL_Surface *surface = IMG_Load(file.data());
     if (!surface) {
-        log->write("gl-texture-env", LogType::Error, "%s failed to load", file.data());
+        log->write("gl-texture-env", LogType::Error, "{} failed to load", file.data());
 
         std::string err = IMG_GetError();
-        log->write("gl-texture-env", LogType::Error, "Error: %s\n", err.c_str());
+        log->write("gl-texture-env", LogType::Error, "Error: {}\n", err.c_str());
 
         if (err.find("Couldn't open") != std::string::npos) {
             return tl::make_unexpected(ImageError::ImageNotExists);
@@ -81,7 +81,7 @@ tl::expected<std::unique_ptr<Texture>, ImageError> GLTextureEnvironment::loadTex
         }
     }
 
-    log->write("gl-texture-env", LogType::Info, "loaded texture '%s'", file.data());
+    log->write("gl-texture-env", LogType::Info, "loaded texture '{}'", file.data());
     auto data = make_surface_unique_ptr(surface);
     return std::make_unique<Texture>(std::move(data));
 }
@@ -135,7 +135,7 @@ tl::expected<std::unique_ptr<Texture>, ImageError> GLTextureEnvironment::loadTex
         data.data(), width, height, depth, pitch, rmask, gmask, bmask, amask);
     if (!surface) {
         log->write("gl-texture-env", LogType::Error, "failed to create image!\n");
-        log->write("gl-texture-env", LogType::Error, "error: %s\n", SDL_GetError());
+        log->write("gl-texture-env", LogType::Error, "error: {}\n", SDL_GetError());
         return tl::make_unexpected(ImageError::UnknownError);
     }
 
@@ -166,7 +166,7 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::uploadTexture(Textur
     GLenum glerr = GL_NO_ERROR;
     if ((glerr = glGetError()) != GL_NO_ERROR) {
         log->write(
-            "gl-texture-env", LogType::Error, "GL error %#x while binding texture handle %d", glerr,
+            "gl-texture-env", LogType::Error, "GL error 0x{:x} while binding texture handle {}", glerr,
             tex_handle);
         return tl::make_unexpected(TextureError::UnknownError);
     }
@@ -181,7 +181,7 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::uploadTexture(Textur
     if (err != GL_NO_ERROR) {
         switch (err) {
         case GL_INVALID_OPERATION:
-            log->write("gl-texture-env", LogType::Info, "setting texture handle %08x data returned a GL_INVALID_OPERATION. The texture format might be unsupported  ", tex_handle);
+            log->write("gl-texture-env", LogType::Info, "setting texture handle {:08x} data returned a GL_INVALID_OPERATION. The texture format might be unsupported  ", tex_handle);
             return tl::make_unexpected(TextureError::BadTextureFormat);
 
         }
@@ -190,7 +190,7 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::uploadTexture(Textur
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    log->write("gl-texture-env", LogType::Info, "added texture handle %08x", tex_handle);
+    log->write("gl-texture-env", LogType::Info, "added texture handle {:08x}", tex_handle);
 
     if (currentbind != 0) {
         glBindTexture(GL_TEXTURE_2D, currentbind);
@@ -236,7 +236,7 @@ void GLTextureEnvironment::updateBoundTextureData(SDL_Surface &data)
             converted_surf = SDL_ConvertSurfaceFormat(&data, SDL_PIXELFORMAT_RGB24, 0);
             if (!converted_surf) {
                 log->write(
-                    "gl-texture-env", LogType::Error, "conversion failed: %s", SDL_GetError());
+                    "gl-texture-env", LogType::Error, "conversion failed: {}", SDL_GetError());
             }
 
             formatstr = "BGR24 -> RGB24";
@@ -266,7 +266,7 @@ void GLTextureEnvironment::updateBoundTextureData(SDL_Surface &data)
     }
 #endif
     log->write(
-        "gl-texture-env", LogType::Info, "setting texture data: width=%d, height=%d, format=%s",
+        "gl-texture-env", LogType::Info, "setting texture data: width={:4d}, height={:4d}, format={}",
         data.w, data.h, formatstr.c_str());
 
     SDL_LockSurface(&data);
@@ -299,7 +299,7 @@ tl::expected<uintptr_t, ImageError> GLTextureEnvironment::setTextureData(
         .map([&](auto ntexture) {
             auto &log = LoggerService::getLogger();
             log->write(
-                "gl-texture-env", LogType::Info, "setting data of texture with handle %08x",
+                "gl-texture-env", LogType::Info, "setting data of texture with handle 0x{:08x}",
                 *t.renderer_handle);
 
             t.data = std::move(ntexture->data);
@@ -345,18 +345,17 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::bindTexture(Texture 
 {
     auto &log = LoggerService::getLogger();
 
-    if (unit >= current_bound_.size()) {
-        log->write(
-            "gl-texture-env", LogType::Error, "Texture unit is out of the bounds for texture %#x",
-            t.renderer_handle);
-        return tl::make_unexpected(TextureError::TextureUnitInvalid);
-    }
-
     if (!t.renderer_handle) {
         log->write(
-            "gl-texture-env", LogType::Error, "Texture %#x not loaded into the videocard",
-            t.renderer_handle);
+            "gl-texture-env", LogType::Error, "Texture not loaded into the videocard");
         return tl::make_unexpected(TextureError::TextureNotFound);
+    }
+
+    if (unit >= current_bound_.size()) {
+        log->write(
+            "gl-texture-env", LogType::Error, "Texture unit is out of the bounds for texture {:x}",
+            *t.renderer_handle);
+        return tl::make_unexpected(TextureError::TextureUnitInvalid);
     }
 
     GLuint handle        = *t.renderer_handle;
@@ -365,7 +364,7 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::bindTexture(Texture 
 
     glBindTexture(GL_TEXTURE_2D, handle);
 #if 0
-    log->write("gl-texture-env", LogType::Debug, "opengl texture %#x bound to unit %d", handle, unit);
+    log->write("gl-texture-env", LogType::Debug, "opengl texture 0x{:x} bound to unit {}", handle, unit);
 #endif
 
     return handle;
@@ -385,7 +384,7 @@ tl::expected<uintptr_t, TextureError> GLTextureEnvironment::unbindTexture(unsign
 
     glBindTexture(GL_TEXTURE_2D, 0);
 #if 0
-    log->write("gl-texture-env", LogType::Debug, "opengl texture %#x unbound from unit %d", handle, unit);
+    log->write("gl-texture-env", LogType::Debug, "opengl texture 0x{:x} unbound from unit {}", handle, unit);
 #endif
     return handle;
 }

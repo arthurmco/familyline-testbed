@@ -81,11 +81,10 @@ void PlayerManager::pushAction(uint64_t id, PlayerInputType type, std::optional<
     auto runtick = tick ? *tick : tick_ + tick_delta_;
 
     log->write(
-        "player-manager", LogType::Info, "push action of player %16x on tick %d to be run on %d",
+        "player-manager", LogType::Info, "push action of player {:16x} on tick {} to be run on {}",
         id, tick_, runtick);
 
     if (tick) {
-        fprintf(stderr, "%d >= %zu\n", *tick, tick_);
         assert(*tick >= tick_);
     }
     
@@ -189,29 +188,29 @@ void writeSelectDebugInfo(std::unique_ptr<Logger>& log, const char* str, const S
     switch (a.objects.size()) {
         case 0:
             log->write(
-                "player-manager", LogType::Info, "%s: SelectAction { objects=0, deselecting all } ",
+                "player-manager", LogType::Info, "{}: SelectAction< objects=0, deselecting all > ",
                 str);
             break;
         case 1:
             log->write(
-                "player-manager", LogType::Info, "%s: SelectAction { objects=[%lld] } ", str,
+                "player-manager", LogType::Info, "{}: SelectAction< objects=[{}] > ", str,
                 a.objects[0]);
             break;
         case 2:
             log->write(
-                "player-manager", LogType::Info, "%s: SelectAction { objects=[%lld, %lld] } ", str,
+                "player-manager", LogType::Info, "{}: SelectAction< objects=[{}, {}] > ", str,
                 a.objects[0], a.objects[1]);
             break;
         case 3:
             log->write(
-                "player-manager", LogType::Info, "%s: SelectAction { objects=[%lld, %lld, %lld] } ",
+                "player-manager", LogType::Info, "{}: SelectAction< objects=[{}, {}, {}] > ",
                 str, a.objects[0], a.objects[1], a.objects[2]);
             break;
         default:
             log->write(
                 "player-manager", LogType::Info,
-                "%s: SelectAction { objects=[%lld, %lld, %lld... (%zu objects)] } ", str,
-                a.objects[0], a.objects[1], a.objects[2], a.objects.size());
+                "{}: SelectAction < objects={} > ", str,
+                a.objects);
             break;
     }
 }
@@ -233,7 +232,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
 
     if (!player.has_value()) {
         log->write(
-            "player-manager", LogType::Fatal, "invalid player ID (%" PRIx64 ")!", pia.playercode);
+            "player-manager", LogType::Fatal, "invalid player ID ({})!", pia.playercode);
         return;
     }
 
@@ -244,15 +243,15 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                  * The attack command is the only command treated specially.
                  */
                 log->write(
-                    "player-manager", LogType::Info, "%s: CommandInput { command=%s } ", str,
-                    a.commandName.c_str());
+                    "player-manager", LogType::Info, "{}: CommandInput< command={} > ", str,
+                    a.commandName);
 
                 if (a.commandName == "attack") {
                     auto* objectID = std::get_if<object_id_t>(&a.param);
                     if (!objectID) {
                         log->write(
                             "player-manager", LogType::Error,
-                            "invalid attackee (eventparamtype=%d)", a.param.index());
+                            "invalid attackee (eventparamtype={})", a.param.index());
                         invalidAction = true;
                         return;
                     }
@@ -277,7 +276,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                     } else {
                         log->write(
                             "player-manager", LogType::Error,
-                            "invalid attackee (ID %d or its target could not be found)", *objectID);
+                            "invalid attackee (ID {} or its target could not be found)", *objectID);
                     }
 
                 } else if (a.commandName == "null") {
@@ -326,7 +325,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
             },
             [&](const ObjectMove& a) {
                 log->write(
-                    "player-manager", LogType::Info, "%s: ObjectMove { xPos=%d, yPos=%d } ", str,
+                    "player-manager", LogType::Info, "{}: ObjectMove< xPos={}, yPos={} >", str,
                     a.xPos, a.yPos);
 
                 auto selections       = (*player)->getSelections();
@@ -341,14 +340,14 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                         pm->startPathing(*s.get(), glm::vec2(a.xPos, a.yPos));
 
                         log->write(
-                            "human-player", LogType::Debug, "moved to %.2fx%.2f", a.xPos, a.yPos);
+                            "human-player", LogType::Debug, "moved to {}, {}", a.xPos, a.yPos);
                     }
                 }
             },
             [&](const CameraMove& a) {
                 log->write(
                     "player-manager", LogType::Info,
-                    "%s: CameraMove { dx=%.2f, dy=%.2f, dZoom=%.2f} ", str, a.deltaX, a.deltaY,
+                    "{}: CameraMove< dx={:.2f}, dy={:.2f}, dZoom={:.2f}> ", str, a.deltaX, a.deltaY,
                     a.deltaZoom);
 
                 auto optcam = (*player)->getCamera();
@@ -362,7 +361,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
             },
             [&](const CameraRotate& a) {
                 log->write(
-                    "player-manager", LogType::Info, "%s: CameraRotate { angle=%.3f rad} ", str,
+                    "player-manager", LogType::Info, "{}: CameraRotate< angle={:.3f} rad > ", str,
                     a.radians);
 
                 auto optcam = (*player)->getCamera();
@@ -370,11 +369,10 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                     (*optcam)->AddRotation(glm::vec3(0, 1, 0), a.radians);
                 }
             },
-            [&](const CreateEntity& a) {
+            [&](const CreateEntity& a) {                
                 log->write(
                     "player-manager", LogType::Info,
-                    "%s: CreateEntity { type=%s, xPos=%d, yPos=%d } ", str, a.type.c_str(), a.xPos,
-                    a.yPos);
+                    "{}: CreateEntity< type={}, xPos={}, yPos={} > ", str, a.type, a.xPos, a.yPos);
 
                 auto& of = LogicService::getObjectFactory();
                 auto nobj =
@@ -382,7 +380,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
 
                 if (!nobj) {
                     log->write(
-                        "player-manager", LogType::Error, "building type %s not found",
+                        "player-manager", LogType::Error, "building type {} not found",
                         a.type.c_str());
                     invalidAction = false;
                     return;

@@ -11,6 +11,39 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <mutex>
+
+#include <fmt/core.h>
+#include <fmt/format.h>
+#include <fmt/chrono.h> // so you can print dates to the log
+#include <fmt/ranges.h> // so you can directly print ranges to the log
+
+#include <optional>
+
+/// BEGIN custom formatters
+
+/**
+ * A formatter for the optional type
+ *
+ * So you can directly log an optional type
+ */
+template <typename T>
+struct fmt::formatter<std::optional<T>> : formatter<T> {
+
+    template <typename FormatContext>
+    auto format(const std::optional<T>& v, FormatContext& ctx) {
+        if (v) {
+            format_to(ctx.out(), "Some(");
+            formatter<T>::format(*v, ctx);
+            format_to(ctx.out(), ")");
+        } else {
+            format_to(ctx.out(), "None");
+        }
+    }   
+};
+
+
+/// END custom formatters
 
 namespace familyline
 {
@@ -22,22 +55,58 @@ class Logger
 {
 private:
     FILE* _out = nullptr;
-    LogType _minlog;
+    LogType minlog_;
     std::vector<std::string> blockTags_;
     std::chrono::steady_clock::time_point _start;
     double getDelta();
 
+    std::mutex mtx;
+    const std::string getLevelText(const LogType type);
+    
 public:
     Logger(
         FILE* out = stderr, LogType minlog = LogType::Info, std::vector<std::string> blockTags = {})
         : _out(out),
-          _minlog(minlog),
+          minlog_(minlog),
           _start(std::chrono::steady_clock::now()),
           blockTags_(blockTags)
     {
     }
 
-    void write(std::string_view tag, LogType type, const char* format, ...);
+    /**
+     * Well..., write a message to a logfile.
+     * The logfile can be a file, or stderr
+     *
+     * The logging format of this function (the `fmt` parameter) follows the convention
+     * of the libfmt library, or the <format> header, which follow similar conventions
+     * to the Python `str.format()` function
+     *
+     * We have 5 levels of logging: Debug, Info, Warning, Error and Fatal.
+     * The logging levels are autodescriptive
+     *
+     */
+    template <typename ...Args>
+    void write(std::string_view tag, const LogType type, const std::string fmt, Args ...args) {
+        if (type < minlog_)
+            return;
+
+        if (std::find(blockTags_.begin(), blockTags_.end(), tag) != blockTags_.end()) return;
+
+        auto strtype = this->getLevelText(type);
+        auto delta = this->getDelta();
+        auto strend = strtype.size() > 0 ? "\033[0m" : "";
+        
+        auto data = fmt::format(fmt, args...);
+        auto stag = tag.size() > 0 ?
+            fmt::format("\033[1m{}\033[0m: ", tag) :
+            "";
+        
+        auto msg = fmt::format("[{:13.4f}] {}{}{}{}\n", delta, strtype, stag, data, strend);
+        
+        mtx.lock();
+        fputs(msg.c_str(), _out);
+        mtx.unlock();
+    }    
 };
 
 class LoggerService

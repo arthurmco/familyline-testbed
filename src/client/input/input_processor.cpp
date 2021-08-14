@@ -52,7 +52,7 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
         } break;
 
         case SDL_QUIT:
-            LOGDEBUG(log, "input-processor", "event: GameExit %d", 0);
+            LOGDEBUG(log, "input-processor", "event: GameExit: {}", 0);
             _actions.push({millis, GameExit{0}});
             _isRunning = false;
             break;
@@ -137,13 +137,13 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
             }
 
             LOGDEBUG(
-                log, "input-processor", "SDL_WindowEvent: %s (id %08x), event %08x, data %08x,%08x",
+                log, "input-processor", "SDL_WindowEvent: {} (id {:08x}), event {:08x}, data {:08x},{:08x}",
                 winevent, e.window.windowID, e.window.event, e.window.data1, e.window.data2);
 
             break;
         default:
 
-            LOGDEBUG(log, "input-processor", "unknown event id %08x", e.type);
+            LOGDEBUG(log, "input-processor", "unknown event id {:08x}", e.type);
     }
 }
 

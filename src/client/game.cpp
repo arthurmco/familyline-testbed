@@ -48,7 +48,7 @@ logic::Terrain& Game::initMap(std::string_view path)
     float aspectRatio         = float(winW) / float(winH);
     camera_ = std::make_unique<Camera>(position + directionOffset, aspectRatio, position);
 
-    log->write("game", LogType::Info, "map '%s' loaded", path.data());
+    log->write("game", LogType::Info, "map '{}' loaded", path.data());
 
     return *terrain_.get();
 }
@@ -81,7 +81,7 @@ void Game::initPlayers(
         if (col.has_value()) {
             col->owner = std::make_optional(colonies_.at(player_id));
             log->write(
-                "game", LogType::Info, "set object id %d (%s) to city %s", o->getID(),
+                "game", LogType::Info, "set object id {} ({}) to city {}", o->getID(),
                 o->getName().c_str(), col->owner.value().get().getName().data());
         }
     };
@@ -195,7 +195,7 @@ void Game::initLoopData(uint64_t human_id)
             hp->SetPicker(ip_.get());
             hp->setPreviewer(pr_.get());
         } else {
-            log->write("game", LogType::Warning, "human player id %lx not found", human_id);
+            log->write("game", LogType::Warning, "human player id {} not found", human_id);
         }
     }
 

@@ -16,7 +16,7 @@ GLFramebuffer::GLFramebuffer(std::string_view name, int width, int height) :
     glBindFramebuffer(GL_FRAMEBUFFER, _handle);
 
     log->write(
-        "fb", LogType::Debug, "creating framebuffer %s: handle=%#x, size=%d x %d", name.data(),
+        "fb", LogType::Debug, "creating framebuffer {}: handle=0x{:x}, size={:d} x {:d}", name.data(),
         _handle, width, height);
 
     glGenRenderbuffers(1, &_rboHandle);
@@ -48,7 +48,7 @@ GLFramebuffer::GLFramebuffer(std::string_view name, int width, int height) :
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         log->write(
-            "fb", LogType::Warning, "framebuffer %s (%#x) is not complete", name.data(),
+            "fb", LogType::Warning, "framebuffer {} (0x{:x}) is not complete", name.data(),
             _handle);  // should be error
     }
 
@@ -60,7 +60,7 @@ GLFramebuffer::GLFramebuffer(std::string_view name, int width, int height) :
     }
 
     log->write(
-        "fb", LogType::Debug, "\tcompleted: texhandle=%#x, rbohandle=%#x", _textureHandle,
+        "fb", LogType::Debug, "\tcompleted: texhandle=0x{:x}, rbohandle=0x{:x}", _textureHandle,
         _rboHandle);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

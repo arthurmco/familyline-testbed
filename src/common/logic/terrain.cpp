@@ -24,7 +24,7 @@ TerrainOverlay* Terrain::createOverlay(const char* name)
     overlays_[n] = std::make_unique<TerrainOverlay>(w * h);
 
     auto& log = LoggerService::getLogger();
-    log->write("terrain", LogType::Debug, "overlay '%s' created", name);
+    log->write("terrain", LogType::Debug, "overlay '{}' created", name);
 
     return overlays_[n].get();
 }

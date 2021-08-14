@@ -88,8 +88,8 @@ in_addr ServerFinder::getLocalIP()
     if (getaddrinfo(hostname.c_str(), NULL, NULL, &addrdata)) {
         log->write(
             "server-finder", LogType::Error,
-            "could not resolve IP for hostname %s (%x/%s), defaulting to loopback",
-            hostname.c_str(), errno, gai_strerror(errno));
+            "could not resolve IP for hostname {} ({:x}/{}), defaulting to loopback",
+            hostname, errno, gai_strerror(errno));
 
         local_addr.s_addr = inet_addr("127.0.0.1");
         return local_addr;
@@ -97,8 +97,8 @@ in_addr ServerFinder::getLocalIP()
 
     if (!addrdata) {
         log->write(
-            "server-finder", LogType::Error, "no IP address found for hostname %s",
-            hostname.c_str());
+            "server-finder", LogType::Error, "no IP address found for hostname {}",
+            hostname);
 
         local_addr.s_addr = inet_addr("127.0.0.1");
         return local_addr;
@@ -146,7 +146,7 @@ ServerFinder::ServerFinder()
     auto local_addr = getLocalIP();
     char buf[61]    = {};
     log->write(
-        "server-finder", LogType::Info, "IP address is %s",
+        "server-finder", LogType::Info, "IP address is {}",
         inet_ntop(AF_INET, &local_addr, buf, 60));
 
     if (setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_IF, (char*)&local_addr, sizeof(local_addr)) <
@@ -330,7 +330,7 @@ void ServerFinder::startDiscover(discovery_cb callback)
                         sizeof(multicastaddr)) < 0) {
                     log->write(
                         "server-finder", LogType::Error,
-                        "sendto() failed when sending discovery message: %d (%s)", errno,
+                        "sendto() failed when sending discovery message: {} ({})", errno,
                         strerror(errno));
                     return;
                 }
@@ -363,7 +363,7 @@ void ServerFinder::startDiscover(discovery_cb callback)
                             log->write(
                                 "server-finder", LogType::Error,
                                 "recvfrom() failed when receiving response of discovery message: "
-                                "%d (%s)",
+                                "{} ({})",
                                 errno, strerror(errno));
                             return;
                     }

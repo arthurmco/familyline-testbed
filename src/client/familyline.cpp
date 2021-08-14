@@ -672,7 +672,7 @@ Game* start_game(
         std::filesystem::path recordpath(confdata.defaultInputRecordDir);
         recordpath.make_preferred() /= recordfilename;
 
-        log->write("game", LogType::Info, "\trecord destination: %s", recordpath.c_str());
+        log->write("game", LogType::Info, "\trecord destination: {}", recordpath.c_str());
 
         if (!ir->createFile(recordpath.string(), of)) {
             log->write("game", LogType::Error, "\tinput record file could not be created");
@@ -683,7 +683,7 @@ Game* start_game(
 
     if (irepr) {
         log->write(
-            "game", LogType::Info, "Replaying inputs from file %s", (*sgai.inputFile).c_str());
+            "game", LogType::Info, "Replaying inputs from file {}", *sgai.inputFile);
 
         irepr->reset();
 
@@ -801,17 +801,14 @@ int main(int argc, char const* argv[])
 #if defined(COMMIT)
     log->write("", LogType::Info, "git commit is " COMMIT);
 #endif
-    log->write("", LogType::Info, "Running on OS %s", sysname.c_str());
-    log->write("", LogType::Info, "  version: %s (%s)", sysversion.c_str(), sysinfo.c_str());
+    log->write("", LogType::Info, "Running on OS {}", sysname);
+    log->write("", LogType::Info, "  version: {} ({})", sysversion, sysinfo);
 
-    log->write("", LogType::Info, "Using renderer '%s'", pi.renderer.c_str());
-
-    char timestr[32];
+    log->write("", LogType::Info, "Using renderer '{}'", pi.renderer);
 
     auto tm     = time(NULL);
     auto tminfo = localtime(&tm);
-    strftime(timestr, 32, "%F %T", tminfo);
-    log->write("", LogType::Info, "Actual date is %s", timestr);
+    log->write("", LogType::Info, "Actual date is {:%F %T}", *tminfo);
 
     log->write("", LogType::Info, "Default model directory is " MODELS_DIR);
     log->write("", LogType::Info, "Default texture directory is " TEXTURES_DIR);
@@ -836,7 +833,7 @@ int main(int argc, char const* argv[])
 
             for (auto& d : devs) {
                 log->write(
-                    "main", LogType::Info, "driver found: %s %s", d->getCode().data(),
+                    "main", LogType::Info, "driver found: {} {}", d->getCode().data(),
                     (d->isDefault() ? "(default)" : ""));
 
                 if (d->isDefault()) {
@@ -872,8 +869,8 @@ int main(int argc, char const* argv[])
             throw net_exception("Could not initialize network");
         }
 
-        log->write("", LogType::Info, "Device name: %s", device->getName().data());
-        log->write("", LogType::Info, "Device vendor: %s ", device->getVendor().data());
+        log->write("", LogType::Info, "Device name: {}", device->getName().data());
+        log->write("", LogType::Info, "Device vendor: {} ", device->getVendor().data());
 
         int fwidth, fheight;
         int gwidth, gheight;
@@ -893,7 +890,7 @@ int main(int argc, char const* argv[])
         /* If we have a networked game ready, don't even show the main menu. */
         auto [texw, texh] = texman->getTextureMaxSize();
         log->write(
-            "texture", LogType::Info, "maximum tex size: %zu x %zu", texw, texh);
+            "texture", LogType::Info, "maximum tex size: {} x {}", texw, texh);
 
         if (pi.mapFile || pi.inputFile) {
             int frames = 0;
@@ -939,7 +936,7 @@ int main(int argc, char const* argv[])
         }
 
     } catch (shader_exception& se) {
-        log->write("init", LogType::Fatal, "Shader error: %s [d]", se.what());
+        log->write("init", LogType::Fatal, "Shader error: {}", se.what());
 
         if (win) {
             std::string content = fmt::format(
@@ -952,7 +949,7 @@ int main(int argc, char const* argv[])
 
         exit(EXIT_FAILURE);
     } catch (graphical_exception& we) {
-        log->write("init", LogType::Fatal, "Window creation error: %s (d)", we.what());
+        log->write("init", LogType::Fatal, "Window creation error: {}", we.what());
 
         if (win) {
             std::string content = fmt::format("Graphical error: {}\n", we.what());
@@ -961,7 +958,7 @@ int main(int argc, char const* argv[])
 
         exit(EXIT_FAILURE);
     } catch (logic_exception& le) {
-        log->write("init", LogType::Fatal, "Logic exception: %s (d)", le.what());
+        log->write("init", LogType::Fatal, "Logic exception: {}", le.what());
 
         if (win) {
             std::string content = fmt::format(
@@ -974,7 +971,7 @@ int main(int argc, char const* argv[])
 
         exit(EXIT_FAILURE);
     } catch (net_exception& le) {
-        log->write("init", LogType::Fatal, "Network exception: %s (d)", le.what());
+        log->write("init", LogType::Fatal, "Network exception: {}", le.what());
 
         if (win) {
             std::string content = fmt::format(
@@ -987,7 +984,7 @@ int main(int argc, char const* argv[])
 
         exit(EXIT_FAILURE);
     } catch (std::bad_alloc& be) {
-        log->write("init", LogType::Fatal, "Allocation error: %s", be.what());
+        log->write("init", LogType::Fatal, "Allocation error: {}", be.what());
 
         log->write("init", LogType::Fatal, "Probably out of memory");
 

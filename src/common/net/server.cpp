@@ -74,7 +74,7 @@ NetResult CServer::checkErrors(unsigned httpcode, std::stringstream& body)
             case 400: {
                 json response       = json::parse(body);
                 std::string message = response["message"];
-                log->write("cli-server", LogType::Error, "login failure: %s", message.c_str());
+                log->write("cli-server", LogType::Error, "login failure: {}", message);
                 if (message.find("Not all clients are ready") != std::string::npos) {
                     return NetResult::NotAllClientsConnected;
                 }
@@ -83,7 +83,7 @@ NetResult CServer::checkErrors(unsigned httpcode, std::stringstream& body)
             }
             default:
                 log->write(
-                    "cli-server", LogType::Error, "login returned weird HTTP code: %d", httpcode);
+                    "cli-server", LogType::Error, "login returned weird HTTP code: {}", httpcode);
                 return NetResult::ConnectionError;
         }
     }
@@ -97,7 +97,7 @@ NetResult CServer::login(std::string address, std::string username)
     http_address_ = address;
     auto& log     = LoggerService::getLogger();
 
-    log->write("cli-server", LogType::Info, "logging to %s", address.c_str());
+    log->write("cli-server", LogType::Info, "logging to {}", address);
     unsigned httpcode = 0;
 
     try {
@@ -133,11 +133,11 @@ NetResult CServer::login(std::string address, std::string username)
 
         log->write(
             "cli-server", LogType::Info,
-            "logged succesfully: username=%s, userid=%ull, token=<XXX>", username.c_str(), userid);
+            "logged succesfully: username={}, userid={:08x}, token=<XXX>", username, userid);
 
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};
-        log->write("cli-server", LogType::Error, "CURL error: %s,", exc.data());
+        log->write("cli-server", LogType::Error, "CURL error: {},", exc.data());
 
         if (exc.find("timed out") != std::string::npos) {
             return NetResult::ConnectionTimeout;
@@ -150,7 +150,7 @@ NetResult CServer::login(std::string address, std::string username)
         if (exc.find("Connection refused") != std::string::npos) {
             return NetResult::ConnectionError;
         }
-        
+
         if (exc.find("reset by peer") != std::string::npos) {
             return NetResult::ConnectionError;
         }
@@ -162,7 +162,7 @@ NetResult CServer::login(std::string address, std::string username)
     } catch (nlohmann::detail::exception& e) {
         log->write(
             "cli-server", LogType::Error,
-            "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
+            "server returned status {} and we could not parse the incoming JSON ({}),", httpcode,
             e.what());
         return NetResult::ServerError;
     }
@@ -196,7 +196,7 @@ NetResult CServer::logout()
         return NetResult::AlreadyLoggedOff;
     }
 
-    log->write("cli-server", LogType::Info, "logging out from %s", http_address_.c_str());
+    log->write("cli-server", LogType::Info, "logging out from {}", http_address_);
     unsigned httpcode = 0;
 
     try {
@@ -225,7 +225,7 @@ NetResult CServer::logout()
         if (serverid != cci_->info.id) {
             log->write(
                 "cli-server", LogType::Error,
-                "for some reason, IDs between client and server differ (cli %llx != ser %llx)",
+                "for some reason, IDs between client and server differ (cli {:16x} != ser {:16x})",
                 cci_->info.id, (uint64_t)serverid);
             return NetResult::ServerError;
         }
@@ -242,7 +242,7 @@ NetResult CServer::logout()
     } catch (nlohmann::detail::exception& e) {
         log->write(
             "cli-server", LogType::Error,
-            "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
+            "server returned status {} and we could not parse the incoming JSON ({}),", httpcode,
             e.what());
         return NetResult::ServerError;
     }
@@ -259,7 +259,7 @@ NetResult CServer::getServerInfo(CServerInfo& info)
         return NetResult::AlreadyLoggedOff;
     }
 
-    log->write("cli-server", LogType::Info, "getting server info from %s", http_address_.c_str());
+    log->write("cli-server", LogType::Info, "getting server info from {}", http_address_.c_str());
     unsigned httpcode = 0;
 
     try {
@@ -307,7 +307,7 @@ NetResult CServer::getServerInfo(CServerInfo& info)
     } catch (nlohmann::detail::exception& e) {
         log->write(
             "cli-server", LogType::Error,
-            "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
+            "server returned status {} and we could not parse the incoming JSON ({}),", httpcode,
             e.what());
         return NetResult::ServerError;
     }
@@ -327,7 +327,7 @@ NetResult CServer::toggleReady(bool value)
     }
 
     log->write(
-        "cli-server", LogType::Info, "setting ready from %s to %s", http_address_.c_str(),
+        "cli-server", LogType::Info, "setting ready from {} to {}", http_address_,
         value ? "true" : "false");
     unsigned httpcode = 0;
 
@@ -364,7 +364,7 @@ NetResult CServer::toggleReady(bool value)
     } catch (nlohmann::detail::exception& e) {
         log->write(
             "cli-server", LogType::Error,
-            "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
+            "server returned status {} and we could not parse the incoming JSON ({}),", httpcode,
             e.what());
         return NetResult::ServerError;
     }
@@ -383,7 +383,7 @@ NetResult CServer::connect()
         return NetResult::AlreadyLoggedOff;
     }
 
-    log->write("cli-server", LogType::Info, "connecting to %s", http_address_.c_str());
+    log->write("cli-server", LogType::Info, "connecting to {}", http_address_);
     unsigned httpcode = 0;
 
     try {
@@ -413,7 +413,7 @@ NetResult CServer::connect()
         gsi_ = std::optional(GameServerInfo{address, port});
 
         log->write(
-            "cli-server", LogType::Info, "game data transmission server at %s:%d", address.c_str(),
+            "cli-server", LogType::Info, "game data transmission server at {}:{}", address,
             port);
 
     } catch (curlpp::RuntimeError& e) {
@@ -426,7 +426,7 @@ NetResult CServer::connect()
     } catch (nlohmann::detail::exception& e) {
         log->write(
             "cli-server", LogType::Error,
-            "server returned status %d and we could not parse the incoming JSON (%s),", httpcode,
+            "server returned status {} and we could not parse the incoming JSON ({}),", httpcode,
             e.what());
         return NetResult::ServerError;
     }

@@ -189,16 +189,16 @@ void ObjectPathManager::update(const ObjectManager& om)
                 if (!currentPos) {
                     log->write(
                         "object-path-manager", LogType::Error,
-                        "Status of pathing %d (object %d (%s)) is PathStatus::InProgress, but you "
+                        "Status of pathing {} (object {} ({})) is PathStatus::InProgress, but you "
                         "called it when no points are available",
-                        op.handleval(), op.object->getID(), op.object->getName().c_str());
+                        op.handleval(), op.object->getID(), op.object->getName());
                     op.status = PathStatus::Invalid;
                 } else if (isLastPosition) {
                     // TODO: make the pathfinder alert if the path was not reached, or was reached
                     // close enough
                     log->write(
-                        "object-path-manager", LogType::Info, "Pathing of %d (%d - %s) completed!",
-                        op.handleval(), op.object->getID(), op.object->getName().c_str());
+                        "object-path-manager", LogType::Info, "Pathing of {} ({} - {}) completed!",
+                        op.handleval(), op.object->getID(), op.object->getName());
 
                     if (!op.pathfinder->hasPossiblePath())
                         op.status = PathStatus::Unreachable;
@@ -216,7 +216,7 @@ void ObjectPathManager::update(const ObjectManager& om)
             case PathStatus::Unreachable:
                 log->write(
                     "object-path-manager", LogType::Warning,
-                    "Path handle %d from (%.2f, %.2f) to (%.2f, %.2f) is not reachable",
+                    "Path handle {} from ({:.2f}, {:.2f}) to ({:.2f}, {:.2f}) is not reachable",
                     op.handleval(), op.start.x, op.start.y, op.end.x, op.end.y);
                 [[fallthrough]];
             case PathStatus::Stopped: [[fallthrough]];
@@ -226,7 +226,7 @@ void ObjectPathManager::update(const ObjectManager& om)
                 if (op.ticks_to_remove < 0) {
                     log->write(
                         "object-path-manager", LogType::Info,
-                        "Scheduling removal of path handle %d from the list", op.handleval());
+                        "Scheduling removal of path handle {} from the list", op.handleval());
                     toRemove.push_back(op.handleval());
                 }
                 break;
@@ -234,8 +234,8 @@ void ObjectPathManager::update(const ObjectManager& om)
             case PathStatus::Repathing: {
                 log->write(
                     "object-path-manager", LogType::Info,
-                    "Pathing of %d (%d - %s) needs to be recalculated!", op.handleval(),
-                    op.object->getID(), op.object->getName().c_str());
+                    "Pathing of {} ({} - {}) needs to be recalculated!", op.handleval(),
+                    op.object->getID(), op.object->getName());
 
                 if (!op.pathfinder->maxIterReached())
                     op.pathfinder->update(createBitmapForObject(*op.object, op.ratio), op.ratio);
@@ -251,7 +251,7 @@ void ObjectPathManager::update(const ObjectManager& om)
     // do not collide with each other
     if (movingEntities > 1) {
         log->write(
-            "object-path-manager", LogType::Info, "Recalculating path for %d entities",
+            "object-path-manager", LogType::Info, "Recalculating path for {} entities",
             movingEntities);
         std::for_each(operations_.begin(), operations_.end(), [this](PathRef& r) {
             r.pathfinder->update(createBitmapForObject(*r.object, r.ratio), r.ratio);
@@ -260,7 +260,7 @@ void ObjectPathManager::update(const ObjectManager& om)
     }
 
     if (toRemove.size() > 0) {
-        log->write("object-path-manager", LogType::Info, "Removing %zu pathrefs", toRemove.size());
+        log->write("object-path-manager", LogType::Info, "Removing {} pathrefs", toRemove.size());
 
         operations_.erase(
             std::remove_if(
@@ -293,8 +293,8 @@ void ObjectPathManager::recalculatePath(PathRef& r, bool force)
     auto& log = LoggerService::getLogger();
     log->write(
         "object-path-manager", LogType::Debug,
-        "Recalculating path for handle %d (%s) (%zu remaining points)", r.handleval(),
-        r.object->getName().c_str(), r.pathElements.size());
+        "Recalculating path for handle {} ({}) ({} remaining points)", r.handleval(),
+        r.object->getName(), r.pathElements.size());
 
     if (r.pathElements.size() <= 2 && !force) return;
 
@@ -324,7 +324,7 @@ std::optional<glm::vec2> ObjectPathManager::updatePosition(PathRef& r)
 
     LoggerService::getLogger()->write(
         "object-path-manager", LogType::Debug,
-        "position of object id %d (%s) is now (%.2f, %d, %.2f)", r.object->getID(),
+        "position of object id {:016x} ({}) is now ({:.2f}, {}, {:.2f})", r.object->getID(),
         r.object->getName().c_str(), pos->x, height, pos->y);
 
     assert(fabs(pos->x - r.object->getPosition().x) <= 1.5);
@@ -370,9 +370,9 @@ void ObjectPathManager::pollEntities(const ObjectManager& om)
 
                 log->write(
                     "object-path-manager", LogType::Debug,
-                    "adding '%s' (%d) (pos %.1f, %.1f, %.1f)to the list of mapped objects (as an "
+                    "adding '{}' ({}) (pos {:.1f}, {:.1f}, {:.1f})to the list of mapped objects (as an "
                     "obstacle)",
-                    (*obj)->getName().c_str(), ec->objectID, (*obj)->getPosition().x,
+                    (*obj)->getName(), ec->objectID, (*obj)->getPosition().x,
                     (*obj)->getPosition().y, (*obj)->getPosition().z);
 
                 mapped_objects_[ec->objectID] = std::make_tuple<>(glm::vec2(pos.x, pos.z), size);
@@ -400,7 +400,7 @@ void ObjectPathManager::pollEntities(const ObjectManager& om)
 
                 log->write(
                     "object-path-manager", LogType::Debug,
-                    "removing pathing handle of destroyed entity %d", ec->objectID);
+                    "removing pathing handle of destroyed entity {}", ec->objectID);
 
                 // if we have a reference to any removed object, destroy it!
                 auto* ref = findPathRefFromObject(ec->objectID);

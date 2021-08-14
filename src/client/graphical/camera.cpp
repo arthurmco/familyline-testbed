@@ -23,7 +23,7 @@ Camera::Camera(glm::vec3 pos, float aspectRatio, glm::vec3 lookAt) : familyline:
     auto& log = LoggerService::getLogger();
 
     log->write(
-        "camera", LogType::Debug, "Created cam at (%.2f, %.2f, %.2f) looking at (%.2f, %.2f, %.2f)",
+        "camera", LogType::Debug, "Created cam at ({:.2f} {:.2f} {:.2f}) looking at ({:.2f} {:.2f} {:.2f})",
         pos.x, pos.y, pos.z, lookAt.x, lookAt.y, lookAt.z);
 
     /* The maximum zoom is 2 times bigger than the starting ypos */
@@ -82,12 +82,12 @@ void Camera::CalculateVectors()
 
     glm::vec3 pivot = (_lookAt - _pos);
     glm::vec3 front = glm::normalize(pivot);
-    log->write("camera", LogType::Info, "front: %.2f %.2f, %.2f", front.x, front.y, front.z);
+    log->write("camera", LogType::Info, "front: {:.2f} {:.2f}, {:.2f}", front.x, front.y, front.z);
     _right = glm::normalize(glm::cross(front, glm::vec3(0, 1, 0)));
 
-    log->write("camera", LogType::Info, "right: %.2f %.2f, %.2f", _right.x, _right.y, _right.z);
+    log->write("camera", LogType::Info, "right: {:.2f} {:.2f}, {:.2f}", _right.x, _right.y, _right.z);
     _up = glm::vec3(0, 1, 0);  // glm::cross(_right, front);
-    log->write("camera", LogType::Info, "up: %.2f %.2f %.2f", _up.x, _up.y, _up.z);
+    log->write("camera", LogType::Info, "up: {:.2f} {:.2f} {:.2f}", _up.x, _up.y, _up.z);
 }
 
 /*  Add rotation to the camera.
