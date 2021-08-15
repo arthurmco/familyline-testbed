@@ -233,8 +233,8 @@ Pathfinder::PathNode* Pathfinder::traversePath(
     if (endtiles.size() == 0) {
         LoggerService::getLogger()->write(
             "pathfinder", LogType::Warning,
-            "cannot go there (%.2f, %.2f)! the pathfinder will try to go to the nearest place",
-            end.x, end.y);
+            "cannot go there {:.2f}! the pathfinder will try to go to the nearest place",
+            end);
     }
 
     while (!open_list_.empty()) {
@@ -262,9 +262,9 @@ Pathfinder::PathNode* Pathfinder::traversePath(
                                 })) {
             LoggerService::getLogger()->write(
                 "pathfinder", LogType::Warning,
-                "requested end point (%.2f, %.2f) not equal to found end point (%.2f, %.2f), but "
+                "requested end point {:.2f} not equal to found end point {:.2f}, but "
                 "close enough",
-                end.x, end.y, best->position.x, best->position.y);
+                end.x, best->position);
             break;
         }
 
@@ -303,8 +303,8 @@ Pathfinder::PathNode* Pathfinder::traversePath(
 
         LoggerService::getLogger()->write(
             "pathfinder", LogType::Debug,
-            "(%03d) open list has %zu, closed list has %zu, best: (%.2f, %.2f)", itercount,
-            open_list_.size(), closed_list_.size(), best->position.x, best->position.y);
+            "({:03d}) open list has {}, closed list has {}, best: {:.2f}", itercount,
+            open_list_.size(), closed_list_.size(), best->position);
 
         itercount++;
     }
@@ -364,8 +364,8 @@ std::vector<glm::vec2> Pathfinder::findPath(
 {
     LoggerService::getLogger()->write(
         "pathfinder", LogType::Debug,
-        "trying to find a path between (%.2f, %.2f) and (%.2f, %.2f), with size (%.2f, %.2f)",
-        start.x, start.y, end.x, end.y, size.x, size.y);
+        "trying to find a path between {:.2f} and {:.2f}, with size {:.2f}",
+        start, end, size);
 
     assert(obstacle_bitmap_.size() > 1);
 

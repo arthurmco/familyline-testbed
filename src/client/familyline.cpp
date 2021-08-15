@@ -681,9 +681,9 @@ Game* start_game(
         }
     }
 
-    if (irepr) {
+    if (irepr) {        
         log->write(
-            "game", LogType::Info, "Replaying inputs from file {}", *sgai.inputFile);
+            "game", LogType::Info, "Replaying inputs from file {}", sgai.inputFile);
 
         irepr->reset();
 

@@ -9,6 +9,7 @@
 #include <chrono>
 #include <cstdio>
 #include <memory>
+#include <type_traits>
 #include <vector>
 #include <string>
 #include <mutex>
@@ -22,6 +23,37 @@
 
 /// BEGIN custom formatters
 
+#include <glm/glm.hpp>
+
+template <>
+struct fmt::formatter<glm::vec3> : formatter<double> {
+
+    template <typename FormatContext>
+    auto format(const glm::vec3& v, FormatContext& ctx) {
+        format_to(ctx.out(), "(");
+        formatter<double>::format(v.x, ctx); 
+        format_to(ctx.out(), ", ");
+        formatter<double>::format(v.y, ctx);
+        format_to(ctx.out(), ", ");
+        formatter<double>::format(v.z, ctx);
+        return format_to(ctx.out(), ")");
+    }   
+};
+
+template <>
+struct fmt::formatter<glm::vec2> : formatter<double> {
+
+    template <typename FormatContext>
+    auto format(const glm::vec2& v, FormatContext& ctx) {
+        format_to(ctx.out(), "(");
+        formatter<double>::format(v.x, ctx); 
+        format_to(ctx.out(), ", ");
+        formatter<double>::format(v.y, ctx);
+        return format_to(ctx.out(), ")");
+    }   
+};
+
+
 /**
  * A formatter for the optional type
  *
@@ -34,10 +66,10 @@ struct fmt::formatter<std::optional<T>> : formatter<T> {
     auto format(const std::optional<T>& v, FormatContext& ctx) {
         if (v) {
             format_to(ctx.out(), "Some(");
-            formatter<T>::format(*v, ctx);
-            format_to(ctx.out(), ")");
+            formatter<T>::format(v.value(), ctx);
+            return format_to(ctx.out(), ")");
         } else {
-            format_to(ctx.out(), "None");
+            return format_to(ctx.out(), "None");
         }
     }   
 };

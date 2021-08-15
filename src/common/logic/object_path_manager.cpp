@@ -216,8 +216,8 @@ void ObjectPathManager::update(const ObjectManager& om)
             case PathStatus::Unreachable:
                 log->write(
                     "object-path-manager", LogType::Warning,
-                    "Path handle {} from ({:.2f}, {:.2f}) to ({:.2f}, {:.2f}) is not reachable",
-                    op.handleval(), op.start.x, op.start.y, op.end.x, op.end.y);
+                    "Path handle {} from {:.2f} to {:.2f} is not reachable",
+                    op.handleval(), op.start, op.end);
                 [[fallthrough]];
             case PathStatus::Stopped: [[fallthrough]];
             case PathStatus::Invalid: [[fallthrough]];  // there is not much we can do here...
@@ -370,10 +370,9 @@ void ObjectPathManager::pollEntities(const ObjectManager& om)
 
                 log->write(
                     "object-path-manager", LogType::Debug,
-                    "adding '{}' ({}) (pos {:.1f}, {:.1f}, {:.1f})to the list of mapped objects (as an "
+                    "adding '{}' ({}) (pos {:.1f}) to the list of mapped objects (as an "
                     "obstacle)",
-                    (*obj)->getName(), ec->objectID, (*obj)->getPosition().x,
-                    (*obj)->getPosition().y, (*obj)->getPosition().z);
+                    (*obj)->getName(), ec->objectID, (*obj)->getPosition());
 
                 mapped_objects_[ec->objectID] = std::make_tuple<>(glm::vec2(pos.x, pos.z), size);
             }
