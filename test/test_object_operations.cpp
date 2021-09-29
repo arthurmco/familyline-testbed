@@ -134,7 +134,7 @@ TEST(ObjectOps, ObjectTestIfRemovalNotifies)
     EXPECT_TRUE(oer.pollEvent(e));
 
     auto* ev = std::get_if<EventDestroyed>(&e.type);
-    EXPECT_TRUE(ev);
+    ASSERT_TRUE(ev);
     EXPECT_EQ(id, ev->objectID);
 
     actionQueue->removeReceiver(&oer);

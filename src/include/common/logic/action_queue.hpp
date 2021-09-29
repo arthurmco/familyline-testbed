@@ -12,13 +12,19 @@ namespace familyline::logic
  *
  * Please keep the queue event enumerator elements in the same order as the
  * EntityEventType variant in the game_event.hpp header, because I use this
- * value as sort of a numeric value 
+ * value as sort of a numeric value
+ *
+ * TODO: actually enforce this, like this:
+ * https://en.cppreference.com/w/cpp/utility/variant/variant_alternative
  */
 enum ActionQueueEvent {
     Created = 0,
     Building,
     Built,
     Ready,
+    AttackStart,
+    AttackMiss,
+    AttackDone,
     Attacking,
     Working,
     Garrisoned,
@@ -27,6 +33,7 @@ enum ActionQueueEvent {
     Destroyed
 };
 
+
 struct ReceiverData {
     EventReceiver* receiver;
     std::vector<ActionQueueEvent> events;
@@ -34,6 +41,9 @@ struct ReceiverData {
 
 /**
  * Acts like a central hub for events
+ *
+ * TODO: Use simple functors as receivers/emitters, not full classes
+ *       This is not Java 7
  */
 class ActionQueue
 {

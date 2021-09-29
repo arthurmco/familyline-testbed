@@ -12,6 +12,9 @@ namespace familyline::logic
 /*
  * These events are events that happen from the point of view of the
  * objects
+ *
+ * They exist so other systems can know what happened to a certain
+ * entity without having to query its attributes all the time.
  */
 typedef unsigned long long entity_id_t;
 
@@ -49,6 +52,72 @@ struct EventBuilt {
  */
 struct EventReady {
     entity_id_t objectID;
+};
+
+/**
+ * An entity initiated an attacker
+ *
+ * We have the attacker, the defender, and an unique ID that will identify this
+ * attack attempt, so you can reliably cross-reference it with the corresponding
+ * EventAttackMiss or EventAttackDone
+ *
+ * You also have the position of the attacker and the defender when the event
+ * was sent to the queue.
+ */
+struct EventAttackStart {
+    entity_id_t attackerID;
+    entity_id_t defenderID;
+
+    uint64_t attackID;
+
+    unsigned int atkXPos, atkYPos;
+    unsigned int defXPos, defYPos;
+};
+
+/**
+ * An entity missed an attack
+ *
+ * You also have the position of the attacker and the defender when the event
+ * was sent to the queue (might not be the same as the corresponding
+ * EventAttackStart)
+ */
+struct EventAttackMiss {
+    entity_id_t attackerID;
+    entity_id_t defenderID;
+
+    uint64_t attackID;
+
+    unsigned int atkXPos, atkYPos;
+    unsigned int defXPos, defYPos;
+};
+
+struct AttackDefinition {int i;};
+
+/**
+ * An entity has done an attack
+ *
+ * One smart note: since like, in real life, when you gonna attack someone
+ * (like, for example, an asshole that called you a slur), and hit, without
+ * wanting to, some of your friends, the `defender` might not be the same
+ * one as the defender in the corresponding EventAttackStart. You might
+ * as well receive multiple attacks with the same attackID
+ *
+ * You also have the used attack definition (the attack component attributes
+ * used to calculate the damage dealt), the damage dealt itself and the
+ * position of the attacker and the defender when the event was sent to the
+ * queue (might not be the same as the corresponding EventAttackStart)
+ */
+struct EventAttackDone {
+    entity_id_t attackerID;
+    entity_id_t defenderID;
+
+    uint64_t attackID;
+
+    unsigned int atkXPos, atkYPos;
+    unsigned int defXPos, defYPos;
+
+    AttackDefinition atkdef;
+    double damageDealt;
 };
 
 /**
@@ -125,9 +194,20 @@ struct EventDestroyed {
 class EventEmitter;
 class ActionQueue;
 
+/**
+ * The event type array
+ *
+ * PLEASE keep these types synced with the enum ActionQueeEvent in <common/logic/action_queue.hpp>,
+ * so the listeners can know what actions to listen
+ *
+ * If you keep them desynchronized (with the .index() of the variant not corresponding to
+ * the same-named ActionQueueEvent member), the listened event types will not match the real
+ * events.
+ */
 typedef std::variant<
-    EventCreated, EventBuilding, EventBuilt, EventReady, EventAttacking, EventWorking,
-    EventGarrisoned, EventDying, EventDead, EventDestroyed>
+    EventCreated, EventBuilding, EventBuilt, EventReady, EventAttackStart, EventAttackMiss,
+    EventAttackDone, EventAttacking, EventWorking, EventGarrisoned, EventDying, EventDead,
+    EventDestroyed>
     EntityEventType;
 
 struct EntityEvent {

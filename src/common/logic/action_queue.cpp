@@ -81,6 +81,31 @@ void ActionQueue::pushEvent(const EntityEvent& ev)
                     "action-queue", LogType::Info, "event added: EventReady ({}, objectID={})",
                     begin, e.objectID);
             },
+            [&](const EventAttackStart& e) {
+                log->write(
+                    "action-queue", LogType::Info,
+                    "event added: EventAttackStart ({}, "
+                    "attacker(id={}, xpos={}, ypos={}), defender(id={}, xpos={}, ypos={}))",
+                    begin, e.attackerID, e.atkXPos, e.atkYPos, e.defenderID, e.defXPos,
+                    e.defYPos);
+            },
+            [&](const EventAttackMiss& e) {
+                log->write(
+                    "action-queue", LogType::Info,
+                    "event added: EventAttackMiss ({}, "
+                    "attacker(id={}, xpos={}, ypos={}), defender(id={}, xpos={}, ypos={}))",
+                    begin, e.attackerID, e.atkXPos, e.atkYPos, e.defenderID, e.defXPos,
+                    e.defYPos);
+            },
+            [&](const EventAttackDone& e) {
+                log->write(
+                    "action-queue", LogType::Info,
+                    "event added: EventAttackDone ({}, "
+                    "attacker(id={}, xpos={}, ypos={}), defender(id={}, xpos={}, ypos={}),"
+                    "damageDealt={:.2f})",
+                    begin, e.attackerID, e.atkXPos, e.atkYPos, e.defenderID, e.defXPos,
+                    e.defYPos, e.damageDealt);
+            },
             [&](const EventAttacking& e) {
                 log->write(
                     "action-queue", LogType::Info,

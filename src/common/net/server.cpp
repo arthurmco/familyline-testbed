@@ -4,7 +4,6 @@
 #include <common/logger.hpp>
 #include <common/net/server.hpp>
 #include <iterator>  // for std::back_inserter
-#include <nlohmann/detail/exceptions.hpp>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <sstream>
