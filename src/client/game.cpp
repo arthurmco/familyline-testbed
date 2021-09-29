@@ -392,7 +392,7 @@ void Game::runLogic()
     pm_->run(gctx);
     olm_->update();
 
-    LogicService::getObjectListener()->updateObjects();
+//    LogicService::getObjectListener()->updateObjects();
 
     /* Logic & graphical processing */
     gam.ProcessListeners();

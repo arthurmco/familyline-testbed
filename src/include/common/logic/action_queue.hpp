@@ -1,12 +1,12 @@
 #pragma once
 
 #include <common/logic/game_event.hpp>
+#include <functional>
 #include <queue>
 #include <vector>
 
 namespace familyline::logic
 {
-
 /**
  * The type of event
  *
@@ -33,17 +33,31 @@ enum ActionQueueEvent {
     Destroyed
 };
 
+/**
+ * The event receiving callback.
+ *
+ * If you register a callback in the action queue, everytime a new event happens
+ * that has one of the types you asked for, this function will be called
+ *
+ * It should return true if there was no problem processing the event, and
+ * false if it was.
+ */
+using EventReceiver = std::function<bool(const EntityEvent&)>;
 
+
+/**
+ * Some sort of receiver data storage
+ */
 struct ReceiverData {
-    EventReceiver* receiver;
+    std::string name;
+    EventReceiver receiver;
     std::vector<ActionQueueEvent> events;
 };
 
 /**
- * Acts like a central hub for events
- *
- * TODO: Use simple functors as receivers/emitters, not full classes
- *       This is not Java 7
+ * Acts like a central hub for events that happen in the game.
+ * Receiving events here is good if you want to know when a certain entity was
+ * created, or died, or has been attacked.
  */
 class ActionQueue
 {
@@ -53,9 +67,9 @@ private:
 
 public:
     void addEmitter(EventEmitter* e);
-    void addReceiver(EventReceiver* r, std::initializer_list<ActionQueueEvent> events);
+    void addReceiver(std::string name, EventReceiver r, std::initializer_list<ActionQueueEvent> events);
 
-    void removeReceiver(EventReceiver*);
+    void removeReceiver(std::string name);
     void removeEmitter(EventEmitter*);
 
     void pushEvent(const EntityEvent& e);

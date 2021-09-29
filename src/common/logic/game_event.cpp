@@ -15,15 +15,3 @@ void EventEmitter::pushEvent(EntityEvent& e)
 
     this->queue->pushEvent(e);
 }
-
-bool EventReceiver::pollEvent(EntityEvent& e)
-{
-    if (events.empty()) return false;
-
-    EntityEvent tmp = events.front();
-    events.pop();
-    e = tmp;
-    return true;
-}
-
-void EventReceiver::pushEvent(EntityEvent& e) { events.push(e); }

@@ -82,25 +82,32 @@ TEST(ObjectOps, ObjectTestIfCreationNotifies)
     auto id        = om.add(std::move(component));
     EXPECT_GT(id, 0);
 
-    EntityEvent e;
-
-    ObjectEventReceiver oer;
-    EXPECT_FALSE(oer.pollEvent(e));
+    std::queue<EntityEvent> events;
+    
+    EventReceiver er = [&](const EntityEvent& e) {
+        events.push(e);
+        return true;
+    };
+        
+    EXPECT_TRUE(events.empty());
 
     actionQueue->addReceiver(
-        &oer, {
-                  ActionQueueEvent::Created,
-              });
+        "test-receiver", er, {
+            ActionQueueEvent::Created,
+        });
 
     actionQueue->processEvents();
 
-    EXPECT_TRUE(oer.pollEvent(e));
+    EXPECT_FALSE(events.empty());
+    EXPECT_EQ(1, events.size());
 
+    auto e = events.front();
     auto* ev = std::get_if<EventCreated>(&e.type);
     EXPECT_TRUE(ev);
     EXPECT_EQ(id, ev->objectID);
 
-    actionQueue->removeReceiver(&oer);
+    events.pop();
+    actionQueue->removeReceiver("test-receiver");
 }
 
 TEST(ObjectOps, ObjectTestIfRemovalNotifies)
@@ -117,25 +124,32 @@ TEST(ObjectOps, ObjectTestIfRemovalNotifies)
     auto id        = om.add(std::move(component));
     EXPECT_GT(id, 0);
 
-    EntityEvent e;
-
-    ObjectEventReceiver oer;
-    EXPECT_FALSE(oer.pollEvent(e));
+    std::queue<EntityEvent> events;
+    
+    EventReceiver er = [&](const EntityEvent& e) {
+        events.push(e);
+        return true;
+    };
+        
+    EXPECT_TRUE(events.empty());
 
     actionQueue->addReceiver(
-        &oer, {
-                  ActionQueueEvent::Destroyed,
-              });
+        "test-receiver", er, {
+            ActionQueueEvent::Destroyed,
+        });
 
     om.remove(id);
 
     actionQueue->processEvents();
 
-    EXPECT_TRUE(oer.pollEvent(e));
+    EXPECT_FALSE(events.empty());
+    EXPECT_EQ(1, events.size());
 
+    auto e = events.front();
     auto* ev = std::get_if<EventDestroyed>(&e.type);
     ASSERT_TRUE(ev);
     EXPECT_EQ(id, ev->objectID);
 
-    actionQueue->removeReceiver(&oer);
+    events.pop();
+    actionQueue->removeReceiver("test-receiver");
 }

@@ -16,9 +16,6 @@ namespace familyline::logic
  */
 class ObjectEventEmitter : public EventEmitter
 {
-private:
-    std::string _name;
-
 public:
     ObjectEventEmitter();
 
@@ -38,14 +35,6 @@ public:
      * No more operations with it will be executed.
      */
     void notifyRemoval(object_id_t id, const std::string& name);
-
-    virtual const std::string getName();
-};
-
-class ObjectEventReceiver : public EventReceiver
-{
-public:
-    virtual const std::string getName() { return "object-event-receiver"; }
 };
 
 class ObjectManager
@@ -54,7 +43,7 @@ private:
     std::vector<std::shared_ptr<GameObject>> _objects;
     int _lastID                      = 0;
     ObjectEventEmitter* eventEmitter = nullptr;
-
+    
 public:
     ObjectManager();
 

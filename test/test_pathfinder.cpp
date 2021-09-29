@@ -197,7 +197,7 @@ TEST(Pathfinder, CanWalkAroundObstacle)
     auto obsid = om.add(std::move(obstacle));
 
     actionQueue->processEvents();
-    olist->updateObjects();
+    //olist->updateObjects();
 
 
     TerrainFile tf{100, 100};
@@ -252,7 +252,7 @@ TEST(Pathfinder, CanWalkAroundObstacleOnScaledPathmap)
     auto obsid = om.add(std::move(obstacle));
 
     actionQueue->processEvents();
-    olist->updateObjects();
+    //olist->updateObjects();
 
 
     TerrainFile tf{100, 100};
@@ -305,7 +305,7 @@ TEST(Pathfinder, CanWalkUpwards)
     auto id = om.add(std::move(component));
 
     actionQueue->processEvents();
-    olist->updateObjects();
+    //olist->updateObjects();
 
     auto heightdata = std::vector<uint16_t>(100*100, 0);
     heightdata[21*100+22] = 255;

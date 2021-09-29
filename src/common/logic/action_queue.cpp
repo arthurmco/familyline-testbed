@@ -10,34 +10,30 @@ using namespace familyline::logic;
 
 void ActionQueue::addEmitter(EventEmitter* e)
 {
-    // printf("\tadded event emitter %s\n", e->getName().c_str());
-
+    auto& log = LoggerService::getLogger();
+    log->write("action-queue", LogType::Debug, "added event emitter {}", e->getName());
     e->queue = this;
 }
 
-void ActionQueue::addReceiver(EventReceiver* r, std::initializer_list<ActionQueueEvent> events)
+void ActionQueue::addReceiver(std::string name, EventReceiver r,
+                              std::initializer_list<ActionQueueEvent> events)
 {
     assert(r);
     auto& log = LoggerService::getLogger();
     
-    ReceiverData rd;
-    rd.events   = events;
-    rd.receiver = r;
+    log->write("action-queue", LogType::Debug, "added event receiver {}", name);
 
-    log->write("action-queue", LogType::Debug, "added event receiver {} ({:x})", r->getName(), (uintptr_t)r);
-
-    this->receivers.push_back(rd);
+    this->receivers.emplace_back(name, r, events);
 }
 
-void ActionQueue::removeReceiver(EventReceiver* r)
+void ActionQueue::removeReceiver(std::string name)
 {
-    assert(r);
     auto& log = LoggerService::getLogger();
-    log->write("action-queue", LogType::Debug, "removed event receiver {} ({:x})", r->getName(), (uintptr_t)r);
 
-    auto newend = std::remove_if(receivers.begin(), receivers.end(), [r](ReceiverData rec) {
-        return (rec.receiver->getName() == r->getName());
+    auto newend = std::remove_if(receivers.begin(), receivers.end(), [name](ReceiverData rec) {
+        return (rec.name == name);
     });
+    log->write("action-queue", LogType::Debug, "removed event receiver {}", name);
     receivers.erase(newend, receivers.end());
 }
 
@@ -56,7 +52,7 @@ void ActionQueue::pushEvent(const EntityEvent& ev)
 {
     std::string begin = fmt::format(
         "timestamp={}, source={}", ev.timestamp,
-        ev.emitter ? ev.emitter->getName().c_str() : "(null emitter)");
+        ev.emitter ? ev.emitter->getName() : "(null emitter)");
 
     auto& log = LoggerService::getLogger();
     std::visit(
@@ -162,7 +158,7 @@ void ActionQueue::processEvents()
             if (std::find(rec.events.begin(), rec.events.end(), e.type.index()) !=
                 rec.events.end()) {
                 // printf("\t received by %s\n", rec.receiver->getName().c_str());
-                rec.receiver->pushEvent(e);
+                rec.receiver(e);
             }
         }
 

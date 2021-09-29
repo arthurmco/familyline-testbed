@@ -17,32 +17,26 @@ using namespace familyline::logic;
  *       only recalculate if a collision would occur
  */
 
-class PathEventReceiver : public EventReceiver
-{
-public:
-    PathEventReceiver()
-    {
-        LogicService::getActionQueue()->addReceiver(
-            this, {
-                      ActionQueueEvent::Created,
-                      ActionQueueEvent::Dead,
-                      ActionQueueEvent::Destroyed,
-                  });
-    }
-
-    PathEventReceiver(PathEventReceiver&) = delete;
-    PathEventReceiver& operator=(PathEventReceiver&) = delete;
-
-    ~PathEventReceiver() { LogicService::getActionQueue()->removeReceiver(this); }
-
-    virtual const std::string getName() { return "path-event-receiver"; }
-};
-
 ObjectPathManager::ObjectPathManager(Terrain& t) : t_(t)
 {
     auto [w, h]      = t_.getSize();
     obstacle_bitmap_ = std::vector<unsigned>(w * h, 0);
-    obj_events_      = std::make_unique<PathEventReceiver>();
+    obj_events_      = [this](const EntityEvent& e) {
+        events_.push(e);
+        return true;
+    };
+    LogicService::getActionQueue()->addReceiver(
+        "path-event-receiver", obj_events_,
+        {
+            ActionQueueEvent::Created,
+            ActionQueueEvent::Dead,
+            ActionQueueEvent::Destroyed,
+        });
+}
+
+ObjectPathManager::~ObjectPathManager()
+{
+    LogicService::getActionQueue()->removeReceiver("path-event-receiver");
 }
 
 /**
@@ -66,10 +60,10 @@ PathHandle ObjectPathManager::startPathing(GameObject& o, glm::vec2 dest)
             o.getID());
         existingref->status = PathStatus::Repathing;
         existingref->start  = existingref->position() ? *existingref->position()
-                                                     : glm::vec2(
+                                                      : glm::vec2(
                                                            existingref->object->getPosition().x,
                                                            existingref->object->getPosition().z);
-        existingref->end = dest;
+        existingref->end    = dest;
         return existingref->handleval();
     } else {
         auto pathref = PathRef(o, t_, dest);
@@ -216,8 +210,8 @@ void ObjectPathManager::update(const ObjectManager& om)
             case PathStatus::Unreachable:
                 log->write(
                     "object-path-manager", LogType::Warning,
-                    "Path handle {} from {:.2f} to {:.2f} is not reachable",
-                    op.handleval(), op.start, op.end);
+                    "Path handle {} from {:.2f} to {:.2f} is not reachable", op.handleval(),
+                    op.start, op.end);
                 [[fallthrough]];
             case PathStatus::Stopped: [[fallthrough]];
             case PathStatus::Invalid: [[fallthrough]];  // there is not much we can do here...
@@ -353,65 +347,72 @@ void ObjectPathManager::updateObstacleBitmap(const ObjectManager& om)
     }
 }
 
+
+void ObjectPathManager::parseEntityEvent(const ObjectManager& om, const EntityEvent& e){
+    auto& log = LoggerService::getLogger();
+
+    if (auto* ec = std::get_if<EventCreated>(&e.type); ec) {
+        if (auto obj = om.get(ec->objectID); obj) {
+            auto pos  = (*obj)->getPosition();
+            auto size = (*obj)->getSize();
+
+            log->write(
+                "object-path-manager", LogType::Debug,
+                "adding '{}' ({}) (pos {:.1f}) to the list of mapped objects (as an "
+                "obstacle)",
+                (*obj)->getName(), ec->objectID, (*obj)->getPosition());
+
+            mapped_objects_[ec->objectID] = std::make_tuple<>(glm::vec2(pos.x, pos.z), size);
+        }
+    }
+
+    // We have this one only to set the pathref status, so it does not go away
+    // immediately.
+    if (auto* ec = std::get_if<EventDead>(&e.type); ec) {
+        mapped_objects_.erase(ec->objectID);
+
+        // if we have a reference to any removed object, destroy it!
+        auto* ref = findPathRefFromObject(ec->objectID);
+        if (ref) {
+            log->write(
+                "object-path-manager", LogType::Info,
+                "pathing of handle %d (id %d) stopped, because the entity is dead",
+                ref->handleval(), ec->objectID);
+
+            ref->status = PathStatus::Stopped;
+        }
+
+        if (auto* ec = std::get_if<EventDestroyed>(&e.type); ec) {
+            mapped_objects_.erase(ec->objectID);
+
+            log->write(
+                "object-path-manager", LogType::Debug,
+                "removing pathing handle of destroyed entity {}", ec->objectID);
+
+            // if we have a reference to any removed object, destroy it!
+            auto* ref = findPathRefFromObject(ec->objectID);
+            if (ref) {
+                operations_.erase(
+                    std::remove_if(
+                        operations_.begin(), operations_.end(),
+                        [&](PathRef& r) { return r.oid == ec->objectID; }),
+                    operations_.end());
+            }
+        }
+    }
+}
+
 /**
  * Update the mapped object list, adding the recently added entities and removing
  * the destroyed entities.
  */
 void ObjectPathManager::pollEntities(const ObjectManager& om)
 {
-    auto& log = LoggerService::getLogger();
 
-    EntityEvent e;
-    while (obj_events_->pollEvent(e)) {
-        if (auto* ec = std::get_if<EventCreated>(&e.type); ec) {
-            if (auto obj = om.get(ec->objectID); obj) {
-                auto pos  = (*obj)->getPosition();
-                auto size = (*obj)->getSize();
-
-                log->write(
-                    "object-path-manager", LogType::Debug,
-                    "adding '{}' ({}) (pos {:.1f}) to the list of mapped objects (as an "
-                    "obstacle)",
-                    (*obj)->getName(), ec->objectID, (*obj)->getPosition());
-
-                mapped_objects_[ec->objectID] = std::make_tuple<>(glm::vec2(pos.x, pos.z), size);
-            }
-        }
-
-        // We have this one only to set the pathref status, so it does not go away
-        // immediately.
-        if (auto* ec = std::get_if<EventDead>(&e.type); ec) {
-            mapped_objects_.erase(ec->objectID);
-
-            // if we have a reference to any removed object, destroy it!
-            auto* ref = findPathRefFromObject(ec->objectID);
-            if (ref) {
-                log->write(
-                    "object-path-manager", LogType::Info,
-                    "pathing of handle %d (id %d) stopped, because the entity is dead",
-                    ref->handleval(), ec->objectID);
-
-                ref->status = PathStatus::Stopped;
-            }
-
-            if (auto* ec = std::get_if<EventDestroyed>(&e.type); ec) {
-                mapped_objects_.erase(ec->objectID);
-
-                log->write(
-                    "object-path-manager", LogType::Debug,
-                    "removing pathing handle of destroyed entity {}", ec->objectID);
-
-                // if we have a reference to any removed object, destroy it!
-                auto* ref = findPathRefFromObject(ec->objectID);
-                if (ref) {
-                    operations_.erase(
-                        std::remove_if(
-                            operations_.begin(), operations_.end(),
-                            [&](PathRef& r) { return r.oid == ec->objectID; }),
-                        operations_.end());
-                }
-            }
-        }
+    while (!events_.empty()) {
+        EntityEvent e = events_.front();        
+        parseEntityEvent(om, e);
+        events_.pop();
     }
 }
 
@@ -433,7 +434,7 @@ std::vector<bool> ObjectPathManager::createBitmapForObject(const GameObject& o, 
     std::vector<unsigned> v{obstacle_bitmap_};
     setObjectOnBitmap(v, o, false, 1);
 
-    std::vector<bool> nv(v.size() / (ratio*ratio), false);
+    std::vector<bool> nv(v.size() / (ratio * ratio), false);
 
     auto [w, h] = t_.getSize();
     for (auto y = 0; y < h; y++) {

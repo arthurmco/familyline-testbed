@@ -8,20 +8,22 @@
  * object position) and others, this class will manage the object
  * listening
  *
- * (C) 2019 Arthur Mendes
+ * (C) 2019-2021 Arthur Mendes
  */
 
+/// TODO: refactor EventReceiver to be a callback instead of a full class with inheritance, etc.
+
 #include <set>
+#include <functional>
 
 #include <common/logic/game_event.hpp>
 #include <common/logic/game_object.hpp>
 
 namespace familyline::logic
 {
-class ObjectListener : public EventReceiver
+class ObjectListener
 {
 private:
-    std::string _name = "object-listener";
 
     /// A set of id=>is_alive values
     ///
@@ -29,15 +31,13 @@ private:
     /// duplicates
     std::set<object_id_t> _objects;
 
-public:
-    ObjectListener() : EventReceiver() {}
-
-    virtual const std::string getName() { return _name; }
-
     /**
      * Update the object statuses according to the events
      */
-    void updateObjects();
+    bool updateObjects(const EntityEvent& e);
+
+public:
+    ObjectListener();
 
     void clear() { _objects.clear(); }
     

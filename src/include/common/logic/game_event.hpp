@@ -217,45 +217,30 @@ struct EntityEvent {
 };
 
 /**
- * Event receiver
+ * The event emitter class
+ *
+ * Will be used like a proxy so you can send events to the action queue
  */
-class EventReceiver
-{
-protected:
-    std::queue<EntityEvent> events;
-
+class EventEmitter {
 public:
-    virtual const std::string getName() = 0;
-
-    /**
-     * Push the event to the receiver internal queue, so it can be
-     * pulled by anyone who is listening through this receiver
-     */
-    void pushEvent(EntityEvent& e);
-
-    bool pollEvent(EntityEvent& e);
-
-    virtual ~EventReceiver() {}
-};
-
-/**
- * Event emitter
- */
-class EventEmitter
-{
-    friend class ActionQueue;
-
-protected:
-    ActionQueue* queue;
+    EventEmitter(std::string name) :
+        name_(name)
+        {}    
 
     /**
      * Pushes the event to the central action queue
      */
     void pushEvent(EntityEvent& e);
 
-public:
-    virtual const std::string getName() = 0;
-
     virtual ~EventEmitter() {}
+    ActionQueue* queue;
+
+    std::string_view getName() const { return name_; }
+protected:
+    std::string name_;
+
+    
 };
+
+    
 }  // namespace familyline::logic

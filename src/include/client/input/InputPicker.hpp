@@ -59,11 +59,12 @@ private:
     familyline::graphics::Camera* _cam;
     familyline::logic::ObjectManager* _om;
 
+    std::queue<logic::EntityEvent> events_;
+
     glm::vec3 _intersectedPosition;
     std::weak_ptr<familyline::logic::GameObject> _locatableObject;
 
     std::vector<const familyline::logic::GameObject*> _olist;
-    familyline::logic::ObjectEventReceiver oel;
 
     bool CheckIfTerrainIntersect(glm::vec3 ray, float start, float end);
 

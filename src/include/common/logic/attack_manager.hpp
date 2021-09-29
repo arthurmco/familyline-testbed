@@ -25,34 +25,10 @@ struct AttackData {
     int atk_tick_delay = 0;
 };
 
-class AttackManagerEventReceiver : public EventReceiver
-{
-private:
-    std::string _name = "atk-manager-event-receiver";
-
-public:
-    AttackManagerEventReceiver();
-
-    virtual const std::string getName();
-
-    virtual ~AttackManagerEventReceiver() {}
-};
-
-class AttackManagerEventEmitter : public EventEmitter
-{
-private:
-    std::string _name = "atk-manager-event-emitter";
-
-public:
-    AttackManagerEventEmitter();
-
-    virtual const std::string getName();
-
-    void generateAttackEvent(AttackComponent* atk, AttackComponent* def, double dmg);
-
-    virtual ~AttackManagerEventEmitter() {}
-};
-
+void generateAttackEvent(
+    EventEmitter* e,
+    AttackComponent* atk, AttackComponent* def, double dmg);
+    
 class AttackManager
 {
 private:
@@ -70,9 +46,10 @@ private:
      * Check if any object has been deleted and should be removed
      */
     void checkRemovedObjects();
-    AttackManagerEventReceiver* ame_receiver;
-    AttackManagerEventEmitter* ame_emitter;
+    EventEmitter* ame_emitter = nullptr;
 
+    std::queue<EntityEvent> events_;
+    
 public:
     AttackManager();
     ~AttackManager();

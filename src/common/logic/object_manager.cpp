@@ -8,7 +8,7 @@ using namespace familyline::logic;
  * Basic object event emitter
  */
 
-ObjectEventEmitter::ObjectEventEmitter() : _name("object-event-emitter")
+ObjectEventEmitter::ObjectEventEmitter() : EventEmitter("object-event-emitter")
 {
     LogicService::getActionQueue()->addEmitter((EventEmitter*)this);
 }
@@ -41,7 +41,6 @@ void ObjectEventEmitter::notifyRemoval(object_id_t id, const std::string& name)
     this->pushEvent(e);
 }
 
-const std::string ObjectEventEmitter::getName() { return _name; }
 
 ObjectManager::ObjectManager() { eventEmitter = new ObjectEventEmitter{}; }
 

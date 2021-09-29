@@ -3,28 +3,26 @@
 #include <common/logic/attack_manager.hpp>
 #include <common/logic/game_object.hpp>
 #include <common/logic/logic_service.hpp>
+
+#include "common/logic/action_queue.hpp"
 #include "common/logic/game_event.hpp"
 
 using namespace familyline::logic;
 
-AttackManagerEventReceiver::AttackManagerEventReceiver()
-{
-    LogicService::getActionQueue()->addReceiver((EventReceiver*)this, {ActionQueueEvent::Destroyed});
-}
-
-const std::string AttackManagerEventReceiver::getName() { return _name; }
-
 AttackManager::AttackManager()
 {
-    ame_receiver = new AttackManagerEventReceiver{};
-    ame_emitter  = new AttackManagerEventEmitter{};
+    LogicService::getActionQueue()->addReceiver(
+        "atk-manager-event-receiver", [this](const EntityEvent& e){
+            this->events_.push(e);
+            return true;
+        }, { ActionQueueEvent::Destroyed });
+    ame_emitter = new EventEmitter("atk-manager-event-emitter");
 }
 
 AttackManager::~AttackManager()
 {
-    LogicService::getActionQueue()->removeReceiver(ame_receiver);
+    LogicService::getActionQueue()->removeReceiver("atk-manager-event-receiver");
     LogicService::getActionQueue()->removeEmitter(ame_emitter);
-    delete ame_receiver;
     delete ame_emitter;
 }
 
@@ -62,16 +60,14 @@ void AttackManager::endAttack(attack_handle_t ahandle) { this->attacks.erase(aha
  */
 void AttackManager::checkRemovedObjects()
 {
-    EntityEvent e;
-
     std::vector<std::tuple<attack_handle_t, int>> to_remove;
-    while (this->ame_receiver->pollEvent(e)) {
+    while (!events_.empty()) {
+        EntityEvent e = events_.front();
+
         // The event types are guaranteed to be only the object destruction events
         auto* atk = std::get_if<EventAttacking>(&e.type);
-        if (!atk)
-            continue;
-        
-        
+        if (!atk) continue;
+
         auto eid = atk->attackerID;
 
         for (auto [ahandle, adata] : this->attacks) {
@@ -92,6 +88,8 @@ void AttackManager::checkRemovedObjects()
                 to_remove.push_back(std::make_tuple(0, eid));
             }
         }
+
+        events_.pop();
     }
 
     for (auto [handle, oid] : to_remove) {
@@ -126,7 +124,7 @@ void AttackManager::processAttacks(ObjectLifecycleManager& olm)
         }
 
         adata.def->object->addHealth(-vdmg);
-        this->ame_emitter->generateAttackEvent(adata.atk, adata.def, vdmg);
+        generateAttackEvent(ame_emitter, adata.atk, adata.def, vdmg);
 
         // When dying, set the health to zero and remove the object
         if (adata.def->object->getHealth() <= 0) {
@@ -164,40 +162,24 @@ std::tuple<int, int> familyline::logic::break_attack_handle(attack_handle_t hand
     return std::make_tuple<int, int>(handle >> 32, handle & 0xffffffff);
 }
 
-AttackManagerEventEmitter::AttackManagerEventEmitter()
-{
-    LogicService::getActionQueue()->addEmitter((EventEmitter*)this);
-}
-
-const std::string AttackManagerEventEmitter::getName() { return _name; }
-
-void AttackManagerEventEmitter::generateAttackEvent(
-    AttackComponent* atk, AttackComponent* def, double dmg)
+void familyline::logic::generateAttackEvent(
+    EventEmitter* e, AttackComponent* atk, AttackComponent* def, double dmg)
 {
     auto atkpos = atk->object->getPosition();
     auto defpos = def->object->getPosition();
 
-
-    EntityEvent eatk{0, EventAttacking{
-            atk->object->getID(),
-            def->object->getID(),
-            unsigned(atkpos.x), unsigned(atkpos.z),
-            unsigned(defpos.x), unsigned(defpos.z),
-            dmg
-        }, nullptr};
-    this->pushEvent(eatk);
-
+    EntityEvent eatk{
+        0,
+        EventAttacking{
+            atk->object->getID(), def->object->getID(), unsigned(atkpos.x), unsigned(atkpos.z),
+            unsigned(defpos.x), unsigned(defpos.z), dmg},
+        nullptr};
+    e->pushEvent(eatk);
 
     if (def->object->getHealth() <= 0.0) {
         EntityEvent edying{
-            0, EventDying{
-                def->object->getID(),
-                unsigned(defpos.x), unsigned(defpos.z)
-            },
-            nullptr
-        };
+            0, EventDying{def->object->getID(), unsigned(defpos.x), unsigned(defpos.z)}, nullptr};
 
-        this->pushEvent(edying);
+        e->pushEvent(edying);
     }
-
 }

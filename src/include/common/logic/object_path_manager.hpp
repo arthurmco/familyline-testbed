@@ -171,10 +171,15 @@ public:
     void setItersPerFrame(int v) { max_iter_paths_per_frame_ = v; }
     int getItersPerFrame() const { return max_iter_paths_per_frame_; }
 
+    ~ObjectPathManager();
+    
 private:
     Terrain& t_;
-    std::unique_ptr<EventReceiver> obj_events_;
-
+    EventReceiver obj_events_;
+    std::queue<EntityEvent> events_;
+    
+    void parseEntityEvent(const ObjectManager& om, const EntityEvent& e);
+    
     int max_iter_paths_per_frame_ = 200;
 
     /**
