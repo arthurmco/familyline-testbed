@@ -15,6 +15,12 @@ namespace familyline::logic
  *
  * They exist so other systems can know what happened to a certain
  * entity without having to query its attributes all the time.
+ *
+ * Following are the event struct types.
+ * Because C++ lack sum types, we need to create separate structs to each
+ * event type and glue them using an std::variant. This is, honestly,
+ * one of the things that I like Rust added, and I would prefer to do
+ * this in Rust.
  */
 typedef unsigned long long entity_id_t;
 
@@ -54,6 +60,95 @@ struct EventReady {
     entity_id_t objectID;
 };
 
+
+/**
+ * The attack type
+ */
+enum class AttackType { Melee, Projectile, Other };
+
+struct AttackTypeMelee {
+    /// Maximum distance a melee attack can be done
+    double a = 0;
+};
+
+struct AttackTypeProjectile {
+    /// Projectile speed, in units/tick
+    double projectileSpeed;
+};
+
+using AttackTypeClass = std::variant<AttackTypeMelee, AttackTypeProjectile, std::monostate>;
+
+/**
+ * The attack rule
+ *
+ * We have, for now, two attack types: melee and projectile attacks.
+ * Each one is governed by a certain rule, who dictates that what attack will
+ * be applied, depending on the distance between two entities.
+ */
+struct AttackRule {
+    /// Minimum an maximum distance this attack type can be done
+    double minDistance, maxDistance;
+    AttackTypeClass ctype;
+};
+
+/**
+ * Information about an attack
+ */
+struct _AttackData {
+    /// The type of the attack
+    AttackType atype;
+
+    /// The chosen rule for this attack
+    AttackRule rule;
+
+    /// The damage value it inflicted
+    double value;
+};
+
+/**
+ * An error explaining why a certain attack could not be done
+ */
+enum class AttackError { DefenderTooNear, DefenderTooFar, DefenderNotInSight };
+
+/**
+ * The attack attributes
+ */
+struct AttackAttributes {
+
+    /// How much health points it will remove from the attacked unit
+    double attackPoints;
+
+    /// How much points it will decrease from the attack of the attacking unit?
+    double defensePoints;
+
+    /// The speed of our attack.
+    ///
+    /// It is use more or less like this:
+    /// We get the number 2048 and divide by the attack speed to get an
+    /// attack interval (`ai`)
+    /// When you do an attack, even if the precision calculations does not
+    /// make it succeed, we set a counter to `ai`, and reduce it on each
+    /// tick.
+    /// When the attack interval reaches zero, we try to attack again.
+    /// If the attack interval is less than one, we attack multiple times
+    /// until it becomes one.
+    /// `ai` cannot be bigger than 128, so the attack speed cannot be
+    /// bigger than 262144
+    ///
+    /// Note that an attack speed of 2048 means that you will attack
+    /// once per tick.
+    double attackSpeed;
+
+    /// The chance of your attack causing damage to the enemy
+    /// 100% is always, 0% is never.
+    double precision;
+
+    /// Maximum angle that the defender you have to be from you so you can
+    /// hit it, assuming it is into the correct distance
+    double maxAngle;
+};
+
+    
 /**
  * An entity initiated an attacker
  *
@@ -70,6 +165,10 @@ struct EventAttackStart {
 
     uint64_t attackID;
 
+    AttackRule rule;
+    AttackAttributes atkAttributes;
+    AttackAttributes defAttributes;
+    
     unsigned int atkXPos, atkYPos;
     unsigned int defXPos, defYPos;
 };
@@ -90,8 +189,6 @@ struct EventAttackMiss {
     unsigned int atkXPos, atkYPos;
     unsigned int defXPos, defYPos;
 };
-
-struct AttackDefinition {int i;};
 
 /**
  * An entity has done an attack
@@ -116,7 +213,7 @@ struct EventAttackDone {
     unsigned int atkXPos, atkYPos;
     unsigned int defXPos, defYPos;
 
-    AttackDefinition atkdef;
+    AttackAttributes atkAttribute;
     double damageDealt;
 };
 

@@ -24,6 +24,10 @@ object_id_t ObjectLifecycleManager::doRegister(std::weak_ptr<GameObject> o)
     auto id         = o.lock()->getID();
     _o_creating[id] = lcd;
 
+    auto& log = LoggerService::getLogger();
+    log->write("lifecycle-manager", LogType::Info, "object with ID {} ({}) has been registered",
+               id, o.lock()->getType());
+
     return id;
 }
 
