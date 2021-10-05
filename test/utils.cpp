@@ -9,8 +9,8 @@ TestObject::TestObject(const struct object_init& init)
     this->fnUpdate_ = init.fnUpdate;
 
     if (init.atkComponent) {
-        this->cAttack                = init.atkComponent;
-        this->cAttack.value().object = this;
+        this->cAttack = init.atkComponent;
+        this->cAttack->setParent(this);
     }
 }
 
@@ -36,8 +36,8 @@ TestOwnableObject::TestOwnableObject(const struct object_init& init)
     this->fnUpdate_ = init.fnUpdate;
 
     if (init.atkComponent) {
-        this->cAttack                = init.atkComponent;
-        this->cAttack.value().object = this;
+        this->cAttack = init.atkComponent;
+        this->cAttack->setParent(this);
     }
 
     this->cColony = std::make_optional(ColonyComponent());
@@ -61,15 +61,13 @@ std::shared_ptr<TestOwnableObject> make_ownable_object(const struct object_init&
 void DummyPlayer::generateInput()
 {
     /// Make sure that the input callback is called once per tick
-    if (last_tick == this->getTick())
-        return;
+    if (last_tick == this->getTick()) return;
 
     last_tick = this->getTick();
-    
+
     auto input = player_input_cb_(last_tick);
 
     for (auto& i : input) {
         this->pushAction(i);
     }
 }
-

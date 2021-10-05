@@ -3,6 +3,7 @@
 #include <common/logic/terrain.hpp>
 #include <common/logic/game_object.hpp>
 #include <common/logic/object_components.hpp>
+#include <common/logic/logic_service.hpp>
 
 using namespace familyline::logic;
 
@@ -24,65 +25,145 @@ void LocationComponent::updateMesh(const Terrain& t)
     this->mesh->setLogicPosition(t.gameToGraphical(glm::vec3(pos.x, height, pos.z)));
 }
 
+
+static uint64_t nextAttackID = 1;
+
+std::shared_ptr<EventEmitter> attack_emitter = std::shared_ptr<EventEmitter>();
+
 /**
- * Check if the attacked component is in range of the attacker
+ * Send the event to the current action queue
  */
-bool AttackComponent::isInAttackRange(const AttackComponent& other)
+void AttackComponent::sendEvent(
+    const AttackComponent& other, const AttackRule& rule, const AttackAttributes& atkAttributes,
+    const AttackAttributes& defAttributes)
 {
-    return (other.object != nullptr && this->doDirectAttack(other).has_value());
+    auto atkpos = this->parent_->getPosition();
+    auto defpos = other.parent_->getPosition();
+
+    if (!attack_emitter) {
+        attack_emitter = std::make_shared<EventEmitter>("attack-component-emitter");
+        LogicService::getActionQueue()->addEmitter(attack_emitter.get());
+    }
+
+    auto e = EntityEvent{
+        0,
+        EventAttackStart{
+            .attackerID    = this->parent_->getID(),
+            .defenderID    = other.parent_->getID(),
+            .attackID      = nextAttackID++,
+            .rule          = rule,
+            .atkAttributes = atkAttributes,
+            .defAttributes = defAttributes,
+            .atkXPos       = (unsigned int)atkpos.x,
+            .atkYPos       = (unsigned int)atkpos.z,
+            .defXPos       = (unsigned int)defpos.x,
+            .defYPos       = (unsigned int)defpos.z,
+        },
+        nullptr};
+    attack_emitter->pushEvent(e);
+}
+
+tl::expected<AttackData, AttackError> AttackComponent::attack(const AttackComponent& other)
+{
+    auto distAndAngle = this->calculateDistanceAndAngle(other);
+    auto rule         = rules_[0];
+    auto not_in_range = this->checkIfInRange(rule, distAndAngle);
+    if (not_in_range) return tl::make_unexpected(*not_in_range);
+
+    this->sendEvent(other, rule, this->attributes_, other.attributes_);
+
+    return AttackData{
+        .atype = AttackType::Melee, .rule = rule, .value = glm::max(this->damage(other), 0.01)};
 }
 
 /**
- * Attack directly another object
- *
- * Do a certain amount of damage to him.
- * Return the pure damage dealt, or an empty optional if the target is out of range
+ * Calculate the base damage that would be inflicted if the attack was now
  */
-std::optional<double> AttackComponent::doDirectAttack(const AttackComponent& defender)
+double AttackComponent::damage(const AttackComponent& other) const
 {
-    if (!this->object->getLocationComponent()) return std::nullopt;
-    
-    if (!this->object->getLocationComponent()) return std::nullopt;
+    return AttackComponent::calculateDamage(this->attributes_, other.attributes_);
+}
 
-    const auto atkpos = this->object->getPosition();
-    const auto defpos = defender.object->getPosition();
+/**
+ * Calculates the base damage that would be inflicted if the attack was done
+ * right now, but using only the component attributes.
+ *
+ * This method is designed to be used for the ones that want to calculate
+ * the damage based on the events
+ */
+double AttackComponent::calculateDamage(
+    const AttackAttributes& attacker, const AttackAttributes& defender)
+{
+    return attacker.attackPoints - defender.defensePoints;
+}
 
-    const double distX = defpos.x - atkpos.x;
-    const double distY = defpos.z - atkpos.z;
+bool AttackComponent::isInRange(const AttackComponent& other) const
+{
+    auto distAndAngle = this->calculateDistanceAndAngle(other);
+    return !this->checkIfInRange(rules_[0], distAndAngle).has_value();
+}
 
-    const double defDistance = sqrt((distX * distX) + (distY * distY));
+/**
+ * Reescale the position of 'base', assuming the position of 'obj' is 0,0
+ */
+glm::vec3 AttackComponent::assumeObjectIsCenter(const GameObject& obj, glm::vec3 base) const
+{
+    auto pos = obj.getPosition();
+    return base - pos;
+}
 
-    // convert the calculations to attacker
-    // it's easier to do the calculations if we assume the attacker angle
-    // is always 0deg, and adjust the attacked angle
-    const double defAngle = atan2(distY, distX) - this->rotation;
+/**
+ * Convert a certain position from cartesian to polar coordinates
+ *
+ * This is done so we can determine if we are inside the angle of attack
+ * In the returned vec2, x is the distance and y is the angle in radians.
+ */
+glm::vec2 AttackComponent::cartesianToPolar(double x, double y) const
+{
+    // x = r*cos O
+    // y - r*sen O
+    auto radius = sqrt(x * x + y * y);
+    auto angle  = acos(x / radius);
 
-    const double arcUpper = this->range / 2;
-    //    const double arcLower = -this->atkAttributes.atkArc/2;
+    return glm::vec2(radius, angle);
+}
 
-    const double sin_defAngle = std::abs(sin(defAngle));
-    const double cos_defAngle = std::abs(cos(defAngle));
+/**
+ * Gets the distance in game units, and angle in radians, between two entities
+ *
+ * About the angle:
+ *   If it is directly in front of you, for example, this should return 0.
+ *   If it is directly behind you, this should return PI (180deg in radians)
+ *
+ * The first element of the tuple is the distance, the second is the angle.
+ */
+std::tuple<double, double> AttackComponent::calculateDistanceAndAngle(
+    const AttackComponent& other) const
+{
+    auto defPos   = this->assumeObjectIsCenter(*this->parent_, other.parent_->getPosition());
+    auto defPolar = this->cartesianToPolar(defPos.x, defPos.z);
 
-    bool all360     = (arcUpper >= M_PI);
-    bool validAngle = all360 || (sin(arcUpper) > sin_defAngle && cos(arcUpper) < cos_defAngle);
+    return std::make_tuple(double(defPolar.x), double(defPolar.y));
+}
 
-    //printf("sin (atk/def): %.2f %.2f\t", sin(arcUpper), sin_defAngle);
-    //printf("cos (atk/def): %.2f %.2f\t", cos(arcUpper), cos_defAngle);
-    //printf("distance (atk/def): %.2f %.2f\n", this->atkDistance, defDistance);
+std::optional<AttackError> AttackComponent::checkIfInRange(
+    const AttackRule& currentrule, std::tuple<double, double> distanceAndAngle) const
+{
+    auto [distance, angle] = distanceAndAngle;
 
-    if (validAngle && this->atkDistance > defDistance) {
-        const double factor = (1 - std::abs(sin_defAngle / arcUpper));
+    auto maxangle = this->attributes_.maxAngle;
+    auto fixangle = angle - M_PI;
 
-        // TODO: Occasionally, the armor points will not be considered
-        // (it would be unfair with weaker units)
+    if (distance < currentrule.minDistance) return std::make_optional(AttackError::DefenderTooNear);
 
-        const double aRange = this->atkRanged;
+    if (distance > currentrule.maxDistance) return std::make_optional(AttackError::DefenderTooFar);
 
-        const double damage = (this->atkRanged + aRange * factor) - defender.armor;
-        return std::make_optional(std::max(0.0, damage));
+    if (fixangle < -maxangle / 2 || fixangle > maxangle / 2) {
+        return std::make_optional(AttackError::DefenderNotInSight);
     }
 
     return std::nullopt;
 }
+
 
 ColonyComponent::ColonyComponent() : owner(std::optional<std::reference_wrapper<Colony>>()) {}

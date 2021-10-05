@@ -38,8 +38,17 @@ TEST(PlayerManager, TestIfPlayerCanBuild)
     PlayerManager pm;
     pm.olm = &olm;
 
-    auto atkc1 = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+
+    auto atkc1 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 2.0, .ctype = AttackTypeMelee{}}}));
+
     auto obj_s =
         make_object({"test", "Test Object", glm::vec2(0, 0), 200, 200, true, []() {}, atkc1});
     LogicService::getObjectFactory()->addObject(obj_s.get());
@@ -87,13 +96,29 @@ TEST(PlayerManager, TestIfPlayerCanSelect)
     PlayerManager pm;
     pm.olm = &olm;
 
-    auto atkc1 = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    
+    auto atkc1 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 2.0, .ctype = AttackTypeMelee{}}}));
     auto obj_s1 =
         make_object({"test", "Test Object", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});
 
-    auto atkc2 = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+
+    auto atkc2 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 2.0, .ctype = AttackTypeMelee{}}}));
     auto obj_s2 =
         make_object({"test2", "Test Object2", glm::vec2(20, 20), 200, 200, true, []() {}, atkc1});
 
@@ -148,13 +173,28 @@ TEST(PlayerManager, TestIfPlayerCanDeselect)
     PlayerManager pm;
     pm.olm = &olm;
 
-    auto atkc1 = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    
+    auto atkc1 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 2.0, .ctype = AttackTypeMelee{}}}));
     auto obj_s1 =
         make_object({"test", "Test Object", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});
 
-    auto atkc2 = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto atkc2 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 2.0, .ctype = AttackTypeMelee{}}}));
     auto obj_s2 =
         make_object({"test2", "Test Object2", glm::vec2(20, 20), 200, 200, true, []() {}, atkc1});
 
@@ -232,13 +272,28 @@ TEST(PlayerManager, TestIfPlayerCannotMoveNotOwnedObject)
     PlayerManager pm;
     pm.olm = &olm;
 
-    auto atkc1  = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+
+    auto atkc1 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 2.0, .ctype = AttackTypeMelee{}}}));
     auto obj_s1 = make_ownable_object(
         {"test", "Test Object", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});
 
-    auto atkc2  = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto atkc2 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 2.0, .ctype = AttackTypeMelee{}}}));
     auto obj_s2 = make_ownable_object(
         {"test2", "Test Object2", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});
 
@@ -328,13 +383,27 @@ TEST(PlayerManager, TestIfPlayerCanMove)
     PlayerManager pm;
     pm.olm = &olm;
 
-    auto atkc1  = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto atkc1 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 2.0, .ctype = AttackTypeMelee{}}}));
     auto obj_s1 = make_ownable_object(
         {"test", "Test Object", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});
 
-    auto atkc2  = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto atkc2 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 2.0, .ctype = AttackTypeMelee{}}}));
     auto obj_s2 = make_ownable_object(
         {"test2", "Test Object2", glm::vec2(10, 10), 200, 200, true, []() {}, atkc1});
 
@@ -424,8 +493,15 @@ TEST(PlayerManager, TestIfTickDeltaIsRespected)
     PlayerManager pm;
     pm.olm = &olm;
 
-    auto atkc1 = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto atkc1 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 2.0, .ctype = AttackTypeMelee{}}}));
     auto obj_s =
         make_object({"test", "Test Object", glm::vec2(0, 0), 200, 200, true, []() {}, atkc1});
     LogicService::getObjectFactory()->addObject(obj_s.get());
@@ -481,8 +557,15 @@ TEST(PlayerManager, TestIfOutOfOrderActionsAreOrdered)
     PlayerManager pm;
     pm.olm = &olm;
 
-    auto atkc1 = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto atkc1 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 2.0, .ctype = AttackTypeMelee{}}}));
     auto obj_s =
         make_object({"test", "Test Object", glm::vec2(0, 0), 200, 200, true, []() {}, atkc1});
     LogicService::getObjectFactory()->addObject(obj_s.get());

@@ -41,8 +41,15 @@ TEST(InputReproduceTest, TestIfInputReproduces)
     Game* g   = new Game(gi);
     auto& map = g->initMap(mapfile);
 
-    auto atkc1 = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto atkc1 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 50, .ctype = AttackTypeMelee{}}}));
     auto obj_s = make_ownable_object(
         {"testobj", "Test Object", glm::vec2(1, 1), 200, 200, true, []() {}, atkc1});
 
@@ -131,8 +138,15 @@ TEST(InputReproduceTest, TestIfInputReproducerFailsOnBrokenFile)
     Game* g   = new Game(gi);
     auto& map = g->initMap(mapfile);
 
-    auto atkc1 = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto atkc1 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 50, .ctype = AttackTypeMelee{}}}));
     auto obj_s = make_ownable_object(
         {"testobj", "Test Object", glm::vec2(1, 1), 200, 200, true, []() {}, atkc1});
 

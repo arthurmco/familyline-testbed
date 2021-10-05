@@ -401,7 +401,7 @@ void Game::runLogic()
 
     LogicService::getActionQueue()->processEvents();
 
-    LogicService::getAttackManager()->processAttacks(*olm_.get());
+    LogicService::getAttackManager()->update(*om_.get(), *olm_.get());
     LogicService::getPathManager()->update(*om_.get());
 
     bool objupdate = objrend_->willUpdate();
@@ -483,7 +483,7 @@ void Game::showHumanPlayerInfo(logic::Player* hp)
         bool attackable = selected->getAttackComponent().has_value();
 
         if (alocc && attackable && selected && alocc->getMaxHealth()) {
-            auto inRange = selected->getAttackComponent()->isInAttackRange(
+            auto inRange = selected->getAttackComponent()->isInRange(
                 alocc->getAttackComponent().value());
 
             widgets.lblRange->setText(inRange ? "In range" : "Not in range");

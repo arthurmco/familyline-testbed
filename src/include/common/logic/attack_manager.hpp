@@ -1,91 +1,96 @@
 #pragma once
 
+#include <common/logic/game_event.hpp>
+#include <common/logic/lifecycle_manager.hpp>
+#include <common/logic/object_components.hpp>
 #include <unordered_map>
-
-#include "game_event.hpp"
-#include "lifecycle_manager.hpp"
-#include "object_components.hpp"
 
 namespace familyline::logic
 {
 /**
- * Manages the attacking and defensing of all objects
+ * The attack manager
  *
- * Will also issue attacking and defending events when those
- * actions occur
+ * Causes the real damage, calculate  the damage of the projectiles, etc.
  */
-
-typedef uint64_t attack_handle_t;
-
-struct AttackData {
-    AttackComponent* atk;
-    AttackComponent* def;
-
-    // Delay until the next attack, in game ticks
-    int atk_tick_delay = 0;
-};
-
-void generateAttackEvent(
-    EventEmitter* e,
-    AttackComponent* atk, AttackComponent* def, double dmg);
-    
 class AttackManager
 {
-private:
-    std::unordered_map<int /* object id */, AttackComponent*> components;
-    std::unordered_map<attack_handle_t, AttackData> attacks;
-
-    /**
-     * Attack the 'defender`
-     *
-     * Also modifies the defender HP and armor by decreasing both
-     */
-    std::optional<double> attack(AttackComponent& defender);
-
-    /**
-     * Check if any object has been deleted and should be removed
-     */
-    void checkRemovedObjects();
-    EventEmitter* ame_emitter = nullptr;
-
-    std::queue<EntityEvent> events_;
-    
 public:
     AttackManager();
     ~AttackManager();
 
-    void doRegister(int oid, AttackComponent& atk);
+    /**
+     * Do the damage, update the projectile positions and other multiple things
+     *
+     * Runs once per tick
+     */
+    void update(ObjectManager& om, ObjectLifecycleManager& olm);
+
+private:
+    /**
+     * Information about an attack.
+     * Will be used so we can replay the attack until the entities are too apart,
+     * from each other, the player sends one unit elsewhere, or one of them is dead.
+     */
+    struct AttackInfo {
+        entity_id_t attackerID;
+        entity_id_t defenderID;
+
+        uint64_t attackID;
+
+        AttackRule rule;
+        AttackAttributes atkAttributes;
+        AttackAttributes defAttributes;
+
+        glm::vec2 atkPosition;
+        glm::vec2 defPosition;
+
+        /// The amount of successful attacks, the ones
+        /// that did hit the target
+        int successful_attacks;
+
+        /// The amount of total attacks done.
+        int total_attacks;
+
+        /// Amount of ticks to the next attack
+        /// It is double because, for hyper fast entities, we can have
+        /// increments between 0 and 1, and so we have two attacks in the same
+        /// tick.
+        double ticks_until_attack;
+    };
 
     /**
-     * Start an attack action from attackerOID against defenderOID
+     * Based on the specified attack precision, check if the
+     * next attack will happen
      *
-     * It will not start now, but will be deferred later, so it can
-     * process all attacks for this tick at once
-     *
-     * Returns an 'attack handle' that you can store to stop the attack
+     * TODO: use a global pseudo-RNG. Also make every game have a seed.
      */
-    attack_handle_t startAttack(int attackerOID, int defenderOID);
+    bool isNextAttackPrecise(unsigned precision) const;
 
     /**
-     * End an attack.
+     * Damage the game object.
      *
-     * Attacks also automatically ends when the attacked unit is out of range
+     * Return its remaining health points
      */
-    void endAttack(attack_handle_t ahandle);
+    double damageObject(GameObject& o, double damage);
+
+    void sendAttackDoneEvent(
+        const AttackInfo& atk, AttackAttributes atkAttribute, double damageDealt);
+    void sendAttackMissEvent(const AttackInfo& atk);
+    void sendDyingEvent(const AttackInfo& atk);
+
+    void updateAttackInfo(const GameObject& attacker, const GameObject& defender, AttackInfo& atk);
+
+    double getAttackInterval(const AttackAttributes& attr) const { return 2048 / attr.attackSpeed; }
 
     /**
-     * Process all scheduled attacks
+     * Start a new countdown to the next attack, by incrementing
+     * the ticks_until_attack by the attack interval.
      */
-    void processAttacks(ObjectLifecycleManager& olm);
+    void countUntilNextAttack(AttackInfo& atk);
+
+    std::vector<AttackInfo> attacks_;
+    EventEmitter emitter_ = EventEmitter("attack-manager-emitter");
+    bool receiveAttackEvents(const EntityEvent& e);
 };
 
-/**
- * Create an attack handle from the attacked and the defended unit OIDs
- */
-attack_handle_t make_attack_handle(int attackerOID, int defenderOID);
-
-/**
- * Split an attack handle to the attacker and defender
- */
-std::tuple<int, int> break_attack_handle(attack_handle_t handle);
 }  // namespace familyline::logic

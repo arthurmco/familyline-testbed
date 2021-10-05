@@ -8,7 +8,6 @@
 #include <glm/fwd.hpp>
 #include <initializer_list>
 #include <optional>
-#include <tl/expected.hpp>
 #include <variant>
 #include <vector>
 
@@ -21,532 +20,10 @@
 
 using namespace familyline::logic;
 
-/**
- * The attack component for our entity
- *
- * You will note that only basic attack decision (aka if you will attack or not)
- * is kept here, most of the real attack code resides on the AttackManager.
- */
-class _AttackComponent
-{
-public:
-    _AttackComponent(AttackAttributes base_attribs, std::vector<AttackRule> rules)
-        : attributes_(base_attribs), rules_(rules)
-    {
-    }
-
-    tl::expected<_AttackData, AttackError> attack(const _AttackComponent& other);
-
-    /**
-     * Calculates the base damage that would be inflicted if the attack was done
-     * right now, but using only the component attributes.
-     *
-     * This method is designed to be used for the ones that want to calculate
-     * the damage based on the events
-     */
-    static double calculateDamage(
-        const AttackAttributes& attacker, const AttackAttributes& defender);
-
-    /**
-     * Returns true if you can attack, false if you cannot
-     */
-    bool isInRange(const _AttackComponent& other) const;
-
-    void setParent(GameObject* parent) { parent_ = parent; }
-
-private:
-    GameObject* parent_;
-
-    /**
-     * Gets the distance in game units, and angle in radians, between two entities
-     *
-     * About the angle:
-     *   If it is directly in front of you, for example, this should return 0.
-     *   If it is directly behind you, this should return PI (180deg in radians)
-     *
-     * The first element of the tuple is the distance, the second is the angle.
-     */
-    std::tuple<double, double> calculateDistanceAndAngle(const _AttackComponent& other) const;
-
-    std::optional<AttackError> checkIfInRange(
-        const AttackRule& currentrule, std::tuple<double, double> distanceAndAngle) const;
-
-    /**
-     * Calculate the base damage that would be inflicted if the attack was now
-     */
-    double damage(const _AttackComponent& other) const;
-
-    /**
-     * Reescale the position of 'base', assuming the position of 'obj' is 0,0
-     */
-    glm::vec3 assumeObjectIsCenter(const GameObject& obj, glm::vec3 base) const;
-
-    /**
-     * Convert a certain position from cartesian to polar coordinates
-     *
-     * This is done so we can determine if we are inside the angle of attack
-     * In the returned vec2, x is the distance and y is the angle.
-     */
-    glm::vec2 cartesianToPolar(double x, double y) const;
-
-    /**
-     * Send the event to the current action queue
-     */
-    void sendEvent(
-        const _AttackComponent& other, const AttackRule& rule,
-        const AttackAttributes& atkAttributes, const AttackAttributes& defAttributes);
-
-    AttackAttributes attributes_;
-    std::vector<AttackRule> rules_;
-};
-
-static uint64_t nextAttackID = 1;
-
-std::shared_ptr<EventEmitter> attack_emitter = std::shared_ptr<EventEmitter>();
-
-/**
- * Send the event to the current action queue
- */
-void _AttackComponent::sendEvent(
-    const _AttackComponent& other, const AttackRule& rule, const AttackAttributes& atkAttributes,
-    const AttackAttributes& defAttributes)
-{
-    auto atkpos = this->parent_->getPosition();
-    auto defpos = other.parent_->getPosition();
-
-    if (!attack_emitter) {
-        attack_emitter = std::make_shared<EventEmitter>("attack-component-emitter");
-        LogicService::getActionQueue()->addEmitter(attack_emitter.get());
-    }
-
-    auto e = EntityEvent{
-        0,
-        EventAttackStart{
-            .attackerID    = this->parent_->getID(),
-            .defenderID    = other.parent_->getID(),
-            .attackID      = nextAttackID++,
-            .rule          = rule,
-            .atkAttributes = atkAttributes,
-            .defAttributes = defAttributes,
-            .atkXPos       = (unsigned int)atkpos.x,
-            .atkYPos       = (unsigned int)atkpos.z,
-            .defXPos       = (unsigned int)defpos.x,
-            .defYPos       = (unsigned int)defpos.z,
-        },
-        nullptr};
-    attack_emitter->pushEvent(e);
-}
-
-tl::expected<_AttackData, AttackError> _AttackComponent::attack(const _AttackComponent& other)
-{
-    auto distAndAngle = this->calculateDistanceAndAngle(other);
-    auto rule         = rules_[0];
-    auto not_in_range = this->checkIfInRange(rule, distAndAngle);
-    if (not_in_range) return tl::make_unexpected(*not_in_range);
-
-    this->sendEvent(other, rule, this->attributes_, other.attributes_);
-
-    return _AttackData{
-        .atype = AttackType::Melee, .rule = rule, .value = glm::max(this->damage(other), 0.01)};
-}
-
-/**
- * Calculate the base damage that would be inflicted if the attack was now
- */
-double _AttackComponent::damage(const _AttackComponent& other) const
-{
-    return _AttackComponent::calculateDamage(this->attributes_, other.attributes_);
-}
-
-/**
- * Calculates the base damage that would be inflicted if the attack was done
- * right now, but using only the component attributes.
- *
- * This method is designed to be used for the ones that want to calculate
- * the damage based on the events
- */
-double _AttackComponent::calculateDamage(
-    const AttackAttributes& attacker, const AttackAttributes& defender)
-{
-    return attacker.attackPoints - defender.defensePoints;
-}
-
-bool _AttackComponent::isInRange(const _AttackComponent& other) const
-{
-    auto distAndAngle = this->calculateDistanceAndAngle(other);
-    return !this->checkIfInRange(rules_[0], distAndAngle).has_value();
-}
-
-/**
- * Reescale the position of 'base', assuming the position of 'obj' is 0,0
- */
-glm::vec3 _AttackComponent::assumeObjectIsCenter(const GameObject& obj, glm::vec3 base) const
-{
-    auto pos = obj.getPosition();
-    return base - pos;
-}
-
-/**
- * Convert a certain position from cartesian to polar coordinates
- *
- * This is done so we can determine if we are inside the angle of attack
- * In the returned vec2, x is the distance and y is the angle in radians.
- */
-glm::vec2 _AttackComponent::cartesianToPolar(double x, double y) const
-{
-    // x = r*cos O
-    // y - r*sen O
-    auto radius = sqrt(x * x + y * y);
-    auto angle  = acos(x / radius);
-
-    return glm::vec2(radius, angle);
-}
-
-/**
- * Gets the distance in game units, and angle in radians, between two entities
- *
- * About the angle:
- *   If it is directly in front of you, for example, this should return 0.
- *   If it is directly behind you, this should return PI (180deg in radians)
- *
- * The first element of the tuple is the distance, the second is the angle.
- */
-std::tuple<double, double> _AttackComponent::calculateDistanceAndAngle(
-    const _AttackComponent& other) const
-{
-    auto defPos   = this->assumeObjectIsCenter(*this->parent_, other.parent_->getPosition());
-    auto defPolar = this->cartesianToPolar(defPos.x, defPos.z);
-
-    return std::make_tuple(double(defPolar.x), double(defPolar.y));
-}
-
-std::optional<AttackError> _AttackComponent::checkIfInRange(
-    const AttackRule& currentrule, std::tuple<double, double> distanceAndAngle) const
-{
-    auto [distance, angle] = distanceAndAngle;
-
-    auto maxangle = this->attributes_.maxAngle;
-    auto fixangle = angle - M_PI;
-
-    if (distance < currentrule.minDistance) return std::make_optional(AttackError::DefenderTooNear);
-
-    if (distance > currentrule.maxDistance) return std::make_optional(AttackError::DefenderTooFar);
-
-    if (fixangle < -maxangle / 2 || fixangle > maxangle / 2) {
-        return std::make_optional(AttackError::DefenderNotInSight);
-    }
-
-    return std::nullopt;
-}
-
 /****************/
-
-/**
- * The attack manager
- *
- * Causes the real damage, calculate  the damage of the projectiles, etc.
- */
-class _AttackManager
-{
-public:
-    _AttackManager();
-    ~_AttackManager();
-
-    /**
-     * Do the damage, update the projectile positions and other multiple things
-     *
-     * Runs once per tick
-     */
-    void update(ObjectManager& om, ObjectLifecycleManager& olm);
-
-private:
-    /**
-     * Information about an attack.
-     * Will be used so we can replay the attack until the entities are too apart,
-     * from each other, the player sends one unit elsewhere, or one of them is dead.
-     */
-    struct AttackInfo {
-        entity_id_t attackerID;
-        entity_id_t defenderID;
-
-        uint64_t attackID;
-
-        AttackRule rule;
-        AttackAttributes atkAttributes;
-        AttackAttributes defAttributes;
-
-        glm::vec2 atkPosition;
-        glm::vec2 defPosition;
-
-        /// The amount of successful attacks, the ones
-        /// that did hit the target
-        int successful_attacks;
-
-        /// The amount of total attacks done.
-        int total_attacks;
-
-        /// Amount of ticks to the next attack
-        /// It is double because, for hyper fast entities, we can have
-        /// increments between 0 and 1, and so we have two attacks in the same
-        /// tick.
-        double ticks_until_attack;
-    };
-
-    /**
-     * Based on the specified attack precision, check if the
-     * next attack will happen
-     *
-     * TODO: use a global pseudo-RNG. Also make every game have a seed.
-     */
-    bool isNextAttackPrecise(unsigned precision) const;
-
-    /**
-     * Damage the game object.
-     *
-     * Return its remaining health points
-     */
-    double damageObject(GameObject& o, double damage);
-
-    void sendAttackDoneEvent(
-        const AttackInfo& atk, AttackAttributes atkAttribute, double damageDealt);
-    void sendAttackMissEvent(const AttackInfo& atk);
-    void sendDyingEvent(const AttackInfo& atk);
-
-    void updateAttackInfo(const GameObject& attacker, const GameObject& defender, AttackInfo& atk);
-
-    double getAttackInterval(const AttackAttributes& attr) const { return 2048 / attr.attackSpeed; }
-
-    /**
-     * Start a new countdown to the next attack, by incrementing
-     * the ticks_until_attack by the attack interval.
-     */
-    void countUntilNextAttack(AttackInfo& atk);
-
-    std::vector<AttackInfo> attacks_;
-    EventEmitter emitter_ = EventEmitter("attack-manager-emitter");
-    bool receiveAttackEvents(const EntityEvent& e);
-};
-
-_AttackManager::_AttackManager()
-{
-    using namespace std::placeholders;
-
-    LogicService::getActionQueue()->addReceiver(
-        "attack-manager", std::bind(&_AttackManager::receiveAttackEvents, this, _1),
-        {ActionQueueEvent::AttackStart});
-
-    LogicService::getActionQueue()->addEmitter(&emitter_);
-}
-
-_AttackManager::~_AttackManager()
-{
-    LogicService::getActionQueue()->removeReceiver("attack-manager");
-    LogicService::getActionQueue()->removeEmitter(&emitter_);
-}
-
-/**
- * Damage the game object.
- *
- * Return its remaining health points
- */
-double _AttackManager::damageObject(GameObject& o, double damage) { return o.addHealth(-damage); }
-
-void _AttackManager::sendAttackDoneEvent(
-    const AttackInfo& atk, AttackAttributes atkAttribute, double damageDealt)
-{
-    auto atkpos = atk.atkPosition;
-    auto defpos = atk.defPosition;
-
-    EntityEvent ev{
-        0,
-        EventAttackDone{
-            .attackerID   = atk.attackerID,
-            .defenderID   = atk.defenderID,
-            .attackID     = atk.attackID,
-            .atkXPos      = (unsigned)atkpos.x,
-            .atkYPos      = (unsigned)atkpos.y,
-            .defXPos      = (unsigned)defpos.x,
-            .defYPos      = (unsigned)defpos.y,
-            .atkAttribute = atkAttribute,
-            .damageDealt  = damageDealt},
-        nullptr};
-    emitter_.pushEvent(ev);
-}
-
-void _AttackManager::sendAttackMissEvent(const AttackInfo& atk)
-{
-    auto atkpos = atk.atkPosition;
-    auto defpos = atk.defPosition;
-
-    EntityEvent ev{
-        0,
-        EventAttackMiss{
-            .attackerID = atk.attackerID,
-            .defenderID = atk.defenderID,
-            .attackID   = atk.attackID,
-            .atkXPos    = (unsigned)atkpos.x,
-            .atkYPos    = (unsigned)atkpos.y,
-            .defXPos    = (unsigned)defpos.x,
-            .defYPos    = (unsigned)defpos.y},
-        nullptr};
-    emitter_.pushEvent(ev);
-}
-
-void _AttackManager::sendDyingEvent(const AttackInfo& atk)
-{
-    auto defpos = atk.defPosition;
-
-    EntityEvent ev{
-        0,
-        EventDying{
-            .objectID = atk.defenderID,
-            .atkXPos    = (unsigned)defpos.x,
-            .atkYPos    = (unsigned)defpos.y},
-        nullptr};
-    emitter_.pushEvent(ev);
-}
-
-void _AttackManager::updateAttackInfo(
-    const GameObject& attacker, const GameObject& defender, AttackInfo& atk)
-{
-    auto atkpos     = attacker.getPosition();
-    auto defpos     = defender.getPosition();
-    atk.atkPosition = glm::vec2(atkpos.x, atkpos.z);
-    atk.defPosition = glm::vec2(defpos.x, defpos.z);
-}
-
-/**
- * Based on the specified attack precision, check if the
- * next attack will happen
- *
- * TODO: use a global pseudo-RNG. Also make every game have a seed.
- */
-bool _AttackManager::isNextAttackPrecise(unsigned precision) const
-{
-    // clang-format off
-    constexpr std::array values = {
-        0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
-        1, 11, 21, 31, 41, 51, 61, 71, 81, 91, 0,
-        2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 1,
-    };
-
-    // clang-format on
-
-    static int i = 0;
-
-    bool answer = (values[i]) <= precision;
-    i++;
-
-    if (i >= values.size()) i = 0;
-
-    return answer;
-}
-
-
-/**
- * Start a new countdown to the next attack, by incrementing
- * the ticks_until_attack by the attack interval.
- */
-void _AttackManager::countUntilNextAttack(AttackInfo& atk)
-{
-    auto interval = this->getAttackInterval(atk.atkAttributes);
-    atk.ticks_until_attack += interval;
-}
-
-/**
- * Do the damage, update the projectile positions and other multiple things
- *
- * Runs once per tick
- */
-void _AttackManager::update(ObjectManager& om, ObjectLifecycleManager& olm)
-{
-    std::vector<uint64_t> attacks_to_remove;
-
-    //    printf("%zu attacks\n", attacks_.size());
-    for (auto& atk : attacks_) {
-        auto atkobj = om.get(atk.attackerID);
-        auto defobj = om.get(atk.defenderID);
-
-        if (!defobj || !atkobj) {
-            fprintf(stderr, "no ID found??????????????\n");
-            attacks_to_remove.push_back(atk.attackID);
-            continue;
-        }
-
-        double damage = _AttackComponent::calculateDamage(atk.atkAttributes, atk.defAttributes);
-
-        this->updateAttackInfo(*atkobj->get(), *defobj->get(), atk);
-
-        atk.ticks_until_attack--;
-        if (atk.ticks_until_attack <= 0.001) {
-            int attacks = 0;
-            if (isNextAttackPrecise(atk.atkAttributes.precision)) {
-
-                // Fix some precision errors that might occur.
-                atk.ticks_until_attack = 0;
-                do {
-                    auto remaining = this->damageObject(*defobj->get(), damage);
-                    this->sendAttackDoneEvent(atk, atk.atkAttributes, damage);
-
-                    if (remaining <= 0) {
-                        this->sendDyingEvent(atk);
-
-                        /// The lifecycle manager will delete the entity for us,
-                        /// but we will have to sent the dying event.
-                        /// TODO: change this, the lifecycle manager will listen to
-                        ///       this event.
-                        olm.notifyDeath(atk.defenderID);
-                        attacks_to_remove.push_back(atk.attackID);
-                    }
-
-                    attacks++;
-                    this->countUntilNextAttack(atk);
-                } while (atk.ticks_until_attack < 1.0);
-
-                atk.successful_attacks += attacks;
-
-            } else {
-                this->sendAttackMissEvent(atk);
-            }
-            atk.total_attacks += attacks;
-        }
-    }
-
-    auto itend = std::remove_if(attacks_.begin(), attacks_.end(),
-                                [&](AttackInfo& a) {
-                                    return std::find(attacks_to_remove.begin(),
-                                                     attacks_to_remove.end(),
-                                                     a.attackID) != attacks_to_remove.end();
-                                });
-    attacks_.erase(itend, attacks_.end());
-}
-
-bool _AttackManager::receiveAttackEvents(const EntityEvent& e)
-{
-
-    if (auto* ev = std::get_if<EventAttackStart>(&e.type); ev) {
-        AttackInfo a{
-            .attackerID         = ev->attackerID,
-            .defenderID         = ev->defenderID,
-            .attackID           = ev->attackID,
-            .rule               = ev->rule,
-            .atkAttributes      = ev->atkAttributes,
-            .defAttributes      = ev->defAttributes,
-            .atkPosition        = glm::vec2(ev->atkXPos, ev->atkYPos),
-            .defPosition        = glm::vec2(ev->defXPos, ev->defYPos),
-            .successful_attacks = 0,
-            .total_attacks      = 0,
-            .ticks_until_attack = 0,
-        };
-        attacks_.push_back(a);
-    }
-
-    return true;
-}
-
 TEST(AttackManager, BaseMeleeAttack)
 {
-    _AttackComponent atk(
+    AttackComponent atk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
@@ -555,7 +32,7 @@ TEST(AttackManager, BaseMeleeAttack)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    _AttackComponent def(
+    AttackComponent def(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -586,7 +63,7 @@ TEST(AttackManager, BaseMeleeAttack)
 
 TEST(AttackManager, TooFarMeleeAttack)
 {
-    _AttackComponent atk(
+    AttackComponent atk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
@@ -595,7 +72,7 @@ TEST(AttackManager, TooFarMeleeAttack)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    _AttackComponent def(
+    AttackComponent def(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -627,7 +104,7 @@ TEST(AttackManager, BaseMeleeAttackWithEventPropagation)
     ObjectManager om;
     ObjectLifecycleManager olm{om};
 
-    _AttackComponent atk(
+    AttackComponent atk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
@@ -636,7 +113,7 @@ TEST(AttackManager, BaseMeleeAttackWithEventPropagation)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    _AttackComponent def(
+    AttackComponent def(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -659,7 +136,7 @@ TEST(AttackManager, BaseMeleeAttackWithEventPropagation)
     auto atkid = om.add(std::move(atker));
     auto defid = om.add(std::move(defer));
 
-    _AttackManager am;
+    AttackManager am;
 
     auto attack = atk.attack(def);
     ASSERT_TRUE(attack.has_value());
@@ -714,7 +191,7 @@ TEST(AttackManager, TooFarMeleeAttackWithEventPropagation)
     ObjectManager om;
     ObjectLifecycleManager olm{om};
 
-    _AttackComponent atk(
+    AttackComponent atk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
@@ -723,7 +200,7 @@ TEST(AttackManager, TooFarMeleeAttackWithEventPropagation)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    _AttackComponent def(
+    AttackComponent def(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -746,7 +223,7 @@ TEST(AttackManager, TooFarMeleeAttackWithEventPropagation)
     auto atkid = om.add(std::move(atker));
     auto defid = om.add(std::move(defer));
 
-    _AttackManager am;
+    AttackManager am;
 
     ASSERT_FALSE(atk.isInRange(def));
     auto attack = atk.attack(def);
@@ -790,7 +267,7 @@ TEST(AttackManager, IsBaseMeleeAttackNotFullyPreciseIfPrecisionIsLow)
     ObjectManager om;
     ObjectLifecycleManager olm{om};
 
-    _AttackComponent atk(
+    AttackComponent atk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
@@ -799,7 +276,7 @@ TEST(AttackManager, IsBaseMeleeAttackNotFullyPreciseIfPrecisionIsLow)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    _AttackComponent def(
+    AttackComponent def(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -822,7 +299,7 @@ TEST(AttackManager, IsBaseMeleeAttackNotFullyPreciseIfPrecisionIsLow)
     auto atkid = om.add(std::move(atker));
     auto defid = om.add(std::move(defer));
 
-    _AttackManager am;
+    AttackManager am;
 
     auto attack = atk.attack(def);
     LogicService::getActionQueue()->processEvents();
@@ -868,7 +345,7 @@ TEST(AttackManager, IsBaseMeleeAttackFullyPreciseIfPrecisionIs100)
     ObjectManager om;
     ObjectLifecycleManager olm{om};
 
-    _AttackComponent atk(
+    AttackComponent atk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
@@ -877,7 +354,7 @@ TEST(AttackManager, IsBaseMeleeAttackFullyPreciseIfPrecisionIs100)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    _AttackComponent def(
+    AttackComponent def(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -900,7 +377,7 @@ TEST(AttackManager, IsBaseMeleeAttackFullyPreciseIfPrecisionIs100)
     auto atkid = om.add(std::move(atker));
     auto defid = om.add(std::move(defer));
 
-    _AttackManager am;
+    AttackManager am;
 
     auto attack = atk.attack(def);
 
@@ -940,7 +417,7 @@ TEST(AttackManager, IsAttackSpeedRespected)
     ObjectManager om;
     ObjectLifecycleManager olm{om};
 
-    _AttackComponent atk(
+    AttackComponent atk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
@@ -949,7 +426,7 @@ TEST(AttackManager, IsAttackSpeedRespected)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    _AttackComponent def(
+    AttackComponent def(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -972,7 +449,7 @@ TEST(AttackManager, IsAttackSpeedRespected)
     auto atkid = om.add(std::move(atker));
     auto defid = om.add(std::move(defer));
 
-    _AttackManager am;
+    AttackManager am;
 
     auto attack = atk.attack(def);
 
@@ -1024,7 +501,7 @@ TEST(AttackManager, IsDeadEventReceivedOnDeath)
     ObjectManager om;
     ObjectLifecycleManager olm{om};
 
-    _AttackComponent atk(
+    AttackComponent atk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
@@ -1033,7 +510,7 @@ TEST(AttackManager, IsDeadEventReceivedOnDeath)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    _AttackComponent def(
+    AttackComponent def(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -1069,7 +546,7 @@ TEST(AttackManager, IsDeadEventReceivedOnDeath)
     olm.notifyCreation(defid);
     olm.update();
 
-    _AttackManager am;
+    AttackManager am;
 
     auto attack = atk.attack(def);
 

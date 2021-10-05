@@ -14,10 +14,6 @@ GameObject::GameObject(
 {
     this->cLocation                = std::make_optional<LocationComponent>();
     this->cLocation.value().object = this;
-
-    this->cAttack                = std::make_optional<AttackComponent>();
-    this->cAttack->range         = 3.14;
-    this->cAttack.value().object = this;
 }
 
 /**
@@ -45,7 +41,7 @@ std::shared_ptr<GameObject> GameObject::create()
                             ? std::make_optional<MovementComponent>(this->cMovement.value())
                             : std::optional<MovementComponent>();
 
-    if (cloned->cAttack) cloned->cAttack->object = this;
+    if (cloned->cAttack) cloned->cAttack->setParent(this);
 
     if (cloned->cLocation) cloned->cLocation->object = this;
 
@@ -66,12 +62,11 @@ object_checksum_t GameObject::getChecksum() const
 {
     char vatk[192] = {};
     if (this->cAttack) {
-        auto& atk = *this->cAttack;
+        auto& attr = this->cAttack->attributes();
         snprintf(
             vatk, 190, "%.3f|%.3f|%.3f|%.3f||%.3f|%.3f|%.3f|%.3f||%.3f|%.3f|%.3f|%.3f",
-            atk.atkRanged, atk.atkMelee, atk.atkSiege, atk.atkTransporter, atk.defRanged,
-            atk.defMelee, atk.defSiege, atk.defTransporter, atk.rotation, atk.atkDistance,
-            atk.armor, atk.range);
+            attr.attackPoints, attr.defensePoints, attr.attackSpeed, attr.precision,
+            attr.maxAngle, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
     } else {
         snprintf(vatk, 190, "%180s", "false");
     }

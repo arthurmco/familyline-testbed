@@ -38,8 +38,7 @@
     c->_id = -1;                                                \
     this->cLocation = std::make_optional<LocationComponent>();  \
     this->cLocation.value().object = this;                      \
-    this->cAttack = std::make_optional<AttackComponent>();          \
-    this->cAttack.value().object = this;                        \
+    if (this->cAttack) this->cAttack->setParent(this);          \
     return std::shared_ptr< classname >(c);                     \
     }
 

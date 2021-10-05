@@ -266,12 +266,10 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                         if (attacker->getColonyComponent().has_value() &&
                             attacker->getColonyComponent()->owner.has_value() &&
                             attacker->getColonyComponent()->owner->get().isOfPlayer(*(*player))) {
-                            auto& atkManager = LogicService::getAttackManager();
-                            atkManager->doRegister(
-                                attacker->getID(), attacker->getAttackComponent().value());
-                            atkManager->doRegister(
-                                attackee->getID(), attackee->getAttackComponent().value());
-                            atkManager->startAttack(attacker->getID(), attackee->getID());
+
+                            if (attacker->getAttackComponent() && attackee->getAttackComponent())
+                                attacker->getAttackComponent()->attack(*attackee->getAttackComponent());
+
                         }
                     } else {
                         log->write(

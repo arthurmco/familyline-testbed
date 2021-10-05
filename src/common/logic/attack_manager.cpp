@@ -4,182 +4,226 @@
 #include <common/logic/game_object.hpp>
 #include <common/logic/logic_service.hpp>
 
-#include "common/logic/action_queue.hpp"
-#include "common/logic/game_event.hpp"
+#include <common/logic/action_queue.hpp>
+#include <common/logic/game_event.hpp>
 
 using namespace familyline::logic;
 
+
 AttackManager::AttackManager()
 {
+    using namespace std::placeholders;
+
     LogicService::getActionQueue()->addReceiver(
-        "atk-manager-event-receiver", [this](const EntityEvent& e){
-            this->events_.push(e);
-            return true;
-        }, { ActionQueueEvent::Destroyed });
-    ame_emitter = new EventEmitter("atk-manager-event-emitter");
+        "attack-manager", std::bind(&AttackManager::receiveAttackEvents, this, _1),
+        {ActionQueueEvent::AttackStart});
+
+    LogicService::getActionQueue()->addEmitter(&emitter_);
 }
 
 AttackManager::~AttackManager()
 {
-    LogicService::getActionQueue()->removeReceiver("atk-manager-event-receiver");
-    LogicService::getActionQueue()->removeEmitter(ame_emitter);
-    delete ame_emitter;
-}
-
-std::optional<double> AttackManager::attack(AttackComponent& defender)
-{
-    return std::optional<double>();
-}
-
-void AttackManager::doRegister(int oid, AttackComponent& atk) { this->components[oid] = &atk; }
-
-attack_handle_t AttackManager::startAttack(int attackerOID, int defenderOID)
-{
-    auto atkhandle = make_attack_handle(attackerOID, defenderOID);
-
-    LoggerService::getLogger()->write(
-        "attack-manager", LogType::Info, "attack started: object ID %d will attack object ID %d",
-        attackerOID, defenderOID);
-
-    AttackData adata;
-    adata.atk = this->components[attackerOID];
-    adata.def = this->components[defenderOID];
-
-    assert(adata.atk != nullptr);
-    assert(adata.def != nullptr);
-
-    this->attacks[atkhandle] = adata;
-
-    return atkhandle;
-}
-
-void AttackManager::endAttack(attack_handle_t ahandle) { this->attacks.erase(ahandle); }
-
-/**
- * Check if any object has been deleted and should be removed
- */
-void AttackManager::checkRemovedObjects()
-{
-    std::vector<std::tuple<attack_handle_t, int>> to_remove;
-    while (!events_.empty()) {
-        EntityEvent e = events_.front();
-
-        // The event types are guaranteed to be only the object destruction events
-        auto* atk = std::get_if<EventAttacking>(&e.type);
-        if (!atk) continue;
-
-        auto eid = atk->attackerID;
-
-        for (auto [ahandle, adata] : this->attacks) {
-            int atkID, defID;
-            std::tie(atkID, defID) = break_attack_handle(ahandle);
-
-            if (eid == atkID || eid == defID) {
-                to_remove.push_back(std::make_tuple(ahandle, eid));
-            }
-        }
-
-        for (auto [cid, _unused] : this->components) {
-            bool is_removing = std::find_if(to_remove.begin(), to_remove.end(), [eid](auto a) {
-                                   return std::get<1>(a) == eid;
-                               }) == to_remove.end();
-
-            if (cid == eid && is_removing) {
-                to_remove.push_back(std::make_tuple(0, eid));
-            }
-        }
-
-        events_.pop();
-    }
-
-    for (auto [handle, oid] : to_remove) {
-        LoggerService::getLogger()->write(
-            "attack-manager", LogType::Debug, "removed %x %lx\n", oid, handle);
-
-        if (handle > 0) this->attacks.erase(handle);
-
-        this->components.erase(oid);
-    }
-}
-
-void AttackManager::processAttacks(ObjectLifecycleManager& olm)
-{
-    this->checkRemovedObjects();
-    auto& log = LoggerService::getLogger();
-
-    std::vector<attack_handle_t> to_remove;
-    for (auto [ahandle, adata] : this->attacks) {
-        auto dmg = adata.atk->doDirectAttack(*adata.def);
-        if (!dmg) {
-            log->write("attack-manager", LogType::Debug, "out of range");
-            to_remove.push_back(ahandle);
-            continue;
-        }
-
-        auto vdmg = dmg.value_or(0);
-        if (vdmg == 0.0) {
-            log->write("attack-manager", LogType::Debug, "damage is null");
-            to_remove.push_back(ahandle);
-            continue;
-        }
-
-        adata.def->object->addHealth(-vdmg);
-        generateAttackEvent(ame_emitter, adata.atk, adata.def, vdmg);
-
-        // When dying, set the health to zero and remove the object
-        if (adata.def->object->getHealth() <= 0) {
-            GameObject* go = adata.def->object;
-
-            go->addHealth(-adata.def->object->getHealth());
-            log->write("attack-manager", LogType::Debug, "the defender is dead");
-            components.erase(go->getID());
-            to_remove.push_back(ahandle);
-
-            olm.notifyDeath(go->getID());
-
-            continue;
-        }
-    }
-
-    for (auto handle : to_remove) {
-        log->write("attack-manager", LogType::Debug, "removed {:08x}\n", handle);
-        this->attacks.erase(handle);
-    }
-}
-
-attack_handle_t familyline::logic::make_attack_handle(int attackerOID, int defenderOID)
-{
-    static_assert(sizeof(int) * 2 == sizeof(attack_handle_t), "Mismatched size for attack handle");
-
-    return defenderOID | (((attack_handle_t)attackerOID) << 32);
+    LogicService::getActionQueue()->removeReceiver("attack-manager");
+    LogicService::getActionQueue()->removeEmitter(&emitter_);
 }
 
 /**
- * Split an attack handle to the attacker and defender
+ * Damage the game object.
+ *
+ * Return its remaining health points
  */
-std::tuple<int, int> familyline::logic::break_attack_handle(attack_handle_t handle)
-{
-    return std::make_tuple<int, int>(handle >> 32, handle & 0xffffffff);
-}
+double AttackManager::damageObject(GameObject& o, double damage) { return o.addHealth(-damage); }
 
-void familyline::logic::generateAttackEvent(
-    EventEmitter* e, AttackComponent* atk, AttackComponent* def, double dmg)
+void AttackManager::sendAttackDoneEvent(
+    const AttackInfo& atk, AttackAttributes atkAttribute, double damageDealt)
 {
-    auto atkpos = atk->object->getPosition();
-    auto defpos = def->object->getPosition();
+    auto atkpos = atk.atkPosition;
+    auto defpos = atk.defPosition;
 
-    EntityEvent eatk{
+    EntityEvent ev{
         0,
-        EventAttacking{
-            atk->object->getID(), def->object->getID(), unsigned(atkpos.x), unsigned(atkpos.z),
-            unsigned(defpos.x), unsigned(defpos.z), dmg},
+        EventAttackDone{
+            .attackerID   = atk.attackerID,
+            .defenderID   = atk.defenderID,
+            .attackID     = atk.attackID,
+            .atkXPos      = (unsigned)atkpos.x,
+            .atkYPos      = (unsigned)atkpos.y,
+            .defXPos      = (unsigned)defpos.x,
+            .defYPos      = (unsigned)defpos.y,
+            .atkAttribute = atkAttribute,
+            .damageDealt  = damageDealt},
         nullptr};
-    e->pushEvent(eatk);
-
-    if (def->object->getHealth() <= 0.0) {
-        EntityEvent edying{
-            0, EventDying{def->object->getID(), unsigned(defpos.x), unsigned(defpos.z)}, nullptr};
-
-        e->pushEvent(edying);
-    }
+    emitter_.pushEvent(ev);
 }
+
+void AttackManager::sendAttackMissEvent(const AttackInfo& atk)
+{
+    auto atkpos = atk.atkPosition;
+    auto defpos = atk.defPosition;
+
+    EntityEvent ev{
+        0,
+        EventAttackMiss{
+            .attackerID = atk.attackerID,
+            .defenderID = atk.defenderID,
+            .attackID   = atk.attackID,
+            .atkXPos    = (unsigned)atkpos.x,
+            .atkYPos    = (unsigned)atkpos.y,
+            .defXPos    = (unsigned)defpos.x,
+            .defYPos    = (unsigned)defpos.y},
+        nullptr};
+    emitter_.pushEvent(ev);
+}
+
+void AttackManager::sendDyingEvent(const AttackInfo& atk)
+{
+    auto defpos = atk.defPosition;
+
+    EntityEvent ev{
+        0,
+        EventDying{
+            .objectID = atk.defenderID,
+            .atkXPos    = (unsigned)defpos.x,
+            .atkYPos    = (unsigned)defpos.y},
+        nullptr};
+    emitter_.pushEvent(ev);
+}
+
+void AttackManager::updateAttackInfo(
+    const GameObject& attacker, const GameObject& defender, AttackInfo& atk)
+{
+    auto atkpos     = attacker.getPosition();
+    auto defpos     = defender.getPosition();
+    atk.atkPosition = glm::vec2(atkpos.x, atkpos.z);
+    atk.defPosition = glm::vec2(defpos.x, defpos.z);
+}
+
+/**
+ * Based on the specified attack precision, check if the
+ * next attack will happen
+ *
+ * TODO: use a global pseudo-RNG. Also make every game have a seed.
+ */
+bool AttackManager::isNextAttackPrecise(unsigned precision) const
+{
+    // clang-format off
+    constexpr std::array values = {
+        0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+        1, 11, 21, 31, 41, 51, 61, 71, 81, 91, 0,
+        2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 1,
+    };
+
+    // clang-format on
+
+    static int i = 0;
+
+    bool answer = (values[i]) <= precision;
+    i++;
+
+    if (i >= values.size()) i = 0;
+
+    return answer;
+}
+
+
+/**
+ * Start a new countdown to the next attack, by incrementing
+ * the ticks_until_attack by the attack interval.
+ */
+void AttackManager::countUntilNextAttack(AttackInfo& atk)
+{
+    auto interval = this->getAttackInterval(atk.atkAttributes);
+    atk.ticks_until_attack += interval;
+}
+
+/**
+ * Do the damage, update the projectile positions and other multiple things
+ *
+ * Runs once per tick
+ */
+void AttackManager::update(ObjectManager& om, ObjectLifecycleManager& olm)
+{
+    std::vector<uint64_t> attacks_to_remove;
+
+    //    printf("%zu attacks\n", attacks_.size());
+    for (auto& atk : attacks_) {
+        auto atkobj = om.get(atk.attackerID);
+        auto defobj = om.get(atk.defenderID);
+
+        if (!defobj || !atkobj) {
+            fprintf(stderr, "no ID found??????????????\n");
+            attacks_to_remove.push_back(atk.attackID);
+            continue;
+        }
+
+        double damage = AttackComponent::calculateDamage(atk.atkAttributes, atk.defAttributes);
+
+        this->updateAttackInfo(*atkobj->get(), *defobj->get(), atk);
+
+        atk.ticks_until_attack--;
+        if (atk.ticks_until_attack <= 0.001) {
+            int attacks = 0;
+            if (isNextAttackPrecise(atk.atkAttributes.precision)) {
+
+                // Fix some precision errors that might occur.
+                atk.ticks_until_attack = 0;
+                do {
+                    auto remaining = this->damageObject(*defobj->get(), damage);
+                    this->sendAttackDoneEvent(atk, atk.atkAttributes, damage);
+
+                    if (remaining <= 0) {
+                        this->sendDyingEvent(atk);
+
+                        /// The lifecycle manager will delete the entity for us,
+                        /// but we will have to sent the dying event.
+                        /// TODO: change this, the lifecycle manager will listen to
+                        ///       this event.
+                        olm.notifyDeath(atk.defenderID);
+                        attacks_to_remove.push_back(atk.attackID);
+                    }
+
+                    attacks++;
+                    this->countUntilNextAttack(atk);
+                } while (atk.ticks_until_attack < 1.0);
+
+                atk.successful_attacks += attacks;
+
+            } else {
+                this->sendAttackMissEvent(atk);
+            }
+            atk.total_attacks += attacks;
+        }
+    }
+
+    auto itend = std::remove_if(attacks_.begin(), attacks_.end(),
+                                [&](AttackInfo& a) {
+                                    return std::find(attacks_to_remove.begin(),
+                                                     attacks_to_remove.end(),
+                                                     a.attackID) != attacks_to_remove.end();
+                                });
+    attacks_.erase(itend, attacks_.end());
+}
+
+bool AttackManager::receiveAttackEvents(const EntityEvent& e)
+{
+
+    if (auto* ev = std::get_if<EventAttackStart>(&e.type); ev) {
+        AttackInfo a{
+            .attackerID         = ev->attackerID,
+            .defenderID         = ev->defenderID,
+            .attackID           = ev->attackID,
+            .rule               = ev->rule,
+            .atkAttributes      = ev->atkAttributes,
+            .defAttributes      = ev->defAttributes,
+            .atkPosition        = glm::vec2(ev->atkXPos, ev->atkYPos),
+            .defPosition        = glm::vec2(ev->defXPos, ev->defYPos),
+            .successful_attacks = 0,
+            .total_attacks      = 0,
+            .ticks_until_attack = 0,
+        };
+        attacks_.push_back(a);
+    }
+
+    return true;
+}
+

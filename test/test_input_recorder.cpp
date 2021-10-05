@@ -30,18 +30,24 @@ TEST(InputRecorderTest, TestIfInputRecords)
 
     std::string mapfile = TESTS_DIR "/terrain_test.flte";
 
-    TestWindow* w = (TestWindow*) GFXService::getDevice()->createWindow(800, 600);
+    TestWindow* w = (TestWindow*)GFXService::getDevice()->createWindow(800, 600);
     w->createRenderer();
     GFXGameInit gi{
         w, GFXService::getDevice()->createFramebuffer("f3D", 800, 600),
-        GFXService::getDevice()->createFramebuffer("fGUI", 800, 600),
-        w->createGUIManager()};
+        GFXService::getDevice()->createFramebuffer("fGUI", 800, 600), w->createGUIManager()};
 
     Game* g   = new Game(gi);
     auto& map = g->initMap(mapfile);
 
-    auto atkc1 = std::optional<AttackComponent>(AttackComponent{
-        nullptr, 1.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 2.0f, 1.0f, 3.14f});
+    auto atkc1 = std::make_optional<AttackComponent>(
+        AttackAttributes{
+            .attackPoints  = 2.0,
+            .defensePoints = 1.0,
+            .attackSpeed   = 2048,
+            .precision     = 100,
+            .maxAngle      = M_PI},
+        std::vector<AttackRule>(
+            {AttackRule{.minDistance = 0.0, .maxDistance = 50, .ctype = AttackTypeMelee{}}}));
     auto obj_s = make_ownable_object(
         {"testobj", "Test Object", glm::vec2(1, 1), 200, 200, true, []() {}, atkc1});
 
@@ -89,8 +95,7 @@ TEST(InputRecorderTest, TestIfInputRecords)
         g->initObjectManager();
         g->initLoopData(i);
 
-        for (auto i = 0; i < (1000 / LOGIC_DELTA) * 20; i++)
-            g->runLoop();
+        for (auto i = 0; i < (1000 / LOGIC_DELTA) * 20; i++) g->runLoop();
 
         delete g;
         delete w;
@@ -101,7 +106,7 @@ TEST(InputRecorderTest, TestIfInputRecords)
         FILE* frec = fopen(recordfile, "rb");
         ASSERT_TRUE(frec != nullptr);
 
-        char start[5] = {};
+        char start[5]    = {};
         uint32_t version = 0;
         fread(start, 4, 1, frec);
         ASSERT_STREQ(start, "FREC");
@@ -109,14 +114,13 @@ TEST(InputRecorderTest, TestIfInputRecords)
         fread(&version, 4, 1, frec);
         ASSERT_EQ(version, 1);
 
-
-        char end[5] = {};
-        uint32_t count = 0;
+        char end[5]       = {};
+        uint32_t count    = 0;
         uint32_t checksum = 0;
 
         fseek(frec, 0, SEEK_END);
         auto posend = ftell(frec);
-        fseek(frec, posend-12, SEEK_SET);
+        fseek(frec, posend - 12, SEEK_SET);
 
         fread(end, 4, 1, frec);
         ASSERT_STREQ(end, "FEND");
@@ -124,12 +128,12 @@ TEST(InputRecorderTest, TestIfInputRecords)
         fread(&count, 4, 1, frec);
         ASSERT_EQ(count, 4);
 
-        fread(&checksum, 4, 1, frec );
+        fread(&checksum, 4, 1, frec);
         ASSERT_NE(checksum, 0);
 
         fclose(frec);
     }
-    
+
     LogicService::getActionQueue()->clearEvents();
     InputService::setInputManager(std::unique_ptr<InputManager>());
     GFXService::setDevice(std::unique_ptr<TestDevice>());

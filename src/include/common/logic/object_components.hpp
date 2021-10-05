@@ -11,12 +11,184 @@
 #include <memory>
 #include <optional>
 #include <vector>
+#include <tl/expected.hpp>
+#include <variant>
 
 namespace familyline::logic
 {
-class GameObject;
 
-// TODO: Handle attacks on its component or elsewhere?
+
+/**
+ * The attack type
+ */
+enum class AttackType { Melee, Projectile, Other };
+
+struct AttackTypeMelee {
+    /// Maximum distance a melee attack can be done
+    double a = 0;
+};
+
+struct AttackTypeProjectile {
+    /// Projectile speed, in units/tick
+    double projectileSpeed;
+};
+
+using AttackTypeClass = std::variant<AttackTypeMelee, AttackTypeProjectile, std::monostate>;
+
+/**
+ * The attack rule
+ *
+ * We have, for now, two attack types: melee and projectile attacks.
+ * Each one is governed by a certain rule, who dictates that what attack will
+ * be applied, depending on the distance between two entities.
+ */
+struct AttackRule {
+    /// Minimum an maximum distance this attack type can be done
+    double minDistance, maxDistance;
+    AttackTypeClass ctype;
+};
+
+/**
+ * Information about an attack
+ */
+struct AttackData {
+    /// The type of the attack
+    AttackType atype;
+
+    /// The chosen rule for this attack
+    AttackRule rule;
+
+    /// The damage value it inflicted
+    double value;
+};
+
+/**
+ * An error explaining why a certain attack could not be done
+ */
+enum class AttackError { DefenderTooNear, DefenderTooFar, DefenderNotInSight };
+
+/**
+ * The attack attributes
+ */
+struct AttackAttributes {
+
+    /// How much health points it will remove from the attacked unit
+    double attackPoints;
+
+    /// How much points it will decrease from the attack of the attacking unit?
+    double defensePoints;
+
+    /// The speed of our attack.
+    ///
+    /// It is use more or less like this:
+    /// We get the number 2048 and divide by the attack speed to get an
+    /// attack interval (`ai`)
+    /// When you do an attack, even if the precision calculations does not
+    /// make it succeed, we set a counter to `ai`, and reduce it on each
+    /// tick.
+    /// When the attack interval reaches zero, we try to attack again.
+    /// If the attack interval is less than one, we attack multiple times
+    /// until it becomes one.
+    /// `ai` cannot be bigger than 128, so the attack speed cannot be
+    /// bigger than 262144
+    ///
+    /// Note that an attack speed of 2048 means that you will attack
+    /// once per tick.
+    double attackSpeed;
+
+    /// The chance of your attack causing damage to the enemy
+    /// 100% is always, 0% is never.
+    double precision;
+
+    /// Maximum angle that the defender you have to be from you so you can
+    /// hit it, assuming it is into the correct distance
+    double maxAngle;
+};
+
+
+    class GameObject;
+    
+/**
+ * The attack component for our entity
+ *
+ * You will note that only basic attack decision (aka if you will attack or not)
+ * is kept here, most of the real attack code resides on the AttackManager.
+ */
+class AttackComponent
+{
+public:
+    AttackComponent(AttackAttributes base_attribs, std::vector<AttackRule> rules)
+        : attributes_(base_attribs), rules_(rules)
+    {
+    }
+
+    tl::expected<AttackData, AttackError> attack(const AttackComponent& other);
+
+    const AttackAttributes& attributes() const { return this->attributes_; }
+    
+    /**
+     * Calculates the base damage that would be inflicted if the attack was done
+     * right now, but using only the component attributes.
+     *
+     * This method is designed to be used for the ones that want to calculate
+     * the damage based on the events
+     */
+    static double calculateDamage(
+        const AttackAttributes& attacker, const AttackAttributes& defender);
+
+    /**
+     * Returns true if you can attack, false if you cannot
+     */
+    bool isInRange(const AttackComponent& other) const;
+
+    void setParent(GameObject* parent) { parent_ = parent; }
+
+private:
+    GameObject* parent_;
+
+    /**
+     * Gets the distance in game units, and angle in radians, between two entities
+     *
+     * About the angle:
+     *   If it is directly in front of you, for example, this should return 0.
+     *   If it is directly behind you, this should return PI (180deg in radians)
+     *
+     * The first element of the tuple is the distance, the second is the angle.
+     */
+    std::tuple<double, double> calculateDistanceAndAngle(const AttackComponent& other) const;
+
+    std::optional<AttackError> checkIfInRange(
+        const AttackRule& currentrule, std::tuple<double, double> distanceAndAngle) const;
+
+    /**
+     * Calculate the base damage that would be inflicted if the attack was now
+     */
+    double damage(const AttackComponent& other) const;
+
+    /**
+     * Reescale the position of 'base', assuming the position of 'obj' is 0,0
+     */
+    glm::vec3 assumeObjectIsCenter(const GameObject& obj, glm::vec3 base) const;
+
+    /**
+     * Convert a certain position from cartesian to polar coordinates
+     *
+     * This is done so we can determine if we are inside the angle of attack
+     * In the returned vec2, x is the distance and y is the angle.
+     */
+    glm::vec2 cartesianToPolar(double x, double y) const;
+
+    /**
+     * Send the event to the current action queue
+     */
+    void sendEvent(
+        const AttackComponent& other, const AttackRule& rule,
+        const AttackAttributes& atkAttributes, const AttackAttributes& defAttributes);
+
+    AttackAttributes attributes_;
+    std::vector<AttackRule> rules_;
+};
+
 
 /**
  * Allows objects to have something visible, something you can see on
@@ -31,76 +203,6 @@ struct LocationComponent {
      * the graphical/OpenGL space and then setting it as the mesh position
      */
     void updateMesh(const Terrain& t);
-};
-
-/**
- * Allows objects to attack and be attacked.
- */
-struct AttackComponent {
-    GameObject* object;
-
-    /**
-     * atkRanged is the power of ranged attack. defRanged is defense against those attacks
-     * atkMelee is the power of melee attack. defMelee is defense against it
-     * atkSiege is the attack against buildings, since siege weapons are made to destroy them
-     * atkTransporter is the attack against transporter units. Mostly ships
-     *
-     * Probably you know what defSiege and defTransporter means.
-     *
-     * atkRanged and atkMelee does not have effects on buildings
-     */
-
-    double atkRanged, atkMelee, atkSiege, atkTransporter;
-    double defRanged, defMelee, defSiege, defTransporter;
-
-    /**
-     * Unit rotation, in radians
-     */
-    double rotation;
-
-    /**
-     * Attack maximum distance, in game units.
-     *
-     * If the attacked unit is more distant than this value, it cannot be harmed
-     * by the unit that started the attack.
-     */
-    double atkDistance;
-
-    /**
-     * Unit armor
-     *
-     * Will protect from attacks. Attacks that have the score lower than the
-     * armor will damage both the armor and the health equally instead of the
-     * unit health, until the armor is destroyed. Then, it will damage the unit
-     * directly
-     *
-     * The armor will replenish itself when the unit is not attacking or being
-     * attacked.
-     */
-    double armor = 0;
-
-    /**
-     * Unit range, or attack "vision", in radians
-     *
-     * The range is symmetrical, the zero axis is the unit "normal", where it is
-     * looking at, and it is mirrored against this vector. So a range of 45deg is
-     * actually 90deg in total, 45 each side of the unit.
-     */
-    double range;
-
-    /**
-     * Check if the attacked component is in range of the attacker
-     */
-    bool isInAttackRange(const AttackComponent& other);
-
-    /**
-     * Attack directly another object
-     *
-     * Do a certain amount of damage to him.
-     * Return the pure damage dealt, or an empty optional if the target is out of range
-     */
-    std::optional<double> doDirectAttack(const AttackComponent& other);
-    
 };
 
 /**
