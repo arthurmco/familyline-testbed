@@ -104,34 +104,36 @@ TEST(AttackManager, BaseMeleeAttackWithEventPropagation)
     ObjectManager om;
     ObjectLifecycleManager olm{om};
 
-    AttackComponent atk(
+    AttackComponent aatk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
             .attackSpeed   = 2048,
             .precision     = 90,
             .maxAngle      = M_PI},
-        {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
+        std::vector<AttackRule>{
+            AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    AttackComponent def(
+    AttackComponent adef(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
             .attackSpeed   = 2048,
             .precision     = 90,
             .maxAngle      = M_PI},
-        {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
+        std::vector<AttackRule>{
+            AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    auto atker =
-        make_object({"atker", "Attacker", glm::vec2(5, 5), 200, 200, true, []() {}, std::nullopt});
-    auto defer =
-        make_object({"defder", "Defender", glm::vec2(5, 5), 200, 200, true, []() {}, std::nullopt});
+    auto atker = make_object(
+        {"atker", "Attacker", glm::vec2(5, 5), 200, 200, true, []() {}, std::make_optional(aatk)});
+    auto defer = make_object(
+        {"defder", "Defender", glm::vec2(5, 5), 200, 200, true, []() {}, std::make_optional(adef)});
 
     atker->setPosition(glm::vec3(4, 0, 4));
     defer->setPosition(glm::vec3(1, 0, 1));
 
-    atk.setParent(atker.get());
-    def.setParent(defer.get());
+    auto atk = atker->getAttackComponent().value();
+    auto def = defer->getAttackComponent().value();
 
     auto atkid = om.add(std::move(atker));
     auto defid = om.add(std::move(defer));
@@ -267,7 +269,7 @@ TEST(AttackManager, IsBaseMeleeAttackNotFullyPreciseIfPrecisionIsLow)
     ObjectManager om;
     ObjectLifecycleManager olm{om};
 
-    AttackComponent atk(
+    AttackComponent aatk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
@@ -276,7 +278,7 @@ TEST(AttackManager, IsBaseMeleeAttackNotFullyPreciseIfPrecisionIsLow)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    AttackComponent def(
+    AttackComponent adef(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -285,16 +287,16 @@ TEST(AttackManager, IsBaseMeleeAttackNotFullyPreciseIfPrecisionIsLow)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    auto atker =
-        make_object({"atker", "Attacker", glm::vec2(5, 5), 200, 200, true, []() {}, std::nullopt});
-    auto defer =
-        make_object({"defder", "Defender", glm::vec2(5, 5), 200, 200, true, []() {}, std::nullopt});
+    auto atker = make_object(
+        {"atker", "Attacker", glm::vec2(5, 5), 200, 200, true, []() {}, std::make_optional(aatk)});
+    auto defer = make_object(
+        {"defder", "Defender", glm::vec2(5, 5), 200, 200, true, []() {}, std::make_optional(adef)});
 
     atker->setPosition(glm::vec3(4, 0, 4));
     defer->setPosition(glm::vec3(1, 0, 1));
 
-    atk.setParent(atker.get());
-    def.setParent(defer.get());
+    auto atk = atker->getAttackComponent().value();
+    auto def = defer->getAttackComponent().value();
 
     auto atkid = om.add(std::move(atker));
     auto defid = om.add(std::move(defer));
@@ -327,11 +329,11 @@ TEST(AttackManager, IsBaseMeleeAttackNotFullyPreciseIfPrecisionIsLow)
     LogicService::getActionQueue()->processEvents();
 
     ASSERT_GT(events_done.size(), 0);
-    EXPECT_GE(events_done.size(), neededAttacksMin*0.9);
+    EXPECT_GE(events_done.size(), neededAttacksMin * 0.9);
     EXPECT_LT(events_done.size(), neededAttacksMax);
     EXPECT_GT(events_miss.size(), 0);
-    EXPECT_LE(events_miss.size(), neededAttacksMin*0.1);
-    EXPECT_GE(events_miss.size(), neededAttacksMin*0.05);
+    EXPECT_LE(events_miss.size(), neededAttacksMin * 0.1);
+    EXPECT_GE(events_miss.size(), neededAttacksMin * 0.05);
 
     LogicService::getActionQueue()->removeReceiver("test-receiver");
     LogicService::getActionQueue()->clearEvents();
@@ -345,7 +347,7 @@ TEST(AttackManager, IsBaseMeleeAttackFullyPreciseIfPrecisionIs100)
     ObjectManager om;
     ObjectLifecycleManager olm{om};
 
-    AttackComponent atk(
+    AttackComponent aatk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
@@ -354,7 +356,7 @@ TEST(AttackManager, IsBaseMeleeAttackFullyPreciseIfPrecisionIs100)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    AttackComponent def(
+    AttackComponent adef(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -363,16 +365,16 @@ TEST(AttackManager, IsBaseMeleeAttackFullyPreciseIfPrecisionIs100)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    auto atker =
-        make_object({"atker", "Attacker", glm::vec2(5, 5), 200, 200, true, []() {}, std::nullopt});
-    auto defer =
-        make_object({"defder", "Defender", glm::vec2(5, 5), 200, 200, true, []() {}, std::nullopt});
+    auto atker = make_object(
+        {"atker", "Attacker", glm::vec2(5, 5), 200, 200, true, []() {}, std::make_optional(aatk)});
+    auto defer = make_object(
+        {"defder", "Defender", glm::vec2(5, 5), 200, 200, true, []() {}, std::make_optional(adef)});
 
     atker->setPosition(glm::vec3(4, 0, 4));
     defer->setPosition(glm::vec3(1, 0, 1));
 
-    atk.setParent(atker.get());
-    def.setParent(defer.get());
+    auto atk = atker->getAttackComponent().value();
+    auto def = defer->getAttackComponent().value();
 
     auto atkid = om.add(std::move(atker));
     auto defid = om.add(std::move(defer));
@@ -417,16 +419,16 @@ TEST(AttackManager, IsAttackSpeedRespected)
     ObjectManager om;
     ObjectLifecycleManager olm{om};
 
-    AttackComponent atk(
+    AttackComponent aatk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
-            .attackSpeed   = 2048/16.0,
+            .attackSpeed   = 2048 / 16.0,
             .precision     = 100,
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    AttackComponent def(
+    AttackComponent adef(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -435,16 +437,16 @@ TEST(AttackManager, IsAttackSpeedRespected)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    auto atker =
-        make_object({"atker", "Attacker", glm::vec2(5, 5), 200, 200, true, []() {}, std::nullopt});
-    auto defer =
-        make_object({"defder", "Defender", glm::vec2(5, 5), 200, 200, true, []() {}, std::nullopt});
+    auto atker = make_object(
+        {"atker", "Attacker", glm::vec2(5, 5), 200, 200, true, []() {}, std::make_optional(aatk)});
+    auto defer = make_object(
+        {"defder", "Defender", glm::vec2(5, 5), 200, 200, true, []() {}, std::make_optional(adef)});
 
     atker->setPosition(glm::vec3(4, 0, 4));
     defer->setPosition(glm::vec3(1, 0, 1));
 
-    atk.setParent(atker.get());
-    def.setParent(defer.get());
+    auto atk = atker->getAttackComponent().value();
+    auto def = defer->getAttackComponent().value();
 
     auto atkid = om.add(std::move(atker));
     auto defid = om.add(std::move(defer));
@@ -453,8 +455,8 @@ TEST(AttackManager, IsAttackSpeedRespected)
 
     auto attack = atk.attack(def);
 
-    auto hitAttacks = int((200 / 0.25) / (100.0 / 100)) - 1;
-    auto neededIters = int((16*200 / 0.25) / (100.0 / 100)) - 16;
+    auto hitAttacks  = int((200 / 0.25) / (100.0 / 100)) - 1;
+    auto neededIters = int((16 * 200 / 0.25) / (100.0 / 100)) - 16;
 
     std::queue<EntityEvent> events_done;
     std::queue<EntityEvent> events_miss;
@@ -478,7 +480,6 @@ TEST(AttackManager, IsAttackSpeedRespected)
     EXPECT_EQ(events_done.size(), hitAttacks);
     EXPECT_EQ(events_miss.size(), 0);
 
-
     {
         auto atkptr = *om.get(atkid);
         auto defptr = *om.get(defid);
@@ -487,11 +488,9 @@ TEST(AttackManager, IsAttackSpeedRespected)
         EXPECT_EQ(defptr->getHealth(), 0.25);
     }
 
-    
     LogicService::getActionQueue()->removeReceiver("test-receiver");
     LogicService::getActionQueue()->clearEvents();
 }
-
 
 TEST(AttackManager, IsDeadEventReceivedOnDeath)
 {
@@ -501,7 +500,7 @@ TEST(AttackManager, IsDeadEventReceivedOnDeath)
     ObjectManager om;
     ObjectLifecycleManager olm{om};
 
-    AttackComponent atk(
+    AttackComponent aatk(
         AttackAttributes{
             .attackPoints  = 1.0,
             .defensePoints = 0.5,
@@ -510,7 +509,7 @@ TEST(AttackManager, IsDeadEventReceivedOnDeath)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    AttackComponent def(
+    AttackComponent adef(
         AttackAttributes{
             .attackPoints  = 0.25,
             .defensePoints = 0.75,
@@ -519,17 +518,16 @@ TEST(AttackManager, IsDeadEventReceivedOnDeath)
             .maxAngle      = M_PI},
         {AttackRule{.minDistance = 0.5, .maxDistance = 5, .ctype = AttackTypeMelee{}}});
 
-    auto atker =
-        make_object({"atker", "Attacker", glm::vec2(5, 5), 200, 200, true, []() {}, std::nullopt});
-    auto defer =
-        make_object({"defder", "Defender", glm::vec2(5, 5), 200, 200, true, []() {}, std::nullopt});
+    auto atker = make_object(
+        {"atker", "Attacker", glm::vec2(5, 5), 200, 200, true, []() {}, std::make_optional(aatk)});
+    auto defer = make_object(
+        {"defder", "Defender", glm::vec2(5, 5), 200, 200, true, []() {}, std::make_optional(adef)});
 
     atker->setPosition(glm::vec3(4, 0, 4));
     defer->setPosition(glm::vec3(1, 0, 1));
 
-    atk.setParent(atker.get());
-    def.setParent(defer.get());
-
+    auto atk = atker->getAttackComponent().value();
+    auto def = defer->getAttackComponent().value();
 
     auto atkid = om.add(std::move(atker));
     auto defid = om.add(std::move(defer));
@@ -579,7 +577,7 @@ TEST(AttackManager, IsDeadEventReceivedOnDeath)
     olm.update();
     LogicService::getActionQueue()->processEvents();
 
-    EXPECT_EQ(events_done.size(), neededAttacks+1);
+    EXPECT_EQ(events_done.size(), neededAttacks + 1);
     EXPECT_EQ(events_dead.size(), 1);
 
     {
@@ -590,11 +588,10 @@ TEST(AttackManager, IsDeadEventReceivedOnDeath)
         EXPECT_LE(defptr->getHealth(), 0);
     }
 
-    for (auto i = 0; i <= 80*10; i++) {
+    for (auto i = 0; i <= 80 * 10; i++) {
         LogicService::getActionQueue()->processEvents();
         am.update(om, olm);
         olm.update();
-
     }
 
     {
@@ -604,7 +601,6 @@ TEST(AttackManager, IsDeadEventReceivedOnDeath)
         EXPECT_TRUE(atkptrv);
         EXPECT_FALSE(defptrv);
     }
-
 
     LogicService::getActionQueue()->removeReceiver("test-receiver");
     LogicService::getActionQueue()->clearEvents();

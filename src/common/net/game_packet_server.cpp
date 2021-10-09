@@ -3,7 +3,7 @@
 #include <flatbuffers/flatbuffers.h>
 #include <fmt/format.h>
 
-#include "common/logic/input_recorder.hpp"
+#include <common/logic/input_recorder.hpp>
 
 #ifdef __linux__
 #include <bits/stdint-uintn.h>

@@ -144,7 +144,7 @@ public:
     void setParent(GameObject* parent) { parent_ = parent; }
 
 private:
-    GameObject* parent_;
+    GameObject* parent_ = nullptr;
 
     /**
      * Gets the distance in game units, and angle in radians, between two entities

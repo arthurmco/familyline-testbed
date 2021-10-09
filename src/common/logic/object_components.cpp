@@ -4,6 +4,7 @@
 #include <common/logic/game_object.hpp>
 #include <common/logic/object_components.hpp>
 #include <common/logic/logic_service.hpp>
+#include <common/logger.hpp>
 
 using namespace familyline::logic;
 
@@ -72,8 +73,20 @@ tl::expected<AttackData, AttackError> AttackComponent::attack(const AttackCompon
 
     this->sendEvent(other, rule, this->attributes_, other.attributes_);
 
+    auto &log = LoggerService::getLogger();
+
+    auto dmg = this->damage(other);
+    log->write(
+        "attack-component", LogType::Debug,
+        "'{}' ({}) attacking '{}' ({}) with damage of {}",
+        this->parent_ ? this->parent_->getName() : "(null)",
+        this->parent_ ? this->parent_->getID() : -1,
+        other.parent_ ? other.parent_->getName() : "(null)",
+        other.parent_ ? other.parent_->getID() : -1,
+        dmg);
+    
     return AttackData{
-        .atype = AttackType::Melee, .rule = rule, .value = glm::max(this->damage(other), 0.01)};
+        .atype = AttackType::Melee, .rule = rule, .value = dmg};
 }
 
 /**
@@ -94,7 +107,7 @@ double AttackComponent::damage(const AttackComponent& other) const
 double AttackComponent::calculateDamage(
     const AttackAttributes& attacker, const AttackAttributes& defender)
 {
-    return attacker.attackPoints - defender.defensePoints;
+    return glm::max(attacker.attackPoints - defender.defensePoints, 0.01);
 }
 
 bool AttackComponent::isInRange(const AttackComponent& other) const
@@ -140,6 +153,7 @@ glm::vec2 AttackComponent::cartesianToPolar(double x, double y) const
 std::tuple<double, double> AttackComponent::calculateDistanceAndAngle(
     const AttackComponent& other) const
 {
+    assert(this->parent_);
     auto defPos   = this->assumeObjectIsCenter(*this->parent_, other.parent_->getPosition());
     auto defPolar = this->cartesianToPolar(defPos.x, defPos.z);
 

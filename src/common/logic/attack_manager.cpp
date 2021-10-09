@@ -1,14 +1,12 @@
 #include <algorithm>
 #include <common/logger.hpp>
+#include <common/logic/action_queue.hpp>
 #include <common/logic/attack_manager.hpp>
+#include <common/logic/game_event.hpp>
 #include <common/logic/game_object.hpp>
 #include <common/logic/logic_service.hpp>
 
-#include <common/logic/action_queue.hpp>
-#include <common/logic/game_event.hpp>
-
 using namespace familyline::logic;
-
 
 AttackManager::AttackManager()
 {
@@ -32,7 +30,10 @@ AttackManager::~AttackManager()
  *
  * Return its remaining health points
  */
-double AttackManager::damageObject(GameObject& o, double damage) { return o.addHealth(-damage); }
+double AttackManager::damageObject(GameObject& o, double damage)
+{
+    return o.addHealth(-damage);
+}
 
 void AttackManager::sendAttackDoneEvent(
     const AttackInfo& atk, AttackAttributes atkAttribute, double damageDealt)
@@ -83,8 +84,8 @@ void AttackManager::sendDyingEvent(const AttackInfo& atk)
         0,
         EventDying{
             .objectID = atk.defenderID,
-            .atkXPos    = (unsigned)defpos.x,
-            .atkYPos    = (unsigned)defpos.y},
+            .atkXPos  = (unsigned)defpos.x,
+            .atkYPos  = (unsigned)defpos.y},
         nullptr};
     emitter_.pushEvent(ev);
 }
@@ -125,7 +126,6 @@ bool AttackManager::isNextAttackPrecise(unsigned precision) const
     return answer;
 }
 
-
 /**
  * Start a new countdown to the next attack, by incrementing
  * the ticks_until_attack by the attack interval.
@@ -144,6 +144,7 @@ void AttackManager::countUntilNextAttack(AttackInfo& atk)
 void AttackManager::update(ObjectManager& om, ObjectLifecycleManager& olm)
 {
     std::vector<uint64_t> attacks_to_remove;
+    auto& log = LoggerService::getLogger();
 
     //    printf("%zu attacks\n", attacks_.size());
     for (auto& atk : attacks_) {
@@ -151,11 +152,25 @@ void AttackManager::update(ObjectManager& om, ObjectLifecycleManager& olm)
         auto defobj = om.get(atk.defenderID);
 
         if (!defobj || !atkobj) {
-            fprintf(stderr, "no ID found??????????????\n");
+            log->write(
+                "attack-manager", LogType::Info,
+                "attack {} ended because one of the participants do not exist anymore (atk={}, "
+                "def={})",
+                atk.attackID, atk.attackerID, atk.defenderID);
             attacks_to_remove.push_back(atk.attackID);
             continue;
         }
 
+        if (!(*atkobj)->getAttackComponent()->isInRange(*defobj->get()->getAttackComponent())) {
+            log->write(
+                "attack-manager", LogType::Info,
+                "attack {} ended because one of the participants is not in range of the other "
+                "(atk={}, def={})",
+                atk.attackID, atk.attackerID, atk.defenderID);
+            attacks_to_remove.push_back(atk.attackID);
+            continue;
+        }
+        
         double damage = AttackComponent::calculateDamage(atk.atkAttributes, atk.defAttributes);
 
         this->updateAttackInfo(*atkobj->get(), *defobj->get(), atk);
@@ -164,7 +179,6 @@ void AttackManager::update(ObjectManager& om, ObjectLifecycleManager& olm)
         if (atk.ticks_until_attack <= 0.001) {
             int attacks = 0;
             if (isNextAttackPrecise(atk.atkAttributes.precision)) {
-
                 // Fix some precision errors that might occur.
                 atk.ticks_until_attack = 0;
                 do {
@@ -173,6 +187,11 @@ void AttackManager::update(ObjectManager& om, ObjectLifecycleManager& olm)
 
                     if (remaining <= 0) {
                         this->sendDyingEvent(atk);
+                        log->write(
+                            "attack-manager", LogType::Info,
+                            "attack {} ended because the attacker killed the defender "
+                            "(atk={}, def={})",
+                            atk.attackID, atk.attackerID, atk.defenderID);
 
                         /// The lifecycle manager will delete the entity for us,
                         /// but we will have to sent the dying event.
@@ -195,19 +214,21 @@ void AttackManager::update(ObjectManager& om, ObjectLifecycleManager& olm)
         }
     }
 
-    auto itend = std::remove_if(attacks_.begin(), attacks_.end(),
-                                [&](AttackInfo& a) {
-                                    return std::find(attacks_to_remove.begin(),
-                                                     attacks_to_remove.end(),
-                                                     a.attackID) != attacks_to_remove.end();
-                                });
+    auto itend = std::remove_if(attacks_.begin(), attacks_.end(), [&](AttackInfo& a) {
+        return std::find(attacks_to_remove.begin(), attacks_to_remove.end(), a.attackID) !=
+               attacks_to_remove.end();
+    });
     attacks_.erase(itend, attacks_.end());
 }
 
 bool AttackManager::receiveAttackEvents(const EntityEvent& e)
 {
+    auto& log = LoggerService::getLogger();
 
     if (auto* ev = std::get_if<EventAttackStart>(&e.type); ev) {
+        log->write(
+            "attack-manager", LogType::Info, "attack event ID {:08x} received (from={}, to={})",
+            ev->attackID, ev->attackerID, ev->defenderID);
         AttackInfo a{
             .attackerID         = ev->attackerID,
             .defenderID         = ev->defenderID,
@@ -226,4 +247,3 @@ bool AttackManager::receiveAttackEvents(const EntityEvent& e)
 
     return true;
 }
-
