@@ -52,6 +52,10 @@ struct ReceiverData {
     std::string name;
     EventReceiver receiver;
     std::vector<ActionQueueEvent> events;
+
+    ReceiverData(std::string name, EventReceiver r, std::initializer_list<ActionQueueEvent> events)
+        : name(name), receiver(r), events(events)
+        {}
 };
 
 /**
