@@ -2,11 +2,10 @@
 #include <SDL2/SDL_surface.h>
 #include <fmt/format.h>
 
+#include <client/graphical/texture_environment.hpp>
 #include <client/graphical/texture_manager.hpp>
 #include <common/logger.hpp>
 #include <tl/expected.hpp>
-
-#include <client/graphical/texture_environment.hpp>
 
 using namespace familyline::graphics;
 
@@ -45,9 +44,10 @@ tl::expected<TextureHandle, ImageError> TextureManager::addTexture(
     std::string_view filename, std::unique_ptr<Texture> texture)
 {
     auto handle = hashFilename(filename);
+    auto &log   = LoggerService::getLogger();
 
     if (auto texiter = textures_.find(handle); texiter != textures_.end()) {
-        printf("texture %s already added\n", filename.data());
+        log->write("texture-manager", LogType::Warning, "texture '{}' already added", filename);
         texiter->second->refcount++;
         return tl::expected<TextureHandle, ImageError>(handle);
     } else {
@@ -144,7 +144,11 @@ tl::expected<TextureHandle, ImageError> TextureManager::loadTexture(
             auto handle = hashFilename(fileinfo);
 
             if (auto texiter = textures_.find(handle); texiter != textures_.end()) {
-                printf("created texture (aliased as %s) already added\n", fileinfo);
+                auto &log = LoggerService::getLogger();
+
+                log->write(
+                    "texture-manager", LogType::Warning,
+                    "created texture (aliased as {}) already added", fileinfo);
                 texiter->second->refcount++;
                 return tl::expected<TextureHandle, ImageError>(handle);
             } else {
@@ -184,13 +188,15 @@ std::optional<TextureError> TextureManager::uploadTexture(TextureHandle t)
  */
 std::optional<TextureError> TextureManager::unloadTexture(TextureHandle t)
 {
+    auto& log = LoggerService::getLogger();
+
     auto texiter = textures_.find(t);
     if (texiter == textures_.end()) {
         return std::make_optional(TextureError::TextureNotFound);
     }
 
     if (texiter->second->texture_unit) {
-        printf(
+        log->write("texture-manager", LogType::Error, 
             "cannot unbind: the texture is bound to texture unit %08x",
             *texiter->second->texture_unit);
         return std::make_optional(TextureError::TextureIsBound);
