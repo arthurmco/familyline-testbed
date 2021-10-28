@@ -1,19 +1,6 @@
-
-# Add all files that are exclusive to the client:
-# (rendering and input gathering code)
-
-include("${CMAKE_SOURCE_DIR}/src/common/generated.cmake")
-
-set(FLINE_RENDERER "opengl" CACHE STRING "Set if you want to support the opengl renderer. 
-Since this is the only renderer, if you disable, you will not be able to render anything")
-
-option(FLINE_USE_GLES  "Set if you want to use OpenGL ES instead of OpenGL. Only has effect if FLINE_RENDERER=opengl" OFF)
-
-message("Renderer: ${FLINE_RENDERER} ")
-
-if (${FLINE_RENDERER} EQUAL "opengl")
-message("Use GLES: ${FLINE_USE_GLES} ")
-endif()
+# CMakeLists for the client part of the engine, the code
+# that is shared between client and server.
+include("${CMAKE_SOURCE_DIR}/cmake/functions.cmake")
 
 add_library(
   familyline-client
@@ -74,9 +61,22 @@ add_library(
   "Timer.cpp"
   )
 
+target_compile_features(familyline-client PRIVATE cxx_std_20)
 
-if (MSVC)
+find_package(FlatBuffers REQUIRED)
+add_dependencies(familyline-client familyline-common input-flatbuffer input-ser-flatbuffer network-flatbuffer)
 
+find_package(fmt 6...7.2 CONFIG REQUIRED)
+find_package(DevIL REQUIRED)
+find_package(ZLIB REQUIRED)
+find_package(tl-expected 1 CONFIG REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(nlohmann_json REQUIRED)
+find_package(Yaml REQUIRED)
+find_package(OpenGL REQUIRED)
+
+if (FLINE_USE_VCPKG)	
   include(${CMAKE_TOOLCHAIN_FILE})
   find_library(PANGO_LIB pango-1.0 REQUIRED)
   find_library(PANGOCAIRO_LIB pangocairo-1.0)
@@ -91,46 +91,48 @@ if (MSVC)
   find_path(CAIRO_INCLUDE_DIRS cairo.h REQUIRED PATH_SUFFIXES "cairo")
 
   target_link_libraries(familyline-client PUBLIC ${PANGO_LIB} ${PANGOCAIRO_LIB} ${GOBJECT_LIB}
-    ${CAIRO_INCLUDE})
+    ${CAIRO_INCLUDE} ${YAML_LIBRARIES})
   target_include_directories(familyline-client PUBLIC 
     ${GLIB_INCLUDES} ${HB_INCLUDE} ${GLIB_CONFIG_INCLUDES} ${PANGO_INCLUDE} 
     ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} 
-    ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR} ${PANGOCAIRO_INCLUDE_DIR})
-  
+    ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR} ${PANGOCAIRO_INCLUDE_DIR}
+    ${yaml_INCLUDE_DIR})
+
 else()
   find_package(PkgConfig REQUIRED)
-
+  find_package(Threads REQUIRED)
+#  find_package(SDL_image REQUIRED)
+  pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
   pkg_search_module(PANGOCAIRO REQUIRED pangocairo) # finds pango-cairo
-  target_include_directories(familyline-client PUBLIC ${PANGOCAIRO_INCLUDE_DIRS})
+  pkg_search_module(GLM REQUIRED glm) # finds glm
   
-endif(MSVC)
+  
+  target_link_libraries(familyline-client PUBLIC fmt::fmt)
+  target_link_libraries(familyline-client PUBLIC SDL2::SDL2 SDL2::SDL2main ${SDL2_LIBRARIES} "-lSDL2_image")
+  target_link_libraries(familyline-client PUBLIC GLEW::GLEW)
+  target_link_libraries(familyline-client PUBLIC OpenGL::OpenGL)
+  target_link_libraries(familyline-client PUBLIC ${IL_LIBRARIES})
+  target_link_libraries(familyline-client PUBLIC ${ILU_LIBRARIES})
+  target_link_libraries(familyline-client PUBLIC ${CAIRO_LINK_LIBRARIES})
+  target_link_libraries(familyline-client PUBLIC ${PANGOCAIRO_LINK_LIBRARIES})
+  target_link_libraries(familyline-client PUBLIC ${GLM_LINK_LIBRARIES})
+  target_link_libraries(familyline-client PUBLIC ${YAML_LIBRARIES})
+  target_link_libraries(familyline-client PUBLIC Threads::Threads)
+  target_include_directories(familyline-client PUBLIC ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${PANGOCAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS}
+    ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
+  
+endif(FLINE_USE_VCPKG)
 
-target_include_directories(familyline-client PRIVATE "${CMAKE_SOURCE_DIR}/src/include" )
-target_link_libraries(familyline-client PUBLIC familyline-common)
-target_compile_features(familyline-client PRIVATE cxx_std_20)
+add_sanitizers(familyline-client)
+add_coverage(familyline-client)
 
-
-if (FLINE_DO_CHECK_ASAN)
-  if (WIN32)
-    message("No support for windows + address sanitizer yet")
-  else() 
-    target_compile_options(familyline-client PUBLIC "-fsanitize=address")
-    target_link_libraries(familyline-client PUBLIC "-fsanitize=address")
-    target_compile_options(familyline-client PUBLIC "-fno-omit-frame-pointer")
-    target_link_libraries(familyline-client PUBLIC "-fno-omit-frame-pointer")
-  endif()
-endif()
-
-
-if (FLINE_DO_CHECK_UBSAN)
-  if (WIN32)
-    message("No support for windows + undefined behavior sanitizer yet")
-  else() 
-    target_compile_options(familyline-client PUBLIC "-fsanitize=undefined")
-    target_link_libraries(familyline-client PUBLIC "-fsanitize=undefined")
-  endif()
-endif()
+fill_build_information(familyline-client)
 
 configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/../../src/include/client/config.h.in"
   "${CMAKE_CURRENT_SOURCE_DIR}/../../src/include/client/config.h" )
 
+target_link_libraries(familyline-client PUBLIC familyline-common)
+
+target_include_directories(familyline-client PUBLIC "${CMAKE_SOURCE_DIR}/src/include"
+  "${CMAKE_SOURCE_DIR}/generated")

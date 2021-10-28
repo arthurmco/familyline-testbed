@@ -1,6 +1,6 @@
-
-# Add all files that are common to the server and client:
-# (logic, logging, net and object code)
+# CMakeLists for the common part of the engine, the code
+# that is shared between client and server.
+include("${CMAKE_SOURCE_DIR}/cmake/functions.cmake")
 
 include("${CMAKE_SOURCE_DIR}/src/common/generated.cmake")
 get_target_property(INPUT_FLATBUFFER_INCLUDE input-flatbuffer GENERATED_INCLUDES_DIR)
@@ -45,21 +45,20 @@ add_library(
   )
 
 add_dependencies(familyline-common input-flatbuffer input-ser-flatbuffer network-flatbuffer)
- 
-find_package(fmt CONFIG REQUIRED)
-find_package(ZLIB REQUIRED)
-find_package(tl-expected CONFIG REQUIRED)
-find_package(SDL2 CONFIG)
-#find_package(nlohmann_json REQUIRED)
-#
-# for some reason, nlohmann::json CMake file cannot be found on the RPI.
-# Need to investigate
 
-if (WIN32)
-	
+target_compile_features(familyline-common PRIVATE cxx_std_20)
+
+find_package(fmt 6...7.2 CONFIG REQUIRED)
+find_package(ZLIB REQUIRED)
+find_package(tl-expected 1 CONFIG REQUIRED)
+find_package(nlohmann_json REQUIRED)
+find_package(FlatBuffers REQUIRED)
+
+if (FLINE_USE_VCPKG)	
   include(${CMAKE_TOOLCHAIN_FILE})
   find_package(glm CONFIG REQUIRED)
   find_package(unofficial-curlpp CONFIG REQUIRED)
+  
   target_include_directories(familyline-common PUBLIC
     ${YAML_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR}
     ${INPUT_FLATBUFFER_INCLUDE})
@@ -72,59 +71,19 @@ else()
   find_package(PkgConfig REQUIRED)
   pkg_search_module(GLM REQUIRED glm) # finds glm
   pkg_search_module(CURLPP REQUIRED curlpp)
+  
   target_link_libraries(familyline-common PUBLIC fmt::fmt ${GLM_LIBRARIES} ${ZLIB_LIBRARIES})
   target_link_libraries(familyline-common PUBLIC tl::expected)
-  target_link_libraries(familyline-common PUBLIC ${CURLPP_LDFLAGS}) 
-  target_link_libraries(familyline-common PUBLIC ${SDL2_LIBRARIES})
- # target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
+  target_link_libraries(familyline-common PUBLIC ${CURLPP_LDFLAGS})
+  target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
   target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIR} ${INPUT_FLATBUFFER_INCLUDE} ${CURLPP_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
-endif(WIN32)
+endif(FLINE_USE_VCPKG)
 
-if (FLINE_SET_COVERAGE)
-  target_compile_options(familyline-common PUBLIC "-fprofile-arcs")
-  target_compile_options(familyline-common PUBLIC "-ftest-coverage")
-  target_compile_options(familyline-common PUBLIC "-O0")
-  target_link_libraries(familyline-common PUBLIC "-fprofile-arcs")
-  target_link_libraries(familyline-common PUBLIC "-ftest-coverage")
-  target_link_libraries(familyline-common PUBLIC "gcov")
-  target_link_libraries(familyline-common PUBLIC "--coverage")
-endif()
+add_sanitizers(familyline-common)
+add_coverage(familyline-common)
 
-if (FLINE_DO_CHECK_ASAN)
-  if (WIN32)
-    message("No support for windows + address sanitizer yet")
-  else() 
-    target_compile_options(familyline-common PUBLIC "-fsanitize=address")
-    target_link_libraries(familyline-common PUBLIC "-fsanitize=address")
-    target_compile_options(familyline-common PUBLIC "-fno-omit-frame-pointer")
-    target_link_libraries(familyline-common PUBLIC "-fno-omit-frame-pointer")
-  endif()
-endif()
+target_include_directories(familyline-common PUBLIC "${CMAKE_SOURCE_DIR}/src/include"
+   "${CMAKE_SOURCE_DIR}/generated")
+fill_build_information(familyline-common)
 
-
-if (FLINE_DO_CHECK_UBSAN)
-  if (WIN32)
-    message("No support for windows + undefined behavior sanitizer yet")
-  else() 
-    target_compile_options(familyline-common PUBLIC "-fsanitize=undefined")
-    target_link_libraries(familyline-common PUBLIC "-fsanitize=undefined")
-  endif()
-endif()
-
-
-target_include_directories(familyline-common PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
-target_compile_features(familyline-common PRIVATE cxx_std_20)
-
-# Retrieve commit number (useful when getting logs from git clones)
-execute_process(
-  COMMAND git log -1 --format=%h
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE COMMIT_HASH OUTPUT_STRIP_TRAILING_WHITESPACE )
-
-# Retrieve the user who compiled
-execute_process(COMMAND whoami OUTPUT_VARIABLE USERNAME
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-target_compile_definitions(familyline-common PUBLIC VERSION="${PROJECT_VERSION}"
-  COMMIT="${COMMIT_HASH}" USERNAME="${USERNAME}")
