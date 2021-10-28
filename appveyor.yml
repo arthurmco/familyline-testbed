@@ -12,7 +12,9 @@ install:
 before_build:
   - git submodule init
   - git submodule update
-  - cmake -G "Visual Studio 16 2019" -A win32 -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DFLATBUFFERS_FLATC_EXECUTABLE=c:/tools/vcpkg/installed/x86-windows/tools/flatbuffers/flatc.exe .
+  - mkdir build
+  - cd build
+  - cmake -G "Visual Studio 16 2019" -A win32 -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DFLATBUFFERS_FLATC_EXECUTABLE=c:/tools/vcpkg/installed/x86-windows/tools/flatbuffers/flatc.exe ..
 
 build:
   project: $(APPVEYOR_BUILD_FOLDER)\$(APPVEYOR_PROJECT_NAME).sln
