@@ -2,6 +2,7 @@
 #include <common/logic/pathfinder.hpp>
 #include <glm/geometric.hpp>
 #include <thread>
+#include <array>
 
 using namespace familyline::logic;
 

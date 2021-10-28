@@ -81,7 +81,7 @@ void SceneManager::remove(scene_object_handle_t meshHandle)
     }
     
     log->write(
-        "scene-renderer", LogType::Debug, "removed scene object {} with ID {:x}",
+        "scene-renderer", LogType::Debug, "removed scene object {} with ID {:08x}",
         iter->object->getName(), meshHandle);
 
     objects_.erase(iter);
@@ -90,7 +90,7 @@ void SceneManager::remove(scene_object_handle_t meshHandle)
 int SceneManager::add(std::shared_ptr<SceneObjectBase> so)
 {
     auto& log = LoggerService::getLogger();
-    int id    = (uintptr_t)so.get();
+    uint64_t id    = (uintptr_t)so.get();
 
     auto vdata    = so->getVertexData();
     auto vinfo    = so->getVertexInfo();

@@ -56,7 +56,7 @@ PathHandle ObjectPathManager::startPathing(GameObject& o, glm::vec2 dest)
     if (existingref) {
         l->write(
             "object-path-manager", LogType::Info,
-            "found an existing reference to '%s' (%d) in the pathing list", o.getName().c_str(),
+            "found an existing reference to '%{}' ({}) in the pathing list", o.getName().c_str(),
             o.getID());
         existingref->status = PathStatus::Repathing;
         existingref->start  = existingref->position() ? *existingref->position()
@@ -69,7 +69,7 @@ PathHandle ObjectPathManager::startPathing(GameObject& o, glm::vec2 dest)
         auto pathref = PathRef(o, t_, dest);
         l->write(
             "object-path-manager", LogType::Info,
-            "adding reference to '%s' (%d) in the pathing list", o.getName().c_str(), o.getID());
+            "adding reference to '{}' ({}) in the pathing list", o.getName().c_str(), o.getID());
         operations_.push_back(std::move(pathref));
         return pathref.handleval();
     }

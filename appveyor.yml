@@ -17,8 +17,8 @@ before_build:
   - cmake -G "Visual Studio 16 2019" -A win32 -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -DFLATBUFFERS_FLATC_EXECUTABLE=c:/tools/vcpkg/installed/x86-windows/tools/flatbuffers/flatc.exe ..
 
 build:
-  project: $(APPVEYOR_BUILD_FOLDER)\$(APPVEYOR_PROJECT_NAME).sln
+  project: $(APPVEYOR_BUILD_FOLDER)\build\$(APPVEYOR_PROJECT_NAME).sln
   verbosity: minimal
 artifacts:
-  - path: Debug\familyline.exe
+  - path: build\Debug\familyline.exe
     name: familyline.exe

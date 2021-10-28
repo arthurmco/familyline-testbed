@@ -25,6 +25,13 @@ else()
   set(FLINE_USE_VCPKG OFF)
 endif()
 
+if (WIN32)
+  set(FLINE_USE_VCPKG ON)
+else()
+  set(FLINE_USE_VCPKG OFF)
+endif()
+
+
 # Add our cmake directory, where we have custom Find*** scripts for cmake
 # to find some of our dependencies.
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" )

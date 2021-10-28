@@ -65,7 +65,8 @@ tl::expected<TextureHandle, ImageError> TextureManager::addTexture(
  */
 tl::expected<TextureHandle, ImageError> TextureManager::loadTexture(std::string_view filename)
 {
-    return environ_->loadTextureFromFile(filename).and_then([this, &filename](auto &&texture) {
+    // We tell the type explicitely because MSVC cannot tell it, for some reason...
+    return environ_->loadTextureFromFile(filename).and_then([this, &filename](std::unique_ptr<Texture>&& texture) {
         return this->addTexture(filename, std::move(texture));
     });
 }
@@ -134,7 +135,7 @@ tl::expected<TextureHandle, ImageError> TextureManager::loadTexture(
     std::span<uint8_t> data, size_t width, size_t height, TextureFormat format)
 {
     return environ_->loadTextureFromMemory(data, width, height, format)
-        .and_then([this, width, height, format, &data](auto &&texture) {
+        .and_then([this, width, height, format, &data](std::unique_ptr<Texture>&& texture) {
             /// TODO: Use fmt::format()
             /// TODO: take a checksum (a crc32/crc64 is ok) from that file
 
