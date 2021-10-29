@@ -108,7 +108,11 @@ else()
   
   
   target_link_libraries(familyline-client PUBLIC fmt::fmt)
-  target_link_libraries(familyline-client PUBLIC SDL2::SDL2 SDL2::SDL2main ${SDL2_LIBRARIES} "-lSDL2_image")
+  if (DEFINED SDL2::SDL2)
+    target_link_libraries(familyline-client PUBLIC SDL2::SDL2 SDL2::SDL2main "-lSDL2_image")
+  else()
+    target_link_libraries(familyline-client PUBLIC ${SDL2_LIBRARIES} "-lSDL2_image")
+  endif()
   target_link_libraries(familyline-client PUBLIC GLEW::GLEW)
   target_link_libraries(familyline-client PUBLIC OpenGL::OpenGL)
   target_link_libraries(familyline-client PUBLIC ${IL_LIBRARIES})

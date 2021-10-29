@@ -172,7 +172,7 @@ public:
     
 private:
 
-    tl::expected<TextureHandle, ImageError> addTexture(std::string_view filename, std::unique_ptr<Texture> texture);
+    tl::expected<TextureHandle, ImageError> addTexture(std::string_view filename, std::unique_ptr<Texture>&& texture);
     
     std::unique_ptr<TextureEnvironment> environ_;
 
