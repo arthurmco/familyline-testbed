@@ -5,8 +5,8 @@
 </p>
 
 <p align="center">
-<a href="https://travis-ci.org/arthurmco/familyline" title="travis badge">
-  <img src="https://api.travis-ci.org/arthurmco/familyline.svg?branch=master" />
+<a href="https://github.com/arthurmco/familyline/actions/workflows/run-test.yml" title="test run">
+  <img src="https://github.com/arthurmco/familyline/actions/workflows/run-test.yml/badge.svg" />
 </a>
 <a
 href="https://ci.appveyor.com/project/arthurmco/familyline/branch/master">
