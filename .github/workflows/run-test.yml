@@ -17,8 +17,7 @@ jobs:
     strategy:
       matrix:
         compiler: ['g++-10', 'clang++-11']
-        asan: ['no-asan', 'asan']
-        ubsan: ['no-ubsan', 'ubsan']
+        sanitizer: ['none', 'asan', 'ubsan']
     
     steps:
     - uses: actions/checkout@v2
@@ -34,14 +33,14 @@ jobs:
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: |        
-        if [${{matrix.asan}} == "asan"]
+        if [${{matrix.sanitizer}} == "asan"]
         then
             ASAN_OPTIONS="-DFLINE_DO_CHECK_ASAN=on"
         else
             ASAN_OPTIONS="-DFLINE_DO_CHECK_ASAN=off"
         fi
 
-        if [${{matrix.ubsan}} == "ubsan"]
+        if [${{matrix.sanitizer}} == "ubsan"]
         then
             UBSAN_OPTIONS="-DFLINE_DO_CHECK_UBSAN=on"
         else
