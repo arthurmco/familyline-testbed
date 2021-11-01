@@ -17,8 +17,8 @@ jobs:
     strategy:
       matrix:
         compiler: ['g++-10']
-        asan: ['off', 'on']
-        ubsan: ['off', 'on']
+        asan: ['no-asan', 'asan']
+        ubsan: ['no-ubsan', 'ubsan']
     
     steps:
     - uses: actions/checkout@v2
@@ -26,27 +26,27 @@ jobs:
     - name: Download dependencies
       run: |
          sudo apt -y update
-         sudo apt -y install g++-10 clang-11 libglm-dev libglew-dev libsdl2-2.0-0 libsdl2-dev libsdl2-image-2.0-0 libfmt-dev libsdl2-image-dev libdevil1c2 libdevil-dev cmake make libcairo2 libcairo2-dev libyaml-0-2 libyaml-dev libpango-1.0-0 libpango1.0-dev libpangocairo-1.0-0 libflatbuffers-dev libflatbuffers1 nlohmann-json3-dev flatbuffers-compiler-dev flatbuffers-compiler libcurlpp-dev libexpected-dev
+         sudo apt -y install g++-10 clang-11 libglm-dev libglew-dev libsdl2-2.0-0 libsdl2-dev libsdl2-image-2.0-0 libfmt-dev libsdl2-image-dev libdevil1c2 libdevil-dev cmake make libcairo2 libcairo2-dev libyaml-0-2 libyaml-dev libpango-1.0-0 libpango1.0-dev libpangocairo-1.0-0 libflatbuffers-dev libflatbuffers1 nlohmann-json3-dev flatbuffers-compiler-dev flatbuffers-compiler libcurlpp-dev libexpected-dev libcurl4-openssl-dev libcurl4
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: |        
-        if [${{matrix.asan}} == "on"]
+        if [${{matrix.asan}} == "asan"]
         then
             ASAN_OPTIONS="-DFLINE_DO_CHECK_ASAN=on"
         else
             ASAN_OPTIONS="-DFLINE_DO_CHECK_ASAN=off"
         fi
 
-        if [${{matrix.ubsan}} == "on"]
+        if [${{matrix.ubsan}} == "ubsan"]
         then
             UBSAN_OPTIONS="-DFLINE_DO_CHECK_UBSAN=on"
         else
             UBSAN_OPTIONS="-DFLINE_DO_CHECK_UBSAN=off"
         fi
         
-        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} ${ASAN_OPTIONS} ${UBSAN_OPTIONS} -DFLATC_TARGET="" -DFLATBUFFERS_FLATC_EXECUTABLE="/usr/bin/flatc";
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} ${ASAN_OPTIONS} ${UBSAN_OPTIONS} -DFLATC_TARGET="" -DCURL_LIBRARY=libcurl -DFLATBUFFERS_FLATC_EXECUTABLE="/usr/bin/flatc";
 
     - name: Build
       # Build your program with the given configuration
