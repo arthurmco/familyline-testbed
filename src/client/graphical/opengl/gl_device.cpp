@@ -95,9 +95,10 @@ ShaderProgram* GLDevice::createShaderProgram(
 
 std::unique_ptr<TextureEnvironment> GLDevice::createTextureEnv()
 {
-    auto glenv = std::make_unique<GLTextureEnvironment>();
+    /// For some reason MSVC does not convert those unique_ptrs
+    GLTextureEnvironment* glenv = new GLTextureEnvironment{};
     glenv->initialize();
-    return glenv;
+    return std::unique_ptr<TextureEnvironment>((TextureEnvironment*)glenv);
 }
     
 

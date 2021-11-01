@@ -207,7 +207,7 @@ int start_networked_game(
 
     LoopRunner lr;
 
-    watchdog = 0;
+    watchdog   = 0;
     int frames = 0;
 
     auto createMultiplayerSession_fn = [&](logic::Terrain& map, auto& local_player_info) {
@@ -272,7 +272,7 @@ int start_networked_game(
     watchdog = 0;
 
     lr.load([&]() {
-        watchdog = 0;        
+        watchdog = 0;
         return g->runLoop();
     });
     run_game_loop(lr, frames);
@@ -672,7 +672,7 @@ Game* start_game(
         std::filesystem::path recordpath(confdata.defaultInputRecordDir);
         recordpath.make_preferred() /= recordfilename;
 
-        log->write("game", LogType::Info, "\trecord destination: {}", recordpath.c_str());
+        log->write("game", LogType::Info, "\trecord destination: {}", recordpath.string());
 
         if (!ir->createFile(recordpath.string(), of)) {
             log->write("game", LogType::Error, "\tinput record file could not be created");
@@ -681,9 +681,8 @@ Game* start_game(
         }
     }
 
-    if (irepr) {        
-        log->write(
-            "game", LogType::Info, "Replaying inputs from file {}", sgai.inputFile);
+    if (irepr) {
+        log->write("game", LogType::Info, "Replaying inputs from file {}", sgai.inputFile);
 
         irepr->reset();
 
@@ -856,9 +855,9 @@ int main(int argc, char const* argv[])
         InputService::setInputManager(std::make_unique<InputManager>(*ipr.get()));
         auto& ima = InputService::getInputManager();
 
-        GFXService::createTextureManager(std::make_unique<TextureManager>(device->createTextureEnv()));
+        GFXService::createTextureManager(
+            std::make_unique<TextureManager>(device->createTextureEnv()));
 
-        
         //        InputManager::GetInstance()->Initialize();
         win = device->createWindow(pi.width, pi.height);
 
@@ -886,11 +885,10 @@ int main(int argc, char const* argv[])
         // guir->initShaders(win);
 
         auto& texman = GFXService::getTextureManager();
-        
+
         /* If we have a networked game ready, don't even show the main menu. */
         auto [texw, texh] = texman->getTextureMaxSize();
-        log->write(
-            "texture", LogType::Info, "maximum tex size: {} x {}", texw, texh);
+        log->write("texture", LogType::Info, "maximum tex size: {} x {}", texw, texh);
 
         if (pi.mapFile || pi.inputFile) {
             int frames = 0;
