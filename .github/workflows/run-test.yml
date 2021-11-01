@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        compiler: ['g++-10']
+        compiler: ['g++-10', 'clang++-11']
         asan: ['no-asan', 'asan']
         ubsan: ['no-ubsan', 'ubsan']
     

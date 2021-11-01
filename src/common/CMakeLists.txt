@@ -53,6 +53,7 @@ find_package(ZLIB REQUIRED)
 find_package(tl-expected 1 CONFIG REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(FlatBuffers REQUIRED)
+find_package(SDL2 CONFIG)
 
 if (FLINE_USE_VCPKG)	
   include(${CMAKE_TOOLCHAIN_FILE})
