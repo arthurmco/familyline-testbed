@@ -62,10 +62,13 @@ struct TextureAtlasLoad {
 class TextureManager
 {
 public:
-    explicit TextureManager(std::unique_ptr<TextureEnvironment> environ)
-        : environ_(std::move(environ))
-    {
-    }
+    explicit TextureManager(std::unique_ptr<TextureEnvironment> environment)
+        : environ_(std::move(environment))
+    {}
+
+
+    TextureManager(const TextureManager&) = delete;
+    TextureManager(TextureManager&) = delete;
 
     /**
      * Load a texture from a file.
@@ -84,8 +87,8 @@ public:
      * Since an error in one image usually means an error in all images, we return a single error,
      * not a list of errors.
      */
-    tl::expected<std::vector<TextureHandle>, ImageError> loadTextureAtlas(std::string_view filename,
-                                                                          std::vector<TextureAtlasLoad> atlasinfo);    
+    tl::expected<std::vector<TextureHandle>, ImageError> loadTextureAtlas(
+        std::string_view filename, std::vector<TextureAtlasLoad> atlasinfo);
 
     /**
      * Load a texture from memory.
@@ -160,20 +163,21 @@ public:
      * Note that this is a temporary API, because we will register everything in their
      * asset manager.
      */
-    void registerTexture(std::string key, TextureHandle val) { storage_[key] = val;  }
+    void registerTexture(std::string key, TextureHandle val) { storage_[key] = val; }
 
-    std::optional<TextureHandle> getFromRegistry(std::string key) {
+    std::optional<TextureHandle> getFromRegistry(std::string key)
+    {
         if (!storage_.contains(key)) {
             return std::nullopt;
         } else {
             return std::make_optional<TextureHandle>(storage_[key]);
         }
     }
-    
-private:
 
-    tl::expected<TextureHandle, ImageError> addTexture(std::string_view filename, std::unique_ptr<Texture>&& texture);
-    
+private:
+    tl::expected<TextureHandle, ImageError> addTexture(
+        std::string_view filename, std::unique_ptr<Texture> texture);
+
     std::unique_ptr<TextureEnvironment> environ_;
 
     uint64_t hashFilename(std::string_view);

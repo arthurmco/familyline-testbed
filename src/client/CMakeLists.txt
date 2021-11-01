@@ -76,11 +76,17 @@ find_package(nlohmann_json REQUIRED)
 find_package(Yaml REQUIRED)
 find_package(OpenGL REQUIRED)
 
+target_link_libraries(familyline-client PUBLIC GLEW::GLEW)
+target_link_libraries(familyline-client PUBLIC ${OPENGL_LIBRARIES})
+
 if (FLINE_USE_VCPKG)	
   include(${CMAKE_TOOLCHAIN_FILE})
   find_library(PANGO_LIB pango-1.0 REQUIRED)
   find_library(PANGOCAIRO_LIB pangocairo-1.0)
   find_library(GOBJECT_LIB gobject-2.0)
+  find_library(CAIRO_LIBRARY cairo REQUIRED)
+  find_package(sdl2-image CONFIG REQUIRED)
+
   find_path(PANGO_INCLUDE NAMES pango/pango.h REQUIRED PATH_SUFFIXES "pango-1.0")
   find_path(HB_INCLUDE NAMES hb.h REQUIRED PATH_SUFFIXES "harfbuzz")
   find_path(PANGOCAIRO_INCLUDE_DIR NAMES "pango/pangocairo.h" REQUIRED PATH_SUFFIXES "pango-1.0")
@@ -89,14 +95,19 @@ if (FLINE_USE_VCPKG)
   find_path(GLIB_CONFIG_INCLUDES NAMES glibconfig.h REQUIRED 
     PATH_SUFFIXES "lib/glib-2.0/include")
   find_path(CAIRO_INCLUDE_DIRS cairo.h REQUIRED PATH_SUFFIXES "cairo")
-
   target_link_libraries(familyline-client PUBLIC ${PANGO_LIB} ${PANGOCAIRO_LIB} ${GOBJECT_LIB}
-    ${CAIRO_INCLUDE} ${YAML_LIBRARIES})
+    ${CAIRO_LIBRARY} ${YAML_LIBRARIES})
+
+  target_link_libraries(familyline-client PUBLIC SDL2::SDL2 SDL2::SDL2main SDL2::SDL2_image)
+
   target_include_directories(familyline-client PUBLIC 
     ${GLIB_INCLUDES} ${HB_INCLUDE} ${GLIB_CONFIG_INCLUDES} ${PANGO_INCLUDE} 
     ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} 
     ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR} ${PANGOCAIRO_INCLUDE_DIR}
     ${yaml_INCLUDE_DIR})
+    
+  target_link_libraries(familyline-client PUBLIC ${IL_LIBRARIES})
+  target_link_libraries(familyline-client PUBLIC ${ILU_LIBRARIES})
 
 else()
   find_package(PkgConfig REQUIRED)
@@ -106,15 +117,15 @@ else()
   pkg_search_module(PANGOCAIRO REQUIRED pangocairo) # finds pango-cairo
   pkg_search_module(GLM REQUIRED glm) # finds glm
   
-  
-  target_link_libraries(familyline-client PUBLIC fmt::fmt)
   if (DEFINED SDL2::SDL2)
     target_link_libraries(familyline-client PUBLIC SDL2::SDL2 SDL2::SDL2main "-lSDL2_image")
   else()
     target_link_libraries(familyline-client PUBLIC ${SDL2_LIBRARIES} "-lSDL2_image")
   endif()
+  
+  target_link_libraries(familyline-client PUBLIC fmt::fmt)
+  
   target_link_libraries(familyline-client PUBLIC GLEW::GLEW)
-  target_link_libraries(familyline-client PUBLIC OpenGL::OpenGL)
   target_link_libraries(familyline-client PUBLIC ${IL_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${ILU_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${CAIRO_LINK_LIBRARIES})
