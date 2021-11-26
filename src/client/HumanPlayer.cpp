@@ -318,11 +318,4 @@ void HumanPlayer::generateInput()
  */
 bool HumanPlayer::exitRequested() { return exit_game; }
 
-/*
-bool HumanPlayer::HasUpdatedObject()
-{
-    return _updated;
-}
-*/
-
 HumanPlayer::~HumanPlayer() {}

@@ -1,12 +1,10 @@
+#pragma once
 /***
     Definitions for human player
 
     Copyright (C) 2016 Arthur M
 
 ***/
-
-#ifndef HUMAN_PLAYER
-#define HUMAN_PLAYER
 
 #include <client/graphical/camera.hpp>
 #include <client/graphical/terrain_renderer.hpp>
@@ -19,6 +17,7 @@
 //#include "graphical/GUIActionManager.hpp>
 #include <client/graphical/object_renderer.hpp>
 #include <client/input/InputPicker.hpp>
+#include <client/input/command_table.hpp>
 #include <client/input/input_manager.hpp>
 #include <client/input/input_service.hpp>
 #include <client/preview_renderer.hpp>
@@ -69,10 +68,8 @@ public:
     void setCamera(familyline::graphics::Camera*);
     void setPreviewer(familyline::PreviewRenderer* pr) { pr_ = pr; }
     void SetPicker(familyline::input::InputPicker* ip);
-    void SetInputManager(familyline::input::InputManager*) {};
+    void SetInputManager(familyline::input::InputManager*){};
     //	void SetGameActionManager(familyline::logic::GameActionManager* );
 
     virtual ~HumanPlayer();
 };
-
-#endif /* end of include guard: HUMAN_PLAYER */

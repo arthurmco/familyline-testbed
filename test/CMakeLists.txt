@@ -31,6 +31,7 @@ set( SRC_TEST_FILES
   "${CMAKE_SOURCE_DIR}/test/test_game.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_input_recorder.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_input_reproducer.cpp"
+  "${CMAKE_SOURCE_DIR}/test/test_humanplayer.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_model_opener.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_object_attack.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_object_factory.cpp"
@@ -46,6 +47,7 @@ set( SRC_TEST_FILES
   "${CMAKE_SOURCE_DIR}/test/utils.cpp"
   "${CMAKE_SOURCE_DIR}/test/utils/test_device.cpp"
   "${CMAKE_SOURCE_DIR}/test/utils/test_texenv.cpp"
+  "${CMAKE_SOURCE_DIR}/test/utils/test_inputprocessor.cpp"
   )
 
 file( GLOB SRC_UTIL_FILES "${CMAKE_SOURCE_DIR}/test/utils/test_renderer.cpp" )

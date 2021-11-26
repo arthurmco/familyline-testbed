@@ -7,6 +7,7 @@
 
 #include "client/graphical/gfx_service.hpp"
 #include "utils.hpp"
+#include "utils/test_inputprocessor.hpp"
 #include "utils/test_framebuffer.hpp"
 #include "utils/test_gui_manager.hpp"
 #include "utils/test_renderer.hpp"
@@ -21,7 +22,7 @@ using namespace familyline;
 
 TEST(GameTest, TestIfGameStartsAndRuns)
 {    
-    auto ipr = std::make_unique<InputProcessor>();
+    auto ipr = std::make_unique<TestInputProcessor>();
     InputService::setInputManager(std::make_unique<InputManager>(*ipr.get()));
     
     LogicService::getActionQueue()->clearEvents();

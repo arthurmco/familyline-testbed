@@ -2,6 +2,7 @@ familyline
 familyline-server
 familyline-tests
 
+.cache/
 
 *.o
 *.swp

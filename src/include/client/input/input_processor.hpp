@@ -14,7 +14,7 @@
 #include <thread>
 #include <string>
 
-#include "input_actions.hpp"
+#include <client/input/input_actions.hpp>
 
 namespace familyline::input
 {
@@ -24,6 +24,8 @@ namespace familyline::input
  * Usually will not generate events that have something to do with game
  * objects, like BuildAction or ObjectClickAction, but you can enable
  * it when the game starts
+ *
+ * We virtualize the public functions so we can mock them on tests
  */
 class InputProcessor
 {
@@ -49,12 +51,12 @@ public:
      * We might not be able to process it, but the system will never
      * treat this game as non-responding.
      */
-    void startInputReceiver();
+    virtual void startInputReceiver();
 
     /**
      * Stops the input receiver thread
      */
-    void stopInputReceiver();
+    virtual void stopInputReceiver();
 
     /**
      * Get the next action
@@ -62,7 +64,7 @@ public:
      * Return true if we have a next action, false if the action queue is
      * empty
      */
-    bool pollAction(HumanInputAction& a);
+    virtual bool pollAction(HumanInputAction& a);
 
     /**
      * Start receiving text events
@@ -70,7 +72,7 @@ public:
      * Call this if, for example, you are inserting text in a
      * textbox
      */
-    void enableTextEvents();
+    virtual void enableTextEvents();
 
     /**
      * Stop receiving text events
@@ -78,11 +80,11 @@ public:
      * Call this if, for example, you moved focus from a combobox to
      * another control
      */
-    void disableTextEvents();
+    virtual void disableTextEvents();
 
-    std::string getClipboardText();
+    virtual std::string getClipboardText();
     
-    ~InputProcessor() { this->stopInputReceiver(); }
+    virtual ~InputProcessor() { this->stopInputReceiver(); }
 };
 
 }  // namespace familyline::input

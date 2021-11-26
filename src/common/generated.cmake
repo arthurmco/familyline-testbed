@@ -20,4 +20,3 @@ build_flatbuffers("${CMAKE_SOURCE_DIR}/src/common/network.fbs" ""
 build_flatbuffers("${CMAKE_SOURCE_DIR}/src/common/input.fbs" ""
   input-flatbuffer ""
   "${CMAKE_SOURCE_DIR}/generated" "" "")
-

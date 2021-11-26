@@ -2,6 +2,11 @@
 # that is shared between client and server.
 include("${CMAKE_SOURCE_DIR}/cmake/functions.cmake")
 
+execute_process(COMMAND python3 "${CMAKE_SOURCE_DIR}/tools/gen_keyset.py"
+  OUTPUT_VARIABLE keyset-out)
+file(WRITE "${CMAKE_SOURCE_DIR}/generated/keyset_gen.h" "${keyset-out}")
+
+
 add_library(
   familyline-client
   "params.cpp"
@@ -54,6 +59,7 @@ add_library(
   "graphical/opengl/gles_utils.cpp"
   "HumanPlayer.cpp"
   "input/Cursor.cpp"
+  "input/command_table.cpp"
   "input/input_processor.cpp"
   "input/input_manager.cpp"
   "input/InputPicker.cpp"

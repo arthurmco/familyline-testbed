@@ -167,7 +167,7 @@ std::string InputProcessor::getClipboardText()
 
 /**
  * Last X and Y positions, used for sending mouse events for events
- * that need them but SDL does not send a mouse event
+ * that need them, but SDL does not send mouse coordinates.
  */
 int lx = -1, ly = -1;
 

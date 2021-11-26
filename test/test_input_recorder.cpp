@@ -10,6 +10,7 @@
 #include "utils.hpp"
 #include "utils/test_device.hpp"
 #include "utils/test_framebuffer.hpp"
+#include "utils/test_inputprocessor.hpp"
 #include "utils/test_gui_manager.hpp"
 #include "utils/test_renderer.hpp"
 #include "utils/test_window.hpp"
@@ -21,7 +22,7 @@ using namespace familyline;
 
 TEST(InputRecorderTest, TestIfInputRecords)
 {
-    auto ipr = std::make_unique<InputProcessor>();
+    auto ipr = std::make_unique<TestInputProcessor>();
     InputService::setInputManager(std::make_unique<InputManager>(*ipr));
 
     LogicService::getActionQueue()->clearEvents();

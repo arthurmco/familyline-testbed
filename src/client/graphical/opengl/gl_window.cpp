@@ -130,7 +130,7 @@ static void enable_gl_debug()
         format_to(out, "[#{:x}] {:s} {:s}: {:s}\0\0", id, sseverity, stype, smsg);
 
         delete[] smsg;
-        LoggerService::getLogger()->write(ssource, ltype, "%s", fmt::to_string(out).data());
+        LoggerService::getLogger()->write(ssource, ltype, "{}", fmt::to_string(out).data());
     };
 
     #ifdef USE_GLES
