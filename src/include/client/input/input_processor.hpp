@@ -39,6 +39,11 @@ private:
 
     void enqueueEvent(const SDL_Event& e, int& lastX, int& lastY);
 
+    // Did the ctrl, shift or alt keys were pressed by themselves?
+    // This is important to know so we can register inputs that combine
+    // the mouse and dead keys, like ctrl+scroll.
+    bool lastCtrl_ = false, lastShift_ = false, lastAlt_ = false;
+    
 public:
     //        InputProcessor(InputPicker& ip)
     //            : _ip(ip)

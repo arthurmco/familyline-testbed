@@ -30,6 +30,7 @@ struct ClickAction {
     int buttonCode;
     int clickCount;
     bool isPressed;
+    uint16_t keyModifiers;
 };
 
 struct MouseAction {
@@ -46,6 +47,7 @@ struct KeyAction {
 struct WheelAction {
     int screenX, screenY;
     int scrollX, scrollY;
+    uint16_t keyModifiers;
 };
 
 /// Text input event.
