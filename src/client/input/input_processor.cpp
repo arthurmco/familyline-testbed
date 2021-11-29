@@ -32,9 +32,10 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
                              .buttonCode   = e.button.button,
                              .clickCount   = e.button.clicks,
                              .isPressed    = isPressed,
-                             .keyModifiers = (lastCtrl_ ? KMOD_CTRL : KMOD_NONE) |
-                                             (lastShift_ ? KMOD_SHIFT : KMOD_NONE) |
-                                             (lastAlt_ ? KMOD_ALT : KMOD_NONE)}});
+                             .keyModifiers = (uint16_t) (
+                                 (lastCtrl_ ? KMOD_CTRL : KMOD_NONE) |
+                                 (lastShift_ ? KMOD_SHIFT : KMOD_NONE) |
+                                 (lastAlt_ ? KMOD_ALT : KMOD_NONE))}});
         } break;
         case SDL_MOUSEWHEEL: {
             bool dirNormal = e.wheel.direction == SDL_MOUSEWHEEL_NORMAL;
@@ -44,9 +45,10 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
                              .screenY      = lastY,
                              .scrollX      = (dirNormal) ? e.wheel.x : -e.wheel.x,
                              .scrollY      = (dirNormal) ? e.wheel.y : -e.wheel.y,
-                             .keyModifiers = (lastCtrl_ ? KMOD_CTRL : KMOD_NONE) |
-                                             (lastShift_ ? KMOD_SHIFT : KMOD_NONE) |
-                                             (lastAlt_ ? KMOD_ALT : KMOD_NONE)}});
+                             .keyModifiers = (uint16_t) (
+                                 (lastCtrl_ ? KMOD_CTRL : KMOD_NONE) |
+                                 (lastShift_ ? KMOD_SHIFT : KMOD_NONE) |
+                                 (lastAlt_ ? KMOD_ALT : KMOD_NONE))}});
         } break;
         case SDL_KEYDOWN:
         case SDL_KEYUP: {
