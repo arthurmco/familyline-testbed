@@ -72,9 +72,10 @@ void DummyPlayer::generateInput()
     }
 }
 
-
+#ifndef WIN32
 namespace glm {
     std::ostream& operator<<(std::ostream& stream, glm::vec3 const& v) {
-        return stream << "( " << v.x << ", " << v.y << ", " << v.z << " )";
+        return stream << fmt::format("({:.3f}, {:.3f}, {:.3f})", v.x, v.y, v.z).c_str();
     }
 }
+#endif
