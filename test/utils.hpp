@@ -88,3 +88,8 @@ public:
 };
 
 
+namespace glm {
+    std::ostream& operator<<(std::ostream& stream, glm::vec3 const& v);
+}
+
+

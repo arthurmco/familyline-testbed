@@ -181,7 +181,6 @@ std::optional<PlayerCommand> CommandTable::actionToCommand(const HumanInputActio
         if (auto ikey = std::get_if<KeyAction>(&inputaction),
             akey      = std::get_if<KeyAction>(&action.type);
             ikey && akey) {
-            fprintf(stderr, "%04x %02x\n", akey->keycode, akey->modifiers);
             return (
                 ikey->keycode == akey->keycode &&
                 ikey->isRepeated == akey->isRepeated &&

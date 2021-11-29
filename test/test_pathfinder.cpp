@@ -18,9 +18,6 @@ namespace glm {
         return os << "(" << val.x << ", " << val.y << ")";
     }
 
-    std::ostream& operator<<(std::ostream& os, const vec3& val) {
-        return os << "(" << val.x << ", " << val.y << ", " << val.z << ")";
-    }
     
 }
 

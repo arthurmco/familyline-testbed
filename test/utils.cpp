@@ -71,3 +71,10 @@ void DummyPlayer::generateInput()
         this->pushAction(i);
     }
 }
+
+
+namespace glm {
+    std::ostream& operator<<(std::ostream& stream, glm::vec3 const& v) {
+        return stream << "( " << v.x << ", " << v.y << ", " << v.z << " )";
+    }
+}

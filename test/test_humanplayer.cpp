@@ -20,9 +20,7 @@ using namespace familyline::graphics;
 using namespace familyline::input;
 using namespace familyline;
 
-
-
-TEST(HumanPlayerTest, TestIfCommandTableIsOk)
+TEST(HumanPlayerTest, TestIfCameraMoveWorks)
 {
     CommandTable ct;
     ct.loadConfiguration({
@@ -32,102 +30,66 @@ TEST(HumanPlayerTest, TestIfCommandTableIsOk)
         {"<left>", "CameraMove, left"},
     });
 
-    ASSERT_EQ(4, ct.size());
+    PlayerSession session = {};
+    session.players       = std::make_unique<PlayerManager>();
+    session.colonies      = std::make_unique<ColonyManager>();
+
+    auto ipr = std::make_unique<TestInputProcessor>();
+    InputService::setInputManager(std::make_unique<InputManager>(*ipr));
+    LogicService::getActionQueue()->clearEvents();
+
+    TerrainFile tf;
+    tf.open(TESTS_DIR "/terrain_test.flte");
+
+    Terrain t{tf};
+
+    auto hp    = std::make_unique<HumanPlayer>(*session.players.get(), t, "Player", 1, ct, true);
+    auto id    = session.players->add(std::move(hp));
+    auto hpptr = (HumanPlayer*)*(session.players->get(id));
+    ObjectManager om;
+    ObjectLifecycleManager olm{om};
     
+    auto winW = 800, winH = 600;
+    glm::vec3 directionOffset = glm::vec3(6.0f, 36.0f, 6.0f);
+    glm::vec3 position        = glm::vec3(0, 0, 0);
+    float aspectRatio         = float(winW) / float(winH);
+
+    Camera c{position + directionOffset, aspectRatio, position};
+    hpptr->setCamera(&c);
+    hpptr->SetPicker(nullptr);
+
+    ipr->startInputReceiver();
+
     auto upcmd = HumanInputAction{
         .timestamp = 0,
         .type      = KeyAction{
-            .keycode    = SDLK_w,
+            .keycode    = SDLK_s,
             .keyname    = "",
             .isPressed  = true,
             .isRepeated = false,
             .modifiers  = 0}};
-    ASSERT_TRUE(ct.actionToCommand(upcmd).has_value());
-    ASSERT_EQ(
-        std::tuple(PlayerCommandType::CameraMove, "up"), ct.actionToCommand(upcmd).value());
+    ipr->pushAction(upcmd);
 
-    auto rightcmd = HumanInputAction{
-        .timestamp = 0,
-        .type      = KeyAction{
-            .keycode    = SDLK_RIGHT,
-            .keyname    = "",
-            .isPressed  = true,
-            .isRepeated = false,
-            .modifiers  = 0}};
-    ASSERT_TRUE(ct.actionToCommand(rightcmd).has_value());
-    ASSERT_EQ(
-        std::tuple(PlayerCommandType::CameraMove, "right"), ct.actionToCommand(rightcmd).value());
-}
+    GameContext gctx {
+        .om = &om,
+        .tick = 1,
+        .elapsed_seconds = 0.03,
+    };
 
-TEST(HumanPlayerTest, TestIfCommandTableCallsUnknownKey)
-{
-    CommandTable ct;
-    ct.loadConfiguration({
-        {"w", "CameraMove, up"},
-        {"<myegg>", "CameraMove, down"},
-        {"<right>", "CameraMove, right"},
-        {"<left>", "CameraMove, left"},
-    });
+    session.players->olm = &olm;
+    session.players->run(gctx);
+    InputService::getInputManager()->processEvents();
+    session.players->generateInput();
+    ASSERT_EQ(c.GetPosition(), position+directionOffset);
 
-    ASSERT_EQ(3, ct.size());
-    
-    auto upcmd = HumanInputAction{
-        .timestamp = 0,
-        .type      = KeyAction{
-            .keycode    = SDLK_w,
-            .keyname    = "",
-            .isPressed  = true,
-            .isRepeated = false,
-            .modifiers  = 0}};
-    ASSERT_TRUE(ct.actionToCommand(upcmd).has_value());
-    ASSERT_EQ(
-        std::tuple(PlayerCommandType::CameraMove, "up"), ct.actionToCommand(upcmd).value());
+    for (auto i = 0; i < session.players->tickDelta(); i++) {
+        gctx.tick++;
+        session.players->run(gctx);
+    }
 
-    auto rightcmd = HumanInputAction{
-        .timestamp = 0,
-        .type      = KeyAction{
-            .keycode    = SDLK_DOWN,
-            .keyname    = "",
-            .isPressed  = true,
-            .isRepeated = false,
-            .modifiers  = 0}};
-    ASSERT_FALSE(ct.actionToCommand(rightcmd).has_value());
-}
+    glm::vec3 nposition = glm::vec3(0, 0, 0.1);
+    ASSERT_EQ(c.GetPosition(), nposition+directionOffset);
 
-TEST(HumanPlayerTest, TestIfMouseInputWorks)
-{
-    CommandTable ct;
-    ct.loadConfiguration({
-        {"w", "CameraMove, up"},
-        {"C-<mouse-2>", "CameraMove, down"},
-        {"<right>", "CameraMove, right"},
-        {"<left>", "CameraMove, left"},
-    });
-
-    ASSERT_EQ(4, ct.size());
-    
-    auto upcmd = HumanInputAction{
-        .timestamp = 0,
-        .type      = KeyAction{
-            .keycode    = SDLK_w,
-            .keyname    = "",
-            .isPressed  = true,
-            .isRepeated = false,
-            .modifiers  = 0}};
-    ASSERT_TRUE(ct.actionToCommand(upcmd).has_value());
-    ASSERT_EQ(
-        std::tuple(PlayerCommandType::CameraMove, "up"), ct.actionToCommand(upcmd).value());
-
-    auto rightcmd = HumanInputAction{
-        .timestamp = 0,
-        .type      = ClickAction{
-            .screenX    = 0,
-            .screenY    = 0,
-            .buttonCode  = SDL_BUTTON_RIGHT,
-            .clickCount = 1,
-            .isPressed = true,
-            .keyModifiers  = KMOD_CTRL}};
-    ASSERT_TRUE(ct.actionToCommand(rightcmd).has_value());
-    ASSERT_EQ(
-        std::tuple(PlayerCommandType::CameraMove, "down"), ct.actionToCommand(rightcmd).value());
+    InputService::setInputManager(std::unique_ptr<InputManager>());
+    LogicService::getActionQueue()->clearEvents();
 }

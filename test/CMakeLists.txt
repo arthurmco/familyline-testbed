@@ -32,6 +32,7 @@ set( SRC_TEST_FILES
   "${CMAKE_SOURCE_DIR}/test/test_input_recorder.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_input_reproducer.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_humanplayer.cpp"
+  "${CMAKE_SOURCE_DIR}/test/test_command_table.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_model_opener.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_object_attack.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_object_factory.cpp"

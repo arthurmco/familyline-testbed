@@ -31,7 +31,6 @@ HumanPlayer::HumanPlayer(PlayerManager& pm, const Terrain& t, const char* name, 
             
             bool pressed = event.isPressed;
             auto [actiontype, actionparam] = *action;
-            fprintf(stderr, "\n\n%s\n", front ? "f+" : "f-");
             
             switch (actiontype) {
             case PlayerCommandType::CameraMove:
@@ -213,7 +212,7 @@ void HumanPlayer::generateInput()
         preview_building = false;        
     }
 
-    bool has_selection = !_ip->GetIntersectedObject().expired();
+    bool has_selection = _ip ? !_ip->GetIntersectedObject().expired() : false;
 
     if (build_something && mouse_click && can_control_) {
         // Something is queued to be built.
@@ -228,7 +227,7 @@ void HumanPlayer::generateInput()
 
         preview_building = false;        
         nextBuild_ = "";
-    } else if (has_selection && mouse_click) {
+    } else if (has_selection && mouse_click && _ip) {
         // Individual object selection, click-based
         // TODO: do multiple object selection, drag-based
         //       this can be started by adding a DragAction on input_actions.hpp
@@ -252,7 +251,7 @@ void HumanPlayer::generateInput()
         // Requested to move a selected object
         glm::vec2 to = _ip->GetGameProjectedPosition();
 
-        if (has_selection) {
+        if (has_selection && _ip) {
             // Requested to run the default action on the selected object
             // Can be harvest or attack.
             auto l = _ip->GetIntersectedObject().lock();
