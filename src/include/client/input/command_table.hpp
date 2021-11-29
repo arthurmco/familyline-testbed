@@ -18,7 +18,7 @@
 
 namespace familyline::input
 {
-    enum class PlayerCommandType { CameraMove, CameraZoom,
+    enum class PlayerCommandType { CameraMove, CameraRotate, CameraZoom,
         DebugCreateEntity,
         DebugDestroyEntity,
         DebugShowBoundingBox};

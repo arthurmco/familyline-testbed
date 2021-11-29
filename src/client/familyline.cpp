@@ -219,7 +219,8 @@ int start_networked_game(
         }
         auto hid = pm->add(
             std::unique_ptr<Player>(
-                new HumanPlayer{*pm.get(), map, local_player_info.name.c_str(), gps.id(), true}),
+                new HumanPlayer{*pm.get(), map, local_player_info.name.c_str(), gps.id(),
+                    *input::InputService::getCommandTable().get(), true}),
             false);
         local_player_info.id = hid;
         printf("\n%lx %lx\n", hid, gps.id());
@@ -637,7 +638,8 @@ Game* start_game(
             cm      = std::move(session.colonies);
 
             human_player_id = pm->add(std::unique_ptr<Player>(
-                new HumanPlayer{*pm.get(), map, player_name.c_str(), 0, false}));
+                new HumanPlayer{*pm.get(), map, player_name.c_str(), 0,
+                    *input::InputService::getCommandTable().get(), false}));
             auto* player    = *(pm->get(human_player_id));
             auto& alliance  = cm->createAlliance(std::string{player->getName()});
             auto& colony    = cm->createColony(
@@ -853,6 +855,27 @@ int main(int argc, char const* argv[])
 
         auto ipr = std::make_unique<InputProcessor>();
         InputService::setInputManager(std::make_unique<InputManager>(*ipr.get()));
+        InputService::setCommandTable(std::make_unique<CommandTable>());
+
+        {
+            auto& ct = input::InputService::getCommandTable();
+            ct->loadConfiguration({
+                    {"<up>", "CameraMove, up"},
+                    {"<down>", "CameraMove, down"},
+                    {"<right>", "CameraMove, right"},
+                    {"<left>", "CameraMove, left"},
+                    {"+", "CameraZoom, in"},
+                    {"-", "CameraZoom, out"},
+                    {"<kp-add>", "CameraZoom, in"},
+                    {"<kp-subtract>", "CameraZoom, out"},
+                    {"c", "DebugCreateEntity, tower"},
+                    {"e", "DebugCreateEntity, tent"},
+                    {"r", "DebugDestroyEntity"},
+                    {"b", "DebugShowBoundingBox"},
+                });
+
+        }
+        
         auto& ima = InputService::getInputManager();
 
         GFXService::createTextureManager(

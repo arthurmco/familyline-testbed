@@ -45,13 +45,35 @@ private:
     bool can_control_ = false;
 
     familyline::PreviewRenderer* pr_ = nullptr;
-    
+
+    bool front = false, back = false;
+    bool left = false, right = false;
+    bool rotate_left = false, rotate_right = false;
+    bool mouse_click = false;
+    bool exit_game   = false;
+
+    bool attack_set = false, attack_ready = false;
+
+    bool remove_object = false;
+
+    bool zoom_in          = false;
+    bool zoom_out         = false;
+    double zoom_factor    = 0;
+    bool zoom_mouse       = false;
+    bool build_something  = false;
+    bool preview_building = false;
+    bool build_tent = false, build_tower = false;
+
+    bool do_something = false;
+
+    const familyline::input::CommandTable& ctable_;
+
 public:
     bool renderBBs = false;
 
     HumanPlayer(
         familyline::logic::PlayerManager& pm, const familyline::logic::Terrain& t, const char* name,
-        uint64_t code, bool can_control_);
+        uint64_t code, const familyline::input::CommandTable& ctable,  bool can_control_);
 
     /**
      * Generate the input actions.

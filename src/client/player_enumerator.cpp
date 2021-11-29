@@ -4,6 +4,8 @@
 #include <common/logger.hpp>
 #include <common/logic/terrain.hpp>
 
+#include <client/input/input_service.hpp>
+
 using namespace familyline;
 using namespace familyline::logic;
 
@@ -61,6 +63,7 @@ public:
     }
 };
 
+
 std::unique_ptr<logic::PlayerManager> initPlayerManager(
     logic::Terrain& terrain, InitPlayerInfo& human_info)
 {
@@ -69,8 +72,10 @@ std::unique_ptr<logic::PlayerManager> initPlayerManager(
 
     auto pm = std::make_unique<PlayerManager>();
 
+    auto& ct = input::InputService::getCommandTable();
     auto hid = pm->add(
-        std::unique_ptr<Player>(new HumanPlayer{*pm.get(), terrain, human_info.name.c_str(), 0, true}));
+        std::unique_ptr<Player>(new HumanPlayer{*pm.get(), terrain, human_info.name.c_str(), 0,
+                *ct.get(), true}));
     pm->add(std::unique_ptr<Player>(new DummyPlayer{*pm.get(), terrain, "Dummy Player", 1}));
 
     human_info.id = hid;
@@ -109,7 +114,7 @@ std::unique_ptr<logic::ColonyManager> initColonyManager(
         int cg = (color >> 8) & 0xff;
         int cb = color & 0xff;
 
-        printf("\033[38;2;%d;%d;%dm %x => %s \033[0m", cr, cg, cb, id, name.c_str());
+        // printf("\033[38;2;%d;%d;%dm %x => %s \033[0m", cr, cg, cb, id, name.c_str());
     }
     puts("");
 

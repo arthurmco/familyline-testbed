@@ -11,30 +11,11 @@ using namespace familyline::input;
 
 #include <cstdio>
 
-bool front = false, back = false;
-bool left = false, right = false;
-bool rotate_left = false, rotate_right = false;
-bool mouse_click = false;
-bool exit_game   = false;
-
-bool attack_set = false, attack_ready = false;
-
-bool remove_object = false;
-
-bool zoom_in         = false;
-bool zoom_out        = false;
-double zoom_factor   = 0;
-bool zoom_mouse      = false;
-bool build_something = false;
-bool preview_building = false;
-bool build_tent = false, build_tower = false;
-
-bool do_something = false;
-
 
 HumanPlayer::HumanPlayer(PlayerManager& pm, const Terrain& t, const char* name, uint64_t code,
+                         const CommandTable& ctable,
                          bool can_control = true)
-    : Player(pm, t, name, code), can_control_(can_control)
+    : Player(pm, t, name, code), ctable_(ctable), can_control_(can_control)
 {
     /* Initialize input subsystems */
     srand((size_t)name * code);
@@ -43,87 +24,61 @@ HumanPlayer::HumanPlayer(PlayerManager& pm, const Terrain& t, const char* name, 
     _listener = [&](HumanInputAction hia) {
         if (std::holds_alternative<KeyAction>(hia.type)) {
             auto event = std::get<KeyAction>(hia.type);
+            auto action = ctable_.actionToCommand(hia);
 
-            switch (event.keycode) {
-                case SDLK_w:
-                    if (event.isPressed)
-                        front = true;
-                    else
-                        front = false;
-                    break;
-                case SDLK_s:
-                    if (event.isPressed)
-                        back = true;
-                    else
-                        back = false;
-                    break;
-                case SDLK_a:
-                    if (event.isPressed)
-                        left = true;
-                    else
-                        left = false;
-                    break;
-                case SDLK_d:
-                    if (event.isPressed)
-                        right = true;
-                    else
-                        right = false;
-                    break;
-                case SDLK_LEFT:
-                    if (event.isPressed)
-                        rotate_left = true;
-                    else
-                        rotate_left = false;
-                    break;
-                case SDLK_RIGHT:
-                    if (event.isPressed)
-                        rotate_right = true;
-                    else
-                        rotate_right = false;
-                    break;
+            if (!action)
+                return false;
+            
+            bool pressed = event.isPressed;
+            auto [actiontype, actionparam] = *action;
+            fprintf(stderr, "\n\n%s\n", front ? "f+" : "f-");
+            
+            switch (actiontype) {
+            case PlayerCommandType::CameraMove:
+                if (actionparam == "up")
+                    front = pressed;
+                else if (actionparam == "down")
+                    back = pressed;
+                else if (actionparam == "left")
+                    left = pressed;
+                else if (actionparam == "right")
+                    right = pressed;
 
-                case SDLK_c: {
-                    if (!event.isPressed) return false;
+                break;
+            case PlayerCommandType::CameraRotate:
+                if (actionparam == "left")
+                    rotate_left = pressed;
+                else if (actionparam == "right")
+                    rotate_right = pressed;
+                break;
+                
+            case PlayerCommandType::CameraZoom:
+                if (actionparam == "in")
+                    zoom_in = pressed;
+                else if (actionparam == "out")
+                    zoom_out = pressed;
+                
+                break;
 
-                    build_tent = true;
-                } break;
-                case SDLK_e: {
-                    if (!event.isPressed) return false;
+            case PlayerCommandType::DebugCreateEntity:
+                if (pressed) {
+                    if (actionparam == "tent")
+                        build_tent = true;
+                    else if (actionparam == "tower")
+                        build_tower = true;
+                    
+                }
+                break;
+            case PlayerCommandType::DebugDestroyEntity:
+                if (pressed) {
+                    remove_object = true;                    
+                }
+                break;
 
-                    build_tower = true;
-                } break;
-                case SDLK_r: {
-                    if (!event.isPressed) return false;
-
-                    remove_object = true;
-                } break;
-
-                case SDLK_b: {
-                    if (!event.isPressed) return false;
-
+            case PlayerCommandType::DebugShowBoundingBox:
+                if (pressed) {
                     this->renderBBs = !this->renderBBs;
-                } break;
-
-                    //            case SDLK_k:
-                    //                attack_set = true;
-                    //                break;
-
-                case SDLK_PLUS:
-                case SDLK_KP_PLUS:
-                    if (!event.isPressed)
-                        zoom_in = false;
-                    else
-                        zoom_in = true;
-
-                    break;
-
-                case SDLK_MINUS:
-                case SDLK_KP_MINUS:
-                    if (!event.isPressed)
-                        zoom_out = false;
-                    else
-                        zoom_out = true;
-                    break;
+                }
             }
             return true;
 
@@ -158,6 +113,7 @@ HumanPlayer::HumanPlayer(PlayerManager& pm, const Terrain& t, const char* name, 
         } else if (std::holds_alternative<WheelAction>(hia.type)) {
             auto event = std::get<WheelAction>(hia.type);
 
+            fprintf(stderr, "\n%d\n", event.scrollY);
             if (event.scrollY > 0) {
                 zoom_in     = true;
                 zoom_out    = false;
