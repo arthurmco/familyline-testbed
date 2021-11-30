@@ -16,7 +16,6 @@ add_library(
   "logic/colony.cpp"
   "logic/colony_manager.cpp"
   "logic/debug_drawer.cpp"
-  "logic/GameActionManager.cpp"
   "logic/game_event.cpp"
   "logic/game_object.cpp"
   "logic/input_recorder.cpp"

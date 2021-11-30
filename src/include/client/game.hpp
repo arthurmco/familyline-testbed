@@ -28,7 +28,6 @@
 #include <client/graphical/window.hpp>
 #include <client/preview_renderer.hpp>
 #include <common/logic/BuildQueue.hpp>
-#include <common/logic/GameActionManager.hpp>
 #include <common/logic/colony_manager.hpp>
 #include <common/logic/debug_drawer.hpp>
 #include <common/logic/input_recorder.hpp>
@@ -188,7 +187,6 @@ private:
     std::chrono::duration<double, std::milli> drawtime_;
 
     // todo: probably will be removed?
-    logic::GameActionManager gam;
     logic::GameContext gctx = {};
 
     ////////////////////// gfx

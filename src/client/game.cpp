@@ -395,7 +395,6 @@ void Game::runLogic()
 //    LogicService::getObjectListener()->updateObjects();
 
     /* Logic & graphical processing */
-    gam.ProcessListeners();
     // terr_rend->Update();
     om_->update();
 
