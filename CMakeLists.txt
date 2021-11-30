@@ -9,7 +9,7 @@ include(cmake/prelude.cmake)
 
 project(
   familyline
-  VERSION 0.2.2
+  VERSION 0.3.1
   DESCRIPTION "a RTS game where you follow the story of a fictional family throughout the ages"
   HOMEPAGE_URL "https://github.com/arthurmco/familyline"
   LANGUAGES CXX
