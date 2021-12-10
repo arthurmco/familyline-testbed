@@ -1,0 +1,41 @@
+body {
+    display: flex;
+    flex-direction: row-reverse;
+    margin: 20px;
+}
+
+div#postamble {
+    width: 25%;
+    max-width: 300px;
+    border-right: 1px solid #888;
+    margin-right: 15px;
+    position: sticky;
+}
+
+nav.sidebar {
+    padding-right: 5px;
+    margin-right: 45px;
+}
+
+nav.sidebar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+}
+
+nav.sidebar>ul>li {
+    padding-top: 5px;
+    margin-top: 5px;
+    border-radius: 10px;
+    background-color: #eee;
+}
+
+nav.sidebar ul ul {
+    margin-left: 10px;
+}
+
+
+div#content {
+    font-family: sans-serif;
+}
