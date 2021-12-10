@@ -1,0 +1,156 @@
+#+TITLE: Entity
+
+A game entity (called *object* by the engine) is anything the player can
+interact.
+
+Usually we mean the entirety of units, buildings and resource sources.
+
+For now, you will need to know C++ to add an entity, but, in the future, you
+will be able to use Scheme to add an entity. This guide will be updated when
+that day comes.
+
+* Requisites
+
+  For each C++ entity, you will need to create a C++ header and source file.
+
+  You will also need to have an asset ready to use as the model of said
+  entity. Checking the data at the =assets.yml= file in the repo can help.
+
+  You will need to add said entity to the ObjectFactory, so that the game
+  simulation can create it.
+
+* Files
+
+  The files usually go into the =common/objects/header= directory.
+
+** Header
+
+#+BEGIN_SRC cpp
+  #pragma once
+
+  #include <common/logic/game_object.hpp>
+  #include "ObjectMacros.h"
+
+  namespace familyline
+  {
+  /*  A tent is a basic people storage building */
+      class MyEntity : public logic::GameObject
+      {
+      public:
+          MyEntity();
+
+          /*  250 HP, no baseAtk, 1.0 baseArmor, 1.0 building material, 0.95 bulding
+              strength, 2 units of garrison capacity */
+
+          /* Called on object initialization */
+          virtual bool Initialize();
+
+          /* Called on each engine loop, when an action is performed */
+          virtual bool DoAction(void);
+
+          CLONE_MACRO_H(MyEntity)
+      };
+
+  }  // namespace familyline
+
+#+END_SRC
+
+The entity class name is =MyEntity=.
+
+The =CLONE_MACRO_H= will add a code block that will handle entity cloning. This
+is used by the object factory class.
+
+** Source
+
+#+BEGIN_SRC cpp
+  #include <common/objects/MyEntity.hpp>
+
+  using namespace familyline;
+  using namespace familyline::logic;
+
+  // static AttackAttributes atk(0, 1, glm::radians(0.0), 0, 0);
+
+  MyEntity::MyEntity() : GameObject(
+      /* entity type: */ "myentity",
+      /* entity display name: */"MyEntity",
+      /* entity size, in game units: */glm::vec2(15, 15),
+      /* entity max HP: */ 250,
+      /* entity current HP: */ 250)
+  {
+      /* The asset that the entity will use.
+       ,* This is not the *file name*, but the *asset name*
+       ,*/
+      DEF_MESH("meshes/myentity");
+
+      /* Attack component. Go 
+       ,* to the attack manager page for more information
+       ,*/
+      this->cAttack = std::make_optional<AttackComponent>(
+          AttackAttributes{
+              .attackPoints  = 0.0,
+              .defensePoints = 2.0,
+              .attackSpeed   = 1.0,
+              .precision     = 1.0,
+              .maxAngle      = M_PI},
+          std::vector<AttackRule>(
+              {AttackRule{.minDistance = 0.0, .maxDistance = 10.0, .ctype = AttackTypeMelee{}}}));
+      this->cAttack->setParent(this);
+
+      /* Colony component.
+       ,* Use this if you want your entity to be able to be part of a team
+       ,*/
+      this->cColony = std::make_optional(ColonyComponent());
+  };
+
+  /* Called on object initialization */
+  bool MyEntity::Initialize() { return true; }
+
+  /* Called on each engine loop, when an action is performed */
+  bool MyEntity::DoAction(void) { return true; }
+
+  CLONE_MACRO_CPP(MyEntity)
+
+#+END_SRC
+
+The comments are pretty much self-explanatory.
+
+The =CLONE_MACRO_CPP=  is the source counterpart of the above =CLONE_MACRO_H=.
+
+** Add to the object factory
+
+   Without adding your object there, the game will not be able to use it
+
+   Go to the =src/client/game.cpp= file, to the method
+   =Game::initObjectFactory=, and add a line similar to the ones that exists for
+   the existing entities.
+
+   (Yes, this is not a good way! But this will change.)
+
+#+BEGIN_SRC cpp
+
+  /**
+   ,* Initialize the object factory, with all game objects, and return a reference to it
+   ,*
+   ,* This is good, so we can get the object checksums
+   ,*/
+  logic::ObjectFactory* Game::initObjectFactory()
+  {
+      auto& of = LogicService::getObjectFactory();
+      factory_objects_.clear();
+
+      factory_objects_.push_back(std::make_unique<WatchTower>());
+      factory_objects_.push_back(std::make_unique<Tent>());
+
+      // add your entity here:
+      factory_objects_.push_back(std::make_unique<MyEntity>());
+    
+      /* Adds the objects to the factory */
+      for (auto& o: factory_objects_)
+          of->addObject(o.get());
+
+      return of.get();
+  }
+
+#+END_SRC
+
+Remember add an =#include= statement to your entity's header in =game.cpp=.

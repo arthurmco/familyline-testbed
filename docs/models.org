@@ -1,6 +1,4 @@
-===================
-Model contribution
-===================
+#+TITLE: Model contribution
 
 Familyline supports, for now, two types of model formats: Wavefront
 OBJ and MD2, without animation
@@ -18,38 +16,35 @@ Familyline to correctly load your model. They are made specifically
 for Blender3D, 'cause it is what I use, but you can adapt it for other
 modelling software if you're smart.
 
-OBJ
-====
+* OBJ
 
-* To export for OBJ format, the Forward direction needs to be -Z and
+- To export for OBJ format, the Forward direction needs to be -Z and
   the Up direction needs to be Y
   (Forward: -Z forward and Up: Y up)
 
-* "Triangulate Faces" *must* be selected, otherwise the engine won't
+- "Triangulate Faces" *must* be selected, otherwise the engine won't
   load your model correctly.
 
-* The "Write Materials" option can be let checked, it will add an mtl
+- The "Write Materials" option can be let checked, it will add an mtl
   file there. However, the usage of this option will be discouraged in the future.
 
-* OBJ animations are not supported and never will be.
+- OBJ animations are not supported and never will be.
 
-* 1 mesh per file. There's support for more in the parser, but not in
-  the mesh opener nor in the asset
+- 1 mesh per file. There's support for more in the parser, but not in
+  the mesh opener nor in the asset.
 
-* The other defaults are OK.
+- The other defaults are OK.
+ 
+* MD2
 
-MD2
-====
-
-* Before exporting, please rotate the model so the Y axis (the green
+- Before exporting, please rotate the model so the Y axis (the green
   arrow) points to the model up direction, and the Z direction (the
   blue arrow) points to the back of your model.
 
-* You need to specify the texture in the code. Familyline doesn't
+- You need to specify the texture in the code. Familyline doesn't
   support texture loading from MD2 and MD2 format doesn't specify
   material names. But the UV coordinates are read correcly.
 
-* MD2 animations are supported on graphical branch, but without
-  respecting framerate (it will run at game framerate)
+- MD2 animations are supported.
 
-* The defaults are OK.
+- The defaults are OK.
