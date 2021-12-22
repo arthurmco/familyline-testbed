@@ -26,11 +26,10 @@
 #include <client/graphical/device.hpp>
 #include <client/graphical/framebuffer.hpp>
 #include <client/graphical/gui/gui_button.hpp>
-#include <client/graphical/gui/gui_checkbox.hpp>
-#include <client/graphical/gui/gui_container_component.hpp>
-#include <client/graphical/gui/gui_imageview.hpp>
+// #include <client/graphical/gui/gui_checkbox.hpp>
+// #include <client/graphical/gui/gui_imageview.hpp>
 #include <client/graphical/gui/gui_label.hpp>
-#include <client/graphical/gui/gui_listbox.hpp>
+// #include <client/graphical/gui/gui_listbox.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
 #include <client/graphical/gui/gui_textbox.hpp>
 #include <client/graphical/gui/gui_window.hpp>

@@ -1,89 +1,96 @@
 #pragma once
 
-#include <cairo/cairo.h>
-#include <pango/pangocairo.h>
-
-#include <client/graphical/gui/control.hpp>
-#include <memory>
 #include <string>
-#include <vector>
-#include <mutex>
+#include <optional>
+#include <tuple>
 
-#include <locale>
-#include <codecvt>
-#include <cwchar>
-#include <iomanip>
+#include <client/graphical/gui/gui_control.hpp>
 
-namespace familyline::graphics::gui
-{
+namespace familyline::graphics::gui {
+
+
 /**
- * The label GUI control
+ * GUITextbox
+ *
+ * Allow the user to input text.
+ *
+ * It is not a very hard control to get, but due to things like IME and
+ * font metrics and whatnot, it is hard to get it right
+ *
+ * Ideally, this textbox will implement things as correctly as possible,
+ * i.e, with IME support, proper metrics for fonts outside of the ascii
+ * standard, etc.
  */
-class Textbox : public Control
-{
-private:
-    unsigned width_, height_;
-
-    /// The individual code points of our text
-    ///
-    /// We could use a normal std::string, but then we would not be able
-    /// to edit the text, because we have multibyte text in utf-8, and the
-    /// array index would not always correspond to the character index
-    ///
-    /// u32string uses UTF-32, with 4 bytes for each codepoint, sufficient
-    /// to be able to store the whole unicode in its array elements, and
-    /// array index and character index would match (if we normalize the
-    /// string, which we will do)
-    std::u32string text_;
-
-    /// The cursor position, an character index that represents where
-    /// the cursor is.
-    int cursorpos_ = 0;
-    
-    PangoLayout* layout_before_ = nullptr;
-    PangoLayout* layout_after_ = nullptr;
-    std::mutex text_mtx_;
-    
-    PangoLayout* getLayout(cairo_t* context, std::string text) const;
-    PangoWeight getPangoWeightFromAppearance(FontWeight fw) const;
-    
-    cairo_t* last_context_ = nullptr;
-
-    std::string convertUTF32ToUTF8(std::u32string v) const;
-    std::u32string convertUTF8ToUTF32(std::string v) const;    
+class GUITextbox : public GUIControl {
 public:
-    Textbox(unsigned width, unsigned height, std::string text)
-        : width_(width), height_(height)
-    {
-        this->appearance_.fontFace = "Arial";
-        this->appearance_.fontSize = 14;
-        this->appearance_.background = {1, 1, 1, 0.9};
-        this->appearance_.foreground = {0, 0, 0, 0.95};
+  GUITextbox(std::string text, GUIControlRenderInfo i = {})
+      : GUIControl(i), text_(toU32(text)) {}
 
-        this->setText(text);
+  /// A textual way of describing the control
+  /// If we were in Python, this would be its `__repr__` method
+  ///
+  /// Used *only* for debugging purposes.
+  virtual std::string describe() const;
+
+  std::string text() const;
+
+  /**
+   * Get the text data in selection blocks.
+   *
+   * Returns a tuple, where:
+   * - the first element is the text before the selection
+   * - the second element is the selected text, or "" if no text is selected.
+   * - the third element is the text after the selection
+   *
+   * The 'block' parameter allows rendering a block cursor, where the cursor
+   * 'selects' the current character.
+   */
+    std::tuple<std::string, std::string, std::string> getTextAsSelection(bool block) const;
+    
+  /**
+   * Get the selection starting and ending points
+   */
+    std::pair<size_t, size_t> getSelection() const {
+        return std::make_pair(select_start_, select_end_);
     }
 
-    virtual bool update(cairo_t* context, cairo_surface_t* canvas);
-
-    virtual std::tuple<int, int> getNeededSize(cairo_t* parent_context) const;
-
-    void setText(std::string v);
-    std::string getText() const;
-    
-    virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq);
-
-    virtual void onFocusEnter();
-    virtual void onFocusLost();
-
-    int maxChars = 255;
-    
-    virtual ~Textbox() {
-        if (layout_before_)
-            g_object_unref(layout_before_);
-        
-        if (layout_after_)
-            g_object_unref(layout_after_);
+    // Focus enter and exit callbacks
+    virtual void onFocusEnter() {
+        GUIControl::onFocusEnter();
+        render_info.setTextInputMode(true);
     }
+    virtual void onFocusExit() {
+        GUIControl::onFocusExit();
+        render_info.setTextInputMode(false);
+    }
+
+
+    virtual void receiveInput(const GUIEvent& e);
+    
+private:
+  /// A string of text
+  ///
+  /// This is not a common string, but a string where a char is 4 bytes.
+  /// It seems wasteful, but since we reached 2 bytes just now on the utf
+  /// codepoint list, it seems easier to have one codepoint per 'char'
+  std::u32string text_;
+
+  /// Convert a normal string to a utf-32 string
+  std::u32string toU32(std::string) const;
+
+  /// Convert a utf-32 string to a normal string
+  std::string toNormalString(std::u32string) const;
+
+  size_t select_start_ = 0;
+  size_t select_end_ = 0;
+
+  /**
+   * Given a X and Y position relative to the start of the control,
+   * give back the character position closest to that point
+   */
+    size_t getCharFromPosition(size_t x, size_t y);
+
+
 };
 
-}  // namespace familyline::graphics::gui
+}

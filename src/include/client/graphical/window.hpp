@@ -40,7 +40,7 @@ public:
     virtual Renderer* createRenderer() = 0;
     virtual Renderer* getRenderer()    = 0;
 
-    virtual gui::GUIManager* createGUIManager() = 0;
+    virtual std::unique_ptr<gui::GUIRenderer> createGUIRenderer() = 0;
 
     /**
      * Shows a message box (can be a system or an in-game message box,

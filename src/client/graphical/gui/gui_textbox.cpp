@@ -1,221 +1,179 @@
-
-#include <SDL2/SDL_keycode.h>
 #include <client/graphical/gui/gui_textbox.hpp>
-#include <client/input/input_service.hpp>
-#include <mutex>
-#include <algorithm>
 
-#include "pango/pango-font.h"
+#include <fmt/core.h>
+#include <string>
+
+#include <cassert>
+#include <cuchar>
+#include <climits>
 
 using namespace familyline::graphics::gui;
-using namespace familyline::input;
 
-/// String converter class, converts between utf32 and utf8
-auto& cvtr = std::use_facet<std::codecvt<char32_t, char, std::mbstate_t>>(std::locale());
-
-PangoWeight Textbox::getPangoWeightFromAppearance(FontWeight fw) const
+std::u32string GUITextbox::toU32(std::string s) const
 {
-    switch (fw) {
-        case FontWeight::Thin: return PANGO_WEIGHT_THIN; break;
-        case FontWeight::Ultralight: return PANGO_WEIGHT_ULTRALIGHT; break;
-        case FontWeight::Light: return PANGO_WEIGHT_LIGHT; break;
-        case FontWeight::Semilight: return PANGO_WEIGHT_SEMILIGHT; break;
-        case FontWeight::Book: return PANGO_WEIGHT_BOOK; break;
-        case FontWeight::Normal: return PANGO_WEIGHT_NORMAL; break;
-        case FontWeight::Medium: return PANGO_WEIGHT_MEDIUM; break;
-        case FontWeight::Semibold: return PANGO_WEIGHT_SEMIBOLD; break;
-        case FontWeight::Bold: return PANGO_WEIGHT_BOLD; break;
-        case FontWeight::Ultrabold: return PANGO_WEIGHT_ULTRABOLD; break;
-        case FontWeight::Heavy: return PANGO_WEIGHT_HEAVY; break;
-        case FontWeight::Ultraheavy: return PANGO_WEIGHT_ULTRAHEAVY; break;
-    }
+    std::u32string ret{};
+    ret.reserve(s.size());
 
-    return PANGO_WEIGHT_NORMAL;
-}
+    std::mbstate_t state{};
+    char32_t codepoint;
+    const char *ptr = s.c_str(), *end = s.c_str() + s.size() + 1;
 
-PangoLayout* Textbox::getLayout(cairo_t* context, std::string text) const
-{
-    PangoFontDescription* font_description = pango_font_description_new();
-    pango_font_description_set_family(font_description, this->appearance_.fontFace.c_str());
-    pango_font_description_set_absolute_size(
-        font_description, this->appearance_.fontSize * PANGO_SCALE);
-    pango_font_description_set_weight(
-        font_description, getPangoWeightFromAppearance(appearance_.fontWeight));
-    pango_font_description_set_style(
-        font_description, appearance_.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-
-    PangoLayout* layout = pango_cairo_create_layout(context);
-    pango_layout_set_font_description(layout, font_description);
-    pango_layout_set_text(layout, text.c_str(), -1);
-
-    pango_font_description_free(font_description);
-
-    return layout;
-}
-
-bool Textbox::update(cairo_t* context, cairo_surface_t* canvas)
-{
-    auto [fr, fg, fb, fa] = this->appearance_.foreground;
-    auto [br, bg, bb, ba] = this->appearance_.background;
-
-    if (layout_before_) {
-        pango_layout_set_font_description(layout_before_, nullptr);
-        g_object_unref(layout_before_);
-    }
-    if (layout_after_) {
-        pango_layout_set_font_description(layout_after_, nullptr);
-        g_object_unref(layout_after_);
-    }
-
-    std::lock_guard<std::mutex> guard(text_mtx_);
-
-    layout_before_ =
-        this->getLayout(context, this->convertUTF32ToUTF8(this->text_.substr(0, cursorpos_)));
-    int textw = 0, texth = 0;
-
-    cairo_set_source_rgba(context, br, bg, bb, ba);
-    cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(context);
-
-    // draw text before the cursor
-    pango_layout_get_size(layout_before_, &textw, &texth);
-    texth /= PANGO_SCALE;
-
-    cairo_set_operator(context, CAIRO_OPERATOR_OVER);
-    cairo_set_source_rgba(context, fr, fg, fb, fa);
-    cairo_move_to(context, 6, (height_ / 2) - (texth / 2));
-    pango_cairo_show_layout(context, layout_before_);
-
-    layout_after_ =
-        this->getLayout(context, this->convertUTF32ToUTF8(this->text_.substr(cursorpos_)));
-
-    int beforew = textw / PANGO_SCALE;
-    // draw text after the cursor
-    pango_layout_get_size(layout_after_, &textw, &texth);
-    texth /= PANGO_SCALE;
-
-    cairo_set_source_rgba(context, fr, fg, fb, fa);
-    cairo_move_to(context, 6 + beforew, (height_ / 2) - (texth / 2));
-    pango_cairo_show_layout(context, layout_after_);
-
-    // draw the cursor
-    cairo_set_line_width(context, 1);
-    cairo_set_source_rgba(context, 0, 0, 0, 0.75);
-    cairo_rectangle(context, 6 + beforew - 1, 0, 2, height_);
-    cairo_fill(context);
-
-    // draw a border
-    cairo_set_line_width(context, 6);
-    cairo_set_source_rgba(context, 0, 0, 0, 1);
-    cairo_rectangle(context, 0, 0, width_, height_);
-    cairo_stroke(context);
-
-    return true;
-}
-
-std::tuple<int, int> Textbox::getNeededSize(cairo_t* parent_context) const
-{
-    return std::tie(width_, height_);
-}
-
-std::string Textbox::convertUTF32ToUTF8(std::u32string v) const
-{
-    // wstring_convert is deprecated, we need to do this ourselves.
-    std::string s8(v.size() * cvtr.max_length(), '\0');
-
+    while(std::size_t rc = std::mbrtoc32(&codepoint, ptr, end - ptr, &state))
     {
-        std::mbstate_t mb{};
-        const char32_t* from_next;
-        char* to_next;
-        cvtr.out(mb, &v[0], &v[v.size()], from_next, &s8[0], &s8[s8.size()], to_next);
-
-        s8.resize(to_next - &s8[0]);
+        assert(rc != (std::size_t)-3); // no surrogates in UTF-32
+        if(rc == (std::size_t)-1) break;
+        if(rc == (std::size_t)-2) break;
+        ret += codepoint;
+        ptr += rc;
     }
 
-    return s8;
+    return ret;
 }
 
-std::u32string Textbox::convertUTF8ToUTF32(std::string v) const
+  /// Convert a utf-32 string to a normal string
+std::string GUITextbox::toNormalString(std::u32string text) const
 {
-    std::u32string ns32(v.size() * cvtr.max_length(), '\0');
-    {
-        std::mbstate_t mb{};
-        char32_t* to_next;
-        const char* from_next;
-        auto ret =
-            cvtr.in(mb, &v[0], &v[v.size()], from_next, &ns32[0], &ns32[ns32.size()], to_next);
+    std::string ret;
+    ret.reserve(text.size());
+    
+    std::mbstate_t state{};
+    for (auto& codepoint : text) {        
+        char c[MB_LEN_MAX+1] = {};
+        auto rc = std::c32rtomb(c, codepoint, &state);                
+        if(rc == (std::size_t)-1) continue;
 
-        ns32.resize(to_next - &ns32[0]);
+        c[rc] = '\0';
+        ret += c;
     }
 
-    return ns32;
+    return ret;
+    
 }
 
-std::string Textbox::getText() const { return this->convertUTF32ToUTF8(this->text_); }
 
-void Textbox::setText(std::string v)
+std::string GUITextbox::text() const
 {
-    std::u32string ns32 = this->convertUTF8ToUTF32(v);
-    std::lock_guard<std::mutex> guard(text_mtx_);
-    if (this->text_ != ns32) {
-        if (ns32.size() < cursorpos_) {
-            cursorpos_ = ns32.size();
+    return toNormalString(text_);
+}
+
+
+/// A textual way of describing the control
+/// If we were in Python, this would be its `__repr__` method
+///
+/// Used *only* for debugging purposes.
+std::string GUITextbox::describe() const
+{
+  char v[128] = {};
+  sprintf(v, "GUITextbox (id %08x, size %d x %d, pos %d,%d | text: '", id(),
+          width_, height_, x_, y_);
+  auto ret = std::string{v};
+  ret += text();
+  ret += "' ";
+
+  if (parent_)
+    ret += "has a parent ";
+
+  if (onFocus_)
+    ret += " | focus";
+
+  ret += ")";
+
+  return ret;
+    
+}
+
+/**
+ * Get the text data in selection blocks.
+ *
+ * Returns a tuple, where:
+ * - the first element is the text before the selection
+ * - the second element is the selected text, or "" if no text is selected.
+ * - the third element is the text after the selection
+ *
+ * The 'block' parameter allows rendering a block cursor, where the cursor
+ * 'selects' the current character.
+ */
+std::tuple<std::string, std::string, std::string> GUITextbox::getTextAsSelection(bool block) const
+{
+    auto begin = text_.substr(0, select_start_);
+    auto selstart = select_start_;
+    auto selend = select_end_;
+    
+    if (block) {
+        selend++;
+    }
+
+    auto sel = text_.substr(selstart, selend - selstart);
+    auto end = text_.substr(selend);
+    
+    if (block && end == U"")
+        end = U"";
+    
+    return std::make_tuple(
+        toNormalString(begin),
+        toNormalString(sel),
+        toNormalString(end)
+     );    
+}
+
+
+
+
+void GUITextbox::receiveInput(const GUIEvent &e) {
+    if (auto *kev = std::get_if<KeyEvent>(&e); kev) {
+        if (kev->key == 'l' && kev->isPressing) {
+            select_start_ = select_end_;
+            select_start_ = std::min(select_start_ + 1, text_.size());
+            select_end_ = select_start_;
+        } else if (kev->key == 'h' && kev->isPressing) {
+            select_start_ = select_end_;
+            select_start_ = (size_t) std::max(int(select_start_ - 1), (int)0);
+            select_end_ = select_start_;        
+        }
+    } else if (auto *tev = std::get_if<TextInput>(&e); tev) {
+        auto data32 = toU32(tev->data);
+        text_.insert(select_end_, data32, 0);
+    }
+
+    
+}
+
+/**
+ * Given a X and Y position relative to the start of the control,
+ * give back the character position closest to that point
+ */
+size_t GUITextbox::getCharFromPosition(size_t x, size_t y)
+{
+    // charx = (charWidth_ * pixelx) / screenWidth_;
+    // pixelx = ??
+
+    // cx = (cw * px) / sw
+    // cx * sw = cw * px
+    // px = (cx * sw) / cw
+    // = (1*800 / 110)
+
+
+    // TODO: these sizes should come from the renderer.
+    double borderToText = 1*800.0/110;
+    double xoff = borderToText;
+    double yoff = borderToText;
+
+    int idx = 0;
+    for (char32_t& c : text_) {
+        auto gsize = this->render_info.getCodepointSize(c, appearance_.font,
+                                                        appearance_.fontsize,
+                                                        appearance_.weight);
+        if (!gsize) {
+            return idx;
         }
         
-        this->text_ = ns32;
-    }
-}
-
-void Textbox::onFocusEnter() { InputService::getInputManager()->enableTextEvents(); }
-void Textbox::onFocusLost() { InputService::getInputManager()->disableTextEvents(); }
-
-void Textbox::receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq)
-{
-    if (std::holds_alternative<KeyAction>(ev.type)) {
-        auto ka = std::get<KeyAction>(ev.type);
-
-        if (ka.isPressed) {
-            switch (ka.keycode) {
-            case SDLK_LEFT: cursorpos_ = std::max(0, cursorpos_ - 1); break;
-            case SDLK_RIGHT: cursorpos_ = std::min((int)text_.size(), cursorpos_ + 1); break;
-            case SDLK_HOME: cursorpos_ = 0; break;
-            case SDLK_END: cursorpos_ = text_.size(); break;
-            case SDLK_BACKSPACE:
-                if (cursorpos_ > 0) {
-                    text_.erase(cursorpos_-1, 1);
-                    cursorpos_--;
-                }
-                break;
-            case SDLK_DELETE:
-                if (text_.size() > 0) {
-                    text_.erase(cursorpos_, 1);
-                }
-            case SDLK_v:
-                if ((ka.modifiers & KMOD_CTRL) > 0) {
-                    auto clipboard = InputService::getInputManager()->getClipboardText();
-                    auto nend = std::remove_if(clipboard.begin(), clipboard.end(),
-					       [](char v) { return v == '\n' || v == '\r'; });
-		    clipboard.erase(nend, clipboard.end());
-                    auto text32 = this->convertUTF8ToUTF32(clipboard);
-                    text_.insert(cursorpos_, text32);
-                    cursorpos_ += text32.size();
-                }
-                
-                break;
-            }
+        xoff += gsize->width;
+        if (xoff >= x) {
+            return idx;
         }
+
+        idx++;        
     }
 
-    if (std::holds_alternative<TextInput>(ev.type)) {
-        auto ti = std::get<TextInput>(ev.type);
-
-        auto text32 = this->convertUTF8ToUTF32(ti.text);
-        if (cursorpos_ + text32.size() > maxChars) {
-            return;
-        }
-        
-        text_.insert(cursorpos_, text32);
-        cursorpos_ += text32.size();        
-    }
-
+    return idx-1;
 }

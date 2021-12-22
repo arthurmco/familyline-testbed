@@ -1,70 +1,64 @@
 #pragma once
 
-#include <cairo/cairo.h>
-#include <pango/pangocairo.h>
-
-#include <client/graphical/gui/control.hpp>
+#include <client/graphical/gui/gui_control.hpp>
 #include <client/graphical/gui/gui_label.hpp>
-#include <future>
-#include <memory>
-#include <string>
-#include <vector>
 
-namespace familyline::graphics::gui
-{
-class Button : public Control
-{
-private:
-    unsigned width_, height_;
-    Label label_;
+namespace familyline::graphics::gui {
 
-    unsigned label_width_, label_height_;
-    cairo_t *l_context_        = nullptr;
-    cairo_surface_t *l_canvas_ = nullptr;
-    EventCallbackFn click_cb_ = [](void* cc){};
+/**
+ * GUIButton
+ *
+ * Stores a button
+ * A button is, of course, a control that you can click
+ */
 
-    std::chrono::time_point<std::chrono::steady_clock> last_hover_ =
-        std::chrono::steady_clock::now();
-
-    bool hovered_ = false;
-
-    bool clicked_      = false;
-    bool click_active_ = false;
-
-    /// Stores the last time the user clicked, so we can make the click animation last more
-    /// than the milisseconds between the GUI updates, a time sufficient for the user to
-    /// see
-    std::chrono::time_point<std::chrono::steady_clock> last_click_ =
-        std::chrono::steady_clock::now();
-
-    std::future<void> click_fut_;
-
+class GUIButton : public GUIControl {
 public:
-    virtual void setAppearance(ControlAppearance &a)
-    {
-        appearance_   = a;
-        a.background  = {0, 0, 0, 0};
-        a.borderColor = {0, 0, 0, 0};
-        label_.setAppearance(a);
-    }
+  GUIButton(std::string text, FGUIEventCallback onClick,
+            GUIControlRenderInfo i = {})
+      : GUIControl(i), label_(GUILabel{text}), onClick_(onClick){};
 
-    Button(unsigned width, unsigned height, std::string text);
+  /// A textual way of describing the control
+  /// If we were in Python, this would be its `__repr__` method
+  ///
+  /// Used *only* for debugging purposes.
+  virtual std::string describe() const;
 
-    virtual bool update(cairo_t *context, cairo_surface_t *canvas);
+  /// Called when this control is resized or repositioned
+  virtual void onResize(int nwidth, int nheight, int nx, int ny);
 
-    virtual std::tuple<int, int> getNeededSize(cairo_t *parent_context) const;
+  //  virtual void autoresize();
 
-    void setClickCallback(EventCallbackFn c) { click_cb_ = c; }
+  /// Called when the parent need to update
+  virtual void update() {
+    label_.update();
+    dirty_ = false;
+  };
 
-    void setText(std::string v);
+  std::string text() const { return label_.text(); }
+  void setText(std::string v) {
+    label_.setText(v);
+    dirty_ = true;
+  }
 
-    virtual void onFocusEnter() { hovered_ = true; }
-    virtual void onFocusLost() { hovered_ = false; }
+  // TODO: use that badge thing from SerenityOS?
+  GUILabel &getInnerLabel() { return label_; }
 
-    
-    virtual void receiveEvent(const familyline::input::HumanInputAction &ev, CallbackQueue &cq);
+  // Focus enter and exit callbacks
+  virtual void onFocusEnter() {
+    onFocus_ = true;
+    label_.onFocusEnter();
+  }
+  virtual void onFocusExit() {
+    onFocus_ = false;
+    label_.onFocusExit();
+  }
 
-    virtual ~Button();
+  virtual void receiveInput(const GUIEvent &e);
+
+private:
+  GUILabel label_;
+
+  FGUIEventCallback onClick_;
 };
-
-}  // namespace familyline::graphics::gui
+}

@@ -4,6 +4,8 @@
 #include <functional>
 #include <vector>
 
+namespace familyline::graphics::gui {
+
 /*
  * BaseLayout
  *
@@ -100,3 +102,4 @@ public:
   }
 };
 
+}

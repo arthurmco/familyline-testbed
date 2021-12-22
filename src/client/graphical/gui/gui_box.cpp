@@ -1,4 +1,6 @@
-#include "gui_box.hpp"
+#include <client/graphical/gui/gui_box.hpp>
+
+using namespace familyline::graphics::gui;
 
 GUIControl &GUIBox::add(GUIControl *c) {
   assert(c);

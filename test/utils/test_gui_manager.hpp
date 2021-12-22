@@ -8,6 +8,8 @@
 
 #include <client/graphical/gui/gui_manager.hpp>
 
+#if 0
+
 class TestGUIManager : public familyline::graphics::gui::GUIManager
 {
 public:
@@ -23,3 +25,5 @@ public:
 
     virtual ~TestGUIManager() {}
 };
+
+#endif

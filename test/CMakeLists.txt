@@ -43,12 +43,14 @@ set( SRC_TEST_FILES
   "${CMAKE_SOURCE_DIR}/test/test_scene_manager.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_texture_manager.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_terrain.cpp"
+  "${CMAKE_SOURCE_DIR}/test/test_gui_base.cpp"
   "${CMAKE_SOURCE_DIR}/test/tests.cpp"
 
   "${CMAKE_SOURCE_DIR}/test/utils.cpp"
   "${CMAKE_SOURCE_DIR}/test/utils/test_device.cpp"
   "${CMAKE_SOURCE_DIR}/test/utils/test_texenv.cpp"
   "${CMAKE_SOURCE_DIR}/test/utils/test_inputprocessor.cpp"
+  "${CMAKE_SOURCE_DIR}/test/utils/test_gui_renderer.cpp"
   )
 
 file( GLOB SRC_UTIL_FILES "${CMAKE_SOURCE_DIR}/test/utils/test_renderer.cpp" )

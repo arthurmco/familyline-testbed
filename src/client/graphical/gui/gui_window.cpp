@@ -1,47 +1,42 @@
-#include <client/graphical/gui/gui_window.hpp>
+#include <client/graphical/gui/gui.hpp>
+#include <string>
 
 using namespace familyline::graphics::gui;
-using namespace familyline::input;
 
-bool GUIWindow::update(cairo_t* context, cairo_surface_t* canvas)
-{
-    auto [br, bg, bb, ba] = this->appearance_.background;
 
-    cairo_set_source_rgba(context, br, bg, bb, ba);
-    cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(context);
-
-    bool ret = rc_.update(rc_context_, rc_canvas_);
-    
-    cairo_set_operator(context, CAIRO_OPERATOR_OVER);
-    cairo_set_source_surface(context, rc_canvas_, 0, 0);
-    cairo_paint(context);
-    return ret;
+std::string GUIWindow::describe() const {
+  char v[128] = {};
+  sprintf(v, "GUIWindow (id %08x, size %d x %d)", this->id(), width_, height_);
+  return std::string{v};
 }
 
-void GUIWindow::receiveEvent(const HumanInputAction& hia, CallbackQueue& cq)
-{
-    HumanInputAction ev = hia;
-    
-    if (std::holds_alternative<ClickAction>(ev.type)) {
-        auto ca = std::get<ClickAction>(ev.type);
-        ca.screenX -= x_;
-        ca.screenY -= y_;
-        ev.type = ca;
-
-        rc_.receiveEvent(ev, cq);
-        return;
-    }
-
-    if (std::holds_alternative<MouseAction>(ev.type)) {
-        auto ma = std::get<MouseAction>(ev.type);
-        ma.screenX -= x_;
-        ma.screenY -= y_;
-        ev.type = ma;       
-
-        rc_.receiveEvent(ev, cq);
-        return;
-    }
-
-    rc_.receiveEvent(hia, cq);
+void GUIWindow::onResize(int nwidth, int nheight, int nx, int ny) {
+  width_ = nwidth;
+  height_ = nheight;
+  box_.onResize(nwidth, nheight, 0, 0);
 }
+
+/// Called when the parent need to update
+void GUIWindow::update() {
+  box_.update();
+  dirty_ = true;
+};
+
+
+void GUIWindow::receiveInput(const GUIEvent &e) {
+  if (auto *kev = std::get_if<KeyEvent>(&e); kev) {
+    if (kev->key == '\t' && kev->isPressing) {
+        if (!inner_box_) {
+            this->box_.onFocusExit();
+        }
+        inner_box_ = this->box_.forwardTabIndexEvent();
+    }
+  }
+
+  this->box().receiveInput(e);
+}
+
+///////////////////
+///////////////////
+////////////////////
+///////////////////

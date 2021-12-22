@@ -1,31 +1,15 @@
-#include "test_renderer.hpp"
+#include "test_gui_renderer.hpp"
 
 #include <cstdio>
 
-void TestRenderer::update(const std::vector<ControlPaintData *> &data)
+using namespace familyline::graphics::gui;
+
+void TestGUIRenderer::update(const std::vector<ControlPaintData *> &data)
 {
     data_ = data;
-
-    for (auto* d : data) {
-        TestControlPaintData *cd = (TestControlPaintData *)d;
-        printf("%08x, %dx%d, at (%d,%d)\n", cd->control.id(), cd->width,
-               cd->height, cd->x, cd->y);
-
-        for (auto& c : cd->children()) {
-            printf("\t%08x, %dx%d, at (%d,%d)\n", c->control.id(), c->width,
-                   c->height, c->x, c->y);
-
-            for (auto& cc : c->children()) {
-                printf("\t\t%08x, %dx%d, at (%d,%d)\n", cc->control.id(), cc->width,
-                       cc->height, cc->x, cc->y);
-            }
-
-        }
-
-    }
 }
 
-TestControlPaintData* TestRenderer::query(int id)
+TestControlPaintData* TestGUIRenderer::query(int id)
 {
     for (auto* d : data_) {
         TestControlPaintData *cd = (TestControlPaintData *)d;
@@ -40,7 +24,7 @@ TestControlPaintData* TestRenderer::query(int id)
 }
 
 
-TestControlPaintData* TestRenderer::queryInto(int id, TestControlPaintData * parent)
+TestControlPaintData* TestGUIRenderer::queryInto(int id, TestControlPaintData * parent)
 {
     for (auto& c : parent->children()) {
         if (c->control.id() == id)
@@ -54,9 +38,9 @@ TestControlPaintData* TestRenderer::queryInto(int id, TestControlPaintData * par
 }
 
 
-void TestRenderer::render() { printf("\n\n\n\n\n\n\n"); }
+void TestGUIRenderer::render() { }
 
-std::optional<GUIGlyphSize> TestRenderer::getCodepointSize(
+std::optional<GUIGlyphSize> TestGUIRenderer::getCodepointSize(
     char32_t codepoint, std::string_view fontName, size_t fontSize, FontWeight weight)
 {
     // Ignore control characters
@@ -68,7 +52,7 @@ std::optional<GUIGlyphSize> TestRenderer::getCodepointSize(
     });
 }
 
-std::unique_ptr<GUIControlPainter> TestRenderer::createPainter()
+std::unique_ptr<GUIControlPainter> TestGUIRenderer::createPainter()
 {    
     return std::make_unique<TestControlPainter>(*this);
 }

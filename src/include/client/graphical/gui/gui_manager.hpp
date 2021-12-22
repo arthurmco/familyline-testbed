@@ -1,247 +1,242 @@
 #pragma once
 
-#include <cairo/cairo.h>
-#include <pango/pangocairo.h>
+#include <yaml-cpp/node/node.h>
+#include <yaml-cpp/yaml.h>
 
-#include <client/graphical/gui/gui_button.hpp>
-#include <client/graphical/gui/gui_imageview.hpp>
-#include <client/graphical/gui/gui_label.hpp>
-#include <client/graphical/gui/gui_window.hpp>
-#include <client/graphical/gui/root_control.hpp>
-#include <client/graphical/shader.hpp>
-#include <client/input/input_manager.hpp>
-#include <common/logger.hpp>
-#include <deque>
+#include <concepts>
+#include <functional>
 #include <memory>
+#include <optional>
 #include <queue>
-#include <span>
-#include <unordered_map>
 #include <string>
-#include <unordered_map>
+#include <string_view>
 #include <vector>
 
-namespace familyline::graphics
-{
-class Window;
-}
+#include <client/graphical/gui/gui.hpp>
+#include <client/graphical/gui/gui_control.hpp>
+#include <client/graphical/gui/gui_renderer.hpp>
 
-namespace familyline::graphics::gui
-{
-/// TODO: PLEASE find a way to run the GUI update function always in tribalia.cpp, or
-///       familyline.cpp if renamed. It will make things easier.
+namespace familyline::graphics::gui {
 
 /**
- * Manages the graphical interface state and rendering
+ * GUITheme
+ *
+ * Each control type has a predefined sets of attributes.
+ * They are known as the control 'theme'
+ *
+ * You might think the game does not need to have such flexibility as themes,
+ * but:  a) development time will be very reduced if we can choose colors
+ * without recompiling and b) skins are a thing now.
+ */
+class GUITheme
+{
+public:
+    GUITheme() {}
+
+    void loadFile(std::string);
+
+    std::optional<GUIAppearance> getAppearanceFor(GUIControl *control) const;
+
+private:
+    std::optional<GUIAppearance> getAppearanceByControlType(std::string_view) const;
+
+    bool file_loaded_ = false;
+    YAML::Node root_node_;
+};
+
+/**
+ * GUIManager
+ *
+ * Has ownership of every control and every window, and has methods to
+ * create them.
+ * Also, you are able to query them from here.
+ *
+ * It also controls rendering of those controls, and controls input sending or
+ * receiving from them
  */
 class GUIManager
 {
-protected:
-    familyline::graphics::Window& win_;
+public:
+    GUIManager(std::unique_ptr<GUIRenderer> renderer)
+        : renderer_(std::move(renderer)), painter_(renderer_->createPainter())
+    {
+        render_info_ = GUIControlRenderInfo{
+            .getCodepointSize = std::bind(
+                &GUIManager::getCodepointSize, this, std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_3, std::placeholders::_4),
+            .setTextInputMode =
+                std::bind(&GUIManager::setTextInputMode, this, std::placeholders::_1)};
 
-    unsigned width_, height_;
+        // Initialize the locale so that string encode conversions work.
+        std::setlocale(LC_ALL, "");
 
-    // Cairo things, to actually do the rendering work
-    // Since Cairo can use hardware acceleration, we do not need to worry much about speed.
-    cairo_t* context_;
-    cairo_surface_t* canvas_;
+    }
 
-    std::unique_ptr<RootControl> root_control_;
+    struct WindowInfo {
+        std::unique_ptr<GUIWindow> window;
+        std::unique_ptr<BaseLayout> layout;
+        std::unique_ptr<ControlPaintData> paint_data;
 
-    // Cached mouse positions, to help check events that do not send the mouse position along them,
-    // like the KepayEvent
-    int hitmousex_ = 1, hitmousey_ = 1;
-    std::queue<familyline::input::HumanInputAction> input_actions_;
+        // The z-index
+        // The higher it is, the most on top it will show
+        int zIndex = 0;
+    };
 
-    bool destroying = false;
-    CallbackQueue cb_queue_;
-
-    /// Hovered control
-    std::optional<Control*> hovered_ = std::nullopt;
-
-    /// A map of all windows created, keyed by name
-    std::unordered_map<std::string, std::unique_ptr<GUIWindow>> windows_;
-
-    /// TODO: add a way to lock event receiving to the GUI. Probably the text edit control
-    /// will need, to ensure you can type on it when you click and continue to be able to,
-    /// even if you move the mouse out of it.
-
-    /**
-     * Initialize shaders and window vertices.
-     *
-     * We render everything to a textured square. This function creates
-     * the said square, the texture plus the shaders that enable the
-     * rendering there
-     */
-    virtual void init(const familyline::graphics::Window& win) = 0;
-
-    /**
-     * Render the cairo canvas to the gui texture
-     */
-    virtual void renderToTexture() = 0;
-
-    /**
-     * Checks if an event mouse position hits a control or not.
-     * This allows us to ignore events that do not belong to us, and pass them
-     * to the handlers under it, such as the ones that handle game input
-     *
-     * If it did not hit any control, return false, else return true
-     */
-    bool checkIfEventHits(const familyline::input::HumanInputAction&);
-
-    /**
-     * Get the control that is at the specified pixel coordinate
-     */
-    std::optional<Control*> getControlAtPoint(int x, int y);
-
-    struct GUIWindowInfo {
-        GUIWindow* win;
-        cairo_t* context;
-        cairo_surface_t* canvas;
-        
-        
-        GUIWindowInfo(GUIWindow* w, cairo_t* ctxt, cairo_surface_t* s)
-            : win(w), context(ctxt), canvas(s)
-        {
-        }
-
-        ~GUIWindowInfo()
-        {
-            cairo_surface_destroy(canvas);
-            cairo_destroy(context);
-        }
-
-        GUIWindowInfo(const GUIWindowInfo& other) = delete;
-
-        GUIWindowInfo(GUIWindowInfo&& other) noexcept
-            : win(std::exchange(other.win, nullptr)),
-              context(std::exchange(other.context, nullptr)),
-              canvas(std::exchange(other.canvas, nullptr))
-        {
-        }
-
-        GUIWindowInfo& operator=(const GUIWindowInfo& other) = delete;
-
-        GUIWindowInfo& operator=(GUIWindowInfo&& other) noexcept
-        {
-            std::swap(win, other.win);
-            std::swap(context, other.context);
-            std::swap(canvas, other.canvas);
-            return *this;
-        }
+    struct EventInfo {
+        FGUIEventCallback cb;
+        GUIControl &control;
     };
 
     /**
-     * We need a location to plot text debug information (like fps, diagnostic information, tick
-     * number) as we are playing the game.
+     * Create a control of type T, in place
+     * Also pass the arguments of said control into the constructor, more or less
+     * like make_unique would do.
      *
-     * This debug window serves as a way to do this.
-     * It will not receive any input events, but it will be the topmost window any time
+     * We store the control in this GUIManager and return a pointer to it,
+     * properly converted
      */
-    GUIWindow debug_window_;
-    GUIWindowInfo debug_window_info_;
-
-    std::deque<GUIWindowInfo> windowstack_;
-
-public:
-    GUIManager(
-        familyline::graphics::Window& win, unsigned width, unsigned height,
-        familyline::input::InputManager& manager)
-        : win_(win),
-          width_(width),
-          height_(height),
-          debug_window_(width, height),
-          debug_window_info_(&debug_window_, nullptr, nullptr),
-          canvas_(cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height))
+    template <typename Control, typename... Args>
+    requires std::derived_from<Control, GUIControl> Control *createControl(Args &&...args)
     {
-        context_ = cairo_create(this->canvas_);
+        auto ptr     = std::make_unique<Control>(args..., render_info_);
+        Control *ret = (Control *)ptr.get();
 
-        auto* canvas  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
-        auto* context = cairo_create(canvas);
-        debug_window_.modifyAppearance([](ControlAppearance& ca) {
-            ca.background = {0, 0, 0, 0.0};
-        });
-        debug_window_.event_onDelete = [](auto& o) {};  // set the delete callback to avoid a
-                                                        // bad function call exception on the
-                                                        // destructor
-        debug_window_info_ = GUIWindowInfo(&debug_window_, context, canvas);
+        auto appearance = theme->getAppearanceFor(ret);
+        if (appearance) ret->setAppearance(*appearance);
 
-        root_control_ = std::make_unique<RootControl>(width, height);
+        controls_.push_back(std::move(ptr));
 
-        manager.addListenerHandler([&](familyline::input::HumanInputAction i) {
-            if (this->checkIfEventHits(i)) {
-                input_actions_.push(i);
-                return true;
-            }
-
-            return false;
-        });
+        return ret;
     }
 
-    void initialize(const Window& win) { this->init(win); }
+    /**
+     * Create a control of type T, in place
+     * Same thing as the above, but define a name for the control
+     *
+     * Useful if you want to get the control later while inside a
+     * handle, where the control reference might not exist anymore.
+     */
+    template <typename Control, typename... Args>
+    Control *createNamedControl(std::string name, Args &&...args)
+    {
+        Control *c          = createControl<Control>(args...);
+        name2control_[name] = c;
+
+        return c;
+    }
+
+    template <typename Control>
+    requires std::derived_from<Control, GUIControl> Control *getControl(std::string name)
+    {
+        if (!name2control_.contains(name)) {
+            return nullptr;
+        }
+
+        return (Control *)name2control_[name];
+    }
 
     /**
-     * Show the window you pass
+     * Creates a window, type parameterizing its layout, because we do not need to
+     * worry about creating it ourselves.
      *
-     * Since the window have a "hidden" delete event, you do not need to remove the
-     * window from the gui, deallocating it will be sufficient
+     * (We also need a way to pass parameters to future layouts, but a parameter
+     * pack might be OK)
      */
-    void showWindow(GUIWindow* w);
+    template <typename Layout>
+    requires std::derived_from<Layout, BaseLayout>
+    GUIWindow &createWindow()
+    {
+        static int winid = 1;
+        auto layoutptr   = std::make_unique<Layout>();
 
-    void closeWindow(const GUIWindow& w);
+        auto ptr       = std::make_unique<GUIWindow>(*layoutptr.get(), render_info_);
+        GUIWindow *ret = ptr.get();
+        ptr->initialize(winid);
 
-    // void add(int x, int y, std::unique_ptr<Control> control);
-    // void add(double x, double y, ControlPositioning cpos, std::unique_ptr<Control> control);
+        auto paintdata = painter_->drawWindow(*ret);
 
-    // void remove(Control* control);
+        windows_.push_back(WindowInfo{std::move(ptr), std::move(layoutptr), std::move(paintdata)});
+        return *ret;
+    }
 
-    GUIWindow& getDebugWindow() { return debug_window_; }
+    // https://www.amazon.com/High-Performance-Master-optimizing-functioning/dp/1839216549
+
+    /// Called when we receive a window resize event
+    ///
+    /// Usually, you will resize the windows proportionally, but, for now,
+    /// we will assume that all windows are fullscreen
+    void onResize(int width, int height);
+
+    /// The current theme for every control created here.
+    std::unique_ptr<GUITheme> theme = std::make_unique<GUITheme>();
+
+    std::optional<GUIGlyphSize> getCodepointSize(
+        char32_t codepoint, std::string_view fontName, size_t fontSize, FontWeight weight)
+    {
+        return renderer_->getCodepointSize(codepoint, fontName, fontSize, weight);
+    }
+
+    void showWindow(GUIWindow &);
+    void closeWindow(GUIWindow &);
 
     void update();
-
-    void render(unsigned int x, unsigned int y);
-
-    /**
-     * Receive an event and act on it
-     *
-     * (In the game, we will probably use input actions, not sdl events directly)
-     */
-    void receiveEvent();
+    void render();
 
     /**
-     * Check if we have any pending callbacks
+     * Run the event handlers.
      *
-     * If we have, run them
-     *
-     * Note that this function needs to be ran in the main thread, because the game loop
-     * runs in one of those callbacks, the new game button. This can cause some race
-     * conditions and crash the game.
-     *
+     * One event will be ran for each call to this function.
      */
-    void runCallbacks();
+    void runEvents();
 
     /**
-     * Creates a GUI window
-     *
-     * This window will be owned by the GUIManager, so you do not need
-     * to care about destroying it
+     * Listen for inputs, add them into the event input queue
      */
-    GUIWindow* createGUIWindow(std::string name, unsigned width, unsigned height);
+    void listenInputs();
 
     /**
-     * Get the window named by `name`, or null if it does not exist
-     *
-     * This raw pointer might not always be valid in the lifetime of the window.
+     * Push the event to be ran the next time you call `runEvents()`
      */
-    GUIWindow* getGUIWindow(std::string name);
+    void pushEvent(FGUIEventCallback cb, GUIControl &control) { events_.emplace(cb, control); }
+
+    GUIRenderer& getRenderer() { return *renderer_.get(); }
+    
+private:
+    std::vector<std::unique_ptr<GUIControl>> controls_;
+    std::vector<WindowInfo> windows_;
+    std::queue<GUIEvent> inputs_;
+
+    std::map<std::string, GUIControl *> name2control_;
 
     /**
-     * Destroy window, aka remove it from memory
+     * Make the graphical framework above us set some sort of text
+     * input mode (SDL, for example, has SDL_StartTextInput)
      *
-     * This will also destroy all controls from it, since they are owned by the window.
+     * This function will take care of all IME related things
+     * (for example, by combining ´ and a to form á, or by converting
+     *  hiragana into kanji), sending all the steps until the final
+     * character
+     *
+     * We make the renderer provide this information, but it might not
+     * be the best place (we will probably need to rename the renderer
+     * class)
      */
-    void destroyGUIWindow(std::string name);
+    void setTextInputMode(bool v) { renderer_->setTextInputMode(v); }
 
-    virtual ~GUIManager();
+    GUIControlRenderInfo render_info_;
+
+    std::unique_ptr<GUIRenderer> renderer_;
+    std::unique_ptr<GUIControlPainter> painter_;
+
+    std::vector<ControlPaintData *> renderer_paint_data_;
+
+    std::queue<EventInfo> events_;
+
+    int shown_zindex_ = 100;
+
+    /// Sort windows by zIndex
+    /// The higher the zIndex, the closer to the first element it is.
+    void sortWindows();
 };
 
-}  // namespace familyline::graphics::gui
+}

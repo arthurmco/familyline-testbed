@@ -381,18 +381,13 @@ void GLWindow::update()
     glEnable(GL_DEPTH_TEST);
 }
 
-gui::GUIManager* GLWindow::createGUIManager()
+std::unique_ptr<gui::GUIRenderer> GLWindow::createGUIRenderer()
 {
-    if (!guim_.get()) {
-        int gwidth, gheight;
-        this->getFramebufferSize(gwidth, gheight);
+    auto guir = new gui::GLGUIRenderer{};
+    
+    
+    return std::unique_ptr<gui::GUIRenderer>( (gui::GUIRenderer*) guir);
 
-        auto& ima = input::InputService::getInputManager();
-
-        guim_ = std::make_unique<gui::GLGUIManager>(*this, gwidth, gheight, *ima.get());
-    }
-
-    return (gui::GUIManager*)guim_.get();
 }
 
 Renderer* GLWindow::createRenderer()

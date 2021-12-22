@@ -1,52 +1,57 @@
 #pragma once
 
-#include <cairo/cairo.h>
-#include <pango/pangocairo.h>
-
-#include <client/graphical/gui/control.hpp>
-#include <memory>
 #include <string>
-#include <vector>
-#include <mutex>
 
-namespace familyline::graphics::gui
-{
+#include <client/graphical/gui/gui_control.hpp>
+
+namespace familyline::graphics::gui {
+
+
 /**
- * The label GUI control
+ * GUILabel
+ *
+ * A text label
+ * Simply stores a text
  */
-class Label : public Control
+class GUILabel : public GUIControl
 {
-private:
-    unsigned width_, height_;
-    std::string text_;
-    PangoLayout* layout_ = nullptr;
-    std::mutex text_mtx_;
-    
-    PangoLayout* getLayout(cairo_t* context) const;
-    PangoWeight getPangoWeightFromAppearance(FontWeight fw) const;
-
-    cairo_t* last_context_ = nullptr;
-    
 public:
-    Label(unsigned width, unsigned height, std::string text)
-        : width_(width), height_(height), text_(text)
+    GUILabel(std::string text, GUIControlRenderInfo i = {}) : GUIControl(i), text_(text)
     {
-        this->appearance_.fontFace = "Arial";
-        this->appearance_.fontSize = 14;
+        calculateNeededSize();
+    };
+
+    /**
+     * A textual way of describing the control
+     * If we were in Python, this would be its `__repr__` method
+     *
+     * Used *only* for debugging purposes.
+     */
+    virtual std::string describe() const;
+
+    /// Called when this control is resized or repositioned
+    virtual void onResize(int nwidth, int nheight, int nx, int ny);
+
+    virtual void autoresize();
+
+    /// Called when the parent need to update
+    virtual void update() { dirty_ = false; };
+
+    std::string text() const { return text_; }
+    void setText(std::string v)
+    {
+        text_  = v;
+        dirty_ = true;
     }
 
-    virtual bool update(cairo_t* context, cairo_surface_t* canvas);
+private:
+    std::string text_;
 
-    virtual std::tuple<int, int> getNeededSize(cairo_t* parent_context) const;
+    // Calculate how much size we need for the text width and height.
+    int textwidth_;
+    int textheight_;
 
-    void setText(std::string v);
-
-    virtual void receiveEvent(const familyline::input::HumanInputAction& ev, CallbackQueue& cq) {}
-
-    virtual ~Label() {
-        if (layout_)
-            g_object_unref(layout_);
-    }
+    void calculateNeededSize();
 };
 
-}  // namespace familyline::graphics::gui
+}

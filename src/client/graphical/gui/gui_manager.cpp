@@ -1,251 +1,255 @@
-#include <client/graphical/window.hpp>
-#include <client/graphical/exceptions.hpp>
-#include <client/graphical/gfx_service.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
-#include <client/graphical/window.hpp>
+#include <client/graphical/gui/gui_control.hpp>
+#include <cstdint>
+#include <fmt/core.h>
+#include <functional>
+#include <yaml-cpp/node/parse.h>
 
 using namespace familyline::graphics::gui;
-using namespace familyline::graphics;
-using namespace familyline::input;
 
-static int vv = 0;
-
-/**
- * Show the window you pass
- *
- * Since the window have a "hidden" delete event, you do not need to remove the
- * window from the gui, deallocating it will be sufficient
- */
-void GUIManager::showWindow(GUIWindow* win)
+void GUITheme::loadFile(std::string path)
 {
-    win->event_onDelete = [&](GUIWindow& w) { this->closeWindow(w); };
+    root_node_ = YAML::LoadFile(path);
 
-    auto [w, h] = win->getNeededSize(context_);
-
-    auto* canvas  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
-    auto* context = cairo_create(canvas);
-    windowstack_.push_back(GUIWindowInfo{win, context, canvas});
+    fmt::print("Name: {}\n", root_node_["name"].as<std::string>());
+    fmt::print("Description: {}\n", root_node_["description"].as<std::string>());
+    
+    file_loaded_ = true;
 }
 
-void GUIManager::closeWindow(const GUIWindow& w)
+std::optional<GUIAppearance> GUITheme::getAppearanceFor(GUIControl* control) const
 {
-    if (!destroying) {
-        auto itend = std::remove_if(windowstack_.begin(), windowstack_.end(), [&](GUIWindowInfo& wi) {
-            return (wi.win->getID() == w.getID());
-        });
-        windowstack_.erase(itend, windowstack_.end());
-    }
-}
-
-void GUIManager::update()
-{
-    root_control_->update(context_, canvas_);
-
-    // Clean bg
-    cairo_set_source_rgba(context_, 0.0, 0.0, 0.0, 0.0);
-    cairo_set_operator(context_, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(context_);
-
-    auto w = cairo_image_surface_get_width(canvas_);
-    auto h = cairo_image_surface_get_height(canvas_);
-
-    auto dabsx = 0;
-    auto dabsy = 0;
-    debug_window_info_.win->update(debug_window_info_.context, debug_window_info_.canvas);
-
-    for (auto& win : windowstack_) {
-        win.win->update(win.context, win.canvas);
-        cairo_set_operator(context_, CAIRO_OPERATOR_OVER);
-
-        auto absx = 0;
-        auto absy = 0;
-
-        cairo_set_source_surface(context_, win.canvas, absx, absy);
-        win.win->updatePosition(absx, absy);
-        cairo_paint(context_);
-    }
-
-    cairo_set_operator(context_, CAIRO_OPERATOR_OVER);
-    cairo_set_source_surface(context_, debug_window_info_.canvas, dabsx, dabsy);
-    debug_window_info_.win->updatePosition(dabsx, dabsy);
-
-    cairo_paint(context_);
-}
-
-void GUIManager::render(unsigned int x, unsigned int y) { this->renderToTexture(); }
-
-GUIManager::~GUIManager()
-{
-    destroying = true;
-    windowstack_.clear();
-    cairo_destroy(context_);
-    cairo_surface_destroy(canvas_);
-
-    // TODO: remove the input handler
-}
-
-/**
- * Get the control that is in the specified pixel coordinate
- *
- * Since we only need to worry about windows, we can simplify this.
- */
-std::optional<Control*> GUIManager::getControlAtPoint(int x, int y)
-{
-    if (windowstack_.empty())
+    if (!file_loaded_)
         return std::nullopt;
-    else
-        return std::optional<Control*>((Control*)windowstack_.back().win);
+
+    
+    if (auto lbl = dynamic_cast<GUILabel*>(control); lbl) {
+        return getAppearanceByControlType("label");
+    } else if (auto btn = dynamic_cast<GUIButton*>(control); btn) {
+        return getAppearanceByControlType("button");
+    } else if (auto text = dynamic_cast<GUITextbox*>(control); text) {
+        return getAppearanceByControlType("textbox");
+    } else if (auto box = dynamic_cast<GUIBox*>(control); box) {
+        return getAppearanceByControlType("box");
+    } else {
+        return std::nullopt;
+    }
+
 }
 
-bool GUIManager::checkIfEventHits(const HumanInputAction& hia)
-{
-    if (std::holds_alternative<GameExit>(hia.type)) {
-        return false;
+
+std::optional<GUIAppearance> GUITheme::getAppearanceByControlType(std::string_view ctype) const
+{    
+    auto appearance = root_node_["controls"][(const char*)ctype.data()];
+
+    if (!appearance) {
+        return std::nullopt;
     }
 
-    if (std::holds_alternative<ClickAction>(hia.type)) {
-        auto ca = std::get<ClickAction>(hia.type);
-        return this->getControlAtPoint(ca.screenX, ca.screenY).has_value();
-    }
+    auto str2color = [](std::string value, std::array<double, 4> defaultv) {
+        if (!value.starts_with("#"))
+            return defaultv;
 
-    if (std::holds_alternative<MouseAction>(hia.type)) {
-        auto ma    = std::get<MouseAction>(hia.type);
-        hitmousex_ = ma.screenX;
-        hitmousey_ = ma.screenY;
-        return this->getControlAtPoint(ma.screenX, ma.screenY).has_value();
-    }
+        auto cvalue = std::string_view{value};
+        cvalue.remove_prefix(1);
+        
+        uint32_t r = 0x0, g = 0x0, b = 0x0, a = 0xff;
+        if (value.size() > 7) {
+            sscanf(cvalue.data(), "%02x%02x%02x%02x",
+                   &r, &g, &b, &a);
+        } else {
+            sscanf(cvalue.data(), "%02x%02x%02x",
+                   &r, &g, &b);            
+        }
 
-    if (std::holds_alternative<KeyAction>(hia.type)) {
-        return this->getControlAtPoint(hitmousex_, hitmousey_).has_value();
-    }
+        return std::array<double, 4>{r/255.0, g/255.0, b/255.0, a/255.0};
+    };
+    
+    GUIAppearance gapp;
+    if (appearance["foreground"])
+        gapp.foreground = str2color(appearance["foreground"].as<std::string>(), {0, 0, 0, 1.0});
+    
+    if (appearance["background"])
+        gapp.background = str2color(appearance["background"].as<std::string>(), {0, 0, 0, 1.0});
 
-    if (std::holds_alternative<WheelAction>(hia.type)) {
-        auto wa = std::get<WheelAction>(hia.type);
-        return this->getControlAtPoint(wa.screenX, wa.screenY).has_value();
-    }
+    if (appearance["font_family"])
+        gapp.font = appearance["font_family"].as<std::string>();
 
-    if (std::holds_alternative<TextInput>(hia.type)) {
-        auto ma = std::get<TextInput>(hia.type);
-        return this->getControlAtPoint(hitmousex_, hitmousey_).has_value();
-    }
+    if (appearance["font_size"])
+        gapp.fontsize = (size_t)appearance["font_size"].as<uint32_t>();
 
-    return false;
+    printf("\tforeground: %s -> %.2f %.2f %.2f %.2f\n",
+           appearance["foreground"].as<std::string>().c_str(),
+           gapp.foreground[0], gapp.foreground[1],
+           gapp.foreground[2], gapp.foreground[3]);
+    
+    /*
+    if (appearance["font_weight"])
+        gapp.weight = appearance["font_weight"].as();
+    */
+    
+    return std::make_optional(gapp);
 }
 
-auto mousex_ = -1;
-auto mousey_ = -1;
 
-/**
- * Process received input events
- *
- */
-void GUIManager::receiveEvent()
-{
-    while (!input_actions_.empty()) {
-        auto& hia           = input_actions_.front();
-        bool is_mouse_event = false;
+void GUIManager::showWindow(GUIWindow &w) {
+  auto window =
+      std::find_if(windows_.begin(), windows_.end(),
+                   [&](WindowInfo &wi) { return wi.window->id() == w.id(); });
 
-        std::optional<Control*> control = std::nullopt;
+  if (window == windows_.end())
+    return;
 
-        if (std::holds_alternative<ClickAction>(hia.type)) {
-            auto ca = std::get<ClickAction>(hia.type);
-            control = this->getControlAtPoint(ca.screenX, ca.screenY);
-        }
-
-        if (std::holds_alternative<MouseAction>(hia.type)) {
-            auto ma        = std::get<MouseAction>(hia.type);
-            mousex_        = ma.screenX;
-            mousey_        = ma.screenY;
-            is_mouse_event = true;
-            control        = this->getControlAtPoint(ma.screenX, ma.screenY);
-        }
-
-        if (std::holds_alternative<KeyAction>(hia.type)) {
-            auto ka = std::get<KeyAction>(hia.type);
-            if (mousex_ >= 0) control = this->getControlAtPoint(mousex_, mousey_);
-        }
-
-        if (std::holds_alternative<WheelAction>(hia.type)) {
-            auto wa = std::get<WheelAction>(hia.type);
-            control = this->getControlAtPoint(wa.screenX, wa.screenY);
-        }
-
-        if (std::holds_alternative<TextInput>(hia.type)) {
-            auto ma = std::get<TextInput>(hia.type);
-            control = this->getControlAtPoint(hitmousex_, hitmousey_);
-        }
-
-        if (control.has_value()) {
-            if (is_mouse_event) {
-                if (hovered_) {
-                    // a control was already focused
-                    if ((*hovered_)->getID() != (*control)->getID()) {
-                        (*hovered_)->onFocusLost();
-
-                        (*control)->onFocusEnter();
-                        hovered_ = control;
-                    }
-
-                } else {
-                    // no control focused yet
-                    (*control)->onFocusEnter();
-                    hovered_ = control;
-                }
-            }
-
-            (*control)->receiveEvent(hia, cb_queue_);
-        }
-
-        input_actions_.pop();
-    }
+  windows_.front().zIndex--;
+  window->zIndex = shown_zindex_;
+  window->window->setEventCallbackRegisterFunction(
+      std::bind(&GUIManager::pushEvent, this, std::placeholders::_1, std::placeholders::_2 ));
+  this->sortWindows();
 }
 
-void GUIManager::runCallbacks()
-{
-    if (!cb_queue_.callbacks.empty()) {
-        // Run one callback per call.
-        auto cb = cb_queue_.callbacks.front();
-        cb_queue_.callbacks.pop();
+void GUIManager::closeWindow(GUIWindow &w) {
+  auto window =
+      std::find_if(windows_.begin(), windows_.end(),
+                   [&](WindowInfo &wi) { return wi.window->id() == w.id(); });
 
-        // TODO: check if the owner exists.
-        cb.fn(cb.owner);
-    }
+  if (window == windows_.end())
+    return;
+
+  window->zIndex = -1;
+  window->window->setEventCallbackRegisterFunction(getDefaultCallbackRegister());
+  
+  if (windows_.size() >= 2) {
+    windows_[1].zIndex = shown_zindex_;
+    windows_[1].window->setEventCallbackRegisterFunction(
+      std::bind(&GUIManager::pushEvent, this, std::placeholders::_1, std::placeholders::_2 ));
+  }
+
+  this->sortWindows();
 }
 
-GUIWindow* GUIManager::createGUIWindow(std::string name, unsigned width, unsigned height)
-{
-    if (windows_.find(name) == windows_.end()) {
-        windows_[name] = std::make_unique<GUIWindow>(width, height);
-    }
+void GUIManager::sortWindows() {
+  std::sort(windows_.begin(), windows_.end(),
+            [](const WindowInfo &a, const WindowInfo &b) {
+              return a.zIndex > b.zIndex;
+            });
 
-    return windows_[name].get();
+  printf("Top window is %s \n", windows_.front().window->describe().c_str());
 }
 
-GUIWindow* GUIManager::getGUIWindow(std::string name)
-{
-    if (auto it = windows_.find(name); it != windows_.end()) {
-        return it->second.get();
-    }
+/// Called when we receive a window resize event
+///
+/// Usually, you will resize the windows proportionally, but, for now,
+/// we will assume that all windows are fullscreen
+void GUIManager::onResize(int width, int height) {
+  std::for_each(windows_.begin(), windows_.end(),
+                [width, height](WindowInfo &w) {
+                  int relwidth = width;
+                  int relheight = height;
+                  int relx = 0;
+                  int rely = 0;
 
-    return nullptr;
+                  w.window->onResize(relwidth, relheight, relx, rely);
+                });
+
+  renderer_->onResize(width, height);
 }
 
 /**
- * Destroy window
+ * Run the event handlers
  */
-void GUIManager::destroyGUIWindow(std::string name)
-{
-    if (auto it = windows_.find(name); it != windows_.end()) {
-        /**
-         * If the current window is being hovered, "unhover" it, so
-         * that a dangling pointer does not remain
-         */
-        if (hovered_) {
-            if ((*hovered_)->getID() == it->second->getID()) hovered_ = std::nullopt;
-        }
+void GUIManager::runEvents() {
+  if (events_.empty())
+    return;
 
-        windows_.erase(it);
-    }
+  auto &event = events_.front();
+  event.cb(event.control);
+  events_.pop();
 }
 
-////////////////////////////////////////////////
+void GUIManager::update() {
+  // Forward inputs to the front window
+  // TODO: forward to the other windows if the front window is
+  //       not in focus (if the event is a key event), or if
+  //       the front window is not under the cursor (if it is
+  //       a mouse event)
+  this->listenInputs();
+  for (auto &w : windows_) {
+    while (!inputs_.empty()) {
+      w.window->receiveInput(inputs_.front());
+      inputs_.pop();
+    }
+
+    break;
+  }
+
+  // Draw the window contents, backwards, because the front window is the last
+  // window to be drawn
+  std::for_each(windows_.rbegin(), windows_.rend(), [this](WindowInfo &w) {
+    if (w.window->dirty()) {
+      w.window->update();
+      w.paint_data = this->painter_->drawWindow(*w.window.get());
+    }
+  });
+
+  renderer_paint_data_.clear();
+  std::transform(windows_.rbegin(), windows_.rend(),
+                 std::back_inserter(renderer_paint_data_),
+                 [](const WindowInfo &w) { return w.paint_data.get(); });
+
+  renderer_->update(renderer_paint_data_);
+}
+
+void GUIManager::render() { renderer_->render(); }
+
+#include <stdlib.h>
+#include <string.h>
+#include <sys/select.h>
+#include <termios.h>
+#include <unistd.h>
+int kbhit() {
+  struct timeval tv = {0L, 0L};
+  fd_set fds;
+  FD_ZERO(&fds);
+  FD_SET(0, &fds);
+  return select(1, &fds, NULL, NULL, &tv);
+}
+
+int getch() {
+  int r;
+  unsigned char c = 0xff;
+  if ((r = read(0, &c, sizeof(c))) < 0) {
+    return r;
+  } else {
+    return c;
+  }
+}
+
+/**
+ * Listen for inputs, add them into the event input queue
+ */
+void GUIManager::listenInputs() {
+  if (kbhit()) {
+      auto ch = (char)getch();
+      auto ev = KeyEvent{
+          .key = ch,
+          .ctrl = false,
+          .alt = false,
+          .shift = false,
+          .isPressing = true,
+          .isReleasing = false
+      };
+
+      inputs_.push(ev);
+
+      ev = KeyEvent{
+          .key = ch,
+          .ctrl = false,
+          .alt = false,
+          .shift = false,
+          .isPressing = false,
+          .isReleasing = true
+      };
+
+      inputs_.push(ev);
+  }
+}

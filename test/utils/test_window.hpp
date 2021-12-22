@@ -12,13 +12,13 @@
 #include <unordered_map>
 
 #include "test_gui_manager.hpp"
+#include "test_gui_renderer.hpp"
 #include "test_renderer.hpp"
 
 class TestWindow : public familyline::graphics::Window
 {
 private:
     TestRenderer* tr = nullptr;
-    TestGUIManager* gm_ = nullptr;
     
 public:
     virtual void getSize(int& w, int& h) const
@@ -46,7 +46,6 @@ public:
     virtual ~TestWindow()
     {
         if (tr) delete tr;
-        if (gm_) delete gm_;
     }
 
     virtual familyline::graphics::Renderer* createRenderer()
@@ -62,11 +61,17 @@ public:
         return (familyline::graphics::Renderer*)tr;
     }
 
-    virtual familyline::graphics::gui::GUIManager* createGUIManager()
+    virtual std::unique_ptr<familyline::graphics::gui::GUIRenderer> createGUIRenderer()
     {
-        auto& ima = familyline::input::InputService::getInputManager();
-        gm_ = new TestGUIManager{*this, 800, 600, *ima.get()};
-        return gm_;
+        //        auto& ima = familyline::input::InputService::getInputManager();
+//        gm_ = new TestGUIManager{*this, 800, 600, *ima.get()};
+//        return gm_;
+
+        TestGUIRenderer* gm = new TestGUIRenderer;
+        gm->onResize(800, 600);
+        
+        return std::unique_ptr<familyline::graphics::gui::GUIRenderer>(
+            (familyline::graphics::gui::GUIRenderer*) gm);
     }
 
     virtual void showMessageBox(

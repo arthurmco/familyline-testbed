@@ -209,6 +209,7 @@ private:
 
     /////////////////////// statistical + debug information
     struct {
+        #if 0
         //  graphics::gui::GUIPanel *p;
         graphics::gui::Label* lbl;
         graphics::gui::Label* lblVersion;
@@ -221,6 +222,8 @@ private:
         graphics::gui::Label* lblSelected   = nullptr;
         graphics::gui::Label* lblTerrainPos = nullptr;
         graphics::gui::Label* lblKeys       = nullptr;
+        #endif
+        int i = 0;
     } widgets;
 
     int frame_ = 0;

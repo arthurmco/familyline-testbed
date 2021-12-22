@@ -24,13 +24,12 @@ add_library(
   "graphical/gfx_service.cpp"
   "graphical/GraphicalPlotInterface.cpp"
   "graphical/gui/gui_button.cpp"
-  "graphical/gui/control.cpp"
-  "graphical/gui/root_control.cpp"
-  "graphical/gui/gui_container_component.cpp"
-  "graphical/gui/gui_imageview.cpp"
+  "graphical/gui/gui_control.cpp"
+  "graphical/gui/gui_box.cpp"
+#  "graphical/gui/gui_imageview.cpp"
   "graphical/gui/gui_label.cpp"
-  "graphical/gui/gui_checkbox.cpp"
-  "graphical/gui/gui_listbox.cpp"
+#  "graphical/gui/gui_checkbox.cpp"
+#  "graphical/gui/gui_listbox.cpp"
   "graphical/gui/gui_textbox.cpp"
   "graphical/gui/gui_manager.cpp"
   "graphical/gui/gui_window.cpp"
@@ -54,7 +53,7 @@ add_library(
   "graphical/opengl/gl_terrain_renderer.cpp"
   "graphical/opengl/gl_framebuffer.cpp"
   "graphical/opengl/gl_texture_environment.cpp"
-  "graphical/opengl/gl_gui_manager.cpp"
+  "graphical/opengl/gl_gui_renderer.cpp"
   "graphical/opengl/gl_shader.cpp"
   "graphical/opengl/gles_utils.cpp"
   "HumanPlayer.cpp"
@@ -80,6 +79,7 @@ find_package(SDL2 CONFIG REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(Yaml REQUIRED)
+find_package(yaml-cpp REQUIRED)
 find_package(OpenGL REQUIRED)
 
 target_link_libraries(familyline-client PUBLIC GLEW::GLEW)
@@ -138,6 +138,7 @@ else()
   target_link_libraries(familyline-client PUBLIC ${PANGOCAIRO_LINK_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${GLM_LINK_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${YAML_LIBRARIES})
+  target_link_libraries(familyline-client PUBLIC ${YAML_CPP_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC Threads::Threads)
   target_include_directories(familyline-client PUBLIC ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${PANGOCAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS}

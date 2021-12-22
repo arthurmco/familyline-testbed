@@ -3,8 +3,10 @@
 #include <cassert>
 
 
-#include "gui_control.hpp"
-#include "gui_layout.hpp"
+#include <client/graphical/gui/gui_control.hpp>
+#include <client/graphical/gui/gui_layout.hpp>
+
+namespace familyline::graphics::gui {
 
 /**
  * GUIBox
@@ -90,3 +92,4 @@ private:
 
   void initLayout(BaseLayout &layout);
 };
+}

@@ -21,23 +21,26 @@ using namespace familyline::input;
 using namespace familyline;
 
 TEST(GameTest, TestIfGameStartsAndRuns)
-{    
+{
     auto ipr = std::make_unique<TestInputProcessor>();
     InputService::setInputManager(std::make_unique<InputManager>(*ipr.get()));
-    
+
     LogicService::getActionQueue()->clearEvents();
     LogicService::getObjectFactory()->clear();
     GFXService::setDevice(std::make_unique<TestDevice>());
     GFXService::createTextureManager(std::make_unique<TextureManager>(GFXService::getDevice()->createTextureEnv()));
-    
+
     std::string mapfile = TESTS_DIR "/terrain_test.flte";
-    
+
     TestWindow* w = (TestWindow*) GFXService::getDevice()->createWindow(800, 600);
     w->createRenderer();
+
+    gui::GUIManager* gm = new gui::GUIManager(w->createGUIRenderer());
+
     GFXGameInit gi{
         w, GFXService::getDevice()->createFramebuffer("f3D", 800, 600),
         GFXService::getDevice()->createFramebuffer("fGUI", 800, 600),
-        w->createGUIManager()};
+        gm};
 
     Game* g   = new Game(gi);
     auto& map = g->initMap(mapfile);
@@ -52,7 +55,7 @@ TEST(GameTest, TestIfGameStartsAndRuns)
         });
     auto i         = session.players->add(std::move(d));
     ASSERT_NE(-1, i);
-    
+
     auto* player   = *(session.players->get(i));
     auto& alliance = session.colonies->createAlliance("Dummy");
     auto& colony   = session.colonies->createColony(
@@ -65,7 +68,7 @@ TEST(GameTest, TestIfGameStartsAndRuns)
                    session.player_colony, i);
     g->initObjectManager();
     g->initLoopData(i);
-    
+
     for (auto i = 0; i < 120; i++) {
         g->runLoop();
     }
@@ -73,6 +76,7 @@ TEST(GameTest, TestIfGameStartsAndRuns)
     ASSERT_NE(-1, i);
 
     delete g;
+    delete gm;
     delete w;
 
     LogicService::getActionQueue()->clearEvents();

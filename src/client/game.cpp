@@ -202,6 +202,7 @@ void Game::initLoopData(uint64_t human_id)
     LogicService::initPathManager(*terrain_.get());
 
     /// add the labels
+    #if 0
     widgets.lblBuilding   = new Label(0.05 * 640, 0.1 * 480, "!!!");
     widgets.lblFPS        = new Label(0.05 * 640, 0.9 * 480, "0 fps, 0 ms/frame");
     widgets.lblRange      = new Label(0.05 * 640, 0.13 * 480, "--");
@@ -252,6 +253,8 @@ void Game::initLoopData(uint64_t human_id)
         5, 125, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)widgets.lblSelected));
     gw.add(5, 155, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)widgets.lblKeys));
 
+    #endif
+    
     started_ = true;
 
     ticks_ = std::chrono::high_resolution_clock::now();
@@ -262,6 +265,7 @@ void Game::initLoopData(uint64_t human_id)
 
 Game::~Game()
 {
+    #if 0
     if (started_) {
         GUIWindow& gw = gui_->getDebugWindow();
         gw.remove(widgets.lblFPS);
@@ -271,6 +275,7 @@ Game::~Game()
         gw.remove(widgets.lblSelected);
         gw.remove(widgets.lblKeys);
     }
+    #endif
 }
 
 bool Game::runLoop()
@@ -334,7 +339,7 @@ bool Game::runLoop()
     sprintf(sfps, "%.2f fps, %.3f ms/frame  - (%.3f ms logic, %.3f ms input, %.3f ms draw) - tick %05zu",
             float(1000 / pms), float(pms), logictime_.count(), inputtime_.count(),
             drawtime_.count(), pm_->tick());
-    widgets.lblFPS->setText(sfps);
+//    widgets.lblFPS->setText(sfps);
 
 #define FPS_LOCK 120.0
 
@@ -376,8 +381,8 @@ bool Game::runInput()
 
     pm_->generateInput();
 
-    if (inputruns % 20 == 0)
-        gui_->update();
+//    if (inputruns % 20 == 0)
+//        gui_->update();
 
     inputruns++;
     return !pm_->exitRequested();
@@ -433,7 +438,7 @@ void Game::runGraphical(double framems)
     fb3D_->endDraw();
 
     fbGUI_->startDraw();
-    gui_->render(0, 0);
+//    gui_->render(0, 0);
     fbGUI_->endDraw();
 
     window_->update();
@@ -445,10 +450,10 @@ void Game::runGraphical(double framems)
 void Game::showDebugInfo()
 {
     if (irepr_) {
-        widgets.lblKeys->setText("Reproducing input...");
+//        widgets.lblKeys->setText("Reproducing input...");
 
         if (irepr_->isReproductionEnded()) {
-            widgets.lblKeys->setText("End of replay!");
+//            widgets.lblKeys->setText("End of replay!");
         }
     }
 
@@ -470,9 +475,9 @@ void Game::showHumanPlayerInfo(logic::Player* hp)
         sprintf(
             s, "Click to build %s",
             BuildQueue::GetInstance()->getNext().value()->getName().c_str());
-        widgets.lblBuilding->setText(s);
+//        widgets.lblBuilding->setText(s);
     } else {
-        widgets.lblBuilding->setText("");
+//        widgets.lblBuilding->setText("");
     }
 
     auto locc = ip_->GetIntersectedObject().lock();
@@ -485,7 +490,7 @@ void Game::showHumanPlayerInfo(logic::Player* hp)
             auto inRange = selected->getAttackComponent()->isInRange(
                 alocc->getAttackComponent().value());
 
-            widgets.lblRange->setText(inRange ? "In range" : "Not in range");
+//            widgets.lblRange->setText(inRange ? "In range" : "Not in range");
         }
     }
 
@@ -502,9 +507,9 @@ void Game::showHumanPlayerInfo(logic::Player* hp)
             sprintf(s, "Selected object: '%s'", selected->getName().c_str());
         }
 
-        widgets.lblSelected->setText(s);
+//        widgets.lblSelected->setText(s);
     } else {
-        widgets.lblSelected->setText("");
+//        widgets.lblSelected->setText("");
     }
 
     glm::vec3 p = ip_->GetTerrainProjectedPosition();
@@ -516,7 +521,7 @@ void Game::showHumanPlayerInfo(logic::Player* hp)
         "Terrain pos: "
         "(ogl: %.3f,%.3f,%.3f | Game: %.2f, %.2f), rotation %.1f",
         p.x, p.y, p.z, q.x, q.y, camera_->GetRotation() * 180 / M_PI);
-    widgets.lblTerrainPos->setText(texs);
+//    widgets.lblTerrainPos->setText(texs);
 }
 
 /// Return maximum, minimum and average fps

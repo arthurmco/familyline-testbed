@@ -1,10 +1,13 @@
-#include "gui_control.hpp"
+#include <client/graphical/gui/gui_control.hpp>
+
+using namespace familyline::graphics::gui;
+
 
 /**
  * Gets a no-op callback register, just so that we do not call a null pointer
  * when we do not have it
  */
-FGUICallbackRegister getDefaultCallbackRegister() {
+FGUICallbackRegister familyline::graphics::gui::getDefaultCallbackRegister() {
     return [](auto fn, auto& control) {};
 }
 

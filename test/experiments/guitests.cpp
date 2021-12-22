@@ -101,9 +101,6 @@ int main() {
 
   auto theme = std::make_unique<GUITheme>();
   theme->loadFile("theme.yaml");
-
-  // Initialize the locale so that string encode conversions work.
-  std::setlocale(LC_ALL, "");
   
 //  set_nonblocking_terminal_mode();
 

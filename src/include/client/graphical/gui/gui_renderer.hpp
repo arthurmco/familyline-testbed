@@ -3,7 +3,10 @@
 #include <cstdint>
 #include <string>
 
-#include "gui.hpp"
+#include <client/graphical/gui/gui.hpp>
+
+namespace familyline::graphics::gui {
+
 
 /**
  * ControlPaintData
@@ -117,3 +120,5 @@ public:
 
   virtual ~GUIRenderer() {}
 };
+
+}

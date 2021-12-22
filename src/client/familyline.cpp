@@ -903,8 +903,8 @@ int main(int argc, char const* argv[])
         Framebuffer* fGUI = GFXService::getDevice()->createFramebuffer("fGUI", gwidth, gheight);
         win->setFramebuffers(f3D, fGUI);
 
-        guir = win->createGUIManager();
-        guir->initialize(*win);
+        guir = new GUIManager(win->createGUIRenderer());
+        // guir->initialize(*win);
         // guir->initShaders(win);
 
         auto& texman = GFXService::getTextureManager();
@@ -1036,6 +1036,7 @@ static int show_starting_menu(
     bool r = true;
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
+    /*
     GUIWindow* gwin = ginfo.guir->createGUIWindow("main", ginfo.gwidth, ginfo.gheight);
     CServer cserv{};
 
@@ -1286,6 +1287,7 @@ static int show_starting_menu(
         });
 
         ginfo.guir->showWindow(gmplayer);
+
     });
 
     bnew->setClickCallback([&](Control* cc) {
@@ -1324,7 +1326,9 @@ static int show_starting_menu(
 
     ginfo.guir->showWindow(gwin);
     // guir->add(0, 0, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)gwin));
+    */
 
+    
     ima->addListenerHandler([&](HumanInputAction hia) {
         /* Only listen for game exit events, because you sure want to
            close the window The others will be handled by the GUI listener */
@@ -1342,13 +1346,16 @@ static int show_starting_menu(
         // Input
         ima->processEvents();
 
+        #if 0
         ginfo.guir->receiveEvent();
         ginfo.guir->runCallbacks();
+        #endif
         ginfo.guir->update();
 
         // Render
         ginfo.fGUI->startDraw();
-        ginfo.guir->render(0, 0);
+
+        ginfo.guir->render();
         // guir->renderToScreen();
         ginfo.fGUI->endDraw();
 

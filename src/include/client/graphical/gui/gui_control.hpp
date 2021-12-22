@@ -7,6 +7,8 @@
 
 #include <variant>
 
+namespace familyline::graphics::gui {
+
 /**
  * The GUI event types
  *
@@ -26,9 +28,10 @@ enum class ButtonType {
   // The three greater and ubiquitous buttons
   Left,
   Right,
-  Middle,
+  Middle
 
   // The ones below exists almost exclusively on gaming mouses
+  #if 0
   Button4,
   Button5,
   Button6,
@@ -36,6 +39,7 @@ enum class ButtonType {
   Button8,
   Button9,
   Button10
+  #endif
 };
 
 /**
@@ -259,3 +263,4 @@ protected:
   /// an invalid parent (a NULLPTR)
   std::optional<GUIControl *> parent_ = std::nullopt;
 };
+}
