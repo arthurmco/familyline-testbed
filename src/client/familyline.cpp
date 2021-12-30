@@ -904,8 +904,7 @@ int main(int argc, char const* argv[])
         win->setFramebuffers(f3D, fGUI);
 
         guir = new GUIManager(win->createGUIRenderer());
-        // guir->initialize(*win);
-        // guir->initShaders(win);
+        guir->onResize(gwidth, gheight);
 
         auto& texman = GFXService::getTextureManager();
 
@@ -1036,6 +1035,35 @@ static int show_starting_menu(
     bool r = true;
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
+    GUIWindow &w = ginfo.guir->createWindow<FlexLayout<false>>();
+    GUILabel &l =
+        (GUILabel &)w.box().add(ginfo.guir->createControl<GUILabel>("FAMILYLINE"));
+    GUILabel &lv =
+        (GUILabel &)w.box().add(ginfo.guir->createControl<GUILabel>("Version " VERSION ", commit " COMMIT));
+
+    GUIButton &bnew =
+        (GUIButton &)w.box().add(ginfo.guir->createControl<GUIButton>("New Game", [](auto c) {
+            
+        }));
+    GUIButton &bsettings =
+        (GUIButton &)w.box().add(ginfo.guir->createControl<GUIButton>("Settings", [](auto c) {
+            
+        }));
+    GUIButton &bmplayer =
+        (GUIButton &)w.box().add(ginfo.guir->createControl<GUIButton>("Multiplayer", [](auto c) {
+            
+        }));
+    GUIButton &bquit =
+        (GUIButton &)w.box().add(ginfo.guir->createControl<GUIButton>("Exit Game", [&](auto c) {
+            (void)c;
+            r = false;
+        }));
+
+
+    // TODO: Autoresize this when autoresizing the gui manager
+    w.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
+    
+    
     /*
     GUIWindow* gwin = ginfo.guir->createGUIWindow("main", ginfo.gwidth, ginfo.gheight);
     CServer cserv{};

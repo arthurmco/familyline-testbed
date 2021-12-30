@@ -1,44 +1,31 @@
 #include <client/graphical/opengl/gl_gui_renderer.hpp>
+#include <client/graphical/gfx_service.hpp>
+#include <common/logger.hpp>
 
 #include <cstdio>
 
+#ifdef RENDERER_OPENGL
+
 using namespace familyline::graphics::gui;
 
-void GLGUIRenderer::update(const std::vector<ControlPaintData *> &data)
-{
-    data_ = data;
-}
+void GLGUIRenderer::update(const std::vector<ControlPaintData *> &data) {
 
-GLControlPaintData* GLGUIRenderer::query(int id)
-{
-    for (auto* d : data_) {
-        GLControlPaintData *cd = (GLControlPaintData *)d;
-        if (cd->control.id() == id)
-            return cd;
+    cairo_set_source_rgba(context_, 0, 0, 0, 0);
+    cairo_set_operator(context_, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(context_);
 
-        if (cd->children().size() > 0)
-            return queryInto(id, cd);
+
+    for (const ControlPaintData* d : data){
+        const GLControlPaintData* gld = (const GLControlPaintData*)d;
+        
+        cairo_set_operator(context_, CAIRO_OPERATOR_OVER);
+        cairo_move_to(context_, gld->x, gld->y);
+        cairo_set_source_surface(context_, (cairo_surface_t*)gld->data(), 0, 0);
+        cairo_paint(context_);
     }
     
-    return nullptr;    
+    
 }
-
-
-GLControlPaintData* GLGUIRenderer::queryInto(int id, GLControlPaintData * parent)
-{
-    for (auto& c : parent->children()) {
-        if (c->control.id() == id)
-            return c.get();
-
-        if (c->children().size() > 0)
-            return queryInto(id, c.get());
-    }
-
-    return nullptr;
-}
-
-
-void GLGUIRenderer::render() { }
 
 std::optional<GUIGlyphSize> GLGUIRenderer::getCodepointSize(
     char32_t codepoint, std::string_view fontName, size_t fontSize, FontWeight weight)
@@ -53,7 +40,7 @@ std::optional<GUIGlyphSize> GLGUIRenderer::getCodepointSize(
 }
 
 std::unique_ptr<GUIControlPainter> GLGUIRenderer::createPainter()
-{    
+{
     return std::make_unique<GLControlPainter>(*this);
 }
 
@@ -65,18 +52,230 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawWindow(GUIWindow &w)
 
 std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl &c)
 {
-    //    printf("\tdrawing control %04x: %s\n", c.id(), c.describe().c_str());
+    auto controlpaint = std::make_unique<GLControlPaintData>(c, c.x(), c.y(), c.width(), c.height());
+
+    cairo_t* ctxt = (cairo_t*) controlpaint->context;
+    
+    cairo_set_line_width(ctxt, 2.0);
+
+    double r = 1.0/(c.id()-65535);
+    
+    cairo_set_source_rgb(ctxt, r, 0, 0.5);
+    cairo_rectangle(ctxt, 1, 1, c.width()-1, c.height()-1);
+    cairo_fill(ctxt);
+
+    cairo_set_source_rgb(ctxt, 0.1, 0.0, 0.25);
+    auto strsize = fmt::format("{:08x}, ({}, {})", c.id(), c.x(), c.y());
+    cairo_move_to(ctxt, 10, 20);
+    cairo_set_font_size(ctxt, 15.0);
+    cairo_show_text(ctxt, strsize.c_str());
+    strsize = fmt::format("{}", c.describe());
+    cairo_move_to(ctxt, 10, 40);
+    cairo_set_font_size(ctxt, 15.0);
+    cairo_show_text(ctxt, strsize.c_str());
+    
+    cairo_set_source_rgb(ctxt, 0.0, 0.0, 1.0);
+    cairo_rectangle(ctxt, 1, 1, c.width()-1, c.height()-1);
+    cairo_stroke(ctxt);
+
     if (auto box = dynamic_cast<GUIBox *>(&c); box) {
-        std::vector<std::unique_ptr<GLControlPaintData>> children;
+
         for (auto *child : *box) {
-            auto pchild = drawControl(*child).release();
-            children.push_back(
-                std::unique_ptr<GLControlPaintData>((GLControlPaintData *)pchild));
+            auto relx = child->x() - c.x();
+            auto rely = child->y() - c.y();
+
+            printf("%d %d %d |", child->id(), relx, rely);
+            
+            auto pchild = drawControl(*child);
+            
+            cairo_set_operator(ctxt, CAIRO_OPERATOR_OVER);
+            cairo_set_source_surface(ctxt, (cairo_surface_t*)pchild->data(), relx, rely);
+            cairo_paint(ctxt);
+            
         }
 
-        return std::make_unique<GLControlPaintData>(
-            *box, box->width(), box->height(), box->x(), box->y(), std::move(children));
-    } else {
-        return std::make_unique<GLControlPaintData>(c, c.width(), c.height(), c.x(), c.y());
+        puts("");
     }
+    
+    return controlpaint;
 }
+
+/* The panel vertex square coordinates.
+   It's a big rectangle, that fills the entire screen  */
+static const float window_pos_coord[][3] = {{-1, 1, 1}, {-1, -1, 1}, {1, -1, 1},
+                                            {-1, 1, 1}, {1, 1, 1},   {1, -1, 1}};
+
+/* Coordinates for every panel texture.
+   Since they have the same vertex order, we don't need to declare multiple
+   texture coordinates
+   Also send the y coordinate inverted, because in OpenGL, Y positive is down, not up
+*/
+static const float window_texture_coord[][2] = {{-1, 1}, {-1, -1}, {1, -1},
+                                                {-1, 1}, {1, 1},   {1, -1}};
+
+GLuint attrPos_, attrTex_;
+GLuint vboPos, vboTex;
+
+GLGUIRenderer::GLGUIRenderer()
+{
+    canvas_ = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, screenWidth_, screenHeight_);
+    context_ = cairo_create(canvas_);
+    this->initShaders();
+    tex_gui_ = this->initTexture(screenWidth_, screenHeight_);
+}
+
+/**
+ * Initialize the GUI shaders
+ */
+void GLGUIRenderer::initShaders()
+{
+    auto& d = GFXService::getDevice();
+
+    sGUI_ = d->createShaderProgram(
+        "gui", {d->createShader("shaders/GUI.vert", ShaderType::Vertex),
+                d->createShader("shaders/GUI.frag", ShaderType::Fragment)});
+
+    sGUI_->link();
+
+    auto fnGetAttrib = [&](const char* name) {
+        return glGetAttribLocation(sGUI_->getHandle(), name);
+    };
+
+    attrPos_ = fnGetAttrib("position");
+    attrTex_ = fnGetAttrib("in_uv");
+
+
+    // Create the vertices
+    glGenVertexArrays(1, &(this->vao_gui_));
+    glBindVertexArray(this->vao_gui_);
+
+    /* Create vertex information */
+    glGenBuffers(1, &vboPos);
+    glBindBuffer(GL_ARRAY_BUFFER, vboPos);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 18, window_pos_coord, GL_STATIC_DRAW);
+    glVertexAttribPointer(attrPos_, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(attrPos_);
+
+    glGenBuffers(1, &vboTex);
+    glBindBuffer(GL_ARRAY_BUFFER, vboTex);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, window_texture_coord, GL_STATIC_DRAW);
+    glVertexAttribPointer(attrTex_, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(attrTex_);
+
+    glBindVertexArray(0);
+
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        auto e = fmt::format("error {:#x} while setting vertices and shaders for GUI content", err);
+        throw graphical_exception(e);
+    }
+    
+}
+
+GLuint GLGUIRenderer::initTexture(int width, int height)
+{
+    GLuint handle;
+    glGenTextures(1, &handle);
+
+    glBindTexture(GL_TEXTURE_2D, handle);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    cairo_surface_flush(this->canvas_);
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE,
+        (void *)cairo_image_surface_get_data(canvas_));
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return handle;
+
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        auto e = fmt::format("error {:#x} while setting texture for GUI content", err);
+        throw graphical_exception(e);
+    }
+
+}
+
+/**
+ * Resize the GUI texture
+ */
+GLuint GLGUIRenderer::resizeTexture(int width, int height)
+{
+    glDeleteTextures(1, &tex_gui_);
+
+    cairo_surface_destroy(canvas_);
+    cairo_destroy(context_);
+
+    canvas_  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+    context_ = cairo_create(canvas_);
+    return initTexture(width, height);
+}
+
+void GLGUIRenderer::render() {
+    auto& log = LoggerService::getLogger();
+
+    cairo_set_source_rgb(context_, 1.0, 1.0, 1.0);
+    auto strsize = fmt::format("{} x {}", screenWidth_, screenHeight_);
+    cairo_move_to(context_, 50, 50);
+    cairo_set_font_size(context_, 15.0);
+    cairo_show_text(context_, strsize.c_str());
+
+    cairo_surface_flush(this->canvas_);
+    auto* canvas_data = cairo_image_surface_get_data(this->canvas_);
+    if (!canvas_data) {
+        log->write("gui-renderer", LogType::Warning, "canvas data points to a null pointer, weird...");
+        return;
+    }
+        
+    // Make the GUI texture transparent
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    GLint depthf;
+    glGetIntegerv(GL_DEPTH_FUNC, &depthf);
+    glDepthFunc(GL_LEQUAL);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+    GFXService::getShaderManager()->use(*sGUI_);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, this->tex_gui_);
+
+    sGUI_->setUniform("texPanel", 0);
+    sGUI_->setUniform("opacity", 1.0f);
+
+    glBindVertexArray(this->vao_gui_);
+
+    glEnableVertexAttribArray(attrPos_);
+    glBindBuffer(GL_ARRAY_BUFFER, vboPos);
+    glVertexAttribPointer(attrPos_, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glEnableVertexAttribArray(attrTex_);
+    glBindBuffer(GL_ARRAY_BUFFER, vboTex);
+    glVertexAttribPointer(attrTex_, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    
+    glTexSubImage2D(
+        GL_TEXTURE_2D, 0, 0, 0, screenWidth_, screenHeight_, GL_BGRA, GL_UNSIGNED_BYTE,
+        (void *)canvas_data);    
+    
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        log->write("gui-renderer", LogType::Error, "OpenGL error %#x", err);
+    }
+
+    glBindVertexArray(0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glDepthFunc(depthf);
+    glDisable(GL_BLEND);
+
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+
+}
+
+#endif
