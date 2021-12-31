@@ -218,9 +218,9 @@ int start_networked_game(
             pm->add(std::make_unique<NetworkPlayer>(*pm.get(), map, c), false);
         }
         auto hid = pm->add(
-            std::unique_ptr<Player>(
-                new HumanPlayer{*pm.get(), map, local_player_info.name.c_str(), gps.id(),
-                    *input::InputService::getCommandTable().get(), true}),
+            std::unique_ptr<Player>(new HumanPlayer{
+                *pm.get(), map, local_player_info.name.c_str(), gps.id(),
+                *input::InputService::getCommandTable().get(), true}),
             false);
         local_player_info.id = hid;
         printf("\n%lx %lx\n", hid, gps.id());
@@ -637,9 +637,9 @@ Game* start_game(
             pm      = std::move(session.players);
             cm      = std::move(session.colonies);
 
-            human_player_id = pm->add(std::unique_ptr<Player>(
-                new HumanPlayer{*pm.get(), map, player_name.c_str(), 0,
-                    *input::InputService::getCommandTable().get(), false}));
+            human_player_id = pm->add(std::unique_ptr<Player>(new HumanPlayer{
+                *pm.get(), map, player_name.c_str(), 0,
+                *input::InputService::getCommandTable().get(), false}));
             auto* player    = *(pm->get(human_player_id));
             auto& alliance  = cm->createAlliance(std::string{player->getName()});
             auto& colony    = cm->createColony(
@@ -860,22 +860,21 @@ int main(int argc, char const* argv[])
         {
             auto& ct = input::InputService::getCommandTable();
             ct->loadConfiguration({
-                    {"<up>", "CameraMove, up"},
-                    {"<down>", "CameraMove, down"},
-                    {"<right>", "CameraMove, right"},
-                    {"<left>", "CameraMove, left"},
-                    {"+", "CameraZoom, in"},
-                    {"-", "CameraZoom, out"},
-                    {"<kp-add>", "CameraZoom, in"},
-                    {"<kp-subtract>", "CameraZoom, out"},
-                    {"c", "DebugCreateEntity, tower"},
-                    {"e", "DebugCreateEntity, tent"},
-                    {"r", "DebugDestroyEntity"},
-                    {"b", "DebugShowBoundingBox"},
-                });
-
+                {"<up>", "CameraMove, up"},
+                {"<down>", "CameraMove, down"},
+                {"<right>", "CameraMove, right"},
+                {"<left>", "CameraMove, left"},
+                {"+", "CameraZoom, in"},
+                {"-", "CameraZoom, out"},
+                {"<kp-add>", "CameraZoom, in"},
+                {"<kp-subtract>", "CameraZoom, out"},
+                {"c", "DebugCreateEntity, tower"},
+                {"e", "DebugCreateEntity, tent"},
+                {"r", "DebugDestroyEntity"},
+                {"b", "DebugShowBoundingBox"},
+            });
         }
-        
+
         auto& ima = InputService::getInputManager();
 
         GFXService::createTextureManager(
@@ -1035,42 +1034,76 @@ static int show_starting_menu(
     bool r = true;
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
-    GUIWindow &w = ginfo.guir->createWindow<FlexLayout<false>>();
-    GUILabel &l =
-        (GUILabel &)w.box().add(ginfo.guir->createControl<GUILabel>("FAMILYLINE"));
+    GUIWindow& background = ginfo.guir->createWindow<FlexLayout<false>>();
+    GUIWindow& w          = ginfo.guir->createWindow<FlexLayout<false>>();
+    // TODO: Autoresize this when autoresizing the gui manager
+    w.onResize(ginfo.gwidth - 2, ginfo.gheight - 2, 1, 1);
+    background.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
+
+    ginfo.guir->showWindow(w);
+
+    GUILabel& l = (GUILabel&)w.box().add(ginfo.guir->createControl<GUILabel>("FAMILYLINE"));
     {
-        auto a = l.appearance();
-        a.fontsize = 28;
+        auto a                = l.appearance();
+        a.fontsize            = 28;
         a.horizontalAlignment = HorizontalAlignment::Center;
+        a.background          = {0, 0, 0, 0};
         l.setAppearance(a);
     }
-    
-    GUILabel &lv =
-        (GUILabel &)w.box().add(ginfo.guir->createControl<GUILabel>("Version " VERSION ", commit " COMMIT));
 
-    GUIButton &bnew =
-        (GUIButton &)w.box().add(ginfo.guir->createControl<GUIButton>("New Game", [](auto c) {
-            
+    GUILabel& lv = (GUILabel&)w.box().add(
+        ginfo.guir->createControl<GUILabel>("Version " VERSION ", commit " COMMIT));
+
+    GUIButton& bnew =
+        (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("New Game", [&](auto c) {
+            (void)c;
+            if (async_test.joinable()) {
+                if (!aexit) {
+                    aexit = true;
+                    async_test.join();
+                }
+            }
+
+            ginfo.guir->destroyWindow(background);
+            ginfo.guir->destroyWindow(w);
+
+            auto createNormalSession_fn = [](logic::Terrain& map, auto& local_player_info) {
+                /// running a normal game
+                return initSinglePlayerSession(map, local_player_info);
+            };
+
+            g = start_game(
+                ginfo, lr, StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt},
+                confdata, createNormalSession_fn);
+
+            if (g) {
+                lr.load([&]() { return g->runLoop(); });
+            }
         }));
-    GUIButton &bsettings =
-        (GUIButton &)w.box().add(ginfo.guir->createControl<GUIButton>("Settings", [](auto c) {
-            
+    GUIButton& bsettings =
+        (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Settings", [](auto c) {
+
         }));
-    GUIButton &bmplayer =
-        (GUIButton &)w.box().add(ginfo.guir->createControl<GUIButton>("Multiplayer", [](auto c) {
-            
+    GUIButton& bmplayer =
+        (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Multiplayer", [](auto c) {
+
         }));
-    GUIButton &bquit =
-        (GUIButton &)w.box().add(ginfo.guir->createControl<GUIButton>("Exit Game", [&](auto c) {
+    GUIButton& bquit =
+        (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Exit Game", [&](auto c) {
             (void)c;
             r = false;
         }));
 
+    GUILabel& backimage = (GUILabel&)background.box().add(
+        ginfo.guir->createControl<GUILabel>("BACKGROUND\nPLACEHOLDER"));
+    {
+        auto a                = backimage.appearance();
+        a.fontsize            = 56;
+        a.horizontalAlignment = HorizontalAlignment::Center;
+        a.foreground          = {0.2, 0.4, 0.8, 1.0};
+        backimage.setAppearance(a);
+    }
 
-    // TODO: Autoresize this when autoresizing the gui manager
-    w.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
-    
-    
     /*
     GUIWindow* gwin = ginfo.guir->createGUIWindow("main", ginfo.gwidth, ginfo.gheight);
     CServer cserv{};
@@ -1326,28 +1359,6 @@ static int show_starting_menu(
     });
 
     bnew->setClickCallback([&](Control* cc) {
-        (void)cc;
-        if (async_test.joinable()) {
-            if (!aexit) {
-                aexit = true;
-                async_test.join();
-            }
-        }
-
-        ginfo.guir->closeWindow(*gwin);
-
-        auto createNormalSession_fn = [](logic::Terrain& map, auto& local_player_info) {
-            /// running a normal game
-            return initSinglePlayerSession(map, local_player_info);
-        };
-
-        g = start_game(
-            ginfo, lr, StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt}, confdata,
-            createNormalSession_fn);
-
-        if (g) {
-            lr.load([&]() { return g->runLoop(); });
-        }
     });
 
     gwin->add(0.37, 0.03, ControlPositioning::CenterX, std::unique_ptr<Control>((Control*)l));
@@ -1363,7 +1374,6 @@ static int show_starting_menu(
     // guir->add(0, 0, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)gwin));
     */
 
-    
     ima->addListenerHandler([&](HumanInputAction hia) {
         /* Only listen for game exit events, because you sure want to
            close the window The others will be handled by the GUI listener */
@@ -1381,10 +1391,10 @@ static int show_starting_menu(
         // Input
         ima->processEvents();
 
-        #if 0
+#if 0
         ginfo.guir->receiveEvent();
         ginfo.guir->runCallbacks();
-        #endif
+#endif
         ginfo.guir->update();
 
         // Render
