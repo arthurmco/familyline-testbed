@@ -7,7 +7,7 @@ image: Visual Studio 2019
 cache: c:\tools\vcpkg\installed\
 
 install:
-  - vcpkg install cairo:x86-windows curl:x86-windows curlpp:x86-windows devil:x86-windows flatbuffers:x86-windows fmt:x86-windows glew:x86-windows glm:x86-windows libyaml:x86-windows nlohmann-json:x86-windows opengl:x86-windows pango:x86-windows sdl2:x86-windows sdl2-image:x86-windows tl-expected:x86-windows
+  - vcpkg install cairo:x86-windows curl:x86-windows curlpp:x86-windows devil:x86-windows flatbuffers:x86-windows fmt:x86-windows glew:x86-windows glm:x86-windows libyaml:x86-windows nlohmann-json:x86-windows opengl:x86-windows pango:x86-windows sdl2:x86-windows sdl2-image:x86-windows tl-expected:x86-windows yaml-cpp:x86-windows
 
 before_build:
   - git submodule init
