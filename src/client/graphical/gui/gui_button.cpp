@@ -39,7 +39,6 @@ void GUIButton::receiveInput(const familyline::input::HumanInputAction &e) {
         }
     } else if (auto *mev = std::get_if<ClickAction>(&e.type); mev) {
         hover_ = true;
-        printf("click");
         onClick_(*this);
     } else if (auto *mev = std::get_if<MouseAction>(&e.type); mev) {
         hover_ = true;

@@ -163,6 +163,10 @@ public:
         return *ret;
     }
 
+    /**
+     * Deletes a window
+     */
+    
     // https://www.amazon.com/High-Performance-Master-optimizing-functioning/dp/1839216549
 
     /// Called when we receive a window resize event
@@ -183,6 +187,12 @@ public:
     void showWindow(GUIWindow &);
     void closeWindow(GUIWindow &);
 
+
+    /**
+     * Removes a window from the window list.
+     */
+    void destroyWindow(GUIWindow& w);
+    
     void update();
     void render();
 

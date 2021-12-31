@@ -91,6 +91,149 @@ TEST_F(GUITestBase, TestRenderLayoutVertical)
     ASSERT_EQ(400, lbottom->height);
 }
 
+TEST_F(GUITestBase, TestRenderLayoutPartialWindow)
+{
+    gm->onResize(800, 800);
+    
+    GUIWindow &w1 = gm->createWindow<FlexLayout<false>>();
+    w1.onResize(400, 800, 0, 0);
+    
+    GUILabel &label11 =
+        (GUILabel &)w1.box().add(gm->createControl<GUILabel>("Top"));
+    GUILabel &label12 =
+        (GUILabel &)w1.box().add(gm->createControl<GUILabel>("Bottom"));
+
+    gm->update();
+    gm->render();
+
+    TestGUIRenderer &tr       = (TestGUIRenderer &)gm->getRenderer();
+    TestControlPaintData *ltop = tr.query(label11.id());
+    TestControlPaintData *lbottom = tr.query(label12.id());
+
+    EXPECT_EQ(0, ltop->x);
+    EXPECT_EQ(0, ltop->y);
+    EXPECT_EQ(400, ltop->width);
+    EXPECT_EQ(400, ltop->height);
+    EXPECT_EQ(0, lbottom->x);
+    EXPECT_EQ(400, lbottom->y);
+    EXPECT_EQ(400, lbottom->width);
+    EXPECT_EQ(400, lbottom->height);
+}
+
+TEST_F(GUITestBase, TestRenderWindowOneAboveOther)
+{
+    gm->onResize(800, 800);
+    
+    GUIWindow &w1 = gm->createWindow<FlexLayout<false>>();
+    w1.onResize(800, 800, 0, 0);
+    
+    GUIWindow &w2 = gm->createWindow<FlexLayout<false>>();
+    w2.onResize(800, 800, 0, 0);
+
+    GUILabel &label11 =
+        (GUILabel &)w1.box().add(gm->createControl<GUILabel>("Top W1"));
+    GUILabel &label12 =
+        (GUILabel &)w1.box().add(gm->createControl<GUILabel>("Bottom W1"));
+    
+    GUILabel &label21 =
+        (GUILabel &)w2.box().add(gm->createControl<GUILabel>("Top W2"));
+    GUILabel &label22 =
+        (GUILabel &)w2.box().add(gm->createControl<GUILabel>("Bottom W2"));
+
+    gm->update();
+    gm->render();
+
+    TestGUIRenderer &tr       = (TestGUIRenderer &)gm->getRenderer();
+    TestControlPaintData *ltop = tr.query(label11.id());
+    TestControlPaintData *lbottom = tr.query(label12.id());
+    
+    ASSERT_TRUE(ltop);
+    ASSERT_TRUE(lbottom);
+
+    EXPECT_EQ(0, ltop->x);
+    EXPECT_EQ(0, ltop->y);
+    EXPECT_EQ(800, ltop->width);
+    EXPECT_EQ(400, ltop->height);
+    EXPECT_EQ(0, lbottom->x);
+    EXPECT_EQ(400, lbottom->y);
+    EXPECT_EQ(800, lbottom->width);
+    EXPECT_EQ(400, lbottom->height);
+
+    ltop = tr.query(label21.id());
+    lbottom = tr.query(label22.id());
+
+    ASSERT_TRUE(ltop);
+    ASSERT_TRUE(lbottom);
+    
+    EXPECT_EQ(0, ltop->x);
+    EXPECT_EQ(0, ltop->y);
+    EXPECT_EQ(800, ltop->width);
+    EXPECT_EQ(400, ltop->height);
+    EXPECT_EQ(0, lbottom->x);
+    EXPECT_EQ(400, lbottom->y);
+    EXPECT_EQ(800, lbottom->width);
+    EXPECT_EQ(400, lbottom->height);
+
+}
+
+
+TEST_F(GUITestBase, TestRenderLayoutMultiWindow)
+{
+    gm->onResize(800, 800);
+    
+    GUIWindow &w1 = gm->createWindow<FlexLayout<false>>();
+    w1.onResize(400, 800, 0, 0);
+    
+    GUIWindow &w2 = gm->createWindow<FlexLayout<false>>();
+    w2.onResize(400, 800, 400, 0);
+    
+    GUILabel &label11 =
+        (GUILabel &)w1.box().add(gm->createControl<GUILabel>("Top W1"));
+    GUILabel &label12 =
+        (GUILabel &)w1.box().add(gm->createControl<GUILabel>("Bottom W1"));
+    
+    GUILabel &label21 =
+        (GUILabel &)w2.box().add(gm->createControl<GUILabel>("Top W2"));
+    GUILabel &label22 =
+        (GUILabel &)w2.box().add(gm->createControl<GUILabel>("Bottom W2"));
+
+    gm->update();
+    gm->render();
+
+    TestGUIRenderer &tr       = (TestGUIRenderer &)gm->getRenderer();
+    TestControlPaintData *ltop = tr.query(label11.id());
+    TestControlPaintData *lbottom = tr.query(label12.id());
+
+    ASSERT_TRUE(ltop);
+    ASSERT_TRUE(lbottom);
+
+    EXPECT_EQ(0, ltop->x);
+    EXPECT_EQ(0, ltop->y);
+    EXPECT_EQ(400, ltop->width);
+    EXPECT_EQ(400, ltop->height);
+    EXPECT_EQ(0, lbottom->x);
+    EXPECT_EQ(400, lbottom->y);
+    EXPECT_EQ(400, lbottom->width);
+    EXPECT_EQ(400, lbottom->height);
+
+    ltop = tr.query(label21.id());
+    lbottom = tr.query(label22.id());
+
+    ASSERT_TRUE(ltop);
+    ASSERT_TRUE(lbottom);
+    
+    EXPECT_EQ(400, ltop->x);
+    EXPECT_EQ(0, ltop->y);
+    EXPECT_EQ(400, ltop->width);
+    EXPECT_EQ(400, ltop->height);
+    EXPECT_EQ(400, lbottom->x);
+    EXPECT_EQ(400, lbottom->y);
+    EXPECT_EQ(400, lbottom->width);
+    EXPECT_EQ(400, lbottom->height);
+
+}
+
+
 TEST_F(GUITestBase, TestRenderLayoutHorizontal)
 {
     GUIWindow &w = gm->createWindow<FlexLayout<true>>();

@@ -16,8 +16,12 @@ TestControlPaintData* TestGUIRenderer::query(int id)
         if (cd->control.id() == id)
             return cd;
 
-        if (cd->children().size() > 0)
-            return queryInto(id, cd);
+        if (cd->children().size() > 0) {
+            auto r = queryInto(id, cd);
+            if (r) {
+                return r;
+            }
+        }
     }
     
     return nullptr;    
@@ -59,13 +63,11 @@ std::unique_ptr<GUIControlPainter> TestGUIRenderer::createPainter()
 
 std::unique_ptr<ControlPaintData> TestControlPainter::drawWindow(GUIWindow &w)
 {
-    //    printf("drawing window %04x: %s\n", w.id(), w.describe().c_str());
     return drawControl(w.box());
 }
 
 std::unique_ptr<ControlPaintData> TestControlPainter::drawControl(GUIControl &c)
 {
-    //    printf("\tdrawing control %04x: %s\n", c.id(), c.describe().c_str());
     if (auto box = dynamic_cast<GUIBox *>(&c); box) {
         std::vector<std::unique_ptr<TestControlPaintData>> children;
         for (auto *child : *box) {

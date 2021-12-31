@@ -44,6 +44,7 @@ set( SRC_TEST_FILES
   "${CMAKE_SOURCE_DIR}/test/test_texture_manager.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_terrain.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_gui_base.cpp"
+  "${CMAKE_SOURCE_DIR}/test/test_gui_events.cpp"
   "${CMAKE_SOURCE_DIR}/test/tests.cpp"
 
   "${CMAKE_SOURCE_DIR}/test/utils.cpp"

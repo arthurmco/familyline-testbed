@@ -13,7 +13,7 @@ std::string GUIWindow::describe() const {
 void GUIWindow::onResize(int nwidth, int nheight, int nx, int ny) {
   width_ = nwidth;
   height_ = nheight;
-  box_.onResize(nwidth, nheight, 0, 0);
+  box_.onResize(nwidth, nheight, nx, ny);
 }
 
 /// Called when the parent need to update
@@ -26,8 +26,6 @@ void GUIWindow::update() {
 void GUIWindow::receiveInput(const familyline::input::HumanInputAction &e) {
     using namespace familyline::input;
 
-    printf("aaan");
-    
     if (auto *kev = std::get_if<KeyAction>(&e.type); kev) {
     if (kev->keycode == SDLK_TAB && kev->isPressed) {
         if (!inner_box_) {

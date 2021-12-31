@@ -119,8 +119,7 @@ GUIControl* last_focus_control = nullptr;
 
 void GUIBox::receiveInput(const familyline::input::HumanInputAction &e)
 {
-    using namespace familyline::input;
-
+    using namespace familyline::input;    
     auto focus_control = controls_.begin();
 
     if (std::holds_alternative<MouseAction>(e.type)) {

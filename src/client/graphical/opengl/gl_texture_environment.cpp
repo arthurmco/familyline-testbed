@@ -279,6 +279,7 @@ void GLTextureEnvironment::updateBoundTextureData(SDL_Surface &data)
             converted_surf->pixels);
         SDL_FreeSurface(converted_surf);
     }
+
     SDL_UnlockSurface(&data);
 
 }
