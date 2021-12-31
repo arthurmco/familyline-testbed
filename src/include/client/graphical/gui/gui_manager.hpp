@@ -16,6 +16,8 @@
 #include <client/graphical/gui/gui_control.hpp>
 #include <client/graphical/gui/gui_renderer.hpp>
 
+#include <client/input/input_service.hpp>
+
 namespace familyline::graphics::gui {
 
 /**
@@ -70,6 +72,8 @@ public:
         // Initialize the locale so that string encode conversions work.
         std::setlocale(LC_ALL, "");
 
+        auto& im = familyline::input::InputService::getInputManager();
+        im->addListenerHandler(std::bind(&GUIManager::listenInputs, this, std::placeholders::_1));
     }
 
     struct WindowInfo {
@@ -192,7 +196,7 @@ public:
     /**
      * Listen for inputs, add them into the event input queue
      */
-    void listenInputs();
+    bool listenInputs(familyline::input::HumanInputAction i);
 
     /**
      * Push the event to be ran the next time you call `runEvents()`
@@ -204,8 +208,7 @@ public:
 private:
     std::vector<std::unique_ptr<GUIControl>> controls_;
     std::vector<WindowInfo> windows_;
-    std::queue<GUIEvent> inputs_;
-
+    
     std::map<std::string, GUIControl *> name2control_;
 
     /**

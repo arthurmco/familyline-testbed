@@ -23,9 +23,13 @@ void GUIWindow::update() {
 };
 
 
-void GUIWindow::receiveInput(const GUIEvent &e) {
-  if (auto *kev = std::get_if<KeyEvent>(&e); kev) {
-    if (kev->key == '\t' && kev->isPressing) {
+void GUIWindow::receiveInput(const familyline::input::HumanInputAction &e) {
+    using namespace familyline::input;
+
+    printf("aaan");
+    
+    if (auto *kev = std::get_if<KeyAction>(&e.type); kev) {
+    if (kev->keycode == SDLK_TAB && kev->isPressed) {
         if (!inner_box_) {
             this->box_.onFocusExit();
         }

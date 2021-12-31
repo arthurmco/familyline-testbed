@@ -1,4 +1,5 @@
 #include <client/graphical/gui/gui_button.hpp>
+#include <client/input/input_actions.hpp>
 
 using namespace familyline::graphics::gui;
 
@@ -29,10 +30,19 @@ void GUIButton::onResize(int nwidth, int nheight, int nx, int ny) {
   y_ = ny;
 }
 
-void GUIButton::receiveInput(const GUIEvent &e) {
-  if (auto *kev = std::get_if<KeyEvent>(&e); kev) {
-    if (kev->key == '\r' && kev->isPressing) {
-      onClick_(*this);
+void GUIButton::receiveInput(const familyline::input::HumanInputAction &e) {
+    using namespace familyline::input;
+    
+    if (auto *kev = std::get_if<KeyAction>(&e.type); kev) {
+        if (kev->keycode == SDLK_RETURN && kev->isPressed) {
+            onClick_(*this);
+        }
+    } else if (auto *mev = std::get_if<ClickAction>(&e.type); mev) {
+        hover_ = true;
+        printf("click");
+        onClick_(*this);
+    } else if (auto *mev = std::get_if<MouseAction>(&e.type); mev) {
+        hover_ = true;
     }
-  }
+
 }

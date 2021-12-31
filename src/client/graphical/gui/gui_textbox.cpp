@@ -119,19 +119,11 @@ std::tuple<std::string, std::string, std::string> GUITextbox::getTextAsSelection
 
 
 
-void GUITextbox::receiveInput(const GUIEvent &e) {
-    if (auto *kev = std::get_if<KeyEvent>(&e); kev) {
-        if (kev->key == 'l' && kev->isPressing) {
-            select_start_ = select_end_;
-            select_start_ = std::min(select_start_ + 1, text_.size());
-            select_end_ = select_start_;
-        } else if (kev->key == 'h' && kev->isPressing) {
-            select_start_ = select_end_;
-            select_start_ = (size_t) std::max(int(select_start_ - 1), (int)0);
-            select_end_ = select_start_;        
-        }
-    } else if (auto *tev = std::get_if<TextInput>(&e); tev) {
-        auto data32 = toU32(tev->data);
+void GUITextbox::receiveInput(const familyline::input::HumanInputAction &e) {
+    using namespace familyline::input;
+
+    if (auto *tev = std::get_if<TextInput>(&e.type); tev) {
+        auto data32 = toU32(tev->text);
         text_.insert(select_end_, data32, 0);
     }
 

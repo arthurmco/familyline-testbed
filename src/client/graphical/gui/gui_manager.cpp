@@ -172,15 +172,6 @@ void GUIManager::update() {
   //       not in focus (if the event is a key event), or if
   //       the front window is not under the cursor (if it is
   //       a mouse event)
-  this->listenInputs();
-  for (auto &w : windows_) {
-    while (!inputs_.empty()) {
-      w.window->receiveInput(inputs_.front());
-      inputs_.pop();
-    }
-
-    break;
-  }
 
   // Draw the window contents, backwards, because the front window is the last
   // window to be drawn
@@ -201,55 +192,52 @@ void GUIManager::update() {
 
 void GUIManager::render() { renderer_->render(); }
 
-#include <stdlib.h>
-#include <string.h>
-#include <sys/select.h>
-#include <termios.h>
-#include <unistd.h>
-int kbhit() {
-  struct timeval tv = {0L, 0L};
-  fd_set fds;
-  FD_ZERO(&fds);
-  FD_SET(0, &fds);
-  return select(1, &fds, NULL, NULL, &tv);
-}
-
-int getch() {
-  int r;
-  unsigned char c = 0xff;
-  if ((r = read(0, &c, sizeof(c))) < 0) {
-    return r;
-  } else {
-    return c;
-  }
-}
-
+unsigned lastX = 0, lastY = 0; 
 /**
  * Listen for inputs, add them into the event input queue
  */
-void GUIManager::listenInputs() {
-  if (kbhit()) {
-      auto ch = (char)getch();
-      auto ev = KeyEvent{
-          .key = ch,
-          .ctrl = false,
-          .alt = false,
-          .shift = false,
-          .isPressing = true,
-          .isReleasing = false
-      };
+bool GUIManager::listenInputs(familyline::input::HumanInputAction i) {
 
-      inputs_.push(ev);
+    using namespace familyline::input;
+    
+    for (auto &w : windows_) {
+        if (std::holds_alternative<MouseAction>(i.type)) {
+            auto event = std::get<MouseAction>(i.type);
 
-      ev = KeyEvent{
-          .key = ch,
-          .ctrl = false,
-          .alt = false,
-          .shift = false,
-          .isPressing = false,
-          .isReleasing = true
-      };
+            lastX = event.screenX;
+            lastY = event.screenY;
+            printf("%d %d\n", lastX, lastY);
+            
+            if (event.screenX >= w.window->x() && event.screenX < (w.window->x() + w.window->width()) &&
+                event.screenY >= w.window->y() && event.screenY < (w.window->y() + w.window->height())) {
+                w.window->receiveInput(i);
+                return true;
+            }
 
-      inputs_.push(ev);
-  }
+        } else if (std::holds_alternative<ClickAction>(i.type)) {
+            auto event = std::get<ClickAction>(i.type);
+
+            lastX = event.screenX;
+            lastY = event.screenY;
+            if (event.screenX >= w.window->x() && event.screenX < (w.window->x() + w.window->width()) &&
+                event.screenY >= w.window->y() && event.screenY < (w.window->y() + w.window->height())) {
+                
+                w.window->receiveInput(i);
+                return true;
+            }
+
+        } else if (std::holds_alternative<GameExit>(i.type)) {
+            return false;
+        } else {
+            if (lastX >= w.window->x() && lastX < (w.window->x() + w.window->width()) &&
+                lastY >= w.window->y() && lastY < (w.window->y() + w.window->height())) {
+                w.window->receiveInput(i);
+                return true;
+                
+            }
+        }
+    }
+
+
+    return false;
 }

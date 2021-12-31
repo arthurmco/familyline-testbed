@@ -1,13 +1,11 @@
 #pragma once
 
 #include <cassert>
-
-
 #include <client/graphical/gui/gui_control.hpp>
 #include <client/graphical/gui/gui_layout.hpp>
 
-namespace familyline::graphics::gui {
-
+namespace familyline::graphics::gui
+{
 /**
  * GUIBox
  *
@@ -19,77 +17,81 @@ namespace familyline::graphics::gui {
  *
  * TODO: finish the GUIBox
  */
-class GUIBox : public GUIControl {
+class GUIBox : public GUIControl
+{
 public:
     GUIBox(BaseLayout &layout, GUIControlRenderInfo render_info = {})
-        : GUIControl(render_info), layout_(layout) { this->initLayout(layout); }
+        : GUIControl(render_info), layout_(layout)
+    {
+        this->initLayout(layout);
+    }
 
-  auto begin() { return controls_.begin(); }
-  auto end() { return controls_.end(); }
-  size_t control_count() { return controls_.size(); }
+    auto begin() { return controls_.begin(); }
+    auto end() { return controls_.end(); }
+    size_t control_count() { return controls_.size(); }
 
-  GUIControl &add(GUIControl *);
-  void remove(GUIControl &);
+    GUIControl &add(GUIControl *);
+    void remove(GUIControl &);
 
-  /**
-   * Get a certain control by its ID
-   */
-    GUIControl* get(int id) const;
-    
-  /// A textual way of describing the control
-  /// If we were in Python, this would be its `__repr__` method
-  ///
-  /// Used *only* for debugging purposes.
-  virtual std::string describe() const;
+    /**
+     * Get a certain control by its ID
+     */
+    GUIControl *get(int id) const;
 
-  /// Called when this control is resized or repositioned
-  virtual void onResize(int nwidth, int nheight, int nx, int ny);
+    /// A textual way of describing the control
+    /// If we were in Python, this would be its `__repr__` method
+    ///
+    /// Used *only* for debugging purposes.
+    virtual std::string describe() const;
 
-  virtual void autoresize();
+    /// Called when this control is resized or repositioned
+    virtual void onResize(int nwidth, int nheight, int nx, int ny);
 
-  /// Called when the parent need to update
-  virtual void update();
+    virtual void autoresize();
 
-  virtual void receiveInput(const GUIEvent &e);
+    /// Called when the parent need to update
+    virtual void update();
 
-  /**
-   * Forward the tab index event (aka the act of changing
-   * control focus when you press TAB) to the next
-   * element
-   *
-   * Returns true while we have elements to tab, false when we do not have any
-   */
-  bool forwardTabIndexEvent();
+    virtual void receiveInput(const familyline::input::HumanInputAction &e);
 
-  virtual void onFocusExit() {
-    onFocus_ = false;
+    /**
+     * Forward the tab index event (aka the act of changing
+     * control focus when you press TAB) to the next
+     * element
+     *
+     * Returns true while we have elements to tab, false when we do not have any
+     */
+    bool forwardTabIndexEvent();
 
-    if (tab_index_ < 0)
-        return;
-    
-    auto tab_control = controls_.begin();
-    std::advance(tab_control, tab_index_);
-    (*tab_control)->onFocusExit();
-    
-    tab_index_ = -1;
-  }
+    virtual void onFocusExit()
+    {
+        onFocus_ = false;
 
-  virtual void
-  setEventCallbackRegisterFunction(FGUICallbackRegister r) override;
+        if (tab_index_ < 0) return;
+
+        auto tab_control = controls_.begin();
+        std::advance(tab_control, tab_index_);
+        (*tab_control)->onFocusExit();
+
+        tab_index_ = -1;
+    }
+
+    virtual void setEventCallbackRegisterFunction(FGUICallbackRegister r) override;
 
 private:
-  ssize_t previous_tab_index_ = -1;
-  ssize_t tab_index_ = -1;
+    ssize_t previous_tab_index_ = -1;
+    ssize_t tab_index_          = -1;
+    bool is_tab                 = false;
 
-  // The index of the currently focused control.
-  // TODO: reset this if the removed control is focused.
-  ssize_t focused_index_ = -1;
+    // The index of the currently focused control.
+    // TODO: reset this if the removed control is focused.
+    ssize_t focused_index_ = -1;
 
-  bool inner_box_ = false;
+    bool inner_box_ = false;
 
-  BaseLayout &layout_;
-  std::vector<GUIControl *> controls_;
+    BaseLayout &layout_;
+    std::vector<GUIControl *> controls_;
 
-  void initLayout(BaseLayout &layout);
+    void initLayout(BaseLayout &layout);
 };
-}
+}  // namespace familyline::graphics::gui

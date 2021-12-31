@@ -7,22 +7,9 @@
 
 #include <variant>
 
+#include <client/input/input_actions.hpp>
+
 namespace familyline::graphics::gui {
-
-/**
- * The GUI event types
- *
- * The GUI manager receives data from the external world through
- * these input types, instead of using SDL types directly
- * (almost directly, because we will use SDL types for key names)
- *
- * This ensures greater testability, and so a greater certainty
- * that our code will not crash on other computers.
- */
-
-struct MouseMoveEvent {
-  int x, y;
-};
 
 enum class ButtonType {
   // The three greater and ubiquitous buttons
@@ -41,29 +28,6 @@ enum class ButtonType {
   Button10
   #endif
 };
-
-/**
- * MouseClicks also can act on touch events
- */
-struct MouseClickEvent {
-  int x, y;
-  ButtonType button;
-  bool isPressing, isReleasing;
-};
-
-struct KeyEvent {
-  char key; // will become an SDL_Keycode
-
-  bool ctrl, alt, shift;
-  bool isPressing, isReleasing;
-};
-
-struct TextInput {
-  std::string data;
-};
-
-using GUIEvent =
-    std::variant<MouseMoveEvent, MouseClickEvent, KeyEvent, TextInput>;
 
 /**
  * GUI glyph size, to notify the size of the font
@@ -186,7 +150,7 @@ public:
   virtual void update(){};
 
   /// Called when an input is received
-  virtual void receiveInput(const GUIEvent &e) {}
+  virtual void receiveInput(const familyline::input::HumanInputAction &e) {}
 
   /// Returns true if the function needs to update its contents and/or redraw
   /// False if it does not

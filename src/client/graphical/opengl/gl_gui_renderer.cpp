@@ -1,30 +1,30 @@
-#include <client/graphical/opengl/gl_gui_renderer.hpp>
-#include <client/graphical/gfx_service.hpp>
-#include <common/logger.hpp>
+#include <pango/pangocairo.h>
 
+#include <client/graphical/gfx_service.hpp>
+#include <client/graphical/opengl/gl_gui_renderer.hpp>
+#include <common/logger.hpp>
 #include <cstdio>
 
 #ifdef RENDERER_OPENGL
 
 using namespace familyline::graphics::gui;
 
-void GLGUIRenderer::update(const std::vector<ControlPaintData *> &data) {
+void GLGUIRenderer::update(const std::vector<ControlPaintData*>& data)
+{
+    srand(data.size() * data.size() * 1000);
 
     cairo_set_source_rgba(context_, 0, 0, 0, 0);
     cairo_set_operator(context_, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context_);
 
-
-    for (const ControlPaintData* d : data){
+    for (const ControlPaintData* d : data) {
         const GLControlPaintData* gld = (const GLControlPaintData*)d;
-        
+
         cairo_set_operator(context_, CAIRO_OPERATOR_OVER);
         cairo_move_to(context_, gld->x, gld->y);
         cairo_set_source_surface(context_, (cairo_surface_t*)gld->data(), 0, 0);
         cairo_paint(context_);
     }
-    
-    
 }
 
 std::optional<GUIGlyphSize> GLGUIRenderer::getCodepointSize(
@@ -44,59 +44,142 @@ std::unique_ptr<GUIControlPainter> GLGUIRenderer::createPainter()
     return std::make_unique<GLControlPainter>(*this);
 }
 
-std::unique_ptr<ControlPaintData> GLControlPainter::drawWindow(GUIWindow &w)
+std::unique_ptr<ControlPaintData> GLControlPainter::drawWindow(GUIWindow& w)
 {
-    //    printf("drawing window %04x: %s\n", w.id(), w.describe().c_str());
     return drawControl(w.box());
 }
 
-std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl &c)
+void drawLabel(cairo_t* ctxt, const GUILabel* label, const GUIAppearance& appearance)
 {
-    auto controlpaint = std::make_unique<GLControlPaintData>(c, c.x(), c.y(), c.width(), c.height());
+    PangoFontDescription* font_description = pango_font_description_new();
+    pango_font_description_set_family(font_description, appearance.font.c_str());
+    pango_font_description_set_absolute_size(font_description, appearance.fontsize * PANGO_SCALE);
 
-    cairo_t* ctxt = (cairo_t*) controlpaint->context;
-    
-    cairo_set_line_width(ctxt, 2.0);
+    PangoWeight weight;
+    switch (appearance.weight) {
+        case FontWeight::Regular: weight = PANGO_WEIGHT_NORMAL; break;
+        case FontWeight::Bold: weight = PANGO_WEIGHT_BOLD; break;
+    }
+    pango_font_description_set_weight(font_description, weight);
 
-    double r = 1.0/(c.id()-65535);
-    
-    cairo_set_source_rgb(ctxt, r, 0, 0.5);
-    cairo_rectangle(ctxt, 1, 1, c.width()-1, c.height()-1);
-    cairo_fill(ctxt);
+    //        pango_font_description_set_style(
+    //            font_description, appearance_.italic ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
 
-    cairo_set_source_rgb(ctxt, 0.1, 0.0, 0.25);
-    auto strsize = fmt::format("{:08x}, ({}, {})", c.id(), c.x(), c.y());
-    cairo_move_to(ctxt, 10, 20);
-    cairo_set_font_size(ctxt, 15.0);
-    cairo_show_text(ctxt, strsize.c_str());
-    strsize = fmt::format("{}", c.describe());
-    cairo_move_to(ctxt, 10, 40);
-    cairo_set_font_size(ctxt, 15.0);
-    cairo_show_text(ctxt, strsize.c_str());
-    
-    cairo_set_source_rgb(ctxt, 0.0, 0.0, 1.0);
-    cairo_rectangle(ctxt, 1, 1, c.width()-1, c.height()-1);
-    cairo_stroke(ctxt);
+    PangoLayout* layout = pango_cairo_create_layout(ctxt);
+    pango_layout_set_font_description(layout, font_description);
+    pango_layout_set_markup(layout, label->text().c_str(), -1);
 
-    if (auto box = dynamic_cast<GUIBox *>(&c); box) {
+    pango_font_description_free(font_description);
 
-        for (auto *child : *box) {
+    int width = 0, height = 0;
+    pango_layout_get_size(layout, &width, &height);
+
+    width /= PANGO_SCALE;
+    height /= PANGO_SCALE;
+
+    int startx = 0, starty = appearance.marginY;
+    switch (appearance.horizontalAlignment) {
+        case HorizontalAlignment::Left: startx = appearance.marginX; break;
+        case HorizontalAlignment::Center:
+            startx = glm::max(appearance.marginX, (label->width() / 2) - (width/2));
+            break;
+        case HorizontalAlignment::Right:
+            startx = label->width() - width - appearance.marginX;
+            break;
+    }
+
+    auto [fr, fg, fb, fa] = appearance.foreground;
+    auto [br, bg, bb, ba] = appearance.background;
+
+    cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
+    cairo_move_to(ctxt, startx, starty);
+    pango_cairo_show_layout(ctxt, layout);
+
+    g_object_unref(layout);
+}
+
+std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
+{
+    auto controlpaint =
+        std::make_unique<GLControlPaintData>(c, c.x(), c.y(), c.width(), c.height());
+
+    cairo_t* ctxt = (cairo_t*)controlpaint->context;
+
+    auto appearance = c.appearance();
+
+    auto [fr, fg, fb, fa] = appearance.foreground;
+    auto [br, bg, bb, ba] = appearance.background;
+
+    if (auto box = dynamic_cast<GUIBox*>(&c); box) {
+        for (auto* child : *box) {
             auto relx = child->x() - c.x();
             auto rely = child->y() - c.y();
 
-            printf("%d %d %d |", child->id(), relx, rely);
-            
             auto pchild = drawControl(*child);
-            
+
             cairo_set_operator(ctxt, CAIRO_OPERATOR_OVER);
             cairo_set_source_surface(ctxt, (cairo_surface_t*)pchild->data(), relx, rely);
             cairo_paint(ctxt);
-            
+        }
+    } else if (auto label = dynamic_cast<GUILabel*>(&c); label) {
+        cairo_set_source_rgba(ctxt, br, bg, bb, ba);
+        cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
+        cairo_paint(ctxt);
+
+        drawLabel(ctxt, label, appearance);
+
+    } else if (auto button = dynamic_cast<GUIButton*>(&c); button) {
+        if (button->isHover()) {
+            br = glm::min(br + 0.2, 1.0);
+            bg = glm::min(bg + 0.2, 1.0);
+            bb = glm::min(bb + 0.2, 1.0);
+            ba = glm::min(ba + 0.2, 1.0);
         }
 
-        puts("");
+        cairo_set_source_rgba(ctxt, br, bg, bb, ba);
+        cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
+        cairo_paint(ctxt);
+
+        cairo_set_line_width(ctxt, 4.0);
+        cairo_set_source_rgb(ctxt, fr, fg, fb);
+        cairo_rectangle(ctxt, 1, 1, c.width() - 1, c.height() - 1);
+        cairo_stroke(ctxt);
+
+        GUIAppearance labelap = appearance;
+        labelap.marginX += 6;
+        labelap.marginY += 6;
+
+        drawLabel(ctxt, &button->getInnerLabel(), labelap);
+
+    } else {
+        double r = (rand() % 256) / 256.0;
+        cairo_set_source_rgb(ctxt, r, 0, 0.5);
+        cairo_rectangle(ctxt, 1, 1, c.width() - 1, c.height() - 1);
+        cairo_fill(ctxt);
+
+        cairo_set_source_rgb(ctxt, 0.1, 0.0, 0.25);
+        auto strsize = fmt::format("{:08x}, ({}, {})", c.id(), c.x(), c.y());
+        cairo_move_to(ctxt, 10, 20);
+        cairo_set_font_size(ctxt, 15.0);
+        cairo_show_text(ctxt, strsize.c_str());
+        strsize = fmt::format("{}", c.describe());
+        cairo_move_to(ctxt, 10, 40);
+        cairo_set_font_size(ctxt, 15.0);
+        cairo_show_text(ctxt, strsize.c_str());
     }
-    
+
+    if (c.onFocus()) {
+        cairo_set_line_width(ctxt, 1.0);
+        cairo_set_source_rgb(ctxt, fr, fg, fb);
+        cairo_rectangle(ctxt, 0, 0, c.width(), c.height());
+        cairo_stroke(ctxt);
+    }
+
+    cairo_set_line_width(ctxt, 1.0);
+    cairo_set_source_rgb(ctxt, 0.0, 0.0, 1.0);
+    cairo_rectangle(ctxt, 1, 1, c.width() - 1, c.height() - 1);
+    cairo_stroke(ctxt);
+
     return controlpaint;
 }
 
@@ -118,7 +201,7 @@ GLuint vboPos, vboTex;
 
 GLGUIRenderer::GLGUIRenderer()
 {
-    canvas_ = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, screenWidth_, screenHeight_);
+    canvas_  = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, screenWidth_, screenHeight_);
     context_ = cairo_create(canvas_);
     this->initShaders();
     tex_gui_ = this->initTexture(screenWidth_, screenHeight_);
@@ -144,7 +227,6 @@ void GLGUIRenderer::initShaders()
     attrPos_ = fnGetAttrib("position");
     attrTex_ = fnGetAttrib("in_uv");
 
-
     // Create the vertices
     glGenVertexArrays(1, &(this->vao_gui_));
     glBindVertexArray(this->vao_gui_);
@@ -169,7 +251,6 @@ void GLGUIRenderer::initShaders()
         auto e = fmt::format("error {:#x} while setting vertices and shaders for GUI content", err);
         throw graphical_exception(e);
     }
-    
 }
 
 GLuint GLGUIRenderer::initTexture(int width, int height)
@@ -184,7 +265,7 @@ GLuint GLGUIRenderer::initTexture(int width, int height)
     cairo_surface_flush(this->canvas_);
     glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE,
-        (void *)cairo_image_surface_get_data(canvas_));
+        (void*)cairo_image_surface_get_data(canvas_));
 
     glBindTexture(GL_TEXTURE_2D, 0);
     return handle;
@@ -194,7 +275,6 @@ GLuint GLGUIRenderer::initTexture(int width, int height)
         auto e = fmt::format("error {:#x} while setting texture for GUI content", err);
         throw graphical_exception(e);
     }
-
 }
 
 /**
@@ -212,7 +292,8 @@ GLuint GLGUIRenderer::resizeTexture(int width, int height)
     return initTexture(width, height);
 }
 
-void GLGUIRenderer::render() {
+void GLGUIRenderer::render()
+{
     auto& log = LoggerService::getLogger();
 
     cairo_set_source_rgb(context_, 1.0, 1.0, 1.0);
@@ -224,10 +305,11 @@ void GLGUIRenderer::render() {
     cairo_surface_flush(this->canvas_);
     auto* canvas_data = cairo_image_surface_get_data(this->canvas_);
     if (!canvas_data) {
-        log->write("gui-renderer", LogType::Warning, "canvas data points to a null pointer, weird...");
+        log->write(
+            "gui-renderer", LogType::Warning, "canvas data points to a null pointer, weird...");
         return;
     }
-        
+
     // Make the GUI texture transparent
     glClearColor(0.0, 0.0, 0.0, 0.0);
     GLint depthf;
@@ -255,11 +337,11 @@ void GLGUIRenderer::render() {
     glEnableVertexAttribArray(attrTex_);
     glBindBuffer(GL_ARRAY_BUFFER, vboTex);
     glVertexAttribPointer(attrTex_, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    
+
     glTexSubImage2D(
         GL_TEXTURE_2D, 0, 0, 0, screenWidth_, screenHeight_, GL_BGRA, GL_UNSIGNED_BYTE,
-        (void *)canvas_data);    
-    
+        (void*)canvas_data);
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     GLenum err = glGetError();
@@ -275,7 +357,6 @@ void GLGUIRenderer::render() {
     glDisable(GL_BLEND);
 
     glClearColor(0.0, 0.0, 0.0, 1.0);
-
 }
 
 #endif

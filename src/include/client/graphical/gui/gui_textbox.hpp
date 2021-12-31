@@ -6,6 +6,7 @@
 
 #include <client/graphical/gui/gui_control.hpp>
 
+
 namespace familyline::graphics::gui {
 
 
@@ -65,7 +66,7 @@ public:
     }
 
 
-    virtual void receiveInput(const GUIEvent& e);
+    virtual void receiveInput(const familyline::input::HumanInputAction& e);
     
 private:
   /// A string of text

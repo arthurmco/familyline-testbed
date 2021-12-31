@@ -1038,6 +1038,13 @@ static int show_starting_menu(
     GUIWindow &w = ginfo.guir->createWindow<FlexLayout<false>>();
     GUILabel &l =
         (GUILabel &)w.box().add(ginfo.guir->createControl<GUILabel>("FAMILYLINE"));
+    {
+        auto a = l.appearance();
+        a.fontsize = 28;
+        a.horizontalAlignment = HorizontalAlignment::Center;
+        l.setAppearance(a);
+    }
+    
     GUILabel &lv =
         (GUILabel &)w.box().add(ginfo.guir->createControl<GUILabel>("Version " VERSION ", commit " COMMIT));
 

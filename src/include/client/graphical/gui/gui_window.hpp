@@ -40,7 +40,7 @@ public:
   /// Called when the parent need to update
   virtual void update();
 
-  virtual void receiveInput(const GUIEvent &e);
+  virtual void receiveInput(const familyline::input::HumanInputAction &e);
 
   GUIBox &box() { return box_; }
 

@@ -1,18 +1,29 @@
 #include <gtest/gtest.h>
 
 #include <client/graphical/gui/gui_manager.hpp>
+#include <client/input/input_manager.hpp>
 #include <memory>
 
 #include "utils/test_gui_renderer.hpp"
+#include "utils/test_inputprocessor.hpp"
 
 using namespace familyline::graphics::gui;
+using namespace familyline::input;
 
 class GUITestBase : public ::testing::Test
 {
 protected:
-    void SetUp() override { gm = new GUIManager(std::make_unique<TestGUIRenderer>()); }
+    void SetUp() override {
+        auto ipr = std::make_unique<TestInputProcessor>();
+        InputService::setInputManager(std::make_unique<InputManager>(*ipr.get()));
 
-    void TearDown() override { delete gm; }
+        gm = new GUIManager(std::make_unique<TestGUIRenderer>());
+    }
+
+    void TearDown() override {        
+        delete gm;
+        InputService::setInputManager(std::unique_ptr<InputManager>());
+    }
 
     GUIManager *gm = nullptr;
 };
