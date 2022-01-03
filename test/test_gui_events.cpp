@@ -33,7 +33,7 @@ TEST_F(GUITestEvents, TestIfButtonRecognizesClick)
 {
     using namespace familyline::input;
     
-    GUIWindow &w = gm->createWindow<FlexLayout<false>>();
+    GUIWindow &w = gm->createWindow<FlexLayout<false>>("test");
     gm->onResize(800, 800);
 
     bool clicked = false;
@@ -46,6 +46,7 @@ TEST_F(GUITestEvents, TestIfButtonRecognizesClick)
             click_times++;
         }));
 
+    gm->showWindow(w);
     gm->update();
     gm->render();
 

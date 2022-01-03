@@ -93,7 +93,7 @@ struct GUIAppearance {
  * when we do not have it
  */
 FGUICallbackRegister getDefaultCallbackRegister();
-
+    
 /**
  * An structure to allow the GUI manager to communicate some things
  * about the final layout of the control (to do things, for example,
@@ -108,6 +108,9 @@ struct GUIControlRenderInfo {
 
   /// GUIRenderer::setTextInputMode(...)
   std::function<void(bool)> setTextInputMode = [](auto) {};
+
+    /// The GUI manager that owns this control
+    void* gm;
 };
 
 /*

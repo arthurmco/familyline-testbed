@@ -6,6 +6,7 @@
 #include <common/logger.hpp>
 #include <cstdint>
 #include <functional>
+#include <ranges>
 
 using namespace familyline::graphics::gui;
 
@@ -92,8 +93,9 @@ void GUIManager::showWindow(GUIWindow &w)
 
     if (window == windows_.end()) return;
 
+    window->zIndex = std::max(shown_zindex_, windows_.front().zIndex + 1);
     windows_.front().zIndex--;
-    window->zIndex = shown_zindex_;
+    window->visible = true;
     window->window->setEventCallbackRegisterFunction(
         std::bind(&GUIManager::pushEvent, this, std::placeholders::_1, std::placeholders::_2));
     this->sortWindows();
@@ -107,14 +109,23 @@ void GUIManager::closeWindow(GUIWindow &w)
 
     if (window == windows_.end()) return;
 
-    window->zIndex = -1;
+    window->zIndex = 0;
     window->window->setEventCallbackRegisterFunction(getDefaultCallbackRegister());
+    window->visible = false;
 
-    if (windows_.size() >= 2) {
-        windows_[1].zIndex = shown_zindex_;
-        windows_[1].window->setEventCallbackRegisterFunction(
-            std::bind(&GUIManager::pushEvent, this, std::placeholders::_1, std::placeholders::_2));
-    }
+    this->sortWindows();
+}
+
+void GUIManager::moveWindowToTop(GUIWindow &w)
+{
+    auto window = std::find_if(windows_.begin(), windows_.end(), [&](WindowInfo &wi) {
+        return wi.window->id() == w.id();
+    });
+
+    if (window == windows_.end()) return;
+
+    window->zIndex  = windows_.front().zIndex + 1;
+    window->visible = true;
 
     this->sortWindows();
 }
@@ -133,12 +144,13 @@ void GUIManager::destroyWindow(GUIWindow &w)
 void GUIManager::sortWindows()
 {
     std::sort(windows_.begin(), windows_.end(), [](const WindowInfo &a, const WindowInfo &b) {
-        return a.zIndex < b.zIndex;
+        return a.zIndex > b.zIndex;
     });
 
     auto &log = LoggerService::getLogger();
     log->write(
-        "gui-manager", LogType::Info, "Top window is {}", windows_.front().window->describe());
+        "gui-manager", LogType::Info, "Top window is {} ({})", windows_.front().window->describe(),
+        windows_.front().name);
 }
 
 /// Called when we receive a window resize event
@@ -171,6 +183,17 @@ void GUIManager::runEvents()
     events_.pop();
 }
 
+GUIWindow *GUIManager::getWindow(std::string name)
+{
+    auto it = std::find_if(windows_.begin(), windows_.end(), [&name](const WindowInfo &wi) {
+        return wi.name == name;
+    });
+
+    if (it == windows_.end()) return nullptr;
+
+    return it->window.get();
+}
+
 void GUIManager::update()
 {
     // Forward inputs to the front window
@@ -182,15 +205,19 @@ void GUIManager::update()
     // Draw the window contents, backwards, because the front window is the last
     // window to be drawn
     std::for_each(windows_.rbegin(), windows_.rend(), [this](WindowInfo &w) {
-        if (w.window->dirty()) {
+        if (w.window->dirty() && w.visible) {
             w.window->update();
             w.paint_data = this->painter_->drawWindow(*w.window.get());
         }
     });
 
     renderer_paint_data_.clear();
+    auto validwindows = windows_ |
+                        std::views::filter([](const WindowInfo &w) { return w.visible; }) |
+                        std::views::reverse;
+
     std::transform(
-        windows_.rbegin(), windows_.rend(), std::back_inserter(renderer_paint_data_),
+        validwindows.begin(), validwindows.end(), std::back_inserter(renderer_paint_data_),
         [](const WindowInfo &w) { return w.paint_data.get(); });
 
     renderer_->update(renderer_paint_data_);
@@ -206,7 +233,8 @@ bool GUIManager::listenInputs(familyline::input::HumanInputAction i)
 {
     using namespace familyline::input;
 
-    for (auto &w : windows_) {
+    for (auto &w : windows_ | std::views::filter(
+                                  [](const WindowInfo &wi) { return wi.visible; })) {
         if (std::holds_alternative<MouseAction>(i.type)) {
             auto event = std::get<MouseAction>(i.type);
 
@@ -230,6 +258,7 @@ bool GUIManager::listenInputs(familyline::input::HumanInputAction i)
                 event.screenX < (w.window->x() + w.window->width()) &&
                 event.screenY >= w.window->y() &&
                 event.screenY < (w.window->y() + w.window->height())) {
+                fprintf(stderr, "%s %08x %08x\n", w.name.c_str(), w.window->id(), windows_.size());
                 w.window->receiveInput(i);
                 return true;
             }

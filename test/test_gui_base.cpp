@@ -25,12 +25,33 @@ protected:
         InputService::setInputManager(std::unique_ptr<InputManager>());
     }
 
+    
     GUIManager *gm = nullptr;
 };
 
 TEST_F(GUITestBase, TestRenderSingleControl)
 {
-    GUIWindow &w = gm->createWindow<FlexLayout<false>>();
+    GUIWindow &w = gm->createWindow<FlexLayout<false>>("test");
+    gm->onResize(800, 800);
+
+    GUILabel &label = (GUILabel &)w.box().add(gm->createControl<GUILabel>("Test label"));
+
+    ASSERT_NE(0, label.id());
+
+    gm->showWindow(w);
+    gm->update();
+    gm->render();
+
+    TestGUIRenderer &tr       = (TestGUIRenderer &)gm->getRenderer();
+    TestControlPaintData *l1t = tr.query(label.id());
+
+    ASSERT_TRUE(l1t);
+    ASSERT_STREQ("Test label", ((GUILabel &)l1t->control).text().c_str());
+}
+
+TEST_F(GUITestBase, TestRenderSingleControlWithoutShowingWindow)
+{
+    GUIWindow &w = gm->createWindow<FlexLayout<false>>("test");
     gm->onResize(800, 800);
 
     GUILabel &label = (GUILabel &)w.box().add(gm->createControl<GUILabel>("Test label"));
@@ -43,18 +64,18 @@ TEST_F(GUITestBase, TestRenderSingleControl)
     TestGUIRenderer &tr       = (TestGUIRenderer &)gm->getRenderer();
     TestControlPaintData *l1t = tr.query(label.id());
 
-    ASSERT_TRUE(l1t);
-    ASSERT_STREQ("Test label", ((GUILabel &)l1t->control).text().c_str());
+    ASSERT_FALSE(l1t);
 }
 
 TEST_F(GUITestBase, TestRenderSingleControlAndQueryTheWrongOne)
 {
-    GUIWindow &w = gm->createWindow<FlexLayout<false>>();
+    GUIWindow &w = gm->createWindow<FlexLayout<false>>("test");
     gm->onResize(800, 800);
 
     GUILabel &label =
         (GUILabel &)w.box().add(gm->createControl<GUILabel>("We will not query this"));
 
+    gm->showWindow(w);
     gm->update();
     gm->render();
 
@@ -66,7 +87,7 @@ TEST_F(GUITestBase, TestRenderSingleControlAndQueryTheWrongOne)
 
 TEST_F(GUITestBase, TestRenderLayoutVertical)
 {
-    GUIWindow &w = gm->createWindow<FlexLayout<false>>();
+    GUIWindow &w = gm->createWindow<FlexLayout<false>>("test");
     gm->onResize(800, 800);
 
     GUILabel &label1 =
@@ -74,6 +95,7 @@ TEST_F(GUITestBase, TestRenderLayoutVertical)
     GUILabel &label2 =
         (GUILabel &)w.box().add(gm->createControl<GUILabel>("Bottom"));
 
+    gm->showWindow(w);
     gm->update();
     gm->render();
 
@@ -91,11 +113,40 @@ TEST_F(GUITestBase, TestRenderLayoutVertical)
     ASSERT_EQ(400, lbottom->height);
 }
 
+TEST_F(GUITestBase, TestQueryNamedControl)
+{
+    GUIWindow &w = gm->createWindow<FlexLayout<false>>("test");
+    gm->onResize(800, 800);
+
+    GUILabel &label1 =
+        (GUILabel &)w.box().add(gm->createNamedControl<GUILabel>("label1", "Top"));
+    GUILabel &label2 =
+        (GUILabel &)w.box().add(gm->createNamedControl<GUILabel>("label2", "Bottom"));
+
+    gm->showWindow(w);
+    gm->update();
+    gm->render();
+
+    GUILabel* lget1 = gm->getControl<GUILabel>("label1");
+    GUILabel* lget3 = gm->getControl<GUILabel>("label3");
+    GUILabel* lget2 = gm->getControl<GUILabel>("label2");
+
+    ASSERT_TRUE(lget1);
+    ASSERT_TRUE(lget2);
+    ASSERT_FALSE(lget3);
+
+    ASSERT_EQ("Top", lget1->text());
+    ASSERT_EQ("Bottom", lget2->text());
+    ASSERT_EQ(label1.id(), lget1->id());
+    ASSERT_EQ(label2.id(), lget2->id());
+
+}
+
 TEST_F(GUITestBase, TestRenderLayoutPartialWindow)
 {
     gm->onResize(800, 800);
     
-    GUIWindow &w1 = gm->createWindow<FlexLayout<false>>();
+    GUIWindow &w1 = gm->createWindow<FlexLayout<false>>("test");
     w1.onResize(400, 800, 0, 0);
     
     GUILabel &label11 =
@@ -103,6 +154,7 @@ TEST_F(GUITestBase, TestRenderLayoutPartialWindow)
     GUILabel &label12 =
         (GUILabel &)w1.box().add(gm->createControl<GUILabel>("Bottom"));
 
+    gm->showWindow(w1);
     gm->update();
     gm->render();
 
@@ -124,10 +176,10 @@ TEST_F(GUITestBase, TestRenderWindowOneAboveOther)
 {
     gm->onResize(800, 800);
     
-    GUIWindow &w1 = gm->createWindow<FlexLayout<false>>();
+    GUIWindow &w1 = gm->createWindow<FlexLayout<false>>("test1");
     w1.onResize(800, 800, 0, 0);
     
-    GUIWindow &w2 = gm->createWindow<FlexLayout<false>>();
+    GUIWindow &w2 = gm->createWindow<FlexLayout<false>>("test2");
     w2.onResize(800, 800, 0, 0);
 
     GUILabel &label11 =
@@ -140,6 +192,8 @@ TEST_F(GUITestBase, TestRenderWindowOneAboveOther)
     GUILabel &label22 =
         (GUILabel &)w2.box().add(gm->createControl<GUILabel>("Bottom W2"));
 
+    gm->showWindow(w1);
+    gm->showWindow(w2);
     gm->update();
     gm->render();
 
@@ -181,10 +235,10 @@ TEST_F(GUITestBase, TestRenderLayoutMultiWindow)
 {
     gm->onResize(800, 800);
     
-    GUIWindow &w1 = gm->createWindow<FlexLayout<false>>();
+    GUIWindow &w1 = gm->createWindow<FlexLayout<false>>("test1");
     w1.onResize(400, 800, 0, 0);
     
-    GUIWindow &w2 = gm->createWindow<FlexLayout<false>>();
+    GUIWindow &w2 = gm->createWindow<FlexLayout<false>>("test2");
     w2.onResize(400, 800, 400, 0);
     
     GUILabel &label11 =
@@ -197,6 +251,8 @@ TEST_F(GUITestBase, TestRenderLayoutMultiWindow)
     GUILabel &label22 =
         (GUILabel &)w2.box().add(gm->createControl<GUILabel>("Bottom W2"));
 
+    gm->showWindow(w1);
+    gm->showWindow(w2);
     gm->update();
     gm->render();
 
@@ -236,7 +292,7 @@ TEST_F(GUITestBase, TestRenderLayoutMultiWindow)
 
 TEST_F(GUITestBase, TestRenderLayoutHorizontal)
 {
-    GUIWindow &w = gm->createWindow<FlexLayout<true>>();
+    GUIWindow &w = gm->createWindow<FlexLayout<true>>("test");
     gm->onResize(800, 800);
 
     GUILabel &label1 =
@@ -244,6 +300,7 @@ TEST_F(GUITestBase, TestRenderLayoutHorizontal)
     GUILabel &label2 =
         (GUILabel &)w.box().add(gm->createControl<GUILabel>("Right"));
 
+    gm->showWindow(w);
     gm->update();
     gm->render();
 
@@ -261,9 +318,60 @@ TEST_F(GUITestBase, TestRenderLayoutHorizontal)
     ASSERT_EQ(800, lright->height);
 }
 
+TEST_F(GUITestBase, TestWindowRestoreWindowBelowWhenAboveIsDestroyed)
+{
+    GUIWindow &w = gm->createWindow<FlexLayout<true>>("test");
+    gm->onResize(800, 800);
+
+    GUILabel &label1 =
+        (GUILabel &)w.box().add(gm->createControl<GUILabel>("Left"));
+    GUILabel &label2 =
+        (GUILabel &)w.box().add(gm->createControl<GUILabel>("Right"));
+
+    gm->showWindow(w);
+    gm->update();
+    gm->render();
+
+    GUIWindow &w2 = gm->createWindow<FlexLayout<true>>("another");
+    w2.onResize(800, 800, 0, 0);
+    
+    GUILabel &labelother =
+        (GUILabel &)w2.box().add(gm->createControl<GUILabel>("Another"));
+    
+    TestGUIRenderer &tr       = (TestGUIRenderer &)gm->getRenderer();
+    
+    gm->showWindow(w2);
+    gm->update();
+    gm->render();
+
+    ASSERT_TRUE(tr.query(labelother.id()));
+
+    
+    gm->destroyWindow(w2);
+
+    gm->update();
+    gm->render();
+        
+    TestControlPaintData *lleft = tr.query(label1.id());
+    TestControlPaintData *lright = tr.query(label2.id());
+
+    ASSERT_TRUE(lleft);
+    ASSERT_TRUE(lright);
+    
+    EXPECT_EQ(0, lleft->x);
+    EXPECT_EQ(0, lleft->y);
+    EXPECT_EQ(400, lleft->width);
+    EXPECT_EQ(800, lleft->height);
+    EXPECT_EQ(400, lright->x);
+    EXPECT_EQ(0, lright->y);
+    EXPECT_EQ(400, lright->width);
+    EXPECT_EQ(800, lright->height);
+}
+
+
 TEST_F(GUITestBase, TestRenderDynamicResizeWhenControlIsAdded)
 {
-    GUIWindow &w = gm->createWindow<FlexLayout<false>>();
+    GUIWindow &w = gm->createWindow<FlexLayout<false>>("test");
     gm->onResize(900, 900);
 
     GUILabel &label1 =
@@ -271,6 +379,7 @@ TEST_F(GUITestBase, TestRenderDynamicResizeWhenControlIsAdded)
     GUILabel &label2 =
         (GUILabel &)w.box().add(gm->createControl<GUILabel>("Middle"));
 
+    gm->showWindow(w);
     gm->update();
     gm->render();
 

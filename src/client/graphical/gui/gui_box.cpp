@@ -1,4 +1,5 @@
 #include <client/graphical/gui/gui_box.hpp>
+#include <client/graphical/gui/gui_manager.hpp>
 
 using namespace familyline::graphics::gui;
 
@@ -115,7 +116,7 @@ void GUIBox::update()
     dirty_ = false;
 };
 
-GUIControl* last_focus_control = nullptr;
+int last_focus_control_id = -1;
 
 void GUIBox::receiveInput(const familyline::input::HumanInputAction &e)
 {
@@ -144,8 +145,15 @@ void GUIBox::receiveInput(const familyline::input::HumanInputAction &e)
         }
     }
 
+    if (focused_index_ < 0)
+        return;
+    
     std::advance(focus_control, focused_index_);
 
+    GUIControl* last_focus_control =
+        (last_focus_control_id >= 0) ?
+        ((GUIManager*)render_info.gm)->getControl<GUIControl>(last_focus_control_id) : nullptr;
+    
     if (last_focus_control != (*focus_control)) {
         if (last_focus_control)
             last_focus_control->onFocusExit();
@@ -154,7 +162,7 @@ void GUIBox::receiveInput(const familyline::input::HumanInputAction &e)
     }
 
     (*focus_control)->receiveInput(e);
-    last_focus_control = *focus_control;
+    last_focus_control_id = (*focus_control)->id();
 }
 
 /**

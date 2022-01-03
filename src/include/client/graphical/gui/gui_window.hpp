@@ -30,6 +30,7 @@ public:
   GUIWindow(BaseLayout &layout, GUIControlRenderInfo i = {})
       : GUIControl(i), box_(layout) {
       box_.initialize(this->id());
+      box_.render_info = i;
   }
 
   virtual std::string describe() const;

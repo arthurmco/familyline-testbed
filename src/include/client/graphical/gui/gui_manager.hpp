@@ -3,6 +3,10 @@
 #include <yaml-cpp/node/node.h>
 #include <yaml-cpp/yaml.h>
 
+#include <client/graphical/gui/gui.hpp>
+#include <client/graphical/gui/gui_control.hpp>
+#include <client/graphical/gui/gui_renderer.hpp>
+#include <client/input/input_service.hpp>
 #include <concepts>
 #include <functional>
 #include <memory>
@@ -12,14 +16,8 @@
 #include <string_view>
 #include <vector>
 
-#include <client/graphical/gui/gui.hpp>
-#include <client/graphical/gui/gui_control.hpp>
-#include <client/graphical/gui/gui_renderer.hpp>
-
-#include <client/input/input_service.hpp>
-
-namespace familyline::graphics::gui {
-
+namespace familyline::graphics::gui
+{
 /**
  * GUITheme
  *
@@ -67,19 +65,24 @@ public:
                 &GUIManager::getCodepointSize, this, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, std::placeholders::_4),
             .setTextInputMode =
-                std::bind(&GUIManager::setTextInputMode, this, std::placeholders::_1)};
+                std::bind(&GUIManager::setTextInputMode, this, std::placeholders::_1),
+            .gm = (void*)this};
 
         // Initialize the locale so that string encode conversions work.
         std::setlocale(LC_ALL, "");
 
-        auto& im = familyline::input::InputService::getInputManager();
+        auto &im = familyline::input::InputService::getInputManager();
         im->addListenerHandler(std::bind(&GUIManager::listenInputs, this, std::placeholders::_1));
     }
 
     struct WindowInfo {
+        std::string name;
+
         std::unique_ptr<GUIWindow> window;
         std::unique_ptr<BaseLayout> layout;
         std::unique_ptr<ControlPaintData> paint_data;
+
+        bool visible = false;
 
         // The z-index
         // The higher it is, the most on top it will show
@@ -102,6 +105,7 @@ public:
     template <typename Control, typename... Args>
     requires std::derived_from<Control, GUIControl> Control *createControl(Args &&...args)
     {
+        render_info_.gm = (void*)this;
         auto ptr     = std::make_unique<Control>(args..., render_info_);
         Control *ret = (Control *)ptr.get();
 
@@ -139,6 +143,20 @@ public:
         return (Control *)name2control_[name];
     }
 
+    template <typename Control>
+    requires std::derived_from<Control, GUIControl> Control *getControl(int id)
+    {
+        auto it = std::find_if(controls_.begin(), controls_.end(),
+                                    [&](auto& control) {
+                                        return control && control->id() == id;
+                                    });
+
+        if (it == controls_.end())
+            return nullptr;
+
+        return (Control*)it->get();
+    }
+
     /**
      * Creates a window, type parameterizing its layout, because we do not need to
      * worry about creating it ourselves.
@@ -147,11 +165,11 @@ public:
      * pack might be OK)
      */
     template <typename Layout>
-    requires std::derived_from<Layout, BaseLayout>
-    GUIWindow &createWindow()
+    requires std::derived_from<Layout, BaseLayout> GUIWindow &createWindow(std::string name)
     {
         static int winid = 1;
         auto layoutptr   = std::make_unique<Layout>();
+        render_info_.gm = (void*)this;
 
         auto ptr       = std::make_unique<GUIWindow>(*layoutptr.get(), render_info_);
         GUIWindow *ret = ptr.get();
@@ -159,14 +177,15 @@ public:
 
         auto paintdata = painter_->drawWindow(*ret);
 
-        windows_.push_back(WindowInfo{std::move(ptr), std::move(layoutptr), std::move(paintdata)});
+        windows_.push_back(
+            WindowInfo{name, std::move(ptr), std::move(layoutptr), std::move(paintdata)});
+        winid++;
+
         return *ret;
     }
 
-    /**
-     * Deletes a window
-     */
-    
+    GUIWindow *getWindow(std::string name);
+
     // https://www.amazon.com/High-Performance-Master-optimizing-functioning/dp/1839216549
 
     /// Called when we receive a window resize event
@@ -187,12 +206,13 @@ public:
     void showWindow(GUIWindow &);
     void closeWindow(GUIWindow &);
 
-
+    void moveWindowToTop(GUIWindow &);
+    
     /**
      * Removes a window from the window list.
      */
-    void destroyWindow(GUIWindow& w);
-    
+    void destroyWindow(GUIWindow &w);
+
     void update();
     void render();
 
@@ -213,12 +233,12 @@ public:
      */
     void pushEvent(FGUIEventCallback cb, GUIControl &control) { events_.emplace(cb, control); }
 
-    GUIRenderer& getRenderer() { return *renderer_.get(); }
-    
+    GUIRenderer &getRenderer() { return *renderer_.get(); }
+
 private:
     std::vector<std::unique_ptr<GUIControl>> controls_;
     std::vector<WindowInfo> windows_;
-    
+
     std::map<std::string, GUIControl *> name2control_;
 
     /**
@@ -252,4 +272,4 @@ private:
     void sortWindows();
 };
 
-}
+}  // namespace familyline::graphics::gui

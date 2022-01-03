@@ -19,6 +19,8 @@ namespace familyline::graphics::gui
  */
 class GUIBox : public GUIControl
 {
+    friend class GUIWindow;
+    
 public:
     GUIBox(BaseLayout &layout, GUIControlRenderInfo render_info = {})
         : GUIControl(render_info), layout_(layout)
@@ -82,6 +84,8 @@ private:
     ssize_t previous_tab_index_ = -1;
     ssize_t tab_index_          = -1;
     bool is_tab                 = false;
+
+//    int last_focus_control_id = -1;
 
     // The index of the currently focused control.
     // TODO: reset this if the removed control is focused.

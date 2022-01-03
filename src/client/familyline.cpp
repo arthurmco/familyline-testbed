@@ -1034,14 +1034,18 @@ static int show_starting_menu(
     bool r = true;
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
-    GUIWindow& background = ginfo.guir->createWindow<FlexLayout<false>>();
-    GUIWindow& w          = ginfo.guir->createWindow<FlexLayout<false>>();
+    GUIWindow& background = ginfo.guir->createWindow<FlexLayout<false>>("bg");
+    GUIWindow& w          = ginfo.guir->createWindow<FlexLayout<false>>("menu");
+    
     // TODO: Autoresize this when autoresizing the gui manager
     w.onResize(ginfo.gwidth - 2, ginfo.gheight - 2, 1, 1);
     background.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
 
+    ginfo.guir->showWindow(background);
     ginfo.guir->showWindow(w);
 
+    ginfo.guir->moveWindowToTop(w);
+    
     GUILabel& l = (GUILabel&)w.box().add(ginfo.guir->createControl<GUILabel>("FAMILYLINE"));
     {
         auto a                = l.appearance();
@@ -1081,8 +1085,19 @@ static int show_starting_menu(
             }
         }));
     GUIButton& bsettings =
-        (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Settings", [](auto c) {
-
+        (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Settings", [&](auto c) {
+            GUIWindow& settings = ginfo.guir->createWindow<FlexLayout<false>>("settings");
+            settings.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
+            
+            GUILabel& title = (GUILabel&)settings.box().add(
+                ginfo.guir->createControl<GUILabel>("Settings"));
+            GUIButton& back = (GUIButton&)settings.box().add(
+                ginfo.guir->createControl<GUIButton>("Back", [&](auto c) {
+                    ginfo.guir->destroyWindow(settings);
+                    ginfo.guir->moveWindowToTop(w);
+                }));
+            
+            ginfo.guir->showWindow(settings);            
         }));
     GUIButton& bmplayer =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Multiplayer", [](auto c) {
