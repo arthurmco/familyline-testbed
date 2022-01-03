@@ -1,6 +1,7 @@
 #include <cerrno>
 #include <client/config_reader.hpp>
-#include <cstring>
+#include <string>
+#include <fmt/format.h>
 
 extern "C" {
 #include <yaml.h>
@@ -10,15 +11,15 @@ using namespace familyline;
 
 std::vector<std::string> familyline::get_config_valid_paths()
 {
-    char file_settings[256] = {};
+    std::string file_settings;
 
 #if __has_include(<windows.h>) && __has_include(<winbase.h>)
     char* appdata = getenv("LOCALAPPDATA");
 
     if (appdata)
-        snprintf(file_settings, 255, "%s\\Familyline\\settings.yaml", appdata);
+        file_settings = fmt::format("{}\\Familyline\\settings.yaml", appdata);
     else
-        strcpy(file_settings, "settings.yaml");
+        file_settings = "settings.yaml";
 
     return {
         "settings.yaml",
@@ -28,16 +29,16 @@ std::vector<std::string> familyline::get_config_valid_paths()
 #else
 
     if (char* configdir = getenv("XDG_CONFIG_HOME"); configdir) {
-        snprintf(file_settings, 255, "%s/familyline/settings.yaml", configdir);
+        file_settings = fmt::format("{}/familyline/settings.yaml", configdir);
     } else if (char* home = getenv("HOME"); home) {
-        snprintf(file_settings, 255, "%s/.config/familyline/settings.yaml", home);
+        file_settings = fmt::format("{}/.config/familyline/settings.yaml", home);
     } else if (char* logname = getenv("LOGNAME"); logname) {
-        snprintf(file_settings, 255, "/home/%s/.config/familyline/settings.yaml", logname);
+        file_settings = fmt::format("/home/{}/.config/familyline/settings.yaml", logname);
     } else {
-        strcpy(file_settings, "/root/.config/familyline/settings.yaml");
+        file_settings = "/root/.config/familyline/settings.yaml";
     }
 
-    return {"/etc/familyline/settings.yaml", file_settings};
+    return {"settings.yaml", "/etc/familyline/settings.yaml", file_settings};
 
 #endif
 
