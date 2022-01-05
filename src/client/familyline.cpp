@@ -1406,10 +1406,7 @@ static int show_starting_menu(
         // Input
         ima->processEvents();
 
-#if 0
-        ginfo.guir->receiveEvent();
-        ginfo.guir->runCallbacks();
-#endif
+        ginfo.guir->runEvents();
         ginfo.guir->update();
 
         // Render

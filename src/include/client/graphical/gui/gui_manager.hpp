@@ -66,7 +66,9 @@ public:
                 std::placeholders::_3, std::placeholders::_4),
             .setTextInputMode =
                 std::bind(&GUIManager::setTextInputMode, this, std::placeholders::_1),
-            .gm = (void*)this};
+            .gm            = (void *)this,
+            .registerEvent = std::bind(
+                &GUIManager::registerEvent, this, std::placeholders::_1, std::placeholders::_2)};
 
         // Initialize the locale so that string encode conversions work.
         std::setlocale(LC_ALL, "");
@@ -105,9 +107,9 @@ public:
     template <typename Control, typename... Args>
     requires std::derived_from<Control, GUIControl> Control *createControl(Args &&...args)
     {
-        render_info_.gm = (void*)this;
-        auto ptr     = std::make_unique<Control>(args..., render_info_);
-        Control *ret = (Control *)ptr.get();
+        render_info_.gm = (void *)this;
+        auto ptr        = std::make_unique<Control>(args..., render_info_);
+        Control *ret    = (Control *)ptr.get();
 
         auto appearance = theme->getAppearanceFor(ret);
         if (appearance) ret->setAppearance(*appearance);
@@ -146,15 +148,13 @@ public:
     template <typename Control>
     requires std::derived_from<Control, GUIControl> Control *getControl(int id)
     {
-        auto it = std::find_if(controls_.begin(), controls_.end(),
-                                    [&](auto& control) {
-                                        return control && control->id() == id;
-                                    });
+        auto it = std::find_if(controls_.begin(), controls_.end(), [&](auto &control) {
+            return control && control->id() == id;
+        });
 
-        if (it == controls_.end())
-            return nullptr;
+        if (it == controls_.end()) return nullptr;
 
-        return (Control*)it->get();
+        return (Control *)it->get();
     }
 
     /**
@@ -169,7 +169,7 @@ public:
     {
         static int winid = 1;
         auto layoutptr   = std::make_unique<Layout>();
-        render_info_.gm = (void*)this;
+        render_info_.gm  = (void *)this;
 
         auto ptr       = std::make_unique<GUIWindow>(*layoutptr.get(), render_info_);
         GUIWindow *ret = ptr.get();
@@ -207,7 +207,7 @@ public:
     void closeWindow(GUIWindow &);
 
     void moveWindowToTop(GUIWindow &);
-    
+
     /**
      * Removes a window from the window list.
      */
@@ -238,6 +238,8 @@ public:
 private:
     std::vector<std::unique_ptr<GUIControl>> controls_;
     std::vector<WindowInfo> windows_;
+
+    std::queue<std::pair<FGUIEventCallback, int>> callbacks_;
 
     std::map<std::string, GUIControl *> name2control_;
 
@@ -270,6 +272,8 @@ private:
     /// Sort windows by zIndex
     /// The higher the zIndex, the closer to the first element it is.
     void sortWindows();
+
+    void registerEvent(FGUIEventCallback handler, int control_id);
 };
 
 }  // namespace familyline::graphics::gui

@@ -136,7 +136,7 @@ void GUIManager::moveWindowToTop(GUIWindow &w)
 void GUIManager::destroyWindow(GUIWindow &w)
 {
     auto window = std::remove_if(windows_.begin(), windows_.end(), [&](WindowInfo &wi) {
-        return wi.window->id() == w.id();
+        return (!wi.window) || wi.window->id() == w.id();
     });
     windows_.erase(window, windows_.end());
 }
@@ -176,11 +176,26 @@ void GUIManager::onResize(int width, int height)
  */
 void GUIManager::runEvents()
 {
-    if (events_.empty()) return;
+    if (!events_.empty()) {
+        auto &event = events_.front();
+        event.cb(event.control);
+        events_.pop();        
+    }
 
-    auto &event = events_.front();
-    event.cb(event.control);
-    events_.pop();
+    if (!callbacks_.empty()) {
+        auto &[callback, controlID] = callbacks_.front();
+        GUIControl* c = this->getControl<GUIControl>(controlID);
+
+        if (c) {
+            callback(*c);
+        } else {
+        
+        }
+    
+        callbacks_.pop();
+        
+    }
+    
 }
 
 GUIWindow *GUIManager::getWindow(std::string name)
@@ -275,4 +290,9 @@ bool GUIManager::listenInputs(familyline::input::HumanInputAction i)
     }
 
     return false;
+}
+
+void GUIManager::registerEvent(FGUIEventCallback handler, int control_id)
+{
+    callbacks_.push(std::make_pair(handler, control_id));
 }

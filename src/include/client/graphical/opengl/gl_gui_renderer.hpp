@@ -1,38 +1,41 @@
 #pragma once
 
-#include <client/graphical/opengl/gl_headers.hpp>
 #include <cairo/cairo.h>
 
 #include <client/graphical/gui/gui_renderer.hpp>
+#include <client/graphical/opengl/gl_headers.hpp>
 #include <client/graphical/shader.hpp>
 
 #ifdef RENDERER_OPENGL
 
-namespace familyline::graphics::gui {
-
+namespace familyline::graphics::gui
+{
 class GLControlPaintData : public ControlPaintData
 {
 public:
-    GLControlPaintData(
-        GUIControl &control, int x, int y, unsigned width, unsigned height)
-        : control(control),
-          canvas_(cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height))
+    GLControlPaintData(GUIControl &control, int x, int y, unsigned width, unsigned height)
+        : control(control), canvas_(cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height))
     {
         context = cairo_create(canvas_);
     }
 
-
     virtual std::string format() const { return "glrenderer"; }
     virtual uint8_t *data() const { return (uint8_t *)canvas_; }
 
-    cairo_t* context;
+    cairo_t *context;
 
     int x, y;
 
     GUIControl &control;
 
+    virtual ~GLControlPaintData()
+    {
+        cairo_surface_destroy(canvas_);
+        cairo_destroy(context);
+    }
+
 private:
-    cairo_surface_t* canvas_;
+    cairo_surface_t *canvas_;
 };
 
 /**
@@ -41,9 +44,8 @@ private:
 class GLGUIRenderer : public GUIRenderer
 {
 public:
-
     GLGUIRenderer();
-    
+
     /// Update the rendered content
     virtual void update(const std::vector<ControlPaintData *> &data);
 
@@ -54,12 +56,11 @@ public:
     {
         screenWidth_  = width;
         screenHeight_ = height;
-        tex_gui_ = this->resizeTexture(width, height);
+        tex_gui_      = this->resizeTexture(width, height);
     }
 
     virtual std::optional<GUIGlyphSize> getCodepointSize(
-        char32_t codepoint, std::string_view fontName, size_t fontSize,
-        FontWeight weight);
+        char32_t codepoint, std::string_view fontName, size_t fontSize, FontWeight weight);
 
     virtual std::unique_ptr<GUIControlPainter> createPainter();
 
@@ -86,10 +87,10 @@ public:
 private:
     std::vector<ControlPaintData *> data_;
 
-    cairo_surface_t* canvas_;
-    cairo_t* context_;
+    cairo_surface_t *canvas_;
+    cairo_t *context_;
 
-    ShaderProgram* sGUI_ = nullptr;
+    ShaderProgram *sGUI_ = nullptr;
     GLuint vao_gui_;
     GLuint tex_gui_;
 
@@ -97,7 +98,7 @@ private:
      * Initialize the GUI shaders
      */
     void initShaders();
-    
+
     /**
      * Initialize a texture, where the GUI contents will be drawn
      */
@@ -108,7 +109,6 @@ private:
      */
     GLuint resizeTexture(int width, int height);
 
-
     int screenWidth_  = 320;
     int screenHeight_ = 240;
 };
@@ -118,10 +118,8 @@ class GLControlPainter : public GUIControlPainter
 public:
     GLControlPainter(GLGUIRenderer &cr) : cr_(cr) {}
 
-    virtual std::unique_ptr<ControlPaintData> drawWindow(
-        GUIWindow &w);
-    virtual std::unique_ptr<ControlPaintData> drawControl(
-        GUIControl &c);
+    virtual std::unique_ptr<ControlPaintData> drawWindow(GUIWindow &w);
+    virtual std::unique_ptr<ControlPaintData> drawControl(GUIControl &c);
 
 private:
     GLGUIRenderer &cr_;

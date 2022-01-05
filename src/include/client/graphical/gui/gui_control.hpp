@@ -109,8 +109,20 @@ struct GUIControlRenderInfo {
   /// GUIRenderer::setTextInputMode(...)
   std::function<void(bool)> setTextInputMode = [](auto) {};
 
-    /// The GUI manager that owns this control
+  /**
+   * The GUI manager that owns this control
+   */
     void* gm;
+
+    /**
+     * A function to register the function for the GUI manager to runcallbacks*
+     *
+     * We need to run those functions in the GUI manager, because if we run them
+     * in the control, if the handler remove the control (that can and *will*
+     * happen), the game will segfault.
+     */
+    std::function<void(FGUIEventCallback, int)> registerEvent;
+    /// ^ GUIRenderer::registerEvent(...);
 };
 
 /*
