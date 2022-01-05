@@ -59,6 +59,9 @@ struct VertexGroup {
 
 std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
 {
+    // Reset the numeric locale, so that the `sscanf` parse function works.
+    auto numlocale = std::setlocale(LC_NUMERIC, "C");
+    
     auto& log = LoggerService::getLogger();
 
     /* The vertices, normals and texcoords of the file
@@ -96,8 +99,7 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
             if (feof(fObj)) break;
 
             throw std::runtime_error{"Error while reading the file"};
-        }
-
+        }        
         // Remove whitespace
         while (l[0] == ' ') l++;
 
@@ -108,7 +110,8 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
             continue;
 
         // Remove the newline
-        l[strlen(l) - 1] = '\0';
+        if (l[strlen(l) - 1] == '\n')
+            l[strlen(l) - 1] = '\0';
 
         // Vertex
         if (l[0] == 'v' && l[1] == ' ') {
@@ -234,7 +237,14 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
                 if (i < (3 * 3) + 1) continue;
 
             } else {
-                fprintf(stderr, "error: unsupported face configuration (%s)\n", l);
+                log->write("meshopener::obj", LogType::Error,
+                           "unsupported face configuration in {} ({})",
+                           file, l);
+                log->write("meshopener::obj", LogType::Debug,
+                           "error conditions: hasNormal={}, hasTexture={}",
+                           current_group->hasNormal,
+                           current_group->hasTexture
+                    );
                 continue;
             }
 
@@ -244,6 +254,9 @@ std::vector<Mesh*> OBJOpener::OpenSpecialized(const char* file)
     }
     delete[] line;
 
+    std::setlocale(LC_NUMERIC, numlocale);
+
+    
     // File parsing ended. We can close the file
     fclose(fObj);
 

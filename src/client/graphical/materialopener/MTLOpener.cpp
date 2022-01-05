@@ -20,6 +20,8 @@ std::vector<Material*> MTLOpener::Open(const char* file)
     char* matname = nullptr;
     glm::vec3 diffuse, ambient, specular;
 
+    auto numlocale = std::setlocale(LC_NUMERIC, "C");
+
     char line[256];
     while (!feof(fMat)) {
         char* fline = &line[0];
@@ -104,6 +106,8 @@ std::vector<Material*> MTLOpener::Open(const char* file)
             continue;
         }
     }
+
+    std::setlocale(LC_NUMERIC, numlocale);
 
     /* Add the last material */
     MaterialData md;
