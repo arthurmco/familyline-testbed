@@ -346,8 +346,7 @@ TEST_F(GUITestBase, TestWindowRestoreWindowBelowWhenAboveIsDestroyed)
 
     ASSERT_TRUE(tr.query(labelother.id()));
 
-    
-    gm->destroyWindow(w2);
+    gm->destroyWindow("another");
 
     gm->update();
     gm->render();

@@ -51,9 +51,12 @@ public:
     box_.setEventCallbackRegisterFunction(r);
   }
 
+    virtual ~GUIWindow() {}
+    
 private:
   bool inner_box_ = false;
   bool last_inner_box_ = true;
+  bool deleting = false;
   GUIBox box_;
 };
 

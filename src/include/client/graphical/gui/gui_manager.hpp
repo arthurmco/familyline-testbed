@@ -210,8 +210,11 @@ public:
 
     /**
      * Removes a window from the window list.
+     *
+     * We use a name reference instead of a pointer because the name might not exist anymore.
+     *
      */
-    void destroyWindow(GUIWindow &w);
+    void destroyWindow(std::string name);
 
     void update();
     void render();

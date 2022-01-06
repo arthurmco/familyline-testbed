@@ -1,4 +1,5 @@
 #include <client/graphical/gui/gui.hpp>
+#include <client/graphical/gui/gui_manager.hpp>
 #include <string>
 
 using namespace familyline::graphics::gui;
@@ -37,8 +38,3 @@ void GUIWindow::receiveInput(const familyline::input::HumanInputAction &e) {
 
   this->box().receiveInput(e);
 }
-
-///////////////////
-///////////////////
-////////////////////
-///////////////////

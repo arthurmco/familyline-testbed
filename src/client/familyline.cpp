@@ -1068,8 +1068,8 @@ static int show_starting_menu(
                 }
             }
 
-            ginfo.guir->destroyWindow(background);
-            ginfo.guir->destroyWindow(w);
+            ginfo.guir->destroyWindow("bg");
+            ginfo.guir->destroyWindow("menu");
 
             auto createNormalSession_fn = [](logic::Terrain& map, auto& local_player_info) {
                 /// running a normal game
@@ -1093,7 +1093,7 @@ static int show_starting_menu(
                 ginfo.guir->createControl<GUILabel>("Settings"));
             GUIButton& back = (GUIButton&)settings.box().add(
                 ginfo.guir->createControl<GUIButton>("Back", [&](auto c) {
-                    ginfo.guir->destroyWindow(settings);
+                    ginfo.guir->destroyWindow("settings");
                     ginfo.guir->moveWindowToTop(w);
                 }));
             

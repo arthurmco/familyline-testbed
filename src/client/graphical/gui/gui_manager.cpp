@@ -133,11 +133,12 @@ void GUIManager::moveWindowToTop(GUIWindow &w)
 /**
  * Removes a window from the window list.
  */
-void GUIManager::destroyWindow(GUIWindow &w)
+void GUIManager::destroyWindow(std::string name)
 {
-    auto window = std::remove_if(windows_.begin(), windows_.end(), [&](WindowInfo &wi) {
-        return (!wi.window) || wi.window->id() == w.id();
+    auto window = std::remove_if(windows_.begin(), windows_.end(), [&](const WindowInfo &wi) {
+        return wi.name == name;
     });
+
     windows_.erase(window, windows_.end());
 }
 
@@ -201,7 +202,7 @@ void GUIManager::runEvents()
 GUIWindow *GUIManager::getWindow(std::string name)
 {
     auto it = std::find_if(windows_.begin(), windows_.end(), [&name](const WindowInfo &wi) {
-        return wi.name == name;
+        return wi.window && wi.name == name;
     });
 
     if (it == windows_.end()) return nullptr;
