@@ -5,6 +5,7 @@
 #include <client/graphical/gui/gui_renderer.hpp>
 #include <client/graphical/opengl/gl_headers.hpp>
 #include <client/graphical/shader.hpp>
+#include "client/input/input_service.hpp"
 
 #ifdef RENDERER_OPENGL
 
@@ -80,7 +81,13 @@ public:
      * be the best place (we will probably need to rename the renderer
      * class)
      */
-    virtual void setTextInputMode(bool v) {}
+    virtual void setTextInputMode(bool v) {
+        if (v)
+            input::InputService::getInputManager()->enableTextEvents();
+        else
+            input::InputService::getInputManager()->disableTextEvents();
+
+    }
 
     virtual ~GLGUIRenderer() {}
 

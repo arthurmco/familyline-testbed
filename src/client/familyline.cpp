@@ -1036,7 +1036,7 @@ static int show_starting_menu(
 
     GUIWindow& background = ginfo.guir->createWindow<FlexLayout<false>>("bg");
     GUIWindow& w          = ginfo.guir->createWindow<FlexLayout<false>>("menu");
-    
+
     // TODO: Autoresize this when autoresizing the gui manager
     w.onResize(ginfo.gwidth - 2, ginfo.gheight - 2, 1, 1);
     background.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
@@ -1045,7 +1045,7 @@ static int show_starting_menu(
     ginfo.guir->showWindow(w);
 
     ginfo.guir->moveWindowToTop(w);
-    
+
     GUILabel& l = (GUILabel&)w.box().add(ginfo.guir->createControl<GUILabel>("FAMILYLINE"));
     {
         auto a                = l.appearance();
@@ -1088,16 +1088,22 @@ static int show_starting_menu(
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Settings", [&](auto c) {
             GUIWindow& settings = ginfo.guir->createWindow<FlexLayout<false>>("settings");
             settings.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
-            
-            GUILabel& title = (GUILabel&)settings.box().add(
-                ginfo.guir->createControl<GUILabel>("Settings"));
+
+            GUILabel& title =
+                (GUILabel&)settings.box().add(ginfo.guir->createControl<GUILabel>("Settings"));
+
+            GUILabel& lblName =
+                (GUILabel&)settings.box().add(ginfo.guir->createControl<GUILabel>("Player name:"));
+            GUITextbox& txtName = (GUITextbox&)settings.box().add(
+                ginfo.guir->createControl<GUITextbox>(confdata.player.username));
+
             GUIButton& back = (GUIButton&)settings.box().add(
                 ginfo.guir->createControl<GUIButton>("Back", [&](auto c) {
                     ginfo.guir->destroyWindow("settings");
                     ginfo.guir->moveWindowToTop(w);
                 }));
-            
-            ginfo.guir->showWindow(settings);            
+
+            ginfo.guir->showWindow(settings);
         }));
     GUIButton& bmplayer =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Multiplayer", [](auto c) {

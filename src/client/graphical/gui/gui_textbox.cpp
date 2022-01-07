@@ -124,7 +124,35 @@ void GUITextbox::receiveInput(const familyline::input::HumanInputAction &e) {
 
     if (auto *tev = std::get_if<TextInput>(&e.type); tev) {
         auto data32 = toU32(tev->text);
-        text_.insert(select_end_, data32, 0);
+        text_.insert(select_end_, data32);
+        select_end_ += data32.size();
+        select_start_ = select_end_;
+    } else if (auto *tev = std::get_if<TextEdit>(&e.type); tev) {
+        fprintf(stderr, "eeee %s\n", tev->text);
+    } else if (auto *kev = std::get_if<KeyAction>(&e.type); kev) {
+        if (kev->keycode == SDLK_BACKSPACE && kev->isPressed) {
+            fprintf(stderr, "backspace\n");
+            if (select_start_ > 0) {
+                text_.erase(select_start_-1, select_end_ - select_start_+1);
+                select_start_--;
+                select_end_ = select_start_;
+            }
+        } else if (kev->keycode == SDLK_DELETE && kev->isPressed) {
+            if (select_end_ < text_.size()-1)
+                text_.erase(select_start_, select_end_ - select_start_ + 1);
+        }
+
+        if (select_start_ == select_end_) {
+            if (kev->keycode == SDLK_LEFT && kev->isPressed)
+                select_end_ = std::max(0, int(select_end_)-1);
+            else if (kev->keycode == SDLK_RIGHT && kev->isPressed)
+                select_end_ = std::min(text_.size(), select_end_+1);
+
+            select_start_ = select_end_;
+        }
+    } else if (auto *mev = std::get_if<ClickAction>(&e.type); mev) {
+        select_start_ = getCharFromPosition(mev->screenX - x(), mev->screenY - y());
+        select_end_ = select_start_;
     }
 
     

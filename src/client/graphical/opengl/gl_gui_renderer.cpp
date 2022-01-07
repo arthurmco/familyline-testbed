@@ -4,10 +4,14 @@
 #include <client/graphical/opengl/gl_gui_renderer.hpp>
 #include <common/logger.hpp>
 #include <cstdio>
+#include <cuchar>
 
 #ifdef RENDERER_OPENGL
 
 using namespace familyline::graphics::gui;
+
+PangoLayout* getLayoutFromText(
+    cairo_t* ctxt, const std::string& text, const GUIAppearance& appearance, bool markup = false);
 
 void GLGUIRenderer::update(const std::vector<ControlPaintData*>& data)
 {
@@ -33,9 +37,26 @@ std::optional<GUIGlyphSize> GLGUIRenderer::getCodepointSize(
     // Ignore control characters
     if (codepoint < 32) return std::optional<GUIGlyphSize>(GUIGlyphSize{.width = 0, .height = 0});
 
+    std::mbstate_t state{};
+    char c[MB_LEN_MAX + 1] = {};
+    auto rc                = std::c32rtomb(c, codepoint, &state);
+    if (rc == (std::size_t)-1) return std::nullopt;
+
+    std::string ret = c;
+
+    GUIAppearance a;
+    a.font     = fontName;
+    a.fontsize = fontSize;
+    a.weight   = weight;
+
+    PangoLayout* l = getLayoutFromText(context_, ret, a);
+    int width = 0, height = 0;
+    pango_layout_get_size(l, &width, &height);
+    g_object_unref(l);
+    
     return std::optional<GUIGlyphSize>(GUIGlyphSize{
-        .width  = 10,
-        .height = 10,
+        .width  = double(width) / PANGO_SCALE,
+        .height = double(height) / PANGO_SCALE,
     });
 }
 
@@ -49,10 +70,11 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawWindow(GUIWindow& w)
     return drawControl(w.box());
 }
 
-void drawLabel(cairo_t* ctxt, const GUILabel* label, const GUIAppearance& appearance)
+PangoLayout* getLayoutFromText(
+    cairo_t* ctxt, const std::string& text, const GUIAppearance& appearance, bool markup)
 {
     PangoFontDescription* font_description = pango_font_description_new();
-    pango_font_description_set_family(font_description, appearance.font.c_str());
+    pango_font_description_set_family(font_description, text.c_str());
     pango_font_description_set_absolute_size(font_description, appearance.fontsize * PANGO_SCALE);
 
     PangoWeight weight;
@@ -67,9 +89,20 @@ void drawLabel(cairo_t* ctxt, const GUILabel* label, const GUIAppearance& appear
 
     PangoLayout* layout = pango_cairo_create_layout(ctxt);
     pango_layout_set_font_description(layout, font_description);
-    pango_layout_set_markup(layout, label->text().c_str(), -1);
+
+    if (markup)
+        pango_layout_set_markup(layout, text.c_str(), -1);
+    else
+        pango_layout_set_text(layout, text.c_str(), -1);
 
     pango_font_description_free(font_description);
+
+    return layout;
+}
+
+void drawLabel(cairo_t* ctxt, const GUILabel* label, const GUIAppearance& appearance)
+{
+    PangoLayout* layout = getLayoutFromText(ctxt, label->text(), appearance, true);
 
     int width = 0, height = 0;
     pango_layout_get_size(layout, &width, &height);
@@ -81,7 +114,7 @@ void drawLabel(cairo_t* ctxt, const GUILabel* label, const GUIAppearance& appear
     switch (appearance.horizontalAlignment) {
         case HorizontalAlignment::Left: startx = appearance.marginX; break;
         case HorizontalAlignment::Center:
-            startx = glm::max(appearance.marginX, (label->width() / 2) - (width/2));
+            startx = glm::max(appearance.marginX, (label->width() / 2) - (width / 2));
             break;
         case HorizontalAlignment::Right:
             startx = label->width() - width - appearance.marginX;
@@ -151,6 +184,60 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
 
         drawLabel(ctxt, &button->getInnerLabel(), labelap);
 
+    } else if (auto textbox = dynamic_cast<GUITextbox*>(&c); textbox) {
+        cairo_move_to(ctxt, 0, 0);
+        cairo_set_source_rgba(ctxt, br, bg, bb, ba);
+        cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
+        cairo_paint(ctxt);
+
+        cairo_set_source_rgba(ctxt, 1.0 - br, 1.0 - bg, 1.0 - bb, ba);
+        cairo_set_line_width(ctxt, 4.0);
+        cairo_rectangle(ctxt, 1, 1, c.width() - 1, c.height() - 1);
+        cairo_stroke(ctxt);
+
+        auto [selbefore, selection, selafter] = textbox->getTextAsSelection(false);
+
+        PangoLayout* layoutBefore = getLayoutFromText(ctxt, selbefore, appearance);
+
+        GUIAppearance inverseAppearance = appearance;
+        std::swap(inverseAppearance.foreground, inverseAppearance.background);
+
+        PangoLayout* layoutSelection = getLayoutFromText(ctxt, selection, inverseAppearance);
+        PangoLayout* layoutAfter     = getLayoutFromText(ctxt, selafter, appearance);
+
+        int selectionoff = 0, height = 0;
+        pango_layout_get_size(layoutBefore, &selectionoff, &height);
+        int selwidth = 0;
+        pango_layout_get_size(layoutSelection, &selwidth, &height);
+
+        selectionoff /= PANGO_SCALE;
+        selwidth /= PANGO_SCALE;
+        height /= PANGO_SCALE;
+
+        selwidth = std::max(selwidth, 2);
+
+        cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
+        cairo_move_to(ctxt, 5, c.height() - height - 4);
+        pango_cairo_show_layout(ctxt, layoutBefore);
+
+        cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
+        cairo_rectangle(ctxt, 5 + selectionoff + 1, 5, selwidth, c.height() - 5);
+        cairo_fill(ctxt);
+
+        if (selection.size() == 0) {
+            cairo_set_source_rgba(ctxt, br, bg, bb, ba);
+            cairo_move_to(ctxt, 5 + selectionoff + 1, c.height() - height - 4);
+            pango_cairo_show_layout(ctxt, layoutSelection);
+        }
+
+        cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
+        cairo_move_to(ctxt, 5 + selectionoff + selwidth, c.height() - height - 4);
+        pango_cairo_show_layout(ctxt, layoutAfter);
+        
+        g_object_unref(layoutBefore);
+        g_object_unref(layoutSelection);
+        g_object_unref(layoutAfter);
+
     } else {
         double r = (rand() % 256) / 256.0;
         cairo_set_source_rgb(ctxt, r, 0, 0.5);
@@ -175,11 +262,12 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
         cairo_stroke(ctxt);
     }
 
+#ifdef DRAW_DEBUG_BORDER
     cairo_set_line_width(ctxt, 1.0);
     cairo_set_source_rgb(ctxt, 0.0, 0.0, 1.0);
     cairo_rectangle(ctxt, 1, 1, c.width() - 1, c.height() - 1);
     cairo_stroke(ctxt);
-
+#endif
     return controlpaint;
 }
 
