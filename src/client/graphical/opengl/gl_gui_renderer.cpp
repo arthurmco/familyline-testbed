@@ -185,15 +185,7 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
         drawLabel(ctxt, &button->getInnerLabel(), labelap);
 
     } else if (auto textbox = dynamic_cast<GUITextbox*>(&c); textbox) {
-        cairo_move_to(ctxt, 0, 0);
-        cairo_set_source_rgba(ctxt, br, bg, bb, ba);
-        cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
-        cairo_paint(ctxt);
 
-        cairo_set_source_rgba(ctxt, 1.0 - br, 1.0 - bg, 1.0 - bb, ba);
-        cairo_set_line_width(ctxt, 4.0);
-        cairo_rectangle(ctxt, 1, 1, c.width() - 1, c.height() - 1);
-        cairo_stroke(ctxt);
 
         auto [selbefore, selection, selafter] = textbox->getTextAsSelection(false);
 
@@ -214,24 +206,36 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
         selwidth /= PANGO_SCALE;
         height /= PANGO_SCALE;
 
+        auto control_height = std::min(height+25, c.height());
+        
+        cairo_move_to(ctxt, 0, 0);
+        cairo_set_source_rgba(ctxt, br, bg, bb, ba);
+        cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
+        cairo_paint(ctxt);
+
+        cairo_set_source_rgba(ctxt, 1.0 - br, 1.0 - bg, 1.0 - bb, ba);
+        cairo_set_line_width(ctxt, 4.0);
+        cairo_rectangle(ctxt, 1, 1, c.width() - 1, control_height - 1);
+        cairo_stroke(ctxt);
+
         selwidth = std::max(selwidth, 2);
 
         cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
-        cairo_move_to(ctxt, 5, c.height() - height - 4);
+        cairo_move_to(ctxt, 5, control_height - height - 4);
         pango_cairo_show_layout(ctxt, layoutBefore);
 
         cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
-        cairo_rectangle(ctxt, 5 + selectionoff + 1, 5, selwidth, c.height() - 5);
+        cairo_rectangle(ctxt, 5 + selectionoff + 1, 5, selwidth, control_height - 5);
         cairo_fill(ctxt);
 
         if (selection.size() == 0) {
             cairo_set_source_rgba(ctxt, br, bg, bb, ba);
-            cairo_move_to(ctxt, 5 + selectionoff + 1, c.height() - height - 4);
+            cairo_move_to(ctxt, 5 + selectionoff + 1, control_height - height - 4);
             pango_cairo_show_layout(ctxt, layoutSelection);
         }
 
         cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
-        cairo_move_to(ctxt, 5 + selectionoff + selwidth, c.height() - height - 4);
+        cairo_move_to(ctxt, 5 + selectionoff + selwidth, control_height - height - 4);
         pango_cairo_show_layout(ctxt, layoutAfter);
         
         g_object_unref(layoutBefore);
