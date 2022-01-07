@@ -72,6 +72,18 @@ std::optional<GUIAppearance> GUITheme::getAppearanceByControlType(std::string_vi
 
     if (appearance["font_size"]) gapp.fontsize = (size_t)appearance["font_size"].as<uint32_t>();
 
+    if (appearance["horizontal_alignment"]) {
+        std::string alignment = appearance["horizontal_alignment"].as<std::string>();
+        
+        if (alignment == "left")
+            gapp.horizontalAlignment = HorizontalAlignment::Left;
+        else if (alignment == "center")
+            gapp.horizontalAlignment = HorizontalAlignment::Center;
+        else if (alignment == "right")
+            gapp.horizontalAlignment = HorizontalAlignment::Right;
+    }
+
+    
     printf(
         "\tforeground: %s -> %.2f %.2f %.2f %.2f\n",
         appearance["foreground"].as<std::string>().c_str(), gapp.foreground[0], gapp.foreground[1],

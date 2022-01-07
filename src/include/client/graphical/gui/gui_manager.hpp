@@ -97,7 +97,7 @@ public:
     };
 
     /**
-     * Create a control of type T, in place
+     * Create a control of type Control, in place
      * Also pass the arguments of said control into the constructor, more or less
      * like make_unique would do.
      *
@@ -120,8 +120,8 @@ public:
     }
 
     /**
-     * Create a control of type T, in place
-     * Same thing as the above, but define a name for the control
+     * Create a control of type Control, in place
+     * Same thing as `createControl`, but define a name for the control
      *
      * Useful if you want to get the control later while inside a
      * handle, where the control reference might not exist anymore.
@@ -185,8 +185,6 @@ public:
     }
 
     GUIWindow *getWindow(std::string name);
-
-    // https://www.amazon.com/High-Performance-Master-optimizing-functioning/dp/1839216549
 
     /// Called when we receive a window resize event
     ///

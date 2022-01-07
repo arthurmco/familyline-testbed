@@ -66,6 +66,7 @@ install(DIRECTORY icons DESTINATION share/familyline)
 install(DIRECTORY materials DESTINATION share/familyline)
 install(DIRECTORY models DESTINATION share/familyline)
 install(FILES assets.yml DESTINATION share/familyline)
+install(FILES theme.yml DESTINATION share/familyline)
 install(FILES terrain_test.flte DESTINATION share/familyline)
 
 configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/src/include/config.h.in"

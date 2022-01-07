@@ -902,7 +902,11 @@ int main(int argc, char const* argv[])
         Framebuffer* fGUI = GFXService::getDevice()->createFramebuffer("fGUI", gwidth, gheight);
         win->setFramebuffers(f3D, fGUI);
 
+        auto theme = std::make_unique<GUITheme>();
+        theme->loadFile(ASSET_FILE_DIR "theme.yml");
+        
         guir = new GUIManager(win->createGUIRenderer());
+        guir->theme = std::move(theme);
         guir->onResize(gwidth, gheight);
 
         auto& texman = GFXService::getTextureManager();
@@ -1102,8 +1106,9 @@ static int show_starting_menu(
                     ginfo.guir->destroyWindow("settings");
                     ginfo.guir->moveWindowToTop(w);
                 }));
-
-            ginfo.guir->showWindow(settings);
+            
+            ginfo.guir->closeWindow(w);            
+            ginfo.guir->showWindow(settings);            
         }));
     GUIButton& bmplayer =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Multiplayer", [](auto c) {

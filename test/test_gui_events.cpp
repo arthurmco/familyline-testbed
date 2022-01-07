@@ -45,7 +45,7 @@ TEST_F(GUITestEvents, TestIfButtonRecognizesClick)
             clicked = true;
             click_times++;
         }));
-
+    
     gm->showWindow(w);
     gm->update();
     gm->render();

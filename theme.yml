@@ -1,0 +1,17 @@
+name: "Basic"
+description: "AAAAAAA"
+controls:
+  label:
+    foreground: "#cccccc"
+    background: "#00000000"
+
+  button:
+    foreground: "#eeeeee"
+    background: "#222222"
+    border: "#8a8a8a"
+    horizontal_alignment: center
+
+  textbox:
+    foreground: "#333333"
+    background: "#efefef"
+    

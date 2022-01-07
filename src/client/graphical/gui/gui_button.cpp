@@ -27,6 +27,8 @@ void GUIButton::onResize(int nwidth, int nheight, int nx, int ny)
     height_ = nheight;
     x_      = nx;
     y_      = ny;
+
+    label_.onResize(nwidth, nheight, nx, ny);
 }
 
 void GUIButton::receiveInput(const familyline::input::HumanInputAction &e)
