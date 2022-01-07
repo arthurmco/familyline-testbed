@@ -53,7 +53,7 @@ jobs:
     - name: Download dependencies
       run: |
          sudo apt -y update
-         sudo apt -y install g++-10 clang-11 libglm-dev libglew-dev libsdl2-2.0-0 libsdl2-dev libsdl2-image-2.0-0 libfmt-dev libsdl2-image-dev libdevil1c2 libdevil-dev cmake make libcairo2 libcairo2-dev libyaml-0-2 libyaml-dev libpango-1.0-0 libpango1.0-dev libpangocairo-1.0-0 libflatbuffers-dev libflatbuffers1 nlohmann-json3-dev flatbuffers-compiler-dev flatbuffers-compiler libcurlpp-dev libexpected-dev libcurl4-openssl-dev libcurl4
+         sudo apt -y install g++-10 clang-11 libglm-dev libglew-dev libsdl2-2.0-0 libsdl2-dev libsdl2-image-2.0-0 libfmt-dev libsdl2-image-dev libdevil1c2 libdevil-dev libyaml-cpp-dev libyaml-cpp0.6 cmake make libcairo2 libcairo2-dev libyaml-0-2 libyaml-dev libpango-1.0-0 libpango1.0-dev libpangocairo-1.0-0 libflatbuffers-dev libflatbuffers1 nlohmann-json3-dev flatbuffers-compiler-dev flatbuffers-compiler libcurlpp-dev libexpected-dev libcurl4-openssl-dev libcurl4
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
