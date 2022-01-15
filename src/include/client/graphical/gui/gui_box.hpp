@@ -1,6 +1,10 @@
 #pragma once
 
-#include <cassert>
+#include <sys/types.h>
+#include <stdint.h>
+
+
+
 #include <client/graphical/gui/gui_control.hpp>
 #include <client/graphical/gui/gui_layout.hpp>
 
@@ -20,7 +24,7 @@ namespace familyline::graphics::gui
 class GUIBox : public GUIControl
 {
     friend class GUIWindow;
-    
+
 public:
     GUIBox(BaseLayout &layout, GUIControlRenderInfo render_info = {})
         : GUIControl(render_info), layout_(layout)
@@ -79,9 +83,8 @@ public:
             tab_control = controls_.begin();
             std::advance(tab_control, last_focus_control_id);
             (*tab_control)->onFocusExit();
-            
         }
-        
+
         tab_index_ = -1;
     }
 
