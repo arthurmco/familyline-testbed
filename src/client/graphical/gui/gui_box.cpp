@@ -116,7 +116,6 @@ void GUIBox::update()
     dirty_ = false;
 };
 
-int last_focus_control_id = -1;
 
 void GUIBox::receiveInput(const familyline::input::HumanInputAction &e)
 {

@@ -75,17 +75,24 @@ public:
         std::advance(tab_control, tab_index_);
         (*tab_control)->onFocusExit();
 
+        if (last_focus_control_id >= 0 && tab_index_ != focused_index_) {
+            tab_control = controls_.begin();
+            std::advance(tab_control, last_focus_control_id);
+            (*tab_control)->onFocusExit();
+            
+        }
+        
         tab_index_ = -1;
     }
 
-    virtual void setEventCallbackRegisterFunction(FGUICallbackRegister r) override;
+    virtual void setEventCallbackRegisterFunction(FGUICallbackRegister r);
 
 private:
     ssize_t previous_tab_index_ = -1;
     ssize_t tab_index_          = -1;
     bool is_tab                 = false;
 
-//    int last_focus_control_id = -1;
+    int last_focus_control_id = -1;
 
     // The index of the currently focused control.
     // TODO: reset this if the removed control is focused.

@@ -184,6 +184,21 @@ public:
         return *ret;
     }
 
+    /**
+     * Create a layout, type parameterizing it, and make the GUI manager manage its lifetime
+     *
+     * Usually you would use this when creating layouts for boxes
+     */
+    template <typename Layout, typename... Args>
+    requires std::derived_from<Layout, BaseLayout> BaseLayout &createLayout(Args &&...args)
+    {
+        auto ptr = std::unique_ptr<BaseLayout>(new Layout(args...));
+        auto ret = ptr.get();
+
+        layouts_.push_back(std::move(ptr));
+        return (BaseLayout&)*ret;
+    }
+
     GUIWindow *getWindow(std::string name);
 
     /// Called when we receive a window resize event
@@ -239,6 +254,7 @@ public:
 private:
     std::vector<std::unique_ptr<GUIControl>> controls_;
     std::vector<WindowInfo> windows_;
+    std::vector<std::unique_ptr<BaseLayout>> layouts_;
 
     std::queue<std::pair<FGUIEventCallback, int>> callbacks_;
 

@@ -904,8 +904,8 @@ int main(int argc, char const* argv[])
 
         auto theme = std::make_unique<GUITheme>();
         theme->loadFile(ASSET_FILE_DIR "theme.yml");
-        
-        guir = new GUIManager(win->createGUIRenderer());
+
+        guir        = new GUIManager(win->createGUIRenderer());
         guir->theme = std::move(theme);
         guir->onResize(gwidth, gheight);
 
@@ -1053,14 +1053,21 @@ static int show_starting_menu(
     GUILabel& l = (GUILabel&)w.box().add(ginfo.guir->createControl<GUILabel>("FAMILYLINE"));
     {
         auto a                = l.appearance();
-        a.fontsize            = 28;
+        a.fontsize            = 32;
         a.horizontalAlignment = HorizontalAlignment::Center;
         a.background          = {0, 0, 0, 0};
+        a.foreground          = {1, 1, 1, 1};
         l.setAppearance(a);
     }
 
     GUILabel& lv = (GUILabel&)w.box().add(
         ginfo.guir->createControl<GUILabel>("Version " VERSION ", commit " COMMIT));
+    {
+        auto a       = lv.appearance();
+        a.background = {1, 1, 1, 0.5};
+        a.foreground = {0.2, 0.2, 1, 1};
+        lv.setAppearance(a);
+    }
 
     GUIButton& bnew =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("New Game", [&](auto c) {
@@ -1106,13 +1113,34 @@ static int show_starting_menu(
                     ginfo.guir->destroyWindow("settings");
                     ginfo.guir->moveWindowToTop(w);
                 }));
-            
-            ginfo.guir->closeWindow(w);            
-            ginfo.guir->showWindow(settings);            
+
+            ginfo.guir->closeWindow(w);
+            ginfo.guir->showWindow(settings);
         }));
     GUIButton& bmplayer =
-        (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Multiplayer", [](auto c) {
+        (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Multiplayer", [&](auto c) {
+            GUIWindow& multiplayer = ginfo.guir->createWindow<FlexLayout<false>>("multiplayer");
+            multiplayer.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
 
+            GUILabel& title = (GUILabel&)multiplayer.box().add(
+                ginfo.guir->createControl<GUILabel>("Multiplayer"));
+
+            GUIBox& btnArea = (GUIBox&)multiplayer.box().add(
+                ginfo.guir->createControl<GUIBox>(ginfo.guir->createLayout<FlexLayout<true>>()));
+
+            GUIButton& back =
+                (GUIButton&)btnArea.add(ginfo.guir->createControl<GUIButton>("Back", [&](auto c) {
+                    ginfo.guir->destroyWindow("multiplayer");
+                    ginfo.guir->moveWindowToTop(w);
+                }));
+            GUIButton& connect = (GUIButton&)btnArea.add(
+                ginfo.guir->createControl<GUIButton>("Connect", [&](auto c) {
+                    ginfo.guir->destroyWindow("multiplayer");
+                    ginfo.guir->moveWindowToTop(w);
+                }));
+
+            ginfo.guir->closeWindow(w);
+            ginfo.guir->showWindow(multiplayer);
         }));
     GUIButton& bquit =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Exit Game", [&](auto c) {
