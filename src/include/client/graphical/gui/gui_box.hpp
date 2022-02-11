@@ -3,8 +3,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 
-
-
+#include <cassert>
 #include <client/graphical/gui/gui_control.hpp>
 #include <client/graphical/gui/gui_layout.hpp>
 

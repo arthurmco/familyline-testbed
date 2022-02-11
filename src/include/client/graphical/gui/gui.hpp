@@ -8,3 +8,4 @@
 #include <client/graphical/gui/gui_textbox.hpp>
 #include <client/graphical/gui/gui_label.hpp>
 #include <client/graphical/gui/gui_button.hpp>
+#include <client/graphical/gui/gui_imageview.hpp>

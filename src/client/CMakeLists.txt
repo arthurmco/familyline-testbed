@@ -26,7 +26,7 @@ add_library(
   "graphical/gui/gui_button.cpp"
   "graphical/gui/gui_control.cpp"
   "graphical/gui/gui_box.cpp"
-#  "graphical/gui/gui_imageview.cpp"
+  "graphical/gui/gui_imageview.cpp"
   "graphical/gui/gui_label.cpp"
 #  "graphical/gui/gui_checkbox.cpp"
 #  "graphical/gui/gui_listbox.cpp"

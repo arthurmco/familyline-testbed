@@ -53,7 +53,7 @@ std::optional<GUIGlyphSize> GLGUIRenderer::getCodepointSize(
     int width = 0, height = 0;
     pango_layout_get_size(l, &width, &height);
     g_object_unref(l);
-    
+
     return std::optional<GUIGlyphSize>(GUIGlyphSize{
         .width  = double(width) / PANGO_SCALE,
         .height = double(height) / PANGO_SCALE,
@@ -207,7 +207,7 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
         height /= PANGO_SCALE;
 
         auto control_height = std::min(height+25, c.height());
-        
+
         cairo_move_to(ctxt, 0, 0);
         cairo_set_source_rgba(ctxt, br, bg, bb, ba);
         cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
@@ -237,11 +237,42 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
         cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
         cairo_move_to(ctxt, 5 + selectionoff + selwidth, control_height - height - 4);
         pango_cairo_show_layout(ctxt, layoutAfter);
-        
+
         g_object_unref(layoutBefore);
         g_object_unref(layoutSelection);
         g_object_unref(layoutAfter);
 
+    } else if (auto iv = dynamic_cast<GUIImageView*>(&c); iv) {
+        SDL_Surface* image = iv->getImageData();
+
+
+        int drawx = 0;
+        int drawy = 0;
+        auto [draww, drawh] = iv->getImageSize();
+        int iw = image->w, ih = image->h;
+
+        SDL_LockSurface(image);
+        auto itype = CAIRO_FORMAT_ARGB32;
+        cairo_surface_t* image_surface = cairo_image_surface_create_for_data(
+            (unsigned char*)image->pixels, itype, iw, ih,
+            cairo_format_stride_for_width(itype, iw));
+        SDL_UnlockSurface(image);
+
+        double scalew = double(draww)/double(iw), scaleh = double(drawh)/double(ih);
+
+        cairo_matrix_t current_mtx;
+        cairo_get_matrix(ctxt, &current_mtx);
+        
+        cairo_move_to(ctxt, 0, 0);
+        cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);      
+        cairo_scale(ctxt, scalew, scaleh);
+        printf("-- %.2f %.2f\n", scalew, scaleh);
+        cairo_set_source_surface(ctxt, image_surface, drawx, drawy);
+        cairo_paint(ctxt);
+
+        cairo_set_matrix(ctxt, &current_mtx);
+
+        cairo_surface_destroy(image_surface);
     } else {
         double r = (rand() % 256) / 256.0;
         cairo_set_source_rgb(ctxt, r, 0, 0.5);

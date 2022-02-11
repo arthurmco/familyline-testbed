@@ -1147,16 +1147,11 @@ static int show_starting_menu(
             (void)c;
             r = false;
         }));
-
-    GUILabel& backimage = (GUILabel&)background.box().add(
-        ginfo.guir->createControl<GUILabel>("BACKGROUND\nPLACEHOLDER"));
-    {
-        auto a                = backimage.appearance();
-        a.fontsize            = 56;
-        a.horizontalAlignment = HorizontalAlignment::Center;
-        a.foreground          = {0.2, 0.4, 0.8, 1.0};
-        backimage.setAppearance(a);
-    }
+    
+    auto& texman = GFXService::getTextureManager();    
+    TextureHandle th = *texman->loadTexture(ICONS_DIR "/familyline-logo.png");
+    GUIImageView& backimage = (GUIImageView&)background.box().add(
+        ginfo.guir->createControl<GUIImageView>(*texman->getRawTexture(th)));
 
     /*
     GUIWindow* gwin = ginfo.guir->createGUIWindow("main", ginfo.gwidth, ginfo.gheight);
