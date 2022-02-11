@@ -105,6 +105,15 @@ public:
     }
 
     /**
+     * Get raw texture from the texture handle
+     *
+     * Usually used by the GUI subsystem so it can use the texture
+     * manager to store GUI images, and load them in an uniform way.
+     */
+    std::optional<std::reference_wrapper<Texture>> getRawTexture(TextureHandle handle);
+
+    
+    /**
      * Upload the specified texture
      *
      * Returns nullopt on success, and an error on texture error

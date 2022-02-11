@@ -5,6 +5,7 @@
 #include <client/graphical/texture_environment.hpp>
 #include <client/graphical/texture_manager.hpp>
 #include <common/logger.hpp>
+#include <functional>
 #include <tl/expected.hpp>
 
 using namespace familyline::graphics;
@@ -38,6 +39,23 @@ uint64_t TextureManager::hashFilename(std::string_view filename)
     base = std::rotr(base, 32);
 
     return base;
+}
+
+
+/**
+ * Get raw texture from the texture handle
+ *
+ * Usually used by the GUI subsystem so it can use the texture
+ * manager to store GUI images, and load them in an uniform way.
+ */
+std::optional<std::reference_wrapper<Texture>> TextureManager::getRawTexture(TextureHandle handle)
+{
+    if (auto texiter = textures_.find(handle); texiter != textures_.end()) {
+        return std::make_optional(std::ref(*texiter->second.get()));
+    }
+
+    return std::nullopt;
+
 }
 
 tl::expected<TextureHandle, ImageError> TextureManager::addTexture(
