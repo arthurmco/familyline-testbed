@@ -1,0 +1,8 @@
+flatbuffers==1.12
+Pillow==9.0.0
+pkg_resources==0.0.0
+PyYAML==6.0
+pre-commit==2.17.0
+mdformat==0.7.13
+mdformat-black==0.1.1
+mdformat-gfm==0.3.5
