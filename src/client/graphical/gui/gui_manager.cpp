@@ -8,6 +8,10 @@
 #include <functional>
 #include <ranges>
 
+#include <range/v3/view/filter.hpp>
+#include <range/v3/view/transform.hpp>
+#include <range/v3/view/reverse.hpp>
+
 using namespace familyline::graphics::gui;
 
 void GUITheme::loadFile(std::string path)
@@ -241,8 +245,8 @@ void GUIManager::update()
 
     renderer_paint_data_.clear();
     auto validwindows = windows_ |
-                        std::views::filter([](const WindowInfo &w) { return w.visible; }) |
-                        std::views::reverse;
+        ranges::views::filter([](const WindowInfo &w) { return w.visible; }) |
+        ranges::views::reverse;
 
     std::transform(
         validwindows.begin(), validwindows.end(), std::back_inserter(renderer_paint_data_),
@@ -261,8 +265,8 @@ bool GUIManager::listenInputs(familyline::input::HumanInputAction i)
 {
     using namespace familyline::input;
 
-    for (auto &w : windows_ | std::views::filter(
-                                  [](const WindowInfo &wi) { return wi.visible; })) {
+    for (auto &w : windows_ | ranges::views::filter(
+             [](const WindowInfo &wi) { return wi.visible; }) ) {
         if (std::holds_alternative<MouseAction>(i.type)) {
             auto event = std::get<MouseAction>(i.type);
 

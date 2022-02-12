@@ -247,7 +247,7 @@ public:
     /**
      * Push the event to be ran the next time you call `runEvents()`
      */
-    void pushEvent(FGUIEventCallback cb, GUIControl &control) { events_.emplace(cb, control); }
+    void pushEvent(FGUIEventCallback cb, GUIControl &control) { events_.push(EventInfo{cb, control}); }
 
     GUIRenderer &getRenderer() { return *renderer_.get(); }
 
