@@ -78,7 +78,6 @@ find_package(tl-expected 1 CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(nlohmann_json REQUIRED)
-find_package(Yaml REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(OpenGL REQUIRED)
 
@@ -109,7 +108,7 @@ if (FLINE_USE_VCPKG)
   target_include_directories(familyline-client PUBLIC 
     ${GLIB_INCLUDES} ${HB_INCLUDE} ${GLIB_CONFIG_INCLUDES} ${PANGO_INCLUDE} 
     ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} 
-    ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR} ${PANGOCAIRO_INCLUDE_DIR}
+    ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${PANGOCAIRO_INCLUDE_DIR}
     ${yaml_INCLUDE_DIR})
     
   target_link_libraries(familyline-client PUBLIC ${IL_LIBRARIES})
@@ -137,7 +136,6 @@ else()
   target_link_libraries(familyline-client PUBLIC ${CAIRO_LINK_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${PANGOCAIRO_LINK_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${GLM_LINK_LIBRARIES})
-  target_link_libraries(familyline-client PUBLIC ${YAML_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${YAML_CPP_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC Threads::Threads)
   target_include_directories(familyline-client PUBLIC ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS}

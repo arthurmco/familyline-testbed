@@ -15,10 +15,7 @@
 #include <unordered_map>
 #include <vector>
 
-extern "C" {
-#include <yaml.h>
-}
-
+#include <yaml-cpp/yaml.h>
 #include <string>
 
 namespace familyline::graphics
@@ -51,7 +48,7 @@ private:
     std::vector<std::shared_ptr<AssetItem>> assets;
     int _asset_idx = 0;
 
-    std::vector<std::shared_ptr<AssetItem>> parseFile(yaml_parser_t* parser);
+    std::vector<std::shared_ptr<AssetItem>> parseFile(YAML::Node& root);
 
     /**
      * Process the assets and discover the dependencies between them

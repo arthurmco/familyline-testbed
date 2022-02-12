@@ -3,9 +3,8 @@
 #include <string>
 #include <fmt/format.h>
 
-extern "C" {
-#include <yaml.h>
-}
+#include <yaml-cpp/yaml.h>
+#include <common/logger.hpp>
 
 using namespace familyline;
 
@@ -97,31 +96,13 @@ std::string expand_path(std::string s)
     return s;
 }
 
-void read_log_block_tags_section(yaml_parser_t* parser, ConfigData& data)
+void read_log_block_tags_section(YAML::Node& tags, ConfigData& data)
 {
-    int level = -1;
-
-    do {
-        yaml_token_t token;
-        yaml_event_t event;
-
-        yaml_parser_parse(parser, &event);
-
-        switch (event.type) {
-            case YAML_SEQUENCE_START_EVENT: level++; break;
-            case YAML_SEQUENCE_END_EVENT: level--; break;
-            case YAML_SCALAR_EVENT:
-                printf("log/block_tags += %s\n", event.data.scalar.value);
-
-                data.log.blockTags.push_back(std::string{
-                    (char*)event.data.scalar.value,
-
-                    event.data.scalar.length});
-                break;
-            default: continue;
-        }
-
-    } while (level >= 0);
+    if (tags.IsSequence()) {
+        for (size_t i = 0; i < tags.size(); i++) {
+            data.log.blockTags.push_back(tags[i].as<std::string>());
+        }        
+    }
 }
 
 /**
@@ -139,33 +120,13 @@ void read_log_block_tags_section(yaml_parser_t* parser, ConfigData& data)
  * ```
  *
  */
-void read_log_section(yaml_parser_t* parser, ConfigData& data)
+void read_log_section(YAML::Node& fileinfo, ConfigData& data)
 {
-    int level = -1;
 
-    do {
-        yaml_token_t token;
-        yaml_event_t event;
-
-        yaml_parser_parse(parser, &event);
-
-        switch (event.type) {
-            case YAML_MAPPING_START_EVENT: level++; break;
-            case YAML_MAPPING_END_EVENT: level--; break;
-            case YAML_SEQUENCE_START_EVENT: level++; break;
-            case YAML_SEQUENCE_END_EVENT: level--; break;
-            case YAML_SCALAR_EVENT: {
-                std::string property((char*)event.data.scalar.value, event.data.scalar.length);
-
-                if (property == "block_tags") {
-                    read_log_block_tags_section(parser, data);
-                }
-                break;
-            }
-            default: continue;
-        }
-
-    } while (level >= 0);
+    if (fileinfo["block_tags"]) {
+        YAML::Node n = fileinfo["block_tags"];
+        read_log_block_tags_section(n, data);
+    }
 }
 
 
@@ -182,133 +143,54 @@ void read_log_section(yaml_parser_t* parser, ConfigData& data)
  * ```
  *
  */
-void read_player_section(yaml_parser_t* parser, ConfigData& data)
+void read_player_section(YAML::Node& player_info, ConfigData& data)
 {
-    int level = -1;
-    std::string current_property = "";
+    if (player_info["username"])
+        data.player.username = player_info["username"].as<std::string>();
 
-    do {
-        yaml_token_t token;
-        yaml_event_t event;
-
-        yaml_parser_parse(parser, &event);
-        
-        switch (event.type) {
-            case YAML_MAPPING_START_EVENT: level++; break;
-            case YAML_MAPPING_END_EVENT: level--; break;
-            case YAML_SEQUENCE_START_EVENT: level++; break;
-            case YAML_SEQUENCE_END_EVENT: level--; break;
-            case YAML_SCALAR_EVENT: {
-                std::string value((char*)event.data.scalar.value, event.data.scalar.length);
-                
-                if (current_property == "") {
-                    current_property = value;
-                    break;
-                }
-
-                if (current_property == "username") {
-                    data.player.username = value;
-                    printf("player.username = %s\n", value.c_str());
-                    current_property = "";
-                }
-                break;
-            }
-            default: continue;
-        }
-
-    } while (level >= 0);
 }
 
 bool familyline::read_config_from(std::string_view path, ConfigData& data)
 {
-    FILE* fConfig = fopen(path.data(), "r");
-    if (!fConfig) {
-        /// Do not finding a config file is not abnormal, do not report
-        if (errno != 0) {
-            fprintf(
-                stderr, "could not open config file '%s', error %d (%s)\n", path.data(), errno,
-                strerror(errno));
+    // create a temporary logger, just to capture those values here..
+    LoggerService::createLogger(stderr, LogType::Debug, {});
+    auto& log = LoggerService::getLogger();
+
+    try {
+        YAML::Node config = YAML::LoadFile(std::string{path});
+
+        log->write("config-reader", LogType::Info, "opening file {}", path.data());
+
+        if (config["log"]) {
+            YAML::Node n = config["log"];
+            read_log_section(n, data);
         }
 
+        if (config["player"]) {
+            YAML::Node n = config["player"];
+            read_player_section(n, data);
+        }
+        
+        if (config["enable_input_recording"]) {
+            data.enableInputRecording = config["enable_input_recording"].as<bool>();
+            log->write("config-reader", LogType::Debug, "\tenableInputRecording: {}",
+                       data.enableInputRecording);
+        }
+        
+        if (config["default_input_record_directory"]) {
+            data.defaultInputRecordDir = expand_path(config["default_input_record_directory"].as<std::string>());
+            log->write("config-reader", LogType::Debug, "\tdefaultInputRecordDir: {}",
+                       data.defaultInputRecordDir);
+        }
+
+        return true;
+        
+    } catch (YAML::BadFile& b) {
+        log->write(
+            "config-reader", LogType::Warning,
+            "could not open config file '{}', error {} ({})", path.data(), errno,
+            strerror(errno));
         return false;
     }
 
-    fprintf(stderr, "opening file %s\n", path.data());
-
-    yaml_parser_t parser;
-    if (!yaml_parser_initialize(&parser)) {
-        fputs("Failed to initialize parser!\n", stderr);
-        return false;
-    }
-
-    yaml_parser_set_input_file(&parser, fConfig);
-
-    int level = 0;
-
-    std::string currentProperty = "";
-
-    do {
-        yaml_event_t event;
-
-        /**
-         * Parsing events instead of tokens gives us the ability to differentiate
-         * an end of a list from an end of a map, for example.
-         * But, for some reason, we lose the ability to differentiate between
-         * a key and a value.
-         *
-         * Since we would not need a lot more of code for us to make this difference
-         * of key and value, it was chosen to use the event-based parsing
-         */
-        if (!yaml_parser_parse(&parser, &event)) {
-            printf("Parser error %d\n", parser.error);
-            return false;
-        }
-
-        switch (event.type) {
-            case YAML_DOCUMENT_START_EVENT: level = 0; break;
-            case YAML_DOCUMENT_END_EVENT: level = -1; break;
-            case YAML_SEQUENCE_START_EVENT: level++; break;
-            case YAML_SEQUENCE_END_EVENT: level--; break;
-            case YAML_SCALAR_EVENT: {
-                std::string value((char*)event.data.scalar.value, event.data.scalar.length);
-
-                // a property was expected
-                if (currentProperty == "") {
-                    if (value == "log") {
-                        read_log_section(&parser, data);                        
-                    } else if (value == "player") {
-                        read_player_section(&parser, data);
-                    } else {
-                        currentProperty = value;
-                    }
-
-                } else {
-                    // a value was expected
-
-                    if (currentProperty == "enable_input_recording") {
-                        printf("enableInputRecording = true\n");
-                        data.enableInputRecording = (value == "true");
-                    } else if (currentProperty == "default_input_record_directory") {
-                        printf("defaultInputRecordDir = %s\n", expand_path(value).c_str());
-                        data.defaultInputRecordDir = expand_path(value);
-                        ;
-                    }
-
-                    currentProperty = "";
-                }
-
-                break;
-            }
-                // The mapping event seems to come after a key/value pair,
-                // or after a list
-            case YAML_MAPPING_END_EVENT: currentProperty = ""; break;
-            default: continue;
-        }
-
-    } while (level >= 0);
-
-    yaml_parser_delete(&parser);
-    fclose(fConfig);
-
-    return true;
 }

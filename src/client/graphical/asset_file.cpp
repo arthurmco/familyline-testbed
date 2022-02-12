@@ -5,6 +5,7 @@
 #include <string>
 
 #include <config.h>
+#include <fmt/format.h>
 
 using namespace familyline::graphics;
 
@@ -18,45 +19,30 @@ std::string AssetItem::getItemOr(const char* key, const char* defaultval)
 
 void AssetFile::loadFile(const char* ofile)
 {
-#ifdef _WIN32
     std::string sfile{ofile};
+#ifdef _WIN32
 
     // Replace slashes
     std::replace(sfile.begin(), sfile.end(), '/', '\\');
-    const char* file = sfile.c_str();
-#else
-    const char* file = ofile;
 #endif
 
-    FILE* fAsset = fopen(file, "r");
-    if (!fAsset) {
-        char e[256 + 256];
-        sprintf(e, "Failed to open asset file list %s", file);
-        throw asset_exception(e, AssetError::AssetFileOpenError);
+    try {
+        YAML::Node asset = YAML::LoadFile(sfile);
+
+        auto& log = LoggerService::getLogger();
+        log->write("asset-file-loader", LogType::Info, "loaded file {}", sfile);
+        auto lassets = this->parseFile(asset);
+        log->write("asset-file-loader", LogType::Info, "loaded {} assets", lassets.size());
+        
+        this->assets = this->processDependencies(std::move(lassets));
+        
+    } catch (YAML::BadFile& b) {
+        throw asset_exception(fmt::format("Failed to open asset file list %s", sfile),
+                              AssetError::AssetFileOpenError);
     }
-
-    yaml_parser_t parser;
-    if (!yaml_parser_initialize(&parser)) {
-        fclose(fAsset);
-        throw asset_exception(
-            "Failed to initialize asset file parser", AssetError::AssetFileParserError);
-    }
-
-    auto& log = LoggerService::getLogger();
-
-    yaml_parser_set_input_file(&parser, fAsset);
-
-    log->write("asset-file-loader", LogType::Info, "loaded file {}", file);
-    auto lassets = this->parseFile(&parser);
-    log->write("asset-file-loader", LogType::Info, "loaded {} assets", lassets.size());
-
-    this->assets = this->processDependencies(std::move(lassets));
-
-    yaml_parser_delete(&parser);
-    fclose(fAsset);
 }
 
-std::vector<std::shared_ptr<AssetItem>> AssetFile::parseFile(yaml_parser_t* parser)
+std::vector<std::shared_ptr<AssetItem>> AssetFile::parseFile(YAML::Node& root)
 {
     auto& log = LoggerService::getLogger();
 
@@ -65,143 +51,52 @@ std::vector<std::shared_ptr<AssetItem>> AssetFile::parseFile(yaml_parser_t* pars
     bool asset_str  = false;
     bool asset_list = false;
 
-    yaml_event_t event;
+    YAML::Node assetsnode = root["assets"];
 
-    // Try to find the 'assets' list
-    do {
-        if (!yaml_parser_parse(parser, &event)) {
-            char s[256];
-            sprintf(s, "Asset file parsing error: %d", parser->error);
-            throw std::runtime_error(s);
-        }
-
-        if (event.type == YAML_SCALAR_EVENT) {
-            if (!strcmp((const char*)event.data.scalar.value, "assets")) {
-                asset_str = true;
-            }
-        } else if (asset_str && event.type == YAML_SEQUENCE_START_EVENT) {
-            asset_list = true;
-            break;
-
-        } else {
-            asset_str  = false;
-            asset_list = false;
-        }
-
-    } while (event.type != YAML_STREAM_END_EVENT);
-
-    if (!asset_str || !asset_list) {
-        throw asset_exception(
-            "Could not find the asset list in the file", AssetError::AssetNotFound);
+    if (!assetsnode.IsSequence()) {
+        return alist;
     }
 
-    AssetItem current_asset;
-    bool is_key = false, is_val = false;
-    std::string current_key;
-
-    int list_sequences = 1;
-
-    // Parse the list contents
-    do {
-        if (!yaml_parser_parse(parser, &event)) {
-            char s[256];
-            sprintf(s, "Asset list parsing error: %d", parser->error);
-            throw std::runtime_error(s);
+    for (size_t i = 0; i < assetsnode.size(); i++) {
+        if (!assetsnode[i]["name"] || !assetsnode[i]["type"] || !assetsnode[i]["path"]) {
+            log->write(
+                "asset-file-loader", LogType::Info, "asset {} does not have all required parameters", i);
+            continue;
         }
 
-        switch (event.type) {
-                // The sequence start has already been processed before, so let's
-                // direct into the mapping
+        auto replace_token = [](std::string& str, const char* from, const char* to) {
+            auto find_str = str.find(from);
+            if (find_str != std::string::npos)
+                str.replace(find_str, find_str + strlen(from), to);
+        };
 
-            case YAML_MAPPING_START_EVENT:
-                if (!asset_list) continue;
+        
+        AssetItem asset;
+        asset.name = assetsnode[i]["name"].as<std::string>();
+        asset.type = assetsnode[i]["type"].as<std::string>();
+        asset.path = assetsnode[i]["path"].as<std::string>();
 
-                current_asset = {};
-                is_key        = true;
-                break;
+        std::string cpath = asset.path;
+        replace_token(cpath, "${MODELS_DIR}/", MODELS_DIR);
+        replace_token(cpath, "${MATERIALS_DIR}/", MATERIALS_DIR);
+        replace_token(cpath, "${TEXTURES_DIR}/", TEXTURES_DIR);
+        asset.path = cpath;
+        
+        for (auto it = assetsnode[i].begin(); it != assetsnode[i].end(); ++it) {
+            std::string key = it->first.as<std::string>();
+            if (key != "name" && key != "type" && key != "path")
+                asset.items[key] = it->second.as<std::string>();
+        }
 
-            case YAML_SCALAR_EVENT: {
-                if (!asset_list) continue;
+        log->write(
+            "asset-file-loader", LogType::Info, "found asset {} type {} path {}",
+            asset.name, asset.type,
+            asset.path);
 
-                const char* str = (const char*)event.data.scalar.value;
+        alist.push_back(std::shared_ptr<AssetItem>{new AssetItem{asset}});
 
-                // If is key, then save the key so we can remember later
-                if (is_key) {
-                    current_key = std::string{str};
-                }
-
-                // If is value, then save the old key+value in the file.
-                if (is_val) {
-                    if (current_key == "name") {
-                        current_asset.name = str;
-                    } else if (current_key == "type") {
-                        current_asset.type = str;
-                    } else if (current_key == "path") {
-                        current_asset.path = str;
-                    } else {
-                        current_asset.items[current_key] = std::string{str};
-                    }
-                }
-
-                is_key = !is_key;
-                is_val = !is_val;
-            } break;
-
-            case YAML_MAPPING_END_EVENT: {
-                if (!asset_list) continue;
-                // Save the resulting asset in the alist
-
-                auto replace_token = [](std::string& str, const char* from, const char* to) {
-                    auto find_str = str.find(from);
-                    if (find_str != std::string::npos)
-                        str.replace(find_str, find_str + strlen(from), to);
-                };
-
-                std::string cpath = current_asset.path;
-                replace_token(cpath, "${MODELS_DIR}/", MODELS_DIR);
-                replace_token(cpath, "${MATERIALS_DIR}/", MATERIALS_DIR);
-                replace_token(cpath, "${TEXTURES_DIR}/", TEXTURES_DIR);
-
-                // todo: alert about confunding curly brackets with parenthesis!
-
-                current_asset.path = cpath;
-
-                log->write(
-                    "asset-file-loader", LogType::Info, "found asset {} type {} path {}",
-                    current_asset.name, current_asset.type,
-                    current_asset.path);
-
-                alist.push_back(std::shared_ptr<AssetItem>{new AssetItem{current_asset}});
-                is_key = false;
-                is_val = false;
-            } break;
-
-            // Handle unplanned lists correctly
-            case YAML_SEQUENCE_START_EVENT:
-                list_sequences++;
-                break;
-
-            case YAML_SEQUENCE_END_EVENT:
-                list_sequences--;
-
-                if (list_sequences <= 0) {
-                    // End of sequence. End of file
-
-                    asset_list = false;
-                }
-
-                break;
-
-            default:
-                is_key = false;
-                is_val = false;
-                break;
-
-        }  // switch(...)
-
-    } while (event.type != YAML_STREAM_END_EVENT);
-    yaml_event_delete(&event);
-
+    }        
+    
     return alist;
 }
 

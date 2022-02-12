@@ -266,7 +266,6 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
         cairo_move_to(ctxt, 0, 0);
         cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);      
         cairo_scale(ctxt, scalew, scaleh);
-        printf("-- %.2f %.2f\n", scalew, scaleh);
         cairo_set_source_surface(ctxt, image_surface, drawx, drawy);
         cairo_paint(ctxt);
 
