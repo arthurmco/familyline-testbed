@@ -101,7 +101,7 @@ if (FLINE_USE_VCPKG)
     PATH_SUFFIXES "lib/glib-2.0/include")
   find_path(CAIRO_INCLUDE_DIRS cairo.h REQUIRED PATH_SUFFIXES "cairo")
   target_link_libraries(familyline-client PUBLIC ${PANGO_LIB} ${PANGOCAIRO_LIB} ${GOBJECT_LIB}
-    ${CAIRO_LIBRARY} ${YAML_LIBRARIES})
+    ${CAIRO_LIBRARY} yaml-cpp)
 
   target_link_libraries(familyline-client PUBLIC SDL2::SDL2 SDL2::SDL2main SDL2::SDL2_image)
 
