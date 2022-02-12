@@ -7,6 +7,12 @@
 #include <client/graphical/gui/gui_control.hpp>
 #include <client/graphical/gui/gui_layout.hpp>
 
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
+
 namespace familyline::graphics::gui
 {
 /**
