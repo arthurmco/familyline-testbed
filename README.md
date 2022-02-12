@@ -23,7 +23,7 @@ and (if the money begin to appear) do a *lot* of quests.
 
 It's made with a homebrew engine, for me to exclusively learn while
 bringing joy to its players. The major objective of this game is
-fun, to play and develop. 
+fun, to play and develop.
 
 Expect it to have a lot of good humor!
 
@@ -31,36 +31,52 @@ Expect it to have a lot of good humor!
 
 The game runs in Linux and Windows. Other platforms need to be tested.
 
-Before you do anything, you need to pull the dependent repositories.
-The only dependency that needs this is the Google Test framework.
+You will need to create a Python virtual environment to install the
+commit hooks and run the auxiliary tools.
 
-Type those commands in the appropriate shell
+The example will use pyenv, but, if you are experienced, you can
+create like you want.
+
+```sh
+pyenv virtualenv familyline
+pyenv activate familyline
+pip install -r tools/requirements.txt
+```
+
+After that, install the commit hook.
+
+This will make your life easier if you want to accept PR.
+
+If you use Emacs and magit, remember to install the
+[pyenv-mode](https://github.com/pythonic-emacs/pyenv-mode)
+and `pyenv-mode-set` to your virtualenv before commiting, or else the
+precommit will not be found.
+
+```sh
+
+pre-commit install
 
 ```
-git submodule init
-git submodule update
-```
-
-and then you are good to go!
 
 ### Penguins
 
 On Linux, you will need the softwares below:
 
- - *GLM*: for vector mathematics
- - *GLEW*: for dealing with OpenGL extensions
- - *SDL*: for dealing with our window. Version 2.0 is required.
- - *devIL*: for loading our textures.
- - *cairo*: for drawing the interfaces
- - *libyaml*: For parsing the `assets.yaml` file, aka the asset list.
- - *nlohmann-json*: For parsing and creating JSON from some network
-   messages.
- - *tl-expected*: We are now starting to use the tl-expected header
-   files to make error handling nicer
- - *curlpp*: For network communication (pre-game server-client
-   communication is HTTP-based)
- - *libflatbuffers*: For serializing the input to a file, and reading
-   from it
+- *GLM*: for vector mathematics
+- *GLEW*: for dealing with OpenGL extensions
+- *SDL*: for dealing with our window. Version 2.0 is required.
+- *devIL*: for loading our textures.
+- *cairo*: for drawing the interfaces
+- *yaml-cpp*: For parsing all the YAML files we need
+- *nlohmann-json*: For parsing and creating JSON from some network
+  messages.
+- *tl-expected*: We are now starting to use the tl-expected header
+  files to make error handling nicer
+- *curlpp*: For network communication (pre-game server-client
+  communication is HTTP-based)
+- *range-v3*: to use a nice C++ feature to make list processing easier
+- *libflatbuffers*: For serializing the input to a file, and reading
+  from it
 
 Please build in a separate directory from the source. For exemple,
 when you clone the repository, you can create a directory named
@@ -77,7 +93,7 @@ make familyline
 The relative path tells that some files, like assets, are in the same
 directory as the executable rather than the default path (/usr/share)
 
-You will probably have to point to the `flatc` executable.  
+You will probably have to point to the `flatc` executable.
 This is more frequent in Windows and MacOS, but, in case you do need,
 just set the `FLATBUFFERS_FLATC_EXECUTABLE` CMake variable to where it
 is.
@@ -90,8 +106,7 @@ You will need to have vcpkg integrated with Visual Studio.
 
 Execute the following command:
 
-`> vcpkg install glm glew sdl2 devil cairo libyaml fmt flatbuffers
-nlohmann-json curlpp tl-expected`
+`> vcpkg install glm glew sdl2 devil cairo libyaml fmt flatbuffers nlohmann-json curlpp tl-expected`
 
 Go make a coffee and buy needed things in the market. Order some
 food. This will take some time.
@@ -113,7 +128,7 @@ variables key
 
 Then, cmake it
 
-You will probably have to point to the `flatc` executable.  
+You will probably have to point to the `flatc` executable.
 Just set the `FLATBUFFERS_FLATC_EXECUTABLE` CMake variable to where it is.
 
 ### Fruits
@@ -123,14 +138,13 @@ by the same God, the God of UNIX compatibility
 
 However, there are some differences:
 
- - You may want to install your dependencies with homebrew
- - Xcode is needed, because the OpenGL headers come with it.  
-   (yes, we still use it, but Vulkan support is coming :wink:)
+- You may want to install your dependencies with homebrew
+- Xcode is needed, because the OpenGL headers come with it.
+  (yes, we still use it, but Vulkan support is coming :wink:)
 
 ### Build
 
-To build the game, type `make familyline` to compile the game, `make
-familyline-server` to compile the server (that doesn't work yet) or
+To build the game, type `make familyline` to compile the game, `make familyline-server` to compile the server (that doesn't work yet) or
 `make familyline-tests` to make the tests.
 
 (On Windows, inside Visual Studio, the targets might appear as projects
@@ -165,10 +179,10 @@ install in the `/usr/local` directory when you run `make install`
 
 Aside from issues, there are things I would like to do very soon
 
- - Increase test coverage
- - Add Windows test coverage
- - Port and test on FreeBSD
- 
+- Increase test coverage
+- Add Windows test coverage
+- Port and test on FreeBSD
+
 ## License
 
 Every file in this game (except some inside the cmake directory) is
