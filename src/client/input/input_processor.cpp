@@ -11,9 +11,10 @@ using namespace familyline::input;
 
 void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
 {
-    auto& log       = LoggerService::getLogger();
-    auto duration   = std::chrono::system_clock::now().time_since_epoch();
-    uint64_t millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    auto& log             = LoggerService::getLogger();
+    auto duration         = std::chrono::system_clock::now().time_since_epoch();
+    uint64_t millis       = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    bool cursor_on_window = false;
 
     switch (e.type) {
         case SDL_MOUSEMOTION:
@@ -26,29 +27,27 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
         case SDL_MOUSEBUTTONUP: {
             bool isPressed = (e.button.state == SDL_PRESSED);
             _actions.push(
-                {millis, ClickAction{
-                             .screenX      = e.motion.x,
-                             .screenY      = e.motion.y,
-                             .buttonCode   = e.button.button,
-                             .clickCount   = e.button.clicks,
-                             .isPressed    = isPressed,
-                             .keyModifiers = (uint16_t) (
-                                 (lastCtrl_ ? KMOD_CTRL : KMOD_NONE) |
-                                 (lastShift_ ? KMOD_SHIFT : KMOD_NONE) |
-                                 (lastAlt_ ? KMOD_ALT : KMOD_NONE))}});
+                {millis,
+                 ClickAction{
+                     .screenX    = e.motion.x,
+                     .screenY    = e.motion.y,
+                     .buttonCode = e.button.button,
+                     .clickCount = e.button.clicks,
+                     .isPressed  = isPressed,
+                     .keyModifiers =
+                         (uint16_t)((lastCtrl_ ? KMOD_CTRL : KMOD_NONE) | (lastShift_ ? KMOD_SHIFT : KMOD_NONE) | (lastAlt_ ? KMOD_ALT : KMOD_NONE))}});
         } break;
         case SDL_MOUSEWHEEL: {
             bool dirNormal = e.wheel.direction == SDL_MOUSEWHEEL_NORMAL;
             _actions.push(
-                {millis, WheelAction{
-                             .screenX      = lastX,
-                             .screenY      = lastY,
-                             .scrollX      = (dirNormal) ? e.wheel.x : -e.wheel.x,
-                             .scrollY      = (dirNormal) ? e.wheel.y : -e.wheel.y,
-                             .keyModifiers = (uint16_t) (
-                                 (lastCtrl_ ? KMOD_CTRL : KMOD_NONE) |
-                                 (lastShift_ ? KMOD_SHIFT : KMOD_NONE) |
-                                 (lastAlt_ ? KMOD_ALT : KMOD_NONE))}});
+                {millis,
+                 WheelAction{
+                     .screenX = lastX,
+                     .screenY = lastY,
+                     .scrollX = (dirNormal) ? e.wheel.x : -e.wheel.x,
+                     .scrollY = (dirNormal) ? e.wheel.y : -e.wheel.y,
+                     .keyModifiers =
+                         (uint16_t)((lastCtrl_ ? KMOD_CTRL : KMOD_NONE) | (lastShift_ ? KMOD_SHIFT : KMOD_NONE) | (lastAlt_ ? KMOD_ALT : KMOD_NONE))}});
         } break;
         case SDL_KEYDOWN:
         case SDL_KEYUP: {
@@ -110,6 +109,7 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
             switch (e.window.event) {
                 case SDL_WINDOWEVENT_SHOWN: winevent = "SDL_WINDOWEVENT_SHOWN"; break;
                 case SDL_WINDOWEVENT_HIDDEN:
+                    cursor_on_window = false;
                     // TODO: add some sort of pause event?
                     winevent = "SDL_WINDOWEVENT_HIDDEN";
                     break;
@@ -122,18 +122,27 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
                 case SDL_WINDOWEVENT_MINIMIZED: winevent = "SDL_WINDOWEVENT_MINIMIZED"; break;
                 case SDL_WINDOWEVENT_MAXIMIZED: winevent = "SDL_WINDOWEVENT_MAXIMIZED"; break;
                 case SDL_WINDOWEVENT_RESTORED: winevent = "SDL_WINDOWEVENT_RESTORED"; break;
-                case SDL_WINDOWEVENT_ENTER: winevent = "SDL_WINDOWEVENT_ENTER (windowID)"; break;
-                case SDL_WINDOWEVENT_LEAVE: winevent = "SDL_WINDOWEVENT_LEAVE (windowID)"; break;
+                case SDL_WINDOWEVENT_ENTER:
+                    cursor_on_window = true;
+                    winevent         = "SDL_WINDOWEVENT_ENTER (windowID)";
+                    break;
+                case SDL_WINDOWEVENT_LEAVE:
+                    cursor_on_window = false;
+                    winevent         = "SDL_WINDOWEVENT_LEAVE (windowID)";
+                    break;
                 case SDL_WINDOWEVENT_FOCUS_GAINED:
-                    winevent = "SDL_WINDOWEVENT_FOCUS_GAINED (windowID)";
+                    cursor_on_window = true;
+                    winevent         = "SDL_WINDOWEVENT_FOCUS_GAINED (windowID)";
                     break;
                 case SDL_WINDOWEVENT_FOCUS_LOST:
-                    winevent = "SDL_WINDOWEVENT_FOCUS_LOST (windowID)";
+                    cursor_on_window = false;
+                    winevent         = "SDL_WINDOWEVENT_FOCUS_LOST (windowID)";
                     break;
                 case SDL_WINDOWEVENT_CLOSE: winevent = "SDL_WINDOWEVENT_CLOSE (windowID)"; break;
 #if SDL_VERSION_ATLEAST(2, 0, 5)
                 case SDL_WINDOWEVENT_TAKE_FOCUS:
-                    winevent = "SDL_WINDOWEVENT_TAKE_FOCUS (windowID)";
+                    cursor_on_window = true;
+                    winevent         = "SDL_WINDOWEVENT_TAKE_FOCUS (windowID)";
                     break;
                 case SDL_WINDOWEVENT_HIT_TEST:
                     winevent = "SDL_WINDOWEVENT_HIT_TEST (windowID)";
@@ -142,10 +151,21 @@ void InputProcessor::enqueueEvent(const SDL_Event& e, int& lastX, int& lastY)
                 default: winevent = "unknown"; break;
             }
 
-            LOGDEBUG(
-                log, "input-processor",
-                "SDL_WindowEvent: {} (id {:08x}), event {:08x}, data {:08x},{:08x}", winevent,
-                e.window.windowID, e.window.event, e.window.data1, e.window.data2);
+            if (cursor_is_on_window_ != cursor_on_window && !cursor_on_window) {
+                LOGDEBUG(
+                    log, "input-processor",
+                    "Cursor left the window (event: {}, id {:08x}, event {:08x}, data "
+                    "{:08x},{:08x})",
+                    winevent, e.window.windowID, e.window.event, e.window.data1, e.window.data2);
+            } else if (cursor_is_on_window_ != cursor_on_window && cursor_on_window) {
+                LOGDEBUG(
+                    log, "input-processor",
+                    "Cursor returned to the window (event: {}, id {:08x}, event {:08x}, data "
+                    "{:08x},{:08x})",
+                    winevent, e.window.windowID, e.window.event, e.window.data1, e.window.data2);
+            }
+
+            cursor_is_on_window_ = cursor_on_window;
 
             break;
         default: LOGDEBUG(log, "input-processor", "unknown event id {:08x}", e.type);

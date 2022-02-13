@@ -10,11 +10,10 @@
  * Copyright (C) 2020 Arthur Mendes
  */
 
-#include <queue>
-#include <thread>
-#include <string>
-
 #include <client/input/input_actions.hpp>
+#include <queue>
+#include <string>
+#include <thread>
 
 namespace familyline::input
 {
@@ -43,7 +42,10 @@ private:
     // This is important to know so we can register inputs that combine
     // the mouse and dead keys, like ctrl+scroll.
     bool lastCtrl_ = false, lastShift_ = false, lastAlt_ = false;
-    
+
+    /// Did the cursor is on the window?
+    bool cursor_is_on_window_ = true;
+
 public:
     //        InputProcessor(InputPicker& ip)
     //            : _ip(ip)
@@ -88,7 +90,7 @@ public:
     virtual void disableTextEvents();
 
     virtual std::string getClipboardText();
-    
+
     virtual ~InputProcessor() { this->stopInputReceiver(); }
 };
 
