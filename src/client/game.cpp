@@ -4,16 +4,15 @@
 #include <client/graphical/animator.hpp>
 #include <client/graphical/gfx_debug_drawer.hpp>
 //#include <client/graphical/gl_renderer.hpp>
+#include <client/graphical/exceptions.hpp>
 #include <client/graphical/light.hpp>
 #include <client/input/input_service.hpp>
 #include <common/logger.hpp>
 #include <common/logic/colony.hpp>
 #include <common/logic/game_event.hpp>
 #include <common/logic/logic_service.hpp>
-#include <exception>
-
-#include <client/graphical/exceptions.hpp>
 #include <common/logic/pathfinder.hpp>
+#include <exception>
 
 using namespace familyline;
 using namespace familyline::logic;
@@ -32,8 +31,7 @@ logic::Terrain& Game::initMap(std::string_view path)
     auto& log = LoggerService::getLogger();
 
     if (!terrFile_->open(path)) {
-        throw logic_exception{
-            fmt::format("Could not open terrain '{}'", path)};
+        throw logic_exception{fmt::format("Could not open terrain '{}'", path)};
     }
 
     terrain_ = std::move(std::make_unique<Terrain>(*terrFile_.get()));
@@ -88,15 +86,12 @@ void Game::initPlayers(
 
     if (human_id != uint64_t(-1)) {
         HumanPlayer* hp = dynamic_cast<HumanPlayer*>(*pm_->get(human_id));
-        if (hp)
-            hp->setCamera(camera_.get());
+        if (hp) hp->setCamera(camera_.get());
         human_id_ = human_id;
     }
 
     log->write("game", LogType::Info, "player manager configured");
 }
-
-
 
 /**
  * Initialize the asset library
@@ -109,9 +104,7 @@ void Game::initAssets()
     am->loadFile(f);
 
     rndr_ = window_->createRenderer();
-    if (terr_rend_)
-        delete terr_rend_;
-
+    if (terr_rend_) delete terr_rend_;
 }
 
 /**
@@ -128,8 +121,7 @@ logic::ObjectFactory* Game::initObjectFactory()
     factory_objects_.push_back(std::make_unique<Tent>());
 
     /* Adds the objects to the factory */
-    for (auto& o: factory_objects_)
-        of->addObject(o.get());
+    for (auto& o : factory_objects_) of->addObject(o.get());
 
     return of.get();
 }
@@ -139,15 +131,13 @@ void Game::initObjectManager()
     auto& log = LoggerService::getLogger();
     log->write("game", LogType::Info, "configuring game objects");
 
-
     terr_rend_ = rndr_->createTerrainRenderer(*camera_.get());
     terr_rend_->setTerrain(terrain_.get());
     terr_rend_->buildVertexData();
     terr_rend_->buildTextures();
 
-
-    om_  = std::make_unique<ObjectManager>();
-    olm_ = std::make_unique<ObjectLifecycleManager>(*om_.get());
+    om_      = std::make_unique<ObjectManager>();
+    olm_     = std::make_unique<ObjectLifecycleManager>(*om_.get());
     pm_->olm = olm_.get();
 
     log->write("game", LogType::Info, "game objects configured");
@@ -187,8 +177,8 @@ void Game::initLoopData(uint64_t human_id)
         terrain_.get(), window_, scenernd_.get(), camera_.get(), om_.get());
 
     if (human_id != -1) {
-        auto& of = LogicService::getObjectFactory();
-        pr_ = std::make_unique<PreviewRenderer>(*of.get(), *rndr_, *ip_.get());
+        auto& of        = LogicService::getObjectFactory();
+        pr_             = std::make_unique<PreviewRenderer>(*of.get(), *rndr_, *ip_.get());
         HumanPlayer* hp = dynamic_cast<HumanPlayer*>(*pm_->get(human_id));
 
         if (hp) {
@@ -200,86 +190,28 @@ void Game::initLoopData(uint64_t human_id)
     }
 
     LogicService::initPathManager(*terrain_.get());
-
-    /// add the labels
-    #if 0
-    widgets.lblBuilding   = new Label(0.05 * 640, 0.1 * 480, "!!!");
-    widgets.lblFPS        = new Label(0.05 * 640, 0.9 * 480, "0 fps, 0 ms/frame");
-    widgets.lblRange      = new Label(0.05 * 640, 0.13 * 480, "--");
-    widgets.lblSelected   = new Label(0.05 * 640, 0.17 * 480, "---");
-    widgets.lblTerrainPos = new Label(0.05 * 640, 0.21 * 480, "---");
-    widgets.lblKeys       = new Label(
-        0.05 * 640, 0.05 * 480,
-        "Press C to build Tent, E to build WatchTower, B to draw bounding boxes");
-
-    widgets.lblBuilding->modifyAppearance([](ControlAppearance& ca) {
-        ca.foreground = {1, 1, 1, 1};
-        ca.background = {0, 0, 0, 0.4};
-    });
-
-    widgets.lblFPS->modifyAppearance([](ControlAppearance& ca) {
-        ca.foreground = {1, 1, 1, 1};
-        ca.background = {0, 0, 0, 0.4};
-    });
-
-    widgets.lblRange->modifyAppearance([](ControlAppearance& ca) {
-        ca.foreground = {1, 1, 1, 1};
-        ca.background = {0, 0, 0, 0.4};
-    });
-
-    widgets.lblSelected->modifyAppearance([](ControlAppearance& ca) {
-        ca.foreground = {1, 1, 1, 1};
-        ca.background = {0, 0, 0, 0.4};
-    });
-
-    widgets.lblKeys->modifyAppearance([](ControlAppearance& ca) {
-        ca.foreground = {0.9, 0.8, 1, 1};
-        ca.background = {0, 0, 0, 0.4};
-    });
-
-    widgets.lblTerrainPos->modifyAppearance([](ControlAppearance& ca) {
-        ca.background = {0, 0, 0, 0.4};
-    });
-
-    GUIWindow& gw = gui_->getDebugWindow();
-    gw.add(
-        5, 65, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)widgets.lblBuilding));
-    gw.add(5, 5, ControlPositioning::Pixel, std::unique_ptr<Control>(widgets.lblFPS));
-    gw.add(
-        5, 35, ControlPositioning::Pixel,
-        std::unique_ptr<Control>((Control*)widgets.lblTerrainPos));
-    gw.add(5, 95, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)widgets.lblRange));
-    gw.add(
-        5, 125, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)widgets.lblSelected));
-    gw.add(5, 155, ControlPositioning::Pixel, std::unique_ptr<Control>((Control*)widgets.lblKeys));
-
-    #endif
-    
     started_ = true;
 
     ticks_ = std::chrono::high_resolution_clock::now();
 
     log->write("game", LogType::Info, "game class ready");
-
 }
 
-Game::~Game()
-{
-    #if 0
-    if (started_) {
-        GUIWindow& gw = gui_->getDebugWindow();
-        gw.remove(widgets.lblFPS);
-        gw.remove(widgets.lblTerrainPos);
-        gw.remove(widgets.lblBuilding);
-        gw.remove(widgets.lblRange);
-        gw.remove(widgets.lblSelected);
-        gw.remove(widgets.lblKeys);
-    }
-    #endif
-}
+Game::~Game() {}
 
 bool Game::runLoop()
 {
+    gui_->debugClear();
+    gui_->debugWrite("Familyline " VERSION " commit " COMMIT
+                     "\n"
+                     "----------------------------\n");
+    gui_->debugWrite("Press C to build Tent, E to build WatchTower\n");
+    gui_->debugWrite(fmt::format(
+        "{:.2f} fps, {:.3f} ms/frame \n\t ({:.3f} ms logic, {:.3f} ms input, {:.3f} ms draw) \n\t "
+        "tick {}\n",
+        float(1000 / pms), float(pms), logictime_.count(), inputtime_.count(), drawtime_.count(),
+        pm_->tick()));
+
     rendertime_ = std::chrono::high_resolution_clock::now();
     bool player = true;
 
@@ -299,7 +231,7 @@ bool Game::runLoop()
      * This is called fixed timestep, and will ensure game consistency
      * on multiplayer games
      */
-    int li = 0;
+    int li          = 0;
     auto logicstart = std::chrono::high_resolution_clock::now();
 
     while (logicTime >= LOGIC_DELTA) {
@@ -309,7 +241,6 @@ bool Game::runLoop()
         gctx.tick++;
     }
     logictime_ = std::chrono::high_resolution_clock::now() - logicstart;
-
 
     if (frame_ > 1) limax = std::max(li, limax);
 
@@ -334,12 +265,6 @@ bool Game::runLoop()
     }
 
     ticks_ = elapsed;
-
-    char sfps[192];
-    sprintf(sfps, "%.2f fps, %.3f ms/frame  - (%.3f ms logic, %.3f ms input, %.3f ms draw) - tick %05zu",
-            float(1000 / pms), float(pms), logictime_.count(), inputtime_.count(),
-            drawtime_.count(), pm_->tick());
-//    widgets.lblFPS->setText(sfps);
 
 #define FPS_LOCK 120.0
 
@@ -376,13 +301,12 @@ bool Game::runInput()
 
     ip_->UpdateIntersectedObject();
     ip_->UpdateTerrainProjectedPosition();
-    
+
     gctx.elapsed_seconds = INPUT_DELTA / 1000.0;
 
     pm_->generateInput();
 
-//    if (inputruns % 20 == 0)
-//        gui_->update();
+    gui_->update();
 
     inputruns++;
     return !pm_->exitRequested();
@@ -391,13 +315,13 @@ bool Game::runInput()
 void Game::runLogic()
 {
     if (irepr_) {
-        irepr_->dispatchEvents((1000/LOGIC_DELTA));
+        irepr_->dispatchEvents((1000 / LOGIC_DELTA));
     }
 
     pm_->run(gctx);
     olm_->update();
 
-//    LogicService::getObjectListener()->updateObjects();
+    //    LogicService::getObjectListener()->updateObjects();
 
     /* Logic & graphical processing */
     // terr_rend->Update();
@@ -412,17 +336,12 @@ void Game::runLogic()
     if (objupdate) {
         objrend_->update();
         auto [w, h] = terrain_->getSize();
-
     }
 
     LogicService::getDebugDrawer()->update();
 }
 
-ObjectManager* Game::getObjectManager() const
-{
-    return om_.get();
-}
-
+ObjectManager* Game::getObjectManager() const { return om_.get(); }
 
 void Game::runGraphical(double framems)
 {
@@ -438,7 +357,7 @@ void Game::runGraphical(double framems)
     fb3D_->endDraw();
 
     fbGUI_->startDraw();
-//    gui_->render(0, 0);
+    gui_->render();
     fbGUI_->endDraw();
 
     window_->update();
@@ -450,10 +369,10 @@ void Game::runGraphical(double framems)
 void Game::showDebugInfo()
 {
     if (irepr_) {
-//        widgets.lblKeys->setText("Reproducing input...");
+        gui_->debugWrite("Reproducing input...\n");
 
         if (irepr_->isReproductionEnded()) {
-//            widgets.lblKeys->setText("End of replay!");
+            gui_->debugWrite("End of replay!\n");
         }
     }
 
@@ -471,13 +390,9 @@ void Game::showHumanPlayerInfo(logic::Player* hp)
         selections.size() >= 1 ? selections[0].lock() : std::shared_ptr<GameObject>();
 
     if (BuildQueue::GetInstance()->getNext()) {
-        char s[256];
-        sprintf(
-            s, "Click to build %s",
-            BuildQueue::GetInstance()->getNext().value()->getName().c_str());
-//        widgets.lblBuilding->setText(s);
-    } else {
-//        widgets.lblBuilding->setText("");
+        gui_->debugWrite(fmt::format(
+            "Click to build {}\n",
+            BuildQueue::GetInstance()->getNext().value()->getName().c_str()));
     }
 
     auto locc = ip_->GetIntersectedObject().lock();
@@ -487,41 +402,37 @@ void Game::showHumanPlayerInfo(logic::Player* hp)
         bool attackable = selected->getAttackComponent().has_value();
 
         if (alocc && attackable && selected && alocc->getMaxHealth()) {
-            auto inRange = selected->getAttackComponent()->isInRange(
-                alocc->getAttackComponent().value());
+            auto inRange =
+                selected->getAttackComponent()->isInRange(alocc->getAttackComponent().value());
 
-//            widgets.lblRange->setText(inRange ? "In range" : "Not in range");
+            gui_->debugWrite(inRange ? "\tIn range\n" : "\tNot in range\n");
         }
     }
-
 
     if (selected) {
         char s[150] = {};
         auto& acomp = selected->getAttackComponent();
 
         if (acomp) {
-            sprintf(
-                s, "Selected object: '%s' (%4f/%4d)", selected->getName().c_str(),
-                selected->getHealth(), selected->getMaxHealth());
+            gui_->debugWrite(fmt::format(
+                "Selected object: '{}' ({:.1f}/{:4d})\n", selected->getName().c_str(),
+                selected->getHealth(), selected->getMaxHealth()));
         } else {
-            sprintf(s, "Selected object: '%s'", selected->getName().c_str());
+            gui_->debugWrite(fmt::format("Selected object: '{}'\n", selected->getName().c_str()));
         }
 
-//        widgets.lblSelected->setText(s);
     } else {
-//        widgets.lblSelected->setText("");
+        gui_->debugWrite("No object selected\n");
     }
 
     glm::vec3 p = ip_->GetTerrainProjectedPosition();
     glm::vec2 q = ip_->GetGameProjectedPosition();
 
     char texs[256];
-    sprintf(
-        texs,
-        "Terrain pos: "
-        "(ogl: %.3f,%.3f,%.3f | Game: %.2f, %.2f), rotation %.1f",
-        p.x, p.y, p.z, q.x, q.y, camera_->GetRotation() * 180 / M_PI);
-//    widgets.lblTerrainPos->setText(texs);
+    gui_->debugWrite(fmt::format(
+        "Terrain pos under the cursor: \n"
+        "\t(ogl: {:.3f},{:.3f},{:.3f}, game: {:.2f}, {:.2f}), rotation {:.2f})\n",
+        p.x, p.y, p.z, q.x, q.y, camera_->GetRotation() * 180 / M_PI));
 }
 
 /// Return maximum, minimum and average fps

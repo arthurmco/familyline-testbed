@@ -6,11 +6,7 @@
 #include <common/logger.hpp>
 #include <cstdint>
 #include <functional>
-#include <ranges>
-
-#include <range/v3/view/filter.hpp>
-#include <range/v3/view/transform.hpp>
-#include <range/v3/view/reverse.hpp>
+#include <range/v3/all.hpp>
 
 using namespace familyline::graphics::gui;
 
@@ -78,7 +74,7 @@ std::optional<GUIAppearance> GUITheme::getAppearanceByControlType(std::string_vi
 
     if (appearance["horizontal_alignment"]) {
         std::string alignment = appearance["horizontal_alignment"].as<std::string>();
-        
+
         if (alignment == "left")
             gapp.horizontalAlignment = HorizontalAlignment::Left;
         else if (alignment == "center")
@@ -87,7 +83,6 @@ std::optional<GUIAppearance> GUITheme::getAppearanceByControlType(std::string_vi
             gapp.horizontalAlignment = HorizontalAlignment::Right;
     }
 
-    
     printf(
         "\tforeground: %s -> %.2f %.2f %.2f %.2f\n",
         appearance["foreground"].as<std::string>().c_str(), gapp.foreground[0], gapp.foreground[1],
@@ -151,9 +146,8 @@ void GUIManager::moveWindowToTop(GUIWindow &w)
  */
 void GUIManager::destroyWindow(std::string name)
 {
-    auto window = std::remove_if(windows_.begin(), windows_.end(), [&](const WindowInfo &wi) {
-        return wi.name == name;
-    });
+    auto window = std::remove_if(
+        windows_.begin(), windows_.end(), [&](const WindowInfo &wi) { return wi.name == name; });
 
     windows_.erase(window, windows_.end());
 }
@@ -196,23 +190,20 @@ void GUIManager::runEvents()
     if (!events_.empty()) {
         auto &event = events_.front();
         event.cb(event.control);
-        events_.pop();        
+        events_.pop();
     }
 
     if (!callbacks_.empty()) {
         auto &[callback, controlID] = callbacks_.front();
-        GUIControl* c = this->getControl<GUIControl>(controlID);
+        GUIControl *c               = this->getControl<GUIControl>(controlID);
 
         if (c) {
             callback(*c);
         } else {
-        
         }
-    
+
         callbacks_.pop();
-        
     }
-    
 }
 
 GUIWindow *GUIManager::getWindow(std::string name)
@@ -245,8 +236,8 @@ void GUIManager::update()
 
     renderer_paint_data_.clear();
     auto validwindows = windows_ |
-        ranges::views::filter([](const WindowInfo &w) { return w.visible; }) |
-        ranges::views::reverse;
+                        ranges::views::filter([](const WindowInfo &w) { return w.visible; }) |
+                        ranges::views::reverse;
 
     std::transform(
         validwindows.begin(), validwindows.end(), std::back_inserter(renderer_paint_data_),
@@ -255,7 +246,11 @@ void GUIManager::update()
     renderer_->update(renderer_paint_data_);
 }
 
-void GUIManager::render() { renderer_->render(); }
+void GUIManager::render()
+{
+    renderer_->debugWrite(debugOut_);
+    renderer_->render();
+}
 
 unsigned lastX = 0, lastY = 0;
 /**
@@ -265,8 +260,8 @@ bool GUIManager::listenInputs(familyline::input::HumanInputAction i)
 {
     using namespace familyline::input;
 
-    for (auto &w : windows_ | ranges::views::filter(
-             [](const WindowInfo &wi) { return wi.visible; }) ) {
+    for (auto &w :
+         windows_ | ranges::views::filter([](const WindowInfo &wi) { return wi.visible; })) {
         if (std::holds_alternative<MouseAction>(i.type)) {
             auto event = std::get<MouseAction>(i.type);
 

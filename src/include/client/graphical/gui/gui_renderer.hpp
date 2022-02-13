@@ -1,13 +1,11 @@
 #pragma once
 
+#include <client/graphical/gui/gui.hpp>
 #include <cstdint>
 #include <string>
 
-#include <client/graphical/gui/gui.hpp>
-
-namespace familyline::graphics::gui {
-
-
+namespace familyline::graphics::gui
+{
 /**
  * ControlPaintData
  *
@@ -23,12 +21,13 @@ namespace familyline::graphics::gui {
  * The control paint data stores painting data for individual controls,
  * and they might be able to be combined.
  */
-class ControlPaintData {
+class ControlPaintData
+{
 public:
-  virtual std::string format() const = 0;
-  virtual uint8_t *data() const = 0;
+    virtual std::string format() const = 0;
+    virtual uint8_t *data() const      = 0;
 
-  virtual ~ControlPaintData() {}
+    virtual ~ControlPaintData() {}
 };
 
 /**
@@ -45,20 +44,21 @@ public:
  * APIs outside Cairo, and even no API, just to test the renderer's
  * behavior, and test the GUI itself
  */
-class GUIControlPainter {
+class GUIControlPainter
+{
 public:
-  virtual std::unique_ptr<ControlPaintData> drawWindow(GUIWindow &w) = 0;
+    virtual std::unique_ptr<ControlPaintData> drawWindow(GUIWindow &w) = 0;
 
-  /// This is here just as an helper, the renderer will not use this
-  /// function directly
-  virtual std::unique_ptr<ControlPaintData> drawControl(GUIControl &c) = 0;
+    /// This is here just as an helper, the renderer will not use this
+    /// function directly
+    virtual std::unique_ptr<ControlPaintData> drawControl(GUIControl &c) = 0;
 
-  /// If you implement caching, you must implement this function, because
-  /// some things (like window resizing) will need a full renderer of the
-  /// window, and so the cache must be invalidated.
-  virtual void invalidateCache() {}
+    /// If you implement caching, you must implement this function, because
+    /// some things (like window resizing) will need a full renderer of the
+    /// window, and so the cache must be invalidated.
+    virtual void invalidateCache() {}
 
-  virtual ~GUIControlPainter(){};
+    virtual ~GUIControlPainter(){};
 };
 
 /**
@@ -70,55 +70,61 @@ public:
  * The Window class (from Familyline) will get this framebuffer and render
  * it to the screen
  */
-class GUIRenderer {
-
+class GUIRenderer
+{
 public:
-  /// Update the rendered content
-  virtual void update(const std::vector<ControlPaintData *> &data) = 0;
+    /// Update the rendered content
+    virtual void update(const std::vector<ControlPaintData *> &data) = 0;
 
-  /// Render the data
-  virtual void render() = 0;
+    /// Render the data
+    virtual void render() = 0;
 
-  virtual std::unique_ptr<GUIControlPainter> createPainter() = 0;
+    virtual std::unique_ptr<GUIControlPainter> createPainter() = 0;
 
-  /**
-   * For some controls, like the textbox, we need to know the exact
-   * measurement of a certain character, so we can know where the cursor will
-   * start selecting and where the cursor will be when we click inside of
-   * the control.
-   *
-   * To do this, we need to know the size of each letter.
-   * The 'letter', in this case, is an Unicode (really utf-32, but we can
-   * assume utf-32 = unicode for a long time now) codepoint.
-   *
-   * We also need to provide font name, size and weight
-   *
-   * Return the codepoint size information, if found.
-   * If not, return std::nullopt
-   */
-  virtual std::optional<GUIGlyphSize>
-  getCodepointSize(char32_t codepoint, std::string_view fontName,
-                   size_t fontSize, FontWeight weight) = 0;
+    /**
+     * For some controls, like the textbox, we need to know the exact
+     * measurement of a certain character, so we can know where the cursor will
+     * start selecting and where the cursor will be when we click inside of
+     * the control.
+     *
+     * To do this, we need to know the size of each letter.
+     * The 'letter', in this case, is an Unicode (really utf-32, but we can
+     * assume utf-32 = unicode for a long time now) codepoint.
+     *
+     * We also need to provide font name, size and weight
+     *
+     * Return the codepoint size information, if found.
+     * If not, return std::nullopt
+     */
+    virtual std::optional<GUIGlyphSize> getCodepointSize(
+        char32_t codepoint, std::string_view fontName, size_t fontSize, FontWeight weight) = 0;
 
-  /**
-   * Make the graphical framework above us set some sort of text
-   * input mode (SDL, for example, has SDL_StartTextInput)
-   *
-   * This function will take care of all IME related things
-   * (for example, by combining ´ and a to form á, or by converting
-   *  hiragana into kanji), sending all the steps until the final
-   * character
-   *
-   * We make the renderer provide this information, but it might not
-   * be the best place (we will probably need to rename the renderer
-   * class)
-   */
-  virtual void setTextInputMode(bool) = 0;
+    /**
+     * Make the graphical framework above us set some sort of text
+     * input mode (SDL, for example, has SDL_StartTextInput)
+     *
+     * This function will take care of all IME related things
+     * (for example, by combining ´ and a to form á, or by converting
+     *  hiragana into kanji), sending all the steps until the final
+     * character
+     *
+     * We make the renderer provide this information, but it might not
+     * be the best place (we will probably need to rename the renderer
+     * class)
+     */
+    virtual void setTextInputMode(bool) = 0;
 
-  /// The GUIManager will call this when it receives a resize event
-  virtual void onResize(int width, int height) = 0;
+    /// The GUIManager will call this when it receives a resize event
+    virtual void onResize(int width, int height) = 0;
 
-  virtual ~GUIRenderer() {}
+    /**
+     * Print to a "virtual" debug pane
+     *
+     * This call is guaranteed to be called right before the render() method.
+     */
+    virtual void debugWrite(std::string) = 0;
+
+    virtual ~GUIRenderer() {}
 };
 
-}
+}  // namespace familyline::graphics::gui

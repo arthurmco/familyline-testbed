@@ -196,7 +196,7 @@ public:
         auto ret = ptr.get();
 
         layouts_.push_back(std::move(ptr));
-        return (BaseLayout&)*ret;
+        return (BaseLayout &)*ret;
     }
 
     GUIWindow *getWindow(std::string name);
@@ -247,11 +247,23 @@ public:
     /**
      * Push the event to be ran the next time you call `runEvents()`
      */
-    void pushEvent(FGUIEventCallback cb, GUIControl &control) { events_.push(EventInfo{cb, control}); }
+    void pushEvent(FGUIEventCallback cb, GUIControl &control)
+    {
+        events_.push(EventInfo{cb, control});
+    }
 
     GUIRenderer &getRenderer() { return *renderer_.get(); }
 
+    void debugClear() { debugOut_ = ""; }
+
+    /**
+     * Write to a debug pane that is cleared on each frame.
+     */
+    void debugWrite(std::string v) { debugOut_ += v; }
+
 private:
+    std::string debugOut_;
+
     std::vector<std::unique_ptr<GUIControl>> controls_;
     std::vector<WindowInfo> windows_;
     std::vector<std::unique_ptr<BaseLayout>> layouts_;

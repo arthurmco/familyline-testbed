@@ -1,12 +1,22 @@
-#include <pango/pangocairo.h>
-
 #include <client/graphical/gfx_service.hpp>
 #include <client/graphical/opengl/gl_gui_renderer.hpp>
 #include <common/logger.hpp>
 #include <cstdio>
 #include <cuchar>
+#include <string_view>
+
+/**
+ * Please do not add `#define True` in a fucking header.
+ * You have stdbool.h in C.
+ */
+#define OldTrue True
+#undef True
+#include <range/v3/all.hpp>
+#define True OldTrue
 
 #ifdef RENDERER_OPENGL
+
+#include <pango/pangocairo.h>
 
 using namespace familyline::graphics::gui;
 
@@ -185,8 +195,6 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
         drawLabel(ctxt, &button->getInnerLabel(), labelap);
 
     } else if (auto textbox = dynamic_cast<GUITextbox*>(&c); textbox) {
-
-
         auto [selbefore, selection, selafter] = textbox->getTextAsSelection(false);
 
         PangoLayout* layoutBefore = getLayoutFromText(ctxt, selbefore, appearance);
@@ -206,7 +214,7 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
         selwidth /= PANGO_SCALE;
         height /= PANGO_SCALE;
 
-        auto control_height = std::min(height+25, c.height());
+        auto control_height = std::min(height + 25, c.height());
 
         cairo_move_to(ctxt, 0, 0);
         cairo_set_source_rgba(ctxt, br, bg, bb, ba);
@@ -245,26 +253,24 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
     } else if (auto iv = dynamic_cast<GUIImageView*>(&c); iv) {
         SDL_Surface* image = iv->getImageData();
 
-
-        int drawx = 0;
-        int drawy = 0;
+        int drawx           = 0;
+        int drawy           = 0;
         auto [draww, drawh] = iv->getImageSize();
         int iw = image->w, ih = image->h;
 
         SDL_LockSurface(image);
-        auto itype = CAIRO_FORMAT_ARGB32;
+        auto itype                     = CAIRO_FORMAT_ARGB32;
         cairo_surface_t* image_surface = cairo_image_surface_create_for_data(
-            (unsigned char*)image->pixels, itype, iw, ih,
-            cairo_format_stride_for_width(itype, iw));
+            (unsigned char*)image->pixels, itype, iw, ih, cairo_format_stride_for_width(itype, iw));
         SDL_UnlockSurface(image);
 
-        double scalew = double(draww)/double(iw), scaleh = double(drawh)/double(ih);
+        double scalew = double(draww) / double(iw), scaleh = double(drawh) / double(ih);
 
         cairo_matrix_t current_mtx;
         cairo_get_matrix(ctxt, &current_mtx);
-        
+
         cairo_move_to(ctxt, 0, 0);
-        cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);      
+        cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
         cairo_scale(ctxt, scalew, scaleh);
         cairo_set_source_surface(ctxt, image_surface, drawx, drawy);
         cairo_paint(ctxt);
@@ -414,15 +420,50 @@ GLuint GLGUIRenderer::resizeTexture(int width, int height)
     return initTexture(width, height);
 }
 
+/**
+ * Print to a "virtual" debug pane
+ *
+ * This call is guaranteed to be called right before the render() method.
+ */
+void GLGUIRenderer::debugWrite(std::string text)
+{
+    if (text.size() > 0) {
+        auto beginy = 20;
+        auto beginx = 20;
+
+        cairo_font_face_t* font = cairo_toy_font_face_create(
+            "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        cairo_set_source_rgb(context_, 1.0, 1.0, 1.0);
+        cairo_set_font_face(context_, font);
+
+        cairo_set_font_size(context_, 14.0);
+
+        auto expand_tabs = [](std::string s) {
+            auto oldtab = 0;
+            for (auto tabidx = s.find_first_of('\t', oldtab); tabidx != std::string::npos;
+                 oldtab = tabidx + 1, tabidx = s.find_first_of('\t', oldtab)) {
+                s.replace(tabidx, 1, "    ");
+            }
+
+            return s;
+        };
+
+        for (auto line :
+             text | ranges::views::split('\n') | ranges::views::transform([&](auto&& lrng) {
+                 auto s = std::string(&*lrng.begin(), ranges::distance(lrng));
+                 return expand_tabs(s);
+             })) {
+            cairo_move_to(context_, beginx, beginy);
+            cairo_show_text(context_, line.c_str());
+            beginy += 20;
+        }
+        cairo_font_face_destroy(font);
+    }
+}
+
 void GLGUIRenderer::render()
 {
     auto& log = LoggerService::getLogger();
-
-    cairo_set_source_rgb(context_, 1.0, 1.0, 1.0);
-    auto strsize = fmt::format("{} x {}", screenWidth_, screenHeight_);
-    cairo_move_to(context_, 50, 50);
-    cairo_set_font_size(context_, 15.0);
-    cairo_show_text(context_, strsize.c_str());
 
     cairo_surface_flush(this->canvas_);
     auto* canvas_data = cairo_image_surface_get_data(this->canvas_);
