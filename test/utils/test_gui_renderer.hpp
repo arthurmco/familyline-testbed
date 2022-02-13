@@ -66,6 +66,13 @@ public:
      */
     virtual void setTextInputMode(bool v) {}
 
+    /**
+     * Print to a "virtual" debug pane
+     *
+     * This call is guaranteed to be called right before the render() method.
+     */
+    virtual void debugWrite(std::string) {}
+
     virtual ~TestGUIRenderer() {}
 
     TestControlPaintData *query(int id);
