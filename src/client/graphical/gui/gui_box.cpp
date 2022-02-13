@@ -1,7 +1,43 @@
 #include <client/graphical/gui/gui_box.hpp>
 #include <client/graphical/gui/gui_manager.hpp>
+#include <numeric>
 
 using namespace familyline::graphics::gui;
+
+/**
+ * Set the minimum and maximum sizes of this box according to
+ * our children
+ */
+void GUIBox::resetBoundarySizes()
+{
+    using bound_info = std::array<std::optional<unsigned>, 4>;
+
+    bound_info info;
+    for (GUIControl *control : controls_) {
+        GUIAppearance a = control->appearance();
+
+        if (a.minWidth) {
+            info[0] = std::make_optional(std::max(info[0].value_or(1), *a.minWidth));
+        }
+        if (a.minHeight) {
+            info[1] = std::make_optional(std::max(info[1].value_or(1), *a.minHeight));
+        }
+
+        if (a.maxWidth && width_ > 0) {
+            info[2] = std::make_optional(std::min(info[2].value_or(width_), *a.maxWidth));
+        }
+        if (a.maxHeight && height_ > 0) {
+            info[3] = std::make_optional(std::min(info[3].value_or(height_), *a.maxHeight));
+        }
+    }
+
+    GUIAppearance a = this->appearance();
+    a.minWidth      = info[0];
+    a.minHeight     = info[1];
+    a.maxWidth      = info[2];
+    a.maxHeight     = info[3];
+    this->setAppearance(a);
+}
 
 GUIControl &GUIBox::add(GUIControl *c)
 {
@@ -22,6 +58,8 @@ GUIControl &GUIBox::add(GUIControl *c)
 
     ret.setParent(std::make_optional(this));
     ret.setEventCallbackRegisterFunction(cb_register_fn_);
+    resetBoundarySizes();
+
     return ret;
 }
 
@@ -88,6 +126,7 @@ void GUIBox::onResize(int nwidth, int nheight, int nx, int ny)
     y_      = ny;
 
     layout_.resize(width_, height_, x_, y_);
+    resetBoundarySizes();
     dirty_ = true;
 }
 
@@ -116,26 +155,24 @@ void GUIBox::update()
     dirty_ = false;
 };
 
-
 void GUIBox::receiveInput(const familyline::input::HumanInputAction &e)
 {
-    using namespace familyline::input;    
+    using namespace familyline::input;
     auto focus_control = controls_.begin();
 
     if (std::holds_alternative<MouseAction>(e.type)) {
-        is_tab = false;
+        is_tab     = false;
         auto event = std::get<MouseAction>(e.type);
 
-        auto mouse_focus = std::find_if(
-            controls_.begin(), controls_.end(),
-            [event](const GUIControl* c) {
-                return (event.screenX >= c->x() && event.screenX < c->x() + c->width() &&
-                        event.screenY >= c->y() && event.screenY < c->y() + c->height());
+        auto mouse_focus =
+            std::find_if(controls_.begin(), controls_.end(), [event](const GUIControl *c) {
+                return (
+                    event.screenX >= c->x() && event.screenX < c->x() + c->width() &&
+                    event.screenY >= c->y() && event.screenY < c->y() + c->height());
             });
 
-        if (mouse_focus == controls_.end())
-            return;
-        
+        if (mouse_focus == controls_.end()) return;
+
         focused_index_ = std::distance(controls_.begin(), mouse_focus);
 
     } else {
@@ -144,18 +181,17 @@ void GUIBox::receiveInput(const familyline::input::HumanInputAction &e)
         }
     }
 
-    if (focused_index_ < 0)
-        return;
-    
+    if (focused_index_ < 0) return;
+
     std::advance(focus_control, focused_index_);
 
-    GUIControl* last_focus_control =
-        (last_focus_control_id >= 0) ?
-        ((GUIManager*)render_info.gm)->getControl<GUIControl>(last_focus_control_id) : nullptr;
-    
+    GUIControl *last_focus_control =
+        (last_focus_control_id >= 0)
+            ? ((GUIManager *)render_info.gm)->getControl<GUIControl>(last_focus_control_id)
+            : nullptr;
+
     if (last_focus_control != (*focus_control)) {
-        if (last_focus_control)
-            last_focus_control->onFocusExit();
+        if (last_focus_control) last_focus_control->onFocusExit();
 
         (*focus_control)->onFocusEnter();
     }

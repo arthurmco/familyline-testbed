@@ -91,11 +91,6 @@ std::optional<GUIAppearance> GUITheme::getAppearanceByControlType(std::string_vi
             gapp.horizontalAlignment = HorizontalAlignment::Right;
     }
 
-    printf(
-        "\tforeground: %s -> %.2f %.2f %.2f %.2f\n",
-        appearance["foreground"].as<std::string>().c_str(), gapp.foreground[0], gapp.foreground[1],
-        gapp.foreground[2], gapp.foreground[3]);
-
     /*
     if (appearance["font_weight"])
         gapp.weight = appearance["font_weight"].as();

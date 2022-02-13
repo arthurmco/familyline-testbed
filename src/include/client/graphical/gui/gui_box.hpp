@@ -1,7 +1,7 @@
 #pragma once
 
-#include <sys/types.h>
 #include <stdint.h>
+#include <sys/types.h>
 
 #include <cassert>
 #include <client/graphical/gui/gui_control.hpp>
@@ -11,7 +11,6 @@
 #include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
 #endif
-
 
 namespace familyline::graphics::gui
 {
@@ -101,6 +100,12 @@ private:
     bool is_tab                 = false;
 
     int last_focus_control_id = -1;
+
+    /**
+     * Set the minimum and maximum sizes of this box according to
+     * our children
+     */
+    void resetBoundarySizes();
 
     // The index of the currently focused control.
     // TODO: reset this if the removed control is focused.

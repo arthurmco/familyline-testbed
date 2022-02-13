@@ -1069,7 +1069,12 @@ static int show_starting_menu(
         lv.setAppearance(a);
     }
 
-    auto buttonAppearances = [](GUIButton& b) { b.setMargins(20, 0); };
+    auto buttonAppearances = [](GUIButton& b) {
+        b.setMargins(20, 0);
+        GUIAppearance a = b.appearance();
+        a.maxWidth      = 360;
+        b.setAppearance(a);
+    };
 
     GUIButton& bnew =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("New Game", [&](auto c) {
@@ -1135,11 +1140,20 @@ static int show_starting_menu(
                     ginfo.guir->destroyWindow("multiplayer");
                     ginfo.guir->moveWindowToTop(w);
                 }));
+
+            GUIAppearance a = back.appearance();
+            a.maxHeight     = 90;
+            back.setAppearance(a);
+
             GUIButton& connect = (GUIButton&)btnArea.add(
                 ginfo.guir->createControl<GUIButton>("Connect", [&](auto c) {
                     ginfo.guir->destroyWindow("multiplayer");
                     ginfo.guir->moveWindowToTop(w);
                 }));
+
+            a           = connect.appearance();
+            a.maxHeight = 90;
+            connect.setAppearance(a);
 
             ginfo.guir->closeWindow(w);
             ginfo.guir->showWindow(multiplayer);

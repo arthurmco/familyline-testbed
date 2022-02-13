@@ -185,6 +185,7 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
 
         cairo_set_line_width(ctxt, 4.0);
         cairo_set_source_rgb(ctxt, fr, fg, fb);
+        cairo_set_operator(ctxt, CAIRO_OPERATOR_OVER);
         cairo_rectangle(ctxt, 1, 1, c.width() - 1, c.height() - 1);
         cairo_stroke(ctxt);
 

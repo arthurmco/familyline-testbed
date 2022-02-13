@@ -75,7 +75,29 @@ public:
 
     void add(int id) { controlIDs_.push_back(id); }
 
-    /// You need to update the positions of the controls you have inside you.
+    /**
+     * With the addition of maximum width and maximum height to our layout components,
+     * guessing the size of them by dividing the total space by the number of controls
+     * will not be possible
+     *
+     * But we can still reuse that strategy to recalculate the remaining space.
+     * We do exacly that here: calculate the width for the remaining controls
+     */
+    std::tuple<int, int> recalculateRemainingSize(int count, int processedcontrols)
+    {
+        int ncount = count - processedcontrols;
+        if (ncount == 0) {
+            return std::make_tuple(0, 0);
+        }
+
+        return std::make_tuple(
+            (horizontal ? windoww_ / ncount : windoww_),
+            (horizontal ? windowh_ : windowh_ / ncount));
+    }
+
+    /**
+     * Update the positions of controls we have here
+     */
     virtual void update()
     {
         assert(windoww_ > 0);
@@ -90,7 +112,12 @@ public:
         int currentw = (horizontal ? windoww_ / ccount : windoww_) - border;
         int currenth = (horizontal ? windowh_ : windowh_ / ccount) - border;
 
+        bool shouldRecalculateRemainingWidth  = false;
+        bool shouldRecalculateRemainingHeight = false;
+
+        int cidx = -1;
         for (auto cid : controlIDs_) {
+            cidx++;
             GUIControl *c = fnGetControl_(cid);
             if (!c) {
                 continue;
@@ -98,7 +125,38 @@ public:
                 GUIAppearance a = c->appearance();
                 auto mx         = a.marginX;
                 auto my         = a.marginY;
+
+                if (a.minWidth || a.maxWidth) {
+                    shouldRecalculateRemainingWidth = true;
+                    if (a.minWidth) {
+                        currentw = std::max((unsigned)currentw, *a.minWidth);
+                    }
+                    if (a.maxWidth) {
+                        currentw = std::min((unsigned)currentw, *a.maxWidth);
+                    }
+                }
+
+                if (a.minHeight || a.maxHeight) {
+                    shouldRecalculateRemainingHeight = true;
+                    if (a.minHeight) {
+                        currenth = std::max((unsigned)currenth, *a.minHeight);
+                    }
+                    if (a.maxHeight) {
+                        currenth = std::min((unsigned)currenth, *a.maxHeight);
+                    }
+                }
+
                 c->onResize(currentw - mx, currenth - my, currentx + mx, currenty + my);
+            }
+
+            if (shouldRecalculateRemainingWidth || shouldRecalculateRemainingHeight) {
+                auto [cw, ch] = recalculateRemainingSize(ccount, cidx + 1);
+                if (shouldRecalculateRemainingWidth) {
+                    currentw = cw;
+                }
+                if (shouldRecalculateRemainingHeight) {
+                    currenth = ch;
+                }
             }
 
             if (horizontal) {

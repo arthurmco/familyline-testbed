@@ -87,6 +87,17 @@ struct GUIAppearance {
     /// Padding, in pixels.
     int paddingX = 0;
     int paddingY = 0;
+
+    /// Minimum and maximum width and heights.
+    /// The layout class need to respect those boundaries
+    ///
+    /// They are optional classes, because we need to distinguish
+    /// between 0 and no value
+    std::optional<unsigned> minWidth;
+    std::optional<unsigned> minHeight;
+
+    std::optional<unsigned> maxWidth;
+    std::optional<unsigned> maxHeight;
 };
 
 /**
