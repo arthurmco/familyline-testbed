@@ -120,14 +120,14 @@ void drawLabel(cairo_t* ctxt, const GUILabel* label, const GUIAppearance& appear
     width /= PANGO_SCALE;
     height /= PANGO_SCALE;
 
-    int startx = 0, starty = appearance.marginY;
+    int startx = 0, starty = appearance.paddingY;
     switch (appearance.horizontalAlignment) {
-        case HorizontalAlignment::Left: startx = appearance.marginX; break;
+        case HorizontalAlignment::Left: startx = appearance.paddingX; break;
         case HorizontalAlignment::Center:
-            startx = glm::max(appearance.marginX, (label->width() / 2) - (width / 2));
+            startx = glm::max(appearance.paddingX, (label->width() / 2) - (width / 2));
             break;
         case HorizontalAlignment::Right:
-            startx = label->width() - width - appearance.marginX;
+            startx = label->width() - width - appearance.paddingX;
             break;
     }
 
@@ -189,8 +189,8 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
         cairo_stroke(ctxt);
 
         GUIAppearance labelap = appearance;
-        labelap.marginX += 6;
-        labelap.marginY += 6;
+        labelap.paddingX += 6;
+        labelap.paddingY += 6;
 
         drawLabel(ctxt, &button->getInnerLabel(), labelap);
 

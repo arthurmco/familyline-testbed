@@ -1069,6 +1069,8 @@ static int show_starting_menu(
         lv.setAppearance(a);
     }
 
+    auto buttonAppearances = [](GUIButton& b) { b.setMargins(20, 0); };
+
     GUIButton& bnew =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("New Game", [&](auto c) {
             (void)c;
@@ -1147,9 +1149,14 @@ static int show_starting_menu(
             (void)c;
             r = false;
         }));
-    
-    auto& texman = GFXService::getTextureManager();    
-    TextureHandle th = *texman->loadTexture(ICONS_DIR "/familyline-logo.png");
+
+    buttonAppearances(bquit);
+    buttonAppearances(bmplayer);
+    buttonAppearances(bsettings);
+    buttonAppearances(bnew);
+
+    auto& texman            = GFXService::getTextureManager();
+    TextureHandle th        = *texman->loadTexture(ICONS_DIR "/familyline-logo.png");
     GUIImageView& backimage = (GUIImageView&)background.box().add(
         ginfo.guir->createControl<GUIImageView>(*texman->getRawTexture(th)));
 
