@@ -101,7 +101,7 @@ void GUIManager::onResize(int width, int height)
  */
 void GUIManager::runEvents()
 {
-    if (!events_.empty()) {
+    while (!events_.empty()) {
         auto &event = events_.front();
         event.cb(event.control);
         events_.pop();
@@ -199,7 +199,6 @@ bool GUIManager::listenInputs(familyline::input::HumanInputAction i)
                 event.screenX < (w.window->x() + w.window->width()) &&
                 event.screenY >= w.window->y() &&
                 event.screenY < (w.window->y() + w.window->height())) {
-                fprintf(stderr, "%s %08x %08x\n", w.name.c_str(), w.window->id(), windows_.size());
                 w.window->receiveInput(i);
                 return true;
             }
