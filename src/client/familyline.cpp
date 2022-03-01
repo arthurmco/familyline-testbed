@@ -1112,8 +1112,17 @@ static int show_starting_menu(
 
             GUILabel& lblName =
                 (GUILabel&)settings.box().add(ginfo.guir->createControl<GUILabel>("Player name:"));
+
+            auto a      = lblName.appearance();
+            a.maxHeight = 40;
+            lblName.setAppearance(a);
+
             GUITextbox& txtName = (GUITextbox&)settings.box().add(
                 ginfo.guir->createControl<GUITextbox>(confdata.player.username));
+
+            a           = txtName.appearance();
+            a.maxHeight = 40;
+            txtName.setAppearance(a);
 
             GUIButton& back = (GUIButton&)settings.box().add(
                 ginfo.guir->createControl<GUIButton>("Back", [&](auto c) {

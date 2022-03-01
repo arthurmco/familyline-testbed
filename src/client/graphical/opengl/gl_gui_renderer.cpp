@@ -304,8 +304,8 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
     }
 
 #ifdef DRAW_DEBUG_BORDER
-    cairo_set_line_width(ctxt, 1.0);
-    cairo_set_source_rgb(ctxt, 0.0, 0.0, 1.0);
+    cairo_set_line_width(ctxt, 3.0);
+    cairo_set_source_rgb(ctxt, 0.0, 1.0, 0.1);
     cairo_rectangle(ctxt, 1, 1, c.width() - 1, c.height() - 1);
     cairo_stroke(ctxt);
 #endif

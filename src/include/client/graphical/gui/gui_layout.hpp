@@ -83,7 +83,7 @@ public:
      * But we can still reuse that strategy to recalculate the remaining space.
      * We do exacly that here: calculate the width for the remaining controls
      */
-    std::tuple<int, int> recalculateRemainingSize(int count, int processedcontrols)
+    std::tuple<int, int> recalculateRemainingSize(int count, int processedcontrols, int currentval)
     {
         int ncount = count - processedcontrols;
         if (ncount == 0) {
@@ -91,8 +91,8 @@ public:
         }
 
         return std::make_tuple(
-            (horizontal ? windoww_ / ncount : windoww_),
-            (horizontal ? windowh_ : windowh_ / ncount));
+            (horizontal ? (windoww_ - currentval) / ncount : windoww_),
+            (horizontal ? windowh_ : (windowh_ - currentval) / ncount));
     }
 
     /**
@@ -121,48 +121,50 @@ public:
             GUIControl *c = fnGetControl_(cid);
             if (!c) {
                 continue;
+            }
+
+            GUIAppearance a = c->appearance();
+            auto mx         = a.marginX;
+            auto my         = a.marginY;
+
+            if (a.minWidth || a.maxWidth) {
+                shouldRecalculateRemainingWidth = true;
+                if (a.minWidth) {
+                    currentw = std::max((unsigned)currentw, *a.minWidth);
+                }
+                if (a.maxWidth) {
+                    currentw = std::min((unsigned)currentw, *a.maxWidth);
+                }
+            }
+
+            if (a.minHeight || a.maxHeight) {
+                shouldRecalculateRemainingHeight = true;
+                if (a.minHeight) {
+                    currenth = std::max((unsigned)currenth, *a.minHeight);
+                }
+                if (a.maxHeight) {
+                    currenth = std::min((unsigned)currenth, *a.maxHeight);
+                }
+            }
+
+            printf("%d %d %d %d (%s)\n", currentx, currenty, currenth, my, c->describe().c_str());
+            c->onResize(currentw - mx, currenth - my, currentx + mx, currenty + my);
+
+            if (horizontal) {
+                currentx += currentw + border;
             } else {
-                GUIAppearance a = c->appearance();
-                auto mx         = a.marginX;
-                auto my         = a.marginY;
-
-                if (a.minWidth || a.maxWidth) {
-                    shouldRecalculateRemainingWidth = true;
-                    if (a.minWidth) {
-                        currentw = std::max((unsigned)currentw, *a.minWidth);
-                    }
-                    if (a.maxWidth) {
-                        currentw = std::min((unsigned)currentw, *a.maxWidth);
-                    }
-                }
-
-                if (a.minHeight || a.maxHeight) {
-                    shouldRecalculateRemainingHeight = true;
-                    if (a.minHeight) {
-                        currenth = std::max((unsigned)currenth, *a.minHeight);
-                    }
-                    if (a.maxHeight) {
-                        currenth = std::min((unsigned)currenth, *a.maxHeight);
-                    }
-                }
-
-                c->onResize(currentw - mx, currenth - my, currentx + mx, currenty + my);
+                currenty += currenth + border;
             }
 
             if (shouldRecalculateRemainingWidth || shouldRecalculateRemainingHeight) {
-                auto [cw, ch] = recalculateRemainingSize(ccount, cidx + 1);
+                auto [cw, ch] =
+                    recalculateRemainingSize(ccount, cidx + 1, horizontal ? currentx : currenty);
                 if (shouldRecalculateRemainingWidth) {
                     currentw = cw;
                 }
                 if (shouldRecalculateRemainingHeight) {
                     currenth = ch;
                 }
-            }
-
-            if (horizontal) {
-                currentx += currentw + border;
-            } else {
-                currenty += currenth + border;
             }
         }
     }
