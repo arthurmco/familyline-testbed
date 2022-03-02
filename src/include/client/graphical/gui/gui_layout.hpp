@@ -147,7 +147,6 @@ public:
                 }
             }
 
-            printf("%d %d %d %d (%s)\n", currentx, currenty, currenth, my, c->describe().c_str());
             c->onResize(currentw - mx, currenth - my, currentx + mx, currenty + my);
 
             if (horizontal) {
