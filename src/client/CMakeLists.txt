@@ -73,7 +73,6 @@ find_package(FlatBuffers REQUIRED)
 add_dependencies(familyline-client familyline-common input-flatbuffer input-ser-flatbuffer network-flatbuffer)
 
 find_package(fmt 6...7.2 CONFIG REQUIRED)
-find_package(DevIL REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(tl-expected 1 CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
@@ -108,12 +107,9 @@ if (FLINE_USE_VCPKG)
 
   target_include_directories(familyline-client PUBLIC
     ${GLIB_INCLUDES} ${HB_INCLUDE} ${GLIB_CONFIG_INCLUDES} ${PANGO_INCLUDE}
-    ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS}
+    ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR}
     ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${PANGOCAIRO_INCLUDE_DIR}
     ${yaml_INCLUDE_DIR})
-
-  target_link_libraries(familyline-client PUBLIC ${IL_LIBRARIES})
-  target_link_libraries(familyline-client PUBLIC ${ILU_LIBRARIES})
 
 else()
   find_package(PkgConfig REQUIRED)
@@ -132,15 +128,13 @@ else()
   target_link_libraries(familyline-client PUBLIC fmt::fmt)
 
   target_link_libraries(familyline-client PUBLIC GLEW::GLEW)
-  target_link_libraries(familyline-client PUBLIC ${IL_LIBRARIES})
-  target_link_libraries(familyline-client PUBLIC ${ILU_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${CAIRO_LINK_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${PANGOCAIRO_LINK_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${GLM_LINK_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${YAML_CPP_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC Threads::Threads)
   target_include_directories(familyline-client PUBLIC ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS}
-    ${OPENGL_INCLUDE_DIR} ${IL_INCLUDE_DIRS} ${PANGOCAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR} ${PANGOCAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS}
     ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
 
 endif(FLINE_USE_VCPKG)

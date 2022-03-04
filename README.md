@@ -65,7 +65,6 @@ On Linux, you will need the softwares below:
 - *GLM*: for vector mathematics
 - *GLEW*: for dealing with OpenGL extensions
 - *SDL*: for dealing with our window. Version 2.0 is required.
-- *devIL*: for loading our textures.
 - *cairo*: for drawing the interfaces
 - *yaml-cpp*: For parsing all the YAML files we need
 - *nlohmann-json*: For parsing and creating JSON from some network
@@ -106,7 +105,7 @@ You will need to have vcpkg integrated with Visual Studio.
 
 Execute the following command:
 
-`> vcpkg install glm glew sdl2 devil cairo libyaml fmt flatbuffers nlohmann-json curlpp tl-expected`
+`> vcpkg install glm glew sdl2 cairo libyaml fmt flatbuffers nlohmann-json curlpp tl-expected`
 
 Go make a coffee and buy needed things in the market. Order some
 food. This will take some time.
