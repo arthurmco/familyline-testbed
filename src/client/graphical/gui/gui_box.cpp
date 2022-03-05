@@ -155,8 +155,34 @@ void GUIBox::update()
     dirty_ = false;
 };
 
+void GUIBox::onDestroyChild(unsigned long id)
+{
+    for (GUIControl *c : controls_) {
+        if (auto box = dynamic_cast<GUIBox *>(c); box) {
+            this->forwardDestroyToChildBox(id, *box);
+        }
+
+        if (focused_index_ >= 0 && id == (*(controls_.begin() + focused_index_))->id()) {
+            focused_index_ = -1;
+        }
+
+        if (last_focus_control_id == id) {
+            last_focus_control_id = -1;
+        }
+    }
+
+    auto r = std::remove_if(
+        controls_.begin(), controls_.end(), [id](GUIControl *c) { return c->id() == id; });
+
+    controls_.erase(r, controls_.end());
+}
+
 void GUIBox::receiveInput(const familyline::input::HumanInputAction &e)
 {
+    if (controls_.size() == 0) {
+        return;
+    }
+
     using namespace familyline::input;
     auto focus_control = controls_.begin();
 
@@ -197,7 +223,11 @@ void GUIBox::receiveInput(const familyline::input::HumanInputAction &e)
     }
 
     (*focus_control)->receiveInput(e);
-    last_focus_control_id = (*focus_control)->id();
+
+    if (focused_index_ >= 0)
+        last_focus_control_id = (*focus_control)->id();
+    else
+        last_focus_control_id = -1;
 }
 
 /**

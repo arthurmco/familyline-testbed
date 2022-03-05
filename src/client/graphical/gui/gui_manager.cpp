@@ -63,6 +63,12 @@ void GUIManager::destroyWindow(std::string name)
     auto window = std::remove_if(
         windows_.begin(), windows_.end(), [&](const WindowInfo &wi) { return wi.name == name; });
 
+    if (window != windows_.end() && window->window) {
+        for (GUIControl *control : window->window->box()) {
+            window->window->box().onDestroyChild(control->id());
+        }
+    }
+
     windows_.erase(window, windows_.end());
 }
 

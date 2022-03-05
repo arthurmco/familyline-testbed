@@ -64,6 +64,8 @@ public:
 
     virtual void receiveInput(const familyline::input::HumanInputAction &e);
 
+    void onDestroyChild(unsigned long id);
+
     /**
      * Forward the tab index event (aka the act of changing
      * control focus when you press TAB) to the next
@@ -117,5 +119,7 @@ private:
     std::vector<GUIControl *> controls_;
 
     void initLayout(BaseLayout &layout);
+
+    void forwardDestroyToChildBox(unsigned long id, GUIBox &box) { box.onDestroyChild(id); }
 };
 }  // namespace familyline::graphics::gui

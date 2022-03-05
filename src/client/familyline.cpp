@@ -1137,6 +1137,9 @@ static int show_starting_menu(
 
             GUIButton& back = (GUIButton&)settings.box().add(
                 ginfo.guir->createControl<GUIButton>("Back", [&](auto c) {
+                    confdata.enableInputRecording = chkRecord.checked();
+                    confdata.player.username      = txtName.text();
+
                     ginfo.guir->destroyWindow("settings");
                     ginfo.guir->moveWindowToTop(w);
                 }));
