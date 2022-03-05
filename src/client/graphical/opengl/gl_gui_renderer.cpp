@@ -171,6 +171,30 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
 
         drawLabel(ctxt, label, appearance);
 
+    } else if (auto checkbox = dynamic_cast<GUICheckbox*>(&c); checkbox) {
+        cairo_set_source_rgba(ctxt, br, bg, bb, ba);
+        cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
+        cairo_paint(ctxt);
+
+        auto maxw = std::min(40, c.width());
+
+        // draw a square
+        cairo_set_line_width(ctxt, 3.0);
+        cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
+        cairo_set_operator(ctxt, CAIRO_OPERATOR_OVER);
+        cairo_rectangle(ctxt, 1, 1, maxw - 1, c.height() - 1);
+        cairo_stroke(ctxt);
+
+        // draw an X
+
+        if (checkbox->checked()) {
+            cairo_move_to(ctxt, 0, 0);
+            cairo_line_to(ctxt, maxw, c.height());
+            cairo_move_to(ctxt, 0, c.height());
+            cairo_line_to(ctxt, maxw, 0);
+            cairo_stroke(ctxt);
+        }
+
     } else if (auto button = dynamic_cast<GUIButton*>(&c); button) {
         if (button->isHover()) {
             br = glm::min(br + 0.2, 1.0);

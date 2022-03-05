@@ -1124,6 +1124,17 @@ static int show_starting_menu(
             a.maxHeight = 40;
             txtName.setAppearance(a);
 
+            GUIBox& brecord = (GUIBox&)settings.box().add(
+                ginfo.guir->createControl<GUIBox>(ginfo.guir->createLayout<FlexLayout<true>>()));
+            a           = brecord.appearance();
+            a.maxHeight = 40;
+            brecord.setAppearance(a);
+
+            GUICheckbox& chkRecord = (GUICheckbox&)brecord.add(
+                ginfo.guir->createControl<GUICheckbox>(confdata.enableInputRecording));
+            GUILabel& lblRecord = (GUILabel&)brecord.add(
+                ginfo.guir->createControl<GUILabel>("Enable input recording"));
+
             GUIButton& back = (GUIButton&)settings.box().add(
                 ginfo.guir->createControl<GUIButton>("Back", [&](auto c) {
                     ginfo.guir->destroyWindow("settings");
