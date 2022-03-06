@@ -104,6 +104,9 @@ public:
         assert(windowh_ > 0);
 
         auto ccount = controlIDs_.size();
+        if (ccount == 0)
+            return;
+        
         int border  = 0;
 
         int currentx = parentx_ + border;

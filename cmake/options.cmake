@@ -28,6 +28,7 @@ set(MATERIALS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/materials/\"")
 set(MODELS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/models/\"")
 set(TEXTURES_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/textures/\"")
 set(ASSET_FILE_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/\"")
+set(SCRIPTS_DIR "\"${CMAKE_INSTALL_PREFIX}/share/familyline/scripts/\"")
 
 if (WIN32 OR FLINE_USE_RELATIVE_PATH)
   set(SHADERS_DIR "\"./shaders/\"")
@@ -36,6 +37,7 @@ if (WIN32 OR FLINE_USE_RELATIVE_PATH)
   set(MODELS_DIR "\"./models/\"")
   set(TEXTURES_DIR "\"./textures/\"")
   set(ASSET_FILE_DIR "\"./\"")
+  set(SCRIPTS_DIR "\"./scripts/\"")
 endif()
 
 

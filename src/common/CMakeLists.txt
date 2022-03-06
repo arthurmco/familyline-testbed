@@ -25,6 +25,7 @@ add_library(
   "logic/input_reproducer.cpp"
   "logic/lifecycle_manager.cpp"
   "logic/logic_service.cpp"
+  "logic/script_environment.cpp"
   "logic/object_components.cpp"
   "logic/object_factory.cpp"
   "logic/object_listener.cpp"

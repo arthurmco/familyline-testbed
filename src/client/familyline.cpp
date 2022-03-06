@@ -12,6 +12,7 @@
 #include <atomic>
 #include <chrono>
 #include <client/familyline.hpp>
+#include <common/logic/script_environment.hpp>
 #include <common/net/net_player_sender.hpp>
 #include <common/net/network_player.hpp>
 #include <concepts>
@@ -787,240 +788,249 @@ ConfigData read_settings()
 int main(int argc, char const* argv[])
 {
     auto pi = parse_params(std::vector<std::string>{argv + 1, argv + argc});
-    enable_console_color(pi.log_device);
+    scm_with_guile(
+        [](void* piptr) -> void* {
+            ParamInfo& pi = *((ParamInfo*)piptr);
 
-    fmt::print("Using resolution {} x {} \n", pi.width, pi.height);
-    ConfigData confdata = read_settings();
+            enable_console_color(pi.log_device);
 
-    LoggerService::createLogger(pi.log_device, LogType::Debug, confdata.log.blockTags);
+            fmt::print("Using resolution {} x {} \n", pi.width, pi.height);
+            ConfigData confdata = read_settings();
 
-    auto& log = LoggerService::getLogger();
+            LoggerService::createLogger(pi.log_device, LogType::Debug, confdata.log.blockTags);
 
-    auto [sysname, sysversion, sysinfo] = get_system_name();
+            auto& log = LoggerService::getLogger();
 
-    log->write("", LogType::Info, "Familyline " VERSION);
-    log->write("", LogType::Info, "built on " __DATE__ " by " USERNAME);
+            auto [sysname, sysversion, sysinfo] = get_system_name();
+
+            log->write("", LogType::Info, "Familyline " VERSION);
+            log->write("", LogType::Info, "built on " __DATE__ " by " USERNAME);
 #if defined(COMMIT)
-    log->write("", LogType::Info, "git commit is " COMMIT);
+            log->write("", LogType::Info, "git commit is " COMMIT);
 #endif
-    log->write("", LogType::Info, "Running on OS {}", sysname);
-    log->write("", LogType::Info, "  version: {} ({})", sysversion, sysinfo);
+            log->write("", LogType::Info, "Running on OS {}", sysname);
+            log->write("", LogType::Info, "  version: {} ({})", sysversion, sysinfo);
 
-    log->write("", LogType::Info, "Using renderer '{}'", pi.renderer);
+            log->write("", LogType::Info, "Using renderer '{}'", pi.renderer);
 
-    auto tm     = time(NULL);
-    auto tminfo = localtime(&tm);
-    log->write("", LogType::Info, "Actual date is {:%F %T}", *tminfo);
+            auto tm     = time(NULL);
+            auto tminfo = localtime(&tm);
+            log->write("", LogType::Info, "Actual date is {:%F %T}", *tminfo);
 
-    log->write("", LogType::Info, "Default model directory is " MODELS_DIR);
-    log->write("", LogType::Info, "Default texture directory is " TEXTURES_DIR);
-    log->write("", LogType::Info, "Default material directory is " MATERIALS_DIR);
+            log->write("", LogType::Info, "Default model directory is " MODELS_DIR);
+            log->write("", LogType::Info, "Default texture directory is " TEXTURES_DIR);
+            log->write("", LogType::Info, "Default material directory is " MATERIALS_DIR);
 
-    LoopRunner lr;
+            LoopRunner lr;
 
-    graphics::Window* win = nullptr;
-    GUIManager* guir      = nullptr;
-    PlayerManager* pm     = nullptr;
-    Game* g               = nullptr;
+            graphics::Window* win = nullptr;
+            GUIManager* guir      = nullptr;
+            PlayerManager* pm     = nullptr;
+            Game* g               = nullptr;
 
-    try {
-        {
-            auto devs = std::move(pi.devices);
-            std::unique_ptr<Device> defaultdev;
+            try {
+                {
+                    auto devs = std::move(pi.devices);
+                    std::unique_ptr<Device> defaultdev;
 
-            if (devs.size() == 0) {
-                log->write("main", LogType::Fatal, "no video devices found!");
-                return 1;
-            }
+                    if (devs.size() == 0) {
+                        log->write("main", LogType::Fatal, "no video devices found!");
+                        exit(1);
+                    }
 
-            for (auto& d : devs) {
-                log->write(
-                    "main", LogType::Info, "driver found: {} {}", d->getCode().data(),
-                    (d->isDefault() ? "(default)" : ""));
+                    for (auto& d : devs) {
+                        log->write(
+                            "main", LogType::Info, "driver found: {} {}", d->getCode().data(),
+                            (d->isDefault() ? "(default)" : ""));
 
-                if (d->isDefault()) {
-                    defaultdev = std::move(d);
+                        if (d->isDefault()) {
+                            defaultdev = std::move(d);
+                        }
+                    }
+
+                    if (!defaultdev) {
+                        log->write(
+                            "main", LogType::Warning,
+                            "no default device available, choosing the first one");
+                        defaultdev = std::move(devs[0]);
+                    }
+                    GFXService::setDevice(std::move(defaultdev));
                 }
+
+                auto& device = GFXService::getDevice();
+
+                auto ipr = std::make_unique<InputProcessor>();
+                InputService::setInputManager(std::make_unique<InputManager>(*ipr.get()));
+                InputService::setCommandTable(std::make_unique<CommandTable>());
+
+                {
+                    auto& ct = input::InputService::getCommandTable();
+                    ct->loadConfiguration({
+                        {"<up>", "CameraMove, up"},
+                        {"<down>", "CameraMove, down"},
+                        {"<right>", "CameraMove, right"},
+                        {"<left>", "CameraMove, left"},
+                        {"+", "CameraZoom, in"},
+                        {"-", "CameraZoom, out"},
+                        {"<kp-add>", "CameraZoom, in"},
+                        {"<kp-subtract>", "CameraZoom, out"},
+                        {"c", "DebugCreateEntity, tower"},
+                        {"e", "DebugCreateEntity, tent"},
+                        {"r", "DebugDestroyEntity"},
+                        {"b", "DebugShowBoundingBox"},
+                    });
+                }
+
+                auto& ima = InputService::getInputManager();
+
+                GFXService::createTextureManager(
+                    std::make_unique<TextureManager>(device->createTextureEnv()));
+
+                //        InputManager::GetInstance()->Initialize();
+                win = device->createWindow(pi.width, pi.height);
+
+                win->show();
+                // enable_gl_debug();
+
+                if (!init_network()) {
+                    throw net_exception("Could not initialize network");
+                }
+
+                log->write("", LogType::Info, "Device name: {}", device->getName().data());
+                log->write("", LogType::Info, "Device vendor: {} ", device->getVendor().data());
+
+                int fwidth, fheight;
+                int gwidth, gheight;
+                win->getFramebufferSize(fwidth, fheight);
+                win->getFramebufferSize(gwidth, gheight);
+
+                Framebuffer* f3D =
+                    GFXService::getDevice()->createFramebuffer("f3D", fwidth, fheight);
+                Framebuffer* fGUI =
+                    GFXService::getDevice()->createFramebuffer("fGUI", gwidth, gheight);
+                win->setFramebuffers(f3D, fGUI);
+
+                auto theme = std::make_unique<GUITheme>();
+                theme->loadFile(ASSET_FILE_DIR "theme.yml");
+
+                guir        = new GUIManager(win->createGUIRenderer());
+                guir->theme = std::move(theme);
+                guir->onResize(gwidth, gheight);
+
+                auto& texman = GFXService::getTextureManager();
+
+                /* If we have a networked game ready, don't even show the main menu. */
+                auto [texw, texh] = texman->getTextureMaxSize();
+                log->write("texture", LogType::Info, "maximum tex size: {} x {}", texw, texh);
+
+                if (pi.mapFile || pi.inputFile) {
+                    int frames = 0;
+
+                    std::string mapFile = pi.inputFile ? "" : *pi.mapFile;
+
+                    auto createNormalSession_fn = [](logic::Terrain& map, auto& local_player_info) {
+                        /// running a normal game
+                        return initSinglePlayerSession(map, local_player_info);
+                    };
+
+                    Game* g = start_game(
+                        GraphicalInfo{f3D, fGUI, win, guir, (size_t)gwidth, (size_t)gheight}, lr,
+                        StartGameInfo{mapFile, pi.inputFile}, confdata, createNormalSession_fn);
+
+                    if (g) {
+                        lr.load([&]() { return g->runLoop(); });
+                        run_game_loop(lr, frames);
+                    }
+
+                    if (g) delete g;
+
+                    delete win;
+                    delete f3D;
+                    delete fGUI;
+                    fmt::print("\nExited. ({:d} frames)\n", frames);
+
+                } else if (pi.serverAddress) {
+                    std::string addr = *pi.serverAddress;
+
+                    if (addr.find_first_of(':') == std::string::npos) {
+                        addr += ":8100";
+                    }
+
+                    fmt::print("Connecting to {}\n", addr);
+                    start_networked_game_cmdline(
+                        GraphicalInfo{f3D, fGUI, win, guir, (size_t)gwidth, (size_t)gheight}, addr,
+                        confdata);
+                } else {
+                    std::exit(show_starting_menu(
+                        pi, GraphicalInfo{f3D, fGUI, win, guir, (size_t)gwidth, (size_t)gheight},
+                        lr, confdata));
+                }
+
+            } catch (shader_exception& se) {
+                log->write("init", LogType::Fatal, "Shader error: {}", se.what());
+
+                if (win) {
+                    std::string content = fmt::format(
+                        "Shader {} could not be compiled\n"
+                        "\n"
+                        "Error: {}",
+                        se.file, se.what());
+                    win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
+                }
+
+                exit(EXIT_FAILURE);
+            } catch (graphical_exception& we) {
+                log->write("init", LogType::Fatal, "Window creation error: {}", we.what());
+
+                if (win) {
+                    std::string content = fmt::format("Graphical error: {}\n", we.what());
+                    win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
+                }
+
+                exit(EXIT_FAILURE);
+            } catch (logic_exception& le) {
+                log->write("init", LogType::Fatal, "Logic exception: {}", le.what());
+
+                if (win) {
+                    std::string content = fmt::format(
+                        "An error happened in the simulation part of the game:\n"
+                        "\n"
+                        "Error: {}",
+                        le.what());
+                    win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
+                }
+
+                exit(EXIT_FAILURE);
+            } catch (net_exception& le) {
+                log->write("init", LogType::Fatal, "Network exception: {}", le.what());
+
+                if (win) {
+                    std::string content = fmt::format(
+                        "A network-related fatal error happened:\n"
+                        "\n"
+                        "Error: {}",
+                        le.what());
+                    win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
+                }
+
+                exit(EXIT_FAILURE);
+            } catch (std::bad_alloc& be) {
+                log->write("init", LogType::Fatal, "Allocation error: {}", be.what());
+
+                log->write("init", LogType::Fatal, "Probably out of memory");
+
+                if (win) {
+                    std::string content =
+                        fmt::format("Insufficient memory\n\nError: {:s}", be.what());
+                    win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
+                }
+
+                exit(EXIT_FAILURE);
             }
 
-            if (!defaultdev) {
-                log->write(
-                    "main", LogType::Warning,
-                    "no default device available, choosing the first one");
-                defaultdev = std::move(devs[0]);
-            }
-            GFXService::setDevice(std::move(defaultdev));
-        }
-
-        auto& device = GFXService::getDevice();
-
-        auto ipr = std::make_unique<InputProcessor>();
-        InputService::setInputManager(std::make_unique<InputManager>(*ipr.get()));
-        InputService::setCommandTable(std::make_unique<CommandTable>());
-
-        {
-            auto& ct = input::InputService::getCommandTable();
-            ct->loadConfiguration({
-                {"<up>", "CameraMove, up"},
-                {"<down>", "CameraMove, down"},
-                {"<right>", "CameraMove, right"},
-                {"<left>", "CameraMove, left"},
-                {"+", "CameraZoom, in"},
-                {"-", "CameraZoom, out"},
-                {"<kp-add>", "CameraZoom, in"},
-                {"<kp-subtract>", "CameraZoom, out"},
-                {"c", "DebugCreateEntity, tower"},
-                {"e", "DebugCreateEntity, tent"},
-                {"r", "DebugDestroyEntity"},
-                {"b", "DebugShowBoundingBox"},
-            });
-        }
-
-        auto& ima = InputService::getInputManager();
-
-        GFXService::createTextureManager(
-            std::make_unique<TextureManager>(device->createTextureEnv()));
-
-        //        InputManager::GetInstance()->Initialize();
-        win = device->createWindow(pi.width, pi.height);
-
-        win->show();
-        // enable_gl_debug();
-
-        if (!init_network()) {
-            throw net_exception("Could not initialize network");
-        }
-
-        log->write("", LogType::Info, "Device name: {}", device->getName().data());
-        log->write("", LogType::Info, "Device vendor: {} ", device->getVendor().data());
-
-        int fwidth, fheight;
-        int gwidth, gheight;
-        win->getFramebufferSize(fwidth, fheight);
-        win->getFramebufferSize(gwidth, gheight);
-
-        Framebuffer* f3D  = GFXService::getDevice()->createFramebuffer("f3D", fwidth, fheight);
-        Framebuffer* fGUI = GFXService::getDevice()->createFramebuffer("fGUI", gwidth, gheight);
-        win->setFramebuffers(f3D, fGUI);
-
-        auto theme = std::make_unique<GUITheme>();
-        theme->loadFile(ASSET_FILE_DIR "theme.yml");
-
-        guir        = new GUIManager(win->createGUIRenderer());
-        guir->theme = std::move(theme);
-        guir->onResize(gwidth, gheight);
-
-        auto& texman = GFXService::getTextureManager();
-
-        /* If we have a networked game ready, don't even show the main menu. */
-        auto [texw, texh] = texman->getTextureMaxSize();
-        log->write("texture", LogType::Info, "maximum tex size: {} x {}", texw, texh);
-
-        if (pi.mapFile || pi.inputFile) {
-            int frames = 0;
-
-            std::string mapFile = pi.inputFile ? "" : *pi.mapFile;
-
-            auto createNormalSession_fn = [](logic::Terrain& map, auto& local_player_info) {
-                /// running a normal game
-                return initSinglePlayerSession(map, local_player_info);
-            };
-
-            Game* g = start_game(
-                GraphicalInfo{f3D, fGUI, win, guir, (size_t)gwidth, (size_t)gheight}, lr,
-                StartGameInfo{mapFile, pi.inputFile}, confdata, createNormalSession_fn);
-
-            if (g) {
-                lr.load([&]() { return g->runLoop(); });
-                run_game_loop(lr, frames);
-            }
-
-            if (g) delete g;
-
-            delete win;
-            delete f3D;
-            delete fGUI;
-            fmt::print("\nExited. ({:d} frames)\n", frames);
-
-        } else if (pi.serverAddress) {
-            std::string addr = *pi.serverAddress;
-
-            if (addr.find_first_of(':') == std::string::npos) {
-                addr += ":8100";
-            }
-
-            fmt::print("Connecting to {}\n", addr);
-            start_networked_game_cmdline(
-                GraphicalInfo{f3D, fGUI, win, guir, (size_t)gwidth, (size_t)gheight}, addr,
-                confdata);
-        } else {
-            return show_starting_menu(
-                pi, GraphicalInfo{f3D, fGUI, win, guir, (size_t)gwidth, (size_t)gheight}, lr,
-                confdata);
-        }
-
-    } catch (shader_exception& se) {
-        log->write("init", LogType::Fatal, "Shader error: {}", se.what());
-
-        if (win) {
-            std::string content = fmt::format(
-                "Shader {} could not be compiled\n"
-                "\n"
-                "Error: {}",
-                se.file, se.what());
-            win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
-        }
-
-        exit(EXIT_FAILURE);
-    } catch (graphical_exception& we) {
-        log->write("init", LogType::Fatal, "Window creation error: {}", we.what());
-
-        if (win) {
-            std::string content = fmt::format("Graphical error: {}\n", we.what());
-            win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
-        }
-
-        exit(EXIT_FAILURE);
-    } catch (logic_exception& le) {
-        log->write("init", LogType::Fatal, "Logic exception: {}", le.what());
-
-        if (win) {
-            std::string content = fmt::format(
-                "An error happened in the simulation part of the game:\n"
-                "\n"
-                "Error: {}",
-                le.what());
-            win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
-        }
-
-        exit(EXIT_FAILURE);
-    } catch (net_exception& le) {
-        log->write("init", LogType::Fatal, "Network exception: {}", le.what());
-
-        if (win) {
-            std::string content = fmt::format(
-                "A network-related fatal error happened:\n"
-                "\n"
-                "Error: {}",
-                le.what());
-            win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
-        }
-
-        exit(EXIT_FAILURE);
-    } catch (std::bad_alloc& be) {
-        log->write("init", LogType::Fatal, "Allocation error: {}", be.what());
-
-        log->write("init", LogType::Fatal, "Probably out of memory");
-
-        if (win) {
-            std::string content = fmt::format("Insufficient memory\n\nError: {:s}", be.what());
-            win->showMessageBox("Familyline Error", SysMessageBoxFlags::Error, content);
-        }
-
-        exit(EXIT_FAILURE);
-    }
-
-    end_network();
+            end_network();
+        },
+        &pi);
 }
 
 static int show_starting_menu(
@@ -1032,27 +1042,36 @@ static int show_starting_menu(
 
     auto sf = ServerFinder();
 
+    GUIScriptRunner gsr(ginfo.guir);
+    gsr.load(SCRIPTS_DIR "gui/gui-prelude.scm");
+    gsr.load(SCRIPTS_DIR "gui/gui.scm");
+
     auto& log = LoggerService::getLogger();
-    Game* g   = nullptr;
-    auto& ima = InputService::getInputManager();
+    Game* g       = nullptr;
+    auto& ima     = InputService::getInputManager();
     /* Render the menu */
     bool r = true;
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
     GUIWindow& background = ginfo.guir->createWindow<FlexLayout<false>>("bg");
-    GUIWindow& w          = ginfo.guir->createWindow<FlexLayout<false>>("menu");
+    GUIWindow* w          = ginfo.guir->getWindow("menu");
+
+    if (!w) {
+        throw std::runtime_error("No valid menu window in script");
+    }
 
     CServer cserv{};
 
     // TODO: Autoresize this when autoresizing the gui manager
-    w.onResize(ginfo.gwidth - 2, ginfo.gheight - 2, 1, 1);
+    w->onResize(ginfo.gwidth - 2, ginfo.gheight - 2, 1, 1);
     background.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
 
     ginfo.guir->showWindow(background);
-    ginfo.guir->showWindow(w);
+    ginfo.guir->showWindow(*w);
 
-    ginfo.guir->moveWindowToTop(w);
+    ginfo.guir->moveWindowToTop(*w);
 
+#if 0
     GUILabel& l = (GUILabel&)w.box().add(ginfo.guir->createControl<GUILabel>("FAMILYLINE"));
     {
         auto a                = l.appearance();
@@ -1331,6 +1350,7 @@ static int show_starting_menu(
     buttonAppearances(bmplayer);
     buttonAppearances(bsettings);
     buttonAppearances(bnew);
+#endif
 
     auto& texman            = GFXService::getTextureManager();
     TextureHandle th        = *texman->loadTexture(ICONS_DIR "/familyline-logo.png");

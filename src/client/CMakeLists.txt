@@ -33,6 +33,7 @@ add_library(
   "graphical/gui/gui_listbox.cpp"
   "graphical/gui/gui_textbox.cpp"
   "graphical/gui/gui_manager.cpp"
+  "graphical/gui/gui_script_runner.cpp"
   "graphical/gui/gui_window.cpp"
   "graphical/material.cpp"
   "graphical/material_manager.cpp"

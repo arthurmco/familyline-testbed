@@ -47,6 +47,7 @@ endfunction()
 # Copy the asset folders to the required folder when building.
 function(copy_files_to_build directory)
   file(COPY "${CMAKE_SOURCE_DIR}/shaders" DESTINATION "${directory}")
+  file(COPY "${CMAKE_SOURCE_DIR}/scripts" DESTINATION "${directory}")
   file(COPY "${CMAKE_SOURCE_DIR}/icons" DESTINATION "${directory}")
   file(COPY "${CMAKE_SOURCE_DIR}/materials" DESTINATION "${directory}")
   file(COPY "${CMAKE_SOURCE_DIR}/models" DESTINATION "${directory}")

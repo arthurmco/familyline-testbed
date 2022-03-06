@@ -5,6 +5,7 @@
 #include <client/graphical/gui/gui_renderer.hpp>
 #include <client/graphical/gui/theme.hpp>
 #include <client/input/input_service.hpp>
+#include <common/logic/script_environment.hpp>
 #include <concepts>
 #include <functional>
 #include <memory>
@@ -16,6 +17,8 @@
 
 namespace familyline::graphics::gui
 {
+class GUIScriptRunner;
+    
 /**
  * GUIManager
  *
@@ -277,4 +280,45 @@ private:
     void registerEvent(FGUIEventCallback handler, int control_id);
 };
 
+
+class GUIScriptRunner
+{
+public:
+    GUIScriptRunner(GUIManager* manager);
+
+    void load(std::string file);
+
+    /**
+     * An enumerator for telling the possible layout options for
+     * a GUIBox, since we cannot decide template types at runtime.
+     */
+    enum SchemeLayout { FlexVertical, FlexHorizontal, Unknown };
+
+    static SchemeLayout getLayoutFromScheme(SCM layout);
+
+    static std::optional<std::string> getWindowNameFromScript(SCM window);
+    static std::optional<std::string> getControlNameFromScript(SCM control);
+
+    /**
+     * Create a control representation to be sent to the script
+     *
+     * If you already know the type, to speed things up, you can
+     * inform it in the `type` variable
+     */
+    static SCM createControlToScript(std::string name, const GUIControl& control,
+                                     std::string type = "");
+
+    /**
+     * Get a color value from its scheme counterpart, a scheme vector of values
+     * this is documentation about vectors:
+     *  <https://www.gnu.org/software/guile/manual/html_node/Vectors.html>
+     */
+    static std::array<double, 4> getColorFromScript(SCM color);
+    
+private:
+    familyline::logic::ScriptEnvironment env_;
+};
+
+
+    
 }  // namespace familyline::graphics::gui
