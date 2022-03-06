@@ -3,6 +3,9 @@
 include("${CMAKE_SOURCE_DIR}/cmake/functions.cmake")
 
 include("${CMAKE_SOURCE_DIR}/src/common/generated.cmake")
+
+include(FetchContent)
+
 get_target_property(INPUT_FLATBUFFER_INCLUDE input-flatbuffer GENERATED_INCLUDES_DIR)
 get_target_property(INPUT_FLATBUFFER_INCLUDE input-ser-flatbuffer GENERATED_INCLUDES_DIR)
 get_target_property(INPUT_FLATBUFFER_INCLUDE network-flatbuffer GENERATED_INCLUDES_DIR)
@@ -55,13 +58,34 @@ find_package(SDL2 CONFIG)
 find_package(range-v3 CONFIG)
 find_package(glm CONFIG)
 
-if (FLINE_USE_VCPKG)
+message("${CMAKE_CURRENT_BINARY_DIR}")
+
+if (FLINE_USE_VCPKG)	
   include(${CMAKE_TOOLCHAIN_FILE})
 
   if (FLINE_NET_SUPPORT)
   find_package(unofficial-curlpp CONFIG REQUIRED)
   target_link_libraries(familyline-common PUBLIC unofficial::curlpp::curlpp)
   endif()
+
+  message("GNU Guile is not present on vcpkg and, currently, we have no way of integrating it...")
+
+  message("Downloading a prebuilt GNU Guile (this may not work)")
+  FetchContent_Declare(
+    guile
+    URL "https://downloads.sourceforge.net/project/ezwinports/guile-2.0.11-2-w32-bin.zip"
+    URL_HASH "SHA256=01c231826e01f640b01516657b133c84075d3e0316fba46a15d5bd97de166d0e"
+    SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/bin/guile"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    )
+  FetchContent_MakeAvailable(guile)
+
+  target_include_directories(familyline-common PUBLIC
+    "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/include/guile/2.0")
+  target_link_libraries(familyline-common PUBLIC fmt::fmt glm::glm
+    "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/lib/libguile-2.0.la")
 
   target_include_directories(familyline-common PUBLIC
     ${YAML_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR}
@@ -79,14 +103,17 @@ else()
   target_include_directories(familyline-common PUBLIC ${CURLPP_INCLUDE_DIRS})
   endif()
   pkg_search_module(ZLIB REQUIRED zlib)
+  pkg_search_module(guile REQUIRED guile-2.2)
 
   target_link_libraries(familyline-common PUBLIC ${glm_LIBRARY})
-
-  target_link_libraries(familyline-common PUBLIC fmt::fmt ${ZLIB_LIBRARIES})
+  target_link_libraries(familyline-common PUBLIC fmt::fmt glm::glm ${ZLIB_LIBRARIES})
+  
   target_link_libraries(familyline-common PUBLIC tl::expected range-v3::range-v3)
+  target_link_libraries(familyline-common PUBLIC ${CURLPP_LDFLAGS} ${guile_LDFLAGS})
   target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
-  target_include_directories(familyline-common PUBLIC
-    ${ZLIB_INCLUDE_DIR} ${INPUT_FLATBUFFER_INCLUDE} ${SDL2_INCLUDE_DIRS})
+  target_include_directories(familyline-common PUBLIC ${ZLIB_INCLUDE_DIR}
+    ${INPUT_FLATBUFFER_INCLUDE} ${CURLPP_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS}
+    ${guile_INCLUDE_DIRS})
 endif(FLINE_USE_VCPKG)
 
 add_sanitizers(familyline-common)
