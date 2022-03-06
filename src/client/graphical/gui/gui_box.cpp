@@ -162,7 +162,9 @@ void GUIBox::onDestroyChild(unsigned long id)
             this->forwardDestroyToChildBox(id, *box);
         }
 
-        if (focused_index_ >= 0 && id == (*(controls_.begin() + focused_index_))->id()) {
+        if (focused_index_ >= controls_.size()) {
+            focused_index_ = -1;
+        } else if (focused_index_ >= 0 && id == (*(controls_.begin() + focused_index_))->id()) {
             focused_index_ = -1;
         }
 

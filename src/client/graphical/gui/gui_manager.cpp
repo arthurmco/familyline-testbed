@@ -64,8 +64,12 @@ void GUIManager::destroyWindow(std::string name)
         windows_.begin(), windows_.end(), [&](const WindowInfo &wi) { return wi.name == name; });
 
     if (window != windows_.end() && window->window) {
-        for (GUIControl *control : window->window->box()) {
-            window->window->box().onDestroyChild(control->id());
+        auto ids = std::vector<int>();
+        std::transform(window->window->box().begin(), window->window->box().end(), 
+            std::back_inserter(ids), [](GUIControl* c) { return c->id(); });
+
+        for (auto id : ids) {
+            window->window->box().onDestroyChild(id);
         }
     }
 
