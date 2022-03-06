@@ -72,7 +72,8 @@ if (FLINE_USE_VCPKG)
   message("GNU Guile is not present on vcpkg and, currently, we have no way of integrating it...")
 
   message("Downloading a prebuilt GNU Guile (this may not work)")
-  find_package(gmp CONFIG)
+  FindPkgConfig()
+  pkg_search_module(gmp REQUIRED gmp)
   FetchContent_Declare(
     guile
     URL "https://downloads.sourceforge.net/project/ezwinports/guile-2.0.11-2-w32-bin.zip"
@@ -84,9 +85,9 @@ if (FLINE_USE_VCPKG)
     )
   FetchContent_MakeAvailable(guile)
 
-  target_include_directories(familyline-common PUBLIC
+  target_include_directories(familyline-common PUBLIC ${gmp_INCLUDE_DIRS}
     "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/include/guile/2.0")
-  target_link_libraries(familyline-common PUBLIC gmp::gmp
+  target_link_libraries(familyline-common PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/lib/libguile-2.0.dll.a")
 
   target_include_directories(familyline-common PUBLIC
