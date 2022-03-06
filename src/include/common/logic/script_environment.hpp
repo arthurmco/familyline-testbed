@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <unordered_map>
+#include <functional>
 
 namespace familyline::logic
 {
@@ -41,6 +43,8 @@ public:
         EnvironmentInfo e;
         e.env = this;
         environments.push_back(e);
+
+        scm_c_define_gsubr("call-public", 1, 1, 0, (void*)&ScriptEnvironment::callPublicFunctionOnEnv);
     }
 
     ~ScriptEnvironment() { puts("TODO: delete the environment from environments list"); }
@@ -63,6 +67,7 @@ public:
         unsigned int ecanary[6] = {0x20434e50, 0x71206564, 0x206d6575, 0x6c206174, 0x6f646e65, 0x0};
     };
 
+    
     /**
      * This is a little quirk to support embedded scheme with global state,
      * such as guile, with our local scheme state.
@@ -93,6 +98,32 @@ public:
         scm_c_define_gsubr(name.c_str(), params, 0, 0, (void*)fptr);
     }
 
+
+    /**
+     * Register a public function
+     *
+     * The difference between a native and a public function is that
+     * the public function can be any callable. This may cause things
+     * to go a bit slow on the translation, because GNU Guile only allow
+     * us to call functions, not any callable, such as functors and lambdas.
+     *
+     * The same rules apply however, and you will need to convert them
+     * arguments, too.
+     *
+     * Also, the public function only receives one argument.
+     */
+    void registerPublicFunction(std::string name, std::function<SCM(SCM)> fun)
+    {
+        public_fns_[name] = fun;
+    }
+
+    SCM callPublicFunction(std::string name, SCM param) {
+        if (!public_fns_.contains(name))
+            return SCM_BOOL_F;
+
+        return public_fns_[name](param);
+    }
+    
     /**
      * Execute a certain script file
      */
@@ -128,6 +159,8 @@ public:
         return v->env->template get_value<T>();
     }
 
+    static SCM callPublicFunctionOnEnv(SCM functionName, SCM param);
+    
     /**
      * Convert an scheme atom to a concrete type (that you specify)
      *
@@ -139,6 +172,8 @@ public:
 private:
     std::any globalv_;
     SCM global_scm_t_;
+
+    std::unordered_map<std::string, std::function<SCM(SCM)>> public_fns_;
 };  // namespace familyline::logic
 
 }  // namespace familyline::logic

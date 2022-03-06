@@ -44,3 +44,41 @@ void ScriptEnvironment::runScript(std::string path)
 }
 
 
+
+/**
+ * Call a public function
+ *
+ * On Scheme, you call this function like this:
+ *  (call-public 'function-name param)
+ */
+SCM ScriptEnvironment::callPublicFunctionOnEnv(SCM functionName, SCM param)
+{
+    auto &log  = familyline::LoggerService::getLogger();
+
+    auto fnName = ScriptEnvironment::convertTypeFrom<std::string>(scm_symbol_to_string(functionName));
+    if (!fnName) {
+        log->write("script-environment", LogType::Error,
+                   "invalid type for function-name");
+        return SCM_BOOL_F;
+    }
+
+    SCM current_global           = scm_c_eval_string("current-global-env");
+    uintptr_t current_global_ptr = scm_to_uintptr_t(current_global);
+
+    auto v = std::find_if(
+        ScriptEnvironment::environments.begin(), ScriptEnvironment::environments.end(),
+        [&](auto& v) {
+            if (v.bcanary[0] == 0x72637345 && ((uintptr_t)v.env) == current_global_ptr &&
+                v.ecanary[0] == 0x20434e50 && v.ecanary[5] == 0x0) {
+                return true;
+            }
+
+            return false;
+        });
+
+    if (v == ScriptEnvironment::environments.end()) {
+        throw std::runtime_error("Invalid script environment!");
+    }
+
+    return v->env->callPublicFunction(*fnName, param);
+}

@@ -1044,13 +1044,44 @@ static int show_starting_menu(
 
     GUIScriptRunner gsr(ginfo.guir);
     gsr.load(SCRIPTS_DIR "gui/gui-prelude.scm");
-    gsr.load(SCRIPTS_DIR "gui/gui.scm");
 
-    auto& log = LoggerService::getLogger();
     Game* g       = nullptr;
     auto& ima     = InputService::getInputManager();
     /* Render the menu */
     bool r = true;
+
+    gsr.registerPublicFunction(
+        "start-game",
+        [&](SCM args) -> SCM {
+            if (async_test.joinable()) {
+                if (!aexit) {
+                    aexit = true;
+                    async_test.join();
+                }
+            }
+
+            ginfo.guir->destroyWindow("bg");
+            ginfo.guir->destroyWindow("menu");
+
+            auto createNormalSession_fn = [](logic::Terrain& map, auto& local_player_info) {
+                /// running a normal game
+                return initSinglePlayerSession(map, local_player_info);
+            };
+
+            g = start_game(
+                ginfo, lr, StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt},
+                confdata, createNormalSession_fn);
+
+            if (g) {
+                lr.load([&]() { return g->runLoop(); });
+            }
+
+            return SCM_BOOL_T;
+        });
+    
+    gsr.load(SCRIPTS_DIR "gui/gui.scm");
+    
+    auto& log = LoggerService::getLogger();
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
     GUIWindow& background = ginfo.guir->createWindow<FlexLayout<false>>("bg");
@@ -1100,29 +1131,6 @@ static int show_starting_menu(
 
     GUIButton& bnew =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("New Game", [&](auto c) {
-            (void)c;
-            if (async_test.joinable()) {
-                if (!aexit) {
-                    aexit = true;
-                    async_test.join();
-                }
-            }
-
-            ginfo.guir->destroyWindow("bg");
-            ginfo.guir->destroyWindow("menu");
-
-            auto createNormalSession_fn = [](logic::Terrain& map, auto& local_player_info) {
-                /// running a normal game
-                return initSinglePlayerSession(map, local_player_info);
-            };
-
-            g = start_game(
-                ginfo, lr, StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt},
-                confdata, createNormalSession_fn);
-
-            if (g) {
-                lr.load([&]() { return g->runLoop(); });
-            }
         }));
     GUIButton& bsettings =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Settings", [&](auto c) {

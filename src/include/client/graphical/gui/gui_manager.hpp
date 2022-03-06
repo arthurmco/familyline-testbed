@@ -314,7 +314,13 @@ public:
      *  <https://www.gnu.org/software/guile/manual/html_node/Vectors.html>
      */
     static std::array<double, 4> getColorFromScript(SCM color);
-    
+
+    void registerPublicFunction(std::string name, std::function<SCM(SCM)> fun)
+        {
+            env_.registerPublicFunction(name, fun);
+
+        }
+
 private:
     familyline::logic::ScriptEnvironment env_;
 };

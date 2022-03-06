@@ -30,7 +30,13 @@
                                                             '((background . #(1 0 0 1))
                                                               (foreground . #(0 1 1 1))))
                                          (control-set b 'text "Vc clicou no butão")
-                                         )))))
+                                         ))
+                       (control-create "start"
+                                       type: 'button
+                                       text: "Start Game"
+                                       click-handler:
+                                       (lambda (b)
+                                         (call-public 'start-game))))))
 
 
 
