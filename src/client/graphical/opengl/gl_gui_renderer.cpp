@@ -84,7 +84,7 @@ PangoLayout* getLayoutFromText(
     cairo_t* ctxt, const std::string& text, const GUIAppearance& appearance, bool markup)
 {
     PangoFontDescription* font_description = pango_font_description_new();
-    pango_font_description_set_family(font_description, text.c_str());
+    pango_font_description_set_family(font_description, appearance.font.c_str());
     pango_font_description_set_absolute_size(font_description, appearance.fontsize * PANGO_SCALE);
 
     PangoWeight weight;
