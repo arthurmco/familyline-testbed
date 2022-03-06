@@ -26,7 +26,14 @@ bool GLTextureEnvironment::initialize()
     if ((initflags & flags) != flags) {
         log->write(
             "gl-texture-env", LogType::Error,
-            "Not all texture formats were supported ({:08x} != {:08x})\n", flags, initflags);
+            "Not all texture formats were supported by the image parser ({:08x} != {:08x})", flags, initflags);
+        log->write(
+            "gl-texture-env", LogType::Error,
+            "\tnot supported:{}{}{}", 
+                initflags & IMG_INIT_JPG ? "" : " JPEG",
+                initflags & IMG_INIT_PNG ? "" : " PNG",
+                initflags & IMG_INIT_TIF ? "" : " TIF"
+            );
         return false;
     }
 
