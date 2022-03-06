@@ -122,7 +122,9 @@ void drawText(
     width /= PANGO_SCALE;
     height /= PANGO_SCALE;
 
-    int startx = 0, starty = offy + appearance.paddingY;
+    pango_layout_set_width(layout, w * PANGO_SCALE);
+
+    int startx = 0, starty = offy + appearance.paddingY;    
     switch (appearance.horizontalAlignment) {
         case HorizontalAlignment::Left: startx = offx + appearance.paddingX; break;
         case HorizontalAlignment::Center:

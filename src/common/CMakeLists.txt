@@ -85,7 +85,7 @@ if (FLINE_USE_VCPKG)
   target_include_directories(familyline-common PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/include/guile/2.0")
   target_link_libraries(familyline-common PUBLIC fmt::fmt glm::glm
-    "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/lib/libguile-2.0.la")
+    "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/lib/libguile-2.0.dll.a")
 
   target_include_directories(familyline-common PUBLIC
     ${YAML_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR}
