@@ -45,6 +45,8 @@
                          text
                          ;; box
                          layout children
+                         ;; checkbox
+                         active
                          ;; button
                          click-handler)
   "Create a control"
@@ -55,6 +57,7 @@
                   [(eq? type 'label) (control-create-label name text)]
                   [(eq? type 'button) (control-create-button name text click-handler)]
                   [(eq? type 'textbox) (control-create-textbox name text)]
+                  [(eq? type 'checkbox) (control-create-checkbox name active)]
                   [else (error "Invalid control type " type)])))
     (when (list? appearance)
       (set-appearance-of control appearance))

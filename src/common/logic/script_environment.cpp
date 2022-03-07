@@ -31,6 +31,13 @@ std::optional<std::string> ScriptEnvironment::convertTypeFrom(SCM value) {
     return scm_is_string(value) ? std::make_optional(scm_to_locale_string(value)) : std::nullopt ;
 }
 
+template <>
+std::optional<bool> ScriptEnvironment::convertTypeFrom(SCM value) {    
+    return scm_is_bool(value) == 1 ?
+        std::make_optional(scm_to_bool(value) == 1) :
+        std::nullopt ;
+}
+
 /**
  * Execute a certain script file
  */

@@ -32,7 +32,26 @@
                                 appearance: button-appearance
                                 text: "Multiplayer"
                                 click-handler:
-                                (lambda (b) #f))
+                                (lambda (b)
+                                  (let ((wmultiplayer
+                                         (window-create
+                                          "multiplayer"
+                                          (use-layout 'flex 'vertical)
+                                          (list
+                                           (control-create "stitle"
+                                                           type: 'label
+                                                           appearance: '((max-height . 35)
+                                                                         (background . #(0 0 0 1))
+                                                                         (font-size . 20))
+                                                           text:  "Multiplayer")
+                                           (control-create "btnBack"
+                                                           type: 'button
+                                                           text: "Back"
+                                                           click-handler:
+                                                           (lambda (b)
+                                                             (window-destroy "multiplayer")
+                                                             (window-move-to-top "menu")))))))
+                                  (window-show wmultiplayer))))
                 (control-create
                  "btnSettings"
                  type: 'button
@@ -60,11 +79,22 @@
                                 type: 'textbox
                                 appearance: '((max-height . 35))
                                 text:  "Arthur")
-                            (control-create "lblEnableRecord"
-                                type: 'label
-                                appearance: '((max-height . 35)
-                                              (background . #(0 0 0 1)))
-                                text:  "Enable input recording")                            
+                            (control-create
+                             ""
+                             type: 'box
+                             appearance: '((max-height . 35))
+                             layout: (use-layout 'flex 'horizontal)
+                             children: (list
+                                        (control-create
+                                         "chkEnableRecord"
+                                         type: 'checkbox
+                                         appearance: '((background . #(0 0 0 1)))
+                                         active: #t)
+                                        (control-create
+                                         "lblEnableRecord"
+                                         type: 'label
+                                         appearance: '((background . #(0 0 0 1)))
+                                         text:  "Enable input recording")))
                             (control-create "btnBack"
                                             type: 'button
                                             text: "Back"

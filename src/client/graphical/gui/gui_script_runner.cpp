@@ -386,6 +386,38 @@ SCM control_create_textbox(SCM name, SCM text)
 }
 
 /**
+ * Creates a checkbox
+ *
+ * (control-create-checkbox name active)
+ *
+ * - name: the checkbox name
+ * - active: #t if the checkbox is checked, #f if it is not
+ */
+SCM control_create_checkbox(SCM name, SCM active)
+{
+    auto &log  = familyline::LoggerService::getLogger();
+    auto sname = ScriptEnvironment::convertTypeFrom<std::string>(name);
+    if (!sname) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-create-checkbox: incorrect type for 'name': {}", name);
+        return SCM_BOOL_F;
+    }
+
+    auto bactive = ScriptEnvironment::convertTypeFrom<bool>(active);
+    if (!bactive) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-create-checkbox: incorrect type for 'active': {}", active);
+        return SCM_BOOL_F;
+    }
+
+    auto gm    = ScriptEnvironment::getGlobalEnv<GUIManager *>();
+    auto checkbox = gm->createNamedControl<GUICheckbox>(*sname, *bactive);
+    return GUIScriptRunner::createControlToScript(*sname, *checkbox, "checkbox");
+}
+
+/**
  * Creates a button
  *
  * (control-create-button name text click_handler)
@@ -600,6 +632,7 @@ GUIScriptRunner::GUIScriptRunner(GUIManager *manager)
     env_.registerFunction("control-create-label", control_create_label);
     env_.registerFunction("control-create-button", control_create_button);
     env_.registerFunction("control-create-textbox", control_create_textbox);
+    env_.registerFunction("control-create-checkbox", control_create_checkbox);
 
     env_.registerFunction("control-get", control_get);
 
