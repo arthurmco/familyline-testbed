@@ -56,6 +56,10 @@
                                 appearance: '((max-height . 35)
                                               (background . #(0 0 0 1)))
                                 text:  "Player name")
+                            (control-create "txtName"
+                                type: 'textbox
+                                appearance: '((max-height . 35))
+                                text:  "Arthur")
                             (control-create "lblEnableRecord"
                                 type: 'label
                                 appearance: '((max-height . 35)

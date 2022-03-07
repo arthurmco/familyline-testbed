@@ -11,9 +11,9 @@
 ; (use-modules (srfi srfi-89)) ; keyword and optional args
 
 (define (use-layout type param)
-  "Create a representation of a layout.
-   (Because the layouts are templated, we cannot instantiate them here, so, FOR NOW, we
-    will create an ephemeral object and pass there"
+  "Create a representation of a layout."
+  "(Because the layouts are templated, we cannot instantiate them here, so, FOR NOW, we"
+  "will create an ephemeral object and pass there"
   (cons type param))
 
 
@@ -47,13 +47,14 @@
                          layout children
                          ;; button
                          click-handler)
-  "Create a control
-   Depending on the control type, forward the function to the specific C++ control
-   creation function"
+  "Create a control"
+  "Depending on the control type, forward the function to the specific C++ control"
+  "creation function"
   (let ((control (cond
                   [(eq? type 'box) (control-create-box name layout children)]
                   [(eq? type 'label) (control-create-label name text)]
                   [(eq? type 'button) (control-create-button name text click-handler)]
+                  [(eq? type 'textbox) (control-create-textbox name text)]
                   [else (error "Invalid control type " type)])))
     (when (list? appearance)
       (set-appearance-of control appearance))

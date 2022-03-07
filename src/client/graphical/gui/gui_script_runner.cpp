@@ -354,6 +354,38 @@ SCM control_create_label(SCM name, SCM text)
 }
 
 /**
+ * Creates a textbox
+ *
+ * (control-create-textbox name text)
+ *
+ * - name is the textbox name
+ * - text is the textbox text
+ */
+SCM control_create_textbox(SCM name, SCM text)
+{
+    auto &log  = familyline::LoggerService::getLogger();
+    auto sname = ScriptEnvironment::convertTypeFrom<std::string>(name);
+    if (!sname) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-create-textbox: incorrect type for 'name': {}", name);
+        return SCM_BOOL_F;
+    }
+
+    auto stext = ScriptEnvironment::convertTypeFrom<std::string>(text);
+    if (!stext) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-create-textbox: incorrect type for 'text': {}", text);
+        return SCM_BOOL_F;
+    }
+
+    auto gm    = ScriptEnvironment::getGlobalEnv<GUIManager *>();
+    auto textbox = gm->createNamedControl<GUITextbox>(*sname, *stext);
+    return GUIScriptRunner::createControlToScript(*sname, *textbox, "textbox");
+}
+
+/**
  * Creates a button
  *
  * (control-create-button name text click_handler)
@@ -567,6 +599,7 @@ GUIScriptRunner::GUIScriptRunner(GUIManager *manager)
     env_.registerFunction("control-create-box", control_create_box);
     env_.registerFunction("control-create-label", control_create_label);
     env_.registerFunction("control-create-button", control_create_button);
+    env_.registerFunction("control-create-textbox", control_create_textbox);
 
     env_.registerFunction("control-get", control_get);
 
