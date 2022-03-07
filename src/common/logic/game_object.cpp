@@ -60,6 +60,7 @@ std::shared_ptr<GameObject> GameObject::create()
  */
 object_checksum_t GameObject::getChecksum() const
 {
+    auto numlocale = std::setlocale(LC_ALL, "C");
     char vatk[192] = {};
     if (this->cAttack) {
         auto& attr = this->cAttack->attributes();
@@ -78,6 +79,7 @@ object_checksum_t GameObject::getChecksum() const
 
     object_checksum_t vchecksum = {};
     snprintf((char*)vchecksum.data(), 255, "%s;%s;%s", this->getType().c_str(), vatk, vmov);
+    std::setlocale(LC_ALL, numlocale);
 
     return vchecksum;
 }

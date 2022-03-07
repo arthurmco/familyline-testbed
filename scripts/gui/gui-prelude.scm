@@ -19,13 +19,9 @@
 
 (define* (window-create name layout #:optional children)
   "Create a window on the current GUI manager for this context."
-  (display "window")
-  (display name)
-  (display layout)
   (let ((w (current-manager-add-window name layout)))
     (when (list? children)
       (newline)
-      (display "hi")
       (map (lambda (c) (window-add-control w c)) children)
       (map display children))
     w))

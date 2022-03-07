@@ -154,7 +154,7 @@ bool verifyChecksum(FILE* f)
 
     unsigned long crc = crc32(0L, Z_NULL, 0);
     crc               = crc32(crc, (const unsigned char*)filedata, reallen);
-
+    
     delete[] filedata;
 
     uint32_t file_crc = 0;
@@ -289,7 +289,7 @@ bool InputReproducer::verifyObjectChecksums(ObjectFactory* const of)
         if (checksumlist[stype] != checksum) {
             log->write(
                 "input-reproducer", LogType::Error,
-                "input file %s has a different checksum of entity type '{}'", file_.data(),
+                "input file {} has a different checksum of entity type '{}'", file_.data(),
                 stype.c_str());
             return false;
         }

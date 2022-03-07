@@ -41,6 +41,8 @@ set( SRC_TEST_FILES
   "${CMAKE_SOURCE_DIR}/test/test_pathmanager.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_player_manager.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_scene_manager.cpp"
+  "${CMAKE_SOURCE_DIR}/test/test_script_interpreter.cpp"
+  "${CMAKE_SOURCE_DIR}/test/test_gui_script.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_texture_manager.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_terrain.cpp"
   "${CMAKE_SOURCE_DIR}/test/test_gui_base.cpp"

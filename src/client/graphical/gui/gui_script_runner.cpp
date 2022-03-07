@@ -3,6 +3,7 @@
 #include <optional>
 #include <range/v3/all.hpp>
 
+#include <config.h>
 #include "libguile/strings.h"
 
 using namespace familyline::graphics::gui;
@@ -80,6 +81,14 @@ std::optional<std::string> GUIScriptRunner::getWindowNameFromScript(SCM window)
  */
 std::optional<std::string> GUIScriptRunner::getControlNameFromScript(SCM control)
 {
+    auto &log = familyline::LoggerService::getLogger();
+    if (scm_pair_p(control) == SCM_BOOL_F) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "invalid format for the control: {}", control);
+        return std::nullopt;
+    }    
+
     return ScriptEnvironment::convertTypeFrom<std::string>(scm_cdr(control));
 }
 
@@ -313,7 +322,6 @@ SCM control_create_box(SCM name, SCM layout, SCM children)
     while (!scm_to_bool(scm_null_p(children))) {
         SCM child               = scm_car(children);
         std::string controlname = GUIScriptRunner::getControlNameFromScript(child).value();
-        printf("CHILD: %s\n", controlname.c_str());
         b->add(gm->getControl<GUIControl>(controlname));
         children = scm_cdr(children);
     }
@@ -724,6 +732,9 @@ GUIScriptRunner::GUIScriptRunner(GUIManager *manager)
     env_.registerFunction("window-show", window_show);
     env_.registerFunction("window-destroy", window_destroy);
     env_.registerFunction("window-move-to-top", window_move_to_top);
+
+    this->load(SCRIPTS_DIR "gui/gui-prelude.scm");
+
 }
 
 GUIWindow *GUIScriptRunner::openMainWindow()

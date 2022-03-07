@@ -29,6 +29,8 @@ TEST(InputReproduceTest, TestIfInputReproduces)
     LogicService::getActionQueue()->clearEvents();
     LogicService::getObjectFactory()->clear();
     GFXService::setDevice(std::make_unique<TestDevice>());
+    GFXService::createTextureManager(
+        std::make_unique<TextureManager>(GFXService::getDevice()->createTextureEnv()));
 
     std::string mapfile = TESTS_DIR "/terrain_test.flte";
 
@@ -117,6 +119,8 @@ TEST(InputReproduceTest, TestIfInputReproduces)
     InputService::setInputManager(std::unique_ptr<InputManager>());
     GFXService::setDevice(std::unique_ptr<TestDevice>());
     LogicService::getObjectFactory()->clear();
+    GFXService::createTextureManager(
+        std::unique_ptr<TextureManager>());
 }
 
 TEST(InputReproduceTest, TestIfInputReproducerFailsOnBrokenFile)

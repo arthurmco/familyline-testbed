@@ -18,7 +18,7 @@
 namespace familyline::graphics::gui
 {
 class GUIScriptRunner;
-    
+
 /**
  * GUIManager
  *
@@ -274,9 +274,9 @@ private:
 
     int shown_zindex_ = 100;
 
-    int width_ = 1;
+    int width_  = 1;
     int height_ = 1;
-    
+
     /// Sort windows by zIndex
     /// The higher the zIndex, the closer to the first element it is.
     void sortWindows();
@@ -284,11 +284,10 @@ private:
     void registerEvent(FGUIEventCallback handler, int control_id);
 };
 
-
 class GUIScriptRunner
 {
 public:
-    GUIScriptRunner(GUIManager* manager);
+    GUIScriptRunner(GUIManager *manager);
 
     void load(std::string file);
 
@@ -309,8 +308,8 @@ public:
      * If you already know the type, to speed things up, you can
      * inform it in the `type` variable
      */
-    static SCM createControlToScript(std::string name, const GUIControl& control,
-                                     std::string type = "");
+    static SCM createControlToScript(
+        std::string name, const GUIControl &control, std::string type = "");
 
     /**
      * Get a color value from its scheme counterpart, a scheme vector of values
@@ -320,17 +319,14 @@ public:
     static std::array<double, 4> getColorFromScript(SCM color);
 
     void registerPublicFunction(std::string name, std::function<SCM(SCM)> fun)
-        {
-            env_.registerPublicFunction(name, fun);
+    {
+        env_.registerPublicFunction(name, fun);
+    }
 
-        }
-    
-    GUIWindow* openMainWindow();
-    
+    GUIWindow *openMainWindow();
+
 private:
     familyline::logic::ScriptEnvironment env_;
 };
 
-
-    
 }  // namespace familyline::graphics::gui

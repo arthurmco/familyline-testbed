@@ -1045,7 +1045,6 @@ static int show_starting_menu(
     auto sf = ServerFinder();
 
     GUIScriptRunner gsr(ginfo.guir);
-    gsr.load(SCRIPTS_DIR "gui/gui-prelude.scm");
 
     Game* g   = nullptr;
     auto& ima = InputService::getInputManager();
