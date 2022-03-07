@@ -1052,6 +1052,8 @@ static int show_starting_menu(
     /* Render the menu */
     bool r = true;
 
+    auto& log = LoggerService::getLogger();
+
     gsr.registerPublicFunction("start-game", [&](SCM args) -> SCM {
         if (async_test.joinable()) {
             if (!aexit) {
@@ -1092,9 +1094,53 @@ static int show_starting_menu(
         return scm_from_locale_string(COMMIT);
     });
 
+    gsr.registerPublicFunction("get-config-option", [&](SCM args) -> SCM {
+        auto property = ScriptEnvironment::convertTypeFrom<std::string>(args);
+
+        if (*property == "enable-input-recording")
+            return scm_from_bool(confdata.enableInputRecording ? 1 : 0);
+        if (*property == "player/username")
+            return scm_from_locale_string(confdata.player.username.c_str());
+
+        log->write("script-config", LogType::Error,
+                   "unknown property '{}'", *property);
+        return SCM_BOOL_F;
+    });
+
+    gsr.registerPublicFunction("set-config-option", [&](SCM args) -> SCM {
+        SCM p = scm_car(args);
+        SCM v = scm_cdr(args);
+        auto property = ScriptEnvironment::convertTypeFrom<std::string>(p);
+
+        if (*property == "enable-input-recording") {
+            auto value = ScriptEnvironment::convertTypeFrom<bool>(v);
+            if (!value) {
+                log->write("script-config", LogType::Error,
+                           "unknown type for property '{}' ({})",
+                           *property, v);
+                return SCM_BOOL_F;
+            }
+            confdata.enableInputRecording = *value;
+            return v;
+        } if (*property == "player/username") {
+            auto value = ScriptEnvironment::convertTypeFrom<std::string>(v);
+            if (!value) {
+                log->write("script-config", LogType::Error,
+                           "unknown type for property '{}' ({})",
+                           *property, v);
+                return SCM_BOOL_F;
+            }
+            confdata.player.username = *value;
+            return v;
+        }
+
+        log->write("script-config", LogType::Error,
+                   "unknown property '{}'", *property);
+        return SCM_BOOL_F;
+    });
+
     gsr.load(SCRIPTS_DIR "gui/gui.scm");
 
-    auto& log = LoggerService::getLogger();
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
     GUIWindow* w = gsr.openMainWindow();

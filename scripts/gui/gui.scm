@@ -78,7 +78,7 @@
                             (control-create "txtName"
                                 type: 'textbox
                                 appearance: '((max-height . 35))
-                                text:  "Arthur")
+                                text:  (get-config-option "player/username"))
                             (control-create
                              ""
                              type: 'box
@@ -89,7 +89,7 @@
                                          "chkEnableRecord"
                                          type: 'checkbox
                                          appearance: '((background . #(0 0 0 1)))
-                                         active: #t)
+                                         active: (get-config-option "enable-input-recording"))
                                         (control-create
                                          "lblEnableRecord"
                                          type: 'label
@@ -100,6 +100,14 @@
                                             text: "Back"
                                             click-handler:
                                             (lambda (b)
+                                              (set-config-option
+                                               "player/username"
+                                               (control-get-property (control-get "txtName")
+                                                                     'text))
+                                              (set-config-option
+                                               "enable-input-recording"
+                                               (control-get-property (control-get "chkEnableRecord")
+                                                                     'active))
                                               (window-destroy "settings")
                                               (window-move-to-top "menu")))))))
                      (window-show wsettings))))

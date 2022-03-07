@@ -40,6 +40,16 @@
      [(eq? ctype #:button) (control-set-button control property value)]
      [else (error "Invalid control type " ctype)])))
 
+(define (control-get-property control property)
+  "Get a certain property of a control"
+  ;; We determine the control type, then forward it to the appropriate
+  ;; function into the native code
+  (let ((ctype (car control)))
+    (cond
+     [(eq? ctype #:textbox) (control-get-textbox-property control property)]
+     [(eq? ctype #:checkbox) (control-get-checkbox-property control property)]
+     [else (error "Invalid control type " ctype)])))
+
 (define* (control-create name #:key type appearance
                          ;; more or less common
                          text
@@ -63,3 +73,11 @@
       (set-appearance-of control appearance))
     control))
 
+
+
+(define (get-config-option name)
+  (call-public 'get-config-option name))
+
+
+(define (set-config-option name value)
+  (call-public 'set-config-option (cons name value)))

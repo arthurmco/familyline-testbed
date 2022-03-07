@@ -517,6 +517,86 @@ SCM control_set_button(SCM control, SCM property, SCM value)
 }
 
 /**
+ * Get the value of a certain property of the control
+ *
+ * The only property for a textbox is its text
+ *
+ * For unknown properties, return #f
+ */
+SCM control_get_textbox_property(SCM control, SCM property)
+{
+    auto &log = familyline::LoggerService::getLogger();
+    auto sproperty =
+        ScriptEnvironment::convertTypeFrom<std::string>(scm_symbol_to_string(property));
+
+    if (!sproperty) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-set-textbox: wrong type for property");
+        return SCM_BOOL_F;
+    }
+
+    auto controlname = GUIScriptRunner::getControlNameFromScript(control);
+    if (!controlname) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-set-textbox: wrong type for control");
+        return SCM_BOOL_F;
+    }
+
+    auto gm     = ScriptEnvironment::getGlobalEnv<GUIManager *>();
+    auto textbox = gm->getControl<GUITextbox>(*controlname);
+
+    if (*sproperty == "text") {
+        auto text = textbox->text();
+        return scm_from_locale_string(text.c_str());
+    }
+
+    return SCM_BOOL_F;
+    
+}
+
+/**
+ * Get the value of a certain property of the checkbox
+ *
+ * The only property for a textbox is its active property
+ *
+ * For unknown properties, return #f
+ */
+SCM control_get_checkbox_property(SCM control, SCM property)
+{
+    auto &log = familyline::LoggerService::getLogger();
+    auto sproperty =
+        ScriptEnvironment::convertTypeFrom<std::string>(scm_symbol_to_string(property));
+
+    if (!sproperty) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-set-checkbox: wrong type for property");
+        return SCM_BOOL_F;
+    }
+
+    auto controlname = GUIScriptRunner::getControlNameFromScript(control);
+    if (!controlname) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-set-checkbox: wrong type for control");
+        return SCM_BOOL_F;
+    }
+
+    auto gm     = ScriptEnvironment::getGlobalEnv<GUIManager *>();
+    auto checkbox = gm->getControl<GUICheckbox>(*controlname);
+
+    if (*sproperty == "active") {
+        auto active = checkbox->checked();
+        return scm_from_bool(active ? 1 : 0);
+    }
+
+    return SCM_BOOL_F;
+    
+}
+
+/**
  * Show the specified window
  */
 SCM window_show(SCM window)
@@ -633,6 +713,9 @@ GUIScriptRunner::GUIScriptRunner(GUIManager *manager)
     env_.registerFunction("control-create-button", control_create_button);
     env_.registerFunction("control-create-textbox", control_create_textbox);
     env_.registerFunction("control-create-checkbox", control_create_checkbox);
+
+    env_.registerFunction("control-get-textbox-property", control_get_textbox_property);
+    env_.registerFunction("control-get-checkbox-property", control_get_checkbox_property);
 
     env_.registerFunction("control-get", control_get);
 
