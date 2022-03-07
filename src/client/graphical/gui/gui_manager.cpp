@@ -103,6 +103,9 @@ void GUIManager::onResize(int width, int height)
         w.window->onResize(relwidth, relheight, relx, rely);
     });
 
+    width_ = width;
+    height_ = height;
+    
     renderer_->onResize(width, height);
 }
 

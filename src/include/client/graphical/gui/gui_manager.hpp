@@ -156,6 +156,7 @@ public:
             WindowInfo{name, std::move(ptr), std::move(layoutptr), std::move(paintdata)});
         winid++;
 
+        ret->onResize(width_, height_, 0, 0);
         return *ret;
     }
 
@@ -273,6 +274,9 @@ private:
 
     int shown_zindex_ = 100;
 
+    int width_ = 1;
+    int height_ = 1;
+    
     /// Sort windows by zIndex
     /// The higher the zIndex, the closer to the first element it is.
     void sortWindows();
@@ -320,7 +324,9 @@ public:
             env_.registerPublicFunction(name, fun);
 
         }
-
+    
+    GUIWindow* openMainWindow();
+    
 private:
     familyline::logic::ScriptEnvironment env_;
 };

@@ -169,6 +169,7 @@ public:
     template <typename T>
     static std::optional<T> convertTypeFrom(SCM value);
 
+    SCM evalFunction(std::string name, SCM arg);    
 private:
     std::any globalv_;
     SCM global_scm_t_;

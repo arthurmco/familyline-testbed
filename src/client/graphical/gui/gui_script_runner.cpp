@@ -1,7 +1,9 @@
 #include <client/graphical/gui/gui_manager.hpp>
 #include <common/logger.hpp>
-#include <range/v3/all.hpp>
 #include <optional>
+#include <range/v3/all.hpp>
+
+#include "libguile/strings.h"
 
 using namespace familyline::graphics::gui;
 using namespace familyline::logic;
@@ -65,9 +67,9 @@ SCM current_manager_add_window(SCM name, SCM layout)
  */
 std::optional<std::string> GUIScriptRunner::getWindowNameFromScript(SCM window)
 {
-    if (!scm_list_p(window)) {
+    if (scm_list_p(window) == SCM_BOOL_F) {
         return std::nullopt;
-    }
+    }    
 
     SCM wname = scm_list_ref(window, scm_from_uint32(0));
     return ScriptEnvironment::convertTypeFrom<std::string>(wname);
@@ -201,12 +203,22 @@ SCM set_appearance_of(SCM control, SCM attributes)
 
         std::string skey = scm_to_locale_string(scm_symbol_to_string(key));
 
-        if (skey == "background") a.background = GUIScriptRunner::getColorFromScript(value);
-        if (skey == "foreground") a.foreground = GUIScriptRunner::getColorFromScript(value);
-        if (skey == "min-height") a.minHeight = ScriptEnvironment::convertTypeFrom<unsigned>(value);
-        if (skey == "min-width") a.minWidth = ScriptEnvironment::convertTypeFrom<unsigned>(value);
-        if (skey == "max-height") a.maxHeight = ScriptEnvironment::convertTypeFrom<unsigned>(value);
-        if (skey == "max-width") a.maxWidth = ScriptEnvironment::convertTypeFrom<unsigned>(value);
+        if (skey == "background")
+            a.background = GUIScriptRunner::getColorFromScript(value);
+        else if (skey == "foreground")
+            a.foreground = GUIScriptRunner::getColorFromScript(value);
+        else if (skey == "font-size")
+            a.fontsize = ScriptEnvironment::convertTypeFrom<size_t>(value).value();
+        else if (skey == "font")
+            a.font = ScriptEnvironment::convertTypeFrom<std::string>(value).value();
+        else if (skey == "min-height")
+            a.minHeight = ScriptEnvironment::convertTypeFrom<unsigned>(value);
+        else if (skey == "min-width")
+            a.minWidth = ScriptEnvironment::convertTypeFrom<unsigned>(value);
+        else if (skey == "max-height")
+            a.maxHeight = ScriptEnvironment::convertTypeFrom<unsigned>(value);
+        else if (skey == "max-width")
+            a.maxWidth = ScriptEnvironment::convertTypeFrom<unsigned>(value);
 
         attributes = scm_cdr(attributes);
     }
@@ -402,44 +414,146 @@ SCM control_get(SCM name)
     return control ? GUIScriptRunner::createControlToScript(*sname, *control) : SCM_BOOL_F;
 }
 
-
 /**
  * Set some button attribute, excluding appareance ones
  */
 SCM control_set_button(SCM control, SCM property, SCM value)
 {
-    auto &log  = familyline::LoggerService::getLogger();
-    auto sproperty = ScriptEnvironment::convertTypeFrom<std::string>(scm_symbol_to_string(property));
-    
+    auto &log = familyline::LoggerService::getLogger();
+    auto sproperty =
+        ScriptEnvironment::convertTypeFrom<std::string>(scm_symbol_to_string(property));
+
     if (!sproperty) {
-        log->write("gui-script-env",
-                   familyline::LogType::Error,
-                   "control-set-button: wrong type for property");
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-set-button: wrong type for property");
         return SCM_BOOL_F;
     }
 
     auto controlname = GUIScriptRunner::getControlNameFromScript(control);
     if (!controlname) {
-        log->write("gui-script-env",
-                   familyline::LogType::Error,
-                   "control-set-button: wrong type for control");
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-set-button: wrong type for control");
         return SCM_BOOL_F;
     }
-    
 
-    auto gm      = ScriptEnvironment::getGlobalEnv<GUIManager *>();
+    auto gm     = ScriptEnvironment::getGlobalEnv<GUIManager *>();
     auto button = gm->getControl<GUIButton>(*controlname);
 
     if (*sproperty == "text") {
         auto svalue = ScriptEnvironment::convertTypeFrom<std::string>(value);
         button->setText(*svalue);
-        log->write("gui-script-env",
-                   familyline::LogType::Info,
-                   "setting button property {} to {}",
-                   *sproperty, *svalue);
+        log->write(
+            "gui-script-env", familyline::LogType::Info, "setting button property {} to {}",
+            *sproperty, *svalue);
     }
-    
+
     return control;
+}
+
+/**
+ * Show the specified window
+ */
+SCM window_show(SCM window)
+{
+    auto &log    = familyline::LoggerService::getLogger();
+    auto winname = GUIScriptRunner::getWindowNameFromScript(window);
+    if (!winname) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "show-window: incorrect type for 'window'");
+        return SCM_BOOL_F;
+    }
+
+    auto gm      = ScriptEnvironment::getGlobalEnv<GUIManager *>();
+    GUIWindow *w = gm->getWindow(*winname);
+    if (!w) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error, "show-window: window '%s' does not exist",
+            *winname);
+        return SCM_BOOL_F;
+    }
+
+    gm->showWindow(*w);
+    return scm_list_3(
+        scm_from_locale_string(winname->c_str()), scm_from_locale_string("window"),
+        scm_from_signed_integer(w->id()));
+}
+
+/**
+ * Move the specified window to the top of the window stack
+ *
+ * We accept two types of "window" here:
+ *  - a window object
+ *  - a window name
+ */
+SCM window_move_to_top(SCM window)
+{
+    auto &log    = familyline::LoggerService::getLogger();
+    auto winname = GUIScriptRunner::getWindowNameFromScript(window);
+    if (!winname) {
+        winname = ScriptEnvironment::convertTypeFrom<std::string>(window);
+    }
+
+    if (!winname) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "window-destroy: incorrect type for 'window': {}", window);
+        return SCM_BOOL_F;
+    }
+
+    auto gm      = ScriptEnvironment::getGlobalEnv<GUIManager *>();
+    GUIWindow *w = gm->getWindow(*winname);
+    if (!w) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error, "show-window: window '%s' does not exist",
+            *winname);
+        return SCM_BOOL_F;
+    }
+    gm->moveWindowToTop(*w);
+
+    return scm_list_3(
+        scm_from_locale_string(winname->c_str()), scm_from_locale_string("window"),
+        scm_from_signed_integer(w->id()));
+}
+
+/**
+ * Show the specified window
+ *
+ * We accept two types of "window" here:
+ *  - a window object
+ *  - a window name
+ */
+SCM window_destroy(SCM window)
+{
+    auto &log    = familyline::LoggerService::getLogger();
+    auto winname = GUIScriptRunner::getWindowNameFromScript(window);
+    if (!winname) {
+        winname = ScriptEnvironment::convertTypeFrom<std::string>(window);
+    }
+
+    if (!winname) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "window-destroy: incorrect type for 'window': {}", window);
+        return SCM_BOOL_F;
+    }
+
+    auto gm      = ScriptEnvironment::getGlobalEnv<GUIManager *>();
+    GUIWindow *w = gm->getWindow(*winname);
+    if (!w) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error, "show-window: window '%s' does not exist",
+            *winname);
+        return SCM_BOOL_F;
+    }
+    gm->closeWindow(*w);
+    gm->destroyWindow(*winname);
+
+    return scm_list_3(
+        scm_from_locale_string(winname->c_str()), scm_from_locale_string("window"),
+        scm_from_signed_integer(w->id()));
 }
 
 GUIScriptRunner::GUIScriptRunner(GUIManager *manager)
@@ -457,6 +571,36 @@ GUIScriptRunner::GUIScriptRunner(GUIManager *manager)
     env_.registerFunction("control-get", control_get);
 
     env_.registerFunction("control-set-button", control_set_button);
+
+    env_.registerFunction("window-show", window_show);
+    env_.registerFunction("window-destroy", window_destroy);
+    env_.registerFunction("window-move-to-top", window_move_to_top);
+}
+
+GUIWindow *GUIScriptRunner::openMainWindow()
+{
+    auto &log      = familyline::LoggerService::getLogger();
+    SCM win        = env_.evalFunction("on-main-menu-open", SCM_BOOL_F);
+    GUIManager *gm = env_.get_value<GUIManager *>();
+
+    fprintf(stderr, "<%s>", scm_to_locale_string(scm_object_to_string(win, SCM_UNDEFINED)));
+    auto winname = GUIScriptRunner::getWindowNameFromScript(win);
+    if (!winname) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "cannot find main window in the script, the type of {} is incorrect", win);
+        return nullptr;
+    }
+
+    GUIWindow *w = gm->getWindow(*winname);
+    if (!w) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "cannot find main window in the script, the window {} does not exist", *winname);
+        return nullptr;
+    }
+
+    return w;
 }
 
 /**

@@ -25,6 +25,7 @@
 #include <iterator>
 #include <memory>
 #include <thread>
+#include "libguile/strings.h"
 
 using namespace familyline;
 using namespace familyline::logic;
@@ -1029,6 +1030,7 @@ int main(int argc, char const* argv[])
             }
 
             end_network();
+            return nullptr;
         },
         &pi);
 }
@@ -1045,48 +1047,57 @@ static int show_starting_menu(
     GUIScriptRunner gsr(ginfo.guir);
     gsr.load(SCRIPTS_DIR "gui/gui-prelude.scm");
 
-    Game* g       = nullptr;
-    auto& ima     = InputService::getInputManager();
+    Game* g   = nullptr;
+    auto& ima = InputService::getInputManager();
     /* Render the menu */
     bool r = true;
 
-    gsr.registerPublicFunction(
-        "start-game",
-        [&](SCM args) -> SCM {
-            if (async_test.joinable()) {
-                if (!aexit) {
-                    aexit = true;
-                    async_test.join();
-                }
+    gsr.registerPublicFunction("start-game", [&](SCM args) -> SCM {
+        if (async_test.joinable()) {
+            if (!aexit) {
+                aexit = true;
+                async_test.join();
             }
+        }
 
-            ginfo.guir->destroyWindow("bg");
-            ginfo.guir->destroyWindow("menu");
+        ginfo.guir->destroyWindow("bg");
+        ginfo.guir->destroyWindow("menu");
 
-            auto createNormalSession_fn = [](logic::Terrain& map, auto& local_player_info) {
-                /// running a normal game
-                return initSinglePlayerSession(map, local_player_info);
-            };
+        auto createNormalSession_fn = [](logic::Terrain& map, auto& local_player_info) {
+            /// running a normal game
+            return initSinglePlayerSession(map, local_player_info);
+        };
 
-            g = start_game(
-                ginfo, lr, StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt},
-                confdata, createNormalSession_fn);
+        g = start_game(
+            ginfo, lr, StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt}, confdata,
+            createNormalSession_fn);
 
-            if (g) {
-                lr.load([&]() { return g->runLoop(); });
-            }
+        if (g) {
+            lr.load([&]() { return g->runLoop(); });
+        }
 
-            return SCM_BOOL_T;
-        });
-    
+        return SCM_BOOL_T;
+    });
+
+    gsr.registerPublicFunction("exit-game", [&](SCM args) -> SCM {
+        r = false;
+        return SCM_BOOL_T;
+    });
+
+    gsr.registerPublicFunction("get-version", [&](SCM args) -> SCM {
+        return scm_from_locale_string(VERSION);
+    });
+
+    gsr.registerPublicFunction("get-commit-id", [&](SCM args) -> SCM {
+        return scm_from_locale_string(COMMIT);
+    });
+
     gsr.load(SCRIPTS_DIR "gui/gui.scm");
-    
+
     auto& log = LoggerService::getLogger();
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
 
-    GUIWindow& background = ginfo.guir->createWindow<FlexLayout<false>>("bg");
-    GUIWindow* w          = ginfo.guir->getWindow("menu");
-
+    GUIWindow* w = gsr.openMainWindow();
     if (!w) {
         throw std::runtime_error("No valid menu window in script");
     }
@@ -1095,11 +1106,12 @@ static int show_starting_menu(
 
     // TODO: Autoresize this when autoresizing the gui manager
     w->onResize(ginfo.gwidth - 2, ginfo.gheight - 2, 1, 1);
+    
+    GUIWindow& background = ginfo.guir->createWindow<FlexLayout<false>>("bg");    
     background.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
+    ginfo.guir->onResize(ginfo.gwidth, ginfo.gheight);
 
     ginfo.guir->showWindow(background);
-    ginfo.guir->showWindow(*w);
-
     ginfo.guir->moveWindowToTop(*w);
 
 #if 0

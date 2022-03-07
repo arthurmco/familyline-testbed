@@ -25,6 +25,10 @@
 
 #include <glm/glm.hpp>
 
+#define volatile 
+#include <libguile.h>
+#undef volatile
+
 template <>
 struct fmt::formatter<glm::vec3> : formatter<double> {
 
@@ -37,6 +41,16 @@ struct fmt::formatter<glm::vec3> : formatter<double> {
         format_to(ctx.out(), ", ");
         formatter<double>::format(v.z, ctx);
         return format_to(ctx.out(), ")");
+    }   
+};
+
+template <>
+struct fmt::formatter<SCM> : formatter<std::string_view> {
+    template <typename FormatContext>
+    auto format(const SCM& s, FormatContext& ctx) {
+        std::string v = fmt::format(
+            "({})", scm_to_locale_string(scm_object_to_string(s, SCM_UNDEFINED)));
+        return format_to(ctx.out(), v);
     }   
 };
 

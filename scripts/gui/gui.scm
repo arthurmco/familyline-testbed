@@ -1,47 +1,81 @@
-(define win
-  (window-create "menu"
-                 (use-layout 'flex 'vertical)
-                 (list (control-create "l2"
-                                       type: 'label
-                                       appearance: '((max-height . 40))
-                                       text:  " DENTRO DO SCHEME")
-                       (control-create
-                        "b" type: 'box
-                        layout: (use-layout 'flex 'horizontal)
-                        children: (list
-                                   (control-create "l"
-                                                   type: 'label
-                                                   text: "Que bonito bolo, que bonitas velas")
-                                   (control-create "lother"
-                                                   type: 'label
-                                                   text: "OLHA SEM C++!!!!")
-                                   (control-create "l1"
-                                                   type: 'label
-                                                   appearance: '((background . #(0.2 0 0 0.1))
-                                                                 (foreground . #(0 1 1 1)))
-                                                   text: "Que bonito corpo, acho que ele está me esquentando")))
-                       (control-create "bt"
-                                       type: 'button
-                                       text: "Eu tenho um presente pra você..."
-                                       click-handler:
-                                       (lambda (b)
-                                         (display b)
-                                         (set-appearance-of (control-get "l")
-                                                            '((background . #(1 0 0 1))
-                                                              (foreground . #(0 1 1 1))))
-                                         (control-set b 'text "Vc clicou no butão")
-                                         ))
-                       (control-create "start"
-                                       type: 'button
-                                       text: "Start Game"
-                                       click-handler:
-                                       (lambda (b)
-                                         (call-public 'start-game))))))
+(define button-appearance
+      '((background . #(0 0 0 0.8))
+        (font-size . 18)
+        (max-width . 360)))
+
+(define (on-main-menu-open val)
+  (let ((win
+         (window-create
+          "menu"
+          (use-layout 'flex 'vertical)
+          (list (control-create "ltitle"
+                                type: 'label
+                                appearance: '((max-height . 45)
+                                              (font-size . 40))
+                                text:  "FAMILYLINE")
+                (control-create "lversion"
+                                type: 'label
+                                appearance: '((max-height . 45)
+                                              (font-size . 14))
+                                text:  (format #f "Version ~a (commit ~a)"
+                                               (call-public 'get-version)
+                                               (call-public 'get-commit-id)))
+                (control-create "btnNew"
+                                type: 'button
+                                text: "New Game"
+                                appearance: button-appearance
+                                click-handler:
+                                (lambda (b)
+                                  (call-public 'start-game)))
+                (control-create "btnMultiPlayer"
+                                type: 'button
+                                appearance: button-appearance
+                                text: "Multiplayer"
+                                click-handler:
+                                (lambda (b) #f))
+                (control-create
+                 "btnSettings"
+                 type: 'button
+                 appearance: button-appearance
+                 text: "Settings"
+                 click-handler:
+                 (lambda (b)
+                   (let ((wsettings
+                          (window-create
+                           "settings"
+                           (use-layout 'flex 'vertical)
+                           (list
+                            (control-create "stitle"
+                                type: 'label
+                                appearance: '((max-height . 35)
+                                              (background . #(0 0 0 1))
+                                              (font-size . 20))
+                                text:  "Settings")
+                            (control-create "lblName"
+                                type: 'label
+                                appearance: '((max-height . 35)
+                                              (background . #(0 0 0 1)))
+                                text:  "Player name")
+                            (control-create "lblEnableRecord"
+                                type: 'label
+                                appearance: '((max-height . 35)
+                                              (background . #(0 0 0 1)))
+                                text:  "Enable input recording")                            
+                            (control-create "btnBack"
+                                            type: 'button
+                                            text: "Back"
+                                            click-handler:
+                                            (lambda (b)
+                                              (window-destroy "settings")
+                                              (window-move-to-top "menu")))))))
+                     (window-show wsettings))))
+                              (control-create "btnQuit"
+                                              type: 'button
+                                              appearance: button-appearance
+                                              text: "Exit"
+                                              click-handler:
+                                              (lambda (b)
+                                                (call-public 'exit-game)))))))
 
 
-
-
-(set-appearance-of (control-get "l2")
-                    '((background . #(1 1 1 1))
-                      (foreground . #(1 0 0 1))))
-
+    (window-show win)))

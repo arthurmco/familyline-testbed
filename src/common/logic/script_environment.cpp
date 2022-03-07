@@ -43,6 +43,24 @@ void ScriptEnvironment::runScript(std::string path)
     scm_c_primitive_load(path.c_str());
 }
 
+SCM ScriptEnvironment::evalFunction(std::string name, SCM arg)
+{
+    auto &log  = familyline::LoggerService::getLogger();
+    log->write("script-environment", LogType::Info, "calling function {}", name);
+    
+    SCM fn = scm_variable_ref(scm_c_lookup(name.c_str()));
+    log->write("script-environment", LogType::Info, "!!! <{}>", fn);
+            
+    if (scm_procedure_p(fn) == SCM_BOOL_F) {
+        log->write("script-environment", LogType::Info, "cannot call {}: wrong type or does not exist",
+                   name);
+        return SCM_BOOL_F;
+    }
+    
+    scm_c_define("current-global-env", scm_from_unsigned_integer((uintptr_t)this));
+    return scm_call_1(fn, arg);
+}
+
 
 
 /**
