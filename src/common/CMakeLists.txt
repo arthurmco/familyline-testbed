@@ -72,8 +72,6 @@ if (FLINE_USE_VCPKG)
   message("GNU Guile is not present on vcpkg and, currently, we have no way of integrating it...")
 
   message("Downloading a prebuilt GNU Guile (this may not work)")
-  FindPkgConfig()
-  pkg_search_module(gmp REQUIRED gmp)
   FetchContent_Declare(
     guile
     URL "https://downloads.sourceforge.net/project/ezwinports/guile-2.0.11-2-w32-bin.zip"
@@ -84,8 +82,20 @@ if (FLINE_USE_VCPKG)
     INSTALL_COMMAND ""
     )
   FetchContent_MakeAvailable(guile)
+  find_path(gmp_INCLUDE_DIR "gmp.h")
 
-  target_include_directories(familyline-common PUBLIC ${gmp_INCLUDE_DIRS}
+  # if (WIN32)
+  # fix some includes in the windows build.
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/include/guile/2.0/sys")
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/include/guile/2.0/sys/time.h"
+    "#pragma once\n #include <time.h>")
+  file(COPY_FILE "${CMAKE_SOURCE_DIR}/generated/winunistd.h"
+	  "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/include/guile/2.0/unistd.h")
+
+
+# endif()
+  
+  target_include_directories(familyline-common PUBLIC ${gmp_INCLUDE_DIR} ${time_INCLUDE_DIR}
     "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/include/guile/2.0")
   target_link_libraries(familyline-common PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/lib/libguile-2.0.dll.a")

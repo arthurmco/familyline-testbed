@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <common/logic/game_object.hpp>
+#include <clocale>
 
 using namespace familyline::logic;
 
