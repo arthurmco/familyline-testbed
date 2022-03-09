@@ -72,7 +72,7 @@ else()
   find_package(PkgConfig REQUIRED)
   pkg_search_module(CURLPP REQUIRED curlpp)
 
-  target_link_libraries(familyline-common PUBLIC fmt::fmt glm ${GLM_LIBRARIES} ${ZLIB_LIBRARIES})
+  target_link_libraries(familyline-common PUBLIC fmt::fmt glm ${ZLIB_LIBRARIES})
   target_link_libraries(familyline-common PUBLIC tl::expected range-v3::range-v3)
   target_link_libraries(familyline-common PUBLIC ${CURLPP_LDFLAGS})
   target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
