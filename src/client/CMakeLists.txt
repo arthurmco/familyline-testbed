@@ -108,7 +108,7 @@ if (FLINE_USE_VCPKG)
   target_include_directories(familyline-client PUBLIC
     ${GLIB_INCLUDES} ${HB_INCLUDE} ${GLIB_CONFIG_INCLUDES} ${PANGO_INCLUDE}
     ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR}
-    ${CAIRO_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${PANGOCAIRO_INCLUDE_DIR}
+    ${CAIRO_INCLUDE_DIRS} ${PANGOCAIRO_INCLUDE_DIR}
     ${yaml_INCLUDE_DIR})
 
 else()
@@ -117,7 +117,6 @@ else()
 #  find_package(SDL_image REQUIRED)
   pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
   pkg_search_module(PANGOCAIRO REQUIRED pangocairo) # finds pango-cairo
-  pkg_search_module(GLM REQUIRED glm) # finds glm
 
   if (DEFINED SDL2::SDL2)
     target_link_libraries(familyline-client PUBLIC SDL2::SDL2 SDL2::SDL2main "-lSDL2_image")
@@ -130,12 +129,11 @@ else()
   target_link_libraries(familyline-client PUBLIC GLEW::GLEW)
   target_link_libraries(familyline-client PUBLIC ${CAIRO_LINK_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${PANGOCAIRO_LINK_LIBRARIES})
-  target_link_libraries(familyline-client PUBLIC ${GLM_LINK_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${YAML_CPP_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC Threads::Threads)
   target_include_directories(familyline-client PUBLIC ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR} ${PANGOCAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS}
-    ${GLM_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
+    ${YAML_INCLUDE_DIR})
 
 endif(FLINE_USE_VCPKG)
 

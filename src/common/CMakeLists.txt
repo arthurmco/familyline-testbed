@@ -54,12 +54,12 @@ find_package(nlohmann_json REQUIRED)
 find_package(FlatBuffers REQUIRED)
 find_package(SDL2 CONFIG)
 find_package(range-v3 CONFIG)
+find_package(glm CONFIG REQUIRED)
 
-if (FLINE_USE_VCPKG)	
+if (FLINE_USE_VCPKG)
   include(${CMAKE_TOOLCHAIN_FILE})
-  find_package(glm CONFIG REQUIRED)
   find_package(unofficial-curlpp CONFIG REQUIRED)
-  
+
   target_include_directories(familyline-common PUBLIC
     ${YAML_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR}
     ${INPUT_FLATBUFFER_INCLUDE})
@@ -67,17 +67,16 @@ if (FLINE_USE_VCPKG)
   target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
   target_link_libraries(familyline-common PUBLIC unofficial::curlpp::curlpp)
   target_link_libraries(familyline-common PUBLIC tl::expected range-v3::range-v3)
-  
+
 else()
   find_package(PkgConfig REQUIRED)
-  pkg_search_module(GLM REQUIRED glm) # finds glm
   pkg_search_module(CURLPP REQUIRED curlpp)
-  
-  target_link_libraries(familyline-common PUBLIC fmt::fmt ${GLM_LIBRARIES} ${ZLIB_LIBRARIES})
+
+  target_link_libraries(familyline-common PUBLIC fmt::fmt glm ${GLM_LIBRARIES} ${ZLIB_LIBRARIES})
   target_link_libraries(familyline-common PUBLIC tl::expected range-v3::range-v3)
   target_link_libraries(familyline-common PUBLIC ${CURLPP_LDFLAGS})
   target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
-  target_include_directories(familyline-common PUBLIC ${GLM_INCLUDE_DIRS}
+  target_include_directories(familyline-common PUBLIC
     ${ZLIB_INCLUDE_DIR} ${INPUT_FLATBUFFER_INCLUDE} ${CURLPP_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
 endif(FLINE_USE_VCPKG)
 
@@ -87,4 +86,3 @@ add_coverage(familyline-common)
 target_include_directories(familyline-common PUBLIC "${CMAKE_SOURCE_DIR}/src/include"
    "${CMAKE_SOURCE_DIR}/generated")
 fill_build_information(familyline-common)
-
