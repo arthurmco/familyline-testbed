@@ -76,22 +76,28 @@ find_package(fmt 6...7.2 CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(tl-expected 1 CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
-find_package(GLEW REQUIRED)
+if (FLINE_RENDERER STREQUAL "opengl")
+  find_package(GLEW REQUIRED)
+  find_package(OpenGL REQUIRED)
+
+  target_link_libraries(familyline-client PUBLIC GLEW::GLEW)
+  target_link_libraries(familyline-client PUBLIC ${OPENGL_LIBRARIES})
+endif()
+
 find_package(nlohmann_json REQUIRED)
 find_package(yaml-cpp REQUIRED)
-find_package(OpenGL REQUIRED)
-
-target_link_libraries(familyline-client PUBLIC GLEW::GLEW)
-target_link_libraries(familyline-client PUBLIC ${OPENGL_LIBRARIES})
 
 if (FLINE_USE_VCPKG)
   include(${CMAKE_TOOLCHAIN_FILE})
+if (FLINE_RENDERER STREQUAL "opengl")
   find_library(PANGO_LIB pango-1.0 REQUIRED)
   find_library(PANGOCAIRO_LIB pangocairo-1.0)
   find_library(GOBJECT_LIB gobject-2.0)
   find_library(CAIRO_LIBRARY cairo REQUIRED)
+endif()
   find_package(sdl2-image CONFIG REQUIRED)
 
+if (FLINE_RENDERER STREQUAL "opengl")
   find_path(PANGO_INCLUDE NAMES pango/pango.h REQUIRED PATH_SUFFIXES "pango-1.0")
   find_path(HB_INCLUDE NAMES hb.h REQUIRED PATH_SUFFIXES "harfbuzz")
   find_path(PANGOCAIRO_INCLUDE_DIR NAMES "pango/pangocairo.h" REQUIRED PATH_SUFFIXES "pango-1.0")
@@ -101,7 +107,10 @@ if (FLINE_USE_VCPKG)
     PATH_SUFFIXES "lib/glib-2.0/include")
   find_path(CAIRO_INCLUDE_DIRS cairo.h REQUIRED PATH_SUFFIXES "cairo")
   target_link_libraries(familyline-client PUBLIC ${PANGO_LIB} ${PANGOCAIRO_LIB} ${GOBJECT_LIB}
-    ${CAIRO_LIBRARY} yaml-cpp)
+    ${CAIRO_LIBRARY})
+endif()
+
+  target_link_libraries(familyline-client PUBLIC yaml-cpp)
 
   target_link_libraries(familyline-client PUBLIC SDL2::SDL2 SDL2::SDL2main SDL2::SDL2_image)
 
@@ -114,9 +123,11 @@ if (FLINE_USE_VCPKG)
 else()
   find_package(PkgConfig REQUIRED)
   find_package(Threads REQUIRED)
-#  find_package(SDL_image REQUIRED)
-  pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
-  pkg_search_module(PANGOCAIRO REQUIRED pangocairo) # finds pango-cairo
+  #  find_package(SDL_image REQUIRED)
+  if (FLINE_RENDERER STREQUAL "opengl")
+    pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
+    pkg_search_module(PANGOCAIRO REQUIRED pangocairo) # finds pango-cairo
+  endif()
 
   if (DEFINED SDL2::SDL2)
     target_link_libraries(familyline-client PUBLIC SDL2::SDL2 SDL2::SDL2main "-lSDL2_image")
@@ -126,14 +137,16 @@ else()
 
   target_link_libraries(familyline-client PUBLIC fmt::fmt)
 
+  if (FLINE_RENDERER STREQUAL "opengl")
   target_link_libraries(familyline-client PUBLIC GLEW::GLEW)
   target_link_libraries(familyline-client PUBLIC ${CAIRO_LINK_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${PANGOCAIRO_LINK_LIBRARIES})
   target_link_libraries(familyline-client PUBLIC ${YAML_CPP_LIBRARIES})
+  target_include_directories(familyline-client PUBLIC ${GLEW_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR} ${PANGOCAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS})
+  endif()
   target_link_libraries(familyline-client PUBLIC Threads::Threads)
-  target_include_directories(familyline-client PUBLIC ${GLEW_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS}
-    ${OPENGL_INCLUDE_DIR} ${PANGOCAIRO_INCLUDE_DIRS} ${CAIRO_INCLUDE_DIRS}
-    ${YAML_INCLUDE_DIR})
+  target_include_directories(familyline-client PUBLIC ${SDL2_INCLUDE_DIRS} ${YAML_INCLUDE_DIR})
 
 endif(FLINE_USE_VCPKG)
 
