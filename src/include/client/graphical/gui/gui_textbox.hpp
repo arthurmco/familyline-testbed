@@ -32,6 +32,8 @@ public:
 
     std::string text() const;
 
+    void setText(std::string v) { text_ = toU32(v); }
+
     /**
      * Get the text data in selection blocks.
      *

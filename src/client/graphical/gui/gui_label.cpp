@@ -5,10 +5,9 @@ std::string GUILabel::describe() const
 {
     char v[128] = {};
     sprintf(
-        v, "GUILabel (id %08x, size %d x %d, pos %d,%d | text: '", id(), width_, height_, x_, y_);
+        v, "GUILabel (id %08x, size %d x %d, pos %d,%d | text: %s'", id(), width_, height_, x_, y_,
+        text_.c_str());
     auto ret = std::string{v};
-    ret += text_;
-    ret += "' ";
 
     if (parent_) ret += "has a parent ";
 

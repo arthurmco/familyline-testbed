@@ -1155,6 +1155,30 @@ static int show_starting_menu(
             GUILabel& title = (GUILabel&)multiplayer.box().add(
                 ginfo.guir->createControl<GUILabel>("Multiplayer"));
 
+            GUIAppearance a = title.appearance();
+            a.maxHeight     = 40;
+            title.setAppearance(a);
+
+            std::vector<std::pair<std::string, std::string>> serveritems = {
+                {"192.168.1.1", "<b>localhost</b>"},
+                {"10.0.0.1", "<span foreground='#ff0000'>lalala</span>"},
+                {"24.69.171.157", "aaaa"}};
+            GUIListbox& lstServers = (GUIListbox&)multiplayer.box().add(
+                ginfo.guir->createControl<GUIListbox>(serveritems));
+            a           = lstServers.appearance();
+            a.minHeight = 120;
+            lstServers.setAppearance(a);
+
+            GUITextbox& txtAddress =
+                (GUITextbox&)multiplayer.box().add(ginfo.guir->createControl<GUITextbox>(""));
+
+            a           = txtAddress.appearance();
+            a.maxHeight = 40;
+            txtAddress.setAppearance(a);
+
+            lstServers.onSelectedItemChange(
+                [&](GUIControl& c, int idx, std::string tag) { txtAddress.setText(tag); });
+
             GUIBox& btnArea = (GUIBox&)multiplayer.box().add(
                 ginfo.guir->createControl<GUIBox>(ginfo.guir->createLayout<FlexLayout<true>>()));
 
@@ -1164,8 +1188,8 @@ static int show_starting_menu(
                     ginfo.guir->moveWindowToTop(w);
                 }));
 
-            GUIAppearance a = back.appearance();
-            a.maxHeight     = 90;
+            a           = back.appearance();
+            a.maxHeight = 90;
             back.setAppearance(a);
 
             GUIButton& connect = (GUIButton&)btnArea.add(

@@ -110,9 +110,11 @@ PangoLayout* getLayoutFromText(
     return layout;
 }
 
-void drawLabel(cairo_t* ctxt, const GUILabel* label, const GUIAppearance& appearance)
+void drawText(
+    cairo_t* ctxt, std::string text, const GUIAppearance& appearance, size_t w, size_t h,
+    int offx = 0, int offy = 0)
 {
-    PangoLayout* layout = getLayoutFromText(ctxt, label->text(), appearance, true);
+    PangoLayout* layout = getLayoutFromText(ctxt, text, appearance, true);
 
     int width = 0, height = 0;
     pango_layout_get_size(layout, &width, &height);
@@ -120,15 +122,13 @@ void drawLabel(cairo_t* ctxt, const GUILabel* label, const GUIAppearance& appear
     width /= PANGO_SCALE;
     height /= PANGO_SCALE;
 
-    int startx = 0, starty = appearance.paddingY;
+    int startx = 0, starty = offy + appearance.paddingY;
     switch (appearance.horizontalAlignment) {
-        case HorizontalAlignment::Left: startx = appearance.paddingX; break;
+        case HorizontalAlignment::Left: startx = offx + appearance.paddingX; break;
         case HorizontalAlignment::Center:
-            startx = glm::max(appearance.paddingX, (label->width() / 2) - (width / 2));
+            startx = offx + glm::max(appearance.paddingX, int(w / 2) - (width / 2));
             break;
-        case HorizontalAlignment::Right:
-            startx = label->width() - width - appearance.paddingX;
-            break;
+        case HorizontalAlignment::Right: startx = offx + w - width - appearance.paddingX; break;
     }
 
     auto [fr, fg, fb, fa] = appearance.foreground;
@@ -139,6 +139,11 @@ void drawLabel(cairo_t* ctxt, const GUILabel* label, const GUIAppearance& appear
     pango_cairo_show_layout(ctxt, layout);
 
     g_object_unref(layout);
+}
+
+void drawLabel(cairo_t* ctxt, const GUILabel* label, const GUIAppearance& appearance)
+{
+    drawText(ctxt, label->text(), appearance, label->width(), label->height());
 }
 
 std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
@@ -164,6 +169,32 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
             cairo_set_source_surface(ctxt, (cairo_surface_t*)pchild->data(), relx, rely);
             cairo_paint(ctxt);
         }
+    } else if (auto listbox = dynamic_cast<GUIListbox*>(&c); listbox) {
+        cairo_set_source_rgba(ctxt, br, bg, bb, ba);
+        cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
+        cairo_paint(ctxt);
+
+        listbox->iterItems([&](size_t index, std::string item) {
+            auto pos = index * listbox->getItemHeight();
+            cairo_move_to(ctxt, 5, pos);
+
+            auto itemAppearance = appearance;
+
+            if (auto selidx = listbox->getSelectedIndex(); selidx && *selidx == index) {
+                cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
+                cairo_set_operator(ctxt, CAIRO_OPERATOR_OVER);
+                cairo_rectangle(ctxt, 0, pos, listbox->width(), listbox->getItemHeight());
+                cairo_fill(ctxt);
+
+                std::swap(itemAppearance.background, itemAppearance.foreground);
+            } else {
+                cairo_set_source_rgba(ctxt, br, bg, bb, ba);
+            }
+
+            drawText(
+                ctxt, item, itemAppearance, listbox->width(), listbox->getItemHeight(), 0, pos);
+        });
+
     } else if (auto label = dynamic_cast<GUILabel*>(&c); label) {
         cairo_set_source_rgba(ctxt, br, bg, bb, ba);
         cairo_set_operator(ctxt, CAIRO_OPERATOR_SOURCE);
