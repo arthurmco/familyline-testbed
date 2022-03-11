@@ -80,7 +80,7 @@ else()
   target_include_directories(familyline-common PUBLIC ${CURLPP_INCLUDE_DIRS})
   endif()
 
-  target_link_libraries(familyline-common PUBLIC fmt::fmt glm ${ZLIB_LIBRARIES})
+  target_link_libraries(familyline-common PUBLIC fmt::fmt glm::glm ${ZLIB_LIBRARIES})
   target_link_libraries(familyline-common PUBLIC tl::expected range-v3::range-v3)
   target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
   target_include_directories(familyline-common PUBLIC
