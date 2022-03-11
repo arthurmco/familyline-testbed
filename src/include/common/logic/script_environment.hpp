@@ -7,7 +7,7 @@
  * Copyright (C) 2022 Arthur Mendes
  */
 
-#include <libguile.h>
+#include <s7.h>
 
 #include <any>
 #include <optional>
@@ -44,10 +44,17 @@ public:
         e.env = this;
         environments.push_back(e);
 
-        scm_c_define_gsubr("call-public", 1, 1, 0, (void*)&ScriptEnvironment::callPublicFunctionOnEnv);
+        s7_ = s7_init();
+        s7_define_function(s7_, "call-public", (s7_function)&ScriptEnvironment::callPublicFunctionOnEnv,
+                           1, 1, false, "(call-public function args) call a 'public' function" );
+        s7_define_variable(s7_,  "current-global-env",
+                           s7_make_integer(s7_, (uintptr_t)this));
     }
 
-    ~ScriptEnvironment() { puts("TODO: delete the environment from environments list"); }
+    ~ScriptEnvironment() {
+        
+        puts("TODO: delete the environment from environments list");
+    }
 
     ScriptEnvironment(ScriptEnvironment& other)       = delete;
     ScriptEnvironment(const ScriptEnvironment& other) = delete;
@@ -84,7 +91,7 @@ public:
      * `fptr` is a pointer to it
      *
      * You will be able to call this function from the script.
-     * All arguments, however, will be passed as an SCM object, which is
+     * All arguments, however, will be passed as an s7_pointer object, which is
      * nothing more than a scheme atom. You will have to do the conversion back
      * to the type you want, but we have the conversion functions available.
      *
@@ -92,10 +99,10 @@ public:
      * arguments, nor it sends the global environment for you.
      */
     template <typename R, typename... Args>
-    void registerFunction(std::string name, R (*fptr)(Args...))
+    void registerFunction(std::string name, unsigned params, R (*fptr)(Args...))
     {
-        auto params = sizeof...(Args);
-        scm_c_define_gsubr(name.c_str(), params, 0, 0, (void*)fptr);
+        s7_define_function(s7_, name.c_str(), (s7_function)fptr,
+                           params, 0, false, "");
     }
 
 
@@ -112,16 +119,16 @@ public:
      *
      * Also, the public function only receives one argument.
      */
-    void registerPublicFunction(std::string name, std::function<SCM(SCM)> fun)
+    void registerPublicFunction(std::string name, std::function<s7_pointer(s7_scheme*,s7_pointer)> fun)
     {
         public_fns_[name] = fun;
     }
 
-    SCM callPublicFunction(std::string name, SCM param) {
+    s7_pointer callPublicFunction(std::string name, s7_pointer param) {
         if (!public_fns_.contains(name))
-            return SCM_BOOL_F;
+            return s7_f(s7_);
 
-        return public_fns_[name](param);
+        return public_fns_[name](s7_, param);
     }
     
     /**
@@ -136,10 +143,10 @@ public:
     }
 
     template <typename T>
-    static T getGlobalEnv()
+    static T getGlobalEnv(s7_scheme* sc)
     {
-        SCM current_global           = scm_c_eval_string("current-global-env");
-        uintptr_t current_global_ptr = scm_to_uintptr_t(current_global);
+        s7_pointer current_global           = s7_eval_c_string(sc, "current-global-env");
+        uintptr_t current_global_ptr = (uintptr_t)s7_integer(current_global);
 
         auto v = std::find_if(
             ScriptEnvironment::environments.begin(), ScriptEnvironment::environments.end(),
@@ -159,22 +166,24 @@ public:
         return v->env->template get_value<T>();
     }
 
-    static SCM callPublicFunctionOnEnv(SCM functionName, SCM param);
-    
+    static s7_pointer callPublicFunctionOnEnv(s7_scheme* sc, s7_pointer args);    
     /**
      * Convert an scheme atom to a concrete type (that you specify)
      *
      * If the type conversion fails, returns nullopt.
      */
     template <typename T>
-    static std::optional<T> convertTypeFrom(SCM value);
+    static std::optional<T> convertTypeFrom(s7_scheme *s7, s7_pointer value);
 
-    SCM evalFunction(std::string name, SCM arg);    
+    s7_pointer evalFunction(std::string name, s7_pointer arg);
+    s7_scheme* getContext() { return s7_; }
+
 private:
     std::any globalv_;
-    SCM global_scm_t_;
-
-    std::unordered_map<std::string, std::function<SCM(SCM)>> public_fns_;
+    s7_pointer global_scm_t_;
+    s7_scheme *s7_;
+    
+    std::unordered_map<std::string, std::function<s7_pointer(s7_scheme*,s7_pointer)>> public_fns_;
 };  // namespace familyline::logic
 
 }  // namespace familyline::logic

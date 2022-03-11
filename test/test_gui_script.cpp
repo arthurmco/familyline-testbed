@@ -17,7 +17,6 @@ class GUITestScript : public ::testing::Test
 protected:
     void SetUp() override
     {
-        scm_init_guile();
         auto ipr = std::make_unique<TestInputProcessor>();
         InputService::setInputManager(std::make_unique<InputManager>(*ipr.get()));
 

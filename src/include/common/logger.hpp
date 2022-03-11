@@ -25,9 +25,7 @@
 
 #include <glm/glm.hpp>
 
-#define volatile 
-#include <libguile.h>
-#undef volatile
+#include <s7.h>
 
 template <>
 struct fmt::formatter<glm::vec3> : formatter<double> {
@@ -44,12 +42,14 @@ struct fmt::formatter<glm::vec3> : formatter<double> {
     }   
 };
 
+using s7_print_pair = std::pair<s7_scheme*, s7_pointer>;
+
 template <>
-struct fmt::formatter<SCM> : formatter<std::string_view> {
+struct fmt::formatter<s7_print_pair> : formatter<std::string_view> {
     template <typename FormatContext>
-    auto format(const SCM& s, FormatContext& ctx) {
+    auto format(const s7_print_pair& s, FormatContext& ctx) {
         std::string v = fmt::format(
-            "({})", scm_to_locale_string(scm_object_to_string(s, SCM_UNDEFINED)));
+            "({})", s7_object_to_c_string(s.first, s.second));
         return format_to(ctx.out(), v);
     }   
 };

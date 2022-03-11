@@ -59,7 +59,22 @@ find_package(SDL2 CONFIG)
 find_package(range-v3 CONFIG)
 find_package(glm CONFIG)
 
-message("${CMAKE_CURRENT_BINARY_DIR}")
+message("Downloading s7 scheme...")
+FetchContent_Declare(
+  s7
+  URL "https://ccrma.stanford.edu/software/s7/s7.tar.gz"
+  URL_HASH "SHA256=20933ddef282f55817a4424b442224749e61770af53dfd07d4f028c204aa1ad8"
+  SOURCE_DIR "${CMAKE_SOURCE_DIR}/generated/s7"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+  )
+FetchContent_MakeAvailable(s7)
+target_include_directories(familyline-common PUBLIC ${s7_SOURCE_DIR})
+set_source_files_properties("${s7_SOURCE_DIR}/s7.c" PROPERTIES LANGUAGE CXX)
+add_library(
+  s7-lib "${s7_SOURCE_DIR}/s7.c")
+target_link_libraries(familyline-common PUBLIC s7-lib)  
 
 if (FLINE_USE_VCPKG)	
   include(${CMAKE_TOOLCHAIN_FILE})
@@ -68,37 +83,6 @@ if (FLINE_USE_VCPKG)
   find_package(unofficial-curlpp CONFIG REQUIRED)
   target_link_libraries(familyline-common PUBLIC unofficial::curlpp::curlpp)
   endif()
-
-  message("GNU Guile is not present on vcpkg and, currently, we have no way of integrating it...")
-
-  message("Downloading a prebuilt GNU Guile (this may not work)")
-  FetchContent_Declare(
-    guile
-    URL "https://downloads.sourceforge.net/project/ezwinports/guile-2.0.11-2-w32-bin.zip"
-    URL_HASH "SHA256=01c231826e01f640b01516657b133c84075d3e0316fba46a15d5bd97de166d0e"
-    SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/bin/guile"
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    )
-  FetchContent_MakeAvailable(guile)
-  find_path(gmp_INCLUDE_DIR "gmp.h")
-
-  # if (WIN32)
-  # fix some includes in the windows build.
-  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/include/guile/2.0/sys")
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/include/guile/2.0/sys/time.h"
-    "#pragma once\n #include <time.h>")
-  file(COPY_FILE "${CMAKE_SOURCE_DIR}/generated/winunistd.h"
-	  "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/include/guile/2.0/unistd.h")
-
-
-# endif()
-  
-  target_include_directories(familyline-common PUBLIC ${gmp_INCLUDE_DIR} ${time_INCLUDE_DIR}
-    "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/include/guile/2.0")
-  target_link_libraries(familyline-common PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}/bin/guile/lib/libguile-2.0.dll.a")
 
   target_include_directories(familyline-common PUBLIC
     ${YAML_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR}
@@ -119,14 +103,16 @@ else()
   pkg_search_module(guile REQUIRED guile-2.2)
 
   target_link_libraries(familyline-common PUBLIC ${glm_LIBRARY})
-  target_link_libraries(familyline-common PUBLIC fmt::fmt glm::glm ${ZLIB_LIBRARIES})
+
+  target_link_libraries(s7-lib PUBLIC "-ldl")  
+
+  target_link_libraries(familyline-common PUBLIC fmt::fmt ${ZLIB_LIBRARIES})
   
   target_link_libraries(familyline-common PUBLIC tl::expected range-v3::range-v3)
-  target_link_libraries(familyline-common PUBLIC ${CURLPP_LDFLAGS} ${guile_LDFLAGS})
+  target_link_libraries(familyline-common PUBLIC ${CURLPP_LDFLAGS})
   target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
   target_include_directories(familyline-common PUBLIC ${ZLIB_INCLUDE_DIR}
-    ${INPUT_FLATBUFFER_INCLUDE} ${CURLPP_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS}
-    ${guile_INCLUDE_DIRS})
+    ${INPUT_FLATBUFFER_INCLUDE} ${CURLPP_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS})
 endif(FLINE_USE_VCPKG)
 
 add_sanitizers(familyline-common)

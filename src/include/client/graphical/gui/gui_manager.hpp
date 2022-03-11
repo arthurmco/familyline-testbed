@@ -297,10 +297,10 @@ public:
      */
     enum SchemeLayout { FlexVertical, FlexHorizontal, Unknown };
 
-    static SchemeLayout getLayoutFromScheme(SCM layout);
+    static SchemeLayout getLayoutFromScheme(s7_scheme* sc, s7_pointer layout);
 
-    static std::optional<std::string> getWindowNameFromScript(SCM window);
-    static std::optional<std::string> getControlNameFromScript(SCM control);
+    static std::optional<std::string> getWindowNameFromScript(s7_scheme* sc, s7_pointer window);
+    static std::optional<std::string> getControlNameFromScript(s7_scheme* sc, s7_pointer control);
 
     /**
      * Create a control representation to be sent to the script
@@ -308,7 +308,7 @@ public:
      * If you already know the type, to speed things up, you can
      * inform it in the `type` variable
      */
-    static SCM createControlToScript(
+    static s7_pointer createControlToScript(s7_scheme* sc, 
         std::string name, const GUIControl &control, std::string type = "");
 
     /**
@@ -316,9 +316,9 @@ public:
      * this is documentation about vectors:
      *  <https://www.gnu.org/software/guile/manual/html_node/Vectors.html>
      */
-    static std::array<double, 4> getColorFromScript(SCM color);
+    static std::array<double, 4> getColorFromScript(s7_scheme* sc, s7_pointer color);
 
-    void registerPublicFunction(std::string name, std::function<SCM(SCM)> fun)
+    void registerPublicFunction(std::string name, std::function<s7_pointer(s7_scheme*,s7_pointer)> fun)
     {
         env_.registerPublicFunction(name, fun);
     }

@@ -4,11 +4,10 @@
 ;;; we do not need to recompile, and the client does not need
 ;;; to know how to use a compiler.
 
-;;; We need support for some SRFIs, though
-(use-modules (srfi srfi-88)) ; keywords
-
-; guile more or less implement this automatically.
-; (use-modules (srfi srfi-89)) ; keyword and optional args
+;;; We need support for some SRFIs, though. s7 implements them already, but
+;;; I will let them here just in case
+;;; (use-modules (srfi srfi-88)) ; keywords
+;;; (use-modules (srfi srfi-89)) ; keyword and optional args
 
 (define (use-layout type param)
   "Create a representation of a layout."
@@ -16,8 +15,7 @@
   "will create an ephemeral object and pass there"
   (cons type param))
 
-
-(define* (window-create name layout #:optional children)
+(define* (window-create name layout (children #f))
   "Create a window on the current GUI manager for this context."
   (let ((w (current-manager-add-window name layout)))
     (when (list? children)
@@ -33,8 +31,8 @@
   ;; function into the native code
   (let ((ctype (car control)))
     (cond
-     [(eq? ctype #:button) (control-set-button control property value)]
-     [else (error "Invalid control type " ctype)])))
+     ((eq? ctype #:button) (control-set-button control property value))
+     (else (error "Invalid control type " ctype)))))
 
 (define (control-get-property control property)
   "Get a certain property of a control"
@@ -42,11 +40,11 @@
   ;; function into the native code
   (let ((ctype (car control)))
     (cond
-     [(eq? ctype #:textbox) (control-get-textbox-property control property)]
-     [(eq? ctype #:checkbox) (control-get-checkbox-property control property)]
-     [else (error "Invalid control type " ctype)])))
+     ((eq? ctype #:textbox) (control-get-textbox-property control property))
+     ((eq? ctype #:checkbox) (control-get-checkbox-property control property))
+     (else (error "Invalid control type " ctype)))))
 
-(define* (control-create name #:key type appearance
+(define* (control-create name type appearance
                          ;; more or less common
                          text
                          ;; box
@@ -59,12 +57,12 @@
   "Depending on the control type, forward the function to the specific C++ control"
   "creation function"
   (let ((control (cond
-                  [(eq? type 'box) (control-create-box name layout children)]
-                  [(eq? type 'label) (control-create-label name text)]
-                  [(eq? type 'button) (control-create-button name text click-handler)]
-                  [(eq? type 'textbox) (control-create-textbox name text)]
-                  [(eq? type 'checkbox) (control-create-checkbox name active)]
-                  [else (error "Invalid control type " type)])))
+                  ((eq? type 'box) (control-create-box name layout children))
+                  ((eq? type 'label) (control-create-label name text))
+                  ((eq? type 'button) (control-create-button name text click-handler))
+                  ((eq? type 'textbox) (control-create-textbox name text))
+                  ((eq? type 'checkbox) (control-create-checkbox name active))
+                  (else (error "Invalid control type " type)))))
     (when (list? appearance)
       (set-appearance-of control appearance))
     control))

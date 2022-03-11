@@ -2,6 +2,8 @@
 #include <fmt/format.h>
 #include <algorithm>
 #include <common/logger.hpp>
+#include <filesystem>
+#include <s7.h>
 
 using namespace familyline::logic;
 
@@ -9,32 +11,38 @@ std::vector<ScriptEnvironment::EnvironmentInfo> ScriptEnvironment::environments 
 
 
 template <typename T>
-std::optional<T> ScriptEnvironment::convertTypeFrom(SCM value) { return std::nullopt; }
+std::optional<T> ScriptEnvironment::convertTypeFrom(s7_scheme *s7,
+                                                    s7_pointer value) { return std::nullopt; }
 
 template <>
-std::optional<long> ScriptEnvironment::convertTypeFrom(SCM value) {    
-    return scm_is_integer(value) ? std::make_optional(scm_to_long(value)) : std::nullopt ;
+std::optional<long> ScriptEnvironment::convertTypeFrom(s7_scheme *s7,
+                                                       s7_pointer value) {    
+    return s7_is_integer(value) ? std::make_optional(s7_integer(value)) : std::nullopt ;
 }
 
 template <>
-std::optional<unsigned long> ScriptEnvironment::convertTypeFrom(SCM value) {    
-    return scm_is_integer(value) ? std::make_optional(scm_to_ulong(value)) : std::nullopt ;
+std::optional<unsigned long> ScriptEnvironment::convertTypeFrom(s7_scheme *s7,
+                                                                s7_pointer value) {    
+    return s7_is_integer(value) ? std::make_optional(s7_integer(value)) : std::nullopt ;
 }
 
 template <>
-std::optional<unsigned> ScriptEnvironment::convertTypeFrom(SCM value) {    
-    return scm_is_integer(value) ? std::make_optional(scm_to_uint(value)) : std::nullopt ;
+std::optional<unsigned> ScriptEnvironment::convertTypeFrom(s7_scheme *s7,
+                                                           s7_pointer value) {    
+    return s7_is_integer(value) ? std::make_optional(s7_integer(value)) : std::nullopt ;
 }
 
 template <>
-std::optional<std::string> ScriptEnvironment::convertTypeFrom(SCM value) {    
-    return scm_is_string(value) ? std::make_optional(scm_to_locale_string(value)) : std::nullopt ;
+std::optional<std::string> ScriptEnvironment::convertTypeFrom(s7_scheme *s7,
+                                                              s7_pointer value) {    
+    return s7_is_string(value) ? std::make_optional(s7_string(value)) : std::nullopt ;
 }
 
 template <>
-std::optional<bool> ScriptEnvironment::convertTypeFrom(SCM value) {    
-    return scm_is_bool(value) == 1 ?
-        std::make_optional(scm_to_bool(value) == 1) :
+std::optional<bool> ScriptEnvironment::convertTypeFrom(s7_scheme *s7,
+                                                       s7_pointer value) {    
+    return s7_is_boolean(value) ?
+        std::make_optional(s7_boolean(s7, value)) :
         std::nullopt ;
 }
 
@@ -45,27 +53,25 @@ void ScriptEnvironment::runScript(std::string path)
 {
     auto &log  = familyline::LoggerService::getLogger();
     log->write("script-environment", LogType::Info, "loading script file {}", path);
-    
-    scm_c_define("current-global-env", scm_from_unsigned_integer((uintptr_t)this));
-    scm_c_primitive_load(path.c_str());
+
+    s7_load(s7_, path.c_str());
 }
 
-SCM ScriptEnvironment::evalFunction(std::string name, SCM arg)
+s7_pointer ScriptEnvironment::evalFunction(std::string name, s7_pointer arg)
 {
     auto &log  = familyline::LoggerService::getLogger();
     log->write("script-environment", LogType::Info, "calling function {}", name);
     
-    SCM fn = scm_variable_ref(scm_c_lookup(name.c_str()));
-    log->write("script-environment", LogType::Info, "!!! <{}>", fn);
+    s7_pointer fn = s7_name_to_value(s7_, name.c_str());
+    log->write("script-environment", LogType::Info, "!!! <{}>", std::make_pair(s7_, fn));
             
-    if (scm_procedure_p(fn) == SCM_BOOL_F) {
+    if (!s7_is_procedure(fn)) {
         log->write("script-environment", LogType::Info, "cannot call {}: wrong type or does not exist",
                    name);
-        return SCM_BOOL_F;
+        return s7_f(s7_);
     }
     
-    scm_c_define("current-global-env", scm_from_unsigned_integer((uintptr_t)this));
-    return scm_call_1(fn, arg);
+    return s7_call(s7_, fn, s7_cons(s7_, arg, s7_nil(s7_)));
 }
 
 
@@ -76,19 +82,24 @@ SCM ScriptEnvironment::evalFunction(std::string name, SCM arg)
  * On Scheme, you call this function like this:
  *  (call-public 'function-name param)
  */
-SCM ScriptEnvironment::callPublicFunctionOnEnv(SCM functionName, SCM param)
+s7_pointer ScriptEnvironment::callPublicFunctionOnEnv(s7_scheme* sc, s7_pointer args)
 {
+    s7_pointer functionName = s7_car(args);
+    s7_pointer param = s7_cadr(args);
+    
+    
     auto &log  = familyline::LoggerService::getLogger();
 
-    auto fnName = ScriptEnvironment::convertTypeFrom<std::string>(scm_symbol_to_string(functionName));
-    if (!fnName) {
+    
+    if (!s7_is_symbol(functionName)) {
         log->write("script-environment", LogType::Error,
                    "invalid type for function-name");
-        return SCM_BOOL_F;
+        return s7_f(sc);
     }
 
-    SCM current_global           = scm_c_eval_string("current-global-env");
-    uintptr_t current_global_ptr = scm_to_uintptr_t(current_global);
+    auto fnName = std::string(s7_symbol_name(functionName));
+    s7_pointer current_global           = s7_eval_c_string(sc, "current-global-env");
+    uintptr_t current_global_ptr = (uintptr_t)s7_integer(current_global);
 
     auto v = std::find_if(
         ScriptEnvironment::environments.begin(), ScriptEnvironment::environments.end(),
@@ -105,5 +116,5 @@ SCM ScriptEnvironment::callPublicFunctionOnEnv(SCM functionName, SCM param)
         throw std::runtime_error("Invalid script environment!");
     }
 
-    return v->env->callPublicFunction(*fnName, param);
+    return v->env->callPublicFunction(fnName, param);
 }

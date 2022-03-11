@@ -1,3 +1,4 @@
+
 (define (on-main-menu-open val)
   (let ((win
          (window-create "menu"
