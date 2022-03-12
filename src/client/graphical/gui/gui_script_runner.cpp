@@ -243,6 +243,22 @@ s7_pointer set_appearance_of(s7_scheme *sc, s7_pointer args)
             a.maxHeight = ScriptEnvironment::convertTypeFrom<unsigned>(sc, value);
         else if (skey == "max-width")
             a.maxWidth = ScriptEnvironment::convertTypeFrom<unsigned>(sc, value);
+        else if (skey == "horizontal-alignment") {
+            std::string alignvalue = s7_symbol_name(value);
+
+            if (alignvalue == "center") {
+                a.horizontalAlignment = HorizontalAlignment::Center;
+            } else if (alignvalue == "left") {
+                a.horizontalAlignment = HorizontalAlignment::Left;
+            } else if (alignvalue == "right") {
+                a.horizontalAlignment = HorizontalAlignment::Right;
+            } else {
+                log->write(
+                    "gui-script-env", familyline::LogType::Error,
+                    "set-appearance-of: cannot set {} to {}", skey, alignvalue);
+                return s7_f(sc);
+            }
+        }
 
         attributes = s7_cdr(attributes);
     }

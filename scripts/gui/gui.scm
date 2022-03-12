@@ -1,6 +1,7 @@
 (define button-appearance
       '((background . #(0 0 0 0.8))
-        (font-size . 18)
+        (font-size . 16)
+        (max-height . 80)
         (max-width . 360)))
 
 (define (on-main-menu-open val)
@@ -11,12 +12,18 @@
           (list (control-create "ltitle"
                                 type: 'label
                                 appearance: '((max-height . 45)
-                                              (font-size . 40))
+                                              (font . "Inconsolata")
+                                              (font-size . 32)
+                                              (horizontal-alignment . center)
+                                              (background . #(0 0 0 0))
+                                              (foreground . #(1 1 1 1)))
                                 text:  "FAMILYLINE")
                 (control-create "lversion"
                                 type: 'label
                                 appearance: '((max-height . 45)
-                                              (font-size . 14))
+                                              (font-size . 14)
+                                              (background . #(1 1 1 0.5))
+                                              (foreground . #(0.2 0.2 1 1)))
                                 text:  (format #f "Version ~a (commit ~a)"
                                                (call-public 'get-version)
                                                (call-public 'get-commit-id)))
@@ -44,13 +51,30 @@
                                                                          (background . #(0 0 0 1))
                                                                          (font-size . 20))
                                                            text:  "Multiplayer")
-                                           (control-create "btnBack"
-                                                           type: 'button
-                                                           text: "Back"
-                                                           click-handler:
-                                                           (lambda (b)
-                                                             (window-destroy "multiplayer")
-                                                             (window-move-to-top "menu")))))))
+                                           (control-create
+                                            ""
+                                            type: 'box
+                                            layout: (use-layout 'flex 'horizontal)
+                                            appearance: '((max-height . 90))
+                                            children: (list
+                                                       (control-create "btnBack"
+                                                                       type: 'button
+                                                                       text: "Back"
+                                                                       click-handler:
+                                                                       (lambda (b)
+                                                                         (window-destroy "multiplayer")
+                                                                         (window-move-to-top "menu")))
+
+                                                       (control-create "btnConnect"
+                                                                       type: 'button
+                                                                       text: "Connect"
+                                                                       click-handler:
+                                                                       (lambda (b)
+                                                                         (window-destroy "multiplayer")
+                                                                         (window-move-to-top "menu")))
+
+                                                       
+                                                       ))))))
                                   (window-show wmultiplayer))))
                 (control-create
                  "btnSettings"
