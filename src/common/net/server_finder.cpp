@@ -11,7 +11,7 @@
 #include <thread>
 
 #ifdef WIN32
-#define errno  WSAGetLastError()
+#define errno WSAGetLastError()
 #endif
 
 using namespace familyline::net;
@@ -88,8 +88,8 @@ in_addr ServerFinder::getLocalIP()
     if (getaddrinfo(hostname.c_str(), NULL, NULL, &addrdata)) {
         log->write(
             "server-finder", LogType::Error,
-            "could not resolve IP for hostname {} ({:x}/{}), defaulting to loopback",
-            hostname, errno, gai_strerror(errno));
+            "could not resolve IP for hostname {} ({:x}/{}), defaulting to loopback", hostname,
+            errno, gai_strerror(errno));
 
         local_addr.s_addr = inet_addr("127.0.0.1");
         return local_addr;
@@ -97,8 +97,7 @@ in_addr ServerFinder::getLocalIP()
 
     if (!addrdata) {
         log->write(
-            "server-finder", LogType::Error, "no IP address found for hostname {}",
-            hostname);
+            "server-finder", LogType::Error, "no IP address found for hostname {}", hostname);
 
         local_addr.s_addr = inet_addr("127.0.0.1");
         return local_addr;
@@ -129,7 +128,7 @@ in_addr ServerFinder::getLocalIP()
 ServerFinder::ServerFinder()
 {
     auto& log = LoggerService::getLogger();
-    
+
 #ifdef FLINE_NET_SUPPORT
 
     socket_ = socket(AF_INET, SOCK_DGRAM, 0);
@@ -157,17 +156,18 @@ ServerFinder::ServerFinder()
     }
 
 #else
-    log->write(
-        "server-finder", LogType::Error, "Network support is not compiled in!");
+    log->write("server-finder", LogType::Error, "Network support is not compiled in!");
 
 #endif
 }
 
 ServerFinder::~ServerFinder()
 {
+#ifdef FLINE_NET_SUPPORT
     if (discovering_) this->stopDiscover();
 
     close(socket_);
+#endif
 }
 
 std::vector<std::string> splitLines(std::string_view s, char sep = '\n')
@@ -220,8 +220,8 @@ std::optional<ServerInfo> parseDiscoverInformation(std::string_view data)
     std::string version;
 
     for (auto& l : lines) {
-      /// RPI C++ compiler does not support C++20 :(
-      if (l.find("HTTP") == 0 && l.find("200 OK") != std::string::npos && l.find("200 OK") > 4) {
+        /// RPI C++ compiler does not support C++20 :(
+        if (l.find("HTTP") == 0 && l.find("200 OK") != std::string::npos && l.find("200 OK") > 4) {
             http_message   = true;
             content_starts = false;
             si             = {};
@@ -347,7 +347,7 @@ void ServerFinder::startDiscover(discovery_cb callback)
             u_long iMode = 1;
             ioctlsocket(s, FIONBIO, &iMode);
 #endif
-            
+
             while (operating) {
                 auto discover = time(nullptr);
                 if (discover - last_discover >= seconds_between_discover) {

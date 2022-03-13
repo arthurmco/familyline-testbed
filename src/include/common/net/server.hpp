@@ -26,13 +26,13 @@ typedef unsigned int in_addr_t;
 #include <sys/un.h>
 #endif
 
-#include <sstream>
-#include <vector>
-#include <optional>
-
 #include <common/net/game_packet_server.hpp>
 #include <common/net/net_client.hpp>
+#include <optional>
+#include <sstream>
+#include <vector>
 
+#ifdef FLINE_NET_SUPPORT
 
 /// i do not want to include curlpp here (but maybe I should?)
 namespace curlpp
@@ -40,10 +40,21 @@ namespace curlpp
 class Easy;
 }
 
+#else
+
+namespace curlpp
+{
+// A ghost curlpp::Easy, just so we can include it when no net support
+// is compiled.
+class Easy
+{
+};
+}  // namespace curlpp
+
+#endif
+
 namespace familyline::net
 {
-
-    
 /// Information about the game server port (the port that you really need to communicate with
 /// the game)
 struct GameServerInfo {
@@ -56,7 +67,6 @@ struct CServerInfo {
     size_t max_clients;
     std::vector<CClientInfo> clients;
 };
-
 
 /**
  * Client-side server communication routines
@@ -106,7 +116,7 @@ public:
     bool isConnecting() const;
 
     std::optional<GamePacketServer> getGameServer();
-    
+
 private:
     /// The address used to communicate with the HTTP part of the game protocol
     std::string http_address_;
@@ -138,7 +148,7 @@ private:
      */
     std::stringstream buildRequest(
         curlpp::Easy& req, std::string endpoint, std::string method = "GET", bool jsonbody = false,
-        std::string data = ""); 
+        std::string data = "");
 };
 
 }  // namespace familyline::net

@@ -14,6 +14,7 @@
 using namespace familyline::net;
 using json = nlohmann::json;
 
+#ifdef FLINE_NET_SUPPORT
 #include <curlpp/Easy.hpp>
 #include <curlpp/Exception.hpp>
 #include <curlpp/Infos.hpp>
@@ -21,12 +22,14 @@ using json = nlohmann::json;
 #include <curlpp/cURLpp.hpp>
 
 using namespace curlpp::options;
+#endif
 
 std::stringstream CServer::buildRequest(
     curlpp::Easy& req, std::string endpoint, std::string method, bool jsonbody, std::string data)
 {
     std::stringstream outstr;
 
+#ifdef FLINE_NET_SUPPORT
     // Set the URL and the timeout lue.
     req.setOpt<Url>(fmt::format("http://{}/{}", http_address_, endpoint));
     req.setOpt<Timeout>(timeout_secs_);
@@ -49,6 +52,7 @@ std::stringstream CServer::buildRequest(
         req.setOpt<PostFields>(data);
         req.setOpt<PostFieldSize>(data.size());
     }
+#endif
 
     return outstr;
 }
@@ -98,6 +102,7 @@ NetResult CServer::login(std::string address, std::string username)
 
     log->write("cli-server", LogType::Info, "logging to {}", address);
     unsigned httpcode = 0;
+#ifdef FLINE_NET_SUPPORT
 
     try {
         // That's all that is needed to do cleanup of used resources (RAII style).
@@ -167,6 +172,10 @@ NetResult CServer::login(std::string address, std::string username)
     }
 
     return NetResult::OK;
+#else
+    // TODO: change to a sort of Not compiled error
+    return NetResult::ConnectionError;
+#endif
 }
 
 json createTokenMessage(std::string token)
@@ -198,6 +207,7 @@ NetResult CServer::logout()
     log->write("cli-server", LogType::Info, "logging out from {}", http_address_);
     unsigned httpcode = 0;
 
+#ifdef FLINE_NET_SUPPORT
     try {
         // That's all that is needed to do cleanup of used resources (RAII style).
         curlpp::Cleanup myCleanup;
@@ -247,6 +257,10 @@ NetResult CServer::logout()
     }
 
     return NetResult::OK;
+#else
+    // TODO: change to a sort of Not compiled error
+    return NetResult::ConnectionError;
+#endif
 }
 
 NetResult CServer::getServerInfo(CServerInfo& info)
@@ -261,6 +275,7 @@ NetResult CServer::getServerInfo(CServerInfo& info)
     log->write("cli-server", LogType::Info, "getting server info from {}", http_address_.c_str());
     unsigned httpcode = 0;
 
+#ifdef FLINE_NET_SUPPORT
     try {
         // That's all that is needed to do cleanup of used resources (RAII style).
         curlpp::Cleanup myCleanup;
@@ -312,6 +327,10 @@ NetResult CServer::getServerInfo(CServerInfo& info)
     }
 
     return NetResult::OK;
+#else
+    // TODO: change to a sort of Not compiled error
+    return NetResult::ConnectionError;
+#endif
 }
 
 bool CServer::isReady() const { return cci_->info.ready; }
@@ -330,6 +349,7 @@ NetResult CServer::toggleReady(bool value)
         value ? "true" : "false");
     unsigned httpcode = 0;
 
+#ifdef FLINE_NET_SUPPORT
     try {
         // That's all that is needed to do cleanup of used resources (RAII style).
         curlpp::Cleanup myCleanup;
@@ -369,6 +389,10 @@ NetResult CServer::toggleReady(bool value)
     }
 
     return NetResult::OK;
+#else
+    // TODO: change to a sort of Not compiled error
+    return NetResult::ConnectionError;
+#endif
 }
 
 bool CServer::isConnecting() const { return (gsi_->address != "" && gsi_->port > 0); }
@@ -385,6 +409,7 @@ NetResult CServer::connect()
     log->write("cli-server", LogType::Info, "connecting to {}", http_address_);
     unsigned httpcode = 0;
 
+#ifdef FLINE_NET_SUPPORT
     try {
         // That's all that is needed to do cleanup of used resources (RAII style).
         curlpp::Cleanup myCleanup;
@@ -412,8 +437,7 @@ NetResult CServer::connect()
         gsi_ = std::optional(GameServerInfo{address, port});
 
         log->write(
-            "cli-server", LogType::Info, "game data transmission server at {}:{}", address,
-            port);
+            "cli-server", LogType::Info, "game data transmission server at {}:{}", address, port);
 
     } catch (curlpp::RuntimeError& e) {
         std::string_view exc{e.what()};
@@ -431,6 +455,10 @@ NetResult CServer::connect()
     }
 
     return NetResult::OK;
+#else
+    // TODO: change to a sort of Not compiled error
+    return NetResult::ConnectionError;
+#endif
 }
 
 std::optional<GamePacketServer> CServer::getGameServer()

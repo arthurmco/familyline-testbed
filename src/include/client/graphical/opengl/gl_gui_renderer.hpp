@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cairo/cairo.h>
-
 #include <client/graphical/gui/gui_renderer.hpp>
 #include <client/graphical/opengl/gl_headers.hpp>
 #include <client/graphical/shader.hpp>
@@ -9,6 +7,8 @@
 #include "client/input/input_service.hpp"
 
 #ifdef RENDERER_OPENGL
+
+#include <cairo/cairo.h>
 
 namespace familyline::graphics::gui
 {

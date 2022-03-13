@@ -6,12 +6,14 @@
  * Copyright (C) 2020 Arthur Mendes
  */
 
+#include <client/graphical/shader.hpp>
 #include <client/graphical/terrain_renderer.hpp>
 #include <client/graphical/texture_manager.hpp>
-#include <client/graphical/shader.hpp>
 #include <common/logic/terrain.hpp>
 #include <glm/glm.hpp>
 #include <unordered_map>
+
+#ifdef RENDERER_OPENGL
 
 namespace familyline::graphics
 {
@@ -93,6 +95,7 @@ public:
     virtual void render(Renderer& rnd);
 
     virtual ~GLTerrainRenderer() {}
-
 };
 }  // namespace familyline::graphics
+
+#endif

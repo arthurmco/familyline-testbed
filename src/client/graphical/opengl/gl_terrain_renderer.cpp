@@ -9,6 +9,8 @@
 #include <common/logger.hpp>
 #include <iterator>
 
+#ifdef RENDERER_OPENGL
+
 using namespace familyline::graphics;
 using namespace familyline::logic;
 
@@ -129,10 +131,9 @@ std::vector<unsigned int> GLTerrainRenderer::createIndices(
             const int idx[4] = {
                 y * width + x, ((x + 1) >= width) ? y * width + x : y * width + (x + 1),
                 ((x + 1) >= width || (y + 1) >= height)
-                    ? ((x + 1) >= width && (y + 1) < height)
-                          ? (y + 1) * width + x
-                          : ((x + 1) < width && (y + 1) >= height) ? y * width + (x + 1)
-                                                                   : y * width + x
+                    ? ((x + 1) >= width && (y + 1) < height)   ? (y + 1) * width + x
+                      : ((x + 1) < width && (y + 1) >= height) ? y * width + (x + 1)
+                                                               : y * width + x
                     : (y + 1) * width + (x + 1),
                 ((y + 1) >= height) ? y * width + x : (y + 1) * width + x};
 
@@ -332,7 +333,7 @@ void GLTerrainRenderer::render(Renderer& r)
 
     glBindVertexArray(tvao_);
 
-    texman->bindTexture(tatlas_, 0); // glBindTexture(GL_TEXTURE_2D, tatlas_->GetHandle());
+    texman->bindTexture(tatlas_, 0);  // glBindTexture(GL_TEXTURE_2D, tatlas_->GetHandle());
     glDrawElements(GL_TRIANGLES, tri_.indices.size(), GL_UNSIGNED_INT, 0);
 
     texman->unbindTexture(0);
@@ -342,3 +343,5 @@ void GLTerrainRenderer::render(Renderer& r)
         log->write("terrain-renderer", LogType::Warning, "GL error 0x{:x}", err);
     }
 }
+
+#endif
