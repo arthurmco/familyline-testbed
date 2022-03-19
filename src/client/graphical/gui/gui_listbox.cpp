@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <client/graphical/gui/gui_listbox.hpp>
 #include <client/input/input_actions.hpp>
 #include <range/v3/all.hpp>
@@ -44,6 +45,34 @@ void GUIListbox::onResize(int nwidth, int nheight, int nx, int ny)
     height_ = nheight;
     x_      = nx;
     y_      = ny;
+}
+
+void GUIListbox::add(std::string tag, std::string item)
+{
+    if (std::find_if(items_.begin(), items_.end(), [&](auto it) { return it.first == tag; }) !=
+        items_.end()) {
+        set(tag, item);
+    } else {
+        items_.emplace_back(std::make_pair(tag, item));
+    }
+}
+
+void GUIListbox::set(std::string tag, std::string newitem)
+{
+    auto it =
+        std::find_if(items_.begin(), items_.end(), [&](auto item) { return item.first == tag; });
+
+    if (it != items_.end()) {
+        it->second = newitem;
+    }
+}
+
+void GUIListbox::remove(std::string tag)
+{
+    auto it =
+        std::remove_if(items_.begin(), items_.end(), [&](auto item) { return item.first == tag; });
+
+    items_.erase(it, items_.end());
 }
 
 void GUIListbox::receiveInput(const familyline::input::HumanInputAction &e)

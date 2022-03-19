@@ -48,6 +48,13 @@ public:
 
     void onSelectedItemChange(FGUISelectedListChange fn) { onSelItemChange_ = fn; };
 
+    void add(std::string item) { add(item, item); }
+    void add(std::string tag, std::string item);
+
+    void set(std::string tag, std::string newitem);
+
+    void remove(std::string tag);
+
 private:
     int itemHeight_ = 20;
     std::optional<size_t> selectedIndex_;
