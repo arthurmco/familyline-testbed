@@ -14,7 +14,7 @@ def advance_version(v, bumprule):
     """
     Advance the version based on a version bump rule
     """
-    
+
     vercomps = v.replace('v', '').split('.')
 
     majv = int(vercomps[0])
@@ -34,7 +34,7 @@ def advance_version(v, bumprule):
         patchv += 1
 
     return "{}.{}.{}".format(majv, minv, patchv)
-    
+
 
 def check_if_staged():
     """
@@ -63,13 +63,13 @@ def get_bump_rule():
         return "patch"
 
     return sys.argv[1]
-    
+
 
 def update_cmakelists(oldver, newver):
     path = "./CMakeLists.txt"
     regex = r"(Familyline VERSION) (\d{1,2}\.\d{1,2}\.\d{1,2})"
     subst = "\\1 {}".format(newver)
-    
+
     with open(path, "r") as cmakefile:
         filedata = cmakefile.read()
 
@@ -94,7 +94,7 @@ except FileNotFoundError:
     print("check if you are in the repository")
     print("you need to run this script from the familyline source root")
     sys.exit(1)
-    
+
 # The newest will be first
 tags.sort(reverse=True)
 
@@ -127,7 +127,7 @@ update_cmakelists(current_ver, next_ver)
 ####################
 
 os.system("git add CMakeLists.txt")
-os.system("git commit -m \"Bump version (v{} -> v{})\"".format(current_ver, next_ver))
+os.system("git commit --no-verify -m \"Bump version (v{} -> v{})\"".format(current_ver, next_ver))
 
 ####################
 

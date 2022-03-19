@@ -1041,6 +1041,8 @@ static int show_starting_menu(
     GUIWindow& background = ginfo.guir->createWindow<FlexLayout<false>>("bg");
     GUIWindow& w          = ginfo.guir->createWindow<FlexLayout<false>>("menu");
 
+    CServer cserv{};
+
     // TODO: Autoresize this when autoresizing the gui manager
     w.onResize(ginfo.gwidth - 2, ginfo.gheight - 2, 1, 1);
     background.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
@@ -1147,8 +1149,15 @@ static int show_starting_menu(
             ginfo.guir->closeWindow(w);
             ginfo.guir->showWindow(settings);
         }));
+
+    std::map<std::string, ServerInfo> silist;
+    std::mutex simtx;
     GUIButton& bmplayer =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Multiplayer", [&](auto c) {
+            simtx.lock();
+            silist.clear();
+            simtx.unlock();
+
             GUIWindow& multiplayer = ginfo.guir->createWindow<FlexLayout<false>>("multiplayer");
             multiplayer.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
 
@@ -1169,8 +1178,8 @@ static int show_starting_menu(
             a.minHeight = 120;
             lstServers.setAppearance(a);
 
-            GUITextbox& txtAddress =
-                (GUITextbox&)multiplayer.box().add(ginfo.guir->createControl<GUITextbox>(""));
+            GUITextbox& txtAddress = (GUITextbox&)multiplayer.box().add(
+                ginfo.guir->createNamedControl<GUITextbox>("txtAddress", ""));
 
             a           = txtAddress.appearance();
             a.maxHeight = 40;
@@ -1184,18 +1193,106 @@ static int show_starting_menu(
 
             GUIButton& back =
                 (GUIButton&)btnArea.add(ginfo.guir->createControl<GUIButton>("Back", [&](auto c) {
+                    aexit = true;
+
+                    sf.stopDiscover();
+
                     ginfo.guir->destroyWindow("multiplayer");
                     ginfo.guir->moveWindowToTop(w);
                 }));
+
+            aexit = false;
 
             a           = back.appearance();
             a.maxHeight = 90;
             back.setAppearance(a);
 
             GUIButton& connect = (GUIButton&)btnArea.add(
-                ginfo.guir->createControl<GUIButton>("Connect", [&](auto c) {
+                ginfo.guir->createNamedControl<GUIButton>("btnConnect", "Connect", [&](auto c) {
+                    GUIButton& b = *ginfo.guir->getControl<GUIButton>("btnConnect");
+
+                    //                    GUIWindow* gmplayer = ginfo.guir->getGUIWindow("mplayer");
+                    auto addr = ginfo.guir->getControl<GUITextbox>("txtAddress")->text();
+                    if (addr.size() < 3) return;
+
+                    b.setText("Connecting...");
+
+                    auto errHandler = [&](std::string msg, NetResult ret) {
+                        switch (ret) {
+                            case NetResult::ConnectionError:
+                                ginfo.win->showMessageBox(
+                                    msg, SysMessageBoxFlags::Warning,
+                                    fmt::format(
+                                        "Could not connect to address {}: Connection error", addr));
+                                break;
+                            case NetResult::WrongPassword:
+                                ginfo.win->showMessageBox(
+                                    msg, SysMessageBoxFlags::Warning,
+                                    fmt::format("Server {} has a password", addr));
+                                break;
+                            case NetResult::LoginFailure:
+                                ginfo.win->showMessageBox(
+                                    msg, SysMessageBoxFlags::Warning,
+                                    fmt::format(
+                                        "Could not log in to {}\nThe server was found, but we "
+                                        "could not "
+                                        "login there.",
+                                        addr));
+                                break;
+                            case NetResult::ConnectionTimeout:
+                                ginfo.win->showMessageBox(
+                                    msg, SysMessageBoxFlags::Warning,
+                                    fmt::format(
+                                        "Timed out while connecting to {}\nThe server probably "
+                                        "does not "
+                                        "exist, or there is a firewall issue.",
+                                        addr));
+                                break;
+                            case NetResult::ServerError:
+                                ginfo.win->showMessageBox(
+                                    msg, SysMessageBoxFlags::Warning,
+                                    fmt::format(
+                                        "Error while connecting to {}. The server sent incorrect "
+                                        "data to "
+                                        "the client.",
+                                        addr));
+                                break;
+                            case NetResult::NotAllClientsConnected:
+                                ginfo.win->showMessageBox(
+                                    msg, SysMessageBoxFlags::Warning,
+                                    fmt::format(
+                                        "Error while connecting to {}. The server reported that "
+                                        "not all "
+                                        "clients were connected, but the client and the server "
+                                        "disagree on "
+                                        "that.",
+                                        addr));
+                                break;
+                            default:
+                                ginfo.win->showMessageBox(
+                                    msg, SysMessageBoxFlags::Warning,
+                                    fmt::format(
+                                        "Could not connect to address {}: unknown error {}", addr,
+                                        ret));
+                                break;
+                        }
+                    };
+
+                    auto ret = cserv.login(addr, confdata.player.username);
+                    if (ret != NetResult::OK) {
+                        ginfo.guir->getControl<GUITextbox>("txtAddress")->setText("");
+                        b.setText("Connect");
+                        errHandler("Connection error", ret);
+                        return;
+                    }
+
+                    b.setText("Connect...");
+
                     ginfo.guir->destroyWindow("multiplayer");
                     ginfo.guir->moveWindowToTop(w);
+                    start_networked_game_room(ginfo, cserv, errHandler, confdata);
+
+                    cserv.logout();
                 }));
 
             a           = connect.appearance();
@@ -1204,6 +1301,23 @@ static int show_starting_menu(
 
             ginfo.guir->closeWindow(w);
             ginfo.guir->showWindow(multiplayer);
+
+            sf.startDiscover([&](ServerInfo si) {
+                fmt::print(
+                    " \033[1m{}\033[0m ({}/{})\n{}:{}\n\n", si.name, si.player_count, si.player_max,
+                    si.ip_addr, si.port);
+
+                GUIListbox* slist = ginfo.guir->getControl<GUIListbox>("serverlist");
+
+                simtx.lock();
+                silist[si.ip_addr] = si;
+                simtx.unlock();
+
+                slist->add(
+                    si.ip_addr, fmt::format(
+                                    "<b>{}</b>     - {}:{} <span foreground='cyan'>({}/{})</span>",
+                                    si.name, si.ip_addr, si.port, si.player_count, si.player_max));
+            });
         }));
     GUIButton& bquit =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Exit Game", [&](auto c) {
@@ -1223,7 +1337,6 @@ static int show_starting_menu(
 
     /*
     GUIWindow* gwin = ginfo.guir->createGUIWindow("main", ginfo.gwidth, ginfo.gheight);
-    CServer cserv{};
 
     Label* l = new Label(0.37, 0.03, "FAMILYLINE");
     l->modifyAppearance([](ControlAppearance& ca) {
@@ -1298,8 +1411,6 @@ static int show_starting_menu(
         ginfo.guir->showWindow(gsettings);
     });
 
-    std::map<std::string, ServerInfo> silist;
-    std::mutex simtx;
     bmplayer->setClickCallback([&](auto* cc) {
         simtx.lock();
         silist.clear();
@@ -1350,80 +1461,6 @@ static int show_starting_menu(
             ca.background = {1, 1, 1, 0.9};
         });
         bconnect->setClickCallback([&](auto* c) {
-            Button* b = (Button*)c;
-
-            GUIWindow* gmplayer = ginfo.guir->getGUIWindow("mplayer");
-            auto addr           = ((Textbox*)gmplayer->get("txtaddr"))->getText();
-            if (addr.size() < 3) return;
-
-            b->setText("Connecting...");
-
-            auto errHandler = [&](std::string msg, NetResult ret) {
-                switch (ret) {
-                    case NetResult::ConnectionError:
-                        ginfo.win->showMessageBox(
-                            msg, SysMessageBoxFlags::Warning,
-                            fmt::format("Could not connect to address {}: Connection error", addr));
-                        break;
-                    case NetResult::WrongPassword:
-                        ginfo.win->showMessageBox(
-                            msg, SysMessageBoxFlags::Warning,
-                            fmt::format("Server {} has a password", addr));
-                        break;
-                    case NetResult::LoginFailure:
-                        ginfo.win->showMessageBox(
-                            msg, SysMessageBoxFlags::Warning,
-                            fmt::format(
-                                "Could not log in to {}\nThe server was found, but we could not "
-                                "login there.",
-                                addr));
-                        break;
-                    case NetResult::ConnectionTimeout:
-                        ginfo.win->showMessageBox(
-                            msg, SysMessageBoxFlags::Warning,
-                            fmt::format(
-                                "Timed out while connecting to {}\nThe server probably does not "
-                                "exist, or there is a firewall issue.",
-                                addr));
-                        break;
-                    case NetResult::ServerError:
-                        ginfo.win->showMessageBox(
-                            msg, SysMessageBoxFlags::Warning,
-                            fmt::format(
-                                "Error while connecting to {}. The server sent incorrect data to "
-                                "the client.",
-                                addr));
-                        break;
-                    case NetResult::NotAllClientsConnected:
-                        ginfo.win->showMessageBox(
-                            msg, SysMessageBoxFlags::Warning,
-                            fmt::format(
-                                "Error while connecting to {}. The server reported that not all "
-                                "clients were connected, but the client and the server disagree on "
-                                "that.",
-                                addr));
-                        break;
-                    default:
-                        ginfo.win->showMessageBox(
-                            msg, SysMessageBoxFlags::Warning,
-                            fmt::format(
-                                "Could not connect to address {}: unknown error {}", addr, ret));
-                        break;
-                }
-            };
-
-            auto ret = cserv.login(addr, confdata.player.username);
-            if (ret != NetResult::OK) {
-                ((Textbox*)gmplayer->get("txtaddr"))->setText("");
-                b->setText("Connect");
-                errHandler("Connection error", ret);
-                return;
-            }
-
-            start_networked_game_room(ginfo, cserv, errHandler, confdata);
-
-            cserv.logout();
-            b->setText("Connect...");
         });
 
         auto bret =
@@ -1450,26 +1487,6 @@ static int show_starting_menu(
         gmplayer->add(0.05, 0.75, ControlPositioning::Relative, std::move(txtaddr), "txtaddr");
         gmplayer->add(0.05, 0.85, ControlPositioning::Relative, std::move(disclbl));
         gmplayer->add(0.37, 0.9, ControlPositioning::CenterX, std::move(bret));
-
-        sf.startDiscover([&](ServerInfo si) {
-            fmt::print(
-                " \033[1m{}\033[0m ({}/{})\n{}:{}\n\n", si.name, si.player_count, si.player_max,
-                si.ip_addr, si.port);
-
-            GUIWindow* gmplayer = ginfo.guir->getGUIWindow("mplayer");
-            Listbox* slist      = (Listbox*)gmplayer->get("serverlist");
-
-            simtx.lock();
-            silist[si.ip_addr] = si;
-            simtx.unlock();
-
-            slist->addItem(
-                si.ip_addr, std::make_unique<Label>(
-                                0, 0,
-                                fmt::format(
-                                    "<b>{}</b>     - {}:{} <span foreground='cyan'>({}/{})</span>",
-                                    si.name, si.ip_addr, si.port, si.player_count, si.player_max)));
-        });
 
         ginfo.guir->showWindow(gmplayer);
 
