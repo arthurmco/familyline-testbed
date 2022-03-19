@@ -56,6 +56,9 @@ using FGUIEventCallback = std::function<void(GUIControl &)>;
  *
  * This allows us to send callbacks to the GUIManager without really
  * needing to have the GUIManager class instantiated
+ *
+ * TODO: Do not pass a reference to the control, because it can be lost between
+ * event trigger and callback calling.
  */
 using FGUICallbackRegister = std::function<void(FGUIEventCallback, GUIControl &)>;
 

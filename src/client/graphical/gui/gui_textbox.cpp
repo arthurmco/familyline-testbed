@@ -1,4 +1,5 @@
 #include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <cassert>
 #include <client/graphical/gui/gui_textbox.hpp>
@@ -55,20 +56,9 @@ std::string GUITextbox::text() const { return toNormalString(text_); }
 /// Used *only* for debugging purposes.
 std::string GUITextbox::describe() const
 {
-    char v[128] = {};
-    sprintf(
-        v, "GUITextbox (id %08x, size %d x %d, pos %d,%d | text: '", id(), width_, height_, x_, y_);
-    auto ret = std::string{v};
-    ret += text();
-    ret += "' ";
-
-    if (parent_) ret += "has a parent ";
-
-    if (onFocus_) ret += " | focus";
-
-    ret += ")";
-
-    return ret;
+    return fmt::format(
+        "GUITextbox (id {:08x}, size {}x{}, pos {},{} | text: '{}', {} | {})", id(), width_,
+        height_, x_, y_, text(), parent_ ? "has a parent" : "", onFocus_ ? "| focus" : "");
 }
 
 /**
@@ -85,8 +75,8 @@ std::string GUITextbox::describe() const
 std::tuple<std::string, std::string, std::string> GUITextbox::getTextAsSelection(bool block) const
 {
     auto begin    = text_.substr(0, select_start_);
-    auto selstart = select_start_;
-    auto selend   = select_end_;
+    auto selstart = std::min(text_.size(), select_start_);
+    auto selend   = std::min(text_.size(), select_end_);
 
     if (block) {
         selend++;
@@ -106,6 +96,10 @@ void GUITextbox::receiveInput(const familyline::input::HumanInputAction &e)
     appearance_.maxHeight = 30;
 
     if (auto *tev = std::get_if<TextInput>(&e.type); tev) {
+        if (select_end_ >= text_.size()) {
+            select_start_ = select_end_ = text_.size();
+        }
+
         auto data32 = toU32(tev->text);
         text_.insert(select_end_, data32);
         select_end_ += data32.size();
@@ -114,7 +108,6 @@ void GUITextbox::receiveInput(const familyline::input::HumanInputAction &e)
         fprintf(stderr, "eeee %s\n", tev->text);
     } else if (auto *kev = std::get_if<KeyAction>(&e.type); kev) {
         if (kev->keycode == SDLK_BACKSPACE && kev->isPressed) {
-            fprintf(stderr, "backspace\n");
             if (select_start_ > 0) {
                 text_.erase(select_start_ - 1, select_end_ - select_start_ + 1);
                 select_start_--;
@@ -174,5 +167,5 @@ size_t GUITextbox::getCharFromPosition(size_t x, size_t y)
         idx++;
     }
 
-    return idx - 1;
+    return std::max(idx - 1, 0);
 }
