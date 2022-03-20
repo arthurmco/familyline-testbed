@@ -1168,10 +1168,7 @@ static int show_starting_menu(
             a.maxHeight     = 40;
             title.setAppearance(a);
 
-            std::vector<std::pair<std::string, std::string>> serveritems = {
-                {"192.168.1.1", "<b>localhost</b>"},
-                {"10.0.0.1", "<span foreground='#ff0000'>lalala</span>"},
-                {"24.69.171.157", "aaaa"}};
+            std::vector<std::pair<std::string, std::string>> serveritems = {};
             GUIListbox& lstServers = (GUIListbox&)multiplayer.box().add(
                 ginfo.guir->createControl<GUIListbox>(serveritems));
             a           = lstServers.appearance();

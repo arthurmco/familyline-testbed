@@ -48,13 +48,12 @@ add_dependencies(familyline-common input-flatbuffer input-ser-flatbuffer network
 target_compile_features(familyline-common PRIVATE cxx_std_20)
 
 find_package(fmt 6...7.2 CONFIG REQUIRED)
-find_package(ZLIB REQUIRED)
 find_package(tl-expected 1 CONFIG REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(FlatBuffers REQUIRED)
 find_package(SDL2 CONFIG)
 find_package(range-v3 CONFIG)
-find_package(glm REQUIRED)
+find_package(glm CONFIG)
 
 if (FLINE_USE_VCPKG)
   include(${CMAKE_TOOLCHAIN_FILE})
@@ -79,8 +78,15 @@ else()
   target_link_libraries(familyline-common PUBLIC ${CURLPP_LDFLAGS})
   target_include_directories(familyline-common PUBLIC ${CURLPP_INCLUDE_DIRS})
   endif()
+  pkg_search_module(ZLIB REQUIRED zlib)
 
-  target_link_libraries(familyline-common PUBLIC fmt::fmt glm::glm ${ZLIB_LIBRARIES})
+  if (DEFINED glm::glm)
+    target_link_libraries(familyline-common PUBLIC glm::glm)
+  else()
+    target_link_libraries(familyline-common PUBLIC glm)
+  endif()
+
+  target_link_libraries(familyline-common PUBLIC fmt::fmt ${ZLIB_LIBRARIES})
   target_link_libraries(familyline-common PUBLIC tl::expected range-v3::range-v3)
   target_link_libraries(familyline-common PUBLIC nlohmann_json::nlohmann_json)
   target_include_directories(familyline-common PUBLIC

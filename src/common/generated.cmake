@@ -5,6 +5,8 @@
 # called INPUT_FLATBUFFER_INCLUDE, where the generated header file
 # is.
 
+# TODO: solve the issue of us having to run cmake twice to get the flatbuffers path
+
 include_guard(GLOBAL)
 
 include("${CMAKE_SOURCE_DIR}/cmake/BuildFlatBuffers.cmake")

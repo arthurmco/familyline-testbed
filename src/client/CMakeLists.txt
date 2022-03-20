@@ -123,16 +123,28 @@ endif()
 else()
   find_package(PkgConfig REQUIRED)
   find_package(Threads REQUIRED)
-  #  find_package(SDL_image REQUIRED)
+  find_package(SDL_image CONFIG)
   if (FLINE_RENDERER STREQUAL "opengl")
     pkg_search_module(CAIRO REQUIRED cairo) # finds cairo
     pkg_search_module(PANGOCAIRO REQUIRED pangocairo) # finds pango-cairo
   endif()
 
-  if (DEFINED SDL2::SDL2)
-    target_link_libraries(familyline-client PUBLIC SDL2::SDL2 SDL2::SDL2main "-lSDL2_image")
+  if (DEFINED SDL2::SDL2_image)
+    target_link_libraries(familyline-client PUBLIC SDL2::SDL2_image)
   else()
-    target_link_libraries(familyline-client PUBLIC ${SDL2_LIBRARIES} "-lSDL2_image")
+    find_library(SDL_IMAGE_LIB "SDL2_image")
+    if (${SDL_IMAGE_LIB} EQUAL "SDL_IMAGE_LIB-NOTFOUND")
+      message(FATAL_ERROR "SDL_image not found")
+    else()
+      target_link_libraries(familyline-client PUBLIC ${SDL_IMAGE_LIB})
+    endif()
+  endif()
+
+
+  if (DEFINED SDL2::SDL2)
+    target_link_libraries(familyline-client PUBLIC SDL2::SDL2 SDL2::SDL2main)
+  else()
+    target_link_libraries(familyline-client PUBLIC ${SDL2_LIBRARIES})
   endif()
 
   target_link_libraries(familyline-client PUBLIC fmt::fmt)
