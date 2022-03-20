@@ -178,17 +178,19 @@ std::unique_ptr<ControlPaintData> GLControlPainter::drawControl(GUIControl& c)
             auto pos = index * listbox->getItemHeight();
             cairo_move_to(ctxt, 5, pos);
 
-            auto itemAppearance = appearance;
+            auto itemAppearance       = appearance;
+            auto [ifr, ifg, ifb, ifa] = appearance.foreground;
+            auto [ibr, ibg, ibb, iba] = appearance.background;
 
             if (auto selidx = listbox->getSelectedIndex(); selidx && *selidx == index) {
-                cairo_set_source_rgba(ctxt, fr, fg, fb, fa);
+                cairo_set_source_rgba(ctxt, ifr, ifg, ifb, ifa);
                 cairo_set_operator(ctxt, CAIRO_OPERATOR_OVER);
                 cairo_rectangle(ctxt, 0, pos, listbox->width(), listbox->getItemHeight());
                 cairo_fill(ctxt);
 
                 std::swap(itemAppearance.background, itemAppearance.foreground);
             } else {
-                cairo_set_source_rgba(ctxt, br, bg, bb, ba);
+                cairo_set_source_rgba(ctxt, ibr, ibg, ibb, iba);
             }
 
             drawText(
