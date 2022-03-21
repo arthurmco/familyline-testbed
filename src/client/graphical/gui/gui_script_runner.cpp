@@ -109,6 +109,8 @@ std::string getControlTypeString(const GUIControl *c)
         return "checkbox";
     } else if (dynamic_cast<const GUITextbox *>(c)) {
         return "textbox";
+    } else if (dynamic_cast<const GUIListbox *>(c)) {
+        return "listbox";
     } else if (dynamic_cast<const GUIButton *>(c)) {
         return "button";
     } else if (dynamic_cast<const GUIImageView *>(c)) {
@@ -422,8 +424,7 @@ s7_pointer control_create_textbox(s7_scheme *sc, s7_pointer args)
     if (!sname) {
         log->write(
             "gui-script-env", familyline::LogType::Error,
-            "control-create-textbox: incorrect type for 'name': {}",
-            std::make_pair(sc, name));
+            "control-create-textbox: incorrect type for 'name': {}", std::make_pair(sc, name));
         return s7_f(sc);
     }
 
@@ -431,14 +432,82 @@ s7_pointer control_create_textbox(s7_scheme *sc, s7_pointer args)
     if (!stext) {
         log->write(
             "gui-script-env", familyline::LogType::Error,
-            "control-create-textbox: incorrect type for 'text': {}",
-            std::make_pair(sc, text));
+            "control-create-textbox: incorrect type for 'text': {}", std::make_pair(sc, text));
         return s7_f(sc);
     }
 
     auto gm      = ScriptEnvironment::getGlobalEnv<GUIManager *>(sc);
     auto textbox = gm->createNamedControl<GUITextbox>(*sname, *stext);
     return GUIScriptRunner::createControlToScript(sc, *sname, *textbox, "textbox");
+}
+
+/**
+ * Creates a listbox
+ *
+ * (control-create-listbox name items)
+ *
+ * - name is the listbox name
+ * - items is the collection of items.
+ *   It can take two forms:
+ *    - a list of strings
+ *    - a list of cons, here the car is the tag and the cdr is the text.
+ */
+s7_pointer control_create_listbox(s7_scheme *sc, s7_pointer args)
+{
+    auto name  = s7_car(args);
+    auto items = s7_cadr(args);
+
+    auto &log  = familyline::LoggerService::getLogger();
+    auto sname = ScriptEnvironment::convertTypeFrom<std::string>(sc, name);
+    if (!sname) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-create-textbox: incorrect type for 'name': {}", std::make_pair(sc, name));
+        return s7_f(sc);
+    }
+    
+    if (!s7_is_boolean(items) && !s7_is_list(sc, items)) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-create-listbox: incorrect type for 'items', expected a list: {}",
+            std::make_pair(sc, items));
+        return s7_f(sc);
+    }
+
+    std::vector<std::pair<std::string, std::string>> vitems;
+
+    if (!s7_is_boolean(items)) {
+        while (!s7_is_null(sc, items)) {
+            s7_pointer item = s7_car(items);
+
+            if (s7_is_string(item)) {
+                std::string sitem = s7_string(item);
+                vitems.push_back(std::make_pair(sitem, sitem));
+            } else {
+                s7_pointer itag = s7_car(item);
+                s7_pointer ival = s7_cdr(item);
+
+                auto stag = ScriptEnvironment::convertTypeFrom<std::string>(sc, itag);
+                auto sval = ScriptEnvironment::convertTypeFrom<std::string>(sc, ival);
+
+                if (stag && sval) {
+                    vitems.push_back(std::make_pair(*stag, *sval));
+                } else {
+                    log->write(
+                        "gui-script-env", familyline::LogType::Error,
+                        "control-create-textbox: incorrect type for item position #{}: {}",
+                        vitems.size(), std::make_pair(sc, item));
+                    return s7_f(sc);
+                }
+            }
+
+            items = s7_cdr(items);
+        }
+    }
+    
+    auto gm      = ScriptEnvironment::getGlobalEnv<GUIManager *>(sc);
+    auto listbox = gm->createNamedControl<GUIListbox>(*sname, vitems);
+    return GUIScriptRunner::createControlToScript(sc, *sname, *listbox, "listbox");
 }
 
 /**
@@ -459,8 +528,7 @@ s7_pointer control_create_checkbox(s7_scheme *sc, s7_pointer args)
     if (!sname) {
         log->write(
             "gui-script-env", familyline::LogType::Error,
-            "control-create-checkbox: incorrect type for 'name': {}",
-            std::make_pair(sc, name));
+            "control-create-checkbox: incorrect type for 'name': {}", std::make_pair(sc, name));
         return s7_f(sc);
     }
 
@@ -468,8 +536,7 @@ s7_pointer control_create_checkbox(s7_scheme *sc, s7_pointer args)
     if (!bactive) {
         log->write(
             "gui-script-env", familyline::LogType::Error,
-            "control-create-checkbox: incorrect type for 'active': {}",
-            std::make_pair(sc, active));
+            "control-create-checkbox: incorrect type for 'active': {}", std::make_pair(sc, active));
         return s7_f(sc);
     }
 
@@ -534,10 +601,10 @@ s7_pointer control_create_button(s7_scheme *sc, s7_pointer args)
  *
  * If the control does not exist, returns #f
  */
-s7_pointer control_get(s7_scheme* sc, s7_pointer args)
+s7_pointer control_get(s7_scheme *sc, s7_pointer args)
 {
     auto name = s7_car(args);
-    
+
     auto sname = ScriptEnvironment::convertTypeFrom<std::string>(sc, name);
     if (!sname) {
         return s7_f(sc);
@@ -555,12 +622,12 @@ s7_pointer control_get(s7_scheme* sc, s7_pointer args)
  *
  * The property is defined as a symbol (like 'text, or 'handler).
  */
-s7_pointer control_set_button(s7_scheme* sc, s7_pointer args)
+s7_pointer control_set_button(s7_scheme *sc, s7_pointer args)
 {
-    auto control = s7_car(args);
+    auto control  = s7_car(args);
     auto property = s7_cadr(args);
-    auto value = s7_caddr(args);
-    
+    auto value    = s7_caddr(args);
+
     auto &log = familyline::LoggerService::getLogger();
 
     if (!s7_is_symbol(property)) {
@@ -570,7 +637,7 @@ s7_pointer control_set_button(s7_scheme* sc, s7_pointer args)
         return s7_f(sc);
     }
 
-    auto sproperty = std::string{s7_symbol_name(property)};
+    auto sproperty   = std::string{s7_symbol_name(property)};
     auto controlname = GUIScriptRunner::getControlNameFromScript(sc, control);
     if (!controlname) {
         log->write(
@@ -594,6 +661,70 @@ s7_pointer control_set_button(s7_scheme* sc, s7_pointer args)
 }
 
 /**
+ * Set some listbox attribute, excluding appareance ones
+ *
+ * You call this from scheme as (control-set-listbox control property value)
+ *
+ * The property is defined as a symbol (like 'handler).
+ *
+ * We can set the on item change handle here..
+ */
+s7_pointer control_set_listbox(s7_scheme *sc, s7_pointer args)
+{
+    auto control  = s7_car(args);
+    auto property = s7_cadr(args);
+    auto value    = s7_caddr(args);
+
+    auto &log = familyline::LoggerService::getLogger();
+
+    if (!s7_is_symbol(property)) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-set-listbox: wrong type for property");
+        return s7_f(sc);
+    }
+
+    auto sproperty   = std::string{s7_symbol_name(property)};
+    auto controlname = GUIScriptRunner::getControlNameFromScript(sc, control);
+    if (!controlname) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-set-listbox: wrong type for control");
+        return s7_f(sc);
+    }
+
+    auto gm      = ScriptEnvironment::getGlobalEnv<GUIManager *>(sc);
+    auto listbox = gm->getControl<GUIListbox>(*controlname);
+
+    if (sproperty == "on-selected-item-change") {
+        if (!s7_is_function(value)) {
+            log->write(
+                "gui-script-env", familyline::LogType::Error,
+                "control-set-listbox: incorrect type for 'on-selected-item-change', expected "
+                "function: {}",
+                std::make_pair(sc, value));
+            return s7_f(sc);
+        }
+
+        s7_gc_protect(sc, value);
+        listbox->onSelectedItemChange([&](GUIControl &c, size_t index, std::string tag) {
+            s7_call(
+                sc, value,
+                s7_list(sc, 3,
+                        GUIScriptRunner::createControlToScript(sc, *controlname, c, "listbox"),
+                        s7_make_integer(sc, index),
+                        s7_make_string(sc, tag.c_str())));
+
+        });
+        log->write(
+            "gui-script-env", familyline::LogType::Info, "setting listbox property {} to {}",
+            sproperty, std::make_pair(sc, value));
+    }
+
+    return control;
+}
+
+/**
  * Get the value of a certain property of the control
  * You would call it like this: (control-get-textbox-property control property)
  *
@@ -601,11 +732,11 @@ s7_pointer control_set_button(s7_scheme* sc, s7_pointer args)
  *
  * For unknown properties, return #f
  */
-s7_pointer control_get_textbox_property(s7_scheme* sc, s7_pointer args)
+s7_pointer control_get_textbox_property(s7_scheme *sc, s7_pointer args)
 {
-    auto control = s7_car(args);
+    auto control  = s7_car(args);
     auto property = s7_cadr(args);
-    
+
     auto &log = familyline::LoggerService::getLogger();
     if (!s7_is_symbol(property)) {
         log->write(
@@ -643,12 +774,12 @@ s7_pointer control_get_textbox_property(s7_scheme* sc, s7_pointer args)
  *
  * For unknown properties, return #f
  */
-s7_pointer control_get_checkbox_property(s7_scheme* sc, s7_pointer args)
+s7_pointer control_get_checkbox_property(s7_scheme *sc, s7_pointer args)
 {
-    auto &log = familyline::LoggerService::getLogger();
-    auto control = s7_car(args);
+    auto &log     = familyline::LoggerService::getLogger();
+    auto control  = s7_car(args);
     auto property = s7_cadr(args);
-    
+
     if (!s7_is_symbol(property)) {
         log->write(
             "gui-script-env", familyline::LogType::Error,
@@ -682,10 +813,10 @@ s7_pointer control_get_checkbox_property(s7_scheme* sc, s7_pointer args)
  *
  * You call it like this: (window-show window)
  */
-s7_pointer window_show(s7_scheme* sc, s7_pointer args)
+s7_pointer window_show(s7_scheme *sc, s7_pointer args)
 {
     auto window = s7_car(args);
-    
+
     auto &log    = familyline::LoggerService::getLogger();
     auto winname = GUIScriptRunner::getWindowNameFromScript(sc, window);
     if (!winname) {
@@ -718,10 +849,10 @@ s7_pointer window_show(s7_scheme* sc, s7_pointer args)
  *  - a window object
  *  - a window name
  */
-s7_pointer window_move_to_top(s7_scheme* sc, s7_pointer args)
+s7_pointer window_move_to_top(s7_scheme *sc, s7_pointer args)
 {
     auto window = s7_car(args);
-    
+
     auto &log    = familyline::LoggerService::getLogger();
     auto winname = GUIScriptRunner::getWindowNameFromScript(sc, window);
     if (!winname) {
@@ -731,8 +862,7 @@ s7_pointer window_move_to_top(s7_scheme* sc, s7_pointer args)
     if (!winname) {
         log->write(
             "gui-script-env", familyline::LogType::Error,
-            "window-destroy: incorrect type for 'window': {}",
-            std::make_pair(sc, window));
+            "window-destroy: incorrect type for 'window': {}", std::make_pair(sc, window));
         return s7_f(sc);
     }
 
@@ -758,10 +888,10 @@ s7_pointer window_move_to_top(s7_scheme* sc, s7_pointer args)
  *  - a window object
  *  - a window name
  */
-s7_pointer window_destroy(s7_scheme* sc, s7_pointer args)
+s7_pointer window_destroy(s7_scheme *sc, s7_pointer args)
 {
     auto window = s7_car(args);
-    
+
     auto &log    = familyline::LoggerService::getLogger();
     auto winname = GUIScriptRunner::getWindowNameFromScript(sc, window);
     if (!winname) {
@@ -771,8 +901,7 @@ s7_pointer window_destroy(s7_scheme* sc, s7_pointer args)
     if (!winname) {
         log->write(
             "gui-script-env", familyline::LogType::Error,
-            "window-destroy: incorrect type for 'window': {}",
-            std::make_pair(sc, window));
+            "window-destroy: incorrect type for 'window': {}", std::make_pair(sc, window));
         return s7_f(sc);
     }
 
@@ -804,6 +933,7 @@ GUIScriptRunner::GUIScriptRunner(GUIManager *manager)
     env_.registerFunction("control-create-label", 2, control_create_label);
     env_.registerFunction("control-create-button", 3, control_create_button);
     env_.registerFunction("control-create-textbox", 2, control_create_textbox);
+    env_.registerFunction("control-create-listbox", 2, control_create_listbox);
     env_.registerFunction("control-create-checkbox", 2, control_create_checkbox);
 
     env_.registerFunction("control-get-textbox-property", 2, control_get_textbox_property);
@@ -812,6 +942,7 @@ GUIScriptRunner::GUIScriptRunner(GUIManager *manager)
     env_.registerFunction("control-get", 1, control_get);
 
     env_.registerFunction("control-set-button", 3, control_set_button);
+    env_.registerFunction("control-set-listbox", 3, control_set_listbox);
 
     env_.registerFunction("window-show", 1, window_show);
     env_.registerFunction("window-destroy", 1, window_destroy);
@@ -823,11 +954,12 @@ GUIScriptRunner::GUIScriptRunner(GUIManager *manager)
 GUIWindow *GUIScriptRunner::openMainWindow()
 {
     auto &log      = familyline::LoggerService::getLogger();
-    s7_pointer win = env_.evalFunction("on-main-menu-open", s7_list(env_.getContext(),
-                                                                    1, s7_t(env_.getContext())));
+    s7_pointer win = env_.evalFunction(
+        "on-main-menu-open", s7_list(env_.getContext(), 1, s7_t(env_.getContext())));
     GUIManager *gm = env_.get_value<GUIManager *>();
 
-//    fprintf(stderr, "<%s>", scm_to_locale_string(scm_object_to_string(win, s7_pointer_UNDEFINED)));
+    //    fprintf(stderr, "<%s>", scm_to_locale_string(scm_object_to_string(win,
+    //    s7_pointer_UNDEFINED)));
     auto winname = GUIScriptRunner::getWindowNameFromScript(env_.getContext(), win);
     if (!winname) {
         log->write(
@@ -852,7 +984,7 @@ GUIWindow *GUIScriptRunner::openMainWindow()
  * In Scheme, a layout is a cons
  * The car is the layout type, the cdr is a parameter
  */
-GUIScriptRunner::SchemeLayout GUIScriptRunner::getLayoutFromScheme(s7_scheme* sc, s7_pointer layout)
+GUIScriptRunner::SchemeLayout GUIScriptRunner::getLayoutFromScheme(s7_scheme *sc, s7_pointer layout)
 {
     auto &log = LoggerService::getLogger();
     if (!s7_is_pair(layout)) {
@@ -892,25 +1024,18 @@ GUIScriptRunner::SchemeLayout GUIScriptRunner::getLayoutFromScheme(s7_scheme* sc
  * this is documentation about vectors:
  *  <https://www.gnu.org/software/guile/manual/html_node/Vectors.html>
  */
-std::array<double, 4> GUIScriptRunner::getColorFromScript(s7_scheme* sc, s7_pointer color)
+std::array<double, 4> GUIScriptRunner::getColorFromScript(s7_scheme *sc, s7_pointer color)
 {
     switch (s7_vector_length(color)) {
-    case 4:
-        return {
-            s7_real(s7_vector_ref(sc, color, 0)),
-            s7_real(s7_vector_ref(sc, color, 1)),
-            s7_real(s7_vector_ref(sc, color, 2)),
-            s7_real(s7_vector_ref(sc, color, 3))
-        };
-    case 3:
-        return {
-            s7_real(s7_vector_ref(sc, color, 0)),
-            s7_real(s7_vector_ref(sc, color, 1)),
-            s7_real(s7_vector_ref(sc, color, 2)),
-            1.0
-        };
-    default:
-        return {0,0,0,0};
+        case 4:
+            return {
+                s7_real(s7_vector_ref(sc, color, 0)), s7_real(s7_vector_ref(sc, color, 1)),
+                s7_real(s7_vector_ref(sc, color, 2)), s7_real(s7_vector_ref(sc, color, 3))};
+        case 3:
+            return {
+                s7_real(s7_vector_ref(sc, color, 0)), s7_real(s7_vector_ref(sc, color, 1)),
+                s7_real(s7_vector_ref(sc, color, 2)), 1.0};
+        default: return {0, 0, 0, 0};
     }
 }
 

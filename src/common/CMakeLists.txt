@@ -100,7 +100,6 @@ else()
   target_include_directories(familyline-common PUBLIC ${CURLPP_INCLUDE_DIRS})
   endif()
   pkg_search_module(ZLIB REQUIRED zlib)
-  pkg_search_module(guile REQUIRED guile-2.2)
 
   target_link_libraries(familyline-common PUBLIC ${glm_LIBRARY})
 

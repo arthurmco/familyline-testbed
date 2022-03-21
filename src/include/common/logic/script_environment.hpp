@@ -77,7 +77,7 @@ public:
     
     /**
      * This is a little quirk to support embedded scheme with global state,
-     * such as guile, with our local scheme state.
+     * such as s7, with our local scheme state.
      *
      * We define a list of defined environments, and store a pointer of the current
      * environment on each run
@@ -111,7 +111,7 @@ public:
      *
      * The difference between a native and a public function is that
      * the public function can be any callable. This may cause things
-     * to go a bit slow on the translation, because GNU Guile only allow
+     * to go a bit slow on the translation, because s7 only allow
      * us to call functions, not any callable, such as functors and lambdas.
      *
      * The same rules apply however, and you will need to convert them

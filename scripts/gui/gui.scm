@@ -51,6 +51,12 @@
                                                                          (background . #(0 0 0 1))
                                                                          (font-size . 20))
                                                            text:  "Multiplayer")
+                                           (control-create "lclients"
+                                                           type: 'listbox)
+                                           (control-create "txtAddress"
+                                                           type: 'textbox
+                                                           appearance: '((max-height . 35))
+                                                           text: "")
                                            (control-create
                                             ""
                                             type: 'box

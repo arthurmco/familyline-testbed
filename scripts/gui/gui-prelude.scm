@@ -32,6 +32,7 @@
   (let ((ctype (car control)))
     (cond
      ((eq? ctype #:button) (control-set-button control property value))
+     ((eq? ctype #:listbox) (control-set-listbox control property value))
      (else (error "Invalid control type " ctype)))))
 
 (define (control-get-property control property)
@@ -51,6 +52,8 @@
                          layout children
                          ;; checkbox
                          active
+                         ;; listbox
+                         items
                          ;; button
                          click-handler)
   "Create a control"
@@ -62,6 +65,9 @@
                   ((eq? type 'button) (control-create-button name text click-handler))
                   ((eq? type 'textbox) (control-create-textbox name text))
                   ((eq? type 'checkbox) (control-create-checkbox name active))
+                  ((eq? type 'listbox)
+                   (let ((c (control-create-listbox name items)))
+                     c))
                   (else (error "Invalid control type " type)))))
     (when (list? appearance)
       (set-appearance-of control appearance))
