@@ -1,3 +1,5 @@
+#include <fmt/core.h>
+
 #include <algorithm>
 #include <client/graphical/gui/gui_listbox.hpp>
 #include <client/input/input_actions.hpp>
@@ -13,19 +15,9 @@ GUIListbox::GUIListbox(std::vector<std::string> items, GUIControlRenderInfo i) :
 
 std::string GUIListbox::describe() const
 {
-    char v[128] = {};
-    sprintf(
-        v, "GUIListbox (id %08x, size %d x %d, pos %d,%d | itemcount: %zu ", id(), width_, height_,
-        x_, y_, items_.size());
-    auto ret = std::string{v};
-
-    if (parent_) ret += "has a parent ";
-
-    if (onFocus_) ret += " | focus";
-
-    ret += ")";
-
-    return ret;
+    return fmt::format(
+        "GUIListbox (id {:08x}, size {}x{}, pos {},{} | itemcount: {}, {} | {})", id(), width_,
+        height_, x_, y_, items_.size(), parent_ ? "has a parent" : "", onFocus_ ? "| focus" : "");
 }
 
 void GUIListbox::iterItems(std::function<void(size_t, std::string)> fn) const

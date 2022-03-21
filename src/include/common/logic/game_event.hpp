@@ -1,10 +1,10 @@
 #pragma once
 
+#include <common/logic/object_components.hpp>
 #include <memory>
 #include <queue>
 #include <string>
 #include <variant>
-#include <common/logic/object_components.hpp>
 
 namespace familyline::logic
 {
@@ -20,7 +20,7 @@ namespace familyline::logic
  * Following are the event struct types.
  * Because C++ lack sum types, we need to create separate structs to each
  * event type and glue them using an std::variant. This is, honestly,
- * one of the things that I like Rust added, and I would prefer to do
+ * one of the things that I liked in Rust, and I would prefer to do
  * this in Rust.
  */
 typedef unsigned long long entity_id_t;
@@ -61,7 +61,6 @@ struct EventReady {
     entity_id_t objectID;
 };
 
-    
 /**
  * An entity initiated an attacker
  *
@@ -81,7 +80,7 @@ struct EventAttackStart {
     AttackRule rule;
     AttackAttributes atkAttributes;
     AttackAttributes defAttributes;
-    
+
     unsigned int atkXPos, atkYPos;
     unsigned int defXPos, defYPos;
 };
@@ -207,7 +206,7 @@ class ActionQueue;
 /**
  * The event type array
  *
- * PLEASE keep these types synced with the enum ActionQueeEvent in <common/logic/action_queue.hpp>,
+ * PLEASE keep these types synced with the enum ActionQueueEvent in <common/logic/action_queue.hpp>,
  * so the listeners can know what actions to listen
  *
  * If you keep them desynchronized (with the .index() of the variant not corresponding to
@@ -231,11 +230,10 @@ struct EntityEvent {
  *
  * Will be used like a proxy so you can send events to the action queue
  */
-class EventEmitter {
+class EventEmitter
+{
 public:
-    EventEmitter(std::string name) :
-        name_(name)
-        {}    
+    EventEmitter(std::string name) : name_(name) {}
 
     /**
      * Pushes the event to the central action queue
@@ -246,11 +244,9 @@ public:
     ActionQueue* queue;
 
     std::string_view getName() const { return name_; }
+
 protected:
     std::string name_;
-
-    
 };
 
-    
 }  // namespace familyline::logic

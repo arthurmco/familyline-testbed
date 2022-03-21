@@ -6,10 +6,9 @@
 
 #pragma once
 
+#include <common/logic/game_event.hpp>
+#include <common/logic/object_manager.hpp>
 #include <unordered_map>
-
-#include "game_event.hpp"
-#include "object_manager.hpp"
 
 namespace familyline::logic
 {

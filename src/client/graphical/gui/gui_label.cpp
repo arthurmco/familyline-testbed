@@ -1,21 +1,14 @@
+#include <fmt/core.h>
+
 #include <client/graphical/gui/gui_label.hpp>
+
 using namespace familyline::graphics::gui;
 
 std::string GUILabel::describe() const
 {
-    char v[128] = {};
-    sprintf(
-        v, "GUILabel (id %08x, size %d x %d, pos %d,%d | text: %s'", id(), width_, height_, x_, y_,
-        text_.c_str());
-    auto ret = std::string{v};
-
-    if (parent_) ret += "has a parent ";
-
-    if (onFocus_) ret += " | focus";
-
-    ret += ")";
-
-    return ret;
+    return fmt::format(
+        "GUILabel (id {:08x}, size {}x{}, pos {},{} | text: '{}', {} | {})", id(), width_, height_,
+        x_, y_, text(), parent_ ? "has a parent" : "", onFocus_ ? "| focus" : "");
 }
 
 void GUILabel::calculateNeededSize()
