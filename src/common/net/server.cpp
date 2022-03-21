@@ -1,3 +1,4 @@
+#include <config.h>
 #include <fmt/format.h>
 
 #include <algorithm>
@@ -173,6 +174,8 @@ NetResult CServer::login(std::string address, std::string username)
 
     return NetResult::OK;
 #else
+    log->write("cli-server", LogType::Warning, "network support not compiled in!");
+
     // TODO: change to a sort of Not compiled error
     return NetResult::ConnectionError;
 #endif

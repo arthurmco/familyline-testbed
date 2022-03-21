@@ -5,7 +5,6 @@
     Copyright 2016, 2017, 2019-2020 Arthur Mendes.
 
 ***/
-#include <config.h>
 #include <fmt/core.h>
 #include <fmt/format.h>
 
@@ -152,6 +151,8 @@ int start_networked_game(
 
             gps.update();
             std::for_each(clients.begin(), clients.end(), [&](NetworkClient& c) { c.update(); });
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
             // 1 min timeout
             if (watchdog == 1000 * 30) {
@@ -1287,6 +1288,10 @@ static int show_starting_menu(
 
                     ginfo.guir->destroyWindow("multiplayer");
                     ginfo.guir->moveWindowToTop(w);
+
+                    ginfo.guir->destroyWindow("bg");
+                    ginfo.guir->destroyWindow("menu");
+
                     start_networked_game_room(ginfo, cserv, errHandler, confdata);
 
                     cserv.logout();

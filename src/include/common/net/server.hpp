@@ -6,6 +6,8 @@
  * Copyright (C) 2021 Arthur Mendes
  */
 
+#include <config.h>
+
 #include <string>
 
 #ifndef WIN32
