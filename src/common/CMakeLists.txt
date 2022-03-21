@@ -80,11 +80,7 @@ else()
   endif()
   pkg_search_module(ZLIB REQUIRED zlib)
 
-  if (DEFINED glm::glm)
-    target_link_libraries(familyline-common PUBLIC glm::glm)
-  else()
-    target_link_libraries(familyline-common PUBLIC glm)
-  endif()
+  target_link_libraries(familyline-common PUBLIC ${glm_LIBRARY})
 
   target_link_libraries(familyline-common PUBLIC fmt::fmt ${ZLIB_LIBRARIES})
   target_link_libraries(familyline-common PUBLIC tl::expected range-v3::range-v3)
