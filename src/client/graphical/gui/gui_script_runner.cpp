@@ -661,6 +661,52 @@ s7_pointer control_set_button(s7_scheme *sc, s7_pointer args)
 }
 
 /**
+ * Set some textbox attribute, excluding appareance ones
+ *
+ * You call this from scheme as (control-set-textbox control property value)
+ *
+ * The property is defined as a symbol (like 'text, or 'handler).
+ */
+s7_pointer control_set_textbox(s7_scheme *sc, s7_pointer args)
+{
+    auto control  = s7_car(args);
+    auto property = s7_cadr(args);
+    auto value    = s7_caddr(args);
+
+    auto &log = familyline::LoggerService::getLogger();
+
+    if (!s7_is_symbol(property)) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-set-textbox: wrong type for property");
+        return s7_f(sc);
+    }
+
+    auto sproperty   = std::string{s7_symbol_name(property)};
+    auto controlname = GUIScriptRunner::getControlNameFromScript(sc, control);
+    if (!controlname) {
+        log->write(
+            "gui-script-env", familyline::LogType::Error,
+            "control-set-textbox: wrong type for control");
+        return s7_f(sc);
+    }
+
+    auto gm     = ScriptEnvironment::getGlobalEnv<GUIManager *>(sc);
+    auto textbox = gm->getControl<GUITextbox>(*controlname);
+
+    if (sproperty == "text") {
+        auto svalue = ScriptEnvironment::convertTypeFrom<std::string>(sc, value);
+        textbox->setText(*svalue);
+        log->write(
+            "gui-script-env", familyline::LogType::Info, "setting textbox property {} to {}",
+            sproperty, *svalue);
+    }
+
+    return control;
+}
+
+
+/**
  * Set some listbox attribute, excluding appareance ones
  *
  * You call this from scheme as (control-set-listbox control property value)
@@ -697,7 +743,7 @@ s7_pointer control_set_listbox(s7_scheme *sc, s7_pointer args)
     auto listbox = gm->getControl<GUIListbox>(*controlname);
 
     if (sproperty == "on-selected-item-change") {
-        if (!s7_is_function(value)) {
+        if (!s7_is_procedure(value)) {
             log->write(
                 "gui-script-env", familyline::LogType::Error,
                 "control-set-listbox: incorrect type for 'on-selected-item-change', expected "
@@ -707,7 +753,7 @@ s7_pointer control_set_listbox(s7_scheme *sc, s7_pointer args)
         }
 
         s7_gc_protect(sc, value);
-        listbox->onSelectedItemChange([&](GUIControl &c, size_t index, std::string tag) {
+        listbox->onSelectedItemChange([=](GUIControl &c, size_t index, std::string tag) {
             s7_call(
                 sc, value,
                 s7_list(sc, 3,
@@ -719,6 +765,13 @@ s7_pointer control_set_listbox(s7_scheme *sc, s7_pointer args)
         log->write(
             "gui-script-env", familyline::LogType::Info, "setting listbox property {} to {}",
             sproperty, std::make_pair(sc, value));
+        
+    } else if (sproperty == "add-item") {
+        auto tag = ScriptEnvironment::convertTypeFrom<std::string>(sc, s7_car(value));
+        auto item = ScriptEnvironment::convertTypeFrom<std::string>(sc, s7_cdr(value));
+
+        if (tag && item)
+            listbox->add(*tag, *item);
     }
 
     return control;
@@ -942,6 +995,7 @@ GUIScriptRunner::GUIScriptRunner(GUIManager *manager)
     env_.registerFunction("control-get", 1, control_get);
 
     env_.registerFunction("control-set-button", 3, control_set_button);
+    env_.registerFunction("control-set-textbox", 3, control_set_textbox);
     env_.registerFunction("control-set-listbox", 3, control_set_listbox);
 
     env_.registerFunction("window-show", 1, window_show);

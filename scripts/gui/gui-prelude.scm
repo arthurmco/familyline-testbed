@@ -31,6 +31,7 @@
   ;; function into the native code
   (let ((ctype (car control)))
     (cond
+     ((eq? ctype #:textbox) (control-set-textbox control property value))
      ((eq? ctype #:button) (control-set-button control property value))
      ((eq? ctype #:listbox) (control-set-listbox control property value))
      (else (error "Invalid control type " ctype)))))
@@ -45,6 +46,13 @@
      ((eq? ctype #:checkbox) (control-get-checkbox-property control property))
      (else (error "Invalid control type " ctype)))))
 
+(define (listbox-add-item-tag listbox tag item)
+  (control-set-listbox listbox 'add-item (cons tag item)))
+
+(define (listbox-add-item listbox item)
+  (listbox-add-item-tag listbox item item))
+
+
 (define* (control-create name type appearance
                          ;; more or less common
                          text
@@ -53,7 +61,7 @@
                          ;; checkbox
                          active
                          ;; listbox
-                         items
+                         items on-selected-item-change
                          ;; button
                          click-handler)
   "Create a control"
@@ -67,6 +75,11 @@
                   ((eq? type 'checkbox) (control-create-checkbox name active))
                   ((eq? type 'listbox)
                    (let ((c (control-create-listbox name items)))
+                     (if (procedure? on-selected-item-change)
+                         (control-set-listbox
+                          c
+                          'on-selected-item-change
+                          on-selected-item-change))
                      c))
                   (else (error "Invalid control type " type)))))
     (when (list? appearance)

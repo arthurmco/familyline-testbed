@@ -52,7 +52,12 @@
                                                                          (font-size . 20))
                                                            text:  "Multiplayer")
                                            (control-create "lclients"
-                                                           type: 'listbox)
+                                                           type: 'listbox
+                                                           on-selected-item-change:
+                                                           (lambda (c idx tag)
+                                                             (control-set-textbox
+                                                              (control-get "txtAddress")
+                                                              'text tag)))
                                            (control-create "txtAddress"
                                                            type: 'textbox
                                                            appearance: '((max-height . 35))
@@ -79,8 +84,9 @@
                                                                          (window-destroy "multiplayer")
                                                                          (window-move-to-top "menu")))
 
-                                                       
+
                                                        ))))))
+                                  (listbox-add-item-tag (control-get "lclients") "192.168.1.1" "localhost")
                                   (window-show wmultiplayer))))
                 (control-create
                  "btnSettings"
