@@ -36,7 +36,7 @@
      ((eq? ctype #:listbox) (control-set-listbox control property value))
      (else (error "Invalid control type " ctype)))))
 
-(define (control-get-property control property)
+(define (control-get-property control property) 
   "Get a certain property of a control"
   ;; We determine the control type, then forward it to the appropriate
   ;; function into the native code
@@ -51,6 +51,13 @@
 
 (define (listbox-add-item listbox item)
   (listbox-add-item-tag listbox item item))
+
+
+(define (listbox-set-item listbox tag item)
+  (control-set-listbox listbox 'set-item (cons tag item)))
+
+(define (listbox-remove-item listbox tag)
+  (control-set-listbox listbox 'remove-item tag))
 
 
 (define* (control-create name type appearance

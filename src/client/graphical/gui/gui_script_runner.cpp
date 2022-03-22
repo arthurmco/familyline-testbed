@@ -465,7 +465,7 @@ s7_pointer control_create_listbox(s7_scheme *sc, s7_pointer args)
             "control-create-textbox: incorrect type for 'name': {}", std::make_pair(sc, name));
         return s7_f(sc);
     }
-    
+
     if (!s7_is_boolean(items) && !s7_is_list(sc, items)) {
         log->write(
             "gui-script-env", familyline::LogType::Error,
@@ -504,7 +504,7 @@ s7_pointer control_create_listbox(s7_scheme *sc, s7_pointer args)
             items = s7_cdr(items);
         }
     }
-    
+
     auto gm      = ScriptEnvironment::getGlobalEnv<GUIManager *>(sc);
     auto listbox = gm->createNamedControl<GUIListbox>(*sname, vitems);
     return GUIScriptRunner::createControlToScript(sc, *sname, *listbox, "listbox");
@@ -691,7 +691,7 @@ s7_pointer control_set_textbox(s7_scheme *sc, s7_pointer args)
         return s7_f(sc);
     }
 
-    auto gm     = ScriptEnvironment::getGlobalEnv<GUIManager *>(sc);
+    auto gm      = ScriptEnvironment::getGlobalEnv<GUIManager *>(sc);
     auto textbox = gm->getControl<GUITextbox>(*controlname);
 
     if (sproperty == "text") {
@@ -704,7 +704,6 @@ s7_pointer control_set_textbox(s7_scheme *sc, s7_pointer args)
 
     return control;
 }
-
 
 /**
  * Set some listbox attribute, excluding appareance ones
@@ -756,22 +755,28 @@ s7_pointer control_set_listbox(s7_scheme *sc, s7_pointer args)
         listbox->onSelectedItemChange([=](GUIControl &c, size_t index, std::string tag) {
             s7_call(
                 sc, value,
-                s7_list(sc, 3,
-                        GUIScriptRunner::createControlToScript(sc, *controlname, c, "listbox"),
-                        s7_make_integer(sc, index),
-                        s7_make_string(sc, tag.c_str())));
-
+                s7_list(
+                    sc, 3, GUIScriptRunner::createControlToScript(sc, *controlname, c, "listbox"),
+                    s7_make_integer(sc, index), s7_make_string(sc, tag.c_str())));
         });
         log->write(
             "gui-script-env", familyline::LogType::Info, "setting listbox property {} to {}",
             sproperty, std::make_pair(sc, value));
-        
+
     } else if (sproperty == "add-item") {
-        auto tag = ScriptEnvironment::convertTypeFrom<std::string>(sc, s7_car(value));
+        auto tag  = ScriptEnvironment::convertTypeFrom<std::string>(sc, s7_car(value));
         auto item = ScriptEnvironment::convertTypeFrom<std::string>(sc, s7_cdr(value));
 
-        if (tag && item)
-            listbox->add(*tag, *item);
+        if (tag && item) listbox->add(*tag, *item);
+    } else if (sproperty == "set-item") {
+        auto tag  = ScriptEnvironment::convertTypeFrom<std::string>(sc, s7_car(value));
+        auto item = ScriptEnvironment::convertTypeFrom<std::string>(sc, s7_cdr(value));
+
+        if (tag && item) listbox->set(*tag, *item);
+    } else if (sproperty == "remove-item") {
+        auto tag = ScriptEnvironment::convertTypeFrom<std::string>(sc, value);
+
+        if (tag) listbox->remove(*tag);
     }
 
     return control;
