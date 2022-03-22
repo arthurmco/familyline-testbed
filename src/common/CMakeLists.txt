@@ -62,8 +62,8 @@ find_package(glm CONFIG)
 message("Downloading s7 scheme...")
 FetchContent_Declare(
   s7
-  URL "https://ccrma.stanford.edu/software/s7/s7.tar.gz"
-  URL_HASH "SHA256=20933ddef282f55817a4424b442224749e61770af53dfd07d4f028c204aa1ad8"
+  URL "https://arthurmco.github.io/externals/s7.tar.gz"
+  URL_HASH "SHA256=749ff831fbc5a43029952a8436ec492a659dc207c298b746c65cd1735fd08c28"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/generated/s7"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
