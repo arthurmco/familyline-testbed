@@ -101,3 +101,27 @@
 
 (define (set-config-option name value)
   (call-public 'set-config-option (cons name value)))
+
+
+(define server-callback (lambda (name addr) (display (string-append name " " addr))))
+(define (multiplayer-listen-start callback)
+  "Start listening for multiplayer servers."
+  "When a server appears, `callback` will be called, with the server name and"
+  "address"
+  "Returns an ID, so you can stop the callback later"
+  (set! server-callback callback)
+  (display server-callback)
+  1)
+
+
+(define (show-message-box title msg)
+  "Show a message box, with the text 'name' and the title 'title' on it"
+  (call-public 'show-message-box '(title msg)))
+
+
+(define (multiplayer-listen-stop handle)
+  (set! server-callback (lambda (name addr) #f)))
+
+
+(define (multiplayer-connect address)
+  (call-public 'multiplayer-connect address))

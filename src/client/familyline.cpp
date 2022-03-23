@@ -1130,16 +1130,124 @@ static int show_starting_menu(
         return s7_f(sc);
     });
 
+    gsr.registerPublicFunction(
+        "show-message-box",
+        [&](s7_scheme* sc, s7_pointer args) -> s7_pointer {
+            s7_pointer title         = s7_car(args);
+            s7_pointer msg         = s7_cadr(args);
+
+            auto stitle = ScriptEnvironment::convertTypeFrom<std::string>(sc, title);
+            auto smsg = ScriptEnvironment::convertTypeFrom<std::string>(sc, msg);
+            if (!smsg || !stitle) {
+                return s7_f(sc);
+            }
+
+            fprintf(stderr, "%s %s\n", stitle->c_str(), smsg->c_str());            
+            
+            ginfo.win->showMessageBox(
+                *stitle, SysMessageBoxFlags::Warning,
+                fmt::format("{}", *smsg));
+            return s7_t(sc);
+            
+        });
+
+    CServer cserv{};
+
+    gsr.registerPublicFunction(
+        "multiplayer-connect",
+        [&](s7_scheme* sc, s7_pointer args) -> s7_pointer {
+            auto addr = ScriptEnvironment::convertTypeFrom<std::string>(sc, args);
+            if (!addr) {
+                return s7_f(sc);
+            }
+
+            if (addr->size() < 3)
+                return s7_f(sc);
+
+//            b.setText("Connecting...");
+
+            auto errHandler = [&](std::string msg, NetResult ret) {
+                switch (ret) {
+                case NetResult::ConnectionError:
+                    ginfo.win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format(
+                            "Could not connect to address {}: Connection error", *addr));
+                    break;
+                case NetResult::WrongPassword:
+                    ginfo.win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format("Server {} has a password", *addr));
+                    break;
+                case NetResult::LoginFailure:
+                    ginfo.win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format(
+                            "Could not log in to {}\nThe server was found, but we "
+                            "could not "
+                            "login there.",
+                            *addr));
+                    break;
+                case NetResult::ConnectionTimeout:
+                    ginfo.win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format(
+                            "Timed out while connecting to {}\nThe server probably "
+                            "does not "
+                            "exist, or there is a firewall issue.",
+                            *addr));
+                    break;
+                case NetResult::ServerError:
+                    ginfo.win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format(
+                             "Error while connecting to {}. The server sent incorrect "
+                            "data to "
+                            "the client.",
+                            *addr));
+                    break;
+                case NetResult::NotAllClientsConnected:
+                    ginfo.win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format(
+                            "Error while connecting to {}. The server reported that "
+                            "not all "
+                            "clients were connected, but the client and the server "
+                            "disagree on "
+                            "that.",
+                            *addr));
+                    break;
+                default:
+                    ginfo.win->showMessageBox(
+                        msg, SysMessageBoxFlags::Warning,
+                        fmt::format(
+                            "Could not connect to address {}: unknown error {}", *addr,
+                            ret));
+                    break;
+                }
+            };
+
+            auto ret = cserv.login(*addr, confdata.player.username);
+            if (ret != NetResult::OK) {
+//                ginfo.guir->getControl<GUITextbox>("txt*Address")->setText("");
+//                b.setText("Connect");
+                errHandler("Connection error", ret);
+                return s7_f(sc);
+            }
+
+            start_networked_game_room(ginfo, cserv, errHandler, confdata);
+            cserv.logout();
+            return s7_t(sc);            
+        });
+    
     gsr.load(SCRIPTS_DIR "gui/gui.scm");
 
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
-
+    
     GUIWindow* w = gsr.openMainWindow();
     if (!w) {
         throw std::runtime_error("No valid menu window in script");
     }
-
-    CServer cserv{};
 
     // TODO: Autoresize this when autoresizing the gui manager
     w->onResize(ginfo.gwidth - 2, ginfo.gheight - 2, 1, 1);
@@ -1287,78 +1395,6 @@ static int show_starting_menu(
 
                     //                    GUIWindow* gmplayer = ginfo.guir->getGUIWindow("mplayer");
                     auto addr = ginfo.guir->getControl<GUITextbox>("txtAddress")->text();
-                    if (addr.size() < 3) return;
-
-                    b.setText("Connecting...");
-
-                    auto errHandler = [&](std::string msg, NetResult ret) {
-                        switch (ret) {
-                            case NetResult::ConnectionError:
-                                ginfo.win->showMessageBox(
-                                    msg, SysMessageBoxFlags::Warning,
-                                    fmt::format(
-                                        "Could not connect to address {}: Connection error", addr));
-                                break;
-                            case NetResult::WrongPassword:
-                                ginfo.win->showMessageBox(
-                                    msg, SysMessageBoxFlags::Warning,
-                                    fmt::format("Server {} has a password", addr));
-                                break;
-                            case NetResult::LoginFailure:
-                                ginfo.win->showMessageBox(
-                                    msg, SysMessageBoxFlags::Warning,
-                                    fmt::format(
-                                        "Could not log in to {}\nThe server was found, but we "
-                                        "could not "
-                                        "login there.",
-                                        addr));
-                                break;
-                            case NetResult::ConnectionTimeout:
-                                ginfo.win->showMessageBox(
-                                    msg, SysMessageBoxFlags::Warning,
-                                    fmt::format(
-                                        "Timed out while connecting to {}\nThe server probably "
-                                        "does not "
-                                        "exist, or there is a firewall issue.",
-                                        addr));
-                                break;
-                            case NetResult::ServerError:
-                                ginfo.win->showMessageBox(
-                                    msg, SysMessageBoxFlags::Warning,
-                                    fmt::format(
-                                        "Error while connecting to {}. The server sent incorrect "
-                                        "data to "
-                                        "the client.",
-                                        addr));
-                                break;
-                            case NetResult::NotAllClientsConnected:
-                                ginfo.win->showMessageBox(
-                                    msg, SysMessageBoxFlags::Warning,
-                                    fmt::format(
-                                        "Error while connecting to {}. The server reported that "
-                                        "not all "
-                                        "clients were connected, but the client and the server "
-                                        "disagree on "
-                                        "that.",
-                                        addr));
-                                break;
-                            default:
-                                ginfo.win->showMessageBox(
-                                    msg, SysMessageBoxFlags::Warning,
-                                    fmt::format(
-                                        "Could not connect to address {}: unknown error {}", addr,
-                                        ret));
-                                break;
-                        }
-                    };
-
-                    auto ret = cserv.login(addr, confdata.player.username);
-                    if (ret != NetResult::OK) {
-                        ginfo.guir->getControl<GUITextbox>("txtAddress")->setText("");
-                        b.setText("Connect");
-                        errHandler("Connection error", ret);
-                        return;
-                    }
 
                     b.setText("Connect...");
 

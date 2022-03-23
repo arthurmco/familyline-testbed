@@ -1,8 +1,71 @@
 (define button-appearance
-      '((background . #(0 0 0 0.8))
-        (font-size . 16)
-        (max-height . 80)
-        (max-width . 360)))
+  '((background . #(0 0 0 0.8))
+    (font-size . 16)
+    (max-height . 80)
+    (max-width . 360)))
+
+(define (multiplayer-click-handler b)
+  (let* ((server-cb (multiplayer-listen-start
+                     (lambda (name addr)
+                       (listbox-add-item-tag
+                        (control-get "lclients")
+                        addr
+                        (string-append "<b>'" name "'</b> &lt;" addr "&gt;" )))))
+         (wmultiplayer
+           (window-create
+            "multiplayer"
+            (use-layout 'flex 'vertical)
+            (list
+             (control-create "stitle"
+                             type: 'label
+                             appearance: '((max-height . 35)
+                                           (background . #(0 0 0 1))
+                                           (font-size . 20))
+                             text:  "Multiplayer")
+             (control-create "lclients"
+                             type: 'listbox
+                             on-selected-item-change:
+                             (lambda (c idx tag)
+                               (control-set-textbox
+                                (control-get "txtAddress")
+                                'text tag)))
+             (control-create "txtAddress"
+                             type: 'textbox
+                             appearance: '((max-height . 35))
+                             text: "")
+             (control-create
+              ""
+              type: 'box
+              layout: (use-layout 'flex 'horizontal)
+              appearance: '((max-height . 90))
+              children: (list
+                         (control-create "btnBack"
+                                         type: 'button
+                                         text: "Back"
+                                         click-handler:
+                                         (lambda (b)
+                                           (multiplayer-listen-stop server-cb)
+                                           (window-destroy "multiplayer")
+                                           (window-move-to-top "menu")))
+
+                         (control-create "btnConnect"
+                                         type: 'button
+                                         text: "Connect"
+                                         click-handler:
+                                         (lambda (b)
+                                           (multiplayer-listen-stop server-cb)
+                                           (window-destroy "multiplayer")
+                                           (window-move-to-top "menu")
+                                           ;; (window-destroy "menu")
+                                           (multiplayer-connect
+                                            (control-get-property
+                                             (control-get "txtAddress") 'text)
+                                            )))
+
+
+                         ))))))
+         (window-show wmultiplayer)
+         (server-callback "Main server" "192.168.1.1")))
 
 (define (on-main-menu-open val)
   (let ((win
@@ -38,56 +101,7 @@
                                 type: 'button
                                 appearance: button-appearance
                                 text: "Multiplayer"
-                                click-handler:
-                                (lambda (b)
-                                  (let ((wmultiplayer
-                                         (window-create
-                                          "multiplayer"
-                                          (use-layout 'flex 'vertical)
-                                          (list
-                                           (control-create "stitle"
-                                                           type: 'label
-                                                           appearance: '((max-height . 35)
-                                                                         (background . #(0 0 0 1))
-                                                                         (font-size . 20))
-                                                           text:  "Multiplayer")
-                                           (control-create "lclients"
-                                                           type: 'listbox
-                                                           on-selected-item-change:
-                                                           (lambda (c idx tag)
-                                                             (control-set-textbox
-                                                              (control-get "txtAddress")
-                                                              'text tag)))
-                                           (control-create "txtAddress"
-                                                           type: 'textbox
-                                                           appearance: '((max-height . 35))
-                                                           text: "")
-                                           (control-create
-                                            ""
-                                            type: 'box
-                                            layout: (use-layout 'flex 'horizontal)
-                                            appearance: '((max-height . 90))
-                                            children: (list
-                                                       (control-create "btnBack"
-                                                                       type: 'button
-                                                                       text: "Back"
-                                                                       click-handler:
-                                                                       (lambda (b)
-                                                                         (window-destroy "multiplayer")
-                                                                         (window-move-to-top "menu")))
-
-                                                       (control-create "btnConnect"
-                                                                       type: 'button
-                                                                       text: "Connect"
-                                                                       click-handler:
-                                                                       (lambda (b)
-                                                                         (window-destroy "multiplayer")
-                                                                         (window-move-to-top "menu")))
-
-
-                                                       ))))))
-                                  (listbox-add-item-tag (control-get "lclients") "192.168.1.1" "localhost")
-                                  (window-show wmultiplayer))))
+                                click-handler: multiplayer-click-handler)
                 (control-create
                  "btnSettings"
                  type: 'button
