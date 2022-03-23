@@ -6,40 +6,39 @@
  * Copyright (C) 2020 Arthur Mendes
  */
 
+#include <fmt/chrono.h>  // so you can print dates to the log
+#include <fmt/core.h>
+#include <fmt/format.h>
+#include <fmt/ranges.h>  // so you can directly print ranges to the log
+
 #include <chrono>
 #include <cstdio>
 #include <memory>
+#include <mutex>
+#include <optional>
+#include <string>
 #include <type_traits>
 #include <vector>
-#include <string>
-#include <mutex>
-
-#include <fmt/core.h>
-#include <fmt/format.h>
-#include <fmt/chrono.h> // so you can print dates to the log
-#include <fmt/ranges.h> // so you can directly print ranges to the log
-
-#include <optional>
 
 /// BEGIN custom formatters
 
-#include <glm/glm.hpp>
-
 #include <s7.h>
+
+#include <glm/glm.hpp>
 
 template <>
 struct fmt::formatter<glm::vec3> : formatter<double> {
-
     template <typename FormatContext>
-    auto format(const glm::vec3& v, FormatContext& ctx) {
+    auto format(const glm::vec3& v, FormatContext& ctx)
+    {
         format_to(ctx.out(), "(");
-        formatter<double>::format(v.x, ctx); 
+        formatter<double>::format(v.x, ctx);
         format_to(ctx.out(), ", ");
         formatter<double>::format(v.y, ctx);
         format_to(ctx.out(), ", ");
         formatter<double>::format(v.z, ctx);
         return format_to(ctx.out(), ")");
-    }   
+    }
 };
 
 using s7_print_pair = std::pair<s7_scheme*, s7_pointer>;
@@ -47,26 +46,25 @@ using s7_print_pair = std::pair<s7_scheme*, s7_pointer>;
 template <>
 struct fmt::formatter<s7_print_pair> : formatter<std::string_view> {
     template <typename FormatContext>
-    auto format(const s7_print_pair& s, FormatContext& ctx) {
-        std::string v = fmt::format(
-            "({})", s7_object_to_c_string(s.first, s.second));
+    auto format(const s7_print_pair& s, FormatContext& ctx)
+    {
+        std::string v = fmt::format("< {} >", s7_object_to_c_string(s.first, s.second));
         return format_to(ctx.out(), v);
-    }   
+    }
 };
 
 template <>
 struct fmt::formatter<glm::vec2> : formatter<double> {
-
     template <typename FormatContext>
-    auto format(const glm::vec2& v, FormatContext& ctx) {
+    auto format(const glm::vec2& v, FormatContext& ctx)
+    {
         format_to(ctx.out(), "(");
-        formatter<double>::format(v.x, ctx); 
+        formatter<double>::format(v.x, ctx);
         format_to(ctx.out(), ", ");
         formatter<double>::format(v.y, ctx);
         return format_to(ctx.out(), ")");
-    }   
+    }
 };
-
 
 /**
  * A formatter for the optional type
@@ -75,9 +73,9 @@ struct fmt::formatter<glm::vec2> : formatter<double> {
  */
 template <typename T>
 struct fmt::formatter<std::optional<T>> : formatter<T> {
-
     template <typename FormatContext>
-    auto format(const std::optional<T>& v, FormatContext& ctx) {
+    auto format(const std::optional<T>& v, FormatContext& ctx)
+    {
         if (v) {
             format_to(ctx.out(), "Some(");
             formatter<T>::format(v.value(), ctx);
@@ -85,9 +83,8 @@ struct fmt::formatter<std::optional<T>> : formatter<T> {
         } else {
             return format_to(ctx.out(), "None");
         }
-    }   
+    }
 };
-
 
 /// END custom formatters
 
@@ -108,7 +105,7 @@ private:
 
     std::mutex mtx;
     const std::string getLevelText(const LogType type);
-    
+
 public:
     Logger(
         FILE* out = stderr, LogType minlog = LogType::Info, std::vector<std::string> blockTags = {})
@@ -131,28 +128,26 @@ public:
      * The logging levels are autodescriptive
      *
      */
-    template <typename ...Args>
-    void write(std::string_view tag, const LogType type, const std::string fmt, Args ...args) {
-        if (type < minlog_)
-            return;
+    template <typename... Args>
+    void write(std::string_view tag, const LogType type, const std::string fmt, Args... args)
+    {
+        if (type < minlog_) return;
 
         if (std::find(blockTags_.begin(), blockTags_.end(), tag) != blockTags_.end()) return;
 
         auto strtype = this->getLevelText(type);
-        auto delta = this->getDelta();
-        auto strend = strtype.size() > 0 ? "\033[0m" : "";
-        
+        auto delta   = this->getDelta();
+        auto strend  = strtype.size() > 0 ? "\033[0m" : "";
+
         auto data = fmt::format(fmt, args...);
-        auto stag = tag.size() > 0 ?
-            fmt::format("\033[1m{}\033[0m: ", tag) :
-            "";
-        
+        auto stag = tag.size() > 0 ? fmt::format("\033[1m{}\033[0m: ", tag) : "";
+
         auto msg = fmt::format("[{:13.4f}] {}{}{}{}\n", delta, strtype, stag, data, strend);
-        
+
         mtx.lock();
         fputs(msg.c_str(), _out);
         mtx.unlock();
-    }    
+    }
 };
 
 class LoggerService

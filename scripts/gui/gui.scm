@@ -4,6 +4,10 @@
     (max-height . 80)
     (max-width . 360)))
 
+(define (multiplayer-error-msg msg-keyword addr)
+  (format #f "error: ~A, addr: ~A" msg-keyword addr))
+
+
 (define (multiplayer-click-handler b)
   (let* ((server-cb (multiplayer-listen-start
                      (lambda (name addr)
@@ -12,60 +16,68 @@
                         addr
                         (string-append "<b>'" name "'</b> &lt;" addr "&gt;" )))))
          (wmultiplayer
-           (window-create
-            "multiplayer"
-            (use-layout 'flex 'vertical)
-            (list
-             (control-create "stitle"
-                             type: 'label
-                             appearance: '((max-height . 35)
-                                           (background . #(0 0 0 1))
-                                           (font-size . 20))
-                             text:  "Multiplayer")
-             (control-create "lclients"
-                             type: 'listbox
-                             on-selected-item-change:
-                             (lambda (c idx tag)
-                               (control-set-textbox
-                                (control-get "txtAddress")
-                                'text tag)))
-             (control-create "txtAddress"
-                             type: 'textbox
-                             appearance: '((max-height . 35))
-                             text: "")
-             (control-create
-              ""
-              type: 'box
-              layout: (use-layout 'flex 'horizontal)
-              appearance: '((max-height . 90))
-              children: (list
-                         (control-create "btnBack"
-                                         type: 'button
-                                         text: "Back"
-                                         click-handler:
-                                         (lambda (b)
-                                           (multiplayer-listen-stop server-cb)
-                                           (window-destroy "multiplayer")
-                                           (window-move-to-top "menu")))
+          (window-create
+           "multiplayer"
+           (use-layout 'flex 'vertical)
+           (list
+            (control-create "stitle"
+                            type: 'label
+                            appearance: '((max-height . 35)
+                                          (background . #(0 0 0 1))
+                                          (font-size . 20))
+                            text:  "Multiplayer")
+            (control-create "lclients"
+                            type: 'listbox
+                            on-selected-item-change:
+                            (lambda (c idx tag)
+                              (control-set-textbox
+                               (control-get "txtAddress")
+                               'text tag)))
+            (control-create "txtAddress"
+                            type: 'textbox
+                            appearance: '((max-height . 35))
+                            text: "")
+            (control-create
+             ""
+             type: 'box
+             layout: (use-layout 'flex 'horizontal)
+             appearance: '((max-height . 90))
+             children: (list
+                        (control-create "btnBack"
+                                        type: 'button
+                                        text: "Back"
+                                        click-handler:
+                                        (lambda (b)
+                                          (multiplayer-listen-stop server-cb)
+                                          (window-destroy "multiplayer")
+                                          (window-move-to-top "menu")))
 
-                         (control-create "btnConnect"
-                                         type: 'button
-                                         text: "Connect"
-                                         click-handler:
-                                         (lambda (b)
-                                           (multiplayer-listen-stop server-cb)
-                                           (window-destroy "multiplayer")
-                                           (window-move-to-top "menu")
-                                           ;; (window-destroy "menu")
-                                           (multiplayer-connect
-                                            (control-get-property
-                                             (control-get "txtAddress") 'text)
-                                            )))
-
-
-                         ))))))
-         (window-show wmultiplayer)
-         (server-callback "Main server" "192.168.1.1")))
+                        (control-create "btnConnect"
+                                        type: 'button
+                                        text: "Connect"
+                                        click-handler:
+                                        (lambda (b)
+                                          (multiplayer-listen-stop server-cb)
+                                          (let ((connectres (multiplayer-connect
+                                                              (control-get-property
+                                                               (control-get "txtAddress") 'text))))
+                                                (display connectres)
+                                                (if (multiplayer-connected? connectres)
+                                                    (begin
+                                                      (window-destroy "multiplayer")
+                                                      (window-move-to-top "menu")
+                                                      (window-destroy "menu")
+                                                      (window-destroy "bg")
+                                                      (multiplayer-login connectres)
+                                                      (on-main-menu-open #f))
+                                                    (let ((errmsg (multiplayer-get-error connectres))
+                                                          (addr (multiplayer-get-login-address
+                                                                 connectres)))
+                                                      (show-message-box
+                                                       "Error"
+                                                       (multiplayer-error-msg errmsg addr)))))))))))))
+    (window-show wmultiplayer)
+    (server-callback "Main server" "192.168.1.1")))
 
 (define (on-main-menu-open val)
   (let ((win
@@ -115,20 +127,20 @@
                            (use-layout 'flex 'vertical)
                            (list
                             (control-create "stitle"
-                                type: 'label
-                                appearance: '((max-height . 35)
-                                              (background . #(0 0 0 1))
-                                              (font-size . 20))
-                                text:  "Settings")
+                                            type: 'label
+                                            appearance: '((max-height . 35)
+                                                          (background . #(0 0 0 1))
+                                                          (font-size . 20))
+                                            text:  "Settings")
                             (control-create "lblName"
-                                type: 'label
-                                appearance: '((max-height . 35)
-                                              (background . #(0 0 0 1)))
-                                text:  "Player name")
+                                            type: 'label
+                                            appearance: '((max-height . 35)
+                                                          (background . #(0 0 0 1)))
+                                            text:  "Player name")
                             (control-create "txtName"
-                                type: 'textbox
-                                appearance: '((max-height . 35))
-                                text:  (get-config-option "player/username"))
+                                            type: 'textbox
+                                            appearance: '((max-height . 35))
+                                            text:  (get-config-option "player/username"))
                             (control-create
                              ""
                              type: 'box
@@ -161,13 +173,13 @@
                                               (window-destroy "settings")
                                               (window-move-to-top "menu")))))))
                      (window-show wsettings))))
-                              (control-create "btnQuit"
-                                              type: 'button
-                                              appearance: button-appearance
-                                              text: "Exit"
-                                              click-handler:
-                                              (lambda (b)
-                                                (call-public 'exit-game)))))))
+                (control-create "btnQuit"
+                                type: 'button
+                                appearance: button-appearance
+                                text: "Exit"
+                                click-handler:
+                                (lambda (b)
+                                  (call-public 'exit-game)))))))
 
 
     (window-show win)))

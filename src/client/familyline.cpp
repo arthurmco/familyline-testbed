@@ -234,7 +234,7 @@ int start_networked_game(
 
             auto& alliance = cm->createAlliance("alliance");
             auto& colony   = cm->createColony(
-                *player, color, std::optional<std::reference_wrapper<Alliance>>{alliance});
+                  *player, color, std::optional<std::reference_wrapper<Alliance>>{alliance});
 
             player_colony.emplace(c.id(), std::reference_wrapper(colony));
         }
@@ -245,7 +245,7 @@ int start_networked_game(
 
             auto& alliance = cm->createAlliance("alliance");
             auto& colony   = cm->createColony(
-                *player, color, std::optional<std::reference_wrapper<Alliance>>{alliance});
+                  *player, color, std::optional<std::reference_wrapper<Alliance>>{alliance});
 
             player_colony.emplace(hid, std::reference_wrapper(colony));
         }
@@ -255,8 +255,8 @@ int start_networked_game(
 
     watchdog = 0;
     Game* g  = start_game(
-        ginfo, lr, StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt}, cdata,
-        createMultiplayerSession_fn);
+         ginfo, lr, StartGameInfo{ASSET_FILE_DIR "terrain_test.flte", std::nullopt}, cdata,
+         createMultiplayerSession_fn);
 
     NetPlayerSender nps{*g->getPlayerManager(), gps, g->getHumanPlayerID()};
 
@@ -645,7 +645,7 @@ Game* start_game(
             auto* player    = *(pm->get(human_player_id));
             auto& alliance  = cm->createAlliance(std::string{player->getName()});
             auto& colony    = cm->createColony(
-                *player, 0xffffff, std::optional<std::reference_wrapper<Alliance>>{alliance});
+                   *player, 0xffffff, std::optional<std::reference_wrapper<Alliance>>{alliance});
             session.player_colony.emplace(human_player_id, std::reference_wrapper(colony));
         }
     } else {
@@ -1096,154 +1096,177 @@ static int show_starting_menu(
             return s7_f(sc);
         });
 
-    gsr.registerPublicFunction("set-config-option",
-                               [&](s7_scheme* sc, s7_pointer args) -> s7_pointer {
-                                   
-        s7_pointer p         = s7_car(args);
-        s7_pointer v         = s7_cdr(args);
-        auto property = ScriptEnvironment::convertTypeFrom<std::string>(sc, p);
+    gsr.registerPublicFunction(
+        "set-config-option", [&](s7_scheme* sc, s7_pointer args) -> s7_pointer {
+            s7_pointer p  = s7_car(args);
+            s7_pointer v  = s7_cdr(args);
+            auto property = ScriptEnvironment::convertTypeFrom<std::string>(sc, p);
 
-        if (*property == "enable-input-recording") {
-            auto value = ScriptEnvironment::convertTypeFrom<bool>(sc, v);
-            if (!value) {
-                log->write(
-                    "script-config", LogType::Error, "unknown type for property '{}' ({})",
-                    *property, std::make_pair(sc, v));
-                return s7_f(sc);
+            if (*property == "enable-input-recording") {
+                auto value = ScriptEnvironment::convertTypeFrom<bool>(sc, v);
+                if (!value) {
+                    log->write(
+                        "script-config", LogType::Error, "unknown type for property '{}' ({})",
+                        *property, std::make_pair(sc, v));
+                    return s7_f(sc);
+                }
+                confdata.enableInputRecording = *value;
+                return v;
             }
-            confdata.enableInputRecording = *value;
-            return v;
-        }
-        if (*property == "player/username") {
-            auto value = ScriptEnvironment::convertTypeFrom<std::string>(sc, v);
-            if (!value) {
-                log->write(
-                    "script-config", LogType::Error, "unknown type for property '{}' ({})",
-                    *property, std::make_pair(sc, v));
-                return s7_f(sc);
+            if (*property == "player/username") {
+                auto value = ScriptEnvironment::convertTypeFrom<std::string>(sc, v);
+                if (!value) {
+                    log->write(
+                        "script-config", LogType::Error, "unknown type for property '{}' ({})",
+                        *property, std::make_pair(sc, v));
+                    return s7_f(sc);
+                }
+                confdata.player.username = *value;
+                return v;
             }
-            confdata.player.username = *value;
-            return v;
-        }
 
-        log->write("script-config", LogType::Error, "unknown property '{}'", *property);
-        return s7_f(sc);
-    });
+            log->write("script-config", LogType::Error, "unknown property '{}'", *property);
+            return s7_f(sc);
+        });
 
     gsr.registerPublicFunction(
-        "show-message-box",
-        [&](s7_scheme* sc, s7_pointer args) -> s7_pointer {
-            s7_pointer title         = s7_car(args);
-            s7_pointer msg         = s7_cadr(args);
+        "show-message-box", [&](s7_scheme* sc, s7_pointer args) -> s7_pointer {
+            s7_pointer title = s7_car(args);
+            s7_pointer msg   = s7_cdr(args);
+
+            fmt::print(stderr, "AAA {}", std::make_pair(sc, args));
 
             auto stitle = ScriptEnvironment::convertTypeFrom<std::string>(sc, title);
-            auto smsg = ScriptEnvironment::convertTypeFrom<std::string>(sc, msg);
+            auto smsg   = ScriptEnvironment::convertTypeFrom<std::string>(sc, msg);
             if (!smsg || !stitle) {
                 return s7_f(sc);
             }
 
-            fprintf(stderr, "%s %s\n", stitle->c_str(), smsg->c_str());            
-            
+            fprintf(stderr, "%s %s\n", stitle->c_str(), smsg->c_str());
+
             ginfo.win->showMessageBox(
-                *stitle, SysMessageBoxFlags::Warning,
-                fmt::format("{}", *smsg));
+                *stitle, SysMessageBoxFlags::Warning, fmt::format("{}", *smsg));
             return s7_t(sc);
-            
         });
 
     CServer cserv{};
 
+    auto errHandler = [&](std::string addr, std::string msg, NetResult ret) {
+        switch (ret) {
+            case NetResult::ConnectionError:
+                ginfo.win->showMessageBox(
+                    msg, SysMessageBoxFlags::Warning,
+                    fmt::format("Could not connect to address {}: Connection error", addr));
+                return "connection-error";
+            case NetResult::WrongPassword:
+                ginfo.win->showMessageBox(
+                    msg, SysMessageBoxFlags::Warning,
+                    fmt::format("Server {} has a password", addr));
+                return "wrong-password";
+                break;
+            case NetResult::LoginFailure:
+                ginfo.win->showMessageBox(
+                    msg, SysMessageBoxFlags::Warning,
+                    fmt::format(
+                        "Could not log in to {}\nThe server was found, but we "
+                        "could not "
+                        "login there.",
+                        addr));
+                return "login-failure";
+            case NetResult::ConnectionTimeout:
+                ginfo.win->showMessageBox(
+                    msg, SysMessageBoxFlags::Warning,
+                    fmt::format(
+                        "Timed out while connecting to {}\nThe server probably "
+                        "does not "
+                        "exist, or there is a firewall issue.",
+                        addr));
+                return "connection-timeout";
+            case NetResult::ServerError:
+                ginfo.win->showMessageBox(
+                    msg, SysMessageBoxFlags::Warning,
+                    fmt::format(
+                        "Error while connecting to {}. The server sent incorrect "
+                        "data to "
+                        "the client.",
+                        addr));
+                return "server-error";
+            case NetResult::NotAllClientsConnected:
+                ginfo.win->showMessageBox(
+                    msg, SysMessageBoxFlags::Warning,
+                    fmt::format(
+                        "Error while connecting to {}. The server reported that "
+                        "not all "
+                        "clients were connected, but the client and the server "
+                        "disagree on "
+                        "that.",
+                        addr));
+                return "not-all-clients-connected";
+            default:
+                ginfo.win->showMessageBox(
+                    msg, SysMessageBoxFlags::Warning,
+                    fmt::format("Could not connect to address {}: unknown error {}", addr, ret));
+                return "unknown-error";
+        }
+    };
+
     gsr.registerPublicFunction(
-        "multiplayer-connect",
-        [&](s7_scheme* sc, s7_pointer args) -> s7_pointer {
+        "multiplayer-connect", [&](s7_scheme* sc, s7_pointer args) -> s7_pointer {
             auto addr = ScriptEnvironment::convertTypeFrom<std::string>(sc, args);
             if (!addr) {
                 return s7_f(sc);
             }
 
-            if (addr->size() < 3)
-                return s7_f(sc);
-
-//            b.setText("Connecting...");
-
-            auto errHandler = [&](std::string msg, NetResult ret) {
-                switch (ret) {
-                case NetResult::ConnectionError:
-                    ginfo.win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format(
-                            "Could not connect to address {}: Connection error", *addr));
-                    break;
-                case NetResult::WrongPassword:
-                    ginfo.win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format("Server {} has a password", *addr));
-                    break;
-                case NetResult::LoginFailure:
-                    ginfo.win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format(
-                            "Could not log in to {}\nThe server was found, but we "
-                            "could not "
-                            "login there.",
-                            *addr));
-                    break;
-                case NetResult::ConnectionTimeout:
-                    ginfo.win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format(
-                            "Timed out while connecting to {}\nThe server probably "
-                            "does not "
-                            "exist, or there is a firewall issue.",
-                            *addr));
-                    break;
-                case NetResult::ServerError:
-                    ginfo.win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format(
-                             "Error while connecting to {}. The server sent incorrect "
-                            "data to "
-                            "the client.",
-                            *addr));
-                    break;
-                case NetResult::NotAllClientsConnected:
-                    ginfo.win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format(
-                            "Error while connecting to {}. The server reported that "
-                            "not all "
-                            "clients were connected, but the client and the server "
-                            "disagree on "
-                            "that.",
-                            *addr));
-                    break;
-                default:
-                    ginfo.win->showMessageBox(
-                        msg, SysMessageBoxFlags::Warning,
-                        fmt::format(
-                            "Could not connect to address {}: unknown error {}", *addr,
-                            ret));
-                    break;
-                }
-            };
+            if (addr->size() < 3) return s7_f(sc);
 
             auto ret = cserv.login(*addr, confdata.player.username);
             if (ret != NetResult::OK) {
-//                ginfo.guir->getControl<GUITextbox>("txt*Address")->setText("");
-//                b.setText("Connect");
-                errHandler("Connection error", ret);
+                auto res = errHandler(*addr, "Connection error", ret);
+                return s7_list(
+                    sc, 4, s7_make_symbol(sc, "login-info"), s7_f(sc),
+                    s7_make_string(sc, addr->c_str()), s7_make_symbol(sc, res));
+            }
+
+            /// Return a list with a login info tag, a success
+            /// tag, the login address and an opaque pointer to cserv
+            return s7_immutable(s7_list(
+                sc, 4, s7_make_symbol(sc, "login-info"), s7_t(sc),
+                s7_make_string(sc, addr->c_str()),
+                s7_make_c_pointer_with_type(
+                    sc, &cserv, s7_make_symbol(sc, "login-info"), s7_t(sc))));
+        });
+
+    gsr.registerPublicFunction(
+        "multiplayer-login", [&](s7_scheme* sc, s7_pointer args) -> s7_pointer {
+            auto tag = s7_car(args);
+            if (!s7_is_symbol(tag) || std::string{s7_symbol_name(tag)} != "login-info")
+                return s7_f(sc);
+
+            if (s7_list_length(sc, args) != 4) return s7_f(sc);
+
+            if (!s7_is_eqv(sc, s7_t(sc), s7_cadr(args))) return s7_f(sc);
+
+            auto addr = ScriptEnvironment::convertTypeFrom<std::string>(sc, s7_caddr(args));
+            if (!addr) {
                 return s7_f(sc);
             }
 
-            start_networked_game_room(ginfo, cserv, errHandler, confdata);
+            auto sptr = s7_cadddr(args);
+            if (!s7_is_c_pointer_of_type(sptr, s7_make_symbol(sc, "login-info"))) return s7_f(sc);
+            CServer* receivecserv = (CServer*)s7_c_pointer(sptr);
+
+            start_networked_game_room(
+                ginfo, *receivecserv,
+                std::bind(errHandler, *addr, std::placeholders::_1, std::placeholders::_2),
+                confdata);
             cserv.logout();
-            return s7_t(sc);            
+            return s7_t(sc);
         });
-    
+
     gsr.load(SCRIPTS_DIR "gui/gui.scm");
 
     // auto deflistener = InputManager::GetInstance()->GetDefaultListener();
-    
+
     GUIWindow* w = gsr.openMainWindow();
     if (!w) {
         throw std::runtime_error("No valid menu window in script");
@@ -1251,8 +1274,8 @@ static int show_starting_menu(
 
     // TODO: Autoresize this when autoresizing the gui manager
     w->onResize(ginfo.gwidth - 2, ginfo.gheight - 2, 1, 1);
-    
-    GUIWindow& background = ginfo.guir->createWindow<FlexLayout<false>>("bg");    
+
+    GUIWindow& background = ginfo.guir->createWindow<FlexLayout<false>>("bg");
     background.onResize(ginfo.gwidth, ginfo.gheight, 0, 0);
     ginfo.guir->onResize(ginfo.gwidth, ginfo.gheight);
 

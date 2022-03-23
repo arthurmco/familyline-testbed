@@ -3,6 +3,7 @@
 
 #include <client/graphical/opengl/gl_window.hpp>
 
+#include "SDL_error.h"
 #include "client/graphical/gui/gui_manager.hpp"
 #include "client/graphical/window.hpp"
 
@@ -12,12 +13,9 @@
 #include <client/graphical/gfx_service.hpp>
 #include <client/graphical/opengl/gl_renderer.hpp>
 #include <client/graphical/opengl/gl_shader.hpp>
-
 #include <client/graphical/opengl/gl_texture_environment.hpp>
-#include <client/graphical/renderer.hpp>
-
 #include <client/graphical/opengl/gles_utils.hpp>
-
+#include <client/graphical/renderer.hpp>
 #include <client/graphical/shader_manager.hpp>
 #include <client/input/input_service.hpp>
 #include <common/logger.hpp>
@@ -133,15 +131,19 @@ static void enable_gl_debug()
         LoggerService::getLogger()->write(ssource, ltype, "{}", fmt::to_string(out).data());
     };
 
-    #ifdef USE_GLES
+#ifdef USE_GLES
 
     glEnable(GL_DEBUG_OUTPUT_KHR);
 
     if (isExtensionPresent("GL_KHR_debug") && isFunctionPresent("glDebugMessageCallbackKHR")) {
         // Try KHR_debug first
-        log->write("gl_window", LogType::Info, "KHR_debug supported and used to get GPU debug messages");
-        callGLFunction<PFNGLDEBUGMESSAGECALLBACKKHRPROC>("glDebugMessageCallbackKHR", gl_debug_callback, nullptr);
-        callGLFunction<PFNGLDEBUGMESSAGECONTROLKHRPROC>("glDebugMessageControlKHR", GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+        log->write(
+            "gl_window", LogType::Info, "KHR_debug supported and used to get GPU debug messages");
+        callGLFunction<PFNGLDEBUGMESSAGECALLBACKKHRPROC>(
+            "glDebugMessageCallbackKHR", gl_debug_callback, nullptr);
+        callGLFunction<PFNGLDEBUGMESSAGECONTROLKHRPROC>(
+            "glDebugMessageControlKHR", GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr,
+            GL_TRUE);
 
     } else {
         log->write(
@@ -149,9 +151,9 @@ static void enable_gl_debug()
             "Neither KHR_debug nor ARB_debug_output extensions are supported");
         log->write("gl_window", LogType::Warning, "GPU debugging messages will not be available");
     }
-     
-    #else
-    
+
+#else
+
     glEnable(GL_DEBUG_OUTPUT);
 
     if (GL_KHR_debug && glDebugMessageCallback) {
@@ -168,13 +170,13 @@ static void enable_gl_debug()
         log->write("gl_window", LogType::Warning, "GPU debugging messages will not be available");
     }
 
-    #endif
+#endif
 }
 
 GLWindow::GLWindow(GLDevice* dev, int width, int height) : _dev(dev), _width(width), _height(height)
 {
     auto& log = LoggerService::getLogger();
-   
+
     /* Setup SDL GL context data */
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -202,7 +204,7 @@ GLWindow::GLWindow(GLDevice* dev, int width, int height) : _dev(dev), _width(wid
     if (true) {
         fflags |= SDL_GL_CONTEXT_DEBUG_FLAG;
     }
-    
+
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, fflags);
 
     log->write("gl_window", LogType::Info, "Using OpenGL as a backend");
@@ -384,10 +386,8 @@ void GLWindow::update()
 std::unique_ptr<gui::GUIRenderer> GLWindow::createGUIRenderer()
 {
     auto guir = new gui::GLGUIRenderer{};
-    
-    
-    return std::unique_ptr<gui::GUIRenderer>( (gui::GUIRenderer*) guir);
 
+    return std::unique_ptr<gui::GUIRenderer>((gui::GUIRenderer*)guir);
 }
 
 Renderer* GLWindow::createRenderer()
@@ -407,9 +407,8 @@ void GLWindow::showMessageBox(std::string title, SysMessageBoxFlags flags, std::
     }
 
     int buttonid = 0;
-    if (SDL_ShowSimpleMessageBox(
-            sdlflags, title.c_str(), content.c_str(), this->_win ? this->_win : nullptr) < 0) {
-        fmt::print("{}\n{}\n\n", title, content);
+    if (SDL_ShowSimpleMessageBox(sdlflags, title.c_str(), content.c_str(), nullptr) < 0) {
+        fmt::print("({}) {}\n{}\n\n", SDL_GetError(), title, content);
     }
 }
 

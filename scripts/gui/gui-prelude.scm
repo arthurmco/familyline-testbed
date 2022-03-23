@@ -20,8 +20,7 @@
   (let ((w (current-manager-add-window name layout)))
     (when (list? children)
       (newline)
-      (map (lambda (c) (window-add-control w c)) children)
-      (map display children))
+      (map (lambda (c) (window-add-control w c)) children))
     w))
 
 
@@ -36,7 +35,7 @@
      ((eq? ctype #:listbox) (control-set-listbox control property value))
      (else (error "Invalid control type " ctype)))))
 
-(define (control-get-property control property) 
+(define (control-get-property control property)
   "Get a certain property of a control"
   ;; We determine the control type, then forward it to the appropriate
   ;; function into the native code
@@ -116,7 +115,7 @@
 
 (define (show-message-box title msg)
   "Show a message box, with the text 'name' and the title 'title' on it"
-  (call-public 'show-message-box '(title msg)))
+  (call-public 'show-message-box (cons title msg)))
 
 
 (define (multiplayer-listen-stop handle)
@@ -125,3 +124,23 @@
 
 (define (multiplayer-connect address)
   (call-public 'multiplayer-connect address))
+
+(define (multiplayer-login connectres)
+  (call-public 'multiplayer-login connectres))
+
+(define (multiplayer-connected? connectres)
+  (let ((restag (car connectres))
+        (result (cadr connectres)))
+    (cond
+     ((and (symbol? restag) (eqv? restag 'login-info)) result)
+     (else #f))))
+
+(define (multiplayer-get-login-address connectres)
+  (if (eqv? (car connectres) 'login-info)
+      (caddr connectres)
+      #f))
+
+(define (multiplayer-get-error connectres)
+  (if (multiplayer-connected? connectres)
+      "success"
+      (cadddr connectres)))
