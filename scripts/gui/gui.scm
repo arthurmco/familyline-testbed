@@ -5,8 +5,22 @@
     (max-width . 360)))
 
 (define (multiplayer-error-msg msg-keyword addr)
-  (format #f "error: ~A, addr: ~A" msg-keyword addr))
-
+  (cond
+   ((eq? msg-keyword 'connection-error)
+    (format #f "~A was not found or the firewall is blocking it" addr))
+   ((eq? msg-keyword 'wrong-password)
+    (format #f "You typed the wrong password for ~A" addr))
+   ((eq? msg-keyword 'login-failure)
+    (format #f "~A was found, but we could not log into it" addr))
+   ((eq? msg-keyword 'connection-timeout)
+    (format #f "Timeout while connecting into ~A" addr))
+   ((eq? msg-keyword 'server-error)
+    (format #f "~A sent some data that we could not comprehend" addr))
+   ((eq? msg-keyword 'not-all-clients-connected)
+    (format #f "Tried to connect to ~A, but not all clients were ready " addr))
+   (else (format #f "Unknown error while connecting to ~A" addr))
+   )
+  )
 
 (define (multiplayer-click-handler b)
   (let* ((server-cb (multiplayer-listen-start
@@ -74,7 +88,8 @@
                                                           (addr (multiplayer-get-login-address
                                                                  connectres)))
                                                       (show-message-box
-                                                       "Error"
+                                                       (string-append "Error: "
+                                                                      (symbol->string errmsg))
                                                        (multiplayer-error-msg errmsg addr)))))))))))))
     (window-show wmultiplayer)
     (server-callback "Main server" "192.168.1.1")))
