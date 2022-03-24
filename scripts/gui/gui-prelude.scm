@@ -102,24 +102,38 @@
   (call-public 'set-config-option (cons name value)))
 
 
-(define server-callback (lambda (name addr) (display (string-append name " " addr))))
+;; Used so we do not send to the callback an address that is already
+;; added.
+;;
+;; TODO: add an edit service, so we can update the parameters of a server
+;; instead of adding new.
+(define multiplayer-current-servers #f)
+
 (define (multiplayer-listen-start callback)
   "Start listening for multiplayer servers."
-  "When a server appears, `callback` will be called, with the server name and"
-  "address"
+  "When a server appears, `callback` will be called, with the server name,"
+  "address, port, player count and maximum player number"
+  " The callback is (lambda (name addr port player-count max-players))"
   "Returns an ID, so you can stop the callback later"
-  (set! server-callback callback)
-  (display server-callback)
-  1)
+  (set! multiplayer-current-servers (make-hash-table))
+  (call-public 'multiplayer-listen-start
+               (lambda (name addr port player-count max-players)
+                 (when (eq? (hash-table-ref multiplayer-current-servers
+                                      (string-append addr ":" port)) #f)
+                   (hash-table-set! multiplayer-current-servers
+                              (string-append addr ":" port)
+                              #t)
+                   (callback name addr port player-count max-players))
+                 )))
+
+(define (multiplayer-listen-stop handle)
+  (call-public 'multiplayer-listen-stop handle))
 
 
 (define (show-message-box title msg)
   "Show a message box, with the text 'name' and the title 'title' on it"
   (call-public 'show-message-box (cons title msg)))
 
-
-(define (multiplayer-listen-stop handle)
-  (set! server-callback (lambda (name addr) #f)))
 
 
 (define (multiplayer-connect address)

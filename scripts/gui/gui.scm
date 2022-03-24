@@ -91,8 +91,7 @@
                                                        (string-append "Error: "
                                                                       (symbol->string errmsg))
                                                        (multiplayer-error-msg errmsg addr)))))))))))))
-    (window-show wmultiplayer)
-    (server-callback "Main server" "192.168.1.1")))
+    (window-show wmultiplayer)))
 
 (define (on-main-menu-open val)
   (let ((win

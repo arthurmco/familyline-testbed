@@ -1149,6 +1149,55 @@ static int show_starting_menu(
             return s7_t(sc);
         });
 
+    bool is_discovering = false;
+    gsr.registerPublicFunction(
+        "multiplayer-listen-start", [&](s7_scheme* sc, s7_pointer args) -> s7_pointer {
+            if (!s7_is_procedure(args)) {
+                return s7_f(sc);
+            }
+
+            s7_pointer fptr = args;
+            auto fguard     = s7_gc_protect(sc, fptr);
+
+            sf.startDiscover([=](ServerInfo si) {
+                fmt::print(
+                    " \033[1m{}\033[0m ({}/{})\n{}:{}\n\n", si.name, si.player_count, si.player_max,
+                    si.ip_addr, si.port);
+
+                s7_call(
+                    sc, fptr,
+                    s7_list(
+                        sc, 5, s7_make_string(sc, si.name.c_str()),
+                        s7_make_string(sc, si.ip_addr.c_str()), s7_make_integer(sc, si.port),
+                        s7_make_integer(sc, si.player_count), s7_make_integer(sc, si.player_max)));
+            });
+
+            is_discovering = true;
+            return s7_immutable(s7_cons(
+                sc, fptr,
+                s7_make_c_pointer_with_type(
+                    sc, (void*)fguard, s7_make_symbol(sc, "guard"), s7_t(sc))));
+        });
+
+    gsr.registerPublicFunction(
+        "multiplayer-listen-stop", [&](s7_scheme* sc, s7_pointer args) -> s7_pointer {
+            if (!s7_is_pair(args) || !s7_is_procedure(s7_car(args))) {
+                return s7_f(sc);
+            }
+
+            if (!s7_is_c_pointer_of_type(s7_cdr(args), s7_make_symbol(sc, "guard"))) {
+                return s7_f(sc);
+            }
+
+            if (!is_discovering) return s7_t(sc);
+
+            s7_gc_unprotect_at(sc, (s7_int)s7_c_pointer(s7_cdr(args)));
+
+            sf.stopDiscover();
+            is_discovering = false;
+            return s7_t(sc);
+        });
+
     CServer cserv{};
 
     auto errHandler = [&](std::string addr, std::string msg, NetResult ret) {
@@ -1358,8 +1407,6 @@ static int show_starting_menu(
             ginfo.guir->showWindow(settings);
         }));
 
-    std::map<std::string, ServerInfo> silist;
-    std::mutex simtx;
     GUIButton& bmplayer =
         (GUIButton&)w.box().add(ginfo.guir->createControl<GUIButton>("Multiplayer", [&](auto c) {
             simtx.lock();
