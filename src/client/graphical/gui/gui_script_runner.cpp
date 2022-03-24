@@ -971,12 +971,13 @@ s7_pointer window_destroy(s7_scheme *sc, s7_pointer args)
             *winname);
         return s7_f(sc);
     }
+    auto winid = w->id();
     gm->closeWindow(*w);
     gm->destroyWindow(*winname);
 
     return s7_list(
         sc, 3, s7_make_string(sc, winname->c_str()), s7_make_string(sc, "window"),
-        s7_make_integer(sc, w->id()));
+        s7_make_integer(sc, winid));
 }
 
 GUIScriptRunner::GUIScriptRunner(GUIManager *manager)
