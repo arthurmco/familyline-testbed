@@ -5,11 +5,27 @@
  */
 #pragma once
 
-#include <common/logic/terrain.hpp>
+#include <cstdint>
 #include <glm/glm.hpp>
-#include <list>
 #include <memory>
+#include <optional>
+#include <unordered_map>
 #include <vector>
+
+// custom specialization of std::hash, so we can make hashes using
+// vectors as keys
+template <>
+struct std::hash<glm::vec2> {
+    std::size_t operator()(glm::vec2 const& v) const noexcept
+    {
+        static_assert(sizeof(size_t) >= 4, "Your size_t type is too low");
+
+        size_t x = unsigned(glm::round(v.x * 100)) & (1 << (sizeof(size_t) / 4));
+        size_t y = unsigned(glm::round(v.y * 100));
+
+        return x | (y << (sizeof(size_t) * 4));
+    }
+};
 
 namespace familyline::logic
 {
@@ -46,142 +62,68 @@ namespace familyline::logic
  *   Here, we also limit the number of iterations for each pathing operation, to not calculate a
  * huge path once per frame. Do not worry, if you do not reach the destination, the point will
  * actually be the point that is closer to there.
+ * This pathfinder will use a bitmap to know if the path can be traversed
+ * or not.
+ *
+ * This pathfinder bitmap is immutable.
+ * If your bitmap changed, create a new pathfinder instance.
  */
 class Pathfinder
 {
 public:
-    Pathfinder(const Terrain& t) : t_(t), obstacle_bitmap_(1 * 1, false) {}
-
-    /**
-     * Update the obstacle bitmap, and the obstacle bitmap size ratio, compared to the
-     * terrain size
-     */
-    void update(std::vector<bool>, int ratio = 1);
-
-    struct TerrainTile {
-        unsigned int height;
-        TerrainType& type;
-    };
-
-    struct PathNode {
-        glm::vec2 position;
-        double height;
-
-        double g;
-        double h;
-        PathNode* parent = nullptr;
-
-        double f() const { return g + h; }
-
-        void calculateG(glm::vec2 start, glm::vec2 end, const TerrainTile& current);
-        void calculateValues(glm::vec2 start, glm::vec2 end, const TerrainTile& current);
-
-        PathNode(glm::vec2 pos) : position(pos), height(0.0), g(0.0), h(0.0) {}
-    };
-
-    /**
-     * Find a path through the terrain
-     *
-     * Return a vector of X+Z position (the height is guessed), ordered, from start to finish
-     */
-    std::vector<glm::vec2> findPath(
-        glm::vec2 start, glm::vec2 end, glm::vec2 size, int maxiters = 200);
-
-    bool maxIterReached() const { return has_max_iter_reached_; }
-
-    bool hasPossiblePath() const {
-        if (open_list_.size() == 0)
-            return closed_list_.size() == 0;
-
-        return true;
+    Pathfinder(std::vector<bool> bitmap, int width, int height)
+        : bitmap_(bitmap), width_(width), height_(height)
+    {
     }
 
+    /**
+     * Calculate a path from 'from' to 'to'
+     *
+     * Return every grid element we passed
+     */
+    std::optional<std::vector<glm::vec2>> calculate(glm::vec2 from, glm::vec2 to);
+
+    struct Node {
+        glm::vec2 pos;
+        Node* parent = nullptr;
+
+        // cost from begin to the current point
+        double g;
+
+        // cost from current point to the end
+        double h;
+
+        double f() const { return g + h; }
+    };
+
 private:
-    const Terrain& t_;
-    std::vector<bool> obstacle_bitmap_;
-
-    std::list<std::unique_ptr<PathNode>> open_list_;
-    std::list<std::unique_ptr<PathNode>> closed_list_;
+    std::vector<bool> bitmap_;
+    int width_, height_;
 
     /**
-     * Ratio of the obstacle bitmap
+     * A hashmap to store the open points
      *
-     * For example, if this value is 2, the bitmap width has half of the size
-     * of the terrain width, and the bitmap height is half of the size of the terrain
-     * height
+     * Since this list will get very big, we need to optimize search for it,
+     * and the unordered map searches faster than a vector.
      */
-    int ratio_ = 1;
-    
-    bool has_max_iter_reached_ = false;
+    std::unordered_map<glm::vec2, std::unique_ptr<Node>> open_;
+
+    bool isPointBlocked(glm::vec2 point) const;
 
     /**
-     * Traverse the path, from begin to end, putting the possible nodes in the open_list and the
-     * closed nodes in the closed list
-     *
-     * Returns the node of the end path, or nullptr if no path is possible
-     * (TODO: fix that, make it always return a path!)
-     *
-     * Please do not clean the closed_list_ before using the PathNode* we return, or you will
-     * crash the program.
+     * Add the 8 neighbors of a certain node to the open list
      */
-    PathNode* traversePath(glm::vec2 start, glm::vec2 end, glm::vec2 size, int maxiters);
+    void addNeighbors(Node& n, glm::vec2 to);
 
     /**
-     * Calculate the path positions
+     * Trace a path from 'from' to 'to'
      *
-     * The first element is the position of the last child, (i.e, the end), and the first element is
-     * the position of the first one, i.e, the start
-     *
-     * If the obstacle bitmap ratio is more than 1, interpolate the points
+     * Return the node pointer for the position 'to'.
+     * Querying the parents, you will be able to get to 'from'
      */
-    std::vector<glm::vec2> calculatePath(
-        glm::vec2 start, glm::vec2 end, glm::vec2 size, int maxiters);
+    Node* tracePath(glm::vec2 from, glm::vec2 to);
 
-    const TerrainTile getTileAtPosition(glm::vec2);
-
-    /**
-     * Move a node from the open to the closed list
-     *
-     * Obviously we remove it from the open list
-     */
-    void moveToClosedList(PathNode* n);
-
-    /**
-     * Check if node is not in an obstacle
-     */
-    bool isWalkable(const PathNode& n, glm::vec2 size) const;
-
-    /**
-     * Check if node is in the closed list
-     */
-    bool isInClosedList(const PathNode& n) const;
-
-    /**
-     * Check if the node is in the open list
-     *
-     * If yes, return a pointer to it
-     * If not, return nullptr
-     */
-    PathNode* findInOpenList(const PathNode& n);
-
-    /**
-     * Generate a list of neighbors for a given node
-     *
-     * We generate exactly 8 neigbors, in all directions, like this:
-     *
-     *   N | N | N     (X is the given node, all others are the neighbors)
-     *  ---+---+---
-     *   N | X | N
-     *  ---+---+---
-     *   N | N | N
-     *
-     *  We might generate less neighbors if, for example, you are in the border of
-     *  the map.
-     *
-     */
-    std::vector<std::unique_ptr<Pathfinder::PathNode>> generateNeighbors(const PathNode& n);
-
-    std::vector<glm::vec2> getCoordsInsideObject(glm::vec2 pos, glm::vec2 size) const;
+    std::vector<std::unique_ptr<Node>> closed_;
+    Node* current_ = nullptr;
 };
-
-};  // namespace familyline::logic
+}  // namespace familyline::logic

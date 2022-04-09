@@ -1,7 +1,6 @@
 #include <fmt/format.h>
 
 #include <algorithm>
-#include <vector>
 #include <cassert>
 #include <chrono>
 #include <cinttypes>
@@ -10,6 +9,7 @@
 #include <common/logic/logic_service.hpp>
 #include <common/logic/object_path_manager.hpp>
 #include <common/logic/player_manager.hpp>
+#include <vector>
 
 /**
  * TODO: create an object that will create other objects.
@@ -87,7 +87,7 @@ void PlayerManager::pushAction(uint64_t id, PlayerInputType type, std::optional<
     if (tick) {
         assert(*tick >= tick_);
     }
-    
+
     PlayerInputAction a;
     a.playercode = id;
     a.tick       = runtick;
@@ -96,11 +96,10 @@ void PlayerManager::pushAction(uint64_t id, PlayerInputType type, std::optional<
 
     actions_.push_back(a);
 
-    
     for (auto h : player_input_listeners_add_) {
         h.handler(a);
     }
-    
+
     std::sort(
         actions_.begin(), actions_.end(),
         [&](const PlayerInputAction& a, const PlayerInputAction& b) {
@@ -142,19 +141,15 @@ auto getValidSelections(const std::vector<std::weak_ptr<GameObject>>& selections
  */
 int PlayerManager::addListener(PlayerListenerHandler h, PlayerHandlerType type)
 {
-    static int id = 1;    
-    
+    static int id = 1;
+
     PlayerHandlerInfo phi;
     phi.id      = id++;
     phi.handler = h;
 
     switch (type) {
-    case PlayerHandlerType::AddHandler:
-        player_input_listeners_add_.push_back(phi);
-        break;
-    case PlayerHandlerType::RunHandler:
-        player_input_listeners_run_.push_back(phi);
-        break;
+        case PlayerHandlerType::AddHandler: player_input_listeners_add_.push_back(phi); break;
+        case PlayerHandlerType::RunHandler: player_input_listeners_run_.push_back(phi); break;
     }
 
     return phi.id;
@@ -203,13 +198,12 @@ void writeSelectDebugInfo(std::unique_ptr<Logger>& log, const char* str, const S
             break;
         case 3:
             log->write(
-                "player-manager", LogType::Info, "{}: SelectAction< objects=[{}, {}, {}] > ",
-                str, a.objects[0], a.objects[1], a.objects[2]);
+                "player-manager", LogType::Info, "{}: SelectAction< objects=[{}, {}, {}] > ", str,
+                a.objects[0], a.objects[1], a.objects[2]);
             break;
         default:
             log->write(
-                "player-manager", LogType::Info,
-                "{}: SelectAction < objects={} > ", str,
+                "player-manager", LogType::Info, "{}: SelectAction < objects={} > ", str,
                 a.objects);
             break;
     }
@@ -231,8 +225,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
     bool invalidAction = false;
 
     if (!player.has_value()) {
-        log->write(
-            "player-manager", LogType::Fatal, "invalid player ID ({})!", pia.playercode);
+        log->write("player-manager", LogType::Fatal, "invalid player ID ({})!", pia.playercode);
         return;
     }
 
@@ -266,10 +259,9 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                         if (attacker->getColonyComponent().has_value() &&
                             attacker->getColonyComponent()->owner.has_value() &&
                             attacker->getColonyComponent()->owner->get().isOfPlayer(*(*player))) {
-
                             if (attacker->getAttackComponent() && attackee->getAttackComponent())
-                                attacker->getAttackComponent()->attack(*attackee->getAttackComponent());
-
+                                attacker->getAttackComponent()->attack(
+                                    *attackee->getAttackComponent());
                         }
                     } else {
                         log->write(
@@ -335,7 +327,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                         s->getColonyComponent()->owner.has_value() &&
                         s->getColonyComponent()->owner->get().isOfPlayer(*(*player))) {
                         auto& pm = LogicService::getPathManager();
-                        pm->startPathing(*s.get(), glm::vec2(a.xPos, a.yPos));
+                        pm->doPathing(s, glm::vec2(a.xPos, a.yPos));
 
                         log->write(
                             "human-player", LogType::Debug, "moved to {}, {}", a.xPos, a.yPos);
@@ -367,7 +359,7 @@ void PlayerManager::processAction(const PlayerInputAction& pia, ObjectManager& o
                     (*optcam)->AddRotation(glm::vec3(0, 1, 0), a.radians);
                 }
             },
-            [&](const CreateEntity& a) {                
+            [&](const CreateEntity& a) {
                 log->write(
                     "player-manager", LogType::Info,
                     "{}: CreateEntity< type={}, xPos={}, yPos={} > ", str, a.type, a.xPos, a.yPos);

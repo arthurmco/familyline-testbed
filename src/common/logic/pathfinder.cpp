@@ -1,394 +1,182 @@
+#include <array>
 #include <common/logger.hpp>
 #include <common/logic/pathfinder.hpp>
+#include <ctime>
 #include <glm/geometric.hpp>
 #include <thread>
-#include <array>
 
 using namespace familyline::logic;
 
 #include <algorithm>
 #include <iterator>
 
-const Pathfinder::TerrainTile Pathfinder::getTileAtPosition(glm::vec2 p)
+std::unique_ptr<Pathfinder::Node> make_node(
+    glm::vec2 pos, Pathfinder::Node* parent, double g, double h)
 {
-    auto [width, height] = t_.getSize();
-    auto idx             = int(p.y) * width + int(p.x);
+    Pathfinder::Node* n = new Pathfinder::Node;
+    n->pos              = pos;
+    n->parent           = parent;
+    n->g                = g;
+    n->h                = h;
 
-    return TerrainTile{t_.getHeightFromCoords(p), (TerrainType&)t_.getTypeData()[idx]};
+    return std::unique_ptr<Pathfinder::Node>(n);
 }
 
-/**
- * Sort the list so that the best tiles stay in the top
- */
-Pathfinder::PathNode* sortBestTile(std::list<std::unique_ptr<Pathfinder::PathNode>>& open_list)
+bool Pathfinder::isPointBlocked(glm::vec2 point) const
 {
-    open_list.sort([](const std::unique_ptr<Pathfinder::PathNode>& a,
-                      const std::unique_ptr<Pathfinder::PathNode>& b) { return a->f() < b->f(); });
-    return open_list.front().get();
+    if (point.y < 0 || point.x < 0 || point.y >= height_ || point.x >= width_) return true;
+
+    unsigned index = int(point.y) * width_ + int(point.x);
+    return bitmap_[index];
 }
 
-/**
- * Generate a list of neighbors for a given node
- *
- * We generate exactly 8 neigbors, in all directions, like this:
- *
- *   N | N | N     (X is the given node, all others are the neighbors)
- *  ---+---+---
- *   N | X | N
- *  ---+---+---
- *   N | N | N
- *
- *  We might generate less neighbors if, for example, you are in the border of
- *  the map, and the neighbor would be out of the map (less than 0, or more than
- *  the width/height)
- *
- */
-std::vector<std::unique_ptr<Pathfinder::PathNode>> Pathfinder::generateNeighbors(const PathNode& n)
+Pathfinder::Node* Pathfinder::tracePath(glm::vec2 from, glm::vec2 to)
 {
-    auto [width, height] = t_.getSize();
+    auto root = make_node(from, nullptr, 0, glm::abs(glm::distance(from, to)));
+    current_  = root.get();
+    //    printf("\x1b[033;1mcurrent: (%.2f, %.2f)\x1b[033;0m\n", current_->pos.x, current_->pos.y);
+    std::swap(open_[from], root);
 
-    std::vector<glm::vec2> directions = {{-ratio_, -ratio_}, {0, -ratio_},    {ratio_, -ratio_},
-                                         {-ratio_, 0},       {ratio_, 0},     {-ratio_, ratio_},
-                                         {0, ratio_},        {ratio_, ratio_}};
+    while (current_->pos != to) {
+        addNeighbors(*current_, to);
 
-    std::vector<std::unique_ptr<Pathfinder::PathNode>> ret;
-    for (auto& d : directions) {
-        auto newpos = d + n.position;
-        assert(int(newpos.x) % ratio_ == 0);
-        assert(int(newpos.y) % ratio_ == 0);
+        auto curr     = std::min_element(open_.begin(), open_.end(), [&](auto& a, auto& b) {
+            return a.second->f() < b.second->f();
+            });
+        auto ncurrent = std::unique_ptr<Node>();
+        std::swap(curr->second, ncurrent);
+        open_.erase(ncurrent->pos);
+        current_ = ncurrent.get();
+        closed_.push_back(std::move(ncurrent));
 
-        if (newpos.x < 0 || newpos.y < 0) continue;
-
-        if (newpos.x >= width || newpos.y >= height) continue;
-
-        ret.push_back(std::make_unique<PathNode>(newpos));
-    }
-    return ret;
-}
-
-/**
- * Check if the node is in the open list
- *
- * If yes, return a pointer to it
- * If not, return nullptr
- */
-Pathfinder::PathNode* Pathfinder::findInOpenList(const PathNode& n)
-{
-    auto it = std::find_if(
-        open_list_.begin(), open_list_.end(),
-        [&](const std::unique_ptr<Pathfinder::PathNode>& v) { return v->position == n.position; });
-
-    if (it == open_list_.end()) return nullptr;
-
-    return it->get();
-}
-
-/**
- * Find all the coordinates that are considered inside the object, respecting the
- * grid
- */
-std::vector<glm::vec2> Pathfinder::getCoordsInsideObject(glm::vec2 pos, glm::vec2 size) const
-{
-    std::vector<glm::vec2> coords;
-    assert(size.x > 0);
-    assert(size.y > 0);
-    auto [width, height] = t_.getSize();
-
-    /// The object position is at the center
-    auto minx = glm::round(pos.x - (size.x / 2.0));
-    auto maxx = glm::round(pos.x + (size.x / 2.0));
-    auto miny = glm::round(pos.y - (size.y / 2.0));
-    auto maxy = glm::round(pos.y + (size.y / 2.0));
-    std::vector<int> indices;
-    for (auto y = int(miny); y <= int(maxy); y++) {
-        for (auto x = int(minx); x <= int(maxx); x++) {
-            if (x >= 0 && y >= 0 && x < width && y < height) coords.push_back(glm::vec2(x, y));
+        if (open_.size() == 0) {
+            return nullptr;
         }
     }
 
-    return coords;
+    return current_;
 }
 
 /**
- * Check if node is not in an obstacle
+ * Calculate a path from 'from' to 'to'
  *
- * Consider the object size.
- * Imagine that the object position is at the center, and the size
- * delimits the width and height.
- *
- * Like this:
- *
- *   size.x
- *  |-----|_
- *   ooooo |
- *   ooPoo | size.y
- *   ooooo |
- *         -
+ * Return every grid element we passed
  */
-bool Pathfinder::isWalkable(const PathNode& n, glm::vec2 size) const
+std::optional<std::vector<glm::vec2>> Pathfinder::calculate(glm::vec2 from, glm::vec2 to)
 {
-    auto width  = std::get<0>(t_.getSize());
-    auto coords = getCoordsInsideObject(n.position, size);
-    std::vector<unsigned int> indices;
-    auto ratio = ratio_;
-    std::transform(
-        coords.begin(), coords.end(), std::back_inserter(indices),
-        [width, ratio](auto& v) { return int(v.y / ratio) * (width / ratio) + int(v.x / ratio); });
+    auto& log = LoggerService::getLogger();
+    log->write("pathfinder", LogType::Debug, "calculating a path from {} to {}", from, to);
 
-    if (indices.size() == 0) return false;
+#if 0
+    for (auto y = 0; y < 40; y++) {
+        printf("%03d |", y);
+        for (auto x = 0; x < 60; x++) {
+            if (x == from.x && y == from.y)
+                printf("F");
+            else if (x == to.x && y == to.y)
+                printf("T");
+            else if (bitmap_[y * width_ + x])
+                printf("X");
+            else
+                printf(" ");
+        }
+        puts("|");
+    }
+#endif
 
-    return std::all_of(indices.begin(), indices.end(), [&](auto index) {
-        return (index >= obstacle_bitmap_.size()) ? false : !obstacle_bitmap_[index];
-    });
+    if (bitmap_[int(from.y) * width_ + int(from.x)]) {
+        log->write(
+            "pathfinder", LogType::Warning, "you are starting from an obstacle (from={}, to={})",
+            from, to);
+        return std::nullopt;
+    }
+
+    Node* last = tracePath(from, to);
+    if (!last) {
+        return std::nullopt;
+    }
+
+    std::vector<glm::vec2> path;
+    path.reserve(closed_.size());
+
+    for (; last != nullptr; last = last->parent) {
+        path.push_back(last->pos);
+    }
+
+    std::reverse(path.begin(), path.end());
+    log->write("pathfinder", LogType::Debug, "the generated path is {}", path);
+
+#if 0
+    for (auto y = 0; y < 40; y++) {
+        printf("%03d |", y);
+        for (auto x = 0; x < 60; x++) {
+            if (x == from.x && y == from.y)
+                printf("F");
+            else if (x == to.x && y == to.y)
+                printf("T");
+            else if (bitmap_[y * width_ + x])
+                printf("X");
+            else if (std::find_if(path.begin(), path.end(), [&](glm::vec2& v) {
+                return int(v.x) == x && int(v.y) == y;
+            }) != path.end())
+                printf(".");
+            else
+                printf(" ");
+        }
+        puts("|");
+    }
+#endif
+
+    return std::make_optional(path);
 }
 
 /**
- * Check if node is in the closed list
+ * Add the 8 neighbors of a certain node to the open list
+ *
+ * If a neighbor is already in the open list, check its G score, and, if the
+ * new G score is less than the calculated one, we replace its parent with
+ * our parent, and recalculate.
  */
-bool Pathfinder::isInClosedList(const PathNode& n) const
+void Pathfinder::addNeighbors(Node& n, glm::vec2 to)
 {
-    auto it = std::find_if(
-        closed_list_.rbegin(), closed_list_.rend(),
-        [&](const std::unique_ptr<Pathfinder::PathNode>& v) { return v->position == n.position; });
-    return (it != closed_list_.rend());
-}
+    std::vector<glm::vec2> posoffsets = {
+        glm::vec2(-1, 1),
+        glm::vec2(0, 1),
+        glm::vec2(1, 1),
+        glm::vec2(-1, 0),
+        /*glm::vec2(0, 0),*/ glm::vec2(1, 0),
+        glm::vec2(-1, -1),
+        glm::vec2(0, -1),
+        glm::vec2(1, -1)};
 
-void Pathfinder::moveToClosedList(Pathfinder::PathNode* n)
-{
-    auto ptr = std::find_if(
-        open_list_.begin(), open_list_.end(),
-        [&](std::unique_ptr<PathNode>& node) { return node.get() == n; });
-    assert(ptr != open_list_.end());
+    glm::vec2 pos = n.pos;
+    for (auto off : posoffsets) {
+        if (!isPointBlocked(pos + off)) {
+            auto gv     = glm::abs(glm::distance(glm::vec2(0, 0), off));
+            auto gscore = n.g + gv;
 
-    auto distance = std::distance(open_list_.begin(), ptr);
-    std::unique_ptr<PathNode> nnode;
-    nnode = std::move(*ptr);
-
-    open_list_.erase(std::next(open_list_.begin(), distance));
-
-    closed_list_.push_back(std::move(nnode));
-}
-
-/// Purge the list of non-existing pointers or pointers that point to nothing
-void purgeList(std::list<std::unique_ptr<Pathfinder::PathNode>>& list)
-{
-    list.erase(
-        std::remove_if(
-            list.begin(), list.end(),
-            [](std::unique_ptr<Pathfinder::PathNode>& v) { return v ? false : true; }),
-        list.end());
-}
-
-Pathfinder::PathNode* Pathfinder::traversePath(
-    glm::vec2 start, glm::vec2 end, glm::vec2 size, int maxiters)
-{
-    auto nstart = std::make_unique<PathNode>(start);
-    nstart->calculateValues(start, end, getTileAtPosition(nstart->position));
-    open_list_.push_back(std::move(nstart));
-    has_max_iter_reached_ = false;
-
-    /// If the start does not align to the "grid", we make it align
-    if (int(start.x) % ratio_ != 0 || int(start.y) % ratio_ != 0) {
-        auto direction = end - start;
-        auto vec       = glm::vec2(
-            direction.x > 0 ? 1 / float(ratio_) : (direction.x < 0 ? -1 / float(ratio_) : 0),
-            direction.y > 0 ? 1 / float(ratio_) : (direction.y < 0 ? -1 / float(ratio_) : 0));
-
-        if (int(start.x) % ratio_ == 0) vec.x = 0;
-        if (int(start.y) % ratio_ == 0) vec.y = 0;
-
-        bool walkable                 = false;
-        int idx                       = 0;
-        std::array<glm::vec2, 8> vals = {glm::vec2(0, 0),  glm::vec2(0, 1),  glm::vec2(0, -1),
-                                         glm::vec2(1, 0),  glm::vec2(-1, 0), glm::vec2(1, 1),
-                                         glm::vec2(-1, -1)};
-
-        moveToClosedList(open_list_.back().get());
-        
-        do {
-            auto pos = (start / float(ratio_) + (vec + vals[idx])) * float(ratio_);
-
-            auto alignstart = std::make_unique<PathNode>(pos);
-            walkable        = isWalkable(*alignstart.get(), size);
-
-            alignstart->calculateValues(start, end, getTileAtPosition(alignstart->position));
-            alignstart->parent = closed_list_.back().get();
-
-            if (walkable) {
-                open_list_.push_back(std::move(alignstart));
+            if (auto existing = open_.find(pos + off); existing != open_.end()) {
+                if (existing->second->g > gscore) {
+                    existing->second->parent = &n;
+                    existing->second->g      = gscore;
+                }
             } else {
-                idx++;
-                if (idx > vals.size()) {
-                    LoggerService::getLogger()->write(
-                        "pathfinder", LogType::Warning,
-                        "Fractional path is completely blocked! Cannot pass through! Returning the "
-                        "best value");
-                    return closed_list_.back().get();
+                if (auto closedex = std::find_if(
+                        closed_.begin(), closed_.end(),
+                        [&](const auto& node) { return (node->pos == (pos + off)); });
+                    closedex == closed_.end()) {
+                    auto hscore = glm::distance(pos + off, to);
+                    //                    printf("add to open [%zu]: (%.2f, %.2f), g=%.2f,
+                    //                    h=%.2f\n",
+                    //                           open_.size(), (pos+off).x, (pos+off).y, gscore,
+                    //                           hscore);
+                    open_[pos + off] = make_node(pos + off, &n, gscore, hscore);
                 }
             }
-        } while (!walkable);
-    }
 
-    int itercount = 0;
-    auto endtiles = getCoordsInsideObject(end, size);
-    if (endtiles.size() == 0) {
-        LoggerService::getLogger()->write(
-            "pathfinder", LogType::Warning,
-            "cannot go there {:.2f}! the pathfinder will try to go to the nearest place",
-            end);
-    }
-
-    while (!open_list_.empty()) {
-        PathNode* best = sortBestTile(open_list_);
-        moveToClosedList(best);
-
-        // we are in the final position
-        if (glm::round(best->position) == glm::round(end)) {
-            break;
-        }
-
-        // we are not in the final position, but sufficiently close to
-        if (auto delta = glm::abs(end - best->position);
-            delta.x < double(ratio_) && delta.y < double(ratio_)) {
-            auto nend    = std::make_unique<PathNode>(end);
-            nend->parent = closed_list_.back().get();
-            closed_list_.push_back(std::move(nend));
-            break;
-        }
-
-        // we cannot go to the final position, but we are sufficiently close
-        if (PathNode tend{end}; !isWalkable(tend, size) &&
-                                std::any_of(endtiles.begin(), endtiles.end(), [&](auto& endpos) {
-                                    return endpos == best->position;
-                                })) {
-            LoggerService::getLogger()->write(
-                "pathfinder", LogType::Warning,
-                "requested end point {:.2f} not equal to found end point {:.2f}, but "
-                "close enough",
-                end.x, best->position);
-            break;
-        }
-
-        // we exceeded the iteration count, maybe retry again next tick
-        if (itercount == maxiters) {
-            LoggerService::getLogger()->write(
-                "pathfinder", LogType::Info, "tick count exceeded! Repathing on next call");
-            has_max_iter_reached_ = true;
-            break;
-        }
-
-        // we are not in the final position nor exceeding iter count
-        auto neighbors = generateNeighbors(*best);
-        for (auto& n : neighbors) {
-            n->parent = best;
-            n->calculateValues(start, end, getTileAtPosition(n->position));
-            if (!isWalkable(*n.get(), size) || isInClosedList(*n.get())) continue;
-
-            auto existing = findInOpenList(*n.get());
-            if (existing) {
-                if (existing->g < n->g) {
-                    existing->parent = best;
-                    existing->calculateG(start, end, getTileAtPosition(existing->position));
-                }
-
-                continue;
-            }
-
-            std::unique_ptr<PathNode> npointer;
-            npointer.swap(n);
-            open_list_.push_back(std::move(npointer));
-        }
-
-        purgeList(open_list_);
-        purgeList(closed_list_);
-
-        LoggerService::getLogger()->write(
-            "pathfinder", LogType::Debug,
-            "({:03d}) open list has {}, closed list has {}, best: {:.2f}", itercount,
-            open_list_.size(), closed_list_.size(), best->position);
-
-        itercount++;
-    }
-
-    if (open_list_.empty()) {
-        LoggerService::getLogger()->write(
-            "pathfinder", LogType::Warning,
-            "Path is completely blocked! Cannot pass through! Returning the best value");
-    }
-
-    return closed_list_.back().get();
-}
-
-void Pathfinder::PathNode::calculateG(glm::vec2 start, glm::vec2 end, const TerrainTile& current)
-{
-    if (parent) {
-        auto heightcost = glm::abs(glm::distance(double(current.height), parent->height)) * 0.01;
-        g = parent->g + glm::abs(glm::distance(position, parent->position)) + heightcost;
-    } else {
-        g = 0;
-    }
-}
-
-void Pathfinder::PathNode::calculateValues(
-    glm::vec2 start, glm::vec2 end, const TerrainTile& current)
-{
-    this->calculateG(start, end, current);
-    h      = glm::abs(glm::distance(position, end));
-    height = current.height;
-}
-
-std::vector<glm::vec2> Pathfinder::calculatePath(
-    glm::vec2 start, glm::vec2 end, glm::vec2 size, int maxiters)
-{
-    PathNode* node = traversePath(start, end, size, maxiters);
-    assert(node);
-
-    std::vector<glm::vec2> positions;
-    positions.reserve(int(glm::abs(glm::distance(start, end))));
-    for (PathNode* current = node; current != nullptr; current = current->parent) {
-        if (positions.size() > 0 &&
-            glm::abs(glm::distance(current->position, positions.back())) >= ratio_) {
-            auto begin = positions.back();
-            for (auto i = 1; i <= ratio_; i++) {
-                positions.push_back(glm::mix(begin, current->position, i / double(ratio_)));
-            }
         } else {
-            positions.push_back(current->position);
+            //            printf("\x1b[033;34mBLOCKED: (%.2f, %.2f)\x1b[033;0m\n", (pos+off).x,
+            //            (pos+off).y);
         }
     }
-
-    return positions;
-}
-
-std::vector<glm::vec2> Pathfinder::findPath(
-    glm::vec2 start, glm::vec2 end, glm::vec2 size, int maxiters)
-{
-    LoggerService::getLogger()->write(
-        "pathfinder", LogType::Debug,
-        "trying to find a path between {:.2f} and {:.2f}, with size {:.2f}",
-        start, end, size);
-
-    assert(obstacle_bitmap_.size() > 1);
-
-    auto positions = this->calculatePath(start, end, size, maxiters);
-    std::vector<glm::vec2> ret;
-    ret.reserve(positions.size());
-
-    std::copy(positions.rbegin(), positions.rend(), std::back_inserter(ret));
-    return ret;
-}
-
-void Pathfinder::update(std::vector<bool> bitmap, int ratio)
-{
-    auto [width, height] = t_.getSize();
-
-    assert(bitmap.size() == (width / ratio) * (height / ratio));
-    obstacle_bitmap_ = bitmap;
-
-    // Invalidate both, because they are simply not valid now.
-    //
-    // We will need to calculate the whole path
-    open_list_.clear();
-    closed_list_.clear();
-    ratio_ = ratio;
 }

@@ -8,6 +8,7 @@
 
 #include <common/logic/game_event.hpp>
 #include <common/logic/game_object.hpp>
+#include <common/logic/object_manager.hpp>
 #include <common/logic/pathfinder.hpp>
 #include <common/logic/terrain.hpp>
 #include <common/logic/types.hpp>
@@ -16,275 +17,172 @@
 #include <optional>
 #include <vector>
 
-#include "common/logic/object_manager.hpp"
-
 namespace familyline::logic
 {
 using PathHandle = unsigned long int;
 
-enum class PathStatus {
-
-    /// Pathing operation completed
-    Completed,
-
-    /// Pathing operation not started
-    NotStarted,
-
-    /// The entity is still following the path
-    InProgress,
-
-    /// The pathing was redone by the user, it clicked to move an object and
-    /// immediately clicked again somewhere
-    Repathing,
-
-    /// The pathing operation detected that the current path cannot be created.
-    /// It stopped in the best position it detected.
-    Unreachable,
-
-    /// The pathing operation has been stopped, because the pathing object
-    /// is dead
-    Stopped,
-
-    /// Pathing operation is invalid
-    Invalid
-};
-
-// TODO: handle path appending (aka defining path waypoints, like in other RTS games)
-
 /**
- * Does management of pathing, by creating paths and moving the objects along it
+ * Manages pathfinding for multiple objects
  */
 class ObjectPathManager
 {
 public:
-    ObjectPathManager(Terrain& t);
+    ObjectPathManager(const Terrain& t);
 
+    ~ObjectPathManager();
+
+    ObjectPathManager(ObjectPathManager&)       = delete;
     ObjectPathManager(const ObjectPathManager&) = delete;
-    ObjectPathManager& operator=(const ObjectPathManager&) = delete;
 
-    struct PathRef {
-        std::unique_ptr<Pathfinder> pathfinder;
+    /**
+     * The object path manager is, more or less, a pathing state machine.
+     *
+     * So, because of this, every pathed object has a status
+     * The statuses are those declared in this enum
+     *
+     * The state flow is like the graph below:
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     */
+    enum class PathState {
+        /// The path ref has just been created
+        Created,
 
-        /// A pointer to a game object
-        /// Apparently, we cannot use a reference here, because moving a reference deletes the move
-        /// constructor
-        GameObject* object;
-        object_id_t oid;
-        PathStatus status;
-        glm::vec2 original_start;
-        glm::vec2 start;
-        glm::vec2 end;
+        /// Pathing in progress.
+        /// The pathfinder is running.
+        Pathing,
 
-        int ticks_to_remove = 300;
+        /// The pathfinder is done
+        /// We are only traversing the path.
+        Traversing,
 
-        /// Current terrain ratio
-        int ratio = 2;        
-        
-        /// A path element deque (because pure queues does not allow copy to it)
-        /// The front element is always where the object is.
-        std::deque<glm::vec2> pathElements;
-       
-        /// The pathing calculation is completed. We now just follow the path
-        bool calculationCompleted = false;
+        /// We encountered an unexpected obstacle, and we need
+        /// to dodge from it
+        Dodging,
 
-        int refcount = 2;
+        /// Our path elements ended, but a path to the destination is still
+        /// possible
+        ///
+        /// It happens when the path positions end before we reach a
+        /// destination, but the pathfinder did not fail. This case is reached
+        /// when we limit the number of pathfinder iterations to avoid stalling
+        /// the machine in a single pathfinder cycle.
+        ///
+        /// The repathing also happens when you order the entity to move (aka
+        /// the mouse right click) while it is following a path.
+        Repathing,
 
-        bool updated = false;
-        bool reinserted = false;
+        /// We completed the traversing.
+        /// We will delete this ref next tick.
+        Completed,
 
-        /// Minimum amount of ticks to pass until we can repath again
-        int minimum_next_repath = 0;
+        /// The path is impossible to make
+        /// (note that we can discover that after starting traversal)
+        ImpossiblePath,
 
-        PathRef(GameObject& o, Terrain& t, glm::vec2 dest)
-            : object(&o),
-              oid(o.getID()),
-              pathfinder(std::make_unique<Pathfinder>(t)),
-              original_start(glm::vec2(o.getPosition().x, o.getPosition().z)),
-              start(glm::vec2(o.getPosition().x, o.getPosition().z)),
-              status(PathStatus::NotStarted),
-              ratio(2),
-              end(dest)
-        {
-        }
+        /// We detected the death of an entity (due to a lifecycle event)
+        /// It is treated more or less like the completed event
+        Died
 
-        PathRef(const PathRef& other) = delete;
-        PathRef& operator=(const PathRef& other) = delete;
-        PathRef(PathRef& other)                  = delete;
-        PathRef& operator=(PathRef& other) = delete;
-
-        PathRef(PathRef&& other) = default;
-        PathRef& operator=(PathRef&& other) = default;
-
-        std::optional<glm::vec2> position() const
-        {
-            if (pathElements.empty()) return std::nullopt;
-
-            return std::make_optional<>(pathElements.front());
-        }
-
-        PathHandle handleval() const { return (PathHandle)(oid * 2); }
     };
 
     /**
-     * Update the pathing
-     *
-     * This means:
-     *  - moving the entity to the next position in the path (the granularity is low, so
-     *    do not worry).
-     *      - In the future we will take into account some things like entity speed, etc.
-     *  - removing paths that completed
-     *  - detect if a path completed calculation in its timeslot. If it did not, we reschedule
-     *    it to the next frame
-     *  - update the terrain bitmaps (according to each path, in the future will be according to
-     *    the FoV of each unit)
+     * The associated state of each pathed object
      */
-    void update(const ObjectManager& om);
+    struct PathRef {
+        std::shared_ptr<GameObject> o;
+
+        PathState state = PathState::Created;
+
+        /// The position that it was set in the previous `update()` call.
+        /// This will be useful when we introduce the speed factor.
+        glm::vec2 previous_position;
+
+        /// The position list set by the pathfinder.
+        /// Here, it is actually a queue, so that removing the first element and
+        /// adding elements at the end is easier.
+        std::deque<glm::vec2> positions;
+
+        /// The pathfinder for this ref.
+        std::unique_ptr<Pathfinder> pf;
+
+        /// The final destination of this entity.
+        glm::vec2 destination;
+
+        /// How many ticks to wait before proceeding
+        int wait = 0;
+
+        /// This pathref is currently repathing to dodge another.
+        bool isDodging = false;
+    };
 
     /**
-     * Start pathing an object
-     *
-     * Returns a path handle
-     *
-     * This function also detects if you are pathing an object that is already been pathed.
-     * If so, we replace the destination and return the handle for the old one
+     * A simpler structure, to handle static objects.
      */
-    PathHandle startPathing(GameObject& o, glm::vec2 dest);
+    struct StaticRef {
+        bool valid = false;
+        glm::vec2 position;
+        glm::vec2 size;
+    };
 
-    /**
-     * Get the status of a pathing operation
-     */
-    PathStatus getPathStatus(PathHandle);
+    std::vector<PathRef> refs_;
+    std::vector<object_id_t> to_delete_;
 
-    /**
-     * Get the status of a pathing operation (overload for an object. Since only one pathing
-     * operation per object is allowed, this operation is not ambiguous)
-     */
-    PathStatus getPathStatus(const GameObject& o);
+    std::unordered_map<object_id_t, StaticRef> statics_;
 
-    /**
-     * Remove the pathing operation
-     *
-     * Note that we will only remove the operation it its refcount is zero
-     */
-    void removePathing(PathHandle);
+    void update(ObjectManager& om);
 
-    void setItersPerFrame(int v) { max_iter_paths_per_frame_ = v; }
-    int getItersPerFrame() const { return max_iter_paths_per_frame_; }
+    void doPathing(std::shared_ptr<GameObject> o, glm::vec2 destination);
 
-    ~ObjectPathManager();
-    
+    size_t pathCount() const { return refs_.size(); }
+
+    void blockBitmapArea(int x, int y, int w, int h);
+
 private:
-    Terrain& t_;
+    const Terrain& t_;
+    std::vector<bool> base_bitmap_;
+
     EventReceiver obj_events_;
-    std::queue<EntityEvent> events_;
-    
-    void parseEntityEvent(const ObjectManager& om, const EntityEvent& e);
-    
-    int max_iter_paths_per_frame_ = 200;
 
     /**
-     * A map of object IDs and their respective positions and sizes, to mask them into the
-     * obstacle bitmap
+     * Generate a terrain bitmap with our known pathrefs
+     */
+    std::vector<bool> generateBitmap(std::vector<object_id_t> exclude_ids = {}) const;
+
+    /**
+     * Will this object collide with the currently pathrefs?
      *
-     * TODO: add an event to the action queue for position changed?
-     */
-    std::unordered_map<object_id_t, std::tuple<glm::vec2 /* pos */, glm::vec2 /* size */>>
-        mapped_objects_;
-
-    /**
-     * Each element for this global obstacle 'bitmap' is a value telling how many entities
-     * would be there.
+     * (The other entities are assured not to collide because of the
+     *  bitmap)
      *
-     * Useful for correctly hiding the obstacle bitmap in certain situations where two meshes would
-     * be over each other
+     * We return a pointer to the first pathref that will collide
+     * with us, or nullptr if no collision is detected
      */
-    std::vector<unsigned> obstacle_bitmap_;
+    PathRef* willCollide(
+        object_id_t ourid, const std::vector<glm::vec2>& positions, glm::vec2 oursize);
 
-    /**
-     * Find an existing path reference from an object
-     *
-     * Useful to see if we are repathing an object
-     *
-     * Returns the pointer to the ref if we found, nullptr if we did not found
-     */
-    PathRef* findPathRefFromObject(const GameObject& o) { return findPathRefFromObject(o.getID()); }
+    void updateRefState(PathRef& ref);
 
-    /**
-     * Find an existing path reference from an object
-     *
-     * Useful to see if we are repathing an object
-     *
-     * Returns the pointer to the ref if we found, nullptr if we did not found
-     */
-    PathRef* findPathRefFromObject(object_id_t oid);
-
-    std::vector<ObjectPathManager::PathRef> operations_;
-
-    /**
-     * Find the path reference from a handle
-     *
-     * Returns an iterator pointing to the object, or the value of end() if the
-     * handle was not found
-     */
-    decltype(operations_.begin()) findPathRefFromHandle(PathHandle);
-
-    /**
-     * Create a path for an object whose path does not exist yet
-     */
-    void createPath(PathRef& r);
-
-    /**
-     * Create a path for an object whose path already exists, essentially redoing it
-     */
-    void recalculatePath(PathRef& r, bool force = false);
-
-    /**
-     * Update the position of an object
-     *
-     * Returns the current position of said object, or nullopt if the object
-     * had no more positions to go when the function was called
-     */
-    std::optional<glm::vec2> updatePosition(PathRef& r);
-
-    /**
-     * Update the mapped object list, adding the recently added entities and removing
-     * the destroyed entities.
-     */
-    void pollEntities(const ObjectManager& om);
-
-    /**
-     * Update the global obstacle bitmap with the data from our event receiver
-     */
-    void updateObstacleBitmap(const ObjectManager& om);
-
-    /**
-     * Creates an obstacle bitmap for the current game object
-     *
-     * Currently, it only removes the actual object from the bitmap, but, in the future,
-     * it will also consider the terrain type (e.g, insert water for units that only walk
-     * on land)
-     */
-    std::vector<bool> createBitmapForObject(const GameObject& o, int ratio=1);
-
-    /**
-     * Set the object data in the obstacle bitmap to a certain state
-     */
-    void setObjectOnBitmap(std::vector<bool>& bitmap, const GameObject& o, bool value, float ratio=1.0);
-
-    /**
-     * Set the object data in the obstacle bitmap to a certain state
-     */
-    void setObjectOnBitmap(std::vector<bool>& bitmap, glm::vec2 pos, glm::vec2 size, bool value, float ratio=1.0);
-    
-    /**
-     * Set the object data in the global obstacle bitmap to a certain state
-     */
-    void setObjectOnBitmap(std::vector<unsigned>& bitmap, const GameObject& o, bool value, float ratio=1.0);
-
-    /**
-     * Set the object data in the global obstacle bitmap to a certain state
-     */
-    void setObjectOnBitmap(std::vector<unsigned>& bitmap, glm::vec2 pos, glm::vec2 size, bool value, float ratio=1.0);
+    bool handleEntityEvent(const EntityEvent& e);
 };
 
 }  // namespace familyline::logic

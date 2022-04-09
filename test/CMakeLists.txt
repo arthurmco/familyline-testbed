@@ -74,7 +74,7 @@ target_include_directories(familyline-tests PRIVATE "${CMAKE_SOURCE_DIR}/src/inc
 file(COPY "${CMAKE_SOURCE_DIR}/test" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
 
 target_link_libraries( familyline-tests
-  PRIVATE gtest gtest_main)
+  PRIVATE gtest_main gmock_main)
 
 add_sanitizers(familyline-tests)
 add_coverage(familyline-tests)
@@ -83,4 +83,5 @@ target_compile_definitions(familyline-tests PUBLIC
   TESTS_DIR="${CMAKE_SOURCE_DIR}/test"
   )
 
-add_test(NAME general-test COMMAND familyline-tests)
+include(GoogleTest)
+gtest_discover_tests(familyline-tests)

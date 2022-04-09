@@ -2,29 +2,20 @@
 #include <array>
 #include <cassert>
 #include <common/logger.hpp>
+#include <common/logic/action_queue.hpp>
+#include <common/logic/game_event.hpp>
 #include <common/logic/logic_service.hpp>
 #include <common/logic/object_path_manager.hpp>
+#include <common/logic/types.hpp>
 #include <iterator>
-
-#include "common/logic/action_queue.hpp"
-#include "common/logic/game_event.hpp"
-#include "common/logic/types.hpp"
 
 using namespace familyline::logic;
 
-/*
- * TODO: maybe, instead of recalculating the path if we have multiple paths in the same map, we
- *       only recalculate if a collision would occur
- */
-
-ObjectPathManager::ObjectPathManager(Terrain& t) : t_(t)
+ObjectPathManager::ObjectPathManager(const Terrain& t)
+    : t_(t),
+      base_bitmap_(std::vector<bool>(std::get<0>(t.getSize()) * std::get<1>(t.getSize()), false)),
+      obj_events_(std::bind_front(&ObjectPathManager::handleEntityEvent, this))
 {
-    auto [w, h]      = t_.getSize();
-    obstacle_bitmap_ = std::vector<unsigned>(w * h, 0);
-    obj_events_      = [this](const EntityEvent& e) {
-        events_.push(e);
-        return true;
-    };
     LogicService::getActionQueue()->addReceiver(
         "path-event-receiver", obj_events_,
         {
@@ -39,477 +30,294 @@ ObjectPathManager::~ObjectPathManager()
     LogicService::getActionQueue()->removeReceiver("path-event-receiver");
 }
 
-/**
- * Start pathing an object
- *
- * Returns a path handle
- *
- * This function also detects if you are pathing an object that is already been pathed.
- * If so, we replace the destination and return the handle for the old one
- */
-PathHandle ObjectPathManager::startPathing(GameObject& o, glm::vec2 dest)
+void ObjectPathManager::blockBitmapArea(int x, int y, int w, int h)
 {
-    // TODO: require some sort of MovementComponent to start pathing
-    auto& l = LoggerService::getLogger();
+    auto [tw, th] = t_.getSize();
 
-    auto* existingref = findPathRefFromObject(o);
-    if (existingref) {
-        l->write(
-            "object-path-manager", LogType::Info,
-            "found an existing reference to '%{}' ({}) in the pathing list", o.getName().c_str(),
-            o.getID());
-        existingref->status = PathStatus::Repathing;
-        existingref->start  = existingref->position() ? *existingref->position()
-                                                      : glm::vec2(
-                                                           existingref->object->getPosition().x,
-                                                           existingref->object->getPosition().z);
-        existingref->end    = dest;
-        return existingref->handleval();
-    } else {
-        auto pathref = PathRef(o, t_, dest);
-        l->write(
-            "object-path-manager", LogType::Info,
-            "adding reference to '{}' ({}) in the pathing list", o.getName().c_str(), o.getID());
-        operations_.push_back(std::move(pathref));
-        return pathref.handleval();
+    auto bx = glm::max(x, 0);
+    auto by = glm::max(y, 0);
+    auto bw = glm::min(w, int(tw) - x);
+    auto bh = glm::min(h, int(th) - y);
+
+    for (y = by; y < by + bh; y++) {
+        for (x = bx; x < bx + bw; x++) {
+            base_bitmap_[y * tw + x] = true;
+        }
     }
 }
 
-/**
- * Find an existing path reference from an object
- *
- * Useful to see if we are repathing an object
- *
- * Returns the pointer to the ref if we found, nullptr if we did not found
- */
-ObjectPathManager::PathRef* ObjectPathManager::findPathRefFromObject(object_id_t oid)
+glm::vec2 to2D(glm::vec3 pos) { return glm::vec2(pos.x, pos.z); }
+
+glm::vec3 to3D(glm::vec2 pos, const Terrain& t)
 {
-    auto v = std::find_if(operations_.begin(), operations_.end(), [&](PathRef& r) {
-        return r.object->getID() == oid;
-    });
+    return glm::vec3(pos.x, t.getHeightFromCoords(pos), pos.y);
+}
 
-    if (v == operations_.end()) return nullptr;
-
-    return &(*v);
+glm::vec2 fixPosition(glm::vec2 pos, glm::vec2 size)
+{
+    return glm::vec2(
+        glm::round(std::max(0.0, pos.x - (size.x / 2.0))),
+        glm::round(std::max(0.0, pos.y - (size.y / 2.0))));
 }
 
 /**
- * Get the status of a pathing operation
+ * Will this object collide with the currently pathrefs?
+ *
+ * (The other entities are assured not to collide because of the
+ *  bitmap)
  */
-PathStatus ObjectPathManager::getPathStatus(PathHandle h)
+ObjectPathManager::PathRef* ObjectPathManager::willCollide(
+    object_id_t ourid, const std::vector<glm::vec2>& positions, glm::vec2 oursize)
 {
-    auto v = findPathRefFromHandle(h);
-    if (v == operations_.end()) {
-        return PathStatus::Invalid;
+    for (auto& ref : refs_) {
+        if (ref.o->getID() == ourid) continue;
+
+        auto otherpos = to2D(ref.o->getPosition());
+
+        auto otherwidth  = ref.o->getSize().x;
+        auto otherheight = ref.o->getSize().y;
+
+        auto ourwidth  = oursize.x;
+        auto ourheight = oursize.y;
+
+        for (const auto& pos : positions) {
+            auto fpos = fixPosition(pos, oursize);
+            if (fpos.x < int(otherpos.x + otherwidth) && int(fpos.x + ourwidth) > otherpos.x &&
+                fpos.y < int(otherpos.y + otherheight) && int(fpos.y + ourheight) > otherpos.y) {
+                fmt::print(
+                    "pos {} otherpos {} size {} othersize ({}, {})\n", fpos, otherpos, oursize,
+                    otherwidth, otherheight);
+                return &ref;
+            }
+        }
     }
 
-    return v->status;
+    return nullptr;
 }
 
-/**
- * Get the status of a pathing operation
- */
-PathStatus ObjectPathManager::getPathStatus(const GameObject& o)
+std::vector<bool> ObjectPathManager::generateBitmap(std::vector<object_id_t> exclude_ids) const
 {
-    auto* v = findPathRefFromObject(o);
-    if (!v) return PathStatus::Invalid;
+    auto [tw, th]       = t_.getSize();
+    std::vector<bool> b = base_bitmap_;
 
-    return v->status;
+    for (auto& ref : refs_) {
+        if (std::find(exclude_ids.begin(), exclude_ids.end(), ref.o->getID()) != exclude_ids.end())
+            continue;
+
+        auto size = ref.o->getSize();
+        auto pos  = fixPosition(to2D(ref.o->getPosition()), size);
+
+        for (int y = 0; y < th; y++) {
+            if (y >= int(pos.y) && y < int(pos.y + size.y)) {
+                for (int x = pos.x; x < int(pos.x + size.x); x++) {
+                    b[y * tw + x] = true;
+                }
+            }
+        }
+    }
+
+    for (auto& [sid, st] : statics_) {
+        if (std::find(exclude_ids.begin(), exclude_ids.end(), sid) != exclude_ids.end()) continue;
+
+        auto pos = fixPosition(st.position, st.size);
+
+        for (int y = 0; y < th; y++) {
+            if (y >= int(pos.y) && y < int(pos.y + st.size.y)) {
+                for (int x = pos.x; x < int(pos.x + st.size.x); x++) {
+                    b[y * tw + x] = true;
+                }
+            }
+        }
+    }
+
+    return b;
 }
 
-/**
- * Find the path reference from a handle
- *
- * Returns an iterator pointing to the object, or the value of end() if the
- * handle was not found
- */
-decltype(ObjectPathManager::operations_.begin()) ObjectPathManager::findPathRefFromHandle(
-    PathHandle h)
+void ObjectPathManager::update(ObjectManager& om)
 {
-    return std::find_if(
-        operations_.begin(), operations_.end(), [&](PathRef& r) { return r.handleval() == h; });
-}
+    for (auto& ref : refs_) {
+        updateRefState(ref);
+    }
 
-/**
- * Remove the pathing operation
- *
- * Note that we will only remove the operation it its refcount is zero
- */
-void ObjectPathManager::removePathing(PathHandle h)
-{
-    operations_.erase(
+    for (auto& [sid, st] : statics_) {
+        if (!st.valid) {
+            auto obj = om.get(sid);
+            if (obj) {
+                st.size     = (*obj)->getSize();
+                st.position = to2D((*obj)->getPosition());
+                st.valid    = true;
+            }
+        }
+    }
+
+    refs_.erase(
         std::remove_if(
-            operations_.begin(), operations_.end(), [&](PathRef& r) { return r.handleval() == h; }),
-        operations_.end());
+            refs_.begin(), refs_.end(),
+            [&](const auto& r) {
+                return std::find(to_delete_.begin(), to_delete_.end(), r.o->getID()) !=
+                       to_delete_.end();
+            }),
+        refs_.end());
+    to_delete_.clear();
 }
 
-/**
- * Update the pathing
- *
- * This means:
- *  - moving the entity to the next position in the path (the granularity is low, so
- *    do not worry).
- *      - In the future we will take into account some things like entity speed, etc.
- *  - removing paths that completed
- *  - detect if a path completed calculation in its timeslot. If it did not, we reschedule
- *    it to the next frame
- *  - update the terrain bitmaps (according to each path, in the future will be according to
- *    the FoV of each unit)
- */
-void ObjectPathManager::update(const ObjectManager& om)
+void ObjectPathManager::doPathing(std::shared_ptr<GameObject> o, glm::vec2 destination)
 {
-    auto& log = LoggerService::getLogger();
-    updateObstacleBitmap(om);
-
-    std::vector<PathHandle> toRemove;
-    int movingEntities = 0;
-
-    for (auto& op : operations_) {
-        switch (op.status) {
-            case PathStatus::NotStarted: {
-                createPath(op);
-                op.status = PathStatus::InProgress;
-                break;
-            }
-            case PathStatus::InProgress: {
-                auto isLastPosition = op.pathElements.size() == 1;
-                auto currentPos     = updatePosition(op);
-                movingEntities++;
-
-                LogicService::getDebugDrawer()->drawPath(
-                    op.pathElements.begin(), op.pathElements.end(), glm::vec4(0, 1, 0, 1));
-
-                // It is InProgress but no more positions. This is not correct
-                if (!currentPos) {
-                    log->write(
-                        "object-path-manager", LogType::Error,
-                        "Status of pathing {} (object {} ({})) is PathStatus::InProgress, but you "
-                        "called it when no points are available",
-                        op.handleval(), op.object->getID(), op.object->getName());
-                    op.status = PathStatus::Invalid;
-                } else if (isLastPosition) {
-                    // TODO: make the pathfinder alert if the path was not reached, or was reached
-                    // close enough
-                    log->write(
-                        "object-path-manager", LogType::Info, "Pathing of {} ({} - {}) completed!",
-                        op.handleval(), op.object->getID(), op.object->getName());
-
-                    if (!op.pathfinder->hasPossiblePath())
-                        op.status = PathStatus::Unreachable;
-                    else
-                        op.status = PathStatus::Completed;
-
-                } else {
-                    if (op.pathfinder->maxIterReached()) {
-                        op.status = PathStatus::Repathing;
-                    }
-                }
-
-                break;
-            }
-            case PathStatus::Unreachable:
-                log->write(
-                    "object-path-manager", LogType::Warning,
-                    "Path handle {} from {:.2f} to {:.2f} is not reachable", op.handleval(),
-                    op.start, op.end);
-                [[fallthrough]];
-            case PathStatus::Stopped: [[fallthrough]];
-            case PathStatus::Invalid: [[fallthrough]];  // there is not much we can do here...
-            case PathStatus::Completed: {
-                op.ticks_to_remove--;
-                if (op.ticks_to_remove < 0) {
-                    log->write(
-                        "object-path-manager", LogType::Info,
-                        "Scheduling removal of path handle {} from the list", op.handleval());
-                    toRemove.push_back(op.handleval());
-                }
-                break;
-            }
-            case PathStatus::Repathing: {
-                log->write(
-                    "object-path-manager", LogType::Info,
-                    "Pathing of {} ({} - {}) needs to be recalculated!", op.handleval(),
-                    op.object->getID(), op.object->getName());
-
-                if (!op.pathfinder->maxIterReached())
-                    op.pathfinder->update(createBitmapForObject(*op.object, op.ratio), op.ratio);
-
-                this->recalculatePath(op, true);
-                op.status = PathStatus::InProgress;
-                break;
-            }
-        }
-    }
-
-    // There is more than one entity moving, path recalculation is needed, so entities
-    // do not collide with each other
-    if (movingEntities > 1) {
-        log->write(
-            "object-path-manager", LogType::Info, "Recalculating path for {} entities",
-            movingEntities);
-        std::for_each(operations_.begin(), operations_.end(), [this](PathRef& r) {
-            r.pathfinder->update(createBitmapForObject(*r.object, r.ratio), r.ratio);
-            this->recalculatePath(r);
-        });
-    }
-
-    if (toRemove.size() > 0) {
-        log->write("object-path-manager", LogType::Info, "Removing {} pathrefs", toRemove.size());
-
-        operations_.erase(
-            std::remove_if(
-                operations_.begin(), operations_.end(),
-                [&](PathRef& r) {
-                    return std::find(toRemove.begin(), toRemove.end(), r.handleval()) !=
-                           toRemove.end();
-                }),
-            operations_.end());
-    }
+    statics_.erase(o->getID());
+    auto [tw, th] = t_.getSize();
+    refs_.push_back(PathRef{
+        .o                 = o,
+        .previous_position = to2D(o->getPosition()),
+        .positions         = {},
+        .pf                = std::make_unique<Pathfinder>(generateBitmap({o->getID()}), tw, th),
+        .destination       = destination});
 }
 
-/**
- * Create a path for an object whose path does not exist yet
- */
-void ObjectPathManager::createPath(PathRef& r)
+bool ObjectPathManager::handleEntityEvent(const EntityEvent& e)
 {
-    r.pathfinder->update(createBitmapForObject(*r.object, r.ratio), r.ratio);
-    auto elements =
-        r.pathfinder->findPath(r.start, r.end, r.object->getSize(), max_iter_paths_per_frame_);
-    assert(r.pathElements.size() == 0);
-    r.pathElements.insert(r.pathElements.begin(), elements.begin(), elements.end());
-}
-
-/**
- * Create a path for an object whose path already exists, essentially redoing it
- */
-void ObjectPathManager::recalculatePath(PathRef& r, bool force)
-{
-    auto& log = LoggerService::getLogger();
-    log->write(
-        "object-path-manager", LogType::Debug,
-        "Recalculating path for handle {} ({}) ({} remaining points)", r.handleval(),
-        r.object->getName(), r.pathElements.size());
-
-    if (r.pathElements.size() <= 2 && !force) return;
-
-    auto pos2d = glm::vec2(r.object->getPosition().x, r.object->getPosition().z);
-    if (r.pathElements.size() == 0) r.pathElements.push_back(pos2d);
-
-    auto posv = r.position().value_or(pos2d);
-
-    auto elements =
-        r.pathfinder->findPath(posv, r.end, r.object->getSize(), max_iter_paths_per_frame_ / 2);
-    r.pathElements.resize(elements.size());
-    std::copy(elements.begin(), elements.end(), r.pathElements.begin());
-}
-
-/**
- * Update the position of an object
- */
-std::optional<glm::vec2> ObjectPathManager::updatePosition(PathRef& r)
-{
-    auto pos = r.position();
-    if (!pos) return std::nullopt;
-
-    auto height = t_.getHeightFromCoords(*pos);
-
-    setObjectOnBitmap(obstacle_bitmap_, *r.object, false);
-    setObjectOnBitmap(obstacle_bitmap_, *pos, r.object->getSize(), true);
-
-    LoggerService::getLogger()->write(
-        "object-path-manager", LogType::Debug,
-        "position of object id {:016x} ({}) is now ({:.2f}, {}, {:.2f})", r.object->getID(),
-        r.object->getName().c_str(), pos->x, height, pos->y);
-
-    assert(fabs(pos->x - r.object->getPosition().x) <= 1.5);
-    assert(fabs(pos->y - r.object->getPosition().z) <= 1.5);
-
-    r.object->setPosition(glm::vec3(pos->x, height, pos->y));
-    mapped_objects_[r.object->getID()] = std::make_tuple<>(*pos, r.object->getSize());
-    r.pathElements.pop_front();
-
-    return pos;
-}
-
-/**
- * Update the global obstacle bitmap with the data from our event receiver
- */
-void ObjectPathManager::updateObstacleBitmap(const ObjectManager& om)
-{
-    pollEntities(om);
-    std::fill(obstacle_bitmap_.begin(), obstacle_bitmap_.end(), false);
-
-    for (auto [id, data] : mapped_objects_) {
-        auto pos  = std::get<0>(data);
-        auto size = std::get<1>(data);
-
-        setObjectOnBitmap(obstacle_bitmap_, pos, size, true);
-    }
-}
-
-
-void ObjectPathManager::parseEntityEvent(const ObjectManager& om, const EntityEvent& e){
-    auto& log = LoggerService::getLogger();
-
     if (auto* ec = std::get_if<EventCreated>(&e.type); ec) {
-        if (auto obj = om.get(ec->objectID); obj) {
-            auto pos  = (*obj)->getPosition();
-            auto size = (*obj)->getSize();
+        // TODO: edit the creation event to pass initial position and size.
+        statics_[ec->objectID] = StaticRef{};
+    } else if (auto* ed = std::get_if<EventDestroyed>(&e.type); ed) {
+        statics_.erase(ed->objectID);
+    }
 
+    return true;
+}
+
+void ObjectPathManager::updateRefState(PathRef& ref)
+{
+    auto& log = LoggerService::getLogger();
+
+    if (ref.wait > 0) {
+        ref.wait--;
+        return;
+    }
+
+    auto [tw, th] = t_.getSize();
+    switch (ref.state) {
+        case PathState::Created: {
+            log->write(
+                "object-path-manager", LogType::Debug, "created (path={} elements)",
+                ref.positions.size());
+            ref.previous_position = to2D(ref.o->getPosition());
+
+            ref.state = PathState::Pathing;
+            break;
+        }
+        case PathState::Pathing: {
+            auto path = ref.pf->calculate(to2D(ref.o->getPosition()), ref.destination);
+            if (!path) {
+                ref.state = PathState::ImpossiblePath;
+                return;
+            }
+
+            std::copy(path->begin(), path->end(), std::back_inserter(ref.positions));
+
+            ref.previous_position = ref.positions.front();
+            ref.positions.pop_front();
+
+            log->write(
+                "object-path-manager", LogType::Debug, "pathing (path={} elements, curr={:.2f})",
+                ref.positions.size(), ref.previous_position);
+
+            ref.state = PathState::Traversing;
+            break;
+        }
+        case PathState::Traversing: {
             log->write(
                 "object-path-manager", LogType::Debug,
-                "adding '{}' ({}) (pos {:.1f}) to the list of mapped objects (as an "
-                "obstacle)",
-                (*obj)->getName(), ec->objectID, (*obj)->getPosition());
+                "traversing (id={}, path={} elements, curr={})", ref.o->getID(),
+                ref.positions.size(), ref.previous_position);
 
-            mapped_objects_[ec->objectID] = std::make_tuple<>(glm::vec2(pos.x, pos.z), size);
+            if (auto pos2d = to2D(ref.o->getPosition()); pos2d == ref.destination) {
+                ref.previous_position = pos2d;
+                ref.state             = PathState::Completed;
+                return;
+            }
+
+            if (ref.positions.size() == 0) {
+                ref.state = PathState::Repathing;
+                return;
+            }
+
+            ref.previous_position                = to2D(ref.o->getPosition());
+            std::vector<glm::vec2> nextPositions = {};
+            for (auto i = 0; i <= 2; i++) {
+                if (ref.positions.size() > i) nextPositions.push_back(*(ref.positions.begin() + i));
+            }
+
+            if (PathRef* otherref = willCollide(ref.o->getID(), nextPositions, ref.o->getSize());
+                otherref) {
+                log->write(
+                    "object-path-manager", LogType::Info, "{} will collide with {}, dodging...",
+                    ref.o->getID(), otherref->o->getID());
+                ref.state = PathState::Dodging;
+                log->write(
+                    "object-path-manager", LogType::Info, "{} will wait {} ticks", ref.o->getID(),
+                    ref.wait);
+                return;
+            }
+
+            ref.o->setPosition(to3D(nextPositions[0], t_));
+            ref.positions.pop_front();
+
+            break;
         }
-    }
-
-    // We have this one only to set the pathref status, so it does not go away
-    // immediately.
-    if (auto* ec = std::get_if<EventDead>(&e.type); ec) {
-        mapped_objects_.erase(ec->objectID);
-
-        // if we have a reference to any removed object, destroy it!
-        auto* ref = findPathRefFromObject(ec->objectID);
-        if (ref) {
+        case PathState::Dodging: {
             log->write(
-                "object-path-manager", LogType::Info,
-                "pathing of handle %d (id %d) stopped, because the entity is dead",
-                ref->handleval(), ec->objectID);
+                "object-path-manager", LogType::Debug, "dodging (id={}, path={} elements, curr={})",
+                ref.o->getID(), ref.positions.size(), to2D(ref.o->getPosition()));
+            auto opos  = to2D(ref.o->getPosition());
+            auto osize = ref.o->getSize();
 
-            ref->status = PathStatus::Stopped;
+            auto b = generateBitmap({ref.o->getID()});
+            ref.pf = std::make_unique<Pathfinder>(b, tw, th);
+
+            auto path = ref.pf->calculate(opos, ref.destination);
+            if (!path || path->size() < 1) {
+                ref.state = PathState::ImpossiblePath;
+                return;
+            }
+
+            ref.positions.clear();
+            std::copy(path->begin() + 1, path->end(), std::back_inserter(ref.positions));
+
+            ref.state = PathState::Traversing;
+
+            break;
         }
-
-        if (auto* ec = std::get_if<EventDestroyed>(&e.type); ec) {
-            mapped_objects_.erase(ec->objectID);
-
+        case PathState::Repathing: {
+            log->write("object-path-manager", LogType::Warning, "repathing is UNIMPLEMENTED!");
+            assert(false);
+            break;
+        }
+        case PathState::ImpossiblePath: {
             log->write(
                 "object-path-manager", LogType::Debug,
-                "removing pathing handle of destroyed entity {}", ec->objectID);
-
-            // if we have a reference to any removed object, destroy it!
-            auto* ref = findPathRefFromObject(ec->objectID);
-            if (ref) {
-                operations_.erase(
-                    std::remove_if(
-                        operations_.begin(), operations_.end(),
-                        [&](PathRef& r) { return r.oid == ec->objectID; }),
-                    operations_.end());
-            }
+                "impossible path (id={}, path={} elements, curr={})", ref.o->getID(),
+                ref.positions.size(), ref.previous_position);
+            to_delete_.push_back(ref.o->getID());
+            statics_[ref.o->getID()] = StaticRef{
+                .valid = true, .position = to2D(ref.o->getPosition()), .size = ref.o->getSize()};
+            break;
         }
-    }
-}
-
-/**
- * Update the mapped object list, adding the recently added entities and removing
- * the destroyed entities.
- */
-void ObjectPathManager::pollEntities(const ObjectManager& om)
-{
-
-    while (!events_.empty()) {
-        EntityEvent e = events_.front();        
-        parseEntityEvent(om, e);
-        events_.pop();
-    }
-}
-
-/**
- * Resize a object bitmap according to a certain ratio
- */
-
-/**
- * Creates an obstacle bitmap for the current game object
- *
- * Currently, it only removes the actual object from the bitmap, but, in the future,
- * it will also consider the terrain type (e.g, insert water for units that only walk
- * on land)
- */
-std::vector<bool> ObjectPathManager::createBitmapForObject(const GameObject& o, int ratio)
-{
-    /// TODO: if two objects are too close to each other, one might not be seen on the other's
-    /// obstacle bitmap
-    std::vector<unsigned> v{obstacle_bitmap_};
-    setObjectOnBitmap(v, o, false, 1);
-
-    std::vector<bool> nv(v.size() / (ratio * ratio), false);
-
-    auto [w, h] = t_.getSize();
-    for (auto y = 0; y < h; y++) {
-        for (auto x = 0; x < w; x++) {
-            nv[(y / ratio) * (w / ratio) + (x / ratio)] = v[y * w + x] > 0;
+        case PathState::Died: {
+            log->write(
+                "object-path-manager", LogType::Debug, "died (path={} elements, curr={})",
+                ref.positions.size(), ref.previous_position);
+            to_delete_.push_back(ref.o->getID());
+            break;
         }
-    }
-
-    return nv;
-}
-
-/**
- * Set the object data in the obstacle bitmap to a certain state
- */
-void ObjectPathManager::setObjectOnBitmap(
-    std::vector<bool>& bitmap, const GameObject& o, bool value, float ratio)
-{
-    auto pos2d = glm::vec2(o.getPosition().x, o.getPosition().z);
-    setObjectOnBitmap(bitmap, pos2d, o.getSize(), value, ratio);
-}
-/**
- * Set the object data in the obstacle bitmap to a certain state
- */
-void ObjectPathManager::setObjectOnBitmap(
-    std::vector<bool>& bitmap, glm::vec2 pos, glm::vec2 size, bool value, float ratio)
-{
-    int posx = pos.x;
-    int posy = pos.y;
-
-    auto [width, height] = t_.getSize();
-
-    for (int y = posy - double(size.y / 2); y < posy + double(size.y / 2); y++) {
-        if (y < 0 || y >= height) continue;
-
-        for (int x = posx - double(size.x / 2); x < posx + double(size.x / 2); x++) {
-            if (x < 0 || x >= width) continue;
-
-            bitmap[int(ceil(y / ratio)) * int(width / ratio) + int(ceil(x / ratio))] = value;
-        }
-    }
-}
-
-/**
- * Set the object data in the global obstacle bitmap to a certain state
- */
-void ObjectPathManager::setObjectOnBitmap(
-    std::vector<unsigned>& bitmap, const GameObject& o, bool value, float ratio)
-{
-    auto pos2d = glm::vec2(o.getPosition().x, o.getPosition().z);
-    setObjectOnBitmap(bitmap, pos2d, o.getSize(), value, ratio);
-}
-/**
- * Set the object data in the global obstacle bitmap to a certain state
- */
-void ObjectPathManager::setObjectOnBitmap(
-    std::vector<unsigned>& bitmap, glm::vec2 pos, glm::vec2 size, bool value, float ratio)
-{
-    int posx = pos.x;
-    int posy = pos.y;
-
-    auto [width, height] = t_.getSize();
-
-    for (int y = posy - double(size.y / 2); y < posy + double(size.y / 2); y++) {
-        if (y < 0 || y >= height) continue;
-
-        for (int x = posx - double(size.x / 2); x < posx + double(size.x / 2); x++) {
-            if (x < 0 || x >= width) continue;
-
-            auto& val = bitmap[int(ceil(y / ratio)) * int(width / ratio) + int(ceil(x / ratio))];
-
-            if (value) {
-                val++;
-            } else {
-                if (val > 0) val--;
-            }
+        case PathState::Completed: {
+            log->write(
+                "object-path-manager", LogType::Debug,
+                "completed (id={}, path={} elements, curr={})\n", ref.o->getID(),
+                ref.positions.size(), ref.previous_position);
+            to_delete_.push_back(ref.o->getID());
+            statics_[ref.o->getID()] = StaticRef{
+                .valid = true, .position = to2D(ref.o->getPosition()), .size = ref.o->getSize()};
+            break;
         }
     }
 }
