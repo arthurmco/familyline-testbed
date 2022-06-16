@@ -1,0 +1,2 @@
+#cmakedefine FLINE_RENDERER ${FLINE_RENDERER}
+#cmakedefine FLINE_USE_GLES ${FLINE_USE_GLES}

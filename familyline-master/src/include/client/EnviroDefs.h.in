@@ -1,0 +1,6 @@
+/* Auto-generated header by CMakeLists.txt 
+ Do not directly edit it! */
+
+#cmakedefine VERSION "@T_VERSION@" 
+#cmakedefine COMMIT "@COMMIT_HASH@" 
+#cmakedefine USERNAME "@USERNAME@"

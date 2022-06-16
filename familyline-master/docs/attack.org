@@ -1,0 +1,80 @@
+#+TITLE: Attack manager
+
+  The attack manager calculations are somewhat complex, so it needs to be
+  somewhat decently documented, and this is what I want to do here.
+
+  Note that what is in here is what is written right now, future discussions
+  about the attack manager, like projectiles or critical damage, will not be
+  documented until their implementation starts.
+
+* Behavior
+
+  Only melee attacks are implemented, although projectile attacks will be soon.
+
+  No matter what attacks are implemented, they have an angle of attack.
+
+  For melee, they can have a minimum and maximum melee distance.
+
+  #+CAPTION: The different parts of the angle of attack
+  #+ATTR_HTML: :alt A circle representing the minimum distance, other representing the maximum distance, and a "pie slice" representing the attack area. The dot in the center is the player
+  [[file:attack-angle.png]]
+   
+  In the figure, the angle of attack is represented by the red
+  polygon's arc, the maximum melee distance is the black circle and the
+  minimum is the magenta circle; the blue dot is the entity.
+
+  The only area where the defending unit will take damage is the area inside
+  the red polygon.
+
+** Melee
+
+   The melee attack is, currently, the only one implemented.
+
+   We have some default behaviors for it
+
+*** Attack Points (AP):
+    On each *attack oportunity*, the HP of the attacked unit will be ==HP -
+    (APa - DPd)==, where =HP= is the attacked unit health points, =APa= is the
+    attacker's attack points, and =DPd= is the attacked unit defense points.
+
+*** Defense Points (DP):
+    When an *attack* is done, the defense points says how much we absorve the
+    attacker's damage
+
+*** Attack Speed (AS):
+    Determines the *attack opportunity*.
+
+    We calculate a *number* =n=. This number is 2048 divided by your *attack
+    speed*.
+
+    Then, you starts counting down: each tick you decrement this number by one
+    until it reaches zero. When it reaches zero, an *attack opportunity*
+    happens, and you do damage.
+
+    Then, we reset this number to =2048/AS= again.
+
+    If this number is between zero and 1, we attack and add =2048/AS= to this
+    number, until it reaches one. Then you decrement it as usual.
+
+    =n= cannot be less than 1/128, and your attack speed cannot be negative.
+
+*** Precision
+    When you attack, a random number between 0 and 100 is created. If the number
+    is below or equal the precision value, the attacked unit gets *damaged*.
+
+    Note that the precision only can go between 0 and 100.
+
+*** Distance
+    The maximum distance that you can attack, It is the radius of that black
+    circle in the image above, in game units.
+
+    FOr melee units, this value is usually small, usually 3x the side of the
+    entity bounding box
+
+*** Maximum angle
+    The maximum angle of attack, in radians
+    
+    
+** Projectile
+   Projectile attacks are not implemented
+   

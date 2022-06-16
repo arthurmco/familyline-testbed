@@ -1,0 +1,80 @@
+familyline
+familyline-server
+familyline-tests
+
+.cache/
+
+*.o
+*.swp
+*.pch
+*.dir-locals.el
+*.exe
+
+*.dll
+!distribute/win32/*.dll
+
+compile*.json
+
+#CMakeLists.txt generated files
+EnviroDefs.h
+
+#CMake generated files
+CMakeCache.txt
+generated/
+
+CMakeFiles/*
+src/*/CMakeFiles/*
+
+
+cmake_install.cmake
+Makefile
+src/config.h
+install_manifest.txt
+
+# Visual Studio and friends data
+*.sln
+*.vcxproj*
+*.VC*
+Debug/*
+Release/*
+familyline.dir/*
+familyline-server.dir/*
+Win32/*
+.vscode/*
+
+# Data files
+#*.bmp
+#*.png
+*.gif
+*.jpeg
+*.blend
+*.blend1
+*.blend2
+
+#GNU global tags
+GPATH
+GRTAGS
+GSYMS
+TAGS
+
+# Google test, Doxygen output and CTest folders
+googletest*/*
+googletest-src
+googletest-src/*
+Testing/*
+CTest*.cmake
+*.pc
+docs/doxygen/
+docs/build/
+
+# Code::Blocks
+*.cbp
+
+/.vs/slnx.sqlite
+/.vs/VSWorkspaceState.json
+/.vs
+build/
+
+.DS_Store
+.clangd/
+src/include/config.h

@@ -1,0 +1,23 @@
+log:
+  block_tags:
+    # This is more of a debugging feature
+    # 
+    # Here, we choose what logging tags we want to block.
+    # Use this if you are receiving too much log messages and want to focus on
+    # what is most important for you.
+    - gl-renderer
+    - terrain-renderer
+    - asset-manager
+    - asset-file-loader
+    - player-manager
+    
+# Where we save the input recordings
+# This is what other games call "replays"
+default_input_record_directory: "~/.local/share/familyline/records"
+
+# Enable the recording of replays?
+enable_input_recording: true
+
+# Player information
+player:
+  username: "Arthur"

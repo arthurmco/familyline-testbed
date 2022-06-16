@@ -1,0 +1,75 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ 'master', 'devel' ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ 'master', 'devel' ]
+  schedule:
+    - cron: '22 8 * * 6'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'cpp', 'python' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
+        # Learn more about CodeQL language support at https://git.io/codeql-language-support
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # By default, queries listed here will override any specified in a config file.
+        # Prefix the list here with "+" to use these queries and those in the config file.
+        # queries: ./path/to/local/query, your-org/your-repo/queries@main
+        
+    - name: Download dependencies
+      run: |
+         sudo apt -y update
+         sudo apt -y install g++-10 clang-11 libglm-dev libglew-dev libsdl2-2.0-0 libsdl2-dev libsdl2-image-2.0-0 libfmt-dev libsdl2-image-dev libyaml-cpp-dev libyaml-cpp0.6 cmake make libcairo2 libcairo2-dev libyaml-0-2 libyaml-dev libpango-1.0-0 guile-2.2-dev libpango1.0-dev libpangocairo-1.0-0 libflatbuffers-dev libflatbuffers1 nlohmann-json3-dev flatbuffers-compiler-dev flatbuffers-compiler libcurlpp-dev libexpected-dev libcurl4-openssl-dev libcurl4 librange-v3-dev
+
+    # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
+    # If this step fails, then you should remove it and run the build manually (see below)
+    - name: Autobuild
+#      uses: github/codeql-action/autobuild@v1
+
+    # ℹ️ Command-line programs to run using the OS shell.
+    # 📚 https://git.io/JvXDl
+
+    # ✏️ If the Autobuild fails above, remove it and uncomment the following three lines
+    #    and modify them (or add more) to build your code if your project
+    #    uses a compiled language
+
+      run: |
+        cmake -B ${{github.workspace}}/build -DFLATC_TARGET="" -DCURL_LIBRARY=libcurl -DFLATBUFFERS_FLATC_EXECUTABLE="/usr/bin/flatc"
+    #   make release
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1

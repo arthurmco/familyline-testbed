@@ -1,0 +1,22 @@
+# Familyline asset file
+
+assets:
+  - name: Tent.obj
+    path: ${MODELS_DIR}/Tent.obj
+    type: mesh
+    mesh.name: default
+    mesh.texture: test.bmp
+
+  - name: test.bmp
+    path: ${TEXTURES_DIR}/test.bmp
+    type: texture
+
+    # This tower.md2 is too fucking big!
+  - name: WatchTower.obj
+    path: ${MODELS_DIR}/tower.md2
+    type: mesh
+    mesh.material: WatchTower.mtl 
+
+  - name: WatchTower.mtl
+    type: material
+    path: ${MATERIALS_DIR}/WatchTower.mtl
