@@ -14,6 +14,19 @@ href="https://ci.appveyor.com/project/arthurmco/familyline/branch/master">
 </a>
 </p>
 
+> **Warning**
+> This repository will be archived because I gave up on CMake (and C++
+> to some extent) and was seduced by the wonders of Cargo and Rust  
+> (sorry Big Iron)
+>
+> It will be used only for testing new things and architectures
+>
+> Thank you for all contributions! If you want, you are more than welcome to fork it.
+>
+> This repository name will be changed into familyline-testbed, and the new
+> rewritten version will become arthurmco/familyline
+
+
 Familyline is a real-time strategy game focused on Ancient Era, from since the
 neolythic period (~ 10.000 AD) to the death of Christ (~ 30 BD).
 
