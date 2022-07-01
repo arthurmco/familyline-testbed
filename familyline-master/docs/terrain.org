@@ -1,0 +1,136 @@
+#+TITLE: Terrain contribution
+
+  Here, I will describe how the terrain generation tool works, and bits about
+  the terrain file format
+
+
+* The tool
+
+   The terrain generation tool is called maketerrain.py. It grabs some image
+   and extracts the red color as terrain data between 0 and 256, which
+   translates in heights between 0 and 2.56m in the game.
+
+   Each pixel there is a 'slot' in the game, so a 16x16 image will make a
+   16x16 terrain.
+
+   The tool usage is something like this:
+
+   #+begin_src
+maketerrain.py <SOURCE> <OUTPUT>
+   #+end_src
+
+   where =source= is an image (any image supported by the Python Image Library
+   should work) and ==output== is the terrain output file name
+
+
+* The terrain format
+
+  If something goes wrong in the terrain generation, you need to know the
+  terrain format. Some things here aren't implemented in both the terrain
+  generator and the game. I will mark these with a star.
+
+  Offsets and sizes are in bytes. Multibyte formats are in little-endian byte
+  encoding, but byte-switching isn't implemented (so the map will be
+  incorrectly generated and read in big-endian architectures)
+
+** File Header
+
+   | Offset | Size | Name                                                                  |
+   |--------+------+-----------------------------------------------------------------------|
+   |    0x0 |    4 | =MAGIC=                                                               |
+   |    0x4 |    4 | =CRC32=: the file CRC32 checksum                                      |
+   |    0x8 |    4 | =VERSION=: the terrain file version                                   |
+   |    0xc |    4 | =TERRAIN_OFF=: the offset of the terrain header, relative to the file |
+
+   *MAGIC* is the file magic number. Equals to =0x45544c46= or =FLTE= in ASCII.
+   =FLTE= stands for *F* amily *L* ine *TE* rrain
+
+   Following that, we have the terrain header block:
+
+** Terrain header
+
+   Offsets are relative to the start of the header itself.
+
+   Usually the header is at offset 0x10, or 16 decimal
+
+   | Offset | Size | Name                                                            |
+   |--------+------+-----------------------------------------------------------------|
+   |   0x00 |    4 | =MAGIC=: The terrain header magic(*).                           |
+   |   0x04 |    4 | =WIDTH=: the terrain width, in game units                       |
+   |   0x08 |    4 | =HEIGHT=: the terrain height, in game units                     |
+   |   0x0c |    4 | =TERRAIN_CRC=: the crc32 of the terrain(**)                     |
+   |   0x10 |    4 | =NAME_OFF=: The offset, in the file, of the terrain name(***)   |
+   |   0x14 |    4 | =AUTHOR_OFF=: The offset, in the file, of the terrain author(s) |
+   |   0x18 |    4 | =DESC_OFF=: The offset, in the file, of the terrain description |
+   |   0x1c |    4 | =TERRAIN_DATA_OFF=: offset of the terrain data information      |
+   |   0x20 |    4 | =TERRAIN_TYPE_OFF=: offset of the terrain type information      |
+
+  - *: The magic number of the terrain header. Equals =0x45454554=, or
+    =TEEE= in ASCII.
+  - **: The CRC32 is calculated over the terrain header, plus the three names,
+    plus the data and type terrain values.
+  - ***: offsets starting from the start of the file
+
+** Strings
+
+  The three names are, in its core, Pascal strings. This means that they are
+  organized like this:
+
+  #+begin_src ditaa :file pascal-string.png :cmdline -E
+    +--------+---------------------------------------+
+    | Size   |  String content                       |
+    | cYEL   |  (without \0 in the end)              |
+    +--------+---------------------------------------+
+  #+end_src
+
+  Where the size is the string size, in bytes, expressed in 1, 2 or 4 bytes,
+  depending on the size of the string.
+
+  We use 1 byte for the name and for each author, and 2 bytes for the
+  description.
+
+  But remember that the author is a list. How do you represent the author?
+
+  #+begin_src ditaa :file terrain-author-array.png :cmdline -E
+
+   +----------+----------+------------------+----------+-------------------+     +--------------+--------------------+
+   | Array    | String 0 | String 0         | String 1 | String 1          |     | String (n−1) | String (n−1)       |
+   | size (n) | size     | content          | size     | content           | ... | size         | content            |
+   | cBLU     | cYEL     |                  | cYEL     |                   |     |  cYEL        |                    |
+   +----------+----------+------------------+----------+-------------------+     +--------------+--------------------+
+  #+end_src
+
+  Each of the size fields are 1 byte, both the author and the array size.
+
+  This means you can have 255 authors at most, but probably you will have only
+  a couple of dozens at maximum.
+
+** Data fields
+
+   Both the terrain data and terrain type fields are arrays of =uint16_t=, or
+   2-byte elements, with size =width= * =height=.
+
+   The types are the terrain types. Currently this is not defined in stone,
+   only the type 0 and 10 are defined, who is grass and sand, respectively.
+   When more types are defined, this doc will be updated.
+
+   The data field is a terrain heightmap. 0 is the lower level, 65536 is the
+   maximum.
+
+   #+CAPTION: Representation of terrain points
+   #+NAME: fig:terrain-points
+   #+ATTR_HTML: :alt A representation of the terrain grid
+   [[file:plot-draw.png]]
+
+   A height value with value =n= is rendered in-game at height =n * 0.01=
+   meters height. Note that the camera is more or less 15m height, and it does
+   not track the terrain height currently, so your terrain can be above the
+   camera if you set the height too high.
+
+   The terrain points distance is equal to 1 unit, and they are spaced 0.5m
+   apart of each other in both X and Z axis.
+
+   The points start in the upper-leftmost column to the down-rightmost, like
+   this:
+
+   Each of those points above has a height and a terrain type value.

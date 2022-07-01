@@ -1,0 +1,48 @@
+# Tribalia gitlab-ci file
+#
+# Copyright (C) 2017 Arthur M
+
+# see https://hub.docker.com/_/gcc/
+image: gcc:7
+
+build:
+  stage: build
+  before_script: 
+    - apt update && apt -y install make cmake gcc g++ gcovr
+    - bash ./scripts/install --devel
+    - git submodule init && git submodule update
+  script: 
+    - cmake -DUSE_RELATIVE_PATH=on -DCMAKE_CXX_COMPILER=g++ -DDO_TESTS=on -DCMAKE_BUILD_TYPE=Debug -DSET_COVERAGE=true
+    - make -j4 familyline-tests
+    - cmake -DUSE_RELATIVE_PATH=on -DCMAKE_CXX_COMPILER=g++ -DDO_TESTS=on -DCMAKE_BUILD_TYPE=Debug -DSET_COVERAGE=false
+    - make -j4 familyline
+    - ./familyline-tests
+    - gcovr -r .
+  artifacts:
+    paths:
+    - ./familyline # The executable
+    - ./familyline-tests # The tests 
+
+# No caching. A full build is better to catch bugs
+
+
+# A basic test.
+# Run Tribalia with non-graphical parameters
+# The docker container might not support opengl > 3.2
+
+compile-test:
+  stage: test
+  script:
+    - apt update
+    - bash ./scripts/install
+    - ./familyline --version
+
+unit-test:
+  stage: test
+  before_script:
+    - apt update
+    - bash ./scripts/install
+    - apt -y install gcovr
+  script:
+    - ./familyline-tests
+    - gcovr -r .

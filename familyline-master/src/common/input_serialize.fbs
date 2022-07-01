@@ -1,0 +1,44 @@
+include "input.fbs";
+
+namespace familyline;
+
+// This file will represent the input recorder file format.
+//
+// Its fields should mirror the ones in the player_actions.hpp header.
+
+
+table PlayerInfo {
+       id: ulong;
+       name: string(required);
+       color: string(required);
+}
+
+table ObjectChecksum {
+      value: [ubyte];
+}
+
+table ObjectChecksums {
+      typenames: [string] (required);
+      checksums: [ObjectChecksum] (required);            
+}
+
+table RecordHeader {
+      players: [PlayerInfo];
+      checksums: ObjectChecksums (required);
+}
+
+table InputElement {
+       tick: ulong;
+       playercode: ulong;
+       timestamp: ulong;
+       type: InputType (required);
+}
+
+table InputFile {
+      player_info: [PlayerInfo];
+      input_element: [InputElement];
+}
+
+file_identifier "FREC";
+file_extension "frec";
+root_type InputFile;
